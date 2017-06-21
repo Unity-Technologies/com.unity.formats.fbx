@@ -383,6 +383,13 @@ namespace FbxExporters
                         fbxScene.Destroy ();
                         fbxExporter.Destroy ();
 
+                        if(exportCancelled){
+                            Debug.LogWarning ("Export Cancelled");
+                            // delete the file that got created
+                            EditorApplication.update += DeleteFile;
+                            return 0;
+                        }
+
                         return status == true ? NumNodes : 0;
                     }
                 }
@@ -394,14 +401,38 @@ namespace FbxExporters
                 }
             }
 
+            static bool exportCancelled = false;
+
             static bool ExportProgressCallback(float percentage, string status) {
                 // Convert from percentage to [0,1].
                 // Then convert from that to [0.5,1] because the first half of
                 // the progress bar was for creating the scene.
                 var progress01 = 0.5f * (1f + (percentage / 100.0f));
 
+                bool cancel = EditorUtility.DisplayCancelableProgressBar(ProgressBarTitle, "Exporting Scene...", progress01);
+
+                if (cancel) {
+                    exportCancelled = true;
+                }
+
                 // Unity says "true" for "cancel"; FBX wants "true" for "continue"
-                return !EditorUtility.DisplayCancelableProgressBar(ProgressBarTitle, "Exporting Scene...", progress01);
+                return !cancel;
+            }
+
+            static void DeleteFile()
+            {
+                if (File.Exists (LastFilePath)) {
+                    try {
+                        File.Delete (LastFilePath);
+                    } catch (IOException) {}
+
+                    if (File.Exists (LastFilePath)) {
+                        Debug.LogWarning ("Failed to delete file: " + LastFilePath);
+                    }
+                } else {
+                    EditorApplication.update -= DeleteFile;
+                    AssetDatabase.Refresh ();
+                }
             }
 
             //
