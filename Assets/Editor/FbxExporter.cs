@@ -34,6 +34,8 @@ namespace FbxExporters
 
             const string FileBaseName = "Untitled";
 
+            const string ProgressBarTitle = "Fbx Export";
+
             /// <summary>
             /// Create instance of example
             /// </summary>
@@ -248,11 +250,22 @@ namespace FbxExporters
             /// <summary>
             /// Unconditionally export components on this game object
             /// </summary>
-            protected void ExportComponents (GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent)
+            protected int ExportComponents (GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent, int currentIndex, int objectCount)
             {
+                int i = currentIndex;
+
                 // create an FbxNode and add it as a child of parent
                 FbxNode fbxNode = FbxNode.Create (fbxScene,  unityGo.name);
                 NumNodes++;
+
+                i++;
+                if (EditorUtility.DisplayCancelableProgressBar(
+                    ProgressBarTitle,
+                    string.Format("Creating FbxNode {0}/{1}", i, objectCount),
+                    (i/(float)objectCount)*0.5f)) {
+                    // cancel silently
+                    return -1;
+                }
 
                 ExportTransform ( unityGo.transform, fbxNode);
                 ExportMesh (GetMeshInfo( unityGo ), fbxNode, fbxScene);
@@ -265,10 +278,27 @@ namespace FbxExporters
                 // now  unityGo  through our children and recurse
                 foreach (Transform childT in  unityGo.transform)
                 {
-                    ExportComponents (childT.gameObject, fbxScene, fbxNode);
+                    i = ExportComponents (childT.gameObject, fbxScene, fbxNode, i, objectCount);
                 }
+                return i;
+            }
 
-                return ;
+            /// <summary>
+            /// A count of how many GameObjects we are exporting, to have a rough
+            /// idea of how long creating the scene will take.
+            /// </summary>
+            /// <returns>The object count.</returns>
+            /// <param name="exportSet">Export set.</param>
+            public int GetGameObjectCount(IEnumerable<UnityEngine.Object> exportSet)
+            {
+                int count = 0;
+                foreach (var obj in exportSet) {
+                    var unityGo = GetGameObject (obj);
+                    if (unityGo) {
+                        count += unityGo.transform.hierarchyCount;
+                    }
+                }
+                return count;
             }
 
             /// <summary>
@@ -278,72 +308,129 @@ namespace FbxExporters
             public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet)
             {
                 Verbose = true;
-
-                // Create the FBX manager
-                using (var fbxManager = FbxManager.Create ())
-                {
-                    // Configure fbx IO settings.
-                    fbxManager.SetIOSettings (FbxIOSettings.Create (fbxManager, Globals.IOSROOT));
-
-                    // Export texture as embedded
-                    fbxManager.GetIOSettings ().SetBoolProp (Globals.EXP_FBX_EMBEDDED, true);
-
-                    // Create the exporter
-                    var fbxExporter = FbxExporter.Create (fbxManager, "Exporter");
-
-                    // Initialize the exporter.
-                    int fileFormat = fbxManager.GetIOPluginRegistry ().FindWriterIDByDescription ("FBX ascii (*.fbx)");
-                    bool status = fbxExporter.Initialize (LastFilePath, fileFormat, fbxManager.GetIOSettings ());
-                    // Check that initialization of the fbxExporter was successful
-                    if (!status)
-                        return 0;
-
-                    // Set compatibility to 2014
-                    fbxExporter.SetFileExportVersion("FBX201400");
-
-                    // Create a scene
-                    var fbxScene = FbxScene.Create (fbxManager, "Scene");
-
-                    // set up the scene info
-                    FbxDocumentInfo fbxSceneInfo = FbxDocumentInfo.Create (fbxManager, "SceneInfo");
-                    fbxSceneInfo.mTitle     = Title;
-                    fbxSceneInfo.mSubject   = Subject;
-                    fbxSceneInfo.mAuthor    = "Unity Technologies";
-                    fbxSceneInfo.mRevision  = "1.0";
-                    fbxSceneInfo.mKeywords  = Keywords;
-                    fbxSceneInfo.mComment   = Comments;
-                    fbxScene.SetSceneInfo (fbxSceneInfo);
-
-                    // Set up the axes (Y up, Z forward, X to the right) and units (meters)
-                    var fbxSettings = fbxScene.GetGlobalSettings();
-                    fbxSettings.SetSystemUnit(FbxSystemUnit.m);
-
-                    // The Unity axis system has Y up, Z forward, X to the right (left handed system with odd parity).
-                    // The Maya axis system has Y up, Z forward, X to the left (right handed system with odd parity).
-                    // We need to export right-handed for Maya because ConvertScene can't switch handedness:
-                    // https://forums.autodesk.com/t5/fbx-forum/get-confused-with-fbxaxissystem-convertscene/td-p/4265472
-                    fbxSettings.SetAxisSystem (FbxAxisSystem.MayaYUp);
-
-                    // export set of object
-                    FbxNode fbxRootNode = fbxScene.GetRootNode ();
-                    foreach (var obj in unityExportSet)
+                try{
+                    // Create the FBX manager
+                    using (var fbxManager = FbxManager.Create ())
                     {
-                        var  unityGo  = GetGameObject (obj);
+                        // Configure fbx IO settings.
+                        fbxManager.SetIOSettings (FbxIOSettings.Create (fbxManager, Globals.IOSROOT));
 
-                        if ( unityGo )
+                        // Export texture as embedded
+                        fbxManager.GetIOSettings ().SetBoolProp (Globals.EXP_FBX_EMBEDDED, true);
+
+                        // Create the exporter
+                        var fbxExporter = FbxExporter.Create (fbxManager, "Exporter");
+
+                        // Initialize the exporter.
+                        int fileFormat = fbxManager.GetIOPluginRegistry ().FindWriterIDByDescription ("FBX ascii (*.fbx)");
+                        bool status = fbxExporter.Initialize (LastFilePath, fileFormat, fbxManager.GetIOSettings ());
+                        // Check that initialization of the fbxExporter was successful
+                        if (!status)
+                            return 0;
+
+                        // Set compatibility to 2014
+                        fbxExporter.SetFileExportVersion("FBX201400");
+
+                        // Set the progress callback.
+                        fbxExporter.SetProgressCallback(ExportProgressCallback);
+
+                        // Create a scene
+                        var fbxScene = FbxScene.Create (fbxManager, "Scene");
+
+                        // set up the scene info
+                        FbxDocumentInfo fbxSceneInfo = FbxDocumentInfo.Create (fbxManager, "SceneInfo");
+                        fbxSceneInfo.mTitle     = Title;
+                        fbxSceneInfo.mSubject   = Subject;
+                        fbxSceneInfo.mAuthor    = "Unity Technologies";
+                        fbxSceneInfo.mRevision  = "1.0";
+                        fbxSceneInfo.mKeywords  = Keywords;
+                        fbxSceneInfo.mComment   = Comments;
+                        fbxScene.SetSceneInfo (fbxSceneInfo);
+
+                        // Set up the axes (Y up, Z forward, X to the right) and units (meters)
+                        var fbxSettings = fbxScene.GetGlobalSettings();
+                        fbxSettings.SetSystemUnit(FbxSystemUnit.m);
+
+                        // The Unity axis system has Y up, Z forward, X to the right (left handed system with odd parity).
+                        // The Maya axis system has Y up, Z forward, X to the left (right handed system with odd parity).
+                        // We need to export right-handed for Maya because ConvertScene can't switch handedness:
+                        // https://forums.autodesk.com/t5/fbx-forum/get-confused-with-fbxaxissystem-convertscene/td-p/4265472
+                        fbxSettings.SetAxisSystem (FbxAxisSystem.MayaYUp);
+
+                        // export set of object
+                        FbxNode fbxRootNode = fbxScene.GetRootNode ();
+                        int i = 0;
+                        int count = GetGameObjectCount(unityExportSet);
+                        foreach (var obj in unityExportSet)
                         {
-                            this.ExportComponents ( unityGo, fbxScene, fbxRootNode);
+                            var  unityGo  = GetGameObject (obj);
+
+                            if ( unityGo )
+                            {
+                                i = this.ExportComponents (unityGo, fbxScene, fbxRootNode, i, count);
+                                if(i < 0){
+                                    Debug.LogWarning("Export Cancelled");
+                                    return 0;
+                                }
+                            }
                         }
+
+                        // Export the scene to the file.
+                        status = fbxExporter.Export (fbxScene);
+
+                        // cleanup
+                        fbxScene.Destroy ();
+                        fbxExporter.Destroy ();
+
+                        if(exportCancelled){
+                            Debug.LogWarning ("Export Cancelled");
+                            // delete the file that got created
+                            EditorApplication.update += DeleteFile;
+                            return 0;
+                        }
+
+                        return status == true ? NumNodes : 0;
                     }
+                }
+                finally {
+                    // You must clear the progress bar when you're done,
+                    // otherwise it never goes away and many actions in Unity
+                    // are blocked (e.g. you can't quit).
+                    EditorUtility.ClearProgressBar();
+                }
+            }
 
-                    // Export the scene to the file.
-                    status = fbxExporter.Export (fbxScene);
+            static bool exportCancelled = false;
 
-                    // cleanup
-                    fbxScene.Destroy ();
-                    fbxExporter.Destroy ();
+            static bool ExportProgressCallback(float percentage, string status) {
+                // Convert from percentage to [0,1].
+                // Then convert from that to [0.5,1] because the first half of
+                // the progress bar was for creating the scene.
+                var progress01 = 0.5f * (1f + (percentage / 100.0f));
 
-                    return status == true ? NumNodes : 0;
+                bool cancel = EditorUtility.DisplayCancelableProgressBar(ProgressBarTitle, "Exporting Scene...", progress01);
+
+                if (cancel) {
+                    exportCancelled = true;
+                }
+
+                // Unity says "true" for "cancel"; FBX wants "true" for "continue"
+                return !cancel;
+            }
+
+            static void DeleteFile()
+            {
+                if (File.Exists (LastFilePath)) {
+                    try {
+                        File.Delete (LastFilePath);
+                    } catch (IOException) {}
+
+                    if (File.Exists (LastFilePath)) {
+                        Debug.LogWarning ("Failed to delete file: " + LastFilePath);
+                    }
+                } else {
+                    EditorApplication.update -= DeleteFile;
+                    AssetDatabase.Refresh ();
                 }
             }
 
