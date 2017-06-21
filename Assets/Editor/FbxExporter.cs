@@ -371,6 +371,7 @@ namespace FbxExporters
                                 i = this.ExportComponents (unityGo, fbxScene, fbxRootNode, i, count);
                                 if(i < 0){
                                     Debug.LogWarning("Export Cancelled");
+                                    return 0;
                                 }
                             }
                         }
