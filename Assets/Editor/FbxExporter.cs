@@ -1,4 +1,3 @@
-//#define UNI_15935
 // ***********************************************************************
 // Copyright (c) 2017 Unity Technologies. All rights reserved.
 //
@@ -31,7 +30,7 @@ namespace FbxExporters
             const string Comments =
                 @"";
 
-            const string MenuItemName = "Assets/Export Model... %e";
+            const string MenuItemName = "Assets/Export Model...";
 
             const string FileBaseName = "Untitled";
 
@@ -348,9 +347,6 @@ namespace FbxExporters
                 }
             }
 
-            //
-            // Create a simple user interface (menu items)
-            //
             /// <summary>
             /// create menu item in the File menu
             /// </summary>
@@ -360,13 +356,6 @@ namespace FbxExporters
                 OnExport();
             }
 
-            // Add a menu item called "Export Model..." to a GameObject's context menu.
-            [MenuItem ("GameObject/Export Model... %e", false, 30)]
-            static void OnContextItem (MenuCommand command)
-            {
-                OnExport ();
-            }
-
             /// <summary>
             // Validate the menu item defined by the function above.
             /// </summary>
@@ -374,6 +363,13 @@ namespace FbxExporters
             public static bool OnValidateMenuItem ()
             {
                 return true;
+            }
+
+            // Add a menu item called "Export Model..." to a GameObject's context menu.
+            [MenuItem ("GameObject/Export Model... %e", false, 30)]
+            static void OnContextItem (MenuCommand command)
+            {
+            	OnExport ();
             }
 
             //
@@ -591,26 +587,39 @@ namespace FbxExporters
                 return basename + "." + extension;
             }
 
-            // use the SaveFile panel to allow user to enter a file name
-            private static void OnExport(object objects = null)
+            private static void OnExport ()
             {
                 // Now that we know we have stuff to export, get the user-desired path.
                 var directory = string.IsNullOrEmpty (LastFilePath)
-                                      ? Application.dataPath
-                                      : System.IO.Path.GetDirectoryName (LastFilePath);
+                					  ? Application.dataPath
+                					  : System.IO.Path.GetDirectoryName (LastFilePath);
 
                 var filename = string.IsNullOrEmpty (LastFilePath)
-                                     ? MakeFileName(basename: FileBaseName, extension: Extension)
-                                     : System.IO.Path.GetFileName (LastFilePath);
+                					 ? MakeFileName (basename: FileBaseName, extension: Extension)
+                					 : System.IO.Path.GetFileName (LastFilePath);
 
                 var title = string.Format ("Export Model FBX ({0})", FileBaseName);
 
                 var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "");
 
                 if (string.IsNullOrEmpty (filePath)) {
-                    return;
+                    return ;
                 }
 
+                if (ExportObjects (filePath)!=null)
+                {
+                    // refresh the asset database so that the file appears in the
+                    // asset folder view.
+                    AssetDatabase.Refresh ();
+                }
+            }
+
+            /// <summary>
+            /// Export a list of (Game) objects to FBX file. 
+            /// Use the SaveFile panel to allow user to enter a file name.
+            /// <summary>
+            public static object ExportObjects(string filePath, UnityEngine.Object[] objects = null)
+            {
                 LastFilePath = filePath;
 
                 using (var fbxExporter = Create())
@@ -618,17 +627,20 @@ namespace FbxExporters
                     // ensure output directory exists
                     EnsureDirectory (filePath);
 
-                    if (objects==null)
+                    if (objects == null)
                     {
                         objects = Selection.objects;
                     }
 
-                    if (fbxExporter.ExportAll(objects as IEnumerable<UnityEngine.Object>) > 0)
+                    if (fbxExporter.ExportAll(objects) > 0)
                     {
                         string message = string.Format ("Successfully exported: {0}", filePath);
                         UnityEngine.Debug.Log (message);
+
+                        return filePath;
                     }
                 }
+                return null;
             }
 
             private static void EnsureDirectory(string path)
