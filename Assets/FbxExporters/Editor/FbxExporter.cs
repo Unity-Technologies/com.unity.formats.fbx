@@ -163,7 +163,9 @@ namespace FbxExporters
                 fbxMaterial.Diffuse.Set(GetMaterialColor(unityMaterial, "_Color"));
                 fbxMaterial.Emissive.Set(GetMaterialColor(unityMaterial, "_EmissionColor"));
                 fbxMaterial.Ambient.Set(new FbxDouble3 ());
-                fbxMaterial.BumpFactor.Set (unityMaterial ? unityMaterial.GetFloat ("_BumpScale") : 0);
+
+                fbxMaterial.BumpFactor.Set (unityMaterial && unityMaterial.HasProperty("_BumpScale") ? unityMaterial.GetFloat ("_BumpScale") : 0);
+
                 if (specular) {
                     (fbxMaterial as FbxSurfacePhong).Specular.Set(GetMaterialColor(unityMaterial, "_SpecColor"));
                 }
