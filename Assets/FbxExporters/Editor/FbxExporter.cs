@@ -223,23 +223,14 @@ namespace FbxExporters
 
                 fbxMesh.InitControlPoints (NumControlPoints);
 
-                Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
-
                 // copy control point data from Unity to FBX
-                for (int v = 0; v < NumControlPoints; v++)
+                for (int v = 0; v < meshInfo.VertexCount; v++)
                 {
-                    if (ControlPointToIndex.ContainsKey (meshInfo.Vertices [v])) {
-                        continue;
-                    }
-
-                    ControlPointToIndex [meshInfo.Vertices [v]] = v;
-
                     fbxMesh.SetControlPointAt(new FbxVector4 (
                         -meshInfo.Vertices [v].x,
                         meshInfo.Vertices [v].y,
                         meshInfo.Vertices [v].z
-                    ),
-                        v);
+                    ), v);
                 }
 
                 /*
@@ -255,10 +246,6 @@ namespace FbxExporters
 
                     foreach (int val in new int[]{0,2,1}) {
                         int tri = meshInfo.Triangles [3 * f + val];
-                        if (tri > fbxMesh.GetControlPointsCount ()) {
-                            int index = ControlPointToIndex [meshInfo.Vertices [tri]];
-                            tri = index;
-                        } 
                         fbxMesh.AddPolygon (tri);
 
                         // save the exported triangle order so we
