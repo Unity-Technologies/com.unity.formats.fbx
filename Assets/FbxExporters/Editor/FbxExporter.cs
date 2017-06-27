@@ -54,7 +54,7 @@ namespace FbxExporters
             /// <summary>
             /// Export the mesh's UVs using layer 0.
             /// </summary>
-            public void ExportUVs (MeshInfo mesh, FbxMesh fbxMesh)
+            public void ExportUVsAndNormals (MeshInfo mesh, FbxMesh fbxMesh, int[] fbxTriangles)
             {
                 // Set the normals on Layer 0.
                 FbxLayer fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
@@ -62,6 +62,27 @@ namespace FbxExporters
                     fbxMesh.CreateLayer ();
                     fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
                 }
+
+				using (var fbxLayerElement = FbxLayerElementNormal.Create (fbxMesh, "Normals")) 
+				{
+                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByControlPoint);
+
+					// TODO: normals for each triangle vertex instead of averaged per control point
+					//fbxNormalLayer.SetMappingMode (FbxLayerElement.eByPolygonVertex);
+
+                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
+
+					// Add one normal per each vertex face index (3 per triangle)
+					FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+
+					for (int n = 0; n < mesh.Normals.Length; n++) 
+					{
+						fbxElementArray.Add (new FbxVector4 (-mesh.Normals [n] [0], 
+							mesh.Normals [n] [1], 
+							mesh.Normals [n] [2]));
+					}
+					fbxLayer.SetNormals (fbxLayerElement);
+				}
 
                 using (var fbxLayerElement = FbxLayerElementUV.Create (fbxMesh, "UVSet"))
                 {
@@ -72,8 +93,8 @@ namespace FbxExporters
                     FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
 
                     for (int n = 0; n < mesh.UV.Length; n++) {
-                    fbxElementArray.Add (new FbxVector2 (mesh.UV [n] [0],
-                                                      mesh.UV [n] [1]));
+                        fbxElementArray.Add (new FbxVector2 (mesh.UV [n] [0],
+                                                          mesh.UV [n] [1]));
                     }
 
                     // For each face index, point to a texture uv
@@ -81,9 +102,10 @@ namespace FbxExporters
                     FbxLayerElementArray fbxIndexArray = fbxLayerElement.GetIndexArray ();
                     fbxIndexArray.SetCount (unityTriangles.Length);
 
-                    for (int i = 0, n = unityTriangles.Length; i < n; ++i) {
-                        fbxIndexArray.SetAt (i, unityTriangles[i]);
+                    for(int i = 0; i < fbxTriangles.Length; i++){
+                        fbxIndexArray.SetAt (i, fbxTriangles [i]);
                     }
+
                     fbxLayer.SetUVs (fbxLayerElement, FbxLayerElement.EType.eTextureDiffuse);
                 }
             }
@@ -201,31 +223,56 @@ namespace FbxExporters
 
                 fbxMesh.InitControlPoints (NumControlPoints);
 
+                Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
+
                 // copy control point data from Unity to FBX
                 for (int v = 0; v < NumControlPoints; v++)
                 {
-                    // convert from left to right-handed by negating x (Unity negates x again on import)
-                    fbxMesh.SetControlPointAt(new FbxVector4 (-meshInfo.Vertices [v].x, meshInfo.Vertices [v].y, meshInfo.Vertices [v].z), v);
+                    if (ControlPointToIndex.ContainsKey (meshInfo.Vertices [v])) {
+                        continue;
+                    }
+
+                    ControlPointToIndex [meshInfo.Vertices [v]] = v;
+
+                    fbxMesh.SetControlPointAt(new FbxVector4 (
+                        -meshInfo.Vertices [v].x,
+                        meshInfo.Vertices [v].y,
+                        meshInfo.Vertices [v].z
+                    ),
+                        v);
                 }
-
-                ExportUVs (meshInfo, fbxMesh);
-
-                var fbxMaterial = ExportMaterial (meshInfo.Material, fbxScene);
-                fbxNode.AddMaterial (fbxMaterial);
 
                 /*
                  * Triangles have to be added in reverse order, 
                  * or else they will be inverted on import 
                  * (due to the conversion from left to right handed coords)
                  */
+                int[] fbxTriangles = new int[meshInfo.Triangles.Length];
+                int current = 0;
                 for (int f = 0; f < meshInfo.Triangles.Length / 3; f++)
                 {
                     fbxMesh.BeginPolygon ();
-                    fbxMesh.AddPolygon (meshInfo.Triangles [3 * f + 2]);
-                    fbxMesh.AddPolygon (meshInfo.Triangles [3 * f + 1]);
-                    fbxMesh.AddPolygon (meshInfo.Triangles [3 * f]);
+
+                    foreach (int val in new int[]{0,2,1}) {
+                        int tri = meshInfo.Triangles [3 * f + val];
+                        if (tri > fbxMesh.GetControlPointsCount ()) {
+                            int index = ControlPointToIndex [meshInfo.Vertices [tri]];
+                            tri = index;
+                        } 
+                        fbxMesh.AddPolygon (tri);
+
+                        // save the exported triangle order so we
+                        // properly export UVs
+                        fbxTriangles [current] = tri;
+                        current++;
+                    }
                     fbxMesh.EndPolygon ();
                 }
+
+                ExportUVsAndNormals (meshInfo, fbxMesh, fbxTriangles);
+
+                var fbxMaterial = ExportMaterial (meshInfo.Material, fbxScene);
+                fbxNode.AddMaterial (fbxMaterial);
 
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
