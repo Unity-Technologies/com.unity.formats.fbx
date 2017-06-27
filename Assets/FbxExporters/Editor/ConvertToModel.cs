@@ -20,7 +20,7 @@ namespace FbxExporters
         {
             const string MenuItemName1 = "Assets/Convert To Model";
             const string MenuItemName2 = "GameObject/Convert To Model";
-            
+
             /// <summary>
             /// Clean up this class on garbage collection
             /// </summary>
@@ -32,7 +32,7 @@ namespace FbxExporters
             [MenuItem (MenuItemName1, false)]
             public static void OnMenuItem ()
             {
-            	OnConvertInPlace ();
+                OnConvertInPlace ();
             }
 
             /// <summary>
@@ -41,21 +41,21 @@ namespace FbxExporters
             [MenuItem (MenuItemName1, true)]
             public static bool OnValidateMenuItem ()
             {
-            	return true;
+                return true;
             }
 
             // Add a menu item called "Export Model..." to a GameObject's context menu.
             [MenuItem (MenuItemName2, false, 30)]
             static void OnContextItem (MenuCommand command)
             {
-            	OnConvertInPlace ();
+                OnConvertInPlace ();
             }
 
             private static List<GameObject> OnConvertInPlace ()
             {
                 List<GameObject> result = new List<GameObject> ();
 
-                GameObject[] unityActiveGOs = Selection.GetFiltered<GameObject>(SelectionMode.Editable | SelectionMode.TopLevel);
+                GameObject [] unityActiveGOs = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
 
                 // find common ancestor root & filePath;
                 string filePath = "";
@@ -64,10 +64,9 @@ namespace FbxExporters
                 GameObject unityCommonAncestor = null;
                 int siblingIndex = -1;
 
-                foreach (GameObject goObj in unityActiveGOs)
-                {
+                foreach (GameObject goObj in unityActiveGOs) {
                     siblingIndex = goObj.transform.GetSiblingIndex ();
-                    unityCommonAncestor = goObj.transform.parent.gameObject;
+                    unityCommonAncestor = (goObj.transform.parent != null) ? goObj.transform.parent.gameObject : null;
                     filePath = Path.Combine (dirPath, goObj.name + ".fbx");
 
                     break;
@@ -75,11 +74,12 @@ namespace FbxExporters
 
                 string fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects (filePath, unityActiveGOs) as string;
 
-                if (fbxFileName!=null)
+                if (fbxFileName != null) 
                 {
                     // make filepath relative to project folder
-                    if (fbxFileName.StartsWith(Application.dataPath, System.StringComparison.CurrentCulture)) {
-                        fbxFileName = "Assets" + fbxFileName.Substring(Application.dataPath.Length);
+                    if (fbxFileName.StartsWith (Application.dataPath, System.StringComparison.CurrentCulture)) 
+                    {
+                        fbxFileName = "Assets" + fbxFileName.Substring (Application.dataPath.Length);
                     }
 
                     // refresh the assetdata base so that we can query for the model
@@ -89,38 +89,47 @@ namespace FbxExporters
                     Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath (fbxFileName);
 
                     if (unityMainAsset != null) {
-                        Transform unityParentTransform = 
-                            (unityCommonAncestor==null) ? null : unityCommonAncestor.transform;
+                        Object unityObj = PrefabUtility.InstantiateAttachedAsset (unityMainAsset);
 
-                        Object unityObj = PrefabUtility.InstantiateAttachedAsset(unityMainAsset);
-
-                        if (unityObj!=null)
+                        if (unityObj != null) 
                         {
                             GameObject unityGO = unityObj as GameObject;
 
                             // configure name
                             const string cloneSuffix = "(Clone)";
 
-                            if (unityGO.name.EndsWith(cloneSuffix,System.StringComparison.CurrentCulture))
-                            {
-                                unityGO.name = unityGO.name.Remove(cloneSuffix.Length-1);  
+                            if (unityGO.name.EndsWith (cloneSuffix, System.StringComparison.CurrentCulture)) {
+                                unityGO.name = unityGO.name.Remove (cloneSuffix.Length - 1);
                             }
 
-                            // configure transform
-                            unityGO.transform.parent = unityParentTransform;
+                            // configure transform and maintain local pose
+                            if (unityCommonAncestor != null) {
+                                unityGO.transform.SetParent (unityCommonAncestor.transform, false);
+                            }
+
                             unityGO.transform.SetSiblingIndex (siblingIndex);
 
                             result.Add (unityObj as GameObject);
 
                             // remove (now redundant) gameobjects
                             for (int i = 0; i < unityActiveGOs.Length; i++) {
+#if UNI_19965
+                                Object.DestroyImmediate (unityActiveGOs [i]);
+#else
+                                // rename and put under scene root in case we need to check values
                                 unityActiveGOs [i].name = "_safe_to_delete_" + unityActiveGOs [i].name;
-                                // Object.DestroyImmediate(unityActiveGOs[i]);
+                                unityActiveGOs [i].transform.parent = null;
+                                unityActiveGOs [i].SetActive (false);
+#endif
                             }
+
+                            // select the instanced Model Prefab
+                            Selection.objects = new GameObject[] {unityGO};
                         }
                     }
 
                 }
+
                 return result;
             }
         }
