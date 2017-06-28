@@ -52,9 +52,9 @@ namespace FbxExporters
             Dictionary<string, FbxTexture> TextureMap = new Dictionary<string, FbxTexture>();
 
             /// <summary>
-            /// Export the mesh's UVs using layer 0.
+            /// Export the mesh's attributes using layer 0.
             /// </summary>
-            public void ExportUVsAndNormals (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
+            public void ExportComponentAttributes (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
             {
                 // Set the normals on Layer 0.
                 FbxLayer fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
@@ -66,7 +66,6 @@ namespace FbxExporters
 				using (var fbxLayerElement = FbxLayerElementNormal.Create (fbxMesh, "Normals")) 
 				{
                     fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
-
                     fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
 
 					// Add one normal per each vertex face index (3 per triangle)
@@ -104,6 +103,42 @@ namespace FbxExporters
                         fbxIndexArray.SetAt (i, unmergedTriangles [i]);
                     }
                     fbxLayer.SetUVs (fbxLayerElement, FbxLayerElement.EType.eTextureDiffuse);
+                }
+
+                /// Set the binormals on Layer 0. 
+                using (var fbxLayerElement = FbxLayerElementBinormal.Create (fbxMesh, "Binormals")) 
+                {
+                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
+
+                    // Add one normal per each vertex face index (3 per triangle)
+                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+
+                    for (int n = 0; n < unmergedTriangles.Length; n++) {
+                        int unityTriangle = unmergedTriangles [n];
+                        fbxElementArray.Add (new FbxVector4 (-mesh.Binormals [unityTriangle] [0],
+                            mesh.Binormals [unityTriangle] [1],
+                            mesh.Binormals [unityTriangle] [2]));
+                    }
+                    fbxLayer.SetBinormals (fbxLayerElement);
+                }
+
+                /// Set the tangents on Layer 0.
+                using (var fbxLayerElement = FbxLayerElementTangent.Create (fbxMesh, "Tangents")) 
+                {
+                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
+
+                    // Add one normal per each vertex face index (3 per triangle)
+                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+
+                    for (int n = 0; n < unmergedTriangles.Length; n++) {
+                        int unityTriangle = unmergedTriangles [n];
+                        fbxElementArray.Add (new FbxVector4 (-mesh.Tangents [unityTriangle] [0],
+                            mesh.Tangents [unityTriangle] [1],
+                            mesh.Tangents [unityTriangle] [2]));
+                    }
+                    fbxLayer.SetTangents (fbxLayerElement);
                 }
             }
 
@@ -285,7 +320,7 @@ namespace FbxExporters
                     fbxMesh.EndPolygon ();
                 }
 
-                ExportUVsAndNormals (meshInfo, fbxMesh, unmergedTriangles);
+                ExportComponentAttributes (meshInfo, fbxMesh, unmergedTriangles);
 
                 var fbxMaterial = ExportMaterial (meshInfo.Material, fbxScene);
                 fbxNode.AddMaterial (fbxMaterial);
@@ -593,7 +628,7 @@ namespace FbxExporters
                         /// NOTE: LINQ
                         ///    return mesh.normals.Zip (mesh.tangents, (first, second)
                         ///    => Math.cross (normal, tangent.xyz) * tangent.w
-                        if (m_Binormals.Length == 0)
+                        if (m_Binormals == null || m_Binormals.Length == 0) 
                         {
                             m_Binormals = new Vector3 [mesh.normals.Length];
 
