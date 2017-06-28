@@ -205,7 +205,7 @@ namespace FbxExporters
             /// Unconditionally export this mesh object to the file.
             /// We have decided; this mesh is definitely getting exported.
             /// </summary>
-            public void ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene)
+            public void ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene, bool mergeVertices = true)
             {
                 if (!meshInfo.IsValid)
                     return;
@@ -220,26 +220,39 @@ namespace FbxExporters
                 Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
 
                 int NumControlPoints = 0;
-                for (int v = 0; v < meshInfo.VertexCount; v++) {
-                    if (ControlPointToIndex.ContainsKey (meshInfo.Vertices [v])) {
-                        continue;
+                if (mergeVertices) {
+                    for (int v = 0; v < meshInfo.VertexCount; v++) {
+                        if (ControlPointToIndex.ContainsKey (meshInfo.Vertices [v])) {
+                            continue;
+                        }
+                        ControlPointToIndex [meshInfo.Vertices [v]] = NumControlPoints;
+
+                        NumControlPoints++;
                     }
-                    ControlPointToIndex [meshInfo.Vertices [v]] = NumControlPoints;
+                    NumVertices += NumControlPoints;
+                    fbxMesh.InitControlPoints (NumControlPoints);
 
-                    NumControlPoints++;
-                }
+                    // copy control point data from Unity to FBX
+                    foreach (var controlPoint in ControlPointToIndex.Keys) {
+                        fbxMesh.SetControlPointAt (new FbxVector4 (
+                            -controlPoint.x,
+                            controlPoint.y,
+                            controlPoint.z
+                        ), ControlPointToIndex [controlPoint]);
+                    }
+                } else {
+                    NumControlPoints = meshInfo.VertexCount;
+                    NumVertices += NumControlPoints;
+                    fbxMesh.InitControlPoints (NumControlPoints);
 
-                NumVertices += NumControlPoints;
-
-                fbxMesh.InitControlPoints (NumControlPoints);
-
-                // copy control point data from Unity to FBX
-                foreach (var controlPoint in ControlPointToIndex.Keys) {
-                    fbxMesh.SetControlPointAt(new FbxVector4 (
-                        -controlPoint.x,
-                        controlPoint.y,
-                        controlPoint.z
-                    ), ControlPointToIndex[controlPoint]);
+                    for (int v = 0; v < NumControlPoints; v++)
+                    {
+                        fbxMesh.SetControlPointAt(new FbxVector4 (
+                            -meshInfo.Vertices [v].x,
+                            meshInfo.Vertices [v].y,
+                            meshInfo.Vertices [v].z
+                        ), v);
+                    }
                 }
 
                 /*
@@ -262,8 +275,9 @@ namespace FbxExporters
                         // properly export UVs, normals, binormals, etc.
                         unmergedTriangles [current] = tri;
 
-                        int index = ControlPointToIndex [meshInfo.Vertices [tri]];
-                        tri = index;
+                        if (mergeVertices) {
+                            tri = ControlPointToIndex [meshInfo.Vertices [tri]];
+                        }
                         fbxMesh.AddPolygon (tri);
 
                         current++;
