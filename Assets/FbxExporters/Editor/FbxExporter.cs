@@ -277,6 +277,12 @@ namespace FbxExporters
                     return -1;
                 }
 
+                // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
+                // This causes issues when converting euler to quaternion, causing the final
+                // rotation to be slighlty off.
+                // Fixed if we set the rotation order to the Unity rotation order in the FBX.
+                fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
+
                 ExportTransform ( unityGo.transform, fbxNode);
                 ExportMesh (GetMeshInfo( unityGo ), fbxNode, fbxScene);
 
