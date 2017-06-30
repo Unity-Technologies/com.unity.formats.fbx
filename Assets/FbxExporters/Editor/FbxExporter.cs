@@ -55,9 +55,9 @@ namespace FbxExporters
             Dictionary<string, FbxTexture> TextureMap = new Dictionary<string, FbxTexture> ();
 
             /// <summary>
-            /// Export the mesh's UVs using layer 0.
+            /// Export the mesh's attributes using layer 0.
             /// </summary>
-            public void ExportUVsAndNormals (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
+            public void ExportComponentAttributes (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
             {
                 // Set the normals on Layer 0.
                 FbxLayer fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
@@ -68,7 +68,6 @@ namespace FbxExporters
 
                 using (var fbxLayerElement = FbxLayerElementNormal.Create (fbxMesh, "Normals")) {
                     fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
-
                     fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
 
                     // Add one normal per each vertex face index (3 per triangle)
@@ -76,9 +75,7 @@ namespace FbxExporters
 
                     for (int n = 0; n < unmergedTriangles.Length; n++) {
                         int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (new FbxVector4 (-mesh.Normals [unityTriangle] [0],
-                            mesh.Normals [unityTriangle] [1],
-                            mesh.Normals [unityTriangle] [2]));
+                        fbxElementArray.Add (CreateRightHandedFbxVector4 (mesh.Normals [unityTriangle]));
                     }
 
 					fbxLayer.SetNormals (fbxLayerElement);
@@ -106,6 +103,57 @@ namespace FbxExporters
                     }
                     fbxLayer.SetUVs (fbxLayerElement, FbxLayerElement.EType.eTextureDiffuse);
                 }
+
+                /// Set the binormals on Layer 0. 
+                using (var fbxLayerElement = FbxLayerElementBinormal.Create (fbxMesh, "Binormals")) 
+                {
+                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
+
+                    // Add one normal per each vertex face index (3 per triangle)
+                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+
+                    for (int n = 0; n < unmergedTriangles.Length; n++) {
+                        int unityTriangle = unmergedTriangles [n];
+                        fbxElementArray.Add (CreateRightHandedFbxVector4 (mesh.Binormals [unityTriangle]));
+                    }
+                    fbxLayer.SetBinormals (fbxLayerElement);
+                }
+
+                /// Set the tangents on Layer 0.
+                using (var fbxLayerElement = FbxLayerElementTangent.Create (fbxMesh, "Tangents")) 
+                {
+                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
+
+                    // Add one normal per each vertex face index (3 per triangle)
+                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+
+                    for (int n = 0; n < unmergedTriangles.Length; n++) {
+                        int unityTriangle = unmergedTriangles [n];
+                        fbxElementArray.Add (CreateRightHandedFbxVector4(
+                            new Vector3(
+                                mesh.Tangents[unityTriangle][0],
+                                mesh.Tangents[unityTriangle][1],
+                                mesh.Tangents[unityTriangle][2]
+                            )));
+                    }
+                    fbxLayer.SetTangents (fbxLayerElement);
+                }
+            }
+
+            /// <summary>
+            /// Takes in a left-handed Vector3, and returns a right-handed FbxVector4.
+            /// Helper for ExportComponentAttributes()
+            /// </summary>
+            /// <returns>The right-handed FbxVector4.</returns>
+            private FbxVector4 CreateRightHandedFbxVector4(Vector3 leftHandedVector)
+            {
+                // negating the x component of the vector converts it from left to right handed coordinates
+                return new FbxVector4 (
+                    -leftHandedVector[0],
+                    leftHandedVector[1],
+                    leftHandedVector[2]);
             }
 
             /// <summary>
@@ -303,7 +351,7 @@ namespace FbxExporters
                     fbxMesh.EndPolygon ();
                 }
 
-                ExportUVsAndNormals (meshInfo, fbxMesh, unmergedTriangles);
+                ExportComponentAttributes (meshInfo, fbxMesh, unmergedTriangles);
 
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
@@ -604,7 +652,8 @@ namespace FbxExporters
                         /// NOTE: LINQ
                         ///    return mesh.normals.Zip (mesh.tangents, (first, second)
                         ///    => Math.cross (normal, tangent.xyz) * tangent.w
-                        if (m_Binormals.Length == 0) {
+                        if (m_Binormals == null || m_Binormals.Length == 0) 
+                        {
                             m_Binormals = new Vector3 [mesh.normals.Length];
 
                             for (int i = 0; i < mesh.normals.Length; i++)
