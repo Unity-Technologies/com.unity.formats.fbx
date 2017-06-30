@@ -73,9 +73,7 @@ namespace FbxExporters
 
                     for (int n = 0; n < unmergedTriangles.Length; n++) {
                         int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (new FbxVector4 (-mesh.Normals [unityTriangle] [0],
-                            mesh.Normals [unityTriangle] [1],
-                            mesh.Normals [unityTriangle] [2]));
+                        fbxElementArray.Add (CreateRightHandedFbxVector4 (mesh.Normals [unityTriangle]));
                     }
 
 					fbxLayer.SetNormals (fbxLayerElement);
@@ -116,9 +114,7 @@ namespace FbxExporters
 
                     for (int n = 0; n < unmergedTriangles.Length; n++) {
                         int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (new FbxVector4 (-mesh.Binormals [unityTriangle] [0],
-                            mesh.Binormals [unityTriangle] [1],
-                            mesh.Binormals [unityTriangle] [2]));
+                        fbxElementArray.Add (CreateRightHandedFbxVector4 (mesh.Binormals [unityTriangle]));
                     }
                     fbxLayer.SetBinormals (fbxLayerElement);
                 }
@@ -134,12 +130,29 @@ namespace FbxExporters
 
                     for (int n = 0; n < unmergedTriangles.Length; n++) {
                         int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (new FbxVector4 (-mesh.Tangents [unityTriangle] [0],
-                            mesh.Tangents [unityTriangle] [1],
-                            mesh.Tangents [unityTriangle] [2]));
+                        fbxElementArray.Add (CreateRightHandedFbxVector4(
+                            new Vector3(
+                                mesh.Tangents[unityTriangle][0],
+                                mesh.Tangents[unityTriangle][1],
+                                mesh.Tangents[unityTriangle][2]
+                            )));
                     }
                     fbxLayer.SetTangents (fbxLayerElement);
                 }
+            }
+
+            /// <summary>
+            /// Takes in a left-handed Vector3, and returns a right-handed FbxVector4.
+            /// Helper for ExportComponentAttributes()
+            /// </summary>
+            /// <returns>The right-handed FbxVector4.</returns>
+            private FbxVector4 CreateRightHandedFbxVector4(Vector3 leftHandedVector)
+            {
+                // negating the x component of the vector converts it from left to right handed coordinates
+                return new FbxVector4 (
+                    -leftHandedVector[0],
+                    leftHandedVector[1],
+                    leftHandedVector[2]);
             }
 
             /// <summary>
