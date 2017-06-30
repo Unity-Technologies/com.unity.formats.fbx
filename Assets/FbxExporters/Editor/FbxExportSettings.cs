@@ -4,12 +4,12 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEditor;
 
-namespace FbxSdk.EditorTools {
+namespace FbxExporters.EditorTools {
 
-    [CustomEditor(typeof(FbxExportSettings))]
-    public class FbxExportSettingsEditor : Editor {
+    [CustomEditor(typeof(ExportSettings))]
+    public class ExportSettingsEditor : UnityEditor.Editor {
         public override void OnInspectorGUI() {
-            FbxExportSettings temp = (FbxExportSettings)target;
+            ExportSettings temp = (ExportSettings)target;
 
             temp.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", temp.weldVertices);
 
@@ -21,7 +21,7 @@ namespace FbxSdk.EditorTools {
     }
 
     [FilePath("ProjectSettings/FbxExportSettings.asset",FilePathAttribute.Location.ProjectFolder)]
-    public class FbxExportSettings : FbxSdk.EditorTools.ScriptableSingleton<FbxExportSettings>
+    public class ExportSettings : FbxExporters.EditorTools.ScriptableSingleton<ExportSettings>
     {
         public bool weldVertices = true;
 
@@ -74,7 +74,6 @@ namespace FbxSdk.EditorTools {
             if (ScriptableSingleton<T>.s_Instance == null)
             {
                 T t = ScriptableObject.CreateInstance<T>();
-                //t.hideFlags = HideFlags.HideAndDontSave;
                 ScriptableSingleton<T>.s_Instance = t;
             }
         }

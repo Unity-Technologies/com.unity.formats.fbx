@@ -405,7 +405,7 @@ namespace FbxExporters
 
                 ExportTransform ( unityGo.transform, fbxNode);
 
-                bool weldVertices = FbxSdk.EditorTools.FbxExportSettings.instance.weldVertices;
+                bool weldVertices = FbxExporters.EditorTools.ExportSettings.instance.weldVertices;
                 ExportMesh (GetMeshInfo( unityGo ), fbxNode, fbxScene, weldVertices);
 
                 if (Verbose)
