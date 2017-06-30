@@ -205,7 +205,7 @@ namespace FbxExporters
             /// Unconditionally export this mesh object to the file.
             /// We have decided; this mesh is definitely getting exported.
             /// </summary>
-            public void ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene, bool mergeVertices = true)
+            public void ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene, bool weldVertices = true)
             {
                 if (!meshInfo.IsValid)
                     return;
@@ -220,7 +220,7 @@ namespace FbxExporters
                 Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
 
                 int NumControlPoints = 0;
-                if (mergeVertices) {
+                if (weldVertices) {
                     for (int v = 0; v < meshInfo.VertexCount; v++) {
                         if (ControlPointToIndex.ContainsKey (meshInfo.Vertices [v])) {
                             continue;
@@ -229,7 +229,6 @@ namespace FbxExporters
 
                         NumControlPoints++;
                     }
-                    NumVertices += NumControlPoints;
                     fbxMesh.InitControlPoints (NumControlPoints);
 
                     // copy control point data from Unity to FBX
@@ -242,7 +241,6 @@ namespace FbxExporters
                     }
                 } else {
                     NumControlPoints = meshInfo.VertexCount;
-                    NumVertices += NumControlPoints;
                     fbxMesh.InitControlPoints (NumControlPoints);
 
                     for (int v = 0; v < NumControlPoints; v++)
@@ -275,7 +273,7 @@ namespace FbxExporters
                         // properly export UVs, normals, binormals, etc.
                         unmergedTriangles [current] = tri;
 
-                        if (mergeVertices) {
+                        if (weldVertices) {
                             tri = ControlPointToIndex [meshInfo.Vertices [tri]];
                         }
                         fbxMesh.AddPolygon (tri);
@@ -721,11 +719,6 @@ namespace FbxExporters
             /// Number of triangles exported
             /// </summary>
             public int NumTriangles { private set; get; }
-
-            /// <summary>
-            /// Number of vertices
-            /// </summary>
-            public int NumVertices { private set; get; }
 
             /// <summary>
             /// Clean up this class on garbage collection
