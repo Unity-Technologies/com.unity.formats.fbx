@@ -81,29 +81,6 @@ namespace FbxExporters
 					fbxLayer.SetNormals (fbxLayerElement);
 				}
 
-                using (var fbxLayerElement = FbxLayerElementUV.Create (fbxMesh, "UVSet")) {
-                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
-                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
-
-                    // set texture coordinates per vertex
-                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
-
-                    // TODO: only copy unique UVs into this array, and index appropriately
-                    for (int n = 0; n < mesh.UV.Length; n++) {
-                        fbxElementArray.Add (new FbxVector2 (mesh.UV [n] [0],
-                            mesh.UV [n] [1]));
-                    }
-
-                    // For each face index, point to a texture uv
-                    FbxLayerElementArray fbxIndexArray = fbxLayerElement.GetIndexArray ();
-                    fbxIndexArray.SetCount (unmergedTriangles.Length);
-
-                    for(int i = 0; i < unmergedTriangles.Length; i++){
-                        fbxIndexArray.SetAt (i, unmergedTriangles [i]);
-                    }
-                    fbxLayer.SetUVs (fbxLayerElement, FbxLayerElement.EType.eTextureDiffuse);
-                }
-
                 /// Set the binormals on Layer 0. 
                 using (var fbxLayerElement = FbxLayerElementBinormal.Create (fbxMesh, "Binormals")) 
                 {
@@ -139,6 +116,60 @@ namespace FbxExporters
                             )));
                     }
                     fbxLayer.SetTangents (fbxLayerElement);
+                }
+
+                using (var fbxLayerElement = FbxLayerElementUV.Create (fbxMesh, "UVSet"))
+                {
+                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
+
+                    // set texture coordinates per vertex
+                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+
+                    // TODO: only copy unique UVs into this array, and index appropriately
+                    for (int n = 0; n < mesh.UV.Length; n++) {
+                        fbxElementArray.Add (new FbxVector2 (mesh.UV [n] [0],
+                            mesh.UV [n] [1]));
+                    }
+
+                    // For each face index, point to a texture uv
+                    FbxLayerElementArray fbxIndexArray = fbxLayerElement.GetIndexArray ();
+                    fbxIndexArray.SetCount (unmergedTriangles.Length);
+
+                    for(int i = 0; i < unmergedTriangles.Length; i++){
+                        fbxIndexArray.SetAt (i, unmergedTriangles [i]);
+                    }
+                    fbxLayer.SetUVs (fbxLayerElement, FbxLayerElement.EType.eTextureDiffuse);
+                }
+
+                using (var fbxLayerElement = FbxLayerElementVertexColor.Create (fbxMesh, "VertexColors")) 
+                {
+                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
+
+                    // set texture coordinates per vertex
+                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+
+                    // TODO: only copy unique UVs into this array, and index appropriately
+                    for (int n = 0; n < mesh.VertexColors.Length; n++) {
+                        // Converting to Color from Color32, as Color32 stores the colors
+                        // as ints between 0-255, while FbxColor and Color
+                        // use doubles between 0-1
+                        Color color = mesh.VertexColors [n];
+                        fbxElementArray.Add (new FbxColor (color.r,
+                            color.g,
+                            color.b,
+                            color.a));
+                    }
+
+                    // For each face index, point to a texture uv
+                    FbxLayerElementArray fbxIndexArray = fbxLayerElement.GetIndexArray ();
+                    fbxIndexArray.SetCount (unmergedTriangles.Length);
+
+                    for(int i = 0; i < unmergedTriangles.Length; i++){
+                        fbxIndexArray.SetAt (i, unmergedTriangles [i]);
+                    }
+                    fbxLayer.SetVertexColors (fbxLayerElement);
                 }
             }
 
@@ -676,7 +707,7 @@ namespace FbxExporters
                 /// TODO: Gets the tangents for the vertices.
                 /// </summary>
                 /// <value>The tangents.</value>
-                public Color [] VertexColors { get { return mesh.colors; } }
+                public Color32 [] VertexColors { get { return mesh.colors32; } }
 
                 /// <summary>
                 /// Gets the uvs.
