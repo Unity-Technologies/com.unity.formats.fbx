@@ -81,7 +81,6 @@ namespace FbxExporters
 					fbxLayer.SetNormals (fbxLayerElement);
 				}
 
-                            mesh.UV [n] [1]));
                 /// Set the binormals on Layer 0. 
                 using (var fbxLayerElement = FbxLayerElementBinormal.Create (fbxMesh, "Binormals")) 
                 {
