@@ -392,6 +392,12 @@ namespace FbxExporters
             // get a fbxNode's global default position.
             protected void ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode)
             {
+                // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
+                // This causes issues when converting euler to quaternion, causing the final
+                // rotation to be slighlty off.
+                // Fixed if we set the rotation order to the Unity rotation order in the FBX.
+                fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
+
                 // get local position of fbxNode (from Unity)
                 UnityEngine.Vector3 unityTranslate = unityTransform.localPosition;
                 UnityEngine.Vector3 unityRotate = unityTransform.localRotation.eulerAngles;
