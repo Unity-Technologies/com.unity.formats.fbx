@@ -261,6 +261,7 @@ namespace FbxExporters
                               
                 var materialName = unityMaterial ? unityMaterial.name : "DefaultMaterial";
                 if (MaterialMap.ContainsKey (materialName)) {
+                    AssignLayerElementMaterial (fbxMesh);
                     return MaterialMap [materialName];
                 }
 
@@ -292,6 +293,14 @@ namespace FbxExporters
                     ExportTexture (unityMaterial, "_SpecGlosMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
                 }
 
+                AssignLayerElementMaterial (fbxMesh);
+
+                MaterialMap.Add (materialName, fbxMaterial);
+                return fbxMaterial;
+            }
+
+            private void AssignLayerElementMaterial(FbxMesh fbxMesh)
+            {
                 // Add FbxLayerElementMaterial to layer 0 of the node
                 FbxLayer fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
                 if (fbxLayer == null) {
@@ -300,7 +309,6 @@ namespace FbxExporters
                 }
 
                 using (var fbxLayerElement = FbxLayerElementMaterial.Create (fbxMesh, "Material")) {
-
                     // Using all same means that the entire mesh uses the same material
                     fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eAllSame);
                     fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
@@ -311,9 +319,6 @@ namespace FbxExporters
                     fbxElementArray.Add (0);
                     fbxLayer.SetMaterials (fbxLayerElement);
                 }
-
-                MaterialMap.Add (materialName, fbxMaterial);
-                return fbxMaterial;
             }
 
             /// <summary>
