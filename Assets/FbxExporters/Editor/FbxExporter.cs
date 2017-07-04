@@ -254,7 +254,7 @@ namespace FbxExporters
             /// <summary>
             /// Export (and map) a Unity PBS material to FBX classic material
             /// </summary>
-            public FbxSurfaceMaterial ExportMaterial (Material unityMaterial, FbxScene fbxScene)
+            public FbxSurfaceMaterial ExportMaterial (Material unityMaterial, FbxScene fbxScene, FbxMesh fbxMesh)
             {
                 if (Verbose)
                     Debug.Log (string.Format ("exporting material {0}", unityMaterial.name));
@@ -290,6 +290,26 @@ namespace FbxExporters
                 ExportTexture (unityMaterial, "_BumpMap", fbxMaterial, FbxSurfaceMaterial.sNormalMap);
                 if (specular) {
                     ExportTexture (unityMaterial, "_SpecGlosMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
+                }
+
+                // Add FbxLayerElementMaterial to layer 0 of the node
+                FbxLayer fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
+                if (fbxLayer == null) {
+                    fbxMesh.CreateLayer ();
+                    fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
+                }
+
+                using (var fbxLayerElement = FbxLayerElementMaterial.Create (fbxMesh, "Material")) {
+
+                    // Using all same means that the entire mesh uses the same material
+                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eAllSame);
+                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
+
+                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+
+                    // Map the entire geometry to the FbxNode material at index 0
+                    fbxElementArray.Add (0);
+                    fbxLayer.SetMaterials (fbxLayerElement);
                 }
 
                 MaterialMap.Add (materialName, fbxMaterial);
@@ -350,7 +370,7 @@ namespace FbxExporters
                     }
                 }
 
-                var fbxMaterial = ExportMaterial (meshInfo.Material, fbxScene);
+                var fbxMaterial = ExportMaterial (meshInfo.Material, fbxScene, fbxMesh);
                 fbxNode.AddMaterial (fbxMaterial);
 
                 /*
@@ -487,13 +507,18 @@ namespace FbxExporters
                         fbxManager.SetIOSettings (FbxIOSettings.Create (fbxManager, Globals.IOSROOT));
 
                         // Export texture as embedded
-                        fbxManager.GetIOSettings ().SetBoolProp (Globals.EXP_FBX_EMBEDDED, true);
+                        if(EditorTools.ExportSettings.instance.embedTextures){
+                            fbxManager.GetIOSettings ().SetBoolProp (Globals.EXP_FBX_EMBEDDED, true);
+                        }
 
                         // Create the exporter
                         var fbxExporter = FbxExporter.Create (fbxManager, "Exporter");
 
                         // Initialize the exporter.
-                        int fileFormat = fbxManager.GetIOPluginRegistry ().FindWriterIDByDescription ("FBX ascii (*.fbx)");
+                        // fileFormat must be binary if we are embedding textures
+                        int fileFormat = EditorTools.ExportSettings.instance.embedTextures? -1 :
+                            fbxManager.GetIOPluginRegistry ().FindWriterIDByDescription ("FBX ascii (*.fbx)");
+
                         bool status = fbxExporter.Initialize (LastFilePath, fileFormat, fbxManager.GetIOSettings ());
                         // Check that initialization of the fbxExporter was successful
                         if (!status)

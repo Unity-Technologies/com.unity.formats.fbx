@@ -9,13 +9,14 @@ namespace FbxExporters.EditorTools {
     [CustomEditor(typeof(ExportSettings))]
     public class ExportSettingsEditor : UnityEditor.Editor {
         public override void OnInspectorGUI() {
-            ExportSettings temp = (ExportSettings)target;
+            ExportSettings exportSettings = (ExportSettings)target;
 
-            temp.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", temp.weldVertices);
+            exportSettings.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", exportSettings.weldVertices);
+            exportSettings.embedTextures = EditorGUILayout.Toggle ("Embed Textures:", exportSettings.embedTextures);
 
             if (GUI.changed) {
-                EditorUtility.SetDirty (temp);
-                temp.Dirty ();
+                EditorUtility.SetDirty (exportSettings);
+                exportSettings.Save ();
             }
         }
     }
@@ -24,6 +25,7 @@ namespace FbxExporters.EditorTools {
     public class ExportSettings : FbxExporters.EditorTools.ScriptableSingleton<ExportSettings>
     {
         public bool weldVertices = true;
+        public bool embedTextures = false;
 
         [MenuItem("Edit/Project Settings/Fbx Export", priority = 300)]
         static void ShowManager()
@@ -32,7 +34,7 @@ namespace FbxExporters.EditorTools {
             Selection.activeObject = instance;
         }
 
-        public void Dirty()
+        public void Save()
         {
             instance.Save (true);
         }
