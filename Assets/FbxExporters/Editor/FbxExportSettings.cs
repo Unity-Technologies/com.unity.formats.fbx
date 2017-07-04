@@ -47,7 +47,7 @@ namespace FbxExporters.EditorTools {
             {
                 if (ScriptableSingleton<T>.s_Instance == null)
                 {
-                    ScriptableSingleton<T>.CreateAndLoad();
+                    return ScriptableSingleton<T>.CreateAndLoad();
                 }
                 return ScriptableSingleton<T>.s_Instance;
             }
@@ -60,15 +60,15 @@ namespace FbxExporters.EditorTools {
                 Debug.LogError("ScriptableSingleton already exists. Did you query the singleton in a constructor?");
             }
         }
-        private static void CreateAndLoad()
+        private static T CreateAndLoad()
         {
             string filePath = ScriptableSingleton<T>.GetFilePath();
             if (!string.IsNullOrEmpty(filePath))
             {
                 var loaded = InternalEditorUtility.LoadSerializedFileAndForget(filePath);
+
                 if (loaded.Length > 0) {
                     ScriptableSingleton<T>.s_Instance = loaded [0] as T;
-                    return;
                 }
             }
             if (ScriptableSingleton<T>.s_Instance == null)
@@ -76,6 +76,7 @@ namespace FbxExporters.EditorTools {
                 T t = ScriptableObject.CreateInstance<T>();
                 ScriptableSingleton<T>.s_Instance = t;
             }
+            return ScriptableSingleton<T>.s_Instance;
         }
         protected virtual void Save(bool saveAsText)
         {
