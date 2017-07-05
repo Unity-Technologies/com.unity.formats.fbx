@@ -57,6 +57,11 @@ namespace FbxExporters
 
                 GameObject [] unityActiveGOs = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
 
+                // Ensure that the root GameObjects retain their relative order after export
+                System.Array.Sort (unityActiveGOs, delegate(GameObject x, GameObject y) {
+                    return x.transform.GetSiblingIndex().CompareTo(y.transform.GetSiblingIndex());
+                });
+
                 // find common ancestor root & filePath;
                 string filePath = "";
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
@@ -109,6 +114,19 @@ namespace FbxExporters
 
                             unityGO.transform.SetSiblingIndex (siblingIndex);
 
+                            // copy the components over, assuming that the hierarchy order is unchanged
+                            if (unityActiveGOs.Length == 1) {
+                                CopyComponentsRecursive (unityActiveGOs [0], unityGO);
+                            } else {
+                                if (unityActiveGOs.Length != unityGO.transform.childCount) {
+                                    Debug.LogWarning (string.Format ("Warning: Exported {0} objects, but only imported {1}",
+                                        unityActiveGOs.Length, unityGO.transform.childCount));
+                                }
+                                for (int i = 0; i < unityGO.transform.childCount; i++) {
+                                    CopyComponentsRecursive (unityActiveGOs [i], unityGO.transform.GetChild (i).gameObject);
+                                }
+                            }
+
                             result.Add (unityObj as GameObject);
 
                             // remove (now redundant) gameobjects
@@ -131,6 +149,36 @@ namespace FbxExporters
                 }
 
                 return result;
+            }
+
+            private static void CopyComponentsRecursive(GameObject from, GameObject to){
+                if (!to.name.StartsWith(from.name) || from.transform.childCount != to.transform.childCount) {
+                    Debug.LogError (string.Format("Error: hierarchies don't match (From: {0}, To: {1})", from.name, to.name));
+                    return;
+                }
+
+                CopyComponents (from, to);
+                for (int i = 0; i < from.transform.childCount; i++) {
+                    CopyComponentsRecursive(from.transform.GetChild(i).gameObject, to.transform.GetChild(i).gameObject);
+                }
+            }
+
+            private static void CopyComponents(GameObject from, GameObject to){
+                var components = from.GetComponents<Component> ();
+                for(int i = 0; i < components.Length; i++){
+                    // if to already has this component, then skip it
+                    if(to.GetComponent(components[i].GetType()) != null){
+                        continue;
+                    }
+                    bool success = UnityEditorInternal.ComponentUtility.CopyComponent (components[i]);
+                    if (success) {
+                        success = UnityEditorInternal.ComponentUtility.PasteComponentAsNew (to);
+                    }
+                    if (!success) {
+                        Debug.LogWarning (string.Format ("Warning: Failed to copy component {0} from {1} to {2}",
+                            components[i].GetType().Name, from.name, to.name));
+                    }
+                }
             }
         }
     }
