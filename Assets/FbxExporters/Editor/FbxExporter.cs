@@ -502,7 +502,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns>The revised export set</returns>
             /// <param name="unityExportSet">Unity export set.</param>
-            protected HashSet<GameObject> RemoveDuplicateObjects(IEnumerable<UnityEngine.Object> unityExportSet)
+            public static HashSet<GameObject> RemoveDuplicateObjects(IEnumerable<UnityEngine.Object> unityExportSet)
             {
                 // basically just remove the descendents from the unity export set
                 HashSet<GameObject> toExport = new HashSet<GameObject> ();
@@ -832,7 +832,7 @@ namespace FbxExporters
             /// <summary>
             /// Get the GameObject
             /// </summary>
-            private GameObject GetGameObject (Object obj)
+            private static GameObject GetGameObject (Object obj)
             {
                 if (obj is UnityEngine.Transform) {
                     var xform = obj as UnityEngine.Transform;

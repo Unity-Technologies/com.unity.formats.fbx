@@ -57,25 +57,36 @@ namespace FbxExporters
 
                 GameObject [] unityActiveGOs = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
 
+                var exportSet = ModelExporter.RemoveDuplicateObjects (unityActiveGOs);
+                GameObject[] gosToExport = new GameObject[exportSet.Count];
+                exportSet.CopyTo (gosToExport);
+
                 // find common ancestor root & filePath;
-                string filePath = "";
+                string[] filePaths = new string[gosToExport.Length];
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
 
-                GameObject unityCommonAncestor = null;
-                int siblingIndex = -1;
+                Transform[] unityCommonAncestors = new Transform[gosToExport.Length];
+                int[] siblingIndices = new int[gosToExport.Length];
 
-                foreach (GameObject goObj in unityActiveGOs) {
-                    siblingIndex = goObj.transform.GetSiblingIndex ();
-                    unityCommonAncestor = (goObj.transform.parent != null) ? goObj.transform.parent.gameObject : null;
-                    filePath = Path.Combine (dirPath, goObj.name + ".fbx");
-
-                    break;
+                for(int n = 0; n < gosToExport.Length; n++){
+                    GameObject goObj = gosToExport[n];
+                    unityCommonAncestors[n] = goObj.transform.parent;
+                    siblingIndices [n] = goObj.transform.GetSiblingIndex ();
+                    filePaths[n] = Path.Combine (dirPath, goObj.name + ".fbx");
                 }
 
-                string fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects (filePath, unityActiveGOs) as string;
+                string[] fbxFileNames = new string[filePaths.Length];
 
-                if (fbxFileName != null) 
+                for (int j = 0; j < gosToExport.Length; j++) {
+                    fbxFileNames[j] = FbxExporters.Editor.ModelExporter.ExportObjects (filePaths[j],
+                        new UnityEngine.Object[] {gosToExport[j]}) as string;
+                }
+
+                List<GameObject> selection = new List<GameObject> ();
+                for(int i = 0; i < fbxFileNames.Length; i++)
                 {
+                    var fbxFileName = fbxFileNames [i];
+
                     // make filepath relative to project folder
                     if (fbxFileName.StartsWith (Application.dataPath, System.StringComparison.CurrentCulture)) 
                     {
@@ -103,32 +114,29 @@ namespace FbxExporters
                             }
 
                             // configure transform and maintain local pose
-                            if (unityCommonAncestor != null) {
-                                unityGO.transform.SetParent (unityCommonAncestor.transform, false);
-                            }
+                            unityGO.transform.SetParent (unityCommonAncestors[i], false);
 
-                            unityGO.transform.SetSiblingIndex (siblingIndex);
+                            unityGO.transform.SetSiblingIndex (siblingIndices[i]);
 
                             result.Add (unityObj as GameObject);
 
-                            // remove (now redundant) gameobjects
-                            for (int i = 0; i < unityActiveGOs.Length; i++) {
+                            // remove (now redundant) gameobject
 #if UNI_19965
-                                Object.DestroyImmediate (unityActiveGOs [i]);
+                            Object.DestroyImmediate (unityActiveGOs [i]);
 #else
-                                // rename and put under scene root in case we need to check values
-                                unityActiveGOs [i].name = "_safe_to_delete_" + unityActiveGOs [i].name;
-                                unityActiveGOs [i].transform.parent = null;
-                                unityActiveGOs [i].SetActive (false);
+                            // rename and put under scene root in case we need to check values
+                            gosToExport [i].name = "_safe_to_delete_" + gosToExport[i].name;
+                            gosToExport [i].transform.parent = null;
+                            gosToExport [i].SetActive (false);
 #endif
-                            }
-
                             // select the instanced Model Prefab
-                            Selection.objects = new GameObject[] {unityGO};
+                            selection.Add(unityGO);
                         }
                     }
 
                 }
+
+                Selection.objects = selection.ToArray ();
 
                 return result;
             }
