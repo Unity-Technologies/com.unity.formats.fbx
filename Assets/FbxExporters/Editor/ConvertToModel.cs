@@ -126,7 +126,6 @@ namespace FbxExporters
 #else
                             // rename and put under scene root in case we need to check values
                             gosToExport [i].name = "_safe_to_delete_" + gosToExport[i].name;
-                            gosToExport [i].transform.parent = null;
                             gosToExport [i].SetActive (false);
 #endif
                             // select the instanced Model Prefab
