@@ -486,16 +486,52 @@ namespace FbxExporters
             /// </summary>
             /// <returns>The object count.</returns>
             /// <param name="exportSet">Export set.</param>
-            public int GetGameObjectCount (IEnumerable<UnityEngine.Object> exportSet)
+            public int GetGameObjectCount (HashSet<GameObject> exportSet)
             {
                 int count = 0;
                 foreach (var obj in exportSet) {
-                    var unityGo = GetGameObject (obj);
-                    if (unityGo) {
-                        count += unityGo.transform.hierarchyCount;
-                    }
+                    count += obj.transform.hierarchyCount;
                 }
                 return count;
+            }
+
+            /// <summary>
+            /// Removes objects that will already be exported anyway.
+            /// E.g. if a parent and its child are both selected, then the child
+            ///      will be removed from the export set.
+            /// </summary>
+            /// <returns>The revised export set</returns>
+            /// <param name="unityExportSet">Unity export set.</param>
+            protected HashSet<GameObject> RemoveDuplicateObjects(IEnumerable<UnityEngine.Object> unityExportSet)
+            {
+                // basically just remove the descendents from the unity export set
+                HashSet<GameObject> toExport = new HashSet<GameObject> ();
+                HashSet<UnityEngine.Object> hashedExportSet = new HashSet<Object> (unityExportSet);
+
+                Queue<UnityEngine.Object> queue = new Queue<Object> (unityExportSet);
+                while(queue.Count > 0) {
+                    var obj = queue.Dequeue();
+                    var unityGo = GetGameObject (obj);
+
+                    if (unityGo) {
+                        // if any of this nodes ancestors is already in the export set,
+                        // then ignore it, it will get exported already
+                        bool parentInSet = false;
+                        var parent = unityGo.transform.parent;
+                        while (parent != null) {
+                            if (hashedExportSet.Contains (parent.gameObject)) {
+                                parentInSet = true;
+                                break;
+                            }
+                            parent = parent.parent;
+                        }
+
+                        if (!parentInSet) {
+                            toExport.Add (unityGo);
+                        }
+                    }
+                }
+                return toExport;
             }
 
             /// <summary>
@@ -561,16 +597,13 @@ namespace FbxExporters
                         // export set of object
                         FbxNode fbxRootNode = fbxScene.GetRootNode ();
                         int i = 0;
-                        int count = GetGameObjectCount (unityExportSet);
-                        foreach (var obj in unityExportSet) {
-                            var unityGo = GetGameObject (obj);
-
-                            if (unityGo) {
-                                i = this.ExportComponents (unityGo, fbxScene, fbxRootNode, i, count);
-                                if (i < 0) {
-                                    Debug.LogWarning ("Export Cancelled");
-                                    return 0;
-                                }
+                        var revisedExportSet = RemoveDuplicateObjects(unityExportSet);
+                        int count = GetGameObjectCount (revisedExportSet);
+                        foreach (var unityGo in revisedExportSet) {
+                            i = this.ExportComponents (unityGo, fbxScene, fbxRootNode, i, count);
+                            if (i < 0) {
+                                Debug.LogWarning ("Export Cancelled");
+                                return 0;
                             }
                         }
 
