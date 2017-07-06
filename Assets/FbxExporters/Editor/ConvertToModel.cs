@@ -95,12 +95,9 @@ namespace FbxExporters
                         {
                             GameObject unityGO = unityObj as GameObject;
 
-                            // configure name
-                            const string cloneSuffix = "(Clone)";
-
-                            if (unityGO.name.EndsWith (cloneSuffix, System.StringComparison.CurrentCulture)) {
-                                unityGO.name = unityGO.name.Remove (cloneSuffix.Length - 1);
-                            }
+                            // Set the name to be the name of the instantiated asset.
+                            // This will get rid of the "(Clone)" if it's added
+                            unityGO.name = unityMainAsset.name;
 
                             // configure transform and maintain local pose
                             if (unityCommonAncestor != null) {
@@ -124,7 +121,7 @@ namespace FbxExporters
                             }
 
                             // select the instanced Model Prefab
-                            Selection.objects = new GameObject[] {unityGO};
+                            Selection.objects = new GameObject[] { unityGO };
                         }
                     }
 
