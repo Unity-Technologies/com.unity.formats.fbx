@@ -508,9 +508,7 @@ namespace FbxExporters
                 HashSet<GameObject> toExport = new HashSet<GameObject> ();
                 HashSet<UnityEngine.Object> hashedExportSet = new HashSet<Object> (unityExportSet);
 
-                Queue<UnityEngine.Object> queue = new Queue<Object> (unityExportSet);
-                while(queue.Count > 0) {
-                    var obj = queue.Dequeue();
+                foreach(var obj in unityExportSet){
                     var unityGo = GetGameObject (obj);
 
                     if (unityGo) {
