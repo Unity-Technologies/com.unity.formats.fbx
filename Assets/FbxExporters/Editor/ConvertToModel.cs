@@ -57,7 +57,7 @@ namespace FbxExporters
 
                 GameObject [] unityActiveGOs = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
 
-                var exportSet = ModelExporter.RemoveDuplicateObjects (unityActiveGOs);
+                var exportSet = ModelExporter.RemoveRedundantObjects (unityActiveGOs);
                 GameObject[] gosToExport = new GameObject[exportSet.Count];
                 exportSet.CopyTo (gosToExport);
 
@@ -65,14 +65,8 @@ namespace FbxExporters
                 string[] filePaths = new string[gosToExport.Length];
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
 
-                Transform[] unityCommonAncestors = new Transform[gosToExport.Length];
-                int[] siblingIndices = new int[gosToExport.Length];
-
                 for(int n = 0; n < gosToExport.Length; n++){
-                    GameObject goObj = gosToExport[n];
-                    unityCommonAncestors[n] = goObj.transform.parent;
-                    siblingIndices [n] = goObj.transform.GetSiblingIndex ();
-                    filePaths[n] = Path.Combine (dirPath, goObj.name + ".fbx");
+                    filePaths[n] = Path.Combine (dirPath, gosToExport[n].name + ".fbx");
                 }
 
                 string[] fbxFileNames = new string[filePaths.Length];
@@ -109,15 +103,24 @@ namespace FbxExporters
                         if (unityObj != null) 
                         {
                             GameObject unityGO = unityObj as GameObject;
+                            Transform unityGOTransform = unityGO.transform;
+                            Transform origGOTransform = gosToExport [i].transform;
 
                             // Set the name to be the name of the instantiated asset.
                             // This will get rid of the "(Clone)" if it's added
                             unityGO.name = unityMainAsset.name;
 
                             // configure transform and maintain local pose
-                            unityGO.transform.SetParent (unityCommonAncestors[i], false);
+                            unityGOTransform.SetParent (origGOTransform.parent, false);
 
-                            unityGO.transform.SetSiblingIndex (siblingIndices[i]);
+                            unityGOTransform.SetSiblingIndex (origGOTransform.GetSiblingIndex());
+
+                            // copy the components over, assuming that the hierarchy order is unchanged
+                            if (origGOTransform.hierarchyCount != unityGOTransform.hierarchyCount) {
+                                Debug.LogWarning (string.Format ("Warning: Exported {0} objects, but only imported {1}",
+                                    origGOTransform.hierarchyCount, unityGOTransform.hierarchyCount));
+                            }
+                            CopyComponentsRecursive (gosToExport[i], unityGO);
 
                             result.Add (unityObj as GameObject);
 
@@ -139,6 +142,36 @@ namespace FbxExporters
                 Selection.objects = selection.ToArray ();
 
                 return result;
+            }
+
+            private static void CopyComponentsRecursive(GameObject from, GameObject to){
+                if (!to.name.StartsWith(from.name) || from.transform.childCount != to.transform.childCount) {
+                    Debug.LogError (string.Format("Error: hierarchies don't match (From: {0}, To: {1})", from.name, to.name));
+                    return;
+                }
+
+                CopyComponents (from, to);
+                for (int i = 0; i < from.transform.childCount; i++) {
+                    CopyComponentsRecursive(from.transform.GetChild(i).gameObject, to.transform.GetChild(i).gameObject);
+                }
+            }
+
+            private static void CopyComponents(GameObject from, GameObject to){
+                var components = from.GetComponents<Component> ();
+                for(int i = 0; i < components.Length; i++){
+                    // if to already has this component, then skip it
+                    if(components[i] == null || to.GetComponent(components[i].GetType()) != null){
+                        continue;
+                    }
+                    bool success = UnityEditorInternal.ComponentUtility.CopyComponent (components[i]);
+                    if (success) {
+                        success = UnityEditorInternal.ComponentUtility.PasteComponentAsNew (to);
+                    }
+                    if (!success) {
+                        Debug.LogWarning (string.Format ("Warning: Failed to copy component {0} from {1} to {2}",
+                            components[i].GetType().Name, from.name, to.name));
+                    }
+                }
             }
         }
     }
