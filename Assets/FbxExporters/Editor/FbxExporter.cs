@@ -484,18 +484,58 @@ namespace FbxExporters
             /// A count of how many GameObjects we are exporting, to have a rough
             /// idea of how long creating the scene will take.
             /// </summary>
-            /// <returns>The object count.</returns>
+            /// <returns>The hierarchy count.</returns>
             /// <param name="exportSet">Export set.</param>
-            public int GetGameObjectCount (IEnumerable<UnityEngine.Object> exportSet)
+            public int GetHierarchyCount (HashSet<GameObject> exportSet)
             {
                 int count = 0;
-                foreach (var obj in exportSet) {
-                    var unityGo = GetGameObject (obj);
-                    if (unityGo) {
-                        count += unityGo.transform.hierarchyCount;
+                Queue<GameObject> queue = new Queue<GameObject> (exportSet);
+                while (queue.Count > 0) {
+                    var obj = queue.Dequeue ();
+                    var objTransform = obj.transform;
+                    foreach (Transform child in objTransform) {
+                        queue.Enqueue (child.gameObject);
                     }
+                    count++;
                 }
                 return count;
+            }
+
+            /// <summary>
+            /// Removes objects that will already be exported anyway.
+            /// E.g. if a parent and its child are both selected, then the child
+            ///      will be removed from the export set.
+            /// </summary>
+            /// <returns>The revised export set</returns>
+            /// <param name="unityExportSet">Unity export set.</param>
+            protected HashSet<GameObject> RemoveRedundantObjects(IEnumerable<UnityEngine.Object> unityExportSet)
+            {
+                // basically just remove the descendents from the unity export set
+                HashSet<GameObject> toExport = new HashSet<GameObject> ();
+                HashSet<UnityEngine.Object> hashedExportSet = new HashSet<Object> (unityExportSet);
+
+                foreach(var obj in unityExportSet){
+                    var unityGo = GetGameObject (obj);
+
+                    if (unityGo) {
+                        // if any of this nodes ancestors is already in the export set,
+                        // then ignore it, it will get exported already
+                        bool parentInSet = false;
+                        var parent = unityGo.transform.parent;
+                        while (parent != null) {
+                            if (hashedExportSet.Contains (parent.gameObject)) {
+                                parentInSet = true;
+                                break;
+                            }
+                            parent = parent.parent;
+                        }
+
+                        if (!parentInSet) {
+                            toExport.Add (unityGo);
+                        }
+                    }
+                }
+                return toExport;
             }
 
             /// <summary>
@@ -561,16 +601,13 @@ namespace FbxExporters
                         // export set of object
                         FbxNode fbxRootNode = fbxScene.GetRootNode ();
                         int i = 0;
-                        int count = GetGameObjectCount (unityExportSet);
-                        foreach (var obj in unityExportSet) {
-                            var unityGo = GetGameObject (obj);
-
-                            if (unityGo) {
-                                i = this.ExportComponents (unityGo, fbxScene, fbxRootNode, i, count);
-                                if (i < 0) {
-                                    Debug.LogWarning ("Export Cancelled");
-                                    return 0;
-                                }
+                        var revisedExportSet = RemoveRedundantObjects(unityExportSet);
+                        int count = GetHierarchyCount (revisedExportSet);
+                        foreach (var unityGo in revisedExportSet) {
+                            i = this.ExportComponents (unityGo, fbxScene, fbxRootNode, i, count);
+                            if (i < 0) {
+                                Debug.LogWarning ("Export Cancelled");
+                                return 0;
                             }
                         }
 
