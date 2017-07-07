@@ -86,6 +86,10 @@ namespace FbxExporters
                 for(int i = 0; i < fbxFileNames.Length; i++)
                 {
                     var fbxFileName = fbxFileNames [i];
+                    if (fbxFileName == null) {
+                        Debug.Log (string.Format ("Warning: Export failed for GameObject {0}", gosToExport [i].name));
+                        continue;
+                    }
 
                     // make filepath relative to project folder
                     if (fbxFileName.StartsWith (Application.dataPath, System.StringComparison.CurrentCulture)) 
