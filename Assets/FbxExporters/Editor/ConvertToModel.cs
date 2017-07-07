@@ -171,7 +171,14 @@ namespace FbxExporters
                             // don't want to copy MeshFilter because then we will replace the
                             // exported mesh with the old mesh
                             if (!(toComponent is MeshFilter)) {
-                                success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                if (toComponent is SkinnedMeshRenderer) {
+                                    var skinnedMesh = toComponent as SkinnedMeshRenderer;
+                                    var sharedMesh = skinnedMesh.sharedMesh;
+                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                    skinnedMesh.sharedMesh = sharedMesh;
+                                } else {
+                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                }
                             }
                         } else {
                             success = UnityEditorInternal.ComponentUtility.PasteComponentAsNew (to);
