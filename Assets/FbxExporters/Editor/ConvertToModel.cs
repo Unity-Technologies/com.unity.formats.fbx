@@ -57,11 +57,6 @@ namespace FbxExporters
 
                 GameObject [] unityActiveGOs = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
 
-                // Ensure that the root GameObjects retain their relative order after export
-                System.Array.Sort (unityActiveGOs, delegate(GameObject x, GameObject y) {
-                    return x.transform.GetSiblingIndex().CompareTo(y.transform.GetSiblingIndex());
-                });
-
                 // find common ancestor root & filePath;
                 string filePath = "";
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
@@ -99,6 +94,7 @@ namespace FbxExporters
                         if (unityObj != null) 
                         {
                             GameObject unityGO = unityObj as GameObject;
+                            Transform unityGOTransform = unityGO.transform;
 
                             // configure name
                             const string cloneSuffix = "(Clone)";
@@ -109,21 +105,21 @@ namespace FbxExporters
 
                             // configure transform and maintain local pose
                             if (unityCommonAncestor != null) {
-                                unityGO.transform.SetParent (unityCommonAncestor.transform, false);
+                                unityGOTransform.SetParent (unityCommonAncestor.transform, false);
                             }
 
-                            unityGO.transform.SetSiblingIndex (siblingIndex);
+                            unityGOTransform.SetSiblingIndex (siblingIndex);
 
                             // copy the components over, assuming that the hierarchy order is unchanged
                             if (unityActiveGOs.Length == 1) {
                                 CopyComponentsRecursive (unityActiveGOs [0], unityGO);
                             } else {
-                                if (unityActiveGOs.Length != unityGO.transform.childCount) {
+                                if (unityActiveGOs.Length != unityGOTransform.childCount) {
                                     Debug.LogWarning (string.Format ("Warning: Exported {0} objects, but only imported {1}",
-                                        unityActiveGOs.Length, unityGO.transform.childCount));
+                                        unityActiveGOs.Length, unityGOTransform.childCount));
                                 }
-                                for (int i = 0; i < unityGO.transform.childCount; i++) {
-                                    CopyComponentsRecursive (unityActiveGOs [i], unityGO.transform.GetChild (i).gameObject);
+                                for (int i = 0, c = unityGOTransform.childCount; i < c; i++) {
+                                    CopyComponentsRecursive (unityActiveGOs [i], unityGOTransform.GetChild (i).gameObject);
                                 }
                             }
 
@@ -167,7 +163,7 @@ namespace FbxExporters
                 var components = from.GetComponents<Component> ();
                 for(int i = 0; i < components.Length; i++){
                     // if to already has this component, then skip it
-                    if(to.GetComponent(components[i].GetType()) != null){
+                    if(components[i] == null || to.GetComponent(components[i].GetType()) != null){
                         continue;
                     }
                     bool success = UnityEditorInternal.ComponentUtility.CopyComponent (components[i]);
