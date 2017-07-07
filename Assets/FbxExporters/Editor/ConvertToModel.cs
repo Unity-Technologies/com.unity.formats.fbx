@@ -172,13 +172,30 @@ namespace FbxExporters
             private static void CopyComponents(GameObject from, GameObject to){
                 var components = from.GetComponents<Component> ();
                 for(int i = 0; i < components.Length; i++){
-                    // if to already has this component, then skip it
-                    if(components[i] == null || to.GetComponent(components[i].GetType()) != null){
+                    if(components[i] == null){
                         continue;
                     }
+                        
                     bool success = UnityEditorInternal.ComponentUtility.CopyComponent (components[i]);
                     if (success) {
-                        success = UnityEditorInternal.ComponentUtility.PasteComponentAsNew (to);
+                        // if to already has this component, then copy the values over
+                        var toComponent = to.GetComponent (components [i].GetType ());
+                        if (toComponent != null) {
+                            // don't want to copy MeshFilter because then we will replace the
+                            // exported mesh with the old mesh
+                            if (!(toComponent is MeshFilter)) {
+                                if (toComponent is SkinnedMeshRenderer) {
+                                    var skinnedMesh = toComponent as SkinnedMeshRenderer;
+                                    var sharedMesh = skinnedMesh.sharedMesh;
+                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                    skinnedMesh.sharedMesh = sharedMesh;
+                                } else {
+                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                }
+                            }
+                        } else {
+                            success = UnityEditorInternal.ComponentUtility.PasteComponentAsNew (to);
+                        }
                     }
                     if (!success) {
                         Debug.LogWarning (string.Format ("Warning: Failed to copy component {0} from {1} to {2}",
