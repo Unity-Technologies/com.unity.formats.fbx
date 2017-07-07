@@ -484,13 +484,19 @@ namespace FbxExporters
             /// A count of how many GameObjects we are exporting, to have a rough
             /// idea of how long creating the scene will take.
             /// </summary>
-            /// <returns>The object count.</returns>
+            /// <returns>The hierarchy count.</returns>
             /// <param name="exportSet">Export set.</param>
-            public int GetGameObjectCount (HashSet<GameObject> exportSet)
+            public int GetHierarchyCount (HashSet<GameObject> exportSet)
             {
                 int count = 0;
-                foreach (var obj in exportSet) {
-                    count += obj.transform.hierarchyCount;
+                Queue<GameObject> queue = new Queue<GameObject> (exportSet);
+                while (queue.Count > 0) {
+                    var obj = queue.Dequeue ();
+                    var objTransform = obj.transform;
+                    foreach (Transform child in objTransform) {
+                        queue.Enqueue (child.gameObject);
+                    }
+                    count++;
                 }
                 return count;
             }
@@ -502,7 +508,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns>The revised export set</returns>
             /// <param name="unityExportSet">Unity export set.</param>
-            protected HashSet<GameObject> RemoveDuplicateObjects(IEnumerable<UnityEngine.Object> unityExportSet)
+            protected HashSet<GameObject> RemoveRedundantObjects(IEnumerable<UnityEngine.Object> unityExportSet)
             {
                 // basically just remove the descendents from the unity export set
                 HashSet<GameObject> toExport = new HashSet<GameObject> ();
@@ -595,8 +601,8 @@ namespace FbxExporters
                         // export set of object
                         FbxNode fbxRootNode = fbxScene.GetRootNode ();
                         int i = 0;
-                        var revisedExportSet = RemoveDuplicateObjects(unityExportSet);
-                        int count = GetGameObjectCount (revisedExportSet);
+                        var revisedExportSet = RemoveRedundantObjects(unityExportSet);
+                        int count = GetHierarchyCount (revisedExportSet);
                         foreach (var unityGo in revisedExportSet) {
                             i = this.ExportComponents (unityGo, fbxScene, fbxRootNode, i, count);
                             if (i < 0) {
