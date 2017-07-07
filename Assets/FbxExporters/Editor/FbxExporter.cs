@@ -838,7 +838,7 @@ namespace FbxExporters
             /// <summary>
             /// Get the GameObject
             /// </summary>
-            private GameObject GetGameObject (Object obj)
+            private static GameObject GetGameObject (Object obj)
             {
                 if (obj is UnityEngine.Transform) {
                     var xform = obj as UnityEngine.Transform;
