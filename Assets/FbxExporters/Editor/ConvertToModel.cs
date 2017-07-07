@@ -170,7 +170,7 @@ namespace FbxExporters
                         if (toComponent != null) {
                             // don't want to copy MeshFilter because then we will replace the
                             // exported mesh with the old mesh
-                            if (!toComponent.GetType ().Equals (typeof(MeshFilter))) {
+                            if (!(toComponent is MeshFilter)) {
                                 success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
                             }
                         } else {
