@@ -415,7 +415,7 @@ namespace FbxExporters
             }
 
             // get a fbxNode's global default position.
-            protected void ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode)
+            protected void ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, TransformExportType exportType)
             {
                 // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
                 // This causes issues when converting euler to quaternion, causing the final
@@ -423,10 +423,27 @@ namespace FbxExporters
                 // Fixed if we set the rotation order to the Unity rotation order in the FBX.
                 fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
 
-                // get local position of fbxNode (from Unity)
-                UnityEngine.Vector3 unityTranslate = unityTransform.localPosition;
-                UnityEngine.Vector3 unityRotate = unityTransform.localRotation.eulerAngles;
-                UnityEngine.Vector3 unityScale = unityTransform.localScale;
+                UnityEngine.Vector3 unityTranslate;
+                UnityEngine.Vector3 unityRotate;
+                UnityEngine.Vector3 unityScale;
+
+                switch (exportType) {
+                case TransformExportType.Zeroed:
+                    unityTranslate = Vector3.zero;
+                    unityRotate = Vector3.zero;
+                    unityScale = Vector3.one;
+                    break;
+                case TransformExportType.Global:
+                    unityTranslate = unityTransform.position;
+                    unityRotate = unityTransform.rotation.eulerAngles;
+                    unityScale = unityTransform.lossyScale;
+                    break;
+                default: /*case TransformExportType.Local*/
+                    unityTranslate = unityTransform.localPosition;
+                    unityRotate = unityTransform.localRotation.eulerAngles;
+                    unityScale = unityTransform.localScale;
+                    break;
+                }
 
                 // transfer transform data from Unity to Fbx
                 // Negating the x value of the translation, and the y and z values of the rotation
@@ -446,24 +463,26 @@ namespace FbxExporters
             /// <summary>
             /// Unconditionally export components on this game object
             /// </summary>
-            protected int ExportComponents (GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent, int currentIndex, int objectCount)
+            protected int ExportComponents (
+                GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
+                int exportProgress, int objectCount, TransformExportType exportType = TransformExportType.Local)
             {
-                int i = currentIndex;
+                int numObjectsExported = exportProgress;
 
                 // create an FbxNode and add it as a child of parent
                 FbxNode fbxNode = FbxNode.Create (fbxScene, unityGo.name);
                 NumNodes++;
 
-                i++;
+                numObjectsExported++;
                 if (EditorUtility.DisplayCancelableProgressBar (
                         ProgressBarTitle,
-                        string.Format ("Creating FbxNode {0}/{1}", i, objectCount),
-                        (i / (float)objectCount) * 0.5f)) {
+                        string.Format ("Creating FbxNode {0}/{1}", numObjectsExported, objectCount),
+                        (numObjectsExported / (float)objectCount) * 0.5f)) {
                     // cancel silently
                     return -1;
                 }
 
-                ExportTransform ( unityGo.transform, fbxNode);
+                ExportTransform ( unityGo.transform, fbxNode, exportType);
 
                 bool weldVertices = FbxExporters.EditorTools.ExportSettings.instance.weldVertices;
                 ExportMesh (GetMeshInfo( unityGo ), fbxNode, fbxScene, weldVertices);
@@ -475,9 +494,9 @@ namespace FbxExporters
 
                 // now  unityGo  through our children and recurse
                 foreach (Transform childT in  unityGo.transform) {
-                    i = ExportComponents (childT.gameObject, fbxScene, fbxNode, i, objectCount);
+                    numObjectsExported = ExportComponents (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount);
                 }
-                return i;
+                return numObjectsExported;
             }
 
             /// <summary>
@@ -537,6 +556,8 @@ namespace FbxExporters
                 }
                 return toExport;
             }
+
+            public enum TransformExportType { Local, Global, Zeroed };
 
             /// <summary>
             /// Export all the objects in the set.
@@ -600,14 +621,28 @@ namespace FbxExporters
 
                         // export set of object
                         FbxNode fbxRootNode = fbxScene.GetRootNode ();
-                        int i = 0;
+                        // stores how many objects we have exported, -1 if export was cancelled
+                        int exportProgress = 0;
                         var revisedExportSet = RemoveRedundantObjects(unityExportSet);
                         int count = GetHierarchyCount (revisedExportSet);
-                        foreach (var unityGo in revisedExportSet) {
-                            i = this.ExportComponents (unityGo, fbxScene, fbxRootNode, i, count);
-                            if (i < 0) {
-                                Debug.LogWarning ("Export Cancelled");
-                                return 0;
+
+                        if(revisedExportSet.Count == 1){
+                            foreach(var unityGo in revisedExportSet){
+                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode, exportProgress, count, TransformExportType.Zeroed);
+                                if (exportProgress < 0) {
+                                    Debug.LogWarning ("Export Cancelled");
+                                    return 0;
+                                }
+                            }
+                        }
+                        else{
+                            foreach (var unityGo in revisedExportSet) {
+                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode, exportProgress, count,
+                                    unityGo.transform.parent == null? TransformExportType.Local : TransformExportType.Global);
+                                if (exportProgress < 0) {
+                                    Debug.LogWarning ("Export Cancelled");
+                                    return 0;
+                                }
                             }
                         }
 

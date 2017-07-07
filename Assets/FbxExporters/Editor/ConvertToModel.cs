@@ -99,30 +99,12 @@ namespace FbxExporters
 
                     if (unityMainAsset != null) {
                         Object unityObj = PrefabUtility.InstantiateAttachedAsset (unityMainAsset);
-
-                        if (unityObj != null) 
+                        GameObject unityGO = unityObj as GameObject;
+                        if (unityGO != null) 
                         {
-                            GameObject unityGO = unityObj as GameObject;
-                            Transform unityGOTransform = unityGO.transform;
-                            Transform origGOTransform = gosToExport [i].transform;
+                            SetupImportedGameObject (gosToExport [i], unityGO);
 
-                            // Set the name to be the name of the instantiated asset.
-                            // This will get rid of the "(Clone)" if it's added
-                            unityGO.name = unityMainAsset.name;
-
-                            // configure transform and maintain local pose
-                            unityGOTransform.SetParent (origGOTransform.parent, false);
-
-                            unityGOTransform.SetSiblingIndex (origGOTransform.GetSiblingIndex());
-
-                            // copy the components over, assuming that the hierarchy order is unchanged
-                            if (origGOTransform.hierarchyCount != unityGOTransform.hierarchyCount) {
-                                Debug.LogWarning (string.Format ("Warning: Exported {0} objects, but only imported {1}",
-                                    origGOTransform.hierarchyCount, unityGOTransform.hierarchyCount));
-                            }
-                            CopyComponentsRecursive (gosToExport[i], unityGO);
-
-                            result.Add (unityObj as GameObject);
+                            result.Add (unityGO);
 
                             // remove (now redundant) gameobject
 #if UNI_19965
@@ -142,6 +124,37 @@ namespace FbxExporters
                 Selection.objects = selection.ToArray ();
 
                 return result;
+            }
+
+            private static void SetupImportedGameObject(GameObject orig, GameObject imported)
+            {
+                Transform importedTransform = imported.transform;
+                Transform origTransform = orig.transform;
+
+                // Set the name to be the name of the instantiated asset.
+                // This will get rid of the "(Clone)" if it's added
+                imported.name = orig.name;
+
+                // configure transform and maintain local pose
+                importedTransform.SetParent (origTransform.parent, false);
+                importedTransform.SetSiblingIndex (origTransform.GetSiblingIndex());
+
+                // set the transform to be the same as before
+                bool success = UnityEditorInternal.ComponentUtility.CopyComponent (origTransform);
+                if (success) {
+                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues(importedTransform);
+                }
+                if (!success) {
+                    Debug.LogWarning (string.Format ("Warning: Failed to copy component Transform from {0} to {1}",
+                        imported.name, origTransform.name));
+                }
+
+                // copy the components over, assuming that the hierarchy order is unchanged
+                if (origTransform.hierarchyCount != importedTransform.hierarchyCount) {
+                    Debug.LogWarning (string.Format ("Warning: Exported {0} objects, but only imported {1}",
+                        origTransform.hierarchyCount, importedTransform.hierarchyCount));
+                }
+                CopyComponentsRecursive (orig, imported);
             }
 
             private static void CopyComponentsRecursive(GameObject from, GameObject to){
