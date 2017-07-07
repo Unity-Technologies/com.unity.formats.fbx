@@ -99,11 +99,9 @@ namespace FbxExporters
 
                     if (unityMainAsset != null) {
                         Object unityObj = PrefabUtility.InstantiateAttachedAsset (unityMainAsset);
-
-                        if (unityObj != null) 
+                        GameObject unityGO = unityObj as GameObject;
+                        if (unityGO != null) 
                         {
-                            GameObject unityGO = unityObj as GameObject;
-
                             SetupImportedGameObject (gosToExport [i], unityGO);
 
                             result.Add (unityGO);
