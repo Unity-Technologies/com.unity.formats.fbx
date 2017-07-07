@@ -508,7 +508,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns>The revised export set</returns>
             /// <param name="unityExportSet">Unity export set.</param>
-            protected HashSet<GameObject> RemoveRedundantObjects(IEnumerable<UnityEngine.Object> unityExportSet)
+            public static HashSet<GameObject> RemoveRedundantObjects(IEnumerable<UnityEngine.Object> unityExportSet)
             {
                 // basically just remove the descendents from the unity export set
                 HashSet<GameObject> toExport = new HashSet<GameObject> ();
