@@ -465,19 +465,19 @@ namespace FbxExporters
             /// </summary>
             protected int ExportComponents (
                 GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
-                int currentIndex, int objectCount, TransformExportType exportType = TransformExportType.Local)
+                int exportProgress, int objectCount, TransformExportType exportType = TransformExportType.Local)
             {
-                int i = currentIndex;
+                int numObjectsExported = exportProgress;
 
                 // create an FbxNode and add it as a child of parent
                 FbxNode fbxNode = FbxNode.Create (fbxScene, unityGo.name);
                 NumNodes++;
 
-                i++;
+                numObjectsExported++;
                 if (EditorUtility.DisplayCancelableProgressBar (
                         ProgressBarTitle,
-                        string.Format ("Creating FbxNode {0}/{1}", i, objectCount),
-                        (i / (float)objectCount) * 0.5f)) {
+                        string.Format ("Creating FbxNode {0}/{1}", numObjectsExported, objectCount),
+                        (numObjectsExported / (float)objectCount) * 0.5f)) {
                     // cancel silently
                     return -1;
                 }
@@ -494,9 +494,9 @@ namespace FbxExporters
 
                 // now  unityGo  through our children and recurse
                 foreach (Transform childT in  unityGo.transform) {
-                    i = ExportComponents (childT.gameObject, fbxScene, fbxNode, i, objectCount);
+                    numObjectsExported = ExportComponents (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount);
                 }
-                return i;
+                return numObjectsExported;
             }
 
             /// <summary>
@@ -621,14 +621,15 @@ namespace FbxExporters
 
                         // export set of object
                         FbxNode fbxRootNode = fbxScene.GetRootNode ();
-                        int i = 0;
+                        // stores how many objects we have exported, -1 if export was cancelled
+                        int exportProgress = 0;
                         var revisedExportSet = RemoveRedundantObjects(unityExportSet);
                         int count = GetHierarchyCount (revisedExportSet);
 
                         if(revisedExportSet.Count == 1){
                             foreach(var unityGo in revisedExportSet){
-                                i = this.ExportComponents (unityGo, fbxScene, fbxRootNode, i, count, TransformExportType.Zeroed);
-                                if (i < 0) {
+                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode, exportProgress, count, TransformExportType.Zeroed);
+                                if (exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
                                     return 0;
                                 }
@@ -636,9 +637,9 @@ namespace FbxExporters
                         }
                         else{
                             foreach (var unityGo in revisedExportSet) {
-                                i = this.ExportComponents (unityGo, fbxScene, fbxRootNode, i, count,
+                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode, exportProgress, count,
                                     unityGo.transform.parent == null? TransformExportType.Local : TransformExportType.Global);
-                                if (i < 0) {
+                                if (exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
                                     return 0;
                                 }
