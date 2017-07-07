@@ -19,10 +19,10 @@ Packaging
 export PROJECT_PATH=~/Development/FbxExporters
 export UNITY3D_PATH=/Applications/Unity\ 5.6.1f1/Unity.app/Contents/MacOS/Unity
 export PACKAGE_NAME=FbxExporters
-export PACKAGE_VERSION=0.0.3a
-export FBXSDK_PACKAGE_PATH=/path/to/FbxSdk.unitypackage
+export PACKAGE_VERSION=0.0.4a
+export FBXSDK_PACKAGE_PATH=~/Development/FbxSharp/FbxSdk_0.0.4a.unitypackage
 
-"${UNITY3D_PATH} -projectPath "${PROJECT_PATH}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
+"${UNITY3D_PATH}" -batchmode -projectPath "${PROJECT_PATH}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
 "${UNITY3D_PATH}" -batchmode -projectPath "${PROJECT_PATH}" -exportPackage Assets/FbxExporters Assets/FbxSdk  ${PROJECT_PATH}/${PACKAGE_NAME}_${PACKAGE_VERSION}.unitypackage -quit
 ```
 
