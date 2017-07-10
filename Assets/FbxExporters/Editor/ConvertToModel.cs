@@ -32,7 +32,8 @@ namespace FbxExporters
             [MenuItem (MenuItemName1, false)]
             public static void OnMenuItem ()
             {
-                OnConvertInPlace ();
+                GameObject [] unityActiveGOs = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
+                OnConvertInPlace (unityActiveGOs);
             }
 
             /// <summary>
@@ -45,17 +46,26 @@ namespace FbxExporters
             }
 
             // Add a menu item called "Export Model..." to a GameObject's context menu.
+            // OnContextItem gets called once per selected object 
+            // (if the parent and child are selected, then OnContextItem will only be called on the parent)
             [MenuItem (MenuItemName2, false, 30)]
             static void OnContextItem (MenuCommand command)
             {
-                OnConvertInPlace ();
+                if (command == null || command.context == null) {
+                    Debug.LogError ("Error: No GameObject selected");
+                    return;
+                }
+                GameObject selected = command.context as GameObject;
+                if (selected == null) {
+                    Debug.LogError (string.Format("Error: {0} is not a GameObject and cannot be converted", command.context.name));
+                    return;
+                }
+                OnConvertInPlace (new GameObject[]{selected});
             }
 
-            private static List<GameObject> OnConvertInPlace ()
+            private static List<GameObject> OnConvertInPlace (GameObject [] unityActiveGOs)
             {
                 List<GameObject> result = new List<GameObject> ();
-
-                GameObject [] unityActiveGOs = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
 
                 var exportSet = ModelExporter.RemoveRedundantObjects (unityActiveGOs);
                 GameObject[] gosToExport = new GameObject[exportSet.Count];
