@@ -351,12 +351,14 @@ namespace FbxExporters
                     }
                     fbxMesh.InitControlPoints (NumControlPoints);
 
-                    // copy control point data from Unity to FBX
+                    // Copy control point data from Unity to FBX.
+                    // As we do so, scale the points by 100 to convert
+                    // from m to cm.
                     foreach (var controlPoint in ControlPointToIndex.Keys) {
                         fbxMesh.SetControlPointAt (new FbxVector4 (
-                            -controlPoint.x,
-                            controlPoint.y,
-                            controlPoint.z
+                            -controlPoint.x*100,
+                            controlPoint.y*100,
+                            controlPoint.z*100
                         ), ControlPointToIndex [controlPoint]);
                     }
                 } else {
@@ -368,9 +370,9 @@ namespace FbxExporters
                     {
                         // convert from left to right-handed by negating x (Unity negates x again on import)
                         fbxMesh.SetControlPointAt(new FbxVector4 (
-                            -meshInfo.Vertices [v].x,
-                            meshInfo.Vertices [v].y,
-                            meshInfo.Vertices [v].z
+                            -meshInfo.Vertices [v].x*100,
+                            meshInfo.Vertices [v].y*100,
+                            meshInfo.Vertices [v].z*100
                         ), v);
                     }
                 }
@@ -447,8 +449,9 @@ namespace FbxExporters
 
                 // transfer transform data from Unity to Fbx
                 // Negating the x value of the translation, and the y and z values of the rotation
-                // to convert from Unity to Maya coordinates (left to righthanded)
-                var fbxTranslate = new FbxDouble3 (-unityTranslate.x, unityTranslate.y, unityTranslate.z);
+                // to convert from Unity to Maya coordinates (left to righthanded).
+                // Scaling the translation by 100 to convert from m to cm.
+                var fbxTranslate = new FbxDouble3 (-unityTranslate.x*100, unityTranslate.y*100, unityTranslate.z*100);
                 var fbxRotate = new FbxDouble3 (unityRotate.x, -unityRotate.y, -unityRotate.z);
                 var fbxScale = new FbxDouble3 (unityScale.x, unityScale.y, unityScale.z);
 
@@ -609,9 +612,11 @@ namespace FbxExporters
                         fbxSceneInfo.mComment = Comments;
                         fbxScene.SetSceneInfo (fbxSceneInfo);
 
-                        // Set up the axes (Y up, Z forward, X to the right) and units (meters)
+                        // Set up the axes (Y up, Z forward, X to the right) and units (centimeters)
+                        // Exporting in centimeters as this is the default unit for FBX files, and easiest
+                        // to work with when importing into Maya or Max
                         var fbxSettings = fbxScene.GetGlobalSettings ();
-                        fbxSettings.SetSystemUnit (FbxSystemUnit.m);
+                        fbxSettings.SetSystemUnit (FbxSystemUnit.cm);
 
                         // The Unity axis system has Y up, Z forward, X to the right (left handed system with odd parity).
                         // The Maya axis system has Y up, Z forward, X to the left (right handed system with odd parity).
