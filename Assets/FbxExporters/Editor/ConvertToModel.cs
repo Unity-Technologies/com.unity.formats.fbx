@@ -76,7 +76,8 @@ namespace FbxExporters
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
 
                 for(int n = 0; n < gosToExport.Length; n++){
-                    filePaths[n] = Path.Combine (dirPath, gosToExport[n].name + ".fbx");
+                    string filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
+                    filePaths[n] = Path.Combine (dirPath, filename);
                 }
 
                 string[] fbxFileNames = new string[filePaths.Length];
@@ -91,7 +92,7 @@ namespace FbxExporters
                 {
                     var fbxFileName = fbxFileNames [i];
                     if (fbxFileName == null) {
-                        Debug.Log (string.Format ("Warning: Export failed for GameObject {0}", gosToExport [i].name));
+                        Debug.LogWarning (string.Format ("Warning: Export failed for GameObject {0}", gosToExport [i].name));
                         continue;
                     }
 
