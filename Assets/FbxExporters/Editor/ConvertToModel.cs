@@ -76,7 +76,8 @@ namespace FbxExporters
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
 
                 for(int n = 0; n < gosToExport.Length; n++){
-                    filePaths[n] = Path.Combine (dirPath, gosToExport[n].name + ".fbx");
+                    string filename = ConvertToValidFilename (gosToExport [n].name + ".fbx");
+                    filePaths[n] = Path.Combine (dirPath, filename);
                 }
 
                 string[] fbxFileNames = new string[filePaths.Length];
@@ -134,6 +135,11 @@ namespace FbxExporters
                 Selection.objects = selection.ToArray ();
 
                 return result;
+            }
+
+            private static string ConvertToValidFilename(string filename)
+            {
+                return System.Text.RegularExpressions.Regex.Replace (filename, "[" + new string(Path.GetInvalidFileNameChars()) + "]", "_");
             }
 
             private static void SetupImportedGameObject(GameObject orig, GameObject imported)
