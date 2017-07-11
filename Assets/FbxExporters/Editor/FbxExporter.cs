@@ -242,10 +242,10 @@ namespace FbxExporters
             public FbxDouble3 GetMaterialColor (Material unityMaterial, string unityPropName)
             {
                 if (!unityMaterial) {
-                    return new FbxDouble3 (0.5);
+                    return new FbxDouble3(1);
                 }
                 if (!unityMaterial.HasProperty (unityPropName)) {
-                    return new FbxDouble3 (0.5);
+                    return new FbxDouble3(1);
                 }
                 var unityColor = unityMaterial.GetColor (unityPropName);
                 return new FbxDouble3 (unityColor.r, unityColor.g, unityColor.b);
