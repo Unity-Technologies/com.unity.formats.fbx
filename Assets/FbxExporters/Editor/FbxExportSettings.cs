@@ -11,8 +11,19 @@ namespace FbxExporters.EditorTools {
         public override void OnInspectorGUI() {
             ExportSettings exportSettings = (ExportSettings)target;
 
+            // Increasing the label width so that none of the text gets cut off
+            EditorGUIUtility.labelWidth = 300;
+
             exportSettings.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", exportSettings.weldVertices);
             exportSettings.embedTextures = EditorGUILayout.Toggle ("Embed Textures:", exportSettings.embedTextures);
+            exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle ("Convert to Maya Compatible Naming on export:",
+                exportSettings.mayaCompatibleNames);
+
+            if (!exportSettings.mayaCompatibleNames) {
+                EditorGUILayout.HelpBox (
+                    "Disabling this feature may result in lost material connections, and unexpected character replacements in Maya.",
+                    MessageType.Warning);
+            }
 
             if (GUI.changed) {
                 EditorUtility.SetDirty (exportSettings);
@@ -26,6 +37,7 @@ namespace FbxExporters.EditorTools {
     {
         public bool weldVertices = true;
         public bool embedTextures = false;
+        public bool mayaCompatibleNames = true;
 
         [MenuItem("Edit/Project Settings/Fbx Export", priority = 300)]
         static void ShowManager()
