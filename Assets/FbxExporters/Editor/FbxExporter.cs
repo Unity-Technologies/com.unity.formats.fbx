@@ -469,6 +469,10 @@ namespace FbxExporters
             {
                 int numObjectsExported = exportProgress;
 
+                if (FbxExporters.EditorTools.ExportSettings.instance.mayaCompatibleNames) {
+                    unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
+                }
+
                 // create an FbxNode and add it as a child of parent
                 FbxNode fbxNode = FbxNode.Create (fbxScene, unityGo.name);
                 NumNodes++;
@@ -838,6 +842,11 @@ namespace FbxExporters
                         if (!renderer) {
                             return null;
                         }
+
+                        if (FbxExporters.EditorTools.ExportSettings.instance.mayaCompatibleNames) {
+                            renderer.sharedMaterial.name = ConvertToMayaCompatibleName (renderer.sharedMaterial.name);
+                        }
+
                         // .material instantiates a new material, which is bad
                         // most of the time.
                         return renderer.sharedMaterial;
@@ -1010,6 +1019,42 @@ namespace FbxExporters
                 if (!fileInfo.Exists) {
                     Directory.CreateDirectory (fileInfo.Directory.FullName);
                 }
+            }
+
+            private static string RemoveDiacritics(string text) 
+            {
+                var normalizedString = text.Normalize(System.Text.NormalizationForm.FormD);
+                var stringBuilder = new System.Text.StringBuilder();
+
+                foreach (var c in normalizedString)
+                {
+                    var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+                    if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+                    {
+                        stringBuilder.Append(c);
+                    }
+                }
+
+                return stringBuilder.ToString().Normalize(System.Text.NormalizationForm.FormC);
+            }
+
+            private static string ConvertToMayaCompatibleName(string name)
+            {
+                string newName = RemoveDiacritics (name);
+
+                if (char.IsDigit (newName [0])) {
+                    newName = newName.Insert (0, "_");
+                }
+
+                for (int i = 0; i < newName.Length; i++) {
+                    if (!char.IsLetterOrDigit (newName, i)) {
+                        if (i < newName.Length-1 && newName [i] == ':') {
+                            continue;
+                        }
+                        newName = newName.Replace (newName [i], '_');
+                    }
+                }
+                return newName;
             }
         }
     }
