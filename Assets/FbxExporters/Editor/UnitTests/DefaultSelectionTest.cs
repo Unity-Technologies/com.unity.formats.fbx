@@ -60,41 +60,53 @@ namespace FbxExporters.UnitTests
             return temp;
         }
 
+        protected GameObject m_root;
+
         [TearDown]
         public void Term ()
         {
             foreach (string file in Directory.GetFiles (this.filePath, MakeFileName("*"))) {
                 File.Delete (file);
             }
+            if (m_root) {
+                UnityEngine.Object.DestroyImmediate (m_root);
+            }
         }
 
         [Test]
         public void TestDefaultSelection ()
         {
-            var root = CreateHierarchy ();
-            Assert.IsNotNull (root);
+            m_root = CreateHierarchy ();
+            Assert.IsNotNull (m_root);
 
             // test Export Root
             // Expected result: everything gets exported
-            var exportedRoot = ExportSelection (new Object[]{root});
-            CompareHierarchies(root, exportedRoot, true);
+            // Expected transform: root is zeroed out, all other transforms unchanged
+            var exportedRoot = ExportSelection (new Object[]{m_root});
+            CompareHierarchies(m_root, exportedRoot, true, false);
+            CompareGlobalTransform (exportedRoot.transform);
 
             // test Export Parent1, Child1
             // Expected result: Parent1, Child1, Child2
-            var parent1 = root.transform.Find("Parent1");
+            // Expected transform: Parent1 zeroed out, all other transforms unchanged
+            var parent1 = m_root.transform.Find("Parent1");
             var child1 = parent1.Find ("Child1");
             exportedRoot = ExportSelection (new Object[]{parent1.gameObject, child1.gameObject});
-            CompareHierarchies(parent1.gameObject, exportedRoot, true);
+            CompareHierarchies(parent1.gameObject, exportedRoot, true, false);
+            CompareGlobalTransform (exportedRoot.transform);
 
             // test Export Child2
             // Expected result: Child2
+            // Expected transform: Child2 zeroed out
             var child2 = parent1.Find("Child2").gameObject;
             exportedRoot = ExportSelection (new Object[]{child2});
-            CompareHierarchies(child2, exportedRoot, true);
+            CompareHierarchies(child2, exportedRoot, true, false);
+            CompareGlobalTransform (exportedRoot.transform);
 
             // test Export Child2, Parent2
             // Expected result: Parent2, Child3, Child2
-            var parent2 = root.transform.Find("Parent2");
+            // Expected transform: Child2 and Parent2 maintain global transform
+            var parent2 = m_root.transform.Find("Parent2");
             exportedRoot = ExportSelection (new Object[]{child2, parent2});
 
             List<GameObject> children = new List<GameObject> ();
@@ -102,8 +114,26 @@ namespace FbxExporters.UnitTests
                 children.Add (child.gameObject);
             }
             CompareHierarchies(new GameObject[]{child2, parent2.gameObject}, children.ToArray());
+        }
 
-            UnityEngine.Object.DestroyImmediate (root);
+        /// <summary>
+        /// Compares the global transform of expected
+        /// to the local transform of actual.
+        /// </summary>
+        /// <param name="actual">Actual.</param>
+        /// <param name="expected">Expected.</param>
+        private void CompareGlobalTransform(Transform actual, Transform expected=null){
+            if (!expected) {
+                // test that actual is zeroed out
+                Assert.AreEqual(Vector3.zero, actual.localPosition);
+                Assert.AreEqual (Vector3.zero, actual.localEulerAngles);
+                Assert.AreEqual (Vector3.one, actual.localScale);
+                return;
+            }
+            float epsilon = 0.0001f;
+            Assert.IsTrue (Vector3.SqrMagnitude(expected.position - actual.localPosition) < epsilon);
+            Assert.IsTrue (Vector3.SqrMagnitude(expected.rotation.eulerAngles - actual.localEulerAngles) < epsilon);
+            Assert.IsTrue (Vector3.SqrMagnitude(expected.lossyScale - actual.localScale) < epsilon);
         }
 
         private GameObject CreateHierarchy ()
@@ -117,9 +147,23 @@ namespace FbxExporters.UnitTests
             //      ----> Child3
 
             var root = CreateGameObject ("Root");
+            SetTransform (root.transform,
+                new Vector3 (3, 4, -6),
+                new Vector3 (45, 10, 34),
+                new Vector3 (2, 1, 3));
 
             var parent1 = CreateGameObject ("Parent1", root.transform);
+            SetTransform (parent1.transform,
+                new Vector3 (53, 0, -1),
+                new Vector3 (0, 5, 0),
+                new Vector3 (1, 1, 1));
+            
             var parent2 = CreateGameObject ("Parent2", root.transform);
+            SetTransform (parent2.transform,
+                new Vector3 (0, 0, 0),
+                new Vector3 (90, 1, 3),
+                new Vector3 (1, 0.3f, 0.5f));
+            
             parent1.transform.SetAsFirstSibling ();
 
             CreateGameObject ("Child1", parent1.transform);
@@ -129,6 +173,12 @@ namespace FbxExporters.UnitTests
             return root;
         }
 
+        private void SetTransform(Transform t, Vector3 pos, Vector3 rot, Vector3 scale){
+            t.localPosition = pos;
+            t.localEulerAngles = rot;
+            t.localScale = scale;
+        }
+
         private GameObject CreateGameObject(string name, Transform parent = null)
         {
             var go = new GameObject (name);
@@ -136,7 +186,9 @@ namespace FbxExporters.UnitTests
             return go;
         }
 
-        private void CompareHierarchies(GameObject expectedHierarchy, GameObject actualHierarchy, bool ignoreName = false)
+        private void CompareHierarchies(
+            GameObject expectedHierarchy, GameObject actualHierarchy,
+            bool ignoreName = false, bool compareTransform = true)
         {
             if (!ignoreName) {
                 Assert.AreEqual (expectedHierarchy.name, actualHierarchy.name);
@@ -144,6 +196,11 @@ namespace FbxExporters.UnitTests
 
             var expectedTransform = expectedHierarchy.transform;
             var actualTransform = actualHierarchy.transform;
+
+            if (compareTransform) {
+                Assert.AreEqual (expectedTransform, actualTransform);
+            }
+
             Assert.AreEqual (expectedTransform.childCount, actualTransform.childCount);
 
             foreach (Transform expectedChild in expectedTransform) {
@@ -165,7 +222,10 @@ namespace FbxExporters.UnitTests
             });
 
             for (int i = 0; i < expectedHierarchy.Length; i++) {
-                CompareHierarchies (expectedHierarchy [i], actualHierarchy [i]);
+                CompareHierarchies (expectedHierarchy [i], actualHierarchy [i], false, false);
+                // if we are Comparing lists of hierarchies, that means that the transforms
+                // should be the global transform of expected, as there is no zeroed out root
+                CompareGlobalTransform (actualHierarchy [i].transform, expectedHierarchy [i].transform);
             }
         }
 
