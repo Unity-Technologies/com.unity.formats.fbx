@@ -108,7 +108,7 @@ namespace FbxExporters
                     Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath (fbxFileName);
 
                     if (unityMainAsset != null) {
-                        Object unityObj = PrefabUtility.InstantiateAttachedAsset (unityMainAsset);
+                        Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);
                         GameObject unityGO = unityObj as GameObject;
                         if (unityGO != null) 
                         {
