@@ -36,6 +36,8 @@ namespace FbxExporters
 
             const string ProgressBarTitle = "Fbx Export";
 
+            const int UnitScaleFactor = 100;
+
             /// <summary>
             /// Create instance of example
             /// </summary>
@@ -356,9 +358,9 @@ namespace FbxExporters
                     // from m to cm.
                     foreach (var controlPoint in ControlPointToIndex.Keys) {
                         fbxMesh.SetControlPointAt (new FbxVector4 (
-                            -controlPoint.x*100,
-                            controlPoint.y*100,
-                            controlPoint.z*100
+                            -controlPoint.x*UnitScaleFactor,
+                            controlPoint.y*UnitScaleFactor,
+                            controlPoint.z*UnitScaleFactor
                         ), ControlPointToIndex [controlPoint]);
                     }
                 } else {
@@ -370,9 +372,9 @@ namespace FbxExporters
                     {
                         // convert from left to right-handed by negating x (Unity negates x again on import)
                         fbxMesh.SetControlPointAt(new FbxVector4 (
-                            -meshInfo.Vertices [v].x*100,
-                            meshInfo.Vertices [v].y*100,
-                            meshInfo.Vertices [v].z*100
+                            -meshInfo.Vertices [v].x*UnitScaleFactor,
+                            meshInfo.Vertices [v].y*UnitScaleFactor,
+                            meshInfo.Vertices [v].z*UnitScaleFactor
                         ), v);
                     }
                 }
@@ -451,7 +453,11 @@ namespace FbxExporters
                 // Negating the x value of the translation, and the y and z values of the rotation
                 // to convert from Unity to Maya coordinates (left to righthanded).
                 // Scaling the translation by 100 to convert from m to cm.
-                var fbxTranslate = new FbxDouble3 (-unityTranslate.x*100, unityTranslate.y*100, unityTranslate.z*100);
+                var fbxTranslate = new FbxDouble3 (
+                    -unityTranslate.x*UnitScaleFactor,
+                    unityTranslate.y*UnitScaleFactor,
+                    unityTranslate.z*UnitScaleFactor
+                );
                 var fbxRotate = new FbxDouble3 (unityRotate.x, -unityRotate.y, -unityRotate.z);
                 var fbxScale = new FbxDouble3 (unityScale.x, unityScale.y, unityScale.z);
 
