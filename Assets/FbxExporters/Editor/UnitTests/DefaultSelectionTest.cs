@@ -74,21 +74,36 @@ namespace FbxExporters.UnitTests
             var root = CreateHierarchy ();
             Assert.IsNotNull (root);
 
-            var exportedRoot = ExportSelection (root, new Object[]{root});
-
             // test Export Root
             // Expected result: everything gets exported
+            var exportedRoot = ExportSelection (new Object[]{root});
+            CompareHierarchies(root, exportedRoot, true);
 
             // test Export Parent1, Child1
             // Expected result: Parent1, Child1, Child2
+            var parent1 = root.transform.Find("Parent1");
+            var child1 = parent1.Find ("Child1");
+            exportedRoot = ExportSelection (new Object[]{parent1.gameObject, child1.gameObject});
+            CompareHierarchies(parent1.gameObject, exportedRoot, true);
 
             // test Export Child2
             // Expected result: Child2
+            var child2 = parent1.Find("Child2").gameObject;
+            exportedRoot = ExportSelection (new Object[]{child2});
+            CompareHierarchies(child2, exportedRoot, true);
 
             // test Export Child2, Parent2
             // Expected result: Parent2, Child3, Child2
+            var parent2 = root.transform.Find("Parent2");
+            exportedRoot = ExportSelection (new Object[]{child2, parent2});
 
-            //UnityEngine.Object.DestroyImmediate (root);
+            List<GameObject> children = new List<GameObject> ();
+            foreach (Transform child in exportedRoot.transform) {
+                children.Add (child.gameObject);
+            }
+            CompareHierarchies(new GameObject[]{child2, parent2.gameObject}, children.ToArray());
+
+            UnityEngine.Object.DestroyImmediate (root);
         }
 
         private GameObject CreateHierarchy ()
@@ -121,15 +136,40 @@ namespace FbxExporters.UnitTests
             return go;
         }
 
-        private void CompareHierarchies(GameObject expectedHierarchy, GameObject actualHierarchy, bool ignoreRoot = false)
+        private void CompareHierarchies(GameObject expectedHierarchy, GameObject actualHierarchy, bool ignoreName = false)
         {
-            if (!ignoreRoot) {
+            if (!ignoreName) {
                 Assert.AreEqual (expectedHierarchy.name, actualHierarchy.name);
-                Assert.AreEqual (expectedHierarchy.transform.childCount, actualHierarchy.transform.childCount);
+            }
+
+            var expectedTransform = expectedHierarchy.transform;
+            var actualTransform = actualHierarchy.transform;
+            Assert.AreEqual (expectedTransform.childCount, actualTransform.childCount);
+
+            foreach (Transform expectedChild in expectedTransform) {
+                var actualChild = actualTransform.Find (expectedChild.name);
+                Assert.IsNotNull (actualChild);
+                CompareHierarchies (expectedChild.gameObject, actualChild.gameObject);
             }
         }
 
-        private GameObject ExportSelection(GameObject origRoot, Object[] selected)
+        private void CompareHierarchies(GameObject[] expectedHierarchy, GameObject[] actualHierarchy)
+        {
+            Assert.AreEqual (expectedHierarchy.Length, actualHierarchy.Length);
+
+            System.Array.Sort (expectedHierarchy, delegate (GameObject x, GameObject y) {
+                return x.name.CompareTo(y.name);
+            });
+            System.Array.Sort (actualHierarchy, delegate (GameObject x, GameObject y) {
+                return x.name.CompareTo(y.name);
+            });
+
+            for (int i = 0; i < expectedHierarchy.Length; i++) {
+                CompareHierarchies (expectedHierarchy [i], actualHierarchy [i]);
+            }
+        }
+
+        private GameObject ExportSelection(Object[] selected)
         {
             // export selected to a file, then return the root
             var filename = GetRandomFileNamePath();
@@ -138,7 +178,6 @@ namespace FbxExporters.UnitTests
             var fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects (filename, selected) as string;
             Debug.unityLogger.logEnabled = true;
 
-            Debug.LogWarning (filename + ", " + fbxFileName);
             Assert.IsNotNull (fbxFileName);
 
             // make filepath relative to project folder
