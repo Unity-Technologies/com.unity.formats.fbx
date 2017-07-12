@@ -16,14 +16,16 @@ namespace FbxExporters.EditorTools {
 
             exportSettings.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", exportSettings.weldVertices);
             exportSettings.embedTextures = EditorGUILayout.Toggle ("Embed Textures:", exportSettings.embedTextures);
-            exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle ("Convert to Maya Compatible Naming on export:",
+            exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
+                new GUIContent("Convert to Maya Compatible Naming:",
+                    "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
+                    "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
+                    "On export, convert the names of GameObjects so they are Maya compatible." +
+                    (exportSettings.mayaCompatibleNames? "" : 
+                        "\n\nWARNING: Disabling this feature may result in lost material connections," +
+                        " and unexpected character replacements in Maya.")
+                ),
                 exportSettings.mayaCompatibleNames);
-
-            if (!exportSettings.mayaCompatibleNames) {
-                EditorGUILayout.HelpBox (
-                    "Disabling this feature may result in lost material connections, and unexpected character replacements in Maya.",
-                    MessageType.Warning);
-            }
 
             if (GUI.changed) {
                 EditorUtility.SetDirty (exportSettings);

@@ -36,6 +36,10 @@ namespace FbxExporters
 
             const string ProgressBarTitle = "Fbx Export";
 
+            const char InvalidCharReplacement = '_';
+
+            const char MayaNamespaceSeparator = ':';
+
             /// <summary>
             /// Create instance of example
             /// </summary>
@@ -1021,6 +1025,12 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Removes the diacritics (i.e. accents) from letters.
+            /// e.g. é becomes e
+            /// </summary>
+            /// <returns>Text with accents removed.</returns>
+            /// <param name="text">Text.</param>
             private static string RemoveDiacritics(string text) 
             {
                 var normalizedString = text.Normalize(System.Text.NormalizationForm.FormD);
@@ -1043,15 +1053,15 @@ namespace FbxExporters
                 string newName = RemoveDiacritics (name);
 
                 if (char.IsDigit (newName [0])) {
-                    newName = newName.Insert (0, "_");
+                    newName = newName.Insert (0, InvalidCharReplacement.ToString());
                 }
 
                 for (int i = 0; i < newName.Length; i++) {
                     if (!char.IsLetterOrDigit (newName, i)) {
-                        if (i < newName.Length-1 && newName [i] == ':') {
+                        if (i < newName.Length-1 && newName [i] == MayaNamespaceSeparator) {
                             continue;
                         }
-                        newName = newName.Replace (newName [i], '_');
+                        newName = newName.Replace (newName [i], InvalidCharReplacement);
                     }
                 }
                 return newName;
