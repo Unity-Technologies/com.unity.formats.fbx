@@ -15,7 +15,7 @@
 ########################################################################
 """
 @package version
-@brief version file for UnityOneClick editor
+@brief version file for UnityOneClick
 @author  Simon Inwood <simon.cf.inwood@gmail.com>
 @defgroup UnityOneClickPluginVersion Plugin Version
 @ingroup UnityOneClickPlugin

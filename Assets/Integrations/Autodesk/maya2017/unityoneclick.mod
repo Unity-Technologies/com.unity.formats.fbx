@@ -14,7 +14,4 @@
 #
 ########################################################################
 
-+ unityoneclick 1.0 {UnityProject}/Assets/Integrations/Autodesk/maya2017
-
-# TODO: how we can modify PYTHONPATH (fixme)?
-PYTHONPATH: python
++ MAYAVERSION:2017 unityoneclick {UnityOneClickVersion} {UnityProject}/Assets/Integrations/Autodesk/maya2017

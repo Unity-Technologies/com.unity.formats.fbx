@@ -18,23 +18,19 @@
 
 import sys
 
-# hack PYTHONPATH for module (fixme)
-import os
-plugin_directory='/Users/inwoods/Development/FbxExporters/Assets/Integrations/Autodesk/maya2017/python'
-if (plugin_directory not in sys.path):
-    sys.path.append(plugin_directory)
-
 import maya.OpenMayaMPx as OpenMayaMPx
 
-from unityOneClick import (version, commands, ui)
+from unityOneClick import (version, commands, ui, debug)
 
 kPluginInfo = { 'name': version.pluginName(), 'version': version.versionName(), 'vendor': version.vendorName() }
+kVerbose = True
 
 # initialize the script plug-in
 def initializePlugin(mobject):
     pluginFn = OpenMayaMPx.MFnPlugin(mobject, kPluginInfo['vendor'], str(kPluginInfo['version']))
     try:
-        sys.stdout.write('loading %s\n'%kPluginInfo['name'])
+        if debug.gDebug:
+            sys.stdout.write('loading %s\n'%kPluginInfo['name'])
         
         commands.register(pluginFn)
         ui.register(pluginFn)
@@ -48,7 +44,8 @@ def initializePlugin(mobject):
 def uninitializePlugin(mobject):
     pluginFn = OpenMayaMPx.MFnPlugin(mobject)
     try:
-        sys.stdout.write('unloading %s\n'%kPluginInfo['name'])
+        if debug.gDebug:
+            sys.stdout.write('unloading %s\n'%kPluginInfo['name'])
         
         ui.unregister(pluginFn)
         commands.unregister(pluginFn)

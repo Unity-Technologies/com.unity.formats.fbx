@@ -17,8 +17,11 @@
 Installation
 ============
 
-1. copy unityoneclick.mod to ~/MayaProjects/modules
+1. copy unityoneclick.mod to 
 
+    MacOS & Ubuntu: ~/MayaProjects/modules
+    Windows:        C:\Program Files\Autodesk\Maya2017\modules
+    
 2. configure path to integration 
 
     {UnityProject}/Assets/Integrations/Autodesk/maya2017
