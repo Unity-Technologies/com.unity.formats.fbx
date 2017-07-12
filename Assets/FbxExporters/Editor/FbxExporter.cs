@@ -36,6 +36,9 @@ namespace FbxExporters
 
             const string ProgressBarTitle = "Fbx Export";
 
+            // replace invalid chars with this string
+            const string InvalidCharReplacement = "_";
+
             /// <summary>
             /// Create instance of example
             /// </summary>
@@ -1023,7 +1026,7 @@ namespace FbxExporters
 
             public static string ConvertToValidFilename(string filename)
             {
-                return System.Text.RegularExpressions.Regex.Replace (filename, "[" + new string(Path.GetInvalidFileNameChars()) + "]", "_");
+                return System.Text.RegularExpressions.Regex.Replace (filename, "[" + new string(Path.GetInvalidFileNameChars()) + "]", InvalidCharReplacement);
             }
         }
     }
