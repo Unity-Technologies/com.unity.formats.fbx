@@ -239,13 +239,13 @@ namespace FbxExporters
             /// <summary>
             /// Get the color of a material, or grey if we can't find it.
             /// </summary>
-            public FbxDouble3 GetMaterialColor (Material unityMaterial, string unityPropName)
+            public FbxDouble3? GetMaterialColor (Material unityMaterial, string unityPropName, float defaultValue = 1)
             {
                 if (!unityMaterial) {
-                    return new FbxDouble3(1);
+                    return new FbxDouble3(defaultValue);
                 }
                 if (!unityMaterial.HasProperty (unityPropName)) {
-                    return new FbxDouble3(1);
+                    return new FbxDouble3(defaultValue);
                 }
                 var unityColor = unityMaterial.GetColor (unityPropName);
                 return new FbxDouble3 (unityColor.r, unityColor.g, unityColor.b);
