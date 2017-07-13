@@ -78,7 +78,12 @@ namespace FbxExporters
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
 
                 for(int n = 0; n < gosToExport.Length; n++){
-                    filePaths[n] = Path.Combine (dirPath, gosToExport[n].name + ".fbx");
+                    var filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
+                    var filePath = Path.Combine (dirPath, filename);
+                    if (File.Exists (filePath)) {
+                        filePath = IncrementFileName (dirPath, filename);
+                    }
+                    filePaths[n] = filePath;
                 }
 
                 string[] fbxFileNames = new string[filePaths.Length];
@@ -93,7 +98,7 @@ namespace FbxExporters
                 {
                     var fbxFileName = fbxFileNames [i];
                     if (fbxFileName == null) {
-                        Debug.Log (string.Format ("Warning: Export failed for GameObject {0}", gosToExport [i].name));
+                        Debug.LogWarning (string.Format ("Warning: Export failed for GameObject {0}", gosToExport [i].name));
                         continue;
                     }
 
@@ -110,7 +115,7 @@ namespace FbxExporters
                     Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath (fbxFileName);
 
                     if (unityMainAsset != null) {
-                        Object unityObj = PrefabUtility.InstantiateAttachedAsset (unityMainAsset);
+                        Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);
                         GameObject unityGO = unityObj as GameObject;
                         if (unityGO != null) 
                         {
@@ -137,6 +142,28 @@ namespace FbxExporters
 
                 return result;
             }
+
+            /// <summary>
+            /// Check if the file exists, and if it does, then increment the name.
+            /// e.g. if filename is Sphere.fbx and it already exists, change it to Sphere 1.fbx.
+            /// </summary>
+            /// <returns>new file name.</returns>
+            /// <param name="filename">Filename.</param>
+            private static string IncrementFileName(string path, string filename)
+            {
+                string fileWithoutExt = Path.GetFileNameWithoutExtension (filename);
+                string ext = Path.GetExtension (filename);
+
+                int index = 1;
+                string file = null;
+                do {
+                    file = string.Format ("{0} {1}{2}", fileWithoutExt, index, ext);
+                    file = Path.Combine(path, file);
+                    index++;
+                } while (File.Exists (file));
+
+                return file;
+            } 
 
             /// <summary>
             /// Enforces that all object names be unique before exporting.
