@@ -306,6 +306,16 @@ namespace FbxExporters
                 return fbxMaterial;
             }
 
+            /// <summary>
+            /// Sets up the material to polygon mapping for fbxMesh.
+            /// To determine which part of the mesh uses which material, look at the submeshes
+            /// and which polygons they represent.
+            /// Assuming equal number of materials as submeshes, and that they are in the same order.
+            /// (i.e. submesh 1 uses material 1)
+            /// </summary>
+            /// <param name="fbxMesh">Fbx mesh.</param>
+            /// <param name="mesh">Mesh.</param>
+            /// <param name="materials">Materials.</param>
             private void AssignLayerElementMaterial(FbxMesh fbxMesh, Mesh mesh, Material[] materials)
             {
                 // Add FbxLayerElementMaterial to layer 0 of the node
@@ -316,14 +326,15 @@ namespace FbxExporters
                 }
 
                 using (var fbxLayerElement = FbxLayerElementMaterial.Create (fbxMesh, "Material")) {
-                    // Using all same means that the entire mesh uses the same material
                     fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygon);
                     fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
 
                     FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+
+                    // assuming that each polygon is a triangle
+                    // TODO: Add support for other mesh topologies (e.g. quads)
                     fbxElementArray.SetCount (mesh.triangles.Length / 3);
 
-                    // Map the entire geometry to the FbxNode material at index 0
                     for (int i = 0; i < mesh.subMeshCount; i++) {
                         int start = ((int)mesh.GetIndexStart (i))/3;
                         int count = ((int)mesh.GetIndexCount (i))/3;
