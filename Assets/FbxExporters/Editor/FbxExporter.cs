@@ -316,7 +316,7 @@ namespace FbxExporters
             /// <param name="fbxMesh">Fbx mesh.</param>
             /// <param name="mesh">Mesh.</param>
             /// <param name="materials">Materials.</param>
-            private void AssignLayerElementMaterial(FbxMesh fbxMesh, Mesh mesh, Material[] materials)
+            private void AssignLayerElementMaterial(FbxMesh fbxMesh, Mesh mesh, int materialCount)
             {
                 // Add FbxLayerElementMaterial to layer 0 of the node
                 FbxLayer fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
@@ -326,20 +326,29 @@ namespace FbxExporters
                 }
 
                 using (var fbxLayerElement = FbxLayerElementMaterial.Create (fbxMesh, "Material")) {
-                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygon);
-                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
+                    // if there is only one material then set everything to that material
+                    if (materialCount == 1) {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eAllSame);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
 
-                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+                        fbxElementArray.Add (0);
+                    } else {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygon);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
 
-                    // assuming that each polygon is a triangle
-                    // TODO: Add support for other mesh topologies (e.g. quads)
-                    fbxElementArray.SetCount (mesh.triangles.Length / 3);
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
 
-                    for (int i = 0; i < mesh.subMeshCount; i++) {
-                        int start = ((int)mesh.GetIndexStart (i))/3;
-                        int count = ((int)mesh.GetIndexCount (i))/3;
-                        for (int j = start; j < start + count; j++) {
-                            fbxElementArray.SetAt (j, i);
+                        // assuming that each polygon is a triangle
+                        // TODO: Add support for other mesh topologies (e.g. quads)
+                        fbxElementArray.SetCount (mesh.triangles.Length / 3);
+
+                        for (int i = 0; i < mesh.subMeshCount; i++) {
+                            int start = ((int)mesh.GetIndexStart (i)) / 3;
+                            int count = ((int)mesh.GetIndexCount (i)) / 3;
+                            for (int j = start; j < start + count; j++) {
+                                fbxElementArray.SetAt (j, i);
+                            }
                         }
                     }
                     fbxLayer.SetMaterials (fbxLayerElement);
@@ -436,7 +445,7 @@ namespace FbxExporters
                     fbxMesh.EndPolygon ();
                 }
 
-                AssignLayerElementMaterial (fbxMesh, meshInfo.mesh, meshInfo.Materials);
+                AssignLayerElementMaterial (fbxMesh, meshInfo.mesh, meshInfo.Materials.Length);
 
                 ExportComponentAttributes (meshInfo, fbxMesh, unmergedTriangles);
 
