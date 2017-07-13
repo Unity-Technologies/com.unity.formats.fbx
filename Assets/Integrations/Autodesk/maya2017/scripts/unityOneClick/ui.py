@@ -1,11 +1,11 @@
 #-
 ########################################################################
-# Unity Technology Aps.
+# Unity Technologies Aps.
 # [2017] -  . All Rights Reserved.
 # NOTICE: All information contained herein is, and remains
 #         the property of Unity Technology Aps. and its suppliers,
 #         if any.  The intellectual and technical concepts contained
-#         herein are proprietary to Unity Technology Aps. and its
+#         herein are proprietary to Unity Technologies Aps. and its
 #         suppliers and may be covered by Canadian, U.S. and/or
 #         Foreign Patents, patents in process, and are protected
 #         by trade secret or copyright law. Dissemination of this
@@ -15,6 +15,12 @@
 #
 ########################################################################
 #+
+"""
+@package ui
+@author  Simon Inwood <simon.cf.inwood@gmail.com>
+@defgroup UnityUI User Interface
+@ingroup UnityUtils
+"""
 
 import maya.cmds              
 
@@ -57,7 +63,7 @@ def installMenu():
 
 def uninstallMenu():
     """
-    uninstall the sequencer menu from main window
+    uninstall the unityOneClick menu from main window
     @ingroup UnityUI
     """
     if maya.cmds.menu(kMainWndMenuName, exists=True):     # @UndefinedVariable

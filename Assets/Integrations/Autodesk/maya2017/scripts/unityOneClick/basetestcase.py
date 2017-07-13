@@ -1,23 +1,23 @@
 ########################################################################
-# Unity Technologes Aps.
+# Unity Technologies Aps.
 # [2017] -  . All Rights Reserved.
 # NOTICE: All information contained herein is, and remains
-#         the property of Unity Technologes Aps. and its suppliers,
+#         the property of Unity Technologies Aps. and its suppliers,
 #         if any.  The intellectual and technical concepts contained
-#         herein are proprietary to Unity Technologes Aps. and its
+#         herein are proprietary to Unity Technologies Aps. and its
 #         suppliers and may be covered by Canadian, U.S. and/or
 #         Foreign Patents, patents in process, and are protected
 #         by trade secret or copyright law. Dissemination of this
 #         information or reproduction of this material is strictly
 #         forbidden unless prior written permission is obtained from
-#         Unity Technologes Aps.
+#         Unity Technologies Aps.
 #
 ########################################################################
 """
 @package basetest
 @author  Simon Inwood <simon.cf.inwood@gmail.com>
 @defgroup UnitTestUtils UnitTest Utilities
-@ingroup UnityUtils
+@ingroup UnityUnitTests
 """
 
 import os
@@ -34,10 +34,11 @@ try:
 except:
     pass
 
-class BaseTest(unittest.TestCase, LoggerMixin):
+class BaseTestCase(unittest.TestCase, LoggerMixin):
     """
-    UnitTest base class. Provides default behaviour for calling all properties and mixes in the LoggerMixin class for reporting.
-    @ingroup UnitTestUtils
+    UnitTest base class. Provides default behaviour for calling all properties
+    and mixes in the LoggerMixin class for reporting.
+    @ingroup UnityUnitTests
     """
     __properties__ = None
     # define dependencies on other plugin packages
@@ -80,7 +81,7 @@ class BaseTest(unittest.TestCase, LoggerMixin):
         
         
     def displayInfo(self, msg):
-        super(BaseTest, self).displayInfo('{0}{1}:{2}{3}'.format('<'*25,self.__class__.__name__,msg,'>'*25))
+        super(BaseTestCase, self).displayInfo('{0}{1}:{2}{3}'.format('<' * 25, self.__class__.__name__, msg, '>' * 25))
         
     # preparing to test
     def setUp(self):

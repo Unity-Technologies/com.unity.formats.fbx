@@ -28,5 +28,5 @@ export PACKAGE_VERSION={CurrentVersion}
 export FBXEXPORTERS_PACKAGE_PATH=${PROJECT_PATH}/${PACKAGE_NAME}_${PACKAGE_VERSION}.unitypackage
 
 "${UNITY3D_PATH}" -projectPath "${PROJECT_PATH}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
-"${UNITY3D_PATH}" -projectPath "${PROJECT_PATH}" -executeMethod FbxExporters.Integrations -quit
+"${UNITY3D_PATH}" -projectPath "${PROJECT_PATH}" -executeMethod FbxExporters.Integrations.InstallMaya2017 -quit
 

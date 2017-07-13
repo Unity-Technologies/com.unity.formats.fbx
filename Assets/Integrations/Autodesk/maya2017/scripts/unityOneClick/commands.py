@@ -1,21 +1,21 @@
 ########################################################################
-# Unity Technologes Aps.
+# Unity Technologies Aps.
 # [2017] -  . All Rights Reserved.
 # NOTICE: All information contained herein is, and remains
-#         the property of Unity Technologes Aps. and its suppliers,
+#         the property of Unity Technologies Aps. and its suppliers,
 #         if any.  The intellectual and technical concepts contained
-#         herein are proprietary to Unity Technologes Aps. and its
+#         herein are proprietary to Unity Technologies Aps. and its
 #         suppliers and may be covered by Canadian, U.S. and/or
 #         Foreign Patents, patents in process, and are protected
 #         by trade secret or copyright law. Dissemination of this
 #         information or reproduction of this material is strictly
 #         forbidden unless prior written permission is obtained from
-#         Unity Technologes Aps.
+#         Unity Technologies Aps.
 #
 ########################################################################
 """
 @package commands
-@defgroup Commands Commands
+@defgroup UnityCommands Commands
 @ingroup UnityOneClickPlugin
 @author  Simon Inwood <simon.cf.inwood@gmail.com>
 """
@@ -43,7 +43,7 @@ class configureCmd(BaseCommand):
     """
     Configure Maya Scene for Reviewing and Publishing to Unity
     
-    @ingroup Commands
+    @ingroup UnityCommands
     """
     kLabel = 'Configure Maya to publish and review to a Unity Project'
     kShortLabel = 'Configure'
@@ -83,7 +83,7 @@ class reviewCmd(BaseCommand):
     """
     Review Model in Unity
         
-    @ingroup Commands
+    @ingroup UnityCommands
     """
     kLabel = 'Review Model in Unity'
     kShortLabel = 'Review'
@@ -121,9 +121,9 @@ class reviewCmd(BaseCommand):
 
 class publishCmd(BaseCommand):
     """
-    Review Model in Unity
+    Publish Model in Unity
         
-    @ingroup Commands
+    @ingroup UnityCommands
     """
     kLabel = 'Publish Model to Unity'
     kShortLabel = 'Publish'
@@ -184,11 +184,11 @@ def unregister(pluginFn):
 # UNIT TESTS
 #===============================================================================
 import unittest
-from unityOneClick.basetest import BaseTest 
+from unityOneClick.basetestcase import BaseTestCase
 
-class BaseCmdTest(BaseTest):
+class BaseCmdTest(BaseTestCase):
     """Base class for command UnitTests
-    @ingroup UnityOneClickUnitTests
+    @ingroup UnityUnitTests
     """
     __cmd__ = None
     

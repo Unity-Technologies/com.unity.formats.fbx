@@ -40,7 +40,7 @@ PROJECT_NUMBER         = v0.0.4a-sprint16
 # If a relative path is entered, it will be relative to the location
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = "$(UNITY_PROJECT_ROOT)/docs”
+OUTPUT_DIRECTORY       = "$(UNITY_PROJECT_ROOT)/docs"
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create
 # 4096 sub-directories (in 2 levels) under the output directory of each output
@@ -571,8 +571,7 @@ WARN_LOGFILE           = "$(UNITY_PROJECT_ROOT)/doc/doxygen_warnings.txt"
 # with spaces.
 
 INPUT                  = \
-	"$(UNITY_PROJECT_ROOT)/python/laaSequencer" \
-        "$(UNITY_PROJECT_ROOT)/python/laaPipeline" 
+	"$(UNITY_PROJECT_ROOT)/scripts/unityOneClick"
 
 
 # This tag can be used to specify the character encoding of the source files

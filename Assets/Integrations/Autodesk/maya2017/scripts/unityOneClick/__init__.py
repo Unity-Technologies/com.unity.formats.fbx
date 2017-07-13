@@ -1,16 +1,16 @@
 ########################################################################
-# 9939962 CANADA INC.
+# Unity Technologies Aps.
 # [2016] -  . All Rights Reserved.
 # NOTICE: All information contained herein is, and remains
-#         the property of 93. and its suppliers,
+#         the property of Unity Technologies Aps. and its suppliers,
 #         if any.  The intellectual and technical concepts contained
-#         herein are proprietary to 9939962 Canada Inc. and its
+#         herein are proprietary to Unity Technologies Aps. and its
 #         suppliers and may be covered by Canadian, U.S. and/or
 #         Foreign Patents, patents in process, and are protected
 #         by trade secret or copyright law. Dissemination of this
 #         information or reproduction of this material is strictly
 #         forbidden unless prior written permission is obtained from
-#         9939962 Canada Inc.
+#         Unity Technologies Aps.
 #
 ########################################################################
 """
@@ -24,11 +24,12 @@ Maya Unity Integration
 @details
 
 @defgroup UnityUtils Utilities
+@defgroup UnityCommands Commands
 @defgroup UnityUI User Interface
 @defgroup UnityUnitTests Unit Tests
 """
 
-# list of public modules for package
+# list of public modules for this package
 __all__ = ["commands", "ui"]
 
 try:             

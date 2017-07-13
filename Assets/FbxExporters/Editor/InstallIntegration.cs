@@ -2,14 +2,14 @@ using UnityEngine;
 using UnityEditor;
 using System;
 
-Namespace FbxExporters
+namespace FbxExporters
 {
    class Integrations
    {
-        Public static void InstallMaya2017()
+        public static void InstallMaya2017()
         {
-            string[] params;
-            params = Environment.GetCommandLineArgs();
+            //string[] params;
+            //params = Environment.GetCommandLineArgs();
 
             //DO SOMETHING
             Debug.Log("InstallMaya2017");

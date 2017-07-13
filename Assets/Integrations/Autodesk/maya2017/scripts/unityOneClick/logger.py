@@ -1,11 +1,11 @@
 #-
 ########################################################################
-# Unity Technology Aps.
+# Unity Technologies Aps.
 # [2017] -  . All Rights Reserved.
 # NOTICE: All information contained herein is, and remains
-#         the property of Unity Technology Aps. and its suppliers,
+#         the property of Unity Technologies Aps. and its suppliers,
 #         if any.  The intellectual and technical concepts contained
-#         herein are proprietary to Unity Technology Aps. and its
+#         herein are proprietary to Unity Technologies Aps. and its
 #         suppliers and may be covered by Canadian, U.S. and/or
 #         Foreign Patents, patents in process, and are protected
 #         by trade secret or copyright law. Dissemination of this
@@ -18,7 +18,7 @@
 """
 @package logger
 @author  Simon Inwood <simon.cf.inwood@gmail.com>
-@defgroup LoggerUtils Logger Utilities
+@defgroup UnityLoggerUtils Logger Utilities
 @ingroup UnityUtils
 """
 
@@ -31,7 +31,7 @@ class LoggerMixin(object):
     """
     The LoggerMissing provides logging methods to classes for that they can report debug messages, 
     info messages, warning messages and error messages to the user.
-    @ingroup LoggerUtils
+    @ingroup UnityLoggerUtils
     """
     def __init__(self):
         self.displayDebug("__init__")
