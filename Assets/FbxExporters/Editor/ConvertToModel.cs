@@ -76,8 +76,12 @@ namespace FbxExporters
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
 
                 for(int n = 0; n < gosToExport.Length; n++){
-                    string filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
-                    filePaths[n] = Path.Combine (dirPath, filename);
+                    var filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
+                    var filePath = Path.Combine (dirPath, filename);
+                    if (File.Exists (filePath)) {
+                        filePath = IncrementFileName (dirPath, filename);
+                    }
+                    filePaths[n] = filePath;
                 }
 
                 string[] fbxFileNames = new string[filePaths.Length];
@@ -136,6 +140,28 @@ namespace FbxExporters
 
                 return result;
             }
+
+            /// <summary>
+            /// Check if the file exists, and if it does, then increment the name.
+            /// e.g. if filename is Sphere.fbx and it already exists, change it to Sphere 1.fbx.
+            /// </summary>
+            /// <returns>new file name.</returns>
+            /// <param name="filename">Filename.</param>
+            private static string IncrementFileName(string path, string filename)
+            {
+                string fileWithoutExt = Path.GetFileNameWithoutExtension (filename);
+                string ext = Path.GetExtension (filename);
+
+                int index = 1;
+                string file = null;
+                do {
+                    file = string.Format ("{0} {1}{2}", fileWithoutExt, index, ext);
+                    file = Path.Combine(path, file);
+                    index++;
+                } while (File.Exists (file));
+
+                return file;
+            } 
 
             private static void SetupImportedGameObject(GameObject orig, GameObject imported)
             {
