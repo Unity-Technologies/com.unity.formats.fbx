@@ -194,6 +194,15 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Sets up the imported GameObject to match the original.
+            /// - Updates the name to be the same as original (i.e. remove the "(Clone)")
+            /// - Moves the imported object to the correct position in the hierarchy
+            /// - Updates the transform of the imported GameObject to match the original
+            /// - Copy over missing components and component values
+            /// </summary>
+            /// <param name="orig">Original GameObject.</param>
+            /// <param name="imported">Imported GameObject.</param>
             private static void SetupImportedGameObject(GameObject orig, GameObject imported)
             {
                 Transform importedTransform = imported.transform;
