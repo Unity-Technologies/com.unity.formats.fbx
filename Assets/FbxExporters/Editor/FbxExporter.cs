@@ -36,9 +36,13 @@ namespace FbxExporters
 
             const string ProgressBarTitle = "Fbx Export";
 
+            const char MayaNamespaceSeparator = ':';
+
+            // replace invalid chars with this one
             const char InvalidCharReplacement = '_';
 
-            const char MayaNamespaceSeparator = ':';
+            const string RegexCharStart = "[";
+            const string RegexCharEnd = "]";
 
             /// <summary>
             /// Create instance of example
@@ -243,7 +247,7 @@ namespace FbxExporters
             /// <summary>
             /// Get the color of a material, or grey if we can't find it.
             /// </summary>
-            public FbxDouble3? GetMaterialColor (Material unityMaterial, string unityPropName, float defaultValue = 1)
+            public FbxDouble3 GetMaterialColor (Material unityMaterial, string unityPropName, float defaultValue = 1)
             {
                 if (!unityMaterial) {
                     return new FbxDouble3(defaultValue);
@@ -733,7 +737,10 @@ namespace FbxExporters
             }
 
             // Add a menu item called "Export Model..." to a GameObject's context menu.
-            [MenuItem ("GameObject/Export Model... %e", false, 30)]
+            // NOTE: The ellipsis at the end of the Menu Item name prevents the context
+            //       from being passed to command, thus resulting in OnContextItem()
+            //       being called only once regardless of what is selected.
+            [MenuItem ("GameObject/Export Model...", false, 30)]
             static void OnContextItem (MenuCommand command)
             {
                 OnExport ();
@@ -969,13 +976,19 @@ namespace FbxExporters
                 					  ? Application.dataPath
                 					  : System.IO.Path.GetDirectoryName (LastFilePath);
 
-                var filename = string.IsNullOrEmpty (LastFilePath)
-                					 ? MakeFileName (basename: FileBaseName, extension: Extension)
-                					 : System.IO.Path.GetFileName (LastFilePath);
+                GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
+                string filename = null;
+                if (selectedGOs.Length == 1) {
+                    filename = ConvertToValidFilename (selectedGOs [0].name + ".fbx");
+                } else {
+                    filename = string.IsNullOrEmpty (LastFilePath)
+                        ? MakeFileName (basename: FileBaseName, extension: Extension)
+                        : System.IO.Path.GetFileName (LastFilePath);
+                }
 
                 var title = string.Format ("Export Model FBX ({0})", FileBaseName);
 
-                var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "");
+                var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "fbx");
 
                 if (string.IsNullOrEmpty (filePath)) {
                     return;
@@ -1065,6 +1078,14 @@ namespace FbxExporters
                     }
                 }
                 return newName;
+            }
+
+            public static string ConvertToValidFilename(string filename)
+            {
+                return System.Text.RegularExpressions.Regex.Replace (filename, 
+                    RegexCharStart + new string(Path.GetInvalidFileNameChars()) + RegexCharEnd,
+                    InvalidCharReplacement.ToString()
+                );
             }
         }
     }
