@@ -4,6 +4,7 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.IO;
 using System.Collections.Generic;
+using FbxSdk;
 
 namespace FbxExporters.UnitTests
 {
@@ -76,6 +77,22 @@ namespace FbxExporters.UnitTests
         [Test]
         public void TestDefaultSelection ()
         {
+            // Default selection behavior:
+            //  - Export descendants
+            //  - Don't export siblings
+            //  - Don't export parents
+            //  - If both a parent and descendant are selected,
+            //    then result will be the same as if just the parent
+            //    were selected
+            //
+            // Default transform export:
+            //  - if there is only one root GameObject being exported
+            //    then zero out the root transform, leave all descendants
+            //    with local transform
+            //  - if there are multiple root GameObjects, then export
+            //    the global transform of each, and local transform
+            //    of descendants
+
             m_root = CreateHierarchy ();
             Assert.IsNotNull (m_root);
 
@@ -119,21 +136,32 @@ namespace FbxExporters.UnitTests
         /// <summary>
         /// Compares the global transform of expected
         /// to the local transform of actual.
+        /// If expected is null, then compare to the identity matrix.
         /// </summary>
         /// <param name="actual">Actual.</param>
         /// <param name="expected">Expected.</param>
         private void CompareGlobalTransform(Transform actual, Transform expected=null){
-            if (!expected) {
-                // test that actual is zeroed out
-                Assert.AreEqual(Vector3.zero, actual.localPosition);
-                Assert.AreEqual (Vector3.zero, actual.localEulerAngles);
-                Assert.AreEqual (Vector3.one, actual.localScale);
-                return;
-            }
-            float epsilon = 0.0001f;
-            Assert.IsTrue (Vector3.SqrMagnitude(expected.position - actual.localPosition) < epsilon);
-            Assert.IsTrue (Vector3.SqrMagnitude(expected.rotation.eulerAngles - actual.localEulerAngles) < epsilon);
-            Assert.IsTrue (Vector3.SqrMagnitude(expected.lossyScale - actual.localScale) < epsilon);
+            var actualMatrix = ConstructTRSMatrix (actual);
+            var expectedMatrix = expected == null? new FbxAMatrix() : ConstructTRSMatrix (expected, false);
+            Assert.AreEqual (expectedMatrix, actualMatrix);
+        }
+
+        /// <summary>
+        /// Constructs a TRS matrix (as an FbxAMatrix) from a tranform.
+        /// </summary>
+        /// <returns>The TRS matrix.</returns>
+        /// <param name="t">Transform.</param>
+        /// <param name="local">If set to <c>true</c> use local transform.</param>
+        private FbxAMatrix ConstructTRSMatrix(Transform t, bool local=true)
+        {
+            var translation = local? t.localPosition : t.position;
+            var rotation = local? t.localEulerAngles : t.eulerAngles;
+            var scale = local? t.localScale : t.lossyScale;
+            return new FbxAMatrix (
+                new FbxVector4 (translation.x, translation.y, translation.z),
+                new FbxVector4 (rotation.x, rotation.y, rotation.z),
+                new FbxVector4 (scale.x, scale.y, scale.z)
+            );
         }
 
         private GameObject CreateHierarchy ()
