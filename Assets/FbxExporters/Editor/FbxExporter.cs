@@ -36,6 +36,16 @@ namespace FbxExporters
 
             const string ProgressBarTitle = "Fbx Export";
 
+            const char MayaNamespaceSeparator = ':';
+
+            // replace invalid chars with this one
+            const char InvalidCharReplacement = '_';
+
+            const string RegexCharStart = "[";
+            const string RegexCharEnd = "]";
+
+            const int UnitScaleFactor = 100;
+
             /// <summary>
             /// Create instance of example
             /// </summary>
@@ -239,13 +249,13 @@ namespace FbxExporters
             /// <summary>
             /// Get the color of a material, or grey if we can't find it.
             /// </summary>
-            public FbxDouble3 GetMaterialColor (Material unityMaterial, string unityPropName)
+            public FbxDouble3 GetMaterialColor (Material unityMaterial, string unityPropName, float defaultValue = 1)
             {
                 if (!unityMaterial) {
-                    return new FbxDouble3 (0.5);
+                    return new FbxDouble3(defaultValue);
                 }
                 if (!unityMaterial.HasProperty (unityPropName)) {
-                    return new FbxDouble3 (0.5);
+                    return new FbxDouble3(defaultValue);
                 }
                 var unityColor = unityMaterial.GetColor (unityPropName);
                 return new FbxDouble3 (unityColor.r, unityColor.g, unityColor.b);
@@ -351,12 +361,14 @@ namespace FbxExporters
                     }
                     fbxMesh.InitControlPoints (NumControlPoints);
 
-                    // copy control point data from Unity to FBX
+                    // Copy control point data from Unity to FBX.
+                    // As we do so, scale the points by 100 to convert
+                    // from m to cm.
                     foreach (var controlPoint in ControlPointToIndex.Keys) {
                         fbxMesh.SetControlPointAt (new FbxVector4 (
-                            -controlPoint.x,
-                            controlPoint.y,
-                            controlPoint.z
+                            -controlPoint.x*UnitScaleFactor,
+                            controlPoint.y*UnitScaleFactor,
+                            controlPoint.z*UnitScaleFactor
                         ), ControlPointToIndex [controlPoint]);
                     }
                 } else {
@@ -368,9 +380,9 @@ namespace FbxExporters
                     {
                         // convert from left to right-handed by negating x (Unity negates x again on import)
                         fbxMesh.SetControlPointAt(new FbxVector4 (
-                            -meshInfo.Vertices [v].x,
-                            meshInfo.Vertices [v].y,
-                            meshInfo.Vertices [v].z
+                            -meshInfo.Vertices [v].x*UnitScaleFactor,
+                            meshInfo.Vertices [v].y*UnitScaleFactor,
+                            meshInfo.Vertices [v].z*UnitScaleFactor
                         ), v);
                     }
                 }
@@ -447,8 +459,13 @@ namespace FbxExporters
 
                 // transfer transform data from Unity to Fbx
                 // Negating the x value of the translation, and the y and z values of the rotation
-                // to convert from Unity to Maya coordinates (left to righthanded)
-                var fbxTranslate = new FbxDouble3 (-unityTranslate.x, unityTranslate.y, unityTranslate.z);
+                // to convert from Unity to Maya coordinates (left to righthanded).
+                // Scaling the translation by 100 to convert from m to cm.
+                var fbxTranslate = new FbxDouble3 (
+                    -unityTranslate.x*UnitScaleFactor,
+                    unityTranslate.y*UnitScaleFactor,
+                    unityTranslate.z*UnitScaleFactor
+                );
                 var fbxRotate = new FbxDouble3 (unityRotate.x, -unityRotate.y, -unityRotate.z);
                 var fbxScale = new FbxDouble3 (unityScale.x, unityScale.y, unityScale.z);
 
@@ -468,6 +485,10 @@ namespace FbxExporters
                 int exportProgress, int objectCount, TransformExportType exportType = TransformExportType.Local)
             {
                 int numObjectsExported = exportProgress;
+
+                if (FbxExporters.EditorTools.ExportSettings.instance.mayaCompatibleNames) {
+                    unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
+                }
 
                 // create an FbxNode and add it as a child of parent
                 FbxNode fbxNode = FbxNode.Create (fbxScene, unityGo.name);
@@ -609,9 +630,11 @@ namespace FbxExporters
                         fbxSceneInfo.mComment = Comments;
                         fbxScene.SetSceneInfo (fbxSceneInfo);
 
-                        // Set up the axes (Y up, Z forward, X to the right) and units (meters)
+                        // Set up the axes (Y up, Z forward, X to the right) and units (centimeters)
+                        // Exporting in centimeters as this is the default unit for FBX files, and easiest
+                        // to work with when importing into Maya or Max
                         var fbxSettings = fbxScene.GetGlobalSettings ();
-                        fbxSettings.SetSystemUnit (FbxSystemUnit.m);
+                        fbxSettings.SetSystemUnit (FbxSystemUnit.cm);
 
                         // The Unity axis system has Y up, Z forward, X to the right (left handed system with odd parity).
                         // The Maya axis system has Y up, Z forward, X to the left (right handed system with odd parity).
@@ -725,7 +748,10 @@ namespace FbxExporters
             }
 
             // Add a menu item called "Export Model..." to a GameObject's context menu.
-            [MenuItem ("GameObject/Export Model... %e", false, 30)]
+            // NOTE: The ellipsis at the end of the Menu Item name prevents the context
+            //       from being passed to command, thus resulting in OnContextItem()
+            //       being called only once regardless of what is selected.
+            [MenuItem ("GameObject/Export Model...", false, 30)]
             static void OnContextItem (MenuCommand command)
             {
                 OnExport ();
@@ -838,6 +864,11 @@ namespace FbxExporters
                         if (!renderer) {
                             return null;
                         }
+
+                        if (FbxExporters.EditorTools.ExportSettings.instance.mayaCompatibleNames) {
+                            renderer.sharedMaterial.name = ConvertToMayaCompatibleName (renderer.sharedMaterial.name);
+                        }
+
                         // .material instantiates a new material, which is bad
                         // most of the time.
                         return renderer.sharedMaterial;
@@ -956,13 +987,19 @@ namespace FbxExporters
                 					  ? Application.dataPath
                 					  : System.IO.Path.GetDirectoryName (LastFilePath);
 
-                var filename = string.IsNullOrEmpty (LastFilePath)
-                					 ? MakeFileName (basename: FileBaseName, extension: Extension)
-                					 : System.IO.Path.GetFileName (LastFilePath);
+                GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
+                string filename = null;
+                if (selectedGOs.Length == 1) {
+                    filename = ConvertToValidFilename (selectedGOs [0].name + ".fbx");
+                } else {
+                    filename = string.IsNullOrEmpty (LastFilePath)
+                        ? MakeFileName (basename: FileBaseName, extension: Extension)
+                        : System.IO.Path.GetFileName (LastFilePath);
+                }
 
                 var title = string.Format ("Export Model FBX ({0})", FileBaseName);
 
-                var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "");
+                var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "fbx");
 
                 if (string.IsNullOrEmpty (filePath)) {
                     return;
@@ -1010,6 +1047,56 @@ namespace FbxExporters
                 if (!fileInfo.Exists) {
                     Directory.CreateDirectory (fileInfo.Directory.FullName);
                 }
+            }
+
+            /// <summary>
+            /// Removes the diacritics (i.e. accents) from letters.
+            /// e.g. é becomes e
+            /// </summary>
+            /// <returns>Text with accents removed.</returns>
+            /// <param name="text">Text.</param>
+            private static string RemoveDiacritics(string text) 
+            {
+                var normalizedString = text.Normalize(System.Text.NormalizationForm.FormD);
+                var stringBuilder = new System.Text.StringBuilder();
+
+                foreach (var c in normalizedString)
+                {
+                    var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+                    if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+                    {
+                        stringBuilder.Append(c);
+                    }
+                }
+
+                return stringBuilder.ToString().Normalize(System.Text.NormalizationForm.FormC);
+            }
+
+            private static string ConvertToMayaCompatibleName(string name)
+            {
+                string newName = RemoveDiacritics (name);
+
+                if (char.IsDigit (newName [0])) {
+                    newName = newName.Insert (0, InvalidCharReplacement.ToString());
+                }
+
+                for (int i = 0; i < newName.Length; i++) {
+                    if (!char.IsLetterOrDigit (newName, i)) {
+                        if (i < newName.Length-1 && newName [i] == MayaNamespaceSeparator) {
+                            continue;
+                        }
+                        newName = newName.Replace (newName [i], InvalidCharReplacement);
+                    }
+                }
+                return newName;
+            }
+
+            public static string ConvertToValidFilename(string filename)
+            {
+                return System.Text.RegularExpressions.Regex.Replace (filename, 
+                    RegexCharStart + new string(Path.GetInvalidFileNameChars()) + RegexCharEnd,
+                    InvalidCharReplacement.ToString()
+                );
             }
         }
     }

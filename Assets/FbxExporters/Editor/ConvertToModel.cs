@@ -76,7 +76,7 @@ namespace FbxExporters
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
 
                 for(int n = 0; n < gosToExport.Length; n++){
-                    var filename = gosToExport [n].name + ".fbx";
+                    var filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
                     var filePath = Path.Combine (dirPath, filename);
                     if (File.Exists (filePath)) {
                         filePath = IncrementFileName (dirPath, filename);
@@ -96,7 +96,7 @@ namespace FbxExporters
                 {
                     var fbxFileName = fbxFileNames [i];
                     if (fbxFileName == null) {
-                        Debug.Log (string.Format ("Warning: Export failed for GameObject {0}", gosToExport [i].name));
+                        Debug.LogWarning (string.Format ("Warning: Export failed for GameObject {0}", gosToExport [i].name));
                         continue;
                     }
 
@@ -113,7 +113,7 @@ namespace FbxExporters
                     Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath (fbxFileName);
 
                     if (unityMainAsset != null) {
-                        Object unityObj = PrefabUtility.InstantiateAttachedAsset (unityMainAsset);
+                        Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);
                         GameObject unityGO = unityObj as GameObject;
                         if (unityGO != null) 
                         {
