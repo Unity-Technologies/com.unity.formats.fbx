@@ -71,6 +71,8 @@ namespace FbxExporters
                 GameObject[] gosToExport = new GameObject[exportSet.Count];
                 exportSet.CopyTo (gosToExport);
 
+                EnforceUniqueNames (gosToExport);
+
                 // find common ancestor root & filePath;
                 string[] filePaths = new string[gosToExport.Length];
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
@@ -136,6 +138,35 @@ namespace FbxExporters
                 return result;
             }
 
+            /// <summary>
+            /// Enforces that all object names be unique before exporting.
+            /// If an object with a duplicate name is found, then it is incremented.
+            /// e.g. Sphere becomes Sphere 1
+            /// </summary>
+            /// <param name="exportSet">Export set.</param>
+            private static void EnforceUniqueNames(GameObject[] exportSet)
+            {
+                Dictionary<string, int> NameToIndexMap = new Dictionary<string, int> ();
+                string format = "{0} {1}";
+
+                Queue<GameObject> queue = new Queue<GameObject> (exportSet);
+
+                while(queue.Count > 0){
+                    var go = queue.Dequeue ();
+                    var name = go.name;
+                    if (NameToIndexMap.ContainsKey (name)) {
+                        go.name = string.Format (format, name, NameToIndexMap [name]);
+                        NameToIndexMap [name]++;
+                    } else {
+                        NameToIndexMap [name] = 1;
+                    }
+
+                    foreach (Transform child in go.transform) {
+                        queue.Enqueue (child.gameObject);
+                    }
+                }
+            }
+
             private static void SetupImportedGameObject(GameObject orig, GameObject imported)
             {
                 Transform importedTransform = imported.transform;
@@ -164,7 +195,23 @@ namespace FbxExporters
                     Debug.LogWarning (string.Format ("Warning: Exported {0} objects, but only imported {1}",
                         origTransform.hierarchyCount, importedTransform.hierarchyCount));
                 }
+                FixSiblingOrder (orig.transform, imported.transform);
                 CopyComponentsRecursive (orig, imported);
+            }
+
+            private static void FixSiblingOrder(Transform orig, Transform imported){
+                foreach (Transform origChild in orig) {
+                    Transform importedChild = imported.Find (origChild.name);
+                    if (importedChild == null) {
+                        Debug.LogWarning (string.Format(
+                            "Warning: Could not find {0} in parented under {1} in import hierarchy",
+                            origChild.name, imported.name
+                        ));
+                        continue;
+                    }
+                    importedChild.SetSiblingIndex (origChild.GetSiblingIndex ());
+                    FixSiblingOrder (origChild, importedChild);
+                }
             }
 
             private static void CopyComponentsRecursive(GameObject from, GameObject to){
