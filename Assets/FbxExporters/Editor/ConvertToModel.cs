@@ -21,6 +21,9 @@ namespace FbxExporters
             const string MenuItemName1 = "Assets/Convert To Model";
             const string MenuItemName2 = "GameObject/Convert To Model";
 
+            const string RegexCharStart = "[";
+            const string RegexCharEnd = "]";
+
             /// <summary>
             /// Clean up this class on garbage collection
             /// </summary>
@@ -76,7 +79,8 @@ namespace FbxExporters
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
 
                 for(int n = 0; n < gosToExport.Length; n++){
-                    filePaths[n] = Path.Combine (dirPath, gosToExport[n].name + ".fbx");
+                    string filename = ConvertToValidFilename (gosToExport [n].name + ".fbx");
+                    filePaths[n] = Path.Combine (dirPath, filename);
                 }
 
                 string[] fbxFileNames = new string[filePaths.Length];
@@ -134,6 +138,12 @@ namespace FbxExporters
                 Selection.objects = selection.ToArray ();
 
                 return result;
+            }
+
+            private static string ConvertToValidFilename(string filename)
+            {
+                return System.Text.RegularExpressions.Regex.Replace (filename, 
+                    RegexCharStart + new string(Path.GetInvalidFileNameChars()) + RegexCharEnd, "_");
             }
 
             private static void SetupImportedGameObject(GameObject orig, GameObject imported)
