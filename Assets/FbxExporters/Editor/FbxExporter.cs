@@ -38,8 +38,11 @@ namespace FbxExporters
 
             const char MayaNamespaceSeparator = ':';
 
-            // replace invalid chars with this string
-            const string InvalidCharReplacement = "_";
+            // replace invalid chars with this one
+            const char InvalidCharReplacement = '_';
+
+            const string RegexCharStart = "[";
+            const string RegexCharEnd = "]";
 
             /// <summary>
             /// Create instance of example
@@ -244,7 +247,7 @@ namespace FbxExporters
             /// <summary>
             /// Get the color of a material, or grey if we can't find it.
             /// </summary>
-            public FbxDouble3? GetMaterialColor (Material unityMaterial, string unityPropName, float defaultValue = 1)
+            public FbxDouble3 GetMaterialColor (Material unityMaterial, string unityPropName, float defaultValue = 1)
             {
                 if (!unityMaterial) {
                     return new FbxDouble3(defaultValue);
@@ -1079,7 +1082,10 @@ namespace FbxExporters
 
             public static string ConvertToValidFilename(string filename)
             {
-                return System.Text.RegularExpressions.Regex.Replace (filename, "[" + new string(Path.GetInvalidFileNameChars()) + "]", InvalidCharReplacement);
+                return System.Text.RegularExpressions.Regex.Replace (filename, 
+                    RegexCharStart + new string(Path.GetInvalidFileNameChars()) + RegexCharEnd,
+                    InvalidCharReplacement.ToString()
+                );
             }
         }
     }
