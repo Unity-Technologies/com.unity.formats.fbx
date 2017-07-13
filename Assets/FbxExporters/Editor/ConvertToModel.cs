@@ -76,7 +76,11 @@ namespace FbxExporters
                 string dirPath = Path.Combine (Application.dataPath, "Objects");
 
                 for(int n = 0; n < gosToExport.Length; n++){
-                    filePaths[n] = Path.Combine (dirPath, gosToExport[n].name + ".fbx");
+                    var filename = gosToExport [n].name + ".fbx";
+                    if (File.Exists (Path.Combine(dirPath, filename))) {
+                        filename = IncrementFileName (dirPath, filename);
+                    }
+                    filePaths[n] = Path.Combine (dirPath, filename);
                 }
 
                 string[] fbxFileNames = new string[filePaths.Length];
@@ -135,6 +139,37 @@ namespace FbxExporters
 
                 return result;
             }
+
+            /// <summary>
+            /// Check if the file exists, and if it does, then increment the name.
+            /// e.g. if filename is Sphere.fbx and it already exists, change it to Sphere1.fbx.
+            /// </summary>
+            /// <returns>new file name.</returns>
+            /// <param name="filename">Filename.</param>
+            private static string IncrementFileName(string path, string filename)
+            {
+                string fileWithoutExt = Path.GetFileNameWithoutExtension (filename);
+                string ext = Path.GetExtension (filename);
+                string pattern = string.Format (@"{0}{1}{2}", fileWithoutExt, "*", ext);
+                string[] files = Directory.GetFiles (path, pattern, SearchOption.TopDirectoryOnly);
+
+                int index = 0;
+                string groupName = "index";
+                pattern = string.Format (@"{0}{1}\{2}", fileWithoutExt, "[ ]*(?<"+groupName+">[0-9]*?)", ext);
+                foreach (var file in files) {
+                    var match = System.Text.RegularExpressions.Regex.Match (file, pattern);
+                    if (match.Success) {
+                        string indexMatch = match.Groups [groupName].Value;
+                        if (!string.IsNullOrEmpty(indexMatch)) {
+                            int i = -1;
+                            if (int.TryParse (indexMatch, out i) && i > index) {
+                                index = i;
+                            }
+                        }
+                    }
+                }
+                return string.Format ("{0} {1}{2}", fileWithoutExt, (index + 1), ext);
+            } 
 
             private static void SetupImportedGameObject(GameObject orig, GameObject imported)
             {
