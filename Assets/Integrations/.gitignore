@@ -1,0 +1,3 @@
+*.meta
+*.pyc
+.DS_Store

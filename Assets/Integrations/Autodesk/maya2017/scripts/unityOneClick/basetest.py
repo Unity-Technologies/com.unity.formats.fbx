@@ -48,13 +48,13 @@ class BaseTest(unittest.TestCase, LoggerMixin):
         if filepath is None:
             filepath = __file__
         
-        return os.path.realpath(os.path.join(os.path.dirname(filepath), '../../../../', 'resources/scenes'))
+        return os.path.realpath(os.path.join(os.path.dirname(filepath), '../../', 'resources/scenes'))
     
     def pluginsPath(self, filepath = None):
         if filepath is None:
             filepath = __file__
         
-        return os.path.realpath(os.path.join(os.path.dirname(filepath), '../../../../', 'plug-ins'))
+        return os.path.realpath(os.path.join(os.path.dirname(filepath), '../../', 'plug-ins'))
     
     def configEnv(self, required_plugins = None):
         self.displayInfo('configEnv {}'.format(required_plugins))
@@ -74,9 +74,9 @@ class BaseTest(unittest.TestCase, LoggerMixin):
                 self.displayDebug('configEnv_', 'appending plugin path', rp, tabs=1) 
                 os.environ['MAYA_PLUG_IN_PATH']='{0}:{1}'.format(os.environ['MAYA_PLUG_IN_PATH'],rp)
     
-        if kMayaScriptDependency:
+        if self.kMayaScriptDependency:
             self.displayDebug('configEnv_', 'source maya dependency', tabs=1)
-            maya.mel.eval('source "{0}.mel";'.format(kMayaScriptDependency))  # @UndefinedVariable
+            maya.mel.eval('source "{0}.mel";'.format(self.kMayaScriptDependency))  # @UndefinedVariable
         
         
     def displayInfo(self, msg):
@@ -87,8 +87,14 @@ class BaseTest(unittest.TestCase, LoggerMixin):
         """ Setting up for the test """
         self.displayDebug('setUp_', 'begin') 
         self.configEnv()
-        maya.cmds.workspace(self.projectPath(), o=True)     # @UndefinedVariable
-        maya.cmds.workspace(dir=self.projectPath())         # @UndefinedVariable
+
+        projectPath = self.projectPath()
+        if os.path.exists(projectPath):
+            maya.cmds.workspace(self.projectPath(), o=True)     # @UndefinedVariable
+            maya.cmds.workspace(dir=self.projectPath())         # @UndefinedVariable
+        else:
+            self.displayWarning('project path does not existing, skipping workspace setup'.format(projectPath))
+
         self.displayDebug('setUp_', 'end', tab=1) 
 
     

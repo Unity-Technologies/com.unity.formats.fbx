@@ -13,6 +13,9 @@
 *.swp
 *.swo
 
+## PyCharm ##
+**/.idea/
+
 ## Unity ##
 *.meta
 [Pp]rojectSettings/*.asset
@@ -54,3 +57,4 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+.gitignore
