@@ -65,7 +65,9 @@ namespace FbxExporters
             Dictionary<string, FbxTexture> TextureMap = new Dictionary<string, FbxTexture> ();
 
             /// <summary>
+            /// Map the name of a prefab to an FbxMesh (for preserving instances) 
             /// </summary>
+            Dictionary<string, FbxMesh> SharedMeshes = new Dictionary<string, FbxMesh>();
 
             /// <summary>
             /// return layer for mesh
@@ -304,14 +306,13 @@ namespace FbxExporters
             /// <summary>
             /// Export (and map) a Unity PBS material to FBX classic material
             /// </summary>
-            public FbxSurfaceMaterial ExportMaterial (Material unityMaterial, FbxScene fbxScene, FbxMesh fbxMesh)
+            public FbxSurfaceMaterial ExportMaterial (Material unityMaterial, FbxScene fbxScene)
             {
                 if (Verbose)
                     Debug.Log (string.Format ("exporting material {0}", unityMaterial.name));
                               
                 var materialName = unityMaterial ? unityMaterial.name : "DefaultMaterial";
                 if (MaterialMap.ContainsKey (materialName)) {
-                    AssignLayerElementMaterial (fbxMesh);
                     return MaterialMap [materialName];
                 }
 
@@ -343,13 +344,21 @@ namespace FbxExporters
                     ExportTexture (unityMaterial, "_SpecGlosMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
                 }
 
-                AssignLayerElementMaterial (fbxMesh);
-
                 MaterialMap.Add (materialName, fbxMaterial);
                 return fbxMaterial;
             }
 
-            private void AssignLayerElementMaterial(FbxMesh fbxMesh)
+            /// <summary>
+            /// Sets up the material to polygon mapping for fbxMesh.
+            /// To determine which part of the mesh uses which material, look at the submeshes
+            /// and which polygons they represent.
+            /// Assuming equal number of materials as submeshes, and that they are in the same order.
+            /// (i.e. submesh 1 uses material 1)
+            /// </summary>
+            /// <param name="fbxMesh">Fbx mesh.</param>
+            /// <param name="mesh">Mesh.</param>
+            /// <param name="materials">Materials.</param>
+            private void AssignLayerElementMaterial(FbxMesh fbxMesh, Mesh mesh, int materialCount)
             {
                 // Add FbxLayerElementMaterial to layer 0 of the node
                 FbxLayer fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
@@ -359,14 +368,31 @@ namespace FbxExporters
                 }
 
                 using (var fbxLayerElement = FbxLayerElementMaterial.Create (fbxMesh, "Material")) {
-                    // Using all same means that the entire mesh uses the same material
-                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eAllSame);
-                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
+                    // if there is only one material then set everything to that material
+                    if (materialCount == 1) {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eAllSame);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
 
-                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+                        fbxElementArray.Add (0);
+                    } else {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygon);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
 
-                    // Map the entire geometry to the FbxNode material at index 0
-                    fbxElementArray.Add (0);
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+
+                        // assuming that each polygon is a triangle
+                        // TODO: Add support for other mesh topologies (e.g. quads)
+                        fbxElementArray.SetCount (mesh.triangles.Length / 3);
+
+                        for (int i = 0; i < mesh.subMeshCount; i++) {
+                            int start = ((int)mesh.GetIndexStart (i)) / 3;
+                            int count = ((int)mesh.GetIndexCount (i)) / 3;
+                            for (int j = start; j < start + count; j++) {
+                                fbxElementArray.SetAt (j, i);
+                            }
+                        }
+                    }
                     fbxLayer.SetMaterials (fbxLayerElement);
                 }
             }
@@ -375,10 +401,10 @@ namespace FbxExporters
             /// Unconditionally export this mesh object to the file.
             /// We have decided; this mesh is definitely getting exported.
             /// </summary>
-            public void ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene, bool weldVertices = true)
+            public FbxMesh ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene, bool weldVertices = true)
             {
                 if (!meshInfo.IsValid)
-                    return;
+                    return null;
 
                 NumMeshes++;
                 NumTriangles += meshInfo.Triangles.Length / 3;
@@ -427,8 +453,10 @@ namespace FbxExporters
                     }
                 }
 
-                var fbxMaterial = ExportMaterial (meshInfo.Material, fbxScene, fbxMesh);
-                fbxNode.AddMaterial (fbxMaterial);
+                foreach (var mat in meshInfo.Materials) {
+                    var fbxMaterial = ExportMaterial (mat, fbxScene);
+                    fbxNode.AddMaterial (fbxMaterial);
+                }
 
                 /*
                  * Triangles have to be added in reverse order, 
@@ -459,11 +487,15 @@ namespace FbxExporters
                     fbxMesh.EndPolygon ();
                 }
 
+                AssignLayerElementMaterial (fbxMesh, meshInfo.mesh, meshInfo.Materials.Length);
+
                 ExportComponentAttributes (meshInfo, fbxMesh, unmergedTriangles);
 
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
                 fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
+
+                return fbxMesh;
             }
 
             // get a fbxNode's global default position.
@@ -518,6 +550,40 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// if this game object is a model prefab then export with shared components
+            /// </summary>
+            protected bool ExportInstance (GameObject unityGo, FbxNode fbxNode, FbxScene fbxScene)
+            {
+                PrefabType unityPrefabType = PrefabUtility.GetPrefabType(unityGo);
+
+                if (unityPrefabType != PrefabType.PrefabInstance) return false;
+
+                Object unityPrefabParent = PrefabUtility.GetPrefabParent (unityGo);
+
+                if (Verbose)
+                    Debug.Log (string.Format ("exporting instance {0}({1})", unityGo.name, unityPrefabParent.name));
+
+                FbxMesh fbxMesh = null;
+
+                if (!SharedMeshes.TryGetValue (unityPrefabParent.name, out fbxMesh))
+                {
+                    bool weldVertices = FbxExporters.EditorTools.ExportSettings.instance.weldVertices;
+                    fbxMesh = ExportMesh (GetMeshInfo (unityGo), fbxNode, fbxScene, weldVertices);
+                    if (fbxMesh != null) {
+                        SharedMeshes [unityPrefabParent.name] = fbxMesh;
+                    }
+                }
+
+                if (fbxMesh == null) return false;
+
+                // set the fbxNode containing the mesh
+                fbxNode.SetNodeAttribute (fbxMesh);
+                fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
+
+                return true;
+            }
+
+            /// <summary>
             /// Unconditionally export components on this game object
             /// </summary>
             protected int ExportComponents (
@@ -545,8 +611,11 @@ namespace FbxExporters
 
                 ExportTransform ( unityGo.transform, fbxNode, exportType);
 
-                bool weldVertices = FbxExporters.EditorTools.ExportSettings.instance.weldVertices;
-                ExportMesh (GetMeshInfo( unityGo ), fbxNode, fbxScene, weldVertices);
+                // try exporting mesh as an instance, export regularly if we cannot
+                if (!ExportInstance (unityGo, fbxNode, fbxScene)) {
+                    bool weldVertices = FbxExporters.EditorTools.ExportSettings.instance.weldVertices;
+                    ExportMesh (GetMeshInfo (unityGo), fbxNode, fbxScene, weldVertices);
+                }
 
                 if (Verbose)
                     Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
@@ -895,7 +964,7 @@ namespace FbxExporters
                 /// The material used, if any; otherwise null.
                 /// We don't support multiple materials on one gameobject.
                 /// </summary>
-                public Material Material {
+                public Material[] Materials {
                     get {
                         if (!unityObject) {
                             return null;
@@ -906,12 +975,14 @@ namespace FbxExporters
                         }
 
                         if (FbxExporters.EditorTools.ExportSettings.instance.mayaCompatibleNames) {
-                            renderer.sharedMaterial.name = ConvertToMayaCompatibleName (renderer.sharedMaterial.name);
+                            foreach (var mat in renderer.sharedMaterials) {
+                                mat.name = ConvertToMayaCompatibleName (mat.name);
+                            }
                         }
 
                         // .material instantiates a new material, which is bad
                         // most of the time.
-                        return renderer.sharedMaterial;
+                        return renderer.sharedMaterials;
                     }
                 }
 
