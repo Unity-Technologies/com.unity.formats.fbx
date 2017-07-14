@@ -70,16 +70,26 @@ namespace FbxExporters
             Dictionary<string, FbxMesh> SharedMeshes = new Dictionary<string, FbxMesh>();
 
             /// <summary>
+            /// return layer for mesh
+            /// </summary>
+            /// 
+            private FbxLayer GetLayer(FbxMesh fbxMesh, int layer = 0 /* default layer */)
+            {
+                FbxLayer fbxLayer = fbxMesh.GetLayer (layer);
+                if (fbxLayer == null) {
+                    fbxMesh.CreateLayer ();
+                    fbxLayer = fbxMesh.GetLayer (layer);
+                }
+                return fbxLayer;
+            }
+
+            /// <summary>
             /// Export the mesh's attributes using layer 0.
             /// </summary>
             public void ExportComponentAttributes (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
             {
                 // Set the normals on Layer 0.
-                FbxLayer fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
-                if (fbxLayer == null) {
-                    fbxMesh.CreateLayer ();
-                    fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
-                }
+                FbxLayer fbxLayer = GetLayer(fbxMesh);
 
                 using (var fbxLayerElement = FbxLayerElementNormal.Create (fbxMesh, "Normals")) {
                     fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
@@ -133,29 +143,7 @@ namespace FbxExporters
                     fbxLayer.SetTangents (fbxLayerElement);
                 }
 
-                using (var fbxLayerElement = FbxLayerElementUV.Create (fbxMesh, "UVSet"))
-                {
-                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
-                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
-
-                    // set texture coordinates per vertex
-                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
-
-                    // TODO: only copy unique UVs into this array, and index appropriately
-                    for (int n = 0; n < mesh.UV.Length; n++) {
-                        fbxElementArray.Add (new FbxVector2 (mesh.UV [n] [0],
-                            mesh.UV [n] [1]));
-                    }
-
-                    // For each face index, point to a texture uv
-                    FbxLayerElementArray fbxIndexArray = fbxLayerElement.GetIndexArray ();
-                    fbxIndexArray.SetCount (unmergedTriangles.Length);
-
-                    for(int i = 0; i < unmergedTriangles.Length; i++){
-                        fbxIndexArray.SetAt (i, unmergedTriangles [i]);
-                    }
-                    fbxLayer.SetUVs (fbxLayerElement, FbxLayerElement.EType.eTextureDiffuse);
-                }
+                ExportUVs (fbxMesh, mesh, unmergedTriangles);
 
                 using (var fbxLayerElement = FbxLayerElementVertexColor.Create (fbxMesh, "VertexColors")) 
                 {
@@ -185,6 +173,55 @@ namespace FbxExporters
                         fbxIndexArray.SetAt (i, unmergedTriangles [i]);
                     }
                     fbxLayer.SetVertexColors (fbxLayerElement);
+                }
+            }
+
+            /// <summary>
+            /// Unity has up to 4 uv sets per mesh. Export all the ones that exist.
+            /// </summary>
+            /// <param name="fbxMesh">Fbx mesh.</param>
+            /// <param name="mesh">Mesh.</param>
+            /// <param name="unmergedTriangles">Unmerged triangles.</param>
+            protected void ExportUVs(FbxMesh fbxMesh, MeshInfo mesh, int[] unmergedTriangles)
+            {
+                Vector2[][] uvs = new Vector2[][] {
+                    mesh.UV,
+                    mesh.mesh.uv2,
+                    mesh.mesh.uv3,
+                    mesh.mesh.uv4
+                };
+
+                int k = 0;
+                for (int i = 0; i < uvs.Length; i++) {
+                    if (uvs [i] == null || uvs [i].Length == 0) {
+                        continue; // don't have these UV's, so skip
+                    }
+
+                    FbxLayer fbxLayer = GetLayer (fbxMesh, k);
+                    using (var fbxLayerElement = FbxLayerElementUV.Create (fbxMesh, "UVSet" + i))
+                    {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
+
+                        // set texture coordinates per vertex
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+
+                        // TODO: only copy unique UVs into this array, and index appropriately
+                        for (int n = 0; n < uvs[i].Length; n++) {
+                            fbxElementArray.Add (new FbxVector2 (uvs[i] [n] [0],
+                                uvs[i] [n] [1]));
+                        }
+
+                        // For each face index, point to a texture uv
+                        FbxLayerElementArray fbxIndexArray = fbxLayerElement.GetIndexArray ();
+                        fbxIndexArray.SetCount (unmergedTriangles.Length);
+
+                        for(int j = 0; j < unmergedTriangles.Length; j++){
+                            fbxIndexArray.SetAt (j, unmergedTriangles [j]);
+                        }
+                        fbxLayer.SetUVs (fbxLayerElement, FbxLayerElement.EType.eTextureDiffuse);
+                    }
+                    k++;
                 }
             }
 
