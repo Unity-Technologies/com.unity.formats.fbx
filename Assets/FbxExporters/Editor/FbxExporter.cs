@@ -264,14 +264,13 @@ namespace FbxExporters
             /// <summary>
             /// Export (and map) a Unity PBS material to FBX classic material
             /// </summary>
-            public FbxSurfaceMaterial ExportMaterial (Material unityMaterial, FbxScene fbxScene, FbxMesh fbxMesh)
+            public FbxSurfaceMaterial ExportMaterial (Material unityMaterial, FbxScene fbxScene)
             {
                 if (Verbose)
                     Debug.Log (string.Format ("exporting material {0}", unityMaterial.name));
                               
                 var materialName = unityMaterial ? unityMaterial.name : "DefaultMaterial";
                 if (MaterialMap.ContainsKey (materialName)) {
-                    AssignLayerElementMaterial (fbxMesh);
                     return MaterialMap [materialName];
                 }
 
@@ -303,13 +302,21 @@ namespace FbxExporters
                     ExportTexture (unityMaterial, "_SpecGlosMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
                 }
 
-                AssignLayerElementMaterial (fbxMesh);
-
                 MaterialMap.Add (materialName, fbxMaterial);
                 return fbxMaterial;
             }
 
-            private void AssignLayerElementMaterial(FbxMesh fbxMesh)
+            /// <summary>
+            /// Sets up the material to polygon mapping for fbxMesh.
+            /// To determine which part of the mesh uses which material, look at the submeshes
+            /// and which polygons they represent.
+            /// Assuming equal number of materials as submeshes, and that they are in the same order.
+            /// (i.e. submesh 1 uses material 1)
+            /// </summary>
+            /// <param name="fbxMesh">Fbx mesh.</param>
+            /// <param name="mesh">Mesh.</param>
+            /// <param name="materials">Materials.</param>
+            private void AssignLayerElementMaterial(FbxMesh fbxMesh, Mesh mesh, int materialCount)
             {
                 // Add FbxLayerElementMaterial to layer 0 of the node
                 FbxLayer fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
@@ -319,14 +326,31 @@ namespace FbxExporters
                 }
 
                 using (var fbxLayerElement = FbxLayerElementMaterial.Create (fbxMesh, "Material")) {
-                    // Using all same means that the entire mesh uses the same material
-                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eAllSame);
-                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
+                    // if there is only one material then set everything to that material
+                    if (materialCount == 1) {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eAllSame);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
 
-                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+                        fbxElementArray.Add (0);
+                    } else {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygon);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
 
-                    // Map the entire geometry to the FbxNode material at index 0
-                    fbxElementArray.Add (0);
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+
+                        // assuming that each polygon is a triangle
+                        // TODO: Add support for other mesh topologies (e.g. quads)
+                        fbxElementArray.SetCount (mesh.triangles.Length / 3);
+
+                        for (int i = 0; i < mesh.subMeshCount; i++) {
+                            int start = ((int)mesh.GetIndexStart (i)) / 3;
+                            int count = ((int)mesh.GetIndexCount (i)) / 3;
+                            for (int j = start; j < start + count; j++) {
+                                fbxElementArray.SetAt (j, i);
+                            }
+                        }
+                    }
                     fbxLayer.SetMaterials (fbxLayerElement);
                 }
             }
@@ -387,8 +411,10 @@ namespace FbxExporters
                     }
                 }
 
-                var fbxMaterial = ExportMaterial (meshInfo.Material, fbxScene, fbxMesh);
-                fbxNode.AddMaterial (fbxMaterial);
+                foreach (var mat in meshInfo.Materials) {
+                    var fbxMaterial = ExportMaterial (mat, fbxScene);
+                    fbxNode.AddMaterial (fbxMaterial);
+                }
 
                 /*
                  * Triangles have to be added in reverse order, 
@@ -418,6 +444,8 @@ namespace FbxExporters
                     }
                     fbxMesh.EndPolygon ();
                 }
+
+                AssignLayerElementMaterial (fbxMesh, meshInfo.mesh, meshInfo.Materials.Length);
 
                 ExportComponentAttributes (meshInfo, fbxMesh, unmergedTriangles);
 
@@ -855,7 +883,7 @@ namespace FbxExporters
                 /// The material used, if any; otherwise null.
                 /// We don't support multiple materials on one gameobject.
                 /// </summary>
-                public Material Material {
+                public Material[] Materials {
                     get {
                         if (!unityObject) {
                             return null;
@@ -866,12 +894,14 @@ namespace FbxExporters
                         }
 
                         if (FbxExporters.EditorTools.ExportSettings.instance.mayaCompatibleNames) {
-                            renderer.sharedMaterial.name = ConvertToMayaCompatibleName (renderer.sharedMaterial.name);
+                            foreach (var mat in renderer.sharedMaterials) {
+                                mat.name = ConvertToMayaCompatibleName (mat.name);
+                            }
                         }
 
                         // .material instantiates a new material, which is bad
                         // most of the time.
-                        return renderer.sharedMaterial;
+                        return renderer.sharedMaterials;
                     }
                 }
 
