@@ -16,6 +16,9 @@ Packaging
 **On OSX and Linux**
 
 ```
+# clone the source
+git clone https://github.com/Unity-Technologies/FbxExporters.git
+
 export PROJECT_PATH=~/Development/FbxExporters
 export UNITY3D_PATH=/Applications/Unity\ 5.6.1f1/Unity.app/Contents/MacOS/Unity
 export PACKAGE_NAME=FbxExporters
@@ -29,7 +32,10 @@ export FBXSDK_PACKAGE_PATH=~/Development/FbxSharp/FbxSdk_0.0.4a.unitypackage
 **On Windows**
 
 ```
-set PROJECT_PATH=/path/to/FbxExporters
+# clone the source
+git clone https://github.com/Unity-Technologies/FbxExporters.git
+
+set PROJECT_PATH=%cd%/FbxExporters
 set UNITY3D_PATH="C:/Program Files/Unity/Editor/Unity.exe"
 set PACKAGE_NAME=FbxExporters
 set PACKAGE_VERSION=0.0.3a
