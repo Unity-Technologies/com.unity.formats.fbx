@@ -65,6 +65,11 @@ namespace FbxExporters
             Dictionary<string, FbxTexture> TextureMap = new Dictionary<string, FbxTexture> ();
 
             /// <summary>
+            /// Map the name of a prefab to an FbxMesh (for preserving instances) 
+            /// </summary>
+            Dictionary<string, FbxMesh> SharedMeshes = new Dictionary<string, FbxMesh>();
+
+            /// <summary>
             /// Export the mesh's attributes using layer 0.
             /// </summary>
             public void ExportComponentAttributes (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
@@ -359,10 +364,10 @@ namespace FbxExporters
             /// Unconditionally export this mesh object to the file.
             /// We have decided; this mesh is definitely getting exported.
             /// </summary>
-            public void ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene, bool weldVertices = true)
+            public FbxMesh ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene, bool weldVertices = true)
             {
                 if (!meshInfo.IsValid)
-                    return;
+                    return null;
 
                 NumMeshes++;
                 NumTriangles += meshInfo.Triangles.Length / 3;
@@ -452,6 +457,8 @@ namespace FbxExporters
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
                 fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
+
+                return fbxMesh;
             }
 
             // get a fbxNode's global default position.
@@ -506,6 +513,40 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// if this game object is a model prefab then export with shared components
+            /// </summary>
+            protected bool ExportInstance (GameObject unityGo, FbxNode fbxNode, FbxScene fbxScene)
+            {
+                PrefabType unityPrefabType = PrefabUtility.GetPrefabType(unityGo);
+
+                if (unityPrefabType != PrefabType.PrefabInstance) return false;
+
+                Object unityPrefabParent = PrefabUtility.GetPrefabParent (unityGo);
+
+                if (Verbose)
+                    Debug.Log (string.Format ("exporting instance {0}({1})", unityGo.name, unityPrefabParent.name));
+
+                FbxMesh fbxMesh = null;
+
+                if (!SharedMeshes.TryGetValue (unityPrefabParent.name, out fbxMesh))
+                {
+                    bool weldVertices = FbxExporters.EditorTools.ExportSettings.instance.weldVertices;
+                    fbxMesh = ExportMesh (GetMeshInfo (unityGo), fbxNode, fbxScene, weldVertices);
+                    if (fbxMesh != null) {
+                        SharedMeshes [unityPrefabParent.name] = fbxMesh;
+                    }
+                }
+
+                if (fbxMesh == null) return false;
+
+                // set the fbxNode containing the mesh
+                fbxNode.SetNodeAttribute (fbxMesh);
+                fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
+
+                return true;
+            }
+
+            /// <summary>
             /// Unconditionally export components on this game object
             /// </summary>
             protected int ExportComponents (
@@ -533,8 +574,11 @@ namespace FbxExporters
 
                 ExportTransform ( unityGo.transform, fbxNode, exportType);
 
-                bool weldVertices = FbxExporters.EditorTools.ExportSettings.instance.weldVertices;
-                ExportMesh (GetMeshInfo( unityGo ), fbxNode, fbxScene, weldVertices);
+                // try exporting mesh as an instance, export regularly if we cannot
+                if (!ExportInstance (unityGo, fbxNode, fbxScene)) {
+                    bool weldVertices = FbxExporters.EditorTools.ExportSettings.instance.weldVertices;
+                    ExportMesh (GetMeshInfo (unityGo), fbxNode, fbxScene, weldVertices);
+                }
 
                 if (Verbose)
                     Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
