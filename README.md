@@ -8,7 +8,7 @@ See LICENSE.md file in the project root for full license information.
 Requirements
 ------------
 
-* [FBX SDK C# Bindings v0.0.3a or higher](https://github.com/Unity-Technologies/FbxSharp)
+* [FBX SDK C# Bindings v0.0.4a or higher](https://github.com/Unity-Technologies/FbxSharp)
 
 Packaging
 ---------
@@ -22,7 +22,7 @@ git clone https://github.com/Unity-Technologies/FbxExporters.git
 export PROJECT_PATH=~/Development/FbxExporters
 export UNITY3D_PATH=/Applications/Unity\ 5.6.1f1/Unity.app/Contents/MacOS/Unity
 export PACKAGE_NAME=FbxExporters
-export PACKAGE_VERSION=0.0.4a
+export PACKAGE_VERSION=0.0.5a
 export FBXSDK_PACKAGE_PATH=~/Development/FbxSharp/FbxSdk_0.0.4a.unitypackage
 
 "${UNITY3D_PATH}" -projectPath "${PROJECT_PATH}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
@@ -38,7 +38,7 @@ git clone https://github.com/Unity-Technologies/FbxExporters.git
 set PROJECT_PATH=%cd%/FbxExporters
 set UNITY3D_PATH="C:/Program Files/Unity/Editor/Unity.exe"
 set PACKAGE_NAME=FbxExporters
-set PACKAGE_VERSION=0.0.3a
+set PACKAGE_VERSION=0.0.5a
 set FBXSDK_PACKAGE_PATH=/path/to/FbxSdk.unitypackage
 
 %UNITY3D_PATH% -projectPath "%PROJECT_PATH%" -importPackage %FBXSDK_PACKAGE_PATH% -quit
