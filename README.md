@@ -20,7 +20,7 @@ Packaging
 git clone https://github.com/Unity-Technologies/FbxExporters.git
 
 export PROJECT_PATH=~/Development/FbxExporters
-export UNITY3D_PATH=/Applications/Unity\ 5.6.1f1/Unity.app/Contents/MacOS/Unity
+export UNITY3D_PATH=/Applications/Unity\ 2017.1.0f3/Unity.app/Contents/MacOS/Unity
 export PACKAGE_NAME=FbxExporters
 export PACKAGE_VERSION=0.0.5a
 export FBXSDK_PACKAGE_PATH=~/Development/FbxSharpBuild/FbxSdk_0.0.4a.unitypackage
