@@ -308,6 +308,9 @@ namespace FbxExporters
             /// </summary>
             public FbxSurfaceMaterial ExportMaterial (Material unityMaterial, FbxScene fbxScene)
             {
+                if (!unityMaterial)
+                    return null;
+                
                 if (Verbose)
                     Debug.Log (string.Format ("exporting material {0}", unityMaterial.name));
                               
@@ -455,7 +458,8 @@ namespace FbxExporters
 
                 foreach (var mat in meshInfo.Materials) {
                     var fbxMaterial = ExportMaterial (mat, fbxScene);
-                    fbxNode.AddMaterial (fbxMaterial);
+                    if (fbxMaterial!=null)
+                        fbxNode.AddMaterial (fbxMaterial);
                 }
 
                 /*
@@ -976,7 +980,9 @@ namespace FbxExporters
 
                         if (FbxExporters.EditorTools.ExportSettings.instance.mayaCompatibleNames) {
                             foreach (var mat in renderer.sharedMaterials) {
-                                mat.name = ConvertToMayaCompatibleName (mat.name);
+                                if (mat) {
+                                    mat.name = ConvertToMayaCompatibleName (mat.name);
+                                }
                             }
                         }
 
