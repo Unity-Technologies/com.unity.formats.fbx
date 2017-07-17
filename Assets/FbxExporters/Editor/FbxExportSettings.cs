@@ -11,8 +11,21 @@ namespace FbxExporters.EditorTools {
         public override void OnInspectorGUI() {
             ExportSettings exportSettings = (ExportSettings)target;
 
+            // Increasing the label width so that none of the text gets cut off
+            EditorGUIUtility.labelWidth = 300;
+
             exportSettings.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", exportSettings.weldVertices);
             exportSettings.embedTextures = EditorGUILayout.Toggle ("Embed Textures:", exportSettings.embedTextures);
+            exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
+                new GUIContent("Convert to Maya Compatible Naming:",
+                    "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
+                    "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
+                    "On export, convert the names of GameObjects so they are Maya compatible." +
+                    (exportSettings.mayaCompatibleNames? "" : 
+                        "\n\nWARNING: Disabling this feature may result in lost material connections," +
+                        " and unexpected character replacements in Maya.")
+                ),
+                exportSettings.mayaCompatibleNames);
 
             if (GUI.changed) {
                 EditorUtility.SetDirty (exportSettings);
@@ -26,6 +39,7 @@ namespace FbxExporters.EditorTools {
     {
         public bool weldVertices = true;
         public bool embedTextures = false;
+        public bool mayaCompatibleNames = true;
 
         [MenuItem("Edit/Project Settings/Fbx Export", priority = 300)]
         static void ShowManager()

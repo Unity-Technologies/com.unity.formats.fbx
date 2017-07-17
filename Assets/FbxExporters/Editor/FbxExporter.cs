@@ -36,6 +36,16 @@ namespace FbxExporters
 
             const string ProgressBarTitle = "Fbx Export";
 
+            const char MayaNamespaceSeparator = ':';
+
+            // replace invalid chars with this one
+            const char InvalidCharReplacement = '_';
+
+            const string RegexCharStart = "[";
+            const string RegexCharEnd = "]";
+
+            const int UnitScaleFactor = 100;
+
             /// <summary>
             /// Create instance of example
             /// </summary>
@@ -55,16 +65,31 @@ namespace FbxExporters
             Dictionary<string, FbxTexture> TextureMap = new Dictionary<string, FbxTexture> ();
 
             /// <summary>
+            /// Map the name of a prefab to an FbxMesh (for preserving instances) 
+            /// </summary>
+            Dictionary<string, FbxMesh> SharedMeshes = new Dictionary<string, FbxMesh>();
+
+            /// <summary>
+            /// return layer for mesh
+            /// </summary>
+            /// 
+            private FbxLayer GetLayer(FbxMesh fbxMesh, int layer = 0 /* default layer */)
+            {
+                FbxLayer fbxLayer = fbxMesh.GetLayer (layer);
+                if (fbxLayer == null) {
+                    fbxMesh.CreateLayer ();
+                    fbxLayer = fbxMesh.GetLayer (layer);
+                }
+                return fbxLayer;
+            }
+
+            /// <summary>
             /// Export the mesh's attributes using layer 0.
             /// </summary>
             public void ExportComponentAttributes (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
             {
                 // Set the normals on Layer 0.
-                FbxLayer fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
-                if (fbxLayer == null) {
-                    fbxMesh.CreateLayer ();
-                    fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
-                }
+                FbxLayer fbxLayer = GetLayer(fbxMesh);
 
                 using (var fbxLayerElement = FbxLayerElementNormal.Create (fbxMesh, "Normals")) {
                     fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
@@ -118,29 +143,7 @@ namespace FbxExporters
                     fbxLayer.SetTangents (fbxLayerElement);
                 }
 
-                using (var fbxLayerElement = FbxLayerElementUV.Create (fbxMesh, "UVSet"))
-                {
-                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
-                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
-
-                    // set texture coordinates per vertex
-                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
-
-                    // TODO: only copy unique UVs into this array, and index appropriately
-                    for (int n = 0; n < mesh.UV.Length; n++) {
-                        fbxElementArray.Add (new FbxVector2 (mesh.UV [n] [0],
-                            mesh.UV [n] [1]));
-                    }
-
-                    // For each face index, point to a texture uv
-                    FbxLayerElementArray fbxIndexArray = fbxLayerElement.GetIndexArray ();
-                    fbxIndexArray.SetCount (unmergedTriangles.Length);
-
-                    for(int i = 0; i < unmergedTriangles.Length; i++){
-                        fbxIndexArray.SetAt (i, unmergedTriangles [i]);
-                    }
-                    fbxLayer.SetUVs (fbxLayerElement, FbxLayerElement.EType.eTextureDiffuse);
-                }
+                ExportUVs (fbxMesh, mesh, unmergedTriangles);
 
                 using (var fbxLayerElement = FbxLayerElementVertexColor.Create (fbxMesh, "VertexColors")) 
                 {
@@ -170,6 +173,55 @@ namespace FbxExporters
                         fbxIndexArray.SetAt (i, unmergedTriangles [i]);
                     }
                     fbxLayer.SetVertexColors (fbxLayerElement);
+                }
+            }
+
+            /// <summary>
+            /// Unity has up to 4 uv sets per mesh. Export all the ones that exist.
+            /// </summary>
+            /// <param name="fbxMesh">Fbx mesh.</param>
+            /// <param name="mesh">Mesh.</param>
+            /// <param name="unmergedTriangles">Unmerged triangles.</param>
+            protected void ExportUVs(FbxMesh fbxMesh, MeshInfo mesh, int[] unmergedTriangles)
+            {
+                Vector2[][] uvs = new Vector2[][] {
+                    mesh.UV,
+                    mesh.mesh.uv2,
+                    mesh.mesh.uv3,
+                    mesh.mesh.uv4
+                };
+
+                int k = 0;
+                for (int i = 0; i < uvs.Length; i++) {
+                    if (uvs [i] == null || uvs [i].Length == 0) {
+                        continue; // don't have these UV's, so skip
+                    }
+
+                    FbxLayer fbxLayer = GetLayer (fbxMesh, k);
+                    using (var fbxLayerElement = FbxLayerElementUV.Create (fbxMesh, "UVSet" + i))
+                    {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
+
+                        // set texture coordinates per vertex
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+
+                        // TODO: only copy unique UVs into this array, and index appropriately
+                        for (int n = 0; n < uvs[i].Length; n++) {
+                            fbxElementArray.Add (new FbxVector2 (uvs[i] [n] [0],
+                                uvs[i] [n] [1]));
+                        }
+
+                        // For each face index, point to a texture uv
+                        FbxLayerElementArray fbxIndexArray = fbxLayerElement.GetIndexArray ();
+                        fbxIndexArray.SetCount (unmergedTriangles.Length);
+
+                        for(int j = 0; j < unmergedTriangles.Length; j++){
+                            fbxIndexArray.SetAt (j, unmergedTriangles [j]);
+                        }
+                        fbxLayer.SetUVs (fbxLayerElement, FbxLayerElement.EType.eTextureDiffuse);
+                    }
+                    k++;
                 }
             }
 
@@ -239,13 +291,13 @@ namespace FbxExporters
             /// <summary>
             /// Get the color of a material, or grey if we can't find it.
             /// </summary>
-            public FbxDouble3 GetMaterialColor (Material unityMaterial, string unityPropName)
+            public FbxDouble3 GetMaterialColor (Material unityMaterial, string unityPropName, float defaultValue = 1)
             {
                 if (!unityMaterial) {
-                    return new FbxDouble3 (0.5);
+                    return new FbxDouble3(defaultValue);
                 }
                 if (!unityMaterial.HasProperty (unityPropName)) {
-                    return new FbxDouble3 (0.5);
+                    return new FbxDouble3(defaultValue);
                 }
                 var unityColor = unityMaterial.GetColor (unityPropName);
                 return new FbxDouble3 (unityColor.r, unityColor.g, unityColor.b);
@@ -254,14 +306,16 @@ namespace FbxExporters
             /// <summary>
             /// Export (and map) a Unity PBS material to FBX classic material
             /// </summary>
-            public FbxSurfaceMaterial ExportMaterial (Material unityMaterial, FbxScene fbxScene, FbxMesh fbxMesh)
+            public FbxSurfaceMaterial ExportMaterial (Material unityMaterial, FbxScene fbxScene)
             {
+                if (!unityMaterial)
+                    return null;
+                
                 if (Verbose)
                     Debug.Log (string.Format ("exporting material {0}", unityMaterial.name));
                               
                 var materialName = unityMaterial ? unityMaterial.name : "DefaultMaterial";
                 if (MaterialMap.ContainsKey (materialName)) {
-                    AssignLayerElementMaterial (fbxMesh);
                     return MaterialMap [materialName];
                 }
 
@@ -293,13 +347,21 @@ namespace FbxExporters
                     ExportTexture (unityMaterial, "_SpecGlosMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
                 }
 
-                AssignLayerElementMaterial (fbxMesh);
-
                 MaterialMap.Add (materialName, fbxMaterial);
                 return fbxMaterial;
             }
 
-            private void AssignLayerElementMaterial(FbxMesh fbxMesh)
+            /// <summary>
+            /// Sets up the material to polygon mapping for fbxMesh.
+            /// To determine which part of the mesh uses which material, look at the submeshes
+            /// and which polygons they represent.
+            /// Assuming equal number of materials as submeshes, and that they are in the same order.
+            /// (i.e. submesh 1 uses material 1)
+            /// </summary>
+            /// <param name="fbxMesh">Fbx mesh.</param>
+            /// <param name="mesh">Mesh.</param>
+            /// <param name="materials">Materials.</param>
+            private void AssignLayerElementMaterial(FbxMesh fbxMesh, Mesh mesh, int materialCount)
             {
                 // Add FbxLayerElementMaterial to layer 0 of the node
                 FbxLayer fbxLayer = fbxMesh.GetLayer (0 /* default layer */);
@@ -309,14 +371,31 @@ namespace FbxExporters
                 }
 
                 using (var fbxLayerElement = FbxLayerElementMaterial.Create (fbxMesh, "Material")) {
-                    // Using all same means that the entire mesh uses the same material
-                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eAllSame);
-                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
+                    // if there is only one material then set everything to that material
+                    if (materialCount == 1) {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eAllSame);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
 
-                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+                        fbxElementArray.Add (0);
+                    } else {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygon);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
 
-                    // Map the entire geometry to the FbxNode material at index 0
-                    fbxElementArray.Add (0);
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
+
+                        // assuming that each polygon is a triangle
+                        // TODO: Add support for other mesh topologies (e.g. quads)
+                        fbxElementArray.SetCount (mesh.triangles.Length / 3);
+
+                        for (int i = 0; i < mesh.subMeshCount; i++) {
+                            int start = ((int)mesh.GetIndexStart (i)) / 3;
+                            int count = ((int)mesh.GetIndexCount (i)) / 3;
+                            for (int j = start; j < start + count; j++) {
+                                fbxElementArray.SetAt (j, i);
+                            }
+                        }
+                    }
                     fbxLayer.SetMaterials (fbxLayerElement);
                 }
             }
@@ -325,10 +404,10 @@ namespace FbxExporters
             /// Unconditionally export this mesh object to the file.
             /// We have decided; this mesh is definitely getting exported.
             /// </summary>
-            public void ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene, bool weldVertices = true)
+            public FbxMesh ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene, bool weldVertices = true)
             {
                 if (!meshInfo.IsValid)
-                    return;
+                    return null;
 
                 NumMeshes++;
                 NumTriangles += meshInfo.Triangles.Length / 3;
@@ -351,12 +430,14 @@ namespace FbxExporters
                     }
                     fbxMesh.InitControlPoints (NumControlPoints);
 
-                    // copy control point data from Unity to FBX
+                    // Copy control point data from Unity to FBX.
+                    // As we do so, scale the points by 100 to convert
+                    // from m to cm.
                     foreach (var controlPoint in ControlPointToIndex.Keys) {
                         fbxMesh.SetControlPointAt (new FbxVector4 (
-                            -controlPoint.x,
-                            controlPoint.y,
-                            controlPoint.z
+                            -controlPoint.x*UnitScaleFactor,
+                            controlPoint.y*UnitScaleFactor,
+                            controlPoint.z*UnitScaleFactor
                         ), ControlPointToIndex [controlPoint]);
                     }
                 } else {
@@ -368,15 +449,18 @@ namespace FbxExporters
                     {
                         // convert from left to right-handed by negating x (Unity negates x again on import)
                         fbxMesh.SetControlPointAt(new FbxVector4 (
-                            -meshInfo.Vertices [v].x,
-                            meshInfo.Vertices [v].y,
-                            meshInfo.Vertices [v].z
+                            -meshInfo.Vertices [v].x*UnitScaleFactor,
+                            meshInfo.Vertices [v].y*UnitScaleFactor,
+                            meshInfo.Vertices [v].z*UnitScaleFactor
                         ), v);
                     }
                 }
 
-                var fbxMaterial = ExportMaterial (meshInfo.Material, fbxScene, fbxMesh);
-                fbxNode.AddMaterial (fbxMaterial);
+                foreach (var mat in meshInfo.Materials) {
+                    var fbxMaterial = ExportMaterial (mat, fbxScene);
+                    if (fbxMaterial!=null)
+                        fbxNode.AddMaterial (fbxMaterial);
+                }
 
                 /*
                  * Triangles have to be added in reverse order, 
@@ -407,11 +491,15 @@ namespace FbxExporters
                     fbxMesh.EndPolygon ();
                 }
 
+                AssignLayerElementMaterial (fbxMesh, meshInfo.mesh, meshInfo.Materials.Length);
+
                 ExportComponentAttributes (meshInfo, fbxMesh, unmergedTriangles);
 
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
                 fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
+
+                return fbxMesh;
             }
 
             // get a fbxNode's global default position.
@@ -447,8 +535,13 @@ namespace FbxExporters
 
                 // transfer transform data from Unity to Fbx
                 // Negating the x value of the translation, and the y and z values of the rotation
-                // to convert from Unity to Maya coordinates (left to righthanded)
-                var fbxTranslate = new FbxDouble3 (-unityTranslate.x, unityTranslate.y, unityTranslate.z);
+                // to convert from Unity to Maya coordinates (left to righthanded).
+                // Scaling the translation by 100 to convert from m to cm.
+                var fbxTranslate = new FbxDouble3 (
+                    -unityTranslate.x*UnitScaleFactor,
+                    unityTranslate.y*UnitScaleFactor,
+                    unityTranslate.z*UnitScaleFactor
+                );
                 var fbxRotate = new FbxDouble3 (unityRotate.x, -unityRotate.y, -unityRotate.z);
                 var fbxScale = new FbxDouble3 (unityScale.x, unityScale.y, unityScale.z);
 
@@ -461,6 +554,40 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// if this game object is a model prefab then export with shared components
+            /// </summary>
+            protected bool ExportInstance (GameObject unityGo, FbxNode fbxNode, FbxScene fbxScene)
+            {
+                PrefabType unityPrefabType = PrefabUtility.GetPrefabType(unityGo);
+
+                if (unityPrefabType != PrefabType.PrefabInstance) return false;
+
+                Object unityPrefabParent = PrefabUtility.GetPrefabParent (unityGo);
+
+                if (Verbose)
+                    Debug.Log (string.Format ("exporting instance {0}({1})", unityGo.name, unityPrefabParent.name));
+
+                FbxMesh fbxMesh = null;
+
+                if (!SharedMeshes.TryGetValue (unityPrefabParent.name, out fbxMesh))
+                {
+                    bool weldVertices = FbxExporters.EditorTools.ExportSettings.instance.weldVertices;
+                    fbxMesh = ExportMesh (GetMeshInfo (unityGo), fbxNode, fbxScene, weldVertices);
+                    if (fbxMesh != null) {
+                        SharedMeshes [unityPrefabParent.name] = fbxMesh;
+                    }
+                }
+
+                if (fbxMesh == null) return false;
+
+                // set the fbxNode containing the mesh
+                fbxNode.SetNodeAttribute (fbxMesh);
+                fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
+
+                return true;
+            }
+
+            /// <summary>
             /// Unconditionally export components on this game object
             /// </summary>
             protected int ExportComponents (
@@ -468,6 +595,10 @@ namespace FbxExporters
                 int exportProgress, int objectCount, TransformExportType exportType = TransformExportType.Local)
             {
                 int numObjectsExported = exportProgress;
+
+                if (FbxExporters.EditorTools.ExportSettings.instance.mayaCompatibleNames) {
+                    unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
+                }
 
                 // create an FbxNode and add it as a child of parent
                 FbxNode fbxNode = FbxNode.Create (fbxScene, unityGo.name);
@@ -484,8 +615,11 @@ namespace FbxExporters
 
                 ExportTransform ( unityGo.transform, fbxNode, exportType);
 
-                bool weldVertices = FbxExporters.EditorTools.ExportSettings.instance.weldVertices;
-                ExportMesh (GetMeshInfo( unityGo ), fbxNode, fbxScene, weldVertices);
+                // try exporting mesh as an instance, export regularly if we cannot
+                if (!ExportInstance (unityGo, fbxNode, fbxScene)) {
+                    bool weldVertices = FbxExporters.EditorTools.ExportSettings.instance.weldVertices;
+                    ExportMesh (GetMeshInfo (unityGo), fbxNode, fbxScene, weldVertices);
+                }
 
                 if (Verbose)
                     Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
@@ -609,9 +743,11 @@ namespace FbxExporters
                         fbxSceneInfo.mComment = Comments;
                         fbxScene.SetSceneInfo (fbxSceneInfo);
 
-                        // Set up the axes (Y up, Z forward, X to the right) and units (meters)
+                        // Set up the axes (Y up, Z forward, X to the right) and units (centimeters)
+                        // Exporting in centimeters as this is the default unit for FBX files, and easiest
+                        // to work with when importing into Maya or Max
                         var fbxSettings = fbxScene.GetGlobalSettings ();
-                        fbxSettings.SetSystemUnit (FbxSystemUnit.m);
+                        fbxSettings.SetSystemUnit (FbxSystemUnit.cm);
 
                         // The Unity axis system has Y up, Z forward, X to the right (left handed system with odd parity).
                         // The Maya axis system has Y up, Z forward, X to the left (right handed system with odd parity).
@@ -725,7 +861,10 @@ namespace FbxExporters
             }
 
             // Add a menu item called "Export Model..." to a GameObject's context menu.
-            [MenuItem ("GameObject/Export Model... %e", false, 30)]
+            // NOTE: The ellipsis at the end of the Menu Item name prevents the context
+            //       from being passed to command, thus resulting in OnContextItem()
+            //       being called only once regardless of what is selected.
+            [MenuItem ("GameObject/Export Model...", false, 30)]
             static void OnContextItem (MenuCommand command)
             {
                 OnExport ();
@@ -829,7 +968,7 @@ namespace FbxExporters
                 /// The material used, if any; otherwise null.
                 /// We don't support multiple materials on one gameobject.
                 /// </summary>
-                public Material Material {
+                public Material[] Materials {
                     get {
                         if (!unityObject) {
                             return null;
@@ -838,9 +977,18 @@ namespace FbxExporters
                         if (!renderer) {
                             return null;
                         }
+
+                        if (FbxExporters.EditorTools.ExportSettings.instance.mayaCompatibleNames) {
+                            foreach (var mat in renderer.sharedMaterials) {
+                                if (mat) {
+                                    mat.name = ConvertToMayaCompatibleName (mat.name);
+                                }
+                            }
+                        }
+
                         // .material instantiates a new material, which is bad
                         // most of the time.
-                        return renderer.sharedMaterial;
+                        return renderer.sharedMaterials;
                     }
                 }
 
@@ -956,13 +1104,19 @@ namespace FbxExporters
                 					  ? Application.dataPath
                 					  : System.IO.Path.GetDirectoryName (LastFilePath);
 
-                var filename = string.IsNullOrEmpty (LastFilePath)
-                					 ? MakeFileName (basename: FileBaseName, extension: Extension)
-                					 : System.IO.Path.GetFileName (LastFilePath);
+                GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
+                string filename = null;
+                if (selectedGOs.Length == 1) {
+                    filename = ConvertToValidFilename (selectedGOs [0].name + ".fbx");
+                } else {
+                    filename = string.IsNullOrEmpty (LastFilePath)
+                        ? MakeFileName (basename: FileBaseName, extension: Extension)
+                        : System.IO.Path.GetFileName (LastFilePath);
+                }
 
                 var title = string.Format ("Export Model FBX ({0})", FileBaseName);
 
-                var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "");
+                var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "fbx");
 
                 if (string.IsNullOrEmpty (filePath)) {
                     return;
@@ -1010,6 +1164,56 @@ namespace FbxExporters
                 if (!fileInfo.Exists) {
                     Directory.CreateDirectory (fileInfo.Directory.FullName);
                 }
+            }
+
+            /// <summary>
+            /// Removes the diacritics (i.e. accents) from letters.
+            /// e.g. é becomes e
+            /// </summary>
+            /// <returns>Text with accents removed.</returns>
+            /// <param name="text">Text.</param>
+            private static string RemoveDiacritics(string text) 
+            {
+                var normalizedString = text.Normalize(System.Text.NormalizationForm.FormD);
+                var stringBuilder = new System.Text.StringBuilder();
+
+                foreach (var c in normalizedString)
+                {
+                    var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+                    if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+                    {
+                        stringBuilder.Append(c);
+                    }
+                }
+
+                return stringBuilder.ToString().Normalize(System.Text.NormalizationForm.FormC);
+            }
+
+            private static string ConvertToMayaCompatibleName(string name)
+            {
+                string newName = RemoveDiacritics (name);
+
+                if (char.IsDigit (newName [0])) {
+                    newName = newName.Insert (0, InvalidCharReplacement.ToString());
+                }
+
+                for (int i = 0; i < newName.Length; i++) {
+                    if (!char.IsLetterOrDigit (newName, i)) {
+                        if (i < newName.Length-1 && newName [i] == MayaNamespaceSeparator) {
+                            continue;
+                        }
+                        newName = newName.Replace (newName [i], InvalidCharReplacement);
+                    }
+                }
+                return newName;
+            }
+
+            public static string ConvertToValidFilename(string filename)
+            {
+                return System.Text.RegularExpressions.Regex.Replace (filename, 
+                    RegexCharStart + new string(Path.GetInvalidFileNameChars()) + RegexCharEnd,
+                    InvalidCharReplacement.ToString()
+                );
             }
         }
     }

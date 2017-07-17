@@ -5,7 +5,7 @@ Copyright (c) 2017 Unity Technologies. All rights reserved.
 Licensed under the ##LICENSENAME##.
 See LICENSE.md file for full license information.
 
-**Version**: 0.0.4a
+**Version**: 0.0.5a
 
 Requirements
 ------------
