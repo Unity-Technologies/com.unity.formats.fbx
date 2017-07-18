@@ -691,35 +691,39 @@ namespace FbxExporters
                 return toExport;
             }
 
+            private int FindCenterRecursive(Transform t, ref Vector3 centerAverage)
+            {
+                var renderer = t.GetComponent <Renderer>();
+                if (renderer) {
+                    centerAverage += renderer.bounds.center;
+                } else {
+                    var mesh = t.GetComponent <Mesh> ();
+                    if (mesh) {
+                        centerAverage += mesh.bounds.center;
+                    } else {
+                        var collider = t.GetComponent <Collider> ();
+                        if (collider) {
+                            centerAverage += collider.bounds.center;
+                        } else {
+                            centerAverage += t.transform.position;
+                        }
+                    }
+                }
+
+                int count = 1;
+                foreach (Transform child in t) {
+                    count += FindCenterRecursive (child, ref centerAverage);
+                }
+                return count;
+            }
+
             private Vector3 FindCenter(IEnumerable<GameObject> gameObjects)
             {
                 // renderer, mesh, collider
                 Vector3 average = Vector3.zero;
                 int count = 0;
                 foreach (var go in gameObjects) {
-                    var renderer = go.GetComponent <Renderer>();
-                    if (renderer) {
-                        average += renderer.bounds.center;
-                        count++;
-                        Debug.Log ("Renderer: " + renderer.bounds.center);
-                        continue;
-                    }
-                    var mesh = go.GetComponent <Mesh>();
-                    if (mesh) {
-                        average += mesh.bounds.center;
-                        count++;
-                        Debug.Log ("Mesh: " + mesh.bounds.center);
-                        continue;
-                    }
-                    var collider = go.GetComponent <Collider>();
-                    if (collider) {
-                        average += collider.bounds.center;
-                        Debug.Log ("Collider: " + collider.bounds.center);
-                        count++;
-                        continue;
-                    }
-                    average += go.transform.position;
-                    count++;
+                    count += FindCenterRecursive (go.transform, ref average);
                 }
                 return average / count;
             }
