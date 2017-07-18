@@ -1,4 +1,4 @@
-﻿// ***********************************************************************
+// ***********************************************************************
 // Copyright (c) 2017 Unity Technologies. All rights reserved.
 //
 // Licensed under the ##LICENSENAME##.
@@ -88,7 +88,7 @@ namespace FbxExporters
                 // find common ancestor root & filePath;
                 string[] filePaths = new string[gosToExport.Length];
                 if (path==null)
-                    path = Path.Combine (Application.dataPath, "Objects");
+                    path = FbxExporters.EditorTools.ExportSettings.instance.convertToModelSavePath;
 
                 for(int n = 0; n < gosToExport.Length; n++){
                     var filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
