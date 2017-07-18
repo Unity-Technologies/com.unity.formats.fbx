@@ -36,15 +36,15 @@ namespace FbxExporters.EditorTools {
 
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
-                "Convert To Model Save Path:",
-                "Path to save fbx files created by Convert To Model. Path must be relative to Assets folder"));
+                "Model Prefab Path:",
+                "Relative path for saving Model Prefabs."));
 
             EditorGUILayout.SelectableLabel(GetRelativePath(exportSettings.convertToModelSavePath, Application.dataPath),
                 EditorStyles.textField, GUILayout.MinWidth(SelectableLabelMinWidth), GUILayout.Height(EditorGUIUtility.singleLineHeight));
 
             if (GUILayout.Button ("Browse", EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
                 string path = EditorUtility.OpenFolderPanel (
-                    "Convert to Model Save Path", Application.dataPath, null
+                    "Select Model Prefabs Path", Application.dataPath, null
                 );
                 // Make sure something is selected, and that it is in the Asset folder
                 if (!string.IsNullOrEmpty (path) && path.StartsWith (Application.dataPath)) {
