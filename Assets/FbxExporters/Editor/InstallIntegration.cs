@@ -3,9 +3,6 @@ using UnityEditor;
 using System;
 using System.Collections.Generic;
 
-// NOTE: uncomment this define to enable installation from menu item
-//#define DEBUG_INSTALLER 1
-
 namespace FbxExporters
 {
     class Integrations
