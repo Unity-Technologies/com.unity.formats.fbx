@@ -64,6 +64,22 @@ namespace FbxExporters
         }
 
         /// <summary>
+        /// Compare the old and new, and update the old according to the rules.
+        /// </summary>
+        void CompareAndUpdate()
+        {
+            var newFbxHistory = SerializeFbx();
+            if (m_fbxHistory == newFbxHistory) {
+                Debug.Log("fbx matches " + m_fbxHistory);
+                return;
+            } else {
+                Debug.Log("fbx changed " + m_fbxHistory + " became " + newFbxHistory);
+                m_fbxHistory = newFbxHistory;
+                return;
+            }
+        }
+
+        /// <summary>
         /// Returns whether the model we're tracking is the same asset as the
         /// path passed in.
         /// </summary>
@@ -80,7 +96,7 @@ namespace FbxExporters
         /// </summary>
         public void SyncPrefab()
         {
-            m_fbxHistory = SerializeFbx();
+            CompareAndUpdate();
             Debug.Log("SyncPrefab " + m_fbxModel.name + " => " + m_fbxHistory);
         }
 #endif
