@@ -516,7 +516,7 @@ namespace FbxExporters
                 UnityEngine.Vector3 unityScale;
 
                 switch (exportType) {
-                case TransformExportType.Zeroed:
+                case TransformExportType.Reset:
                     unityTranslate = Vector3.zero;
                     unityRotate = Vector3.zero;
                     unityScale = Vector3.one;
@@ -691,7 +691,40 @@ namespace FbxExporters
                 return toExport;
             }
 
-            public enum TransformExportType { Local, Global, Zeroed };
+            private Vector3 FindCenter(IEnumerable<GameObject> gameObjects)
+            {
+                // renderer, mesh, collider
+                Vector3 average = Vector3.zero;
+                int count = 0;
+                foreach (var go in gameObjects) {
+                    var renderer = go.GetComponent <Renderer>();
+                    if (renderer) {
+                        average += renderer.bounds.center;
+                        count++;
+                        Debug.Log ("Renderer: " + renderer.bounds.center);
+                        continue;
+                    }
+                    var mesh = go.GetComponent <Mesh>();
+                    if (mesh) {
+                        average += mesh.bounds.center;
+                        count++;
+                        Debug.Log ("Mesh: " + mesh.bounds.center);
+                        continue;
+                    }
+                    var collider = go.GetComponent <Collider>();
+                    if (collider) {
+                        average += collider.bounds.center;
+                        Debug.Log ("Collider: " + collider.bounds.center);
+                        count++;
+                        continue;
+                    }
+                    average += go.transform.position;
+                    count++;
+                }
+                return average / count;
+            }
+
+            public enum TransformExportType { Local, Global, Reset };
 
             /// <summary>
             /// Export all the objects in the set.
@@ -764,7 +797,7 @@ namespace FbxExporters
 
                         if(revisedExportSet.Count == 1){
                             foreach(var unityGo in revisedExportSet){
-                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode, exportProgress, count, TransformExportType.Zeroed);
+                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode, exportProgress, count, TransformExportType.Reset);
                                 if (exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
                                     return 0;
@@ -772,6 +805,11 @@ namespace FbxExporters
                             }
                         }
                         else{
+                            // find the center of the export set
+                            Vector3 center = FindCenter(revisedExportSet);
+                            var test = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                            test.transform.position = center;
+
                             foreach (var unityGo in revisedExportSet) {
                                 exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode, exportProgress, count,
                                     unityGo.transform.parent == null? TransformExportType.Local : TransformExportType.Global);
