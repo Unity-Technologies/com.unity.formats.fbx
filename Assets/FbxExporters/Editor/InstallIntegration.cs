@@ -10,8 +10,6 @@ namespace FbxExporters
 {
     class Integrations
     {
-        const string MenuItemName = "FbxExporters/Install Maya2017 Integration";
-        
         private const string MAYA_VERSION = "2017";
         private const string MODULE_FILENAME = "unityoneclick.mod";
         private const string PACKAGE_NAME = "FbxExporters";
@@ -34,7 +32,7 @@ namespace FbxExporters
 
         private static string GetUserFolder()
         {
-#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_EDITOR_LINUX 
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
             return System.Environment.GetEnvironmentVariable("HOME");
 #else
             return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal)
