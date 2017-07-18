@@ -158,7 +158,6 @@ namespace FbxExporters
         {
             // check if package installed
             string moduleTemplatePath = GetModuleTemplatePath(MAYA_VERSION);
-            if (verbose) Debug.Log(moduleTemplatePath);
 
             if (!System.IO.File.Exists(moduleTemplatePath))
             {
@@ -172,7 +171,6 @@ namespace FbxExporters
 
             // check for {USER} modules folder
             string modulePath = GetModulePath(MAYA_VERSION);
-            if (verbose) Debug.Log(modulePath);
 
             string moduleFilePath = System.IO.Path.Combine( modulePath, MODULE_FILENAME);
 
@@ -230,7 +228,7 @@ namespace FbxExporters
                 // parse template, replace "{UnityProject}" with project path
                 List<string> lines = ParseTemplateFile(moduleTemplatePath, Tokens);
 
-                 if (verbose) Debug.Log(string.Format("Installing plugin module file to {0}",moduleFilePath));
+                 if (verbose) Debug.Log(string.Format("Copying plugin module file to {0}",moduleFilePath));
 
                 // write out .mod file
                 WriteFile(moduleFilePath, lines);
