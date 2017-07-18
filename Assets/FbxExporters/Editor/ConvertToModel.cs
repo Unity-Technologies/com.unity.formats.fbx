@@ -32,8 +32,10 @@ namespace FbxExporters
             [MenuItem (MenuItemName1, false)]
             public static void OnMenuItem ()
             {
-                GameObject [] unityActiveGOs = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
-                OnConvertInPlace (unityActiveGOs);
+                GameObject [] unityGameObjectsToConvert = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
+                Object[] result = CreateInstantiatedModelPrefab (unityGameObjectsToConvert);
+                if (result.Length>0)
+                    Selection.objects = result;
             }
 
             /// <summary>
@@ -60,14 +62,23 @@ namespace FbxExporters
                     Debug.LogError (string.Format("Error: {0} is not a GameObject and cannot be converted", command.context.name));
                     return;
                 }
-                OnConvertInPlace (new GameObject[]{selected});
+                GameObject[] result = CreateInstantiatedModelPrefab (new GameObject[]{selected});
+                if (result.Length>0)
+                    Selection.objects = result;
+
             }
 
-            private static List<GameObject> OnConvertInPlace (GameObject [] unityActiveGOs)
+            /// <summary>
+            /// Create an instantiated model prefab from an game object hierarchy.
+            /// </summary>
+            /// <returns>list of instanced model prefabs</returns>
+            /// <param name="unityGameObjectsToConvert">Unity game objects to convert to model prefab instances</param>
+            /// <param name="keepBackup">If set to <c>true</c> keep backup.</param>
+            public static GameObject[] CreateInstantiatedModelPrefab (GameObject [] unityGameObjectsToConvert, string path = null, bool keepBackup = true)
             {
                 List<GameObject> result = new List<GameObject> ();
 
-                var exportSet = ModelExporter.RemoveRedundantObjects (unityActiveGOs);
+                var exportSet = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
                 GameObject[] gosToExport = new GameObject[exportSet.Count];
                 exportSet.CopyTo (gosToExport);
 
@@ -75,13 +86,14 @@ namespace FbxExporters
 
                 // find common ancestor root & filePath;
                 string[] filePaths = new string[gosToExport.Length];
-                string dirPath = Path.Combine (Application.dataPath, "Objects");
+                if (path==null)
+                    path = Path.Combine (Application.dataPath, "Objects");
 
                 for(int n = 0; n < gosToExport.Length; n++){
                     var filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
-                    var filePath = Path.Combine (dirPath, filename);
+                    var filePath = Path.Combine (path, filename);
                     if (File.Exists (filePath)) {
-                        filePath = IncrementFileName (dirPath, filename);
+                        filePath = IncrementFileName (path, filename);
                     }
                     filePaths[n] = filePath;
                 }
@@ -93,7 +105,6 @@ namespace FbxExporters
                         new UnityEngine.Object[] {gosToExport[j]}) as string;
                 }
 
-                List<GameObject> selection = new List<GameObject> ();
                 for(int i = 0; i < fbxFileNames.Length; i++)
                 {
                     var fbxFileName = fbxFileNames [i];
@@ -121,26 +132,26 @@ namespace FbxExporters
                         {
                             SetupImportedGameObject (gosToExport [i], unityGO);
 
-                            result.Add (unityGO);
 
                             // remove (now redundant) gameobject
-#if UNI_19965
-                            Object.DestroyImmediate (unityActiveGOs [i]);
-#else
-                            // rename and put under scene root in case we need to check values
-                            gosToExport [i].name = "_safe_to_delete_" + gosToExport[i].name;
-                            gosToExport [i].SetActive (false);
-#endif
-                            // select the instanced Model Prefab
-                            selection.Add(unityGO);
+                            if (!keepBackup) {
+                                Object.DestroyImmediate (unityGameObjectsToConvert [i]);
+                            } 
+                            else 
+                            {
+                                // rename and put under scene root in case we need to check values
+                                gosToExport [i].name = "_safe_to_delete_" + gosToExport [i].name;
+                                gosToExport [i].SetActive (false);
+                            }
+
+                            // add the instanced Model Prefab
+                            result.Add (unityGO);
                         }
                     }
 
                 }
 
-                Selection.objects = selection.ToArray ();
-
-                return result;
+                return result.ToArray ();
             }
 
             /// <summary>
