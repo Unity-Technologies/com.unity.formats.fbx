@@ -26,9 +26,10 @@ export PACKAGE_NAME=FbxExporters
 export PACKAGE_VERSION={CurrentVersion}
 export FBXEXPORTERS_PACKAGE_PATH=${PROJECT_PATH}/${PACKAGE_NAME}_${PACKAGE_VERSION}.unitypackage
 
-"${UNITY3D_PATH}" -projectPath "${PROJECT_PATH}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
+# must be non-batch to import correctly
+"${UNITY3D_PATH}" -projectPath "${PROJECT_PATH}" -importPackage ${FBXEXPORTERS_PACKAGE_PATH} -quit
 
-# Use "InstallMaya2017CommandsOnly" to install an integration with no UI
+# Use "InstallMaya2017CommandsOnly" to install without UI
 "${UNITY3D_PATH}" -batchMode -projectPath "${PROJECT_PATH}" -executeMethod FbxExporters.Integrations.InstallMaya2017 -quit
 
 Configuring Maya2017
