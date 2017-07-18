@@ -13,6 +13,9 @@
 *.swp
 *.swo
 
+## PyCharm ##
+**/.idea/
+
 ## Unity ##
 *.meta
 [Pp]rojectSettings/*.asset
@@ -43,7 +46,6 @@ ExportedObj/
 *.pidb
 *.booproj
 *.svd
-*.pdb
 
 # Unity3D generated meta files
 *.pidb.meta
