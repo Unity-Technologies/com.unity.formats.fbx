@@ -1,6 +1,5 @@
 ########################################################################
-# Unity Technologies Aps.
-# [2016] -  . All Rights Reserved.
+# Copyright (c) 2017 Unity Technologies. All rights reserved.
 # NOTICE: All information contained herein is, and remains
 #         the property of Unity Technologies Aps. and its suppliers,
 #         if any.  The intellectual and technical concepts contained

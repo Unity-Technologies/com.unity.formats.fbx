@@ -1,6 +1,5 @@
 ########################################################################
-# Unity Technologies Aps.
-# [2017] -  . All Rights Reserved.
+# Copyright (c) 2017 Unity Technologies. All rights reserved.
 # NOTICE: All information contained herein is, and remains
 #         the property of Unity Technologies Aps. and its suppliers,
 #         if any.  The intellectual and technical concepts contained
@@ -30,10 +29,9 @@ Installation
 Running Unit Tests
 ==================
 
-MacOS / Ubuntu
+MacOS
 
 export MAYAPY_PATH=/Applications/Autodesk/maya2017/Maya.app/Contents/bin/mayapy
-export UNITY_PROJECT_PATH=~/Development/FbxExporters
 export MAYA_INTEGRATION_PATH=${UNITY_PROJECT_PATH}/Assets/Integrations/Autodesk/maya2017
 export PYTHONPATH=${MAYA_INTEGRATION_PATH}/scripts
 

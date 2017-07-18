@@ -8,26 +8,33 @@ using System.Collections.Generic;
 
 namespace FbxExporters
 {
-   class Integrations
-   {
+    class Integrations
+    {
+        const string MenuItemName = "FbxExporters/Install Maya2017 Integration";
+        
+        private const string MAYA_VERSION = "2017";
+        private const string MODULE_FILENAME = "unityoneclick.mod";
         private const string PACKAGE_NAME = "FbxExporters";
         private const string VERSION_FILENAME = "README.txt";
         private const string VERSION_FIELD = "**Version**";
+        private const string VERSION_TAG = "{Version}";
+        private const string PROJECT_TAG = "{UnityProject}";
+
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
-        private const string REL_MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya<version>/unityoneclick.mod";
+        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya"+VERSION_TAG+"/unityoneclick.mod";
 
-#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-        private const string REL_MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/<version>/modules";
-#elif UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX
-        private const string REL_MAYA_MODULES_PATH = "Maya/<version>/modules";
+#if UNITY_EDITOR_OSX
+        private const string REL_MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/"+VERSION_TAG+"/modules";
+#elif UNITY_EDITOR_LINUX 
+        private const string REL_MAYA_MODULES_PATH = "Maya/"+VERSION_TAG+"/modules";
 #else
-        private const string REL_MAYA_MODULES_PATH = "My Documents/Maya/<version>/modules";
+        private const string REL_MAYA_MODULES_PATH = "My Documents/Maya/"+VERSION_TAG+"/modules";
 #endif
 
         private static string GetUserFolder()
         {
-#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_EDITOR_LINUX 
             return System.Environment.GetEnvironmentVariable("HOME");
 #else
             return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal)
@@ -38,14 +45,14 @@ namespace FbxExporters
         {
             string result = System.IO.Path.Combine(GetUserFolder(), REL_MAYA_MODULES_PATH);
 
-            return result.Replace("<version>",version);
+            return result.Replace(VERSION_TAG,version);
         }
 
         private static string GetModuleTemplatePath(string version)
         {
-            string result = System.IO.Path.Combine(Application.dataPath, REL_MODULE_TEMPLATE_PATH);
+            string result = System.IO.Path.Combine(Application.dataPath, MODULE_TEMPLATE_PATH);
 
-            return result.Replace("<version>",version);
+            return result.Replace(VERSION_TAG,version);
         }
 
         private static string GetProjectPath()
@@ -152,21 +159,11 @@ namespace FbxExporters
             }
         }
 
-#if DEBUG_INSTALLER
-        const string MenuItemName = "File/Install Maya2017 Integration";
-        [MenuItem (MenuItemName, false)]
-        public static void OnMenuItem ()
+        private static void _InstallMaya2017(bool verbose=true, bool commandsOnly=false)
         {
-        	InstallMaya2017 ();
-        }
-#endif
-
-        public static void InstallMaya2017()
-        {
-            Debug.Log("Installing Maya2017 Integration");
-
             // check if package installed
-            string moduleTemplatePath = GetModuleTemplatePath("2017");
+            string moduleTemplatePath = GetModuleTemplatePath(MAYA_VERSION);
+            if (verbose) Debug.Log(moduleTemplatePath);
 
             if (!System.IO.File.Exists(moduleTemplatePath))
             {
@@ -179,14 +176,16 @@ namespace FbxExporters
             // TODO:  if not maya2017 installed warn user
 
             // check for {USER} modules folder
-            string modulePath = GetModulePath("2017");
-            string moduleFilePath = System.IO.Path.Combine( modulePath, "unityoneclick.mod");
+            string modulePath = GetModulePath(MAYA_VERSION);
+            if (verbose) Debug.Log(modulePath);
+
+            string moduleFilePath = System.IO.Path.Combine( modulePath, MODULE_FILENAME);
 
             bool installed = false;
 
             if (!System.IO.Directory.Exists(modulePath))
             {
-                Debug.Log(string.Format("Creating Maya Modules Folder {0}", modulePath));
+                if (verbose) Debug.Log(string.Format("Creating Maya Modules Folder {0}", modulePath));
 
                 try
                 {
@@ -217,9 +216,9 @@ namespace FbxExporters
                         System.IO.File.Delete(moduleFilePath);
                         installed = false;
                     }
-                    catch 
+                    catch
                     {
-                        Debug.LogError(string.Format ("Failed to delete plugin module file {0}", moduleFilePath));
+                        Debug.LogWarning(string.Format ("Failed to delete plugin module file {0}", moduleFilePath));
                     }
                 }
             }
@@ -229,14 +228,14 @@ namespace FbxExporters
             {
                 Dictionary<string,string> Tokens = new Dictionary<string,string>()
                 {
-                    {"{UnityOneClickVersion}", GetPackageVersion() },
-                    {"{UnityProject}", GetProjectPath() }
+                    {VERSION_TAG, GetPackageVersion() },
+                    {PROJECT_TAG, GetProjectPath() }
                  };
 
                 // parse template, replace "{UnityProject}" with project path
                 List<string> lines = ParseTemplateFile(moduleTemplatePath, Tokens);
 
-                Debug.Log(string.Format("Installing plugin module file: {0}",moduleFilePath));
+                 if (verbose) Debug.Log(string.Format("Installing plugin module file to {0}",moduleFilePath));
 
                 // write out .mod file
                 WriteFile(moduleFilePath, lines);
@@ -256,9 +255,47 @@ namespace FbxExporters
                     // TODO: print message package already installed else where
             }
 
+            if (commandsOnly)
+                throw new NotImplementedException();
+
             // TODO: configure maya to auto-load plugin on next startup
 
-            Debug.Log("Finished installing Maya 2017 Integration.");
         }
-   }
+
+        public static void InstallMaya2017()
+        {
+            bool verbose=true;
+
+            Debug.Log(string.Format("Installing Maya {0} Integration",MAYA_VERSION));
+
+            _InstallMaya2017(verbose);
+
+            if (verbose) Debug.Log(string.Format("Finished installing Maya {0} Integration.",MAYA_VERSION));
+        }
+
+        public static void InstallMaya2017CommandsOnly()
+        {
+            bool verbose=true;
+
+            Debug.Log(string.Format("Installing Maya {0} Integration Commands Only",MAYA_VERSION));
+
+            _InstallMaya2017(verbose, true);
+
+            if (verbose) Debug.Log(string.Format("Finished installing Maya {0} Integration Commands Only.",MAYA_VERSION));
+        }
+    }
+
+    namespace Editors
+    {
+        class IntegrationsUI
+        {
+            const string MenuItemName = "FbxExporters/Install Maya2017 Integration";
+
+            [MenuItem (MenuItemName, false, 0)]
+            public static void OnMenuItem ()
+            {
+            	Integrations.InstallMaya2017();
+            }
+        }
+    }
 }
