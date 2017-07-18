@@ -8,29 +8,81 @@ namespace FbxExporters.EditorTools {
 
     [CustomEditor(typeof(ExportSettings))]
     public class ExportSettingsEditor : UnityEditor.Editor {
+        Vector2 scrollPos = Vector2.zero;
+        const float LabelWidth = 225;
+        const float SelectableLabelMinWidth = 200;
+        const float BrowseButtonWidth = 55;
+
         public override void OnInspectorGUI() {
             ExportSettings exportSettings = (ExportSettings)target;
 
             // Increasing the label width so that none of the text gets cut off
-            EditorGUIUtility.labelWidth = 300;
+            EditorGUIUtility.labelWidth = LabelWidth;
+
+            scrollPos = GUILayout.BeginScrollView (scrollPos);
 
             exportSettings.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", exportSettings.weldVertices);
             exportSettings.embedTextures = EditorGUILayout.Toggle ("Embed Textures:", exportSettings.embedTextures);
             exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
-                new GUIContent("Convert to Maya Compatible Naming:",
+                new GUIContent ("Convert to Maya Compatible Naming:",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
                     "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
                     "On export, convert the names of GameObjects so they are Maya compatible." +
-                    (exportSettings.mayaCompatibleNames? "" : 
+                    (exportSettings.mayaCompatibleNames ? "" : 
                         "\n\nWARNING: Disabling this feature may result in lost material connections," +
-                        " and unexpected character replacements in Maya.")
+                    " and unexpected character replacements in Maya.")
                 ),
                 exportSettings.mayaCompatibleNames);
+
+            GUILayout.BeginHorizontal ();
+            GUILayout.Label (new GUIContent (
+                "Convert To Model Save Path:",
+                "Path to save fbx files created by Convert To Model. Path must be relative to Assets folder"));
+
+            EditorGUILayout.SelectableLabel(GetRelativePath(exportSettings.convertToModelSavePath, Application.dataPath),
+                EditorStyles.textField, GUILayout.MinWidth(SelectableLabelMinWidth), GUILayout.Height(EditorGUIUtility.singleLineHeight));
+
+            if (GUILayout.Button ("Browse", EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
+                string path = EditorUtility.OpenFolderPanel (
+                    "Convert to Model Save Path", Application.dataPath, null
+                );
+                // Make sure something is selected, and that it is in the Asset folder
+                if (!string.IsNullOrEmpty (path) && path.StartsWith (Application.dataPath)) {
+                    exportSettings.convertToModelSavePath = path;
+                } else {
+                    Debug.LogWarning ("Please select a location in Assets/");
+                }
+            }
+
+            GUILayout.EndHorizontal ();
+            GUILayout.FlexibleSpace ();
+            GUILayout.EndScrollView ();
 
             if (GUI.changed) {
                 EditorUtility.SetDirty (exportSettings);
                 exportSettings.Save ();
             }
+        }
+
+        private string GetRelativePath(string filePath, string folder){
+            Uri pathUri;
+            try{
+                pathUri = new Uri (filePath);
+            }
+            catch(UriFormatException){
+                return filePath;
+            }
+            if (!folder.EndsWith (Path.DirectorySeparatorChar.ToString ())) {
+                folder += Path.DirectorySeparatorChar;
+            }
+            Uri folderUri = new Uri (folder);
+            string relativePath = Uri.UnescapeDataString (
+                                      folderUri.MakeRelativeUri (pathUri).ToString ().Replace ('/', Path.DirectorySeparatorChar)
+                                  );
+            if (!relativePath.StartsWith ("Assets")) {
+                relativePath = string.Format("Assets{0}{1}", Path.DirectorySeparatorChar, relativePath);
+            }
+            return relativePath;
         }
     }
 
@@ -40,6 +92,12 @@ namespace FbxExporters.EditorTools {
         public bool weldVertices = true;
         public bool embedTextures = false;
         public bool mayaCompatibleNames = true;
+        public string convertToModelSavePath;
+
+        void OnEnable()
+        {
+            convertToModelSavePath = Path.Combine (Application.dataPath, "Objects");
+        }
 
         [MenuItem("Edit/Project Settings/Fbx Export", priority = 300)]
         static void ShowManager()
