@@ -71,10 +71,11 @@ namespace FbxExporters
             /// <summary>
             /// Create an instantiated model prefab from an game object hierarchy.
             /// </summary>
-            /// <returns>list of instanced model prefabs</returns>
-            /// <param name="unityGameObjectsToConvert">Unity game objects to convert to model prefab instances</param>
-            /// <param name="keepBackup">If set to <c>true</c> keep backup.</param>
-            public static GameObject[] CreateInstantiatedModelPrefab (GameObject [] unityGameObjectsToConvert, string path = null, bool keepBackup = true)
+            /// <returns>list of instanced Model Prefabs</returns>
+            /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
+            /// <param name="path">Path to save Model Prefab</param>
+            /// <param name="keepOriginal">If set to <c>true</c> keep original gameobject hierarchy.</param>
+            public static GameObject[] CreateInstantiatedModelPrefab (GameObject [] unityGameObjectsToConvert, string path = null, bool keepOriginal = true)
             {
                 List<GameObject> result = new List<GameObject> ();
 
@@ -134,7 +135,7 @@ namespace FbxExporters
 
 
                             // remove (now redundant) gameobject
-                            if (!keepBackup) {
+                            if (!keepOriginal) {
                                 Object.DestroyImmediate (unityGameObjectsToConvert [i]);
                             } 
                             else 
