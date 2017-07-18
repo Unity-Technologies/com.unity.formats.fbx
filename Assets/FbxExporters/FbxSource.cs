@@ -33,10 +33,34 @@ namespace FbxExporters
         // None of the code should be included in the build, because this
         // component is really only about the editor.
 #if UNITY_EDITOR
+        void SerializeFbx(Transform xfo, System.Text.StringBuilder builder)
+        {
+            builder.Append('"');
+            builder.Append(xfo.name);
+            builder.Append('"');
+            builder.Append(':');
+            builder.Append('{');
+            bool first = true;
+            foreach(Transform child in xfo) {
+                if (!first) { builder.Append(','); } else { first = false; }
+                SerializeFbx(child, builder);
+            }
+            builder.Append('}');
+        }
+
         string SerializeFbx()
         {
             Debug.Log("SerializeFbx on " + m_fbxModel.name);
-            return "";
+
+            // Serialize what we care about on the FBX, which is the hierarchy.
+            // Format is basically json:
+            // {"root":{"child1":{"grandchild":{}},"child2":{}}}
+            var builder = new System.Text.StringBuilder();
+            builder.Append('{');
+            SerializeFbx(m_fbxModel.transform, builder);
+            builder.Append('}');
+
+            return builder.ToString();
         }
 
         /// <summary>
@@ -56,8 +80,8 @@ namespace FbxExporters
         /// </summary>
         public void SyncPrefab()
         {
-            Debug.Log("SyncPrefab on " + m_fbxModel.name + " => " + this.name);
             m_fbxHistory = SerializeFbx();
+            Debug.Log("SyncPrefab " + m_fbxModel.name + " => " + m_fbxHistory);
         }
 #endif
     }
