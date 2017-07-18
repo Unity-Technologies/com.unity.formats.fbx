@@ -76,6 +76,9 @@ namespace FbxExporters
                     Debug.Log("Probably linked to " + fbxModel);
                     fbxSourcePrefabPaths.Add(pathname);
                 }
+                if (fbxSourcePrefabPaths.Count == 0) {
+                    continue;
+                }
 
                 //
                 // Load each prefab we found, see if its FbxSource points to the
@@ -98,7 +101,12 @@ namespace FbxExporters
                         continue;
                     }
                     foreach(var fbxSourceComponent in gameObj.GetComponentsInChildren<FbxSource>()) {
+                        Debug.Log("looking at " + fbxSourceComponent.gameObject.name);
+                        if (!fbxSourceComponent.MatchesFbxFile(fbxModel)) {
+                            continue;
+                        }
                         Debug.Log("updating starting at " + fbxSourceComponent.gameObject.name + " in prefab " + prefabPath + " from fbx model " + fbxModel);
+                        fbxSourceComponent.SyncPrefab();
                     }
                 }
             }
