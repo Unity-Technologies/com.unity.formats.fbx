@@ -75,7 +75,7 @@ namespace FbxExporters
 
                 // find common ancestor root & filePath;
                 string[] filePaths = new string[gosToExport.Length];
-                string dirPath = Path.Combine (Application.dataPath, "Objects");
+                string dirPath = FbxExporters.EditorTools.ExportSettings.instance.convertToModelSavePath;
 
                 for(int n = 0; n < gosToExport.Length; n++){
                     var filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
