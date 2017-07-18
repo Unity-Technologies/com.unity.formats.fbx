@@ -24,7 +24,7 @@ namespace FbxExporters
 #elif UNITY_EDITOR_LINUX 
         private const string REL_MAYA_MODULES_PATH = "Maya/"+VERSION_TAG+"/modules";
 #else
-        private const string REL_MAYA_MODULES_PATH = "My Documents/Maya/"+VERSION_TAG+"/modules";
+        private const string REL_MAYA_MODULES_PATH = "maya/"+VERSION_TAG+"/modules";
 #endif
 
         private static string GetUserFolder()
@@ -32,7 +32,7 @@ namespace FbxExporters
 #if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
             return System.Environment.GetEnvironmentVariable("HOME");
 #else
-            return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal)
+            return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
 #endif
         }
 
