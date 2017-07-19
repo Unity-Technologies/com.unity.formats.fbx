@@ -50,7 +50,7 @@ namespace FbxExporters
             return result.Replace(VERSION_TAG,version);
         }
 
-        private static string GetProjectPath()
+        public static string GetProjectPath()
         {
             return System.IO.Directory.GetParent(Application.dataPath).FullName;
         }
@@ -299,7 +299,8 @@ namespace FbxExporters
             	if (Integrations.InstallMaya(Integrations.MAYA_VERSION, true, false))
             	{
                     string title = string.Format("Completed installation of Maya {0} Integration.", Integrations.MAYA_VERSION);
-                    string message = "Please run the following MEL commands to configure auto-loading of the plugin in Maya.\n\nloadPlugin unityOneClickPlugin; pluginInfo -edit -autoload true unityOneClickPlugin;\n";
+                    string commands = string.Format("optionVar -stringValue \"UnityProject\" \"{0}\"; loadPlugin unityOneClickPlugin; pluginInfo -edit -autoload true unityOneClickPlugin;",Integrations.GetProjectPath());
+                    string message = string.Format("Please run the following MEL commands to configure auto-loading of the plugin in Maya.\n\n{0}\n", commands);
 
                     EditorUtility.DisplayDialog (title, message, "Ok");
                     Debug.Log(message);
