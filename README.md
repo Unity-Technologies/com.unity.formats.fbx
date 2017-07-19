@@ -35,7 +35,7 @@ else
   UNITY_EDITOR_PATH=/opt/Unity/Editor/Unity/Unity
 fi
 "${UNITY_EDITOR_PATH}" -projectPath "${PROJECT_PATH}" -importPackage "${FBXSDK_PACKAGE_PATH}" -quit
-"${UNITY_EDITOR_PATH}" -batchmode -projectPath "${PROJECT_PATH}" -exportPackage Assets/FbxExporters Assets/FbxSdk  "${PROJECT_PATH}/FbxExporters_${PACKAGE_VERSION}.unitypackage" -quit
+"${UNITY_EDITOR_PATH}" -batchmode -projectPath "${PROJECT_PATH}" -exportPackage Assets/FbxExporters Assets/FbxSdk Assets/Integrations "${PROJECT_PATH}/FbxExporters_${PACKAGE_VERSION}.unitypackage" -quit
 ```
 
 **On Windows**
