@@ -18,11 +18,13 @@
 import sys
 
 import maya.OpenMayaMPx as OpenMayaMPx
+import maya.cmds
 
 from unityOneClick import (version, commands, ui, debug)
 
 kPluginInfo = { 'name': version.pluginName(), 'version': version.versionName(), 'vendor': version.vendorName() }
 kVerbose = True
+kHeadlessInstall = maya.cmds.optionVar( exists='UnityOneClick_Headless' )
 
 # initialize the script plug-in
 def initializePlugin(mobject):
@@ -32,7 +34,9 @@ def initializePlugin(mobject):
             sys.stdout.write('loading %s\n'%kPluginInfo['name'])
         
         commands.register(pluginFn)
-        ui.register(pluginFn)
+
+        if not kHeadlessInstall:
+            ui.register(pluginFn)
 
     except Exception as e:
         assert isinstance(sys.stderr.write, object)
@@ -46,7 +50,9 @@ def uninitializePlugin(mobject):
         if debug.EnableDebugMessages:
             sys.stdout.write('unloading %s\n'%kPluginInfo['name'])
         
-        ui.unregister(pluginFn)
+        if not kHeadlessInstall:
+            ui.unregister(pluginFn)
+
         commands.unregister(pluginFn)
 
     except:
