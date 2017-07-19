@@ -37,21 +37,6 @@ namespace FbxExporters
 #endif
         }
 
-        public static string BuildCommandLineArgs (List<string> argsList)
-        {
-        	System.Text.StringBuilder sb = new System.Text.StringBuilder ();
-
-        	foreach (string arg in argsList) {
-        		sb.Append ("\"\"" + arg.Replace ("\"", @"\" + "\"") + "\"\" ");
-        	}
-
-        	if (sb.Length > 0) {
-        		sb = sb.Remove (sb.Length - 1, 1);
-        	}
-
-        	return sb.ToString ();
-        }
-
         private static string GetModulePath(string version)
         {
             string result = System.IO.Path.Combine(GetUserFolder(), REL_MAYA_MODULES_PATH);
@@ -182,13 +167,29 @@ namespace FbxExporters
 
 #if UNITY_EDITOR_OSX
                 myProcess.StartInfo.FileName = "open";
-                string mayaCommandLine = string.Format(@"/Applications/Autodesk/maya{0}/Maya.app --args -command '{1}'", version, MAYA_COMMANDS);
+                string mayaPath = string.Format ("/Applications/Autodesk/maya{0}/Maya.app", version);
+
+                if (!System.IO.Directory.Exists(mayaPath))
+                {
+                    Debug.LogError (string.Format ("No maya installation found at {0}",mayaPath));
+                    return -1;
+                }
+
+                string mayaCommandLine = string.Format(@"{0} --args -command '{1}'", mayaPath, MAYA_COMMANDS);
                 myProcess.StartInfo.Arguments = "-a " + mayaCommandLine;
 #elif UNITY_EDITOR_LINUX
                 throw new NotImplementedException();
 #else
+                string mayaPath = string.Format ("C:/Program Files/Autodesk/Maya{0}/maya.exe", version);
+
+                if (!System.IO.File.Exists(mayaPath))
+                {
+                    Debug.LogError (string.Format ("No maya installation found at {0}", mayaPath));
+                    return -1;
+                }
+
                 myProcess.StartInfo.FileName = "C:/Windows/system32/cmd.exe";
-                string mayaCommandLine = string.Format("C:/Program Files/Autodesk/Maya{0}/maya.exe -command '{1}'", version, MAYA_COMMANDS);
+                string mayaCommandLine = string.Format("{0} -command '{1}'", mayaPath, MAYA_COMMANDS);
                 myProcess.StartInfo.Arguments = "/c " + mayaCommandLine;
 #endif
                 myProcess.EnableRaisingEvents = true;
