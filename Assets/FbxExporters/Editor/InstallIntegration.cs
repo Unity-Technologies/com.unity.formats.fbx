@@ -250,12 +250,11 @@ namespace FbxExporters
         public static void InstallMaya2017()
         {
             const bool verbose = true;
-            const bool headless = false;
             const string version = Integrations.MAYA_VERSION;
 
             Debug.Log(string.Format("Installing Maya {0} Integration", version));
 
-            if (InstallMaya (version, verbose, headless)) {
+            if (InstallMaya (version, verbose)) {
                 if (verbose) Debug.Log (string.Format ("Completed installation of Maya {0} Integration.", version));
             } else {
                 if (verbose) Debug.Log (string.Format ("Failed to install Maya {0} Integration.", version));
@@ -272,7 +271,7 @@ namespace FbxExporters
             [MenuItem (MenuItemName, false, 0)]
             public static void OnMenuItem ()
             {
-            	if (Integrations.InstallMaya(Integrations.MAYA_VERSION, true, false))
+            	if (Integrations.InstallMaya(Integrations.MAYA_VERSION))
             	{
                     string title = string.Format("Completed installation of Maya {0} Integration.", Integrations.MAYA_VERSION);
                     string message = "Please run the following MEL commands to configure auto-loading of the plugin in Maya.\n\nloadPlugin unityOneClickPlugin; pluginInfo -edit -autoload true unityOneClickPlugin;\n";
