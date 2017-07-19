@@ -20,7 +20,7 @@ You can install the package and integrations from the command-line using the fol
 MacOS:
 
 # Configure where Unity is installed
-UNITY3D_VERSION=" 2017.1.0f3"
+UNITY3D_VERSION="2017.1.0f3"
 
 # Try special versioned location
 UNITY3D_PATH="/Applications/Unity ${UNITY3D_VERSION}/Unity.app/Contents/MacOS/Unity"
