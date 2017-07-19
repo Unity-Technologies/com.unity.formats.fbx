@@ -154,7 +154,7 @@ namespace FbxExporters
             }
         }
 
-        public static bool InstallMaya(string version, bool verbose=true, bool commandsOnly=false)
+        public static bool InstallMaya(string version, bool verbose=true, bool headless=false)
         {
             // check if package installed
             string moduleTemplatePath = GetModuleTemplatePath(version);
@@ -248,7 +248,7 @@ namespace FbxExporters
                     // TODO: print message package already installed else where
             }
 
-            if (commandsOnly)
+            if (headless)
                 throw new NotImplementedException();
 
             // TODO: configure maya to auto-load plugin on next startup
@@ -259,30 +259,30 @@ namespace FbxExporters
         public static void InstallMaya2017()
         {
             const bool verbose = true;
-            const bool commandsOnly = false;
+            const bool headless = false;
             const string version = Integrations.MAYA_VERSION;
 
             Debug.Log(string.Format("Installing Maya {0} Integration", version));
 
-            if (InstallMaya (version, verbose, commandsOnly)) {
+            if (InstallMaya (version, verbose, headless)) {
                 if (verbose) Debug.Log (string.Format ("Completed installation of Maya {0} Integration.", version));
             } else {
                 if (verbose) Debug.Log (string.Format ("Failed to install Maya {0} Integration.", version));
             }
         }
 
-        public static void InstallMaya2017CommandsOnly ()
+        public static void InstallMaya2017Headless ()
         {
             const bool verbose = true;
-            const bool commandsOnly = true;
+            const bool headless = true;
             const string version = Integrations.MAYA_VERSION;
 
-            Debug.Log (string.Format ("Installing Maya {0} Integration (Commands Only).", version));
+            Debug.Log (string.Format ("Installing Maya {0} Integration (Headless).", version));
 
-            if (InstallMaya (version, verbose, commandsOnly)) {
-                if (verbose) Debug.Log (string.Format ("Completed installation of Maya {0} Integration (Commands Only).", version));
+            if (InstallMaya (version, verbose, headless)) {
+                if (verbose) Debug.Log (string.Format ("Completed installation of Maya {0} Integration (Headless).", version));
             } else {
-                if (verbose) Debug.Log (string.Format ("Failed to install Maya {0} Integration (Commands Only).", version));
+                if (verbose) Debug.Log (string.Format ("Failed to install Maya {0} Integration (Headless).", version));
             }
         }
     }

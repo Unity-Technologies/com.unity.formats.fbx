@@ -36,7 +36,6 @@ else
     "${UNITY3D_PATH}" -projectPath "${PROJECT_PATH}" -importPackage ${PACKAGE_PATH} -quit
 
     # Install Maya2017 Integration
-    # Use "InstallMaya2017CommandsOnly" to install without UI
     "${UNITY3D_PATH}" -batchMode -projectPath "${PROJECT_PATH}" -executeMethod FbxExporters.Integrations.InstallMaya2017 -quit
 
     # Configuring Maya2017 to auto-load integration
@@ -45,7 +44,8 @@ else
     if [ ! -f "${MAYA_PATH}" ]; then
         echo "Maya2017 not installed"
     else
-        "${MAYA_PATH}" -command "loadPlugin unityOneClickPlugin; pluginInfo -edit -autoload true unityOneClickPlugin; quit;"
+        # To configure without user interface prepend the following command: optionVar -intValue \"UnityOneClick_Headless\" 1;
+        "${MAYA_PATH}" -command "optionVar -intValue \"UnityOneClick_Headless\" 1; loadPlugin unityOneClickPlugin; pluginInfo -edit -autoload true unityOneClickPlugin; quit;"
     fi
 fi
 
