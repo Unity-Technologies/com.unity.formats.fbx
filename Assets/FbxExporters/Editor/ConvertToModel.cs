@@ -1,4 +1,4 @@
-﻿// ***********************************************************************
+// ***********************************************************************
 // Copyright (c) 2017 Unity Technologies. All rights reserved.
 //
 // Licensed under the ##LICENSENAME##.
@@ -32,7 +32,10 @@ namespace FbxExporters
             [MenuItem (MenuItemName1, false)]
             public static void OnMenuItem ()
             {
-                OnConvertInPlace ();
+                GameObject [] unityGameObjectsToConvert = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
+                Object[] result = CreateInstantiatedModelPrefab (unityGameObjectsToConvert);
+                if (result.Length>0)
+                    Selection.objects = result;
             }
 
             /// <summary>
@@ -45,28 +48,55 @@ namespace FbxExporters
             }
 
             // Add a menu item called "Export Model..." to a GameObject's context menu.
+            // OnContextItem gets called once per selected object 
+            // (if the parent and child are selected, then OnContextItem will only be called on the parent)
             [MenuItem (MenuItemName2, false, 30)]
             static void OnContextItem (MenuCommand command)
             {
-                OnConvertInPlace ();
+                if (command == null || command.context == null) {
+                    Debug.LogError ("Error: No GameObject selected");
+                    return;
+                }
+                GameObject selected = command.context as GameObject;
+                if (selected == null) {
+                    Debug.LogError (string.Format("Error: {0} is not a GameObject and cannot be converted", command.context.name));
+                    return;
+                }
+                GameObject[] result = CreateInstantiatedModelPrefab (new GameObject[]{selected});
+                if (result.Length>0)
+                    Selection.objects = result;
+
             }
 
-            private static List<GameObject> OnConvertInPlace ()
+            /// <summary>
+            /// Create an instantiated model prefab from an game object hierarchy.
+            /// </summary>
+            /// <returns>list of instanced Model Prefabs</returns>
+            /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
+            /// <param name="path">Path to save Model Prefab</param>
+            /// <param name="keepOriginal">If set to <c>true</c> keep original gameobject hierarchy.</param>
+            public static GameObject[] CreateInstantiatedModelPrefab (GameObject [] unityGameObjectsToConvert, string path = null, bool keepOriginal = true)
             {
                 List<GameObject> result = new List<GameObject> ();
 
-                GameObject [] unityActiveGOs = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
-
-                var exportSet = ModelExporter.RemoveRedundantObjects (unityActiveGOs);
+                var exportSet = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
                 GameObject[] gosToExport = new GameObject[exportSet.Count];
                 exportSet.CopyTo (gosToExport);
 
+                EnforceUniqueNames (gosToExport);
+
                 // find common ancestor root & filePath;
                 string[] filePaths = new string[gosToExport.Length];
-                string dirPath = Path.Combine (Application.dataPath, "Objects");
+                if (path==null)
+                    path = FbxExporters.EditorTools.ExportSettings.instance.convertToModelSavePath;
 
                 for(int n = 0; n < gosToExport.Length; n++){
-                    filePaths[n] = Path.Combine (dirPath, gosToExport[n].name + ".fbx");
+                    var filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
+                    var filePath = Path.Combine (path, filename);
+                    if (File.Exists (filePath)) {
+                        filePath = IncrementFileName (path, filename);
+                    }
+                    filePaths[n] = filePath;
                 }
 
                 string[] fbxFileNames = new string[filePaths.Length];
@@ -76,12 +106,11 @@ namespace FbxExporters
                         new UnityEngine.Object[] {gosToExport[j]}) as string;
                 }
 
-                List<GameObject> selection = new List<GameObject> ();
                 for(int i = 0; i < fbxFileNames.Length; i++)
                 {
                     var fbxFileName = fbxFileNames [i];
                     if (fbxFileName == null) {
-                        Debug.Log (string.Format ("Warning: Export failed for GameObject {0}", gosToExport [i].name));
+                        Debug.LogWarning (string.Format ("Warning: Export failed for GameObject {0}", gosToExport [i].name));
                         continue;
                     }
 
@@ -98,34 +127,94 @@ namespace FbxExporters
                     Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath (fbxFileName);
 
                     if (unityMainAsset != null) {
-                        Object unityObj = PrefabUtility.InstantiateAttachedAsset (unityMainAsset);
+                        Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);
                         GameObject unityGO = unityObj as GameObject;
                         if (unityGO != null) 
                         {
                             SetupImportedGameObject (gosToExport [i], unityGO);
 
-                            result.Add (unityGO);
 
                             // remove (now redundant) gameobject
-#if UNI_19965
-                            Object.DestroyImmediate (unityActiveGOs [i]);
-#else
-                            // rename and put under scene root in case we need to check values
-                            gosToExport [i].name = "_safe_to_delete_" + gosToExport[i].name;
-                            gosToExport [i].SetActive (false);
-#endif
-                            // select the instanced Model Prefab
-                            selection.Add(unityGO);
+                            if (!keepOriginal) {
+                                Object.DestroyImmediate (unityGameObjectsToConvert [i]);
+                            } 
+                            else 
+                            {
+                                // rename and put under scene root in case we need to check values
+                                gosToExport [i].name = "_safe_to_delete_" + gosToExport [i].name;
+                                gosToExport [i].SetActive (false);
+                            }
+
+                            // add the instanced Model Prefab
+                            result.Add (unityGO);
                         }
                     }
 
                 }
 
-                Selection.objects = selection.ToArray ();
-
-                return result;
+                return result.ToArray ();
             }
 
+            /// <summary>
+            /// Check if the file exists, and if it does, then increment the name.
+            /// e.g. if filename is Sphere.fbx and it already exists, change it to Sphere 1.fbx.
+            /// </summary>
+            /// <returns>new file name.</returns>
+            /// <param name="filename">Filename.</param>
+            private static string IncrementFileName(string path, string filename)
+            {
+                string fileWithoutExt = Path.GetFileNameWithoutExtension (filename);
+                string ext = Path.GetExtension (filename);
+
+                int index = 1;
+                string file = null;
+                do {
+                    file = string.Format ("{0} {1}{2}", fileWithoutExt, index, ext);
+                    file = Path.Combine(path, file);
+                    index++;
+                } while (File.Exists (file));
+
+                return file;
+            } 
+
+            /// <summary>
+            /// Enforces that all object names be unique before exporting.
+            /// If an object with a duplicate name is found, then it is incremented.
+            /// e.g. Sphere becomes Sphere 1
+            /// </summary>
+            /// <param name="exportSet">Export set.</param>
+            private static void EnforceUniqueNames(GameObject[] exportSet)
+            {
+                Dictionary<string, int> NameToIndexMap = new Dictionary<string, int> ();
+                string format = "{0} {1}";
+
+                Queue<GameObject> queue = new Queue<GameObject> (exportSet);
+
+                while(queue.Count > 0){
+                    var go = queue.Dequeue ();
+                    var name = go.name;
+                    if (NameToIndexMap.ContainsKey (name)) {
+                        go.name = string.Format (format, name, NameToIndexMap [name]);
+                        NameToIndexMap [name]++;
+                    } else {
+                        NameToIndexMap [name] = 1;
+                    }
+
+                    foreach (Transform child in go.transform) {
+                        queue.Enqueue (child.gameObject);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Sets up the imported GameObject to match the original.
+            /// - Updates the name to be the same as original (i.e. remove the "(Clone)")
+            /// - Moves the imported object to the correct position in the hierarchy
+            /// - Updates the transform of the imported GameObject to match the original
+            /// - Copy over missing components and component values
+            /// </summary>
+            /// <param name="orig">Original GameObject.</param>
+            /// <param name="imported">Imported GameObject.</param>
             private static void SetupImportedGameObject(GameObject orig, GameObject imported)
             {
                 Transform importedTransform = imported.transform;
@@ -154,7 +243,23 @@ namespace FbxExporters
                     Debug.LogWarning (string.Format ("Warning: Exported {0} objects, but only imported {1}",
                         origTransform.hierarchyCount, importedTransform.hierarchyCount));
                 }
+                FixSiblingOrder (orig.transform, imported.transform);
                 CopyComponentsRecursive (orig, imported);
+            }
+
+            private static void FixSiblingOrder(Transform orig, Transform imported){
+                foreach (Transform origChild in orig) {
+                    Transform importedChild = imported.Find (origChild.name);
+                    if (importedChild == null) {
+                        Debug.LogWarning (string.Format(
+                            "Warning: Could not find {0} in parented under {1} in import hierarchy",
+                            origChild.name, imported.name
+                        ));
+                        continue;
+                    }
+                    importedChild.SetSiblingIndex (origChild.GetSiblingIndex ());
+                    FixSiblingOrder (origChild, importedChild);
+                }
             }
 
             private static void CopyComponentsRecursive(GameObject from, GameObject to){
