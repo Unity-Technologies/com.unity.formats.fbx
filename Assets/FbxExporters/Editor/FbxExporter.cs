@@ -694,35 +694,48 @@ namespace FbxExporters
 
             /// <summary>
             /// Recursively go through the hierarchy, adding up the bounding box centers
-            /// of all the children, to help find the center of all selected objects.
+            /// of all the children, return number of transforms recursed.
             /// </summary>
             /// <returns>The number of GameObjects in hierarchy starting at t.</returns>
             /// <param name="t">Transform.</param>
-            /// <param name="centerAverage">Sum of all the bounding box centers in hierarchy.</param>
-            private int FindCenterRecursive(Transform t, ref Vector3 centerAverage)
+            /// <param name="centerSum">Sum of all the bounding box centers in hierarchy.</param>
+            private int GetBoundingBoxCentersSum(Transform t, ref Vector3 centerSum)
             {
-                var renderer = t.GetComponent <Renderer>();
-                if (renderer) {
-                    centerAverage += renderer.bounds.center;
+                var bounds = GetBounds (t);
+                if (bounds.HasValue) {
+                    centerSum += bounds.Value.center;
                 } else {
-                    var mesh = t.GetComponent <Mesh> ();
-                    if (mesh) {
-                        centerAverage += mesh.bounds.center;
-                    } else {
-                        var collider = t.GetComponent <Collider> ();
-                        if (collider) {
-                            centerAverage += collider.bounds.center;
-                        } else {
-                            centerAverage += t.transform.position;
-                        }
-                    }
+                    centerSum += t.transform.position;
                 }
 
                 int count = 1;
                 foreach (Transform child in t) {
-                    count += FindCenterRecursive (child, ref centerAverage);
+                    count += GetBoundingBoxCentersSum (child, ref centerSum);
                 }
                 return count;
+            }
+
+            /// <summary>
+            /// Gets the bounds of a transform. 
+            /// Looks first at the Renderer, then Mesh, then Collider.
+            /// </summary>
+            /// <returns>The bounds, or null if not found.</returns>
+            /// <param name="t">Transform.</param>
+            private Bounds? GetBounds(Transform t)
+            {
+                var renderer = t.GetComponent<Renderer> ();
+                if (renderer) {
+                    return renderer.bounds;
+                }
+                var mesh = t.GetComponent<Mesh> ();
+                if (mesh) {
+                    return mesh.bounds;
+                }
+                var collider = t.GetComponent<Collider> ();
+                if (collider) {
+                    return collider.bounds;
+                }
+                return null;
             }
 
             /// <summary>
@@ -735,7 +748,7 @@ namespace FbxExporters
                 Vector3 average = Vector3.zero;
                 int count = 0;
                 foreach (var go in gameObjects) {
-                    count += FindCenterRecursive (go.transform, ref average);
+                    count += GetBoundingBoxCentersSum (go.transform, ref average);
                 }
                 return average / count;
             }
