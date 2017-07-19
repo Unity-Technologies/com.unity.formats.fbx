@@ -28,15 +28,22 @@ namespace FbxExporters
                 case 1:
                     return AssetDatabase.GUIDToAssetPath(allGuids[0]);
                 default:
-                    Debug.LogError(string.Format("{0} versions of FbxSource.cs somehow?!?", allGuids.Length));
+                    Debug.LogWarning(string.Format("{0} versions of FbxSource.cs somehow?!?", allGuids.Length));
                     return AssetDatabase.GUIDToAssetPath(allGuids[0]);
             }
         }
 
         static void OnPostprocessAllAssets(string [] imported, string [] deleted, string [] moved, string [] movedFrom)
         {
+            //
             // TODO: lots of optimization potential! On project load right now we're running
-            // an algorithm that takes O(#fbx * (#prefabs + #fbx)). Should be #prefabs + #fbx only.
+            // an algorithm that takes O(#fbx * (#prefabs + #fbx)).
+            //
+            // Could easily be #prefabs + #fbx only.
+            //
+            // Ideally it'd be even faster: we'd know which prefab points to which FBX, no
+            // searching needed.
+            //
             var fbxSourceScript = FindFbxSourceAssetPath();
 
             foreach(var fbxModel in imported) {
