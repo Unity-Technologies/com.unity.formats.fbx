@@ -835,9 +835,7 @@ namespace FbxExporters
                         }
                         else{
                             // find the center of the export set
-                            Vector3 center = FindCenter(revisedExportSet);
-                            var test = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                            test.transform.position = center;
+                            Vector3 center = EditorTools.ExportSettings.instance.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
 
                             foreach (var unityGo in revisedExportSet) {
                                 exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode,
