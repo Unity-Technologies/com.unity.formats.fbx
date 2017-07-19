@@ -1,0 +1,9 @@
+global proc configureUnityOneClick(string $unityProject)
+{
+    optionVar -stringValue "UnityProject" "{0}";
+    loadPlugin unityOneClickPlugin;
+    pluginInfo -edit -autoload true unityOneClickPlugin;
+    scriptJob -idleEvent quit;
+
+    return;
+}
