@@ -154,7 +154,7 @@ namespace FbxExporters
             }
         }
 
-        public static bool InstallMaya(string version, bool verbose=true, bool commandsOnly=false)
+        public static bool InstallMaya(string version, bool verbose=true)
         {
             // check if package installed
             string moduleTemplatePath = GetModuleTemplatePath(version);
@@ -164,10 +164,6 @@ namespace FbxExporters
                 Debug.LogError(string.Format("FbxExporters package not installed, please install first"));
                 return false;
             }
-
-            // TODO: detect maya2017 installation
-
-            // TODO:  if not maya2017 installed warn user
 
             // check for {USER} modules folder
             string modulePath = GetModulePath(version);
@@ -248,41 +244,20 @@ namespace FbxExporters
                     // TODO: print message package already installed else where
             }
 
-            if (commandsOnly)
-                throw new NotImplementedException();
-
-            // TODO: configure maya to auto-load plugin on next startup
-
             return true;
         }
 
         public static void InstallMaya2017()
         {
             const bool verbose = true;
-            const bool commandsOnly = false;
             const string version = Integrations.MAYA_VERSION;
 
             Debug.Log(string.Format("Installing Maya {0} Integration", version));
 
-            if (InstallMaya (version, verbose, commandsOnly)) {
+            if (InstallMaya (version, verbose)) {
                 if (verbose) Debug.Log (string.Format ("Completed installation of Maya {0} Integration.", version));
             } else {
                 if (verbose) Debug.Log (string.Format ("Failed to install Maya {0} Integration.", version));
-            }
-        }
-
-        public static void InstallMaya2017CommandsOnly ()
-        {
-            const bool verbose = true;
-            const bool commandsOnly = true;
-            const string version = Integrations.MAYA_VERSION;
-
-            Debug.Log (string.Format ("Installing Maya {0} Integration (Commands Only).", version));
-
-            if (InstallMaya (version, verbose, commandsOnly)) {
-                if (verbose) Debug.Log (string.Format ("Completed installation of Maya {0} Integration (Commands Only).", version));
-            } else {
-                if (verbose) Debug.Log (string.Format ("Failed to install Maya {0} Integration (Commands Only).", version));
             }
         }
     }
@@ -296,7 +271,7 @@ namespace FbxExporters
             [MenuItem (MenuItemName, false, 0)]
             public static void OnMenuItem ()
             {
-            	if (Integrations.InstallMaya(Integrations.MAYA_VERSION, true, false))
+            	if (Integrations.InstallMaya(Integrations.MAYA_VERSION))
             	{
                     string title = string.Format("Completed installation of Maya {0} Integration.", Integrations.MAYA_VERSION);
                     string message = "Please run the following MEL commands to configure auto-loading of the plugin in Maya.\n\nloadPlugin unityOneClickPlugin; pluginInfo -edit -autoload true unityOneClickPlugin;\n";
