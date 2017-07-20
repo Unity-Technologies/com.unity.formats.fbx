@@ -180,7 +180,7 @@ namespace FbxExporters
 #elif UNITY_EDITOR_LINUX
                 throw new NotImplementedException();
 #else
-                string mayaPath = string.Format ("C:/Program Files/Autodesk/Maya{0}/maya.exe", version);
+                string mayaPath = string.Format ("C:/Program Files/Autodesk/Maya{0}/bin/maya.exe", version);
 
                 if (!System.IO.File.Exists(mayaPath))
                 {
@@ -188,9 +188,8 @@ namespace FbxExporters
                     return -1;
                 }
 
-                myProcess.StartInfo.FileName = "C:/Windows/system32/cmd.exe";
-                string mayaCommandLine = string.Format("{0} -command '{1}'", mayaPath, MAYA_COMMANDS);
-                myProcess.StartInfo.Arguments = "/c " + mayaCommandLine;
+                myProcess.StartInfo.FileName = mayaPath;
+                myProcess.StartInfo.Arguments = string.Format("{0} -command '{1}'", mayaPath, MAYA_COMMANDS);
 #endif
                 myProcess.EnableRaisingEvents = true;
                 myProcess.Start();
