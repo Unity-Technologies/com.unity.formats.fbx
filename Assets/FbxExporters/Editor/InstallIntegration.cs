@@ -14,7 +14,15 @@ namespace FbxExporters
         private const string VERSION_FIELD = "**Version**";
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
-
+        private static string MAYA_COMMANDS { get { 
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX 
+            return string.Format(@"configureUnityOneClick {1}{0}{1};", 
+                Integrations.GetProjectPath(), @"" + (char) 34); 
+#else
+            return string.Format("configureUnityOneClick \\{1}{0}\\{1};", 
+                Integrations.GetProjectPath().Replace("\\","/"), @"" + (char) 34); 
+#endif
+        }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
         private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya"+VERSION_TAG+"/unityoneclick.mod";
@@ -154,7 +162,56 @@ namespace FbxExporters
             }
         }
 
-        public static bool InstallMaya(string version, bool verbose=true)
+        public static int ConfigureMaya(string version)
+        {
+             int ExitCode = 0;
+
+             try {
+                System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+                myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                myProcess.StartInfo.CreateNoWindow = true;
+                myProcess.StartInfo.UseShellExecute = false;
+
+#if UNITY_EDITOR_OSX
+                myProcess.StartInfo.FileName = "open";
+                string mayaPath = string.Format ("/Applications/Autodesk/maya{0}/Maya.app", version);
+
+                if (!System.IO.Directory.Exists(mayaPath))
+                {
+                    Debug.LogError (string.Format ("No maya installation found at {0}",mayaPath));
+                    return -1;
+                }
+
+                string mayaCommandLine = string.Format(@"{0} --args -command '{1}'", mayaPath, MAYA_COMMANDS);
+                myProcess.StartInfo.Arguments = "-a " + mayaCommandLine;
+#elif UNITY_EDITOR_LINUX
+                throw new NotImplementedException();
+#else
+                string mayaPath = string.Format ("C:/Program Files/Autodesk/Maya{0}/bin/maya.exe", version);
+
+                if (!System.IO.File.Exists(mayaPath))
+                {
+                    Debug.LogError (string.Format ("No maya installation found at {0}", mayaPath));
+                    return -1;
+                }
+
+                myProcess.StartInfo.FileName = mayaPath;
+                myProcess.StartInfo.Arguments = string.Format("-command \"{0}\"", MAYA_COMMANDS);
+#endif
+                myProcess.EnableRaisingEvents = true;
+                myProcess.Start();
+                myProcess.WaitForExit();
+                ExitCode = myProcess.ExitCode;
+             }
+             catch (Exception e)
+             {
+                UnityEngine.Debug.LogError(string.Format ("Exception failed to start Maya ({0})", e.Message));
+                ExitCode = -1;
+             }
+            return ExitCode;
+        }
+
+        public static bool InstallMaya(string version, bool verbose = false)
         {
             // check if package installed
             string moduleTemplatePath = GetModuleTemplatePath(version);
@@ -249,15 +306,12 @@ namespace FbxExporters
 
         public static void InstallMaya2017()
         {
-            const bool verbose = true;
             const string version = Integrations.MAYA_VERSION;
 
             Debug.Log(string.Format("Installing Maya {0} Integration", version));
 
-            if (InstallMaya (version, verbose)) {
-                if (verbose) Debug.Log (string.Format ("Completed installation of Maya {0} Integration.", version));
-            } else {
-                if (verbose) Debug.Log (string.Format ("Failed to install Maya {0} Integration.", version));
+            if (!InstallMaya (version)) {
+                Debug.LogError (string.Format ("Failed to install Maya {0} Integration.", version));
             }
         }
     }
@@ -266,19 +320,24 @@ namespace FbxExporters
     {
         class IntegrationsUI
         {
-            const string MenuItemName = "FbxExporters/Install Maya" + Integrations.MAYA_VERSION + " Integration" ;
+            const string MenuItemName1 = "FbxExporters/Install Maya" + Integrations.MAYA_VERSION + " Integration";
 
-            [MenuItem (MenuItemName, false, 0)]
-            public static void OnMenuItem ()
+            [MenuItem (MenuItemName1, false, 0)]
+            public static void OnMenuItem1 ()
             {
             	if (Integrations.InstallMaya(Integrations.MAYA_VERSION))
             	{
-                    string title = string.Format("Completed installation of Maya {0} Integration.", Integrations.MAYA_VERSION);
-                    string commands = string.Format("optionVar -stringValue \"UnityProject\" \"{0}\"; loadPlugin unityOneClickPlugin; pluginInfo -edit -autoload true unityOneClickPlugin;",Integrations.GetProjectPath());
-                    string message = string.Format("Please run the following MEL commands to configure auto-loading of the plugin in Maya.\n\n{0}\n", commands);
+                    int exitCode = Integrations.ConfigureMaya (Integrations.MAYA_VERSION);
 
-                    EditorUtility.DisplayDialog (title, message, "Ok");
-                    Debug.Log(message);
+                    string title = string.Format("Completed installation of Maya{0} Integration.", Integrations.MAYA_VERSION);
+                    string message = "Maya will close when it has finished configuring integration.";
+
+                    if (exitCode!=0)
+                    {
+                        message = string.Format("Failed to configure Maya, please check logs (exitcode={0})", exitCode);
+                    }
+
+                    UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
                 }
             }
         }
