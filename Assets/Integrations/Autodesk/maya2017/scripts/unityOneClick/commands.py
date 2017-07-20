@@ -23,7 +23,8 @@ from unityOneClick.logger import LoggerMixin
 
 import maya.OpenMaya as OpenMaya        # @UnresolvedImport
 import maya.OpenMayaMPx as OpenMayaMPx  # @UnresolvedImport
-import maya.mel                         
+import maya.mel
+import maya.cmds
 
 import unityOneClick.version as version
 
@@ -107,8 +108,18 @@ class reviewCmd(BaseCommand):
         return
     
     def doIt(self, args):
-        self.displayDebug('doIt')
-    
+
+        unityAppPath = maya.cmds.optionVar(q='UnityApp')
+        unityProjectPath = maya.cmds.optionVar(q='UnityProject')
+        unityTurnTableCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
+
+        melCommand = r'system("open -a \"{0}\" --args -projectPath {1} -executeMethod {2}");'\
+            .format(unityAppPath, unityProjectPath, unityTurnTableCommand)
+
+        self.displayDebug('doIt({0})'.format(melCommand))
+
+        maya.mel.eval(melCommand)
+
     @classmethod
     def invoke(cls):
         """

@@ -44,8 +44,8 @@ else
     if [ ! -f "${MAYA_PATH}" ]; then
         echo "Maya2017 not installed"
     else
-        # To configure without user interface prepend the following command: optionVar -intValue \"UnityOneClick_Headless\" 1;
-        "${MAYA_PATH}" -command "optionVar -stringValue \"UnityProject\" \"${PROJECT_PATH}\"; loadPlugin unityOneClickPlugin; pluginInfo -edit -autoload true unityOneClickPlugin; quit;"
+        # To configure without user interface change the last argument to 1 instead of 0
+        "${MAYA_PATH}" -command "configureUnityOneClick \"${PROJECT_PATH}\" \"${UNITY3D_PATH}\" 0; scriptJob -idleEvent quit;"
     fi
 fi
 

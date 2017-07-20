@@ -14,6 +14,8 @@ namespace FbxExporters
         private const string VERSION_FIELD = "**Version**";
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
+        private static string MAYA_COMMANDS { get { return string.Format(@"configureUnityOneClick {1}{0}{1} {1}{2}{1} 0; scriptJob -idleEvent quit;"
+            , GetProjectPath(), @"" + (char) 34, GetUnityPath()); } }
 
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
@@ -48,6 +50,11 @@ namespace FbxExporters
             string result = System.IO.Path.Combine(Application.dataPath, MODULE_TEMPLATE_PATH);
 
             return result.Replace(VERSION_TAG,version);
+        }
+
+        public static string GetUnityPath()
+        {
+            return EditorApplication.applicationPath;
         }
 
         public static string GetProjectPath()

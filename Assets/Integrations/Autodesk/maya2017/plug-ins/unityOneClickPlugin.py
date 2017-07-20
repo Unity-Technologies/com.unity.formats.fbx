@@ -24,7 +24,8 @@ from unityOneClick import (version, commands, ui, debug)
 
 kPluginInfo = { 'name': version.pluginName(), 'version': version.versionName(), 'vendor': version.vendorName() }
 kVerbose = True
-kHeadlessInstall = maya.cmds.optionVar( exists='UnityOneClick_Headless' )
+kHeadlessInstall = (maya.cmds.optionVar( exists='UnityOneClick_Headless')
+                    and maya.cmds.optionVar(q='UnityOneClick_Headless') == 1)
 
 # initialize the script plug-in
 def initializePlugin(mobject):
