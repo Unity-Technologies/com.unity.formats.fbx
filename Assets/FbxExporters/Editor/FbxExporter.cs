@@ -693,35 +693,29 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Recursively go through the hierarchy, adding up the bounding box centers
-            /// of all the children, return number of transforms recursed.
+            /// Recursively go through the hierarchy, unioning the bounding box centers
+            /// of all the children, to find the combined bounds.
             /// </summary>
-            /// <returns>The number of GameObjects in hierarchy starting at t.</returns>
             /// <param name="t">Transform.</param>
-            /// <param name="centerSum">Sum of all the bounding box centers in hierarchy.</param>
-            private int GetBoundingBoxCentersSum(Transform t, ref Vector3 centerSum)
+            /// <param name="boundsUnion">The Bounds that is the Union of all the bounds on this transform's hierarchy.</param>
+            private void EncapsulateBounds(Transform t, ref Bounds boundsUnion)
             {
                 var bounds = GetBounds (t);
-                if (bounds.HasValue) {
-                    centerSum += bounds.Value.center;
-                } else {
-                    centerSum += t.transform.position;
-                }
+                boundsUnion.Encapsulate (bounds);
 
-                int count = 1;
                 foreach (Transform child in t) {
-                    count += GetBoundingBoxCentersSum (child, ref centerSum);
+                    EncapsulateBounds (child, ref boundsUnion);
                 }
-                return count;
             }
 
             /// <summary>
             /// Gets the bounds of a transform. 
             /// Looks first at the Renderer, then Mesh, then Collider.
+            /// Default to a bounds with center transform.position and size zero.
             /// </summary>
-            /// <returns>The bounds, or null if not found.</returns>
+            /// <returns>The bounds.</returns>
             /// <param name="t">Transform.</param>
-            private Bounds? GetBounds(Transform t)
+            private Bounds GetBounds(Transform t)
             {
                 var renderer = t.GetComponent<Renderer> ();
                 if (renderer) {
@@ -735,7 +729,7 @@ namespace FbxExporters
                 if (collider) {
                     return collider.bounds;
                 }
-                return null;
+                return new Bounds(t.position, Vector3.zero);
             }
 
             /// <summary>
@@ -745,12 +739,18 @@ namespace FbxExporters
             /// <param name="gameObjects">Game objects.</param>
             private Vector3 FindCenter(IEnumerable<GameObject> gameObjects)
             {
-                Vector3 average = Vector3.zero;
-                int count = 0;
+                Bounds bounds = new Bounds();
+                // Assign the initial bounds to first GameObject's bounds
+                // (if we initialize the bounds to 0, then 0 will be part of the bounds)
                 foreach (var go in gameObjects) {
-                    count += GetBoundingBoxCentersSum (go.transform, ref average);
+                    var tempBounds = GetBounds (go.transform);
+                    bounds = new Bounds (tempBounds.center, tempBounds.size);
+                    break;
                 }
-                return average / count;
+                foreach (var go in gameObjects) {
+                    EncapsulateBounds (go.transform, ref bounds);
+                }
+                return bounds.center;
             }
 
             /// <summary>
