@@ -149,7 +149,9 @@ namespace FbxExporters
             //    1- !old and !new and prefab => skip (added by user)
             //    0- !old and !new and !prefab  => not possible given the loop
             var names = new HashSet<string>();
-            if (oldHistory != null && oldHistory.c != null) {
+            if (oldHistory == null || oldHistory.c == null) {
+                oldHistory = null;
+            } else {
                 foreach(var name in oldHistory.c.Keys) { names.Add(name); }
             }
             foreach(Transform child in newFbx) { names.Add(child.name); }
