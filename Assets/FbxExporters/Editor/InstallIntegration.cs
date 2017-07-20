@@ -14,8 +14,15 @@ namespace FbxExporters
         private const string VERSION_FIELD = "**Version**";
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
-        private static string MAYA_COMMANDS { get { return string.Format(@"configureUnityOneClick {1}{0}{1};", Integrations.GetProjectPath(), @"" + (char) 34); } }
-
+        private static string MAYA_COMMANDS { get { 
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX 
+            return string.Format(@"configureUnityOneClick {1}{0}{1};", 
+                Integrations.GetProjectPath(), @"" + (char) 34); 
+#else
+            return string.Format("configureUnityOneClick \\{1}{0}\\{1};", 
+                Integrations.GetProjectPath().Replace("\\","/"), @"" + (char) 34); 
+#endif
+        }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
         private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya"+VERSION_TAG+"/unityoneclick.mod";
@@ -189,7 +196,7 @@ namespace FbxExporters
                 }
 
                 myProcess.StartInfo.FileName = mayaPath;
-                myProcess.StartInfo.Arguments = string.Format("{0} -command '{1}'", mayaPath, MAYA_COMMANDS);
+                myProcess.StartInfo.Arguments = string.Format("-command \"{0}\"", MAYA_COMMANDS);
 #endif
                 myProcess.EnableRaisingEvents = true;
                 myProcess.Start();
