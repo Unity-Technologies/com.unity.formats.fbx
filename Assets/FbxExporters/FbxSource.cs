@@ -245,11 +245,52 @@ namespace FbxExporters
         }
 
         /// <summary>
-        /// Sync the prefab to match the newly-imported FBX file.
+        /// Sync the prefab to match the FBX file.
         /// </summary>
         public void SyncPrefab()
         {
             CompareAndUpdate();
+        }
+
+        /// <summary>
+        /// Set up the FBX file that this prefab should track.
+        ///
+        /// Set to null to stop tracking in a way that we can
+        /// still restart tracking later.
+        /// </summary>
+        public void SetSourceModel(GameObject fbxModel) {
+            m_fbxModel = fbxModel;
+
+            // Case 0: fbxModel is null and we have no history
+            //          => not normal data flow, but doing nothing is
+            //             non-surprising
+            // Case 1: fbxModel is null and we have history
+            //          => user wants to stop auto-update. Remember history for
+            //             when they want to reconnect.
+            // Case 2: fbxModel is not null and we have no history
+            //          => normal case in ConvertToModel when we just added the
+            //             component
+            // Case 3: fbxModel is not null and we have history
+            //          => normal case when user wants to reconnect or change
+            //             the model. Keep the old history and update
+            //             immediately.
+            if (!m_fbxModel) {
+                // Case 0 or 1
+                return;
+            }
+
+            if (string.IsNullOrEmpty(m_fbxHistory)) {
+                // Case 2.
+                // This is the first time we've seen the FBX file. Assume that
+                // it's the original FBX. Further assume that the user is happy
+                // with the prefab as it is now, so don't update it to match the FBX.
+                m_fbxHistory = FbxRepresentation.FromTransform(m_fbxModel.transform).ToJson();
+            } else {
+                // Case 3.
+                // User wants to reconnect or change the connection.
+                // Update immediately.
+                CompareAndUpdate();
+            }
         }
 #endif
     }
