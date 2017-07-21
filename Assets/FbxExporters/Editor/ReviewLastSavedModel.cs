@@ -57,7 +57,7 @@ namespace FbxExporters
                     GameObject unityGo = model as GameObject;
                     unityGo.SetActive (false);
 
-                    DestroyImmediate (model);
+                    Object.DestroyImmediate (model);
                 }
             }
 
