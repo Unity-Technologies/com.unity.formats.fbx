@@ -1,15 +1,23 @@
+using UnityEngine;
+
 namespace FbxExporters
 {
     namespace Review
     {
-        class TurnTable
+        class TurnTable : MonoBehaviour
         {
-            const string MenuItemName = "FbxExporters/Turntable Review/Latest Model Update";
+            const string MenuItemName = "FbxExporters/Turntable Review/Latest Model Published";
+
+            const string ScenesPath = "Assets";
+            const string SceneName = "FbxExporters_TurnTableReview";
+
+            static string LastFilePath = null;
+            static Object LastModel = null;
 
             [UnityEditor.MenuItem (MenuItemName, false, 10)]
             public static void OnMenu()
             {
-                LastSavedModel();
+                UpdateLastSavedModel();
             }
 
             private static System.IO.FileInfo GetLastSavedFile(string directoryPath, string ext = ".fbx")
@@ -36,15 +44,28 @@ namespace FbxExporters
                 return recentFile;                
             }
 
-            public static void LastSavedModel()
+            private static string GetLastSavedFilePath()
             {
                 string modelPath = FbxExporters.EditorTools.ExportSettings.instance.convertToModelSavePath;
 
-                string LastSavedModel = GetLastSavedFile(modelPath).FullName;
+                return GetLastSavedFile(modelPath).FullName;
+            }
 
-                string fbxFileName = LastSavedModel;
+            private static void UnloadModel(Object model)
+            {
+                if (model) {
+                    GameObject unityGo = model as GameObject;
+                    unityGo.SetActive (false);
 
-                if (fbxFileName.StartsWith (UnityEngine.Application.dataPath, System.StringComparison.CurrentCulture)) 
+                    DestroyImmediate (model);
+                }
+            }
+
+            private static Object LoadModel(string fbxFileName)
+            {
+                Object model = null;
+
+                if (fbxFileName.StartsWith (UnityEngine.Application.dataPath, System.StringComparison.CurrentCulture))
                 {
                     fbxFileName = fbxFileName.Substring (UnityEngine.Application.dataPath.Length+1);
                     fbxFileName = System.IO.Path.Combine ("Assets", fbxFileName);
@@ -52,8 +73,65 @@ namespace FbxExporters
 
                 UnityEngine.Object unityMainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath (fbxFileName);
 
-                if (unityMainAsset != null) {
-                    UnityEditor.PrefabUtility.InstantiatePrefab (unityMainAsset);
+                if (unityMainAsset) {
+                    model = UnityEditor.PrefabUtility.InstantiatePrefab (unityMainAsset);
+                }
+
+                return model;
+            }
+
+            private static void UpdateLastSavedModel()
+            {
+                string fbxFileName = GetLastSavedFilePath();
+
+                if (fbxFileName!=LastFilePath || LastModel==null)
+                {
+                    Object model = LoadModel(fbxFileName);
+
+                    if (model!=null)
+                    {
+                        if (LastModel!=null)
+                        {
+                            UnloadModel(LastModel);
+                        }
+
+                        LastModel = model as Object;
+                        LastFilePath = fbxFileName;
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.LogWarning(string.Format("failed to load model : {0}", fbxFileName));
+                    }
+                }
+            }
+
+            public static void LastSavedModel()
+            {
+                UnityEngine.SceneManagement.Scene scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+
+                if (scene.name == "")
+                {
+                    UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene, System.IO.Path.Combine( ScenesPath, SceneName + ".unity" ));
+                }
+
+                if (AutoUpdateEnabled ()) 
+                {
+                    UnityEditor.EditorApplication.hierarchyWindowChanged += Update;
+
+                    UpdateLastSavedModel ();
+                }
+            }
+
+            private static bool AutoUpdateEnabled()
+            {
+                return (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == SceneName);
+            }
+
+            public static void Update()
+            {
+                if (AutoUpdateEnabled())
+                {
+                    UpdateLastSavedModel();
                 }
             }
         }

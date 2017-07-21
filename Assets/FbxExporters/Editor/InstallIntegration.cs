@@ -18,7 +18,7 @@ namespace FbxExporters
 		// NOTE: we use @"" + (char) 34 to get the correct escape quoting for \"
 #if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX 
             return string.Format(@"configureUnityOneClick {1}{0}{1} {1}{2}{1} 0; scriptJob -idleEvent quit;", 
-                Integrations.GetProjectPath(), @"" + (char) 34, GetUnityPath(); 
+                                 Integrations.GetProjectPath(), @"" + (char) 34, GetUnityPath()); 
 #else
             return string.Format("configureUnityOneClick \\{1}{0}\\{1} {1}{2}{1} 0; scriptJob -idleEvent quit;", 
                 Integrations.GetProjectPath().Replace("\\","/"), @"" + (char) 34, GetUnityPath().Replace("\\","/"); 
