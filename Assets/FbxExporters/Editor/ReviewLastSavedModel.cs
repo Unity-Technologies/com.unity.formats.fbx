@@ -4,7 +4,7 @@ namespace FbxExporters
 {
     namespace Review
     {
-        class TurnTable : MonoBehaviour
+        class TurnTable 
         {
             const string MenuItemName = "FbxExporters/Turntable Review/Latest Model Published";
 
