@@ -54,9 +54,12 @@ namespace FbxExporters
             static void OnContextItem (MenuCommand command)
             {
                 if (command == null || command.context == null) {
-                    Debug.LogError ("Error: No GameObject selected");
+                    // We were actually invoked from the top GameObject menu,
+                    // not the context menu, so treat it as such.
+                    OnMenuItem();
                     return;
                 }
+
                 GameObject selected = command.context as GameObject;
                 if (selected == null) {
                     Debug.LogError (string.Format("Error: {0} is not a GameObject and cannot be converted", command.context.name));
