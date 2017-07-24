@@ -502,14 +502,29 @@ namespace FbxExporters
                 return fbxMesh;
             }
 
+            /// <summary>
+            /// Takes a Quaternion and returns a Euler with XYZ rotation order.
+            /// </summary>
+            /// <returns>Euler with XYZ rotation order.</returns>
+            public static Vector3 QuaternionToXYZEuler(Quaternion q)
+            {
+                FbxQuaternion quat = new FbxQuaternion (q.x, q.y, q.z, q.w);
+                FbxAMatrix m = new FbxAMatrix ();
+                m.SetQ (quat);
+                var vector4 = m.GetR ();
+                var result = new Vector3 ((float)vector4.X, (float)vector4.Y, (float)vector4.Z);
+
+                return result;
+            }
+
             // get a fbxNode's global default position.
             protected void ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, TransformExportType exportType)
             {
                 // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
                 // This causes issues when converting euler to quaternion, causing the final
                 // rotation to be slighlty off.
-                // Fixed if we set the rotation order to the Unity rotation order in the FBX.
-                fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
+                // Fixed by exporting the rotations as eulers with XYZ rotation order.
+                fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderXYZ);
 
                 UnityEngine.Vector3 unityTranslate;
                 UnityEngine.Vector3 unityRotate;
@@ -523,12 +538,12 @@ namespace FbxExporters
                     break;
                 case TransformExportType.Global:
                     unityTranslate = unityTransform.position;
-                    unityRotate = unityTransform.rotation.eulerAngles;
+                    unityRotate = QuaternionToXYZEuler(unityTransform.rotation);
                     unityScale = unityTransform.lossyScale;
                     break;
                 default: /*case TransformExportType.Local*/
                     unityTranslate = unityTransform.localPosition;
-                    unityRotate = unityTransform.localRotation.eulerAngles;
+                    unityRotate = QuaternionToXYZEuler(unityTransform.localRotation);
                     unityScale = unityTransform.localScale;
                     break;
                 }
@@ -699,6 +714,7 @@ namespace FbxExporters
             /// </summary>
             public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet)
             {
+                exportCancelled = false;
                 Verbose = true;
                 try {
                     // Create the FBX manager
