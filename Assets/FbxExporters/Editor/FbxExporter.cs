@@ -789,6 +789,42 @@ namespace FbxExporters
 
             public enum TransformExportType { Local, Global, Reset };
 
+            protected const string DefaultFileNamePrefix = "_safe_to_delete__";
+            protected const string DefaultFileNameExt = ".fbx";
+
+            private string MakeFileName(string baseName = null, string prefixName = null, string extName = null)
+            {
+                if (baseName==null)
+                    baseName = Path.GetRandomFileName();
+
+                if (prefixName==null)
+                    prefixName = DefaultFileNamePrefix;
+
+                if (extName==null)
+                    extName = DefaultFileNameExt;
+
+                return prefixName + baseName + extName;
+            }
+
+            protected string GetRandomFileNamePath(string pathName, string prefixName = null, string extName = null)
+            {
+                string temp;
+
+                if (prefixName==null)
+                    prefixName = DefaultFileNamePrefix;
+
+                if (extName==null)
+                    extName = DefaultFileNameExt;
+
+                // repeat until you find a file that does not already exist
+                do {
+                    temp = Path.Combine (pathName, MakeFileName(prefixName: prefixName, extName: extName));
+
+                } while(File.Exists (temp));
+
+                return temp;
+            }
+
             /// <summary>
             /// Export all the objects in the set.
             /// Return the number of objects in the set that we exported.
@@ -797,6 +833,22 @@ namespace FbxExporters
             {
                 exportCancelled = false;
                 Verbose = true;
+
+                // If we are overwriting a file, export first to a temporary file
+                // in case the export is cancelled.
+                TempFilePath = LastFilePath;
+                if (File.Exists (LastFilePath)) {
+                    var directory = string.IsNullOrEmpty (LastFilePath)
+                                    ? Application.dataPath
+                                    : System.IO.Path.GetDirectoryName (LastFilePath);
+                    
+                    TempFilePath = GetRandomFileNamePath (directory);
+                }
+
+                if (string.IsNullOrEmpty (TempFilePath)) {
+                    return 0;
+                }
+
                 try {
                     // Create the FBX manager
                     using (var fbxManager = FbxManager.Create ()) {
@@ -816,7 +868,7 @@ namespace FbxExporters
                         int fileFormat = EditorTools.ExportSettings.instance.embedTextures? -1 :
                             fbxManager.GetIOPluginRegistry ().FindWriterIDByDescription ("FBX ascii (*.fbx)");
 
-                        bool status = fbxExporter.Initialize (LastFilePath, fileFormat, fbxManager.GetIOSettings ());
+                        bool status = fbxExporter.Initialize (TempFilePath, fileFormat, fbxManager.GetIOSettings ());
                         // Check that initialization of the fbxExporter was successful
                         if (!status)
                             return 0;
@@ -897,6 +949,8 @@ namespace FbxExporters
                             EditorApplication.update += DeleteFile;
                             return 0;
                         }
+                        // delete old file, move temp file
+                        EditorApplication.update += ReplaceFile;
 
                         return status == true ? NumNodes : 0;
                     }
@@ -927,9 +981,34 @@ namespace FbxExporters
                 return !cancel;
             }
 
+            /// <summary>
+            /// On Editor update, deletes the file that got created while exporting.
+            /// </summary>
             static void DeleteFile ()
             {
-                if (File.Exists (LastFilePath)) {
+                if (File.Exists (TempFilePath)) {
+                    try {
+                        File.Delete (TempFilePath);
+                    } catch (IOException) {
+                    }
+
+                    if (File.Exists (TempFilePath)) {
+                        Debug.LogWarning ("Failed to delete file: " + TempFilePath);
+                    }
+                } else {
+                    EditorApplication.update -= DeleteFile;
+                    AssetDatabase.Refresh ();
+                }
+            }
+
+            /// <summary>
+            /// On Editor update, replaces the file we are overwriting with
+            /// the temp file that was exported to.
+            /// </summary>
+            static void ReplaceFile ()
+            {
+                if (!TempFilePath.Equals(LastFilePath) && File.Exists (TempFilePath)) {
+                    // delete old file
                     try {
                         File.Delete (LastFilePath);
                     } catch (IOException) {
@@ -938,8 +1017,15 @@ namespace FbxExporters
                     if (File.Exists (LastFilePath)) {
                         Debug.LogWarning ("Failed to delete file: " + LastFilePath);
                     }
+
+                    // rename the new file
+                    try{
+                        File.Move(TempFilePath, LastFilePath);
+                    } catch(IOException){
+                        Debug.LogWarning (string.Format("Failed to move file {0} to {1}", TempFilePath, LastFilePath));
+                    }
                 } else {
-                    EditorApplication.update -= DeleteFile;
+                    EditorApplication.update -= ReplaceFile;
                     AssetDatabase.Refresh ();
                 }
             }
@@ -1191,6 +1277,7 @@ namespace FbxExporters
             /// manage the selection of a filename
             /// </summary>
             static string LastFilePath { get; set; }
+            static string TempFilePath { get; set; }
 
             const string Extension = "fbx";
 
