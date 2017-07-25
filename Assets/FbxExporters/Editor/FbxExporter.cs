@@ -876,7 +876,7 @@ namespace FbxExporters
             ///<summary>
             ///Information about the mesh that is important for exporting.
             ///</summary>
-            public struct MeshInfo
+            public class MeshInfo
             {
                 /// <summary>
                 /// The transform of the mesh.
@@ -948,12 +948,15 @@ namespace FbxExporters
                         ///    => Math.cross (normal, tangent.xyz) * tangent.w
                         if (m_Binormals == null || m_Binormals.Length == 0) 
                         {
-                            m_Binormals = new Vector3 [Normals.Length];
+                            var normals = Normals;
+                            var tangents = Tangents;
 
-                            for (int i = 0; i < Normals.Length; i++)
-                                m_Binormals [i] = Vector3.Cross (Normals [i],
-                                    Tangents [i])
-                                    * Tangents [i].w;
+                            m_Binormals = new Vector3 [normals.Length];
+
+                            for (int i = 0; i < normals.Length; i++)
+                                m_Binormals [i] = Vector3.Cross (normals [i],
+                                    tangents [i])
+                                    * tangents [i].w;
 
                         }
                         return m_Binormals;
@@ -1100,7 +1103,7 @@ namespace FbxExporters
                     }
                 }
                 if (!mesh) {
-                    return new MeshInfo ();
+                    return new MeshInfo(null);
                 }
                 return new MeshInfo (gameObject, mesh);
             }
