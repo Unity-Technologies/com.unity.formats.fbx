@@ -502,47 +502,70 @@ namespace FbxExporters
                 return fbxMesh;
             }
 
+            /// <summary>
+            /// Takes a Quaternion and returns a Euler with XYZ rotation order.
+            /// Also converts from left (Unity) to righthanded (Maya) coordinates.
+            /// 
+            /// Note: Cannot simply use the FbxQuaternion.DecomposeSphericalXYZ()
+            ///       function as this returns the angle in spherical coordinates 
+            ///       instead of Euler angles, which Maya does not import properly. 
+            /// </summary>
+            /// <returns>Euler with XYZ rotation order.</returns>
+            public static FbxDouble3 QuaternionToXYZEuler(Quaternion q)
+            {
+                FbxQuaternion quat = new FbxQuaternion (q.x, q.y, q.z, q.w);
+                FbxAMatrix m = new FbxAMatrix ();
+                m.SetQ (quat);
+                var vector4 = m.GetR ();
+
+                // Negate the y and z values of the rotation to convert 
+                // from Unity to Maya coordinates (left to righthanded).
+                var result = new FbxDouble3 (vector4.X, -vector4.Y, -vector4.Z);
+
+                return result;
+            }
+
             // get a fbxNode's global default position.
             protected void ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, Vector3 newCenter, TransformExportType exportType)
             {
                 // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
                 // This causes issues when converting euler to quaternion, causing the final
                 // rotation to be slighlty off.
-                // Fixed if we set the rotation order to the Unity rotation order in the FBX.
-                fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
+                // Fixed by exporting the rotations as eulers with XYZ rotation order.
+                fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderXYZ);
 
                 UnityEngine.Vector3 unityTranslate;
-                UnityEngine.Vector3 unityRotate;
+                FbxDouble3 unityRotate;
                 UnityEngine.Vector3 unityScale;
 
                 switch (exportType) {
                 case TransformExportType.Reset:
                     unityTranslate = Vector3.zero;
-                    unityRotate = Vector3.zero;
+                    unityRotate = new FbxDouble3 (0);
                     unityScale = Vector3.one;
                     break;
                 case TransformExportType.Global:
                     unityTranslate = GetRecenteredTranslation(unityTransform, newCenter);
-                    unityRotate = unityTransform.rotation.eulerAngles;
+                    unityRotate = QuaternionToXYZEuler(unityTransform.rotation);
                     unityScale = unityTransform.lossyScale;
                     break;
                 default: /*case TransformExportType.Local*/
                     unityTranslate = unityTransform.localPosition;
-                    unityRotate = unityTransform.localRotation.eulerAngles;
+                    unityRotate = QuaternionToXYZEuler(unityTransform.localRotation);
                     unityScale = unityTransform.localScale;
                     break;
                 }
 
                 // transfer transform data from Unity to Fbx
-                // Negating the x value of the translation, and the y and z values of the rotation
-                // to convert from Unity to Maya coordinates (left to righthanded).
+                // Negating the x value of the translation to convert from Unity
+                // to Maya coordinates (left to righthanded).
                 // Scaling the translation by 100 to convert from m to cm.
                 var fbxTranslate = new FbxDouble3 (
                     -unityTranslate.x*UnitScaleFactor,
                     unityTranslate.y*UnitScaleFactor,
                     unityTranslate.z*UnitScaleFactor
                 );
-                var fbxRotate = new FbxDouble3 (unityRotate.x, -unityRotate.y, -unityRotate.z);
+                var fbxRotate = unityRotate;
                 var fbxScale = new FbxDouble3 (unityScale.x, unityScale.y, unityScale.z);
 
                 // set the local position of fbxNode
@@ -772,6 +795,7 @@ namespace FbxExporters
             /// </summary>
             public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet)
             {
+                exportCancelled = false;
                 Verbose = true;
                 try {
                     // Create the FBX manager
