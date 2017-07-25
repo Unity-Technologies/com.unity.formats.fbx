@@ -601,7 +601,7 @@ namespace FbxExporters
             /// <summary>
             /// Ensures that the inputted name is unique.
             /// If a duplicate name is found, then it is incremented.
-            /// e.g. Sphere becomes Sphere 1
+            /// e.g. Sphere becomes Sphere_1
             /// </summary>
             /// <returns>Unique name</returns>
             /// <param name="name">Name</param>
