@@ -52,11 +52,13 @@ namespace FbxExporters.EditorTools {
                 string path = EditorUtility.OpenFolderPanel (
                     "Select Model Prefabs Path", Application.dataPath, null
                 );
-                // Make sure something is selected, and that it is in the Asset folder
-                if (!string.IsNullOrEmpty (path) && path.StartsWith (Application.dataPath)) {
-                    exportSettings.convertToModelSavePath = path;
-                } else {
-                    Debug.LogWarning ("Please select a location in Assets/");
+                // Unless the user canceled, make sure they chose something in the Assets folder.
+                if (!string.IsNullOrEmpty (path)) {
+                   if(path.StartsWith (Application.dataPath)) {
+                       exportSettings.convertToModelSavePath = path;
+                   } else {
+                       Debug.LogWarning ("Please select a location in Assets/");
+                   }
                 }
             }
 
