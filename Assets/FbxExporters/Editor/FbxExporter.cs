@@ -70,6 +70,17 @@ namespace FbxExporters
             Dictionary<string, FbxMesh> SharedMeshes = new Dictionary<string, FbxMesh>();
 
             /// <summary>
+            /// Map for the Name of an Object to number of objects with this name.
+            /// Used for enforcing unique names on export.
+            /// </summary>
+            Dictionary<string, int> NameToIndexMap = new Dictionary<string, int> ();
+
+            /// <summary>
+            /// Format for creating unique names
+            /// </summary>
+            const string UniqueNameFormat = "{0}_{1}";
+
+            /// <summary>
             /// return layer for mesh
             /// </summary>
             /// 
@@ -588,6 +599,25 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Ensures that the inputted name is unique.
+            /// If a duplicate name is found, then it is incremented.
+            /// e.g. Sphere becomes Sphere 1
+            /// </summary>
+            /// <returns>Unique name</returns>
+            /// <param name="name">Name</param>
+            private string GetUniqueName(string name)
+            {
+                var uniqueName = name;
+                if (NameToIndexMap.ContainsKey (name)) {
+                    uniqueName = string.Format (UniqueNameFormat, name, NameToIndexMap [name]);
+                    NameToIndexMap [name]++;
+                } else {
+                    NameToIndexMap [name] = 1;
+                }
+                return uniqueName;
+            }
+
+            /// <summary>
             /// Unconditionally export components on this game object
             /// </summary>
             protected int ExportComponents (
@@ -602,7 +632,7 @@ namespace FbxExporters
                 }
 
                 // create an FbxNode and add it as a child of parent
-                FbxNode fbxNode = FbxNode.Create (fbxScene, unityGo.name);
+                FbxNode fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
                 NumNodes++;
 
                 numObjectsExported++;
