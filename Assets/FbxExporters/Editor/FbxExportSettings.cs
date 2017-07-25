@@ -33,7 +33,13 @@ namespace FbxExporters.EditorTools {
                     " and unexpected character replacements in Maya.")
                 ),
                 exportSettings.mayaCompatibleNames);
-
+            
+            exportSettings.centerObjects = EditorGUILayout.Toggle (
+                new GUIContent("Center Objects:",
+                    "Export objects centered around the union of the bounding box of selected objects"),
+                exportSettings.centerObjects
+            );
+                
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "Model Prefab Path:",
@@ -92,6 +98,7 @@ namespace FbxExporters.EditorTools {
         public bool weldVertices = true;
         public bool embedTextures = false;
         public bool mayaCompatibleNames = true;
+        public bool centerObjects = true;
         public string convertToModelSavePath;
 
         void OnEnable()

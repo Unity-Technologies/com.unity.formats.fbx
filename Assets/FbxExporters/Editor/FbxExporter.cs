@@ -503,7 +503,7 @@ namespace FbxExporters
             }
 
             // get a fbxNode's global default position.
-            protected void ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, TransformExportType exportType)
+            protected void ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, Vector3 newCenter, TransformExportType exportType)
             {
                 // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
                 // This causes issues when converting euler to quaternion, causing the final
@@ -516,13 +516,13 @@ namespace FbxExporters
                 UnityEngine.Vector3 unityScale;
 
                 switch (exportType) {
-                case TransformExportType.Zeroed:
+                case TransformExportType.Reset:
                     unityTranslate = Vector3.zero;
                     unityRotate = Vector3.zero;
                     unityScale = Vector3.one;
                     break;
                 case TransformExportType.Global:
-                    unityTranslate = unityTransform.position;
+                    unityTranslate = GetRecenteredTranslation(unityTransform, newCenter);
                     unityRotate = unityTransform.rotation.eulerAngles;
                     unityScale = unityTransform.lossyScale;
                     break;
@@ -592,7 +592,8 @@ namespace FbxExporters
             /// </summary>
             protected int ExportComponents (
                 GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
-                int exportProgress, int objectCount, TransformExportType exportType = TransformExportType.Local)
+                int exportProgress, int objectCount, Vector3 newCenter,
+                TransformExportType exportType = TransformExportType.Local)
             {
                 int numObjectsExported = exportProgress;
 
@@ -613,7 +614,7 @@ namespace FbxExporters
                     return -1;
                 }
 
-                ExportTransform ( unityGo.transform, fbxNode, exportType);
+                ExportTransform ( unityGo.transform, fbxNode, newCenter, exportType);
 
                 // try exporting mesh as an instance, export regularly if we cannot
                 if (!ExportInstance (unityGo, fbxNode, fbxScene)) {
@@ -628,7 +629,7 @@ namespace FbxExporters
 
                 // now  unityGo  through our children and recurse
                 foreach (Transform childT in  unityGo.transform) {
-                    numObjectsExported = ExportComponents (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount);
+                    numObjectsExported = ExportComponents (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter);
                 }
                 return numObjectsExported;
             }
@@ -691,7 +692,79 @@ namespace FbxExporters
                 return toExport;
             }
 
-            public enum TransformExportType { Local, Global, Zeroed };
+            /// <summary>
+            /// Recursively go through the hierarchy, unioning the bounding box centers
+            /// of all the children, to find the combined bounds.
+            /// </summary>
+            /// <param name="t">Transform.</param>
+            /// <param name="boundsUnion">The Bounds that is the Union of all the bounds on this transform's hierarchy.</param>
+            private void EncapsulateBounds(Transform t, ref Bounds boundsUnion)
+            {
+                var bounds = GetBounds (t);
+                boundsUnion.Encapsulate (bounds);
+
+                foreach (Transform child in t) {
+                    EncapsulateBounds (child, ref boundsUnion);
+                }
+            }
+
+            /// <summary>
+            /// Gets the bounds of a transform. 
+            /// Looks first at the Renderer, then Mesh, then Collider.
+            /// Default to a bounds with center transform.position and size zero.
+            /// </summary>
+            /// <returns>The bounds.</returns>
+            /// <param name="t">Transform.</param>
+            private Bounds GetBounds(Transform t)
+            {
+                var renderer = t.GetComponent<Renderer> ();
+                if (renderer) {
+                    return renderer.bounds;
+                }
+                var mesh = t.GetComponent<Mesh> ();
+                if (mesh) {
+                    return mesh.bounds;
+                }
+                var collider = t.GetComponent<Collider> ();
+                if (collider) {
+                    return collider.bounds;
+                }
+                return new Bounds(t.position, Vector3.zero);
+            }
+
+            /// <summary>
+            /// Finds the center of a group of GameObjects.
+            /// </summary>
+            /// <returns>Center of gameObjects.</returns>
+            /// <param name="gameObjects">Game objects.</param>
+            private Vector3 FindCenter(IEnumerable<GameObject> gameObjects)
+            {
+                Bounds bounds = new Bounds();
+                // Assign the initial bounds to first GameObject's bounds
+                // (if we initialize the bounds to 0, then 0 will be part of the bounds)
+                foreach (var go in gameObjects) {
+                    var tempBounds = GetBounds (go.transform);
+                    bounds = new Bounds (tempBounds.center, tempBounds.size);
+                    break;
+                }
+                foreach (var go in gameObjects) {
+                    EncapsulateBounds (go.transform, ref bounds);
+                }
+                return bounds.center;
+            }
+
+            /// <summary>
+            /// Gets the recentered translation.
+            /// </summary>
+            /// <returns>The recentered translation.</returns>
+            /// <param name="t">Transform.</param>
+            /// <param name="center">Center point.</param>
+            private Vector3 GetRecenteredTranslation(Transform t, Vector3 center)
+            {
+                return t.position - center;
+            }
+
+            public enum TransformExportType { Local, Global, Reset };
 
             /// <summary>
             /// Export all the objects in the set.
@@ -764,7 +837,9 @@ namespace FbxExporters
 
                         if(revisedExportSet.Count == 1){
                             foreach(var unityGo in revisedExportSet){
-                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode, exportProgress, count, TransformExportType.Zeroed);
+                                exportProgress = this.ExportComponents (
+                                    unityGo, fbxScene, fbxRootNode, exportProgress,
+                                    count, Vector3.zero, TransformExportType.Reset);
                                 if (exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
                                     return 0;
@@ -772,9 +847,12 @@ namespace FbxExporters
                             }
                         }
                         else{
+                            // find the center of the export set
+                            Vector3 center = EditorTools.ExportSettings.instance.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
+
                             foreach (var unityGo in revisedExportSet) {
-                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode, exportProgress, count,
-                                    unityGo.transform.parent == null? TransformExportType.Local : TransformExportType.Global);
+                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode,
+                                    exportProgress, count, center, TransformExportType.Global);
                                 if (exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
                                     return 0;
