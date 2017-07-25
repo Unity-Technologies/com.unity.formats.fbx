@@ -223,10 +223,6 @@ namespace FbxExporters
                 Transform importedTransform = imported.transform;
                 Transform origTransform = orig.transform;
 
-                // Set the name to be the name of the instantiated asset.
-                // This will get rid of the "(Clone)" if it's added
-                imported.name = orig.name;
-
                 // configure transform and maintain local pose
                 importedTransform.SetParent (origTransform.parent, false);
                 importedTransform.SetSiblingIndex (origTransform.GetSiblingIndex());
@@ -247,7 +243,10 @@ namespace FbxExporters
                         origTransform.hierarchyCount, importedTransform.hierarchyCount));
                 }
                 FixSiblingOrder (orig.transform, imported.transform);
-                CopyComponentsRecursive (orig, imported);
+
+                // the imported GameObject will have the same name as the file to which it was imported from,
+                // which might not be the same name as the original GameObject
+                CopyComponentsRecursive (orig, imported, namesExpectedMatch:false);
             }
 
             private static void FixSiblingOrder(Transform orig, Transform imported){
@@ -265,8 +264,8 @@ namespace FbxExporters
                 }
             }
 
-            private static void CopyComponentsRecursive(GameObject from, GameObject to){
-                if (!to.name.StartsWith(from.name) || from.transform.childCount != to.transform.childCount) {
+            private static void CopyComponentsRecursive(GameObject from, GameObject to, bool namesExpectedMatch = true){
+                if (namesExpectedMatch && !to.name.StartsWith(from.name) || from.transform.childCount != to.transform.childCount) {
                     Debug.LogError (string.Format("Error: hierarchies don't match (From: {0}, To: {1})", from.name, to.name));
                     return;
                 }
