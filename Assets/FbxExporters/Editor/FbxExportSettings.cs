@@ -49,9 +49,15 @@ namespace FbxExporters.EditorTools {
                 EditorStyles.textField, GUILayout.MinWidth(SelectableLabelMinWidth), GUILayout.Height(EditorGUIUtility.singleLineHeight));
 
             if (GUILayout.Button ("Browse", EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
+                string initialPath = exportSettings.convertToModelSavePath;
+                bool initialPathIsValid = true;
+                if (string.IsNullOrEmpty(initialPath)) {
+                    initialPathIsValid = false;
+                }
                 string path = EditorUtility.OpenFolderPanel (
-                    "Select Model Prefabs Path", Application.dataPath, null
+                    "Select Model Prefabs Path", initialPathIsValid ? initialPath : Application.dataPath, null
                 );
+
                 // Unless the user canceled, make sure they chose something in the Assets folder.
                 if (!string.IsNullOrEmpty (path)) {
                    if(path.StartsWith (Application.dataPath)) {
