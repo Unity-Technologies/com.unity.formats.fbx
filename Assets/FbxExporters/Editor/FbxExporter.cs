@@ -978,7 +978,7 @@ namespace FbxExporters
             ///<summary>
             ///Information about the mesh that is important for exporting.
             ///</summary>
-            public struct MeshInfo
+            public class MeshInfo
             {
                 /// <summary>
                 /// The transform of the mesh.
@@ -1009,19 +1009,33 @@ namespace FbxExporters
                 /// Ex: if triangles = [3,4,2], then we have one triangle with vertices vertices[3], vertices[4], and vertices[2]
                 /// </summary>
                 /// <value>The triangles.</value>
-                public int [] Triangles { get { return mesh.triangles; } }
+                private int[] m_triangles;
+                public int [] Triangles { get { 
+                        if(m_triangles == null) { m_triangles = mesh.triangles; }
+                        return m_triangles; 
+                    } }
 
                 /// <summary>
                 /// Gets the vertices, represented in local coordinates.
                 /// </summary>
                 /// <value>The vertices.</value>
-                public Vector3 [] Vertices { get { return mesh.vertices; } }
+                private Vector3[] m_vertices;
+                public Vector3 [] Vertices { get { 
+                        if(m_vertices == null) { m_vertices = mesh.vertices; }
+                        return m_vertices; 
+                    } }
 
                 /// <summary>
                 /// Gets the normals for the vertices.
                 /// </summary>
                 /// <value>The normals.</value>
-                public Vector3 [] Normals { get { return mesh.normals; } }
+                private Vector3[] m_normals;
+                public Vector3 [] Normals { get {
+                        if (m_normals == null) {
+                            m_normals = mesh.normals;
+                        }
+                        return m_normals; 
+                    } }
 
                 /// <summary>
                 /// TODO: Gets the binormals for the vertices.
@@ -1036,12 +1050,15 @@ namespace FbxExporters
                         ///    => Math.cross (normal, tangent.xyz) * tangent.w
                         if (m_Binormals == null || m_Binormals.Length == 0) 
                         {
-                            m_Binormals = new Vector3 [mesh.normals.Length];
+                            var normals = Normals;
+                            var tangents = Tangents;
 
-                            for (int i = 0; i < mesh.normals.Length; i++)
-                                m_Binormals [i] = Vector3.Cross (mesh.normals [i],
-                                    mesh.tangents [i])
-                                * mesh.tangents [i].w;
+                            m_Binormals = new Vector3 [normals.Length];
+
+                            for (int i = 0; i < normals.Length; i++)
+                                m_Binormals [i] = Vector3.Cross (normals [i],
+                                    tangents [i])
+                                    * tangents [i].w;
 
                         }
                         return m_Binormals;
@@ -1052,19 +1069,37 @@ namespace FbxExporters
                 /// TODO: Gets the tangents for the vertices.
                 /// </summary>
                 /// <value>The tangents.</value>
-                public Vector4 [] Tangents { get { return mesh.tangents; } }
+                private Vector4[] m_tangents;
+                public Vector4 [] Tangents { get { 
+                        if (m_tangents == null) {
+                            m_tangents = mesh.tangents;
+                        }
+                        return m_tangents; 
+                    } }
 
                 /// <summary>
-                /// TODO: Gets the tangents for the vertices.
+                /// TODO: Gets the vertex colors for the vertices.
                 /// </summary>
-                /// <value>The tangents.</value>
-                public Color32 [] VertexColors { get { return mesh.colors32; } }
+                /// <value>The vertex colors.</value>
+                private Color32 [] m_vertexColors;
+                public Color32 [] VertexColors { get { 
+                        if (m_vertexColors == null) {
+                            m_vertexColors = mesh.colors32;
+                        }
+                        return m_vertexColors; 
+                    } }
 
                 /// <summary>
                 /// Gets the uvs.
                 /// </summary>
                 /// <value>The uv.</value>
-                public Vector2 [] UV { get { return mesh.uv; } }
+                private Vector2[] m_UVs;
+                public Vector2 [] UV { get { 
+                        if (m_UVs == null) {
+                            m_UVs = mesh.uv;
+                        }
+                        return m_UVs; 
+                    } }
 
                 /// <summary>
                 /// The material used, if any; otherwise null.
@@ -1104,6 +1139,12 @@ namespace FbxExporters
                     this.xform = Matrix4x4.identity;
                     this.unityObject = null;
                     this.m_Binormals = null;
+                    this.m_vertices = null;
+                    this.m_triangles = null;
+                    this.m_normals = null;
+                    this.m_UVs = null;
+                    this.m_vertexColors = null;
+                    this.m_tangents = null;
                 }
 
                 /// <summary>
@@ -1117,6 +1158,12 @@ namespace FbxExporters
                     this.xform = gameObject.transform.localToWorldMatrix;
                     this.unityObject = gameObject;
                     this.m_Binormals = null;
+                    this.m_vertices = null;
+                    this.m_triangles = null;
+                    this.m_normals = null;
+                    this.m_UVs = null;
+                    this.m_vertexColors = null;
+                    this.m_tangents = null;
                 }
             }
 
@@ -1158,7 +1205,7 @@ namespace FbxExporters
                     }
                 }
                 if (!mesh) {
-                    return new MeshInfo ();
+                    return new MeshInfo(null);
                 }
                 return new MeshInfo (gameObject, mesh);
             }
