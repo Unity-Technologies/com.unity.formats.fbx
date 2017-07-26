@@ -117,7 +117,7 @@ namespace FbxExporters.EditorTools {
     }
 
     [FilePath("ProjectSettings/FbxExportSettings.asset",FilePathAttribute.Location.ProjectFolder)]
-    public class ExportSettings : FbxExporters.EditorTools.ScriptableSingleton<ExportSettings>
+    public class ExportSettings : ScriptableSingleton<ExportSettings>
     {
         public const string kDefaultSavePath = "Objects";
 
@@ -183,47 +183,53 @@ namespace FbxExporters.EditorTools {
         {
             get
             {
-                if (ScriptableSingleton<T>.s_Instance == null)
+                if (s_Instance == null)
                 {
-                    return ScriptableSingleton<T>.CreateAndLoad();
+                    return CreateAndLoad();
                 }
-                return ScriptableSingleton<T>.s_Instance;
+                return s_Instance;
             }
         }
 
         protected ScriptableSingleton()
         {
-            if (ScriptableSingleton<T>.s_Instance != null)
+            if (s_Instance != null)
             {
-                Debug.LogError("ScriptableSingleton already exists. Did you query the singleton in a constructor?");
+                Debug.LogError(typeof(T) + " already exists. Did you query the singleton in a constructor?");
             }
         }
+
         private static T CreateAndLoad()
         {
-            string filePath = ScriptableSingleton<T>.GetFilePath();
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                var loaded = InternalEditorUtility.LoadSerializedFileAndForget(filePath);
-
-                if (loaded.Length > 0) {
-                    ScriptableSingleton<T>.s_Instance = loaded [0] as T;
-                }
-            }
-            if (ScriptableSingleton<T>.s_Instance == null)
+            // First create.
+            if (s_Instance == null)
             {
                 T t = ScriptableObject.CreateInstance<T>();
-                ScriptableSingleton<T>.s_Instance = t;
+                s_Instance = t;
             }
-            return ScriptableSingleton<T>.s_Instance;
+
+            // Then load.
+            string filePath = GetFilePath();
+            if (System.IO.File.Exists(filePath)) {
+                try {
+                    var fileData = System.IO.File.ReadAllText(filePath);
+                    EditorJsonUtility.FromJsonOverwrite(fileData, s_Instance);
+                } catch(Exception xcp) {
+                    // Quash the exception and go on with the default settings.
+                    Debug.LogException(xcp);
+                }
+            }
+            return s_Instance;
         }
+
         protected virtual void Save(bool saveAsText)
         {
-            if (ScriptableSingleton<T>.s_Instance == null)
+            if (s_Instance == null)
             {
                 Debug.Log("Cannot save ScriptableSingleton: no instance!");
                 return;
             }
-            string filePath = ScriptableSingleton<T>.GetFilePath();
+            string filePath = GetFilePath();
             if (!string.IsNullOrEmpty(filePath))
             {
                 string directoryName = Path.GetDirectoryName(filePath);
@@ -231,23 +237,16 @@ namespace FbxExporters.EditorTools {
                 {
                     Directory.CreateDirectory(directoryName);
                 }
-                InternalEditorUtility.SaveToSerializedFileAndForget(new T[]
-                    {
-                        ScriptableSingleton<T>.s_Instance
-                    }, filePath, saveAsText);
+                System.IO.File.WriteAllText(filePath, EditorJsonUtility.ToJson(s_Instance, true));
             }
         }
+
         private static string GetFilePath()
         {
-            Type typeFromHandle = typeof(T);
-            object[] customAttributes = typeFromHandle.GetCustomAttributes(true);
-            object[] array = customAttributes;
-            for (int i = 0; i < array.Length; i++)
-            {
-                object obj = array[i];
-                if (obj is FilePathAttribute)
+            foreach(var attr in typeof(T).GetCustomAttributes(true)) {
+                FilePathAttribute filePathAttribute = attr as FilePathAttribute;
+                if (filePathAttribute != null)
                 {
-                    FilePathAttribute filePathAttribute = obj as FilePathAttribute;
                     return filePathAttribute.filepath;
                 }
             }
