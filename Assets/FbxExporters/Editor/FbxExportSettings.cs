@@ -10,7 +10,7 @@ namespace FbxExporters.EditorTools {
     public class ExportSettingsEditor : UnityEditor.Editor {
         Vector2 scrollPos = Vector2.zero;
         const float LabelWidth = 225;
-        const float SelectableLabelMinWidth = 200;
+        const float SelectableLabelMinWidth = 100;
         const float BrowseButtonWidth = 55;
 
         public override void OnInspectorGUI() {
@@ -42,7 +42,7 @@ namespace FbxExporters.EditorTools {
                 
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
-                "Model Prefab Path:",
+                "Export Path:",
                 "Relative path for saving Model Prefabs."));
 
             EditorGUILayout.SelectableLabel(GetRelativePath(exportSettings.convertToModelSavePath, Application.dataPath),
