@@ -341,7 +341,7 @@ namespace FbxExporters
 
                 // Copy the flat colours over from Unity standard materials to FBX.
                 fbxMaterial.Diffuse.Set (GetMaterialColor (unityMaterial, "_Color"));
-                fbxMaterial.Emissive.Set (GetMaterialColor (unityMaterial, "_EmissionColor"));
+                fbxMaterial.Emissive.Set (GetMaterialColor (unityMaterial, "_EmissionColor", 0));
                 fbxMaterial.Ambient.Set (new FbxDouble3 ());
 
                 fbxMaterial.BumpFactor.Set (unityMaterial && unityMaterial.HasProperty ("_BumpScale") ? unityMaterial.GetFloat ("_BumpScale") : 0);
@@ -352,7 +352,7 @@ namespace FbxExporters
 
                 // Export the textures from Unity standard materials to FBX.
                 ExportTexture (unityMaterial, "_MainTex", fbxMaterial, FbxSurfaceMaterial.sDiffuse);
-                ExportTexture (unityMaterial, "_EmissionMap", fbxMaterial, "emissive");
+                ExportTexture (unityMaterial, "_EmissionMap", fbxMaterial, FbxSurfaceMaterial.sEmissive);
                 ExportTexture (unityMaterial, "_BumpMap", fbxMaterial, FbxSurfaceMaterial.sNormalMap);
                 if (specular) {
                     ExportTexture (unityMaterial, "_SpecGlosMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
