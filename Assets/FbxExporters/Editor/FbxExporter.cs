@@ -395,15 +395,31 @@ namespace FbxExporters
 
                         FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
 
-                        // assuming that each polygon is a triangle
-                        // TODO: Add support for other mesh topologies (e.g. quads)
-                        fbxElementArray.SetCount (mesh.triangles.Length / 3);
-
                         for (int i = 0; i < mesh.subMeshCount; i++) {
-                            int start = ((int)mesh.GetIndexStart (i)) / 3;
-                            int count = ((int)mesh.GetIndexCount (i)) / 3;
-                            for (int j = start; j < start + count; j++) {
-                                fbxElementArray.SetAt (j, i);
+                            var topology = mesh.GetTopology (i);
+                            int polySize;
+
+                            switch (topology) {
+                            case MeshTopology.Quads:
+                                polySize = 4;
+                                break;
+                            case MeshTopology.Lines:
+                                throw new System.NotImplementedException();
+                                break;
+                            case MeshTopology.Points:
+                                throw new System.NotImplementedException();
+                                break;
+                            case MeshTopology.LineStrip:
+                                throw new System.NotImplementedException();
+                                break;
+                            default: /* MeshTopology.Triangles */
+                                polySize = 3;
+                                break;
+                            }
+
+                            var indices = mesh.GetIndices (i);
+                            for (int j = 0; j < indices.Length / polySize; j++) {
+                                fbxElementArray.Add (i);
                             }
                         }
                     }
@@ -473,38 +489,63 @@ namespace FbxExporters
                         fbxNode.AddMaterial (fbxMaterial);
                 }
 
-                /*
-                 * Triangles have to be added in reverse order, 
-                 * or else they will be inverted on import 
-                 * (due to the conversion from left to right handed coords)
-                 */
-                int[] unmergedTriangles = new int[meshInfo.Triangles.Length];
+                int[] unmergedPolygons = new int[meshInfo.Triangles.Length];
                 int current = 0;
-                for (int f = 0; f < meshInfo.Triangles.Length / 3; f++) {
-                    fbxMesh.BeginPolygon ();
+                var mesh = meshInfo.mesh;
+                for (int s = 0; s < mesh.subMeshCount; s++) {
+                    var topology = mesh.GetTopology (s);
+                    var indices = mesh.GetIndices (s);
 
-                    // triangle vertices have to be reordered to be 0,2,1 instead
-                    // of 0,1,2, as this gets flipped back during import
-                    foreach (int val in new int[]{0,2,1}) {
-                        int tri = meshInfo.Triangles [3 * f + val];
+                    int polySize;
+                    int[] vertOrder;
 
-                        // Save the triangle order (without merging vertices) so we
-                        // properly export UVs, normals, binormals, etc.
-                        unmergedTriangles [current] = tri;
-
-                        if (weldVertices) {
-                            tri = ControlPointToIndex [meshInfo.Vertices [tri]];
-                        }
-                        fbxMesh.AddPolygon (tri);
-
-                        current++;
+                    switch (topology) {
+                    case MeshTopology.Quads:
+                        polySize = 4;
+                        // vertices have to be reordered as this gets flipped back during import
+                        vertOrder = new int[]{ 0, 3, 2, 1 };
+                        break;
+                    case MeshTopology.Lines:
+                        throw new System.NotImplementedException();
+                        break;
+                    case MeshTopology.Points:
+                        throw new System.NotImplementedException();
+                        break;
+                    case MeshTopology.LineStrip:
+                        throw new System.NotImplementedException();
+                        break;
+                    default: /* MeshTopology.Triangles */
+                        polySize = 3;
+                        // triangle vertices have to be reordered to be 0,2,1 instead
+                        // of 0,1,2, as this gets flipped back during import
+                        vertOrder = new int[]{ 0, 2, 1 };
+                        break;
                     }
-                    fbxMesh.EndPolygon ();
+
+                    for (int f = 0; f < indices.Length / polySize; f++) {
+                        fbxMesh.BeginPolygon ();
+
+                        foreach (int val in vertOrder) {
+                            int polyVert = indices [polySize * f + val];
+
+                            // Save the polygon order (without merging vertices) so we
+                            // properly export UVs, normals, binormals, etc.
+                            unmergedPolygons [current] = polyVert;
+
+                            if (weldVertices) {
+                                polyVert = ControlPointToIndex [meshInfo.Vertices [polyVert]];
+                            }
+                            fbxMesh.AddPolygon (polyVert);
+
+                            current++;
+                        }
+                        fbxMesh.EndPolygon ();
+                    }
                 }
 
                 AssignLayerElementMaterial (fbxMesh, meshInfo.mesh, meshInfo.Materials.Length);
 
-                ExportComponentAttributes (meshInfo, fbxMesh, unmergedTriangles);
+                ExportComponentAttributes (meshInfo, fbxMesh, unmergedPolygons);
 
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
