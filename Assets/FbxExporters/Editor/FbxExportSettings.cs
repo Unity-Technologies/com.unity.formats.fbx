@@ -39,32 +39,35 @@ namespace FbxExporters.EditorTools {
                     "Export objects centered around the union of the bounding box of selected objects"),
                 exportSettings.centerObjects
             );
-                
+
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "Export Path:",
                 "Relative path for saving Model Prefabs."));
 
-            EditorGUILayout.SelectableLabel(GetRelativePath(exportSettings.convertToModelSavePath, Application.dataPath),
-                EditorStyles.textField, GUILayout.MinWidth(SelectableLabelMinWidth), GUILayout.Height(EditorGUIUtility.singleLineHeight));
+            var pathLabel = ExportSettings.GetRelativeSavePath();
+            if (pathLabel == "./") { pathLabel = "(Assets root)"; }
+            EditorGUILayout.SelectableLabel(pathLabel,
+                EditorStyles.textField,
+                GUILayout.MinWidth(SelectableLabelMinWidth),
+                GUILayout.Height(EditorGUIUtility.singleLineHeight));
 
             if (GUILayout.Button ("Browse", EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
-                string initialPath = exportSettings.convertToModelSavePath;
-                bool initialPathIsValid = true;
-                if (string.IsNullOrEmpty(initialPath)) {
-                    initialPathIsValid = false;
-                }
-                string path = EditorUtility.OpenFolderPanel (
-                    "Select Model Prefabs Path", initialPathIsValid ? initialPath : Application.dataPath, null
-                );
+                string initialPath = ExportSettings.GetAbsoluteSavePath();
+                string fullPath = EditorUtility.OpenFolderPanel (
+                        "Select Model Prefabs Path", initialPath, null
+                        );
 
                 // Unless the user canceled, make sure they chose something in the Assets folder.
-                if (!string.IsNullOrEmpty (path)) {
-                   if(path.StartsWith (Application.dataPath)) {
-                       exportSettings.convertToModelSavePath = path;
-                   } else {
-                       Debug.LogWarning ("Please select a location in Assets/");
-                   }
+                if (!string.IsNullOrEmpty (fullPath)) {
+                    var relativePath = GetRelativePath(Application.dataPath, fullPath);
+                    if (string.IsNullOrEmpty(relativePath)
+                            || relativePath == ".."
+                            || relativePath.StartsWith(".." + Path.DirectorySeparatorChar)) {
+                        Debug.LogWarning ("Please select a location in the Assets folder");
+                    } else {
+                        ExportSettings.SetRelativeSavePath(relativePath);
+                    }
                 }
             }
 
@@ -78,24 +81,37 @@ namespace FbxExporters.EditorTools {
             }
         }
 
-        private string GetRelativePath(string filePath, string folder){
-            Uri pathUri;
-            try{
-                pathUri = new Uri (filePath);
+        private string GetRelativePath(string fromDir, string toDir) {
+            // https://stackoverflow.com/questions/275689/how-to-get-relative-path-from-absolute-path
+            // With fixes to handle that fromDir and toDir are both directories (not files).
+            if (String.IsNullOrEmpty(fromDir)) throw new ArgumentNullException("fromDir");
+            if (String.IsNullOrEmpty(toDir))   throw new ArgumentNullException("toDir");
+
+            // MakeRelativeUri assumes the path is a file unless it ends with a
+            // path separator, so add one. Having multiple in a row is no problem.
+            fromDir += Path.DirectorySeparatorChar;
+            toDir += Path.DirectorySeparatorChar;
+
+            // Workaround for https://bugzilla.xamarin.com/show_bug.cgi?id=5921
+            fromDir += Path.DirectorySeparatorChar;
+
+            Uri fromUri = new Uri(fromDir);
+            Uri toUri = new Uri(toDir);
+
+            if (fromUri.Scheme != toUri.Scheme) { return null; } // path can't be made relative.
+
+            Uri relativeUri = fromUri.MakeRelativeUri(toUri);
+            String relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+            if (string.IsNullOrEmpty(relativePath)) {
+                // The relative path is empty if it's the same directory.
+                relativePath = "./";
             }
-            catch(UriFormatException){
-                return filePath;
+
+            if (toUri.Scheme.Equals("file", StringComparison.InvariantCultureIgnoreCase)) {
+                relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
             }
-            if (!folder.EndsWith (Path.DirectorySeparatorChar.ToString ())) {
-                folder += Path.DirectorySeparatorChar;
-            }
-            Uri folderUri = new Uri (folder);
-            string relativePath = Uri.UnescapeDataString (
-                                      folderUri.MakeRelativeUri (pathUri).ToString ().Replace ('/', Path.DirectorySeparatorChar)
-                                  );
-            if (!relativePath.StartsWith ("Assets")) {
-                relativePath = string.Format("Assets{0}{1}", Path.DirectorySeparatorChar, relativePath);
-            }
+
             return relativePath;
         }
     }
@@ -103,15 +119,48 @@ namespace FbxExporters.EditorTools {
     [FilePath("ProjectSettings/FbxExportSettings.asset",FilePathAttribute.Location.ProjectFolder)]
     public class ExportSettings : FbxExporters.EditorTools.ScriptableSingleton<ExportSettings>
     {
+        public const string kDefaultSavePath = "Objects";
+
         public bool weldVertices = true;
         public bool embedTextures = false;
         public bool mayaCompatibleNames = true;
         public bool centerObjects = true;
-        public string convertToModelSavePath;
 
-        void OnEnable()
-        {
-            convertToModelSavePath = Path.Combine (Application.dataPath, "Objects");
+        /// <summary>
+        /// The path where Convert To Model will save the new fbx and prefab.
+        /// This is relative to the Application.dataPath
+        /// </summary>
+        [SerializeField]
+        string convertToModelSavePath = kDefaultSavePath;
+
+        /// <summary>
+        /// The path where Convert To Model will save the new fbx and prefab.
+        /// This is relative to the Application.dataPath
+        /// </summary>
+        public static string GetRelativeSavePath() {
+            var relativePath = instance.convertToModelSavePath;
+            if (string.IsNullOrEmpty(relativePath)) {
+                relativePath = kDefaultSavePath;
+            }
+            return relativePath;
+        }
+
+        /// <summary>
+        /// The path where Convert To Model will save the new fbx and prefab.
+        /// This is an absolute path
+        /// </summary>
+        public static string GetAbsoluteSavePath() {
+            var relativePath = GetRelativeSavePath();
+            var absolutePath = Path.Combine(Application.dataPath, relativePath);
+            return Path.GetFullPath(absolutePath);
+        }
+
+        /// <summary>
+        /// Set the path where Convert To Model will save the new fbx and prefab.
+        /// This is interpreted as being relative to the Application.dataPath
+        /// </summary>
+        public static void SetRelativeSavePath(string newPath) {
+            instance.convertToModelSavePath = newPath;
         }
 
         [MenuItem("Edit/Project Settings/Fbx Export", priority = 300)]

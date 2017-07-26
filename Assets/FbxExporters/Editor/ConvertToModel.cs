@@ -76,10 +76,16 @@ namespace FbxExporters
             /// </summary>
             /// <returns>list of instanced Model Prefabs</returns>
             /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
-            /// <param name="path">Path to save Model Prefab</param>
+            /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
             /// <param name="keepOriginal">If set to <c>true</c> keep original gameobject hierarchy.</param>
             public static GameObject[] CreateInstantiatedModelPrefab (GameObject [] unityGameObjectsToConvert, string path = null, bool keepOriginal = true)
             {
+                if (path == null) {
+                    path = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath();
+                } else {
+                    path = Path.GetFullPath(path);
+                }
+
                 List<GameObject> result = new List<GameObject> ();
 
                 var exportSet = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
@@ -90,8 +96,6 @@ namespace FbxExporters
 
                 // find common ancestor root & filePath;
                 string[] filePaths = new string[gosToExport.Length];
-                if (path==null)
-                    path = FbxExporters.EditorTools.ExportSettings.instance.convertToModelSavePath;
 
                 for(int n = 0; n < gosToExport.Length; n++){
                     var filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
