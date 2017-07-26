@@ -789,42 +789,6 @@ namespace FbxExporters
 
             public enum TransformExportType { Local, Global, Reset };
 
-            protected const string DefaultFileNamePrefix = "_safe_to_delete__";
-            protected const string DefaultFileNameExt = ".fbx";
-
-            private string MakeFileName(string baseName = null, string prefixName = null, string extName = null)
-            {
-                if (baseName==null)
-                    baseName = Path.GetRandomFileName();
-
-                if (prefixName==null)
-                    prefixName = DefaultFileNamePrefix;
-
-                if (extName==null)
-                    extName = DefaultFileNameExt;
-
-                return prefixName + baseName + extName;
-            }
-
-            protected string GetRandomFileNamePath(string pathName, string prefixName = null, string extName = null)
-            {
-                string temp;
-
-                if (prefixName==null)
-                    prefixName = DefaultFileNamePrefix;
-
-                if (extName==null)
-                    extName = DefaultFileNameExt;
-
-                // repeat until you find a file that does not already exist
-                do {
-                    temp = Path.Combine (pathName, MakeFileName(prefixName: prefixName, extName: extName));
-
-                } while(File.Exists (temp));
-
-                return temp;
-            }
-
             /// <summary>
             /// Export all the objects in the set.
             /// Return the number of objects in the set that we exported.
@@ -834,22 +798,23 @@ namespace FbxExporters
                 exportCancelled = false;
                 Verbose = true;
 
-                // If we are overwriting a file, export first to a temporary file
+                // Export first to a temporary file
                 // in case the export is cancelled.
-                TempFilePath = LastFilePath;
-                if (File.Exists (LastFilePath)) {
-                    var directory = string.IsNullOrEmpty (LastFilePath)
-                                    ? Application.dataPath
-                                    : System.IO.Path.GetDirectoryName (LastFilePath);
-                    
-                    TempFilePath = GetRandomFileNamePath (directory);
+                // This way we won't overwrite existing files.
+                try{
+                    m_tempFilePath = Path.GetTempFileName();
                 }
+                catch(IOException){
+                    return 0;
+                }
+                m_lastFilePath = LastFilePath;
 
-                if (string.IsNullOrEmpty (TempFilePath)) {
+                if (string.IsNullOrEmpty (m_tempFilePath)) {
                     return 0;
                 }
 
                 try {
+                    bool status = false;
                     // Create the FBX manager
                     using (var fbxManager = FbxManager.Create ()) {
                         // Configure fbx IO settings.
@@ -868,7 +833,7 @@ namespace FbxExporters
                         int fileFormat = EditorTools.ExportSettings.instance.embedTextures? -1 :
                             fbxManager.GetIOPluginRegistry ().FindWriterIDByDescription ("FBX ascii (*.fbx)");
 
-                        bool status = fbxExporter.Initialize (TempFilePath, fileFormat, fbxManager.GetIOSettings ());
+                        status = fbxExporter.Initialize (m_tempFilePath, fileFormat, fbxManager.GetIOSettings ());
                         // Check that initialization of the fbxExporter was successful
                         if (!status)
                             return 0;
@@ -916,7 +881,7 @@ namespace FbxExporters
                                 exportProgress = this.ExportComponents (
                                     unityGo, fbxScene, fbxRootNode, exportProgress,
                                     count, Vector3.zero, TransformExportType.Reset);
-                                if (exportProgress < 0) {
+                                if (exportCancelled || exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
                                     return 0;
                                 }
@@ -929,7 +894,7 @@ namespace FbxExporters
                             foreach (var unityGo in revisedExportSet) {
                                 exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode,
                                     exportProgress, count, center, TransformExportType.Global);
-                                if (exportProgress < 0) {
+                                if (exportCancelled || exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
                                     return 0;
                                 }
@@ -942,23 +907,27 @@ namespace FbxExporters
                         // cleanup
                         fbxScene.Destroy ();
                         fbxExporter.Destroy ();
-
-                        if (exportCancelled) {
-                            Debug.LogWarning ("Export Cancelled");
-                            // delete the file that got created
-                            EditorApplication.update += DeleteFile;
-                            return 0;
-                        }
-                        // delete old file, move temp file
-                        EditorApplication.update += ReplaceFile;
-
-                        return status == true ? NumNodes : 0;
                     }
-                } finally {
+
+                    if (exportCancelled) {
+                        Debug.LogWarning ("Export Cancelled");
+                        return 0;
+                    }
+                    // delete old file, move temp file
+                    ReplaceFile();
+                    AssetDatabase.Refresh();
+
+                    return status == true ? NumNodes : 0;
+                }
+                finally {
                     // You must clear the progress bar when you're done,
                     // otherwise it never goes away and many actions in Unity
                     // are blocked (e.g. you can't quit).
                     EditorUtility.ClearProgressBar ();
+
+                    // make sure the temp file is deleted, no matter
+                    // when we return
+                    DeleteTempFile();
                 }
             }
 
@@ -982,51 +951,49 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// On Editor update, deletes the file that got created while exporting.
+            /// Deletes the file that got created while exporting.
             /// </summary>
-            static void DeleteFile ()
+            private void DeleteTempFile ()
             {
-                if (File.Exists (TempFilePath)) {
-                    try {
-                        File.Delete (TempFilePath);
-                    } catch (IOException) {
-                    }
+                if (!File.Exists (m_tempFilePath)) {
+                    return;
+                }
 
-                    if (File.Exists (TempFilePath)) {
-                        Debug.LogWarning ("Failed to delete file: " + TempFilePath);
-                    }
-                } else {
-                    EditorApplication.update -= DeleteFile;
-                    AssetDatabase.Refresh ();
+                try {
+                    File.Delete (m_tempFilePath);
+                } catch (IOException) {
+                }
+
+                if (File.Exists (m_tempFilePath)) {
+                    Debug.LogWarning ("Failed to delete file: " + m_tempFilePath);
+                    EditorApplication.update -= DeleteTempFile;
                 }
             }
 
             /// <summary>
-            /// On Editor update, replaces the file we are overwriting with
+            /// Replaces the file we are overwriting with
             /// the temp file that was exported to.
             /// </summary>
-            static void ReplaceFile ()
+            private void ReplaceFile ()
             {
-                if (!TempFilePath.Equals(LastFilePath) && File.Exists (TempFilePath)) {
-                    // delete old file
-                    try {
-                        File.Delete (LastFilePath);
-                    } catch (IOException) {
-                    }
+                if (m_tempFilePath.Equals (m_lastFilePath) || !File.Exists (m_tempFilePath)) {
+                    return;
+                }
+                // delete old file
+                try {
+                    File.Delete (m_lastFilePath);
+                } catch (IOException) {
+                }
 
-                    if (File.Exists (LastFilePath)) {
-                        Debug.LogWarning ("Failed to delete file: " + LastFilePath);
-                    }
+                if (File.Exists (m_lastFilePath)) {
+                    Debug.LogWarning ("Failed to delete file: " + m_lastFilePath);
+                }
 
-                    // rename the new file
-                    try{
-                        File.Move(TempFilePath, LastFilePath);
-                    } catch(IOException){
-                        Debug.LogWarning (string.Format("Failed to move file {0} to {1}", TempFilePath, LastFilePath));
-                    }
-                } else {
-                    EditorApplication.update -= ReplaceFile;
-                    AssetDatabase.Refresh ();
+                // rename the new file
+                try{
+                    File.Move(m_tempFilePath, m_lastFilePath);
+                } catch(IOException){
+                    Debug.LogWarning (string.Format("Failed to move file {0} to {1}", m_tempFilePath, m_lastFilePath));
                 }
             }
 
@@ -1277,7 +1244,8 @@ namespace FbxExporters
             /// manage the selection of a filename
             /// </summary>
             static string LastFilePath { get; set; }
-            static string TempFilePath { get; set; }
+            private string m_tempFilePath { get; set; }
+            private string m_lastFilePath { get; set; }
 
             const string Extension = "fbx";
 
