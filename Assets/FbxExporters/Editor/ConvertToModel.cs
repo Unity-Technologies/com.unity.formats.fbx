@@ -285,9 +285,11 @@ namespace FbxExporters
                         
                     bool success = UnityEditorInternal.ComponentUtility.CopyComponent (components[i]);
                     if (success) {
-                        // if to already has this component, then copy the values over
+                        // if "to" already has this component, and it is not a MeshFilter, Transform, or Renderer, then paste as new.
+                        // We can't have multiple MeshFilters, Transforms, or Renderers, but we can have multiple
+                        // of other components.
                         var toComponent = to.GetComponent (components [i].GetType ());
-                        if (toComponent == null) {
+                        if (toComponent == null || !(toComponent is MeshFilter || toComponent is Transform || toComponent is Renderer)) {
                             success = UnityEditorInternal.ComponentUtility.PasteComponentAsNew (to);
                         } else{
                             // Don't want to copy MeshFilter because then we will replace the
