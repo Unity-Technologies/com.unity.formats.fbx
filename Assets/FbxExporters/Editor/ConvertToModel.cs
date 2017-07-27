@@ -121,17 +121,16 @@ namespace FbxExporters
                         continue;
                     }
 
-                    // make filepath relative to project folder
-                    if (fbxFileName.StartsWith (Application.dataPath, System.StringComparison.CurrentCulture)) 
-                    {
-                        fbxFileName = "Assets" + fbxFileName.Substring (Application.dataPath.Length);
-                    }
+                    // make filepath relative to assets folder
+                    var relativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFileName);
 
                     // refresh the assetdata base so that we can query for the model
                     AssetDatabase.Refresh ();
 
-                    // replace w Model asset
-                    Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath (fbxFileName);
+                    // Replace w Model asset. LoadMainAssetAtPath wants a path
+                    // relative to the project, not relative to the assets
+                    // folder.
+                    Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath(Path.Combine("Assets", relativePath));
 
                     if (unityMainAsset != null) {
                         Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);

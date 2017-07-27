@@ -60,7 +60,7 @@ namespace FbxExporters.EditorTools {
 
                 // Unless the user canceled, make sure they chose something in the Assets folder.
                 if (!string.IsNullOrEmpty (fullPath)) {
-                    var relativePath = GetRelativePath(Application.dataPath, fullPath);
+                    var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
                     if (string.IsNullOrEmpty(relativePath)
                             || relativePath == ".."
                             || relativePath.StartsWith(".." + Path.DirectorySeparatorChar)) {
@@ -81,39 +81,6 @@ namespace FbxExporters.EditorTools {
             }
         }
 
-        private string GetRelativePath(string fromDir, string toDir) {
-            // https://stackoverflow.com/questions/275689/how-to-get-relative-path-from-absolute-path
-            // With fixes to handle that fromDir and toDir are both directories (not files).
-            if (String.IsNullOrEmpty(fromDir)) throw new ArgumentNullException("fromDir");
-            if (String.IsNullOrEmpty(toDir))   throw new ArgumentNullException("toDir");
-
-            // MakeRelativeUri assumes the path is a file unless it ends with a
-            // path separator, so add one. Having multiple in a row is no problem.
-            fromDir += Path.DirectorySeparatorChar;
-            toDir += Path.DirectorySeparatorChar;
-
-            // Workaround for https://bugzilla.xamarin.com/show_bug.cgi?id=5921
-            fromDir += Path.DirectorySeparatorChar;
-
-            Uri fromUri = new Uri(fromDir);
-            Uri toUri = new Uri(toDir);
-
-            if (fromUri.Scheme != toUri.Scheme) { return null; } // path can't be made relative.
-
-            Uri relativeUri = fromUri.MakeRelativeUri(toUri);
-            String relativePath = Uri.UnescapeDataString(relativeUri.ToString());
-
-            if (string.IsNullOrEmpty(relativePath)) {
-                // The relative path is empty if it's the same directory.
-                relativePath = "./";
-            }
-
-            if (toUri.Scheme.Equals("file", StringComparison.InvariantCultureIgnoreCase)) {
-                relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-            }
-
-            return relativePath;
-        }
     }
 
     [FilePath("ProjectSettings/FbxExportSettings.asset",FilePathAttribute.Location.ProjectFolder)]
@@ -148,19 +115,7 @@ namespace FbxExporters.EditorTools {
             if (string.IsNullOrEmpty(relativePath)) {
                 relativePath = kDefaultSavePath;
             }
-
-            // Normalize to the platform path separator.
-            relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar,
-                    Path.DirectorySeparatorChar);
-
-            // Trim off trailing slashes. If all we had was slashes, we're at
-            // the root of the Application.dataPath so return "."
-            relativePath = relativePath.TrimEnd(Path.DirectorySeparatorChar);
-            if (string.IsNullOrEmpty(relativePath)) {
-                relativePath = ".";
-            }
-
-            return relativePath;
+            return NormalizeRelativePath(relativePath);
         }
 
         /// <summary>
@@ -181,6 +136,66 @@ namespace FbxExporters.EditorTools {
             instance.convertToModelSavePath = newPath
                 .Replace('\\', '/')
                 .TrimEnd(Path.DirectorySeparatorChar);
+        }
+
+        /// <summary>
+        /// Convert an absolute path into a relative path like what you would
+        /// get from GetRelativeSavePath.
+        ///
+        /// Returns an empty string if the path is invalid.
+        /// The path uses platform path separators, and no trailing or leading
+        /// slashes.
+        /// </summary>
+        public static string ConvertToAssetRelativePath(string fullPathInAssets)
+        {
+            return GetRelativePath(Application.dataPath, fullPathInAssets);
+        }
+
+        private static string GetRelativePath(string fromDir, string toDir) {
+            // https://stackoverflow.com/questions/275689/how-to-get-relative-path-from-absolute-path
+            // With fixes to handle that fromDir and toDir are both directories (not files).
+            if (String.IsNullOrEmpty(fromDir)) throw new ArgumentNullException("fromDir");
+            if (String.IsNullOrEmpty(toDir))   throw new ArgumentNullException("toDir");
+
+            // MakeRelativeUri assumes the path is a file unless it ends with a
+            // path separator, so add one. Having multiple in a row is no problem.
+            fromDir += Path.DirectorySeparatorChar;
+            toDir += Path.DirectorySeparatorChar;
+
+            // Workaround for https://bugzilla.xamarin.com/show_bug.cgi?id=5921
+            fromDir += Path.DirectorySeparatorChar;
+
+            Uri fromUri = new Uri(fromDir);
+            Uri toUri = new Uri(toDir);
+
+            if (fromUri.Scheme != toUri.Scheme) { return null; } // path can't be made relative.
+
+            Uri relativeUri = fromUri.MakeRelativeUri(toUri);
+            String relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+            if (string.IsNullOrEmpty(relativePath)) {
+                // The relative path is empty if it's the same directory.
+                relativePath = ".";
+            }
+
+            return NormalizeRelativePath(relativePath);
+        }
+
+        private static string NormalizeRelativePath(string relativePath)
+        {
+            // Normalize to the platform path separator.
+            relativePath = relativePath.Replace(
+                    Path.AltDirectorySeparatorChar,
+                    Path.DirectorySeparatorChar);
+
+            // Trim off leading and trailing slashes. If all we had was
+            // slashes, we're at the root of the Application.dataPath so return
+            // "."
+            relativePath = relativePath.Trim(Path.DirectorySeparatorChar);
+            if (string.IsNullOrEmpty(relativePath)) {
+                relativePath = ".";
+            }
+            return relativePath;
         }
 
         [MenuItem("Edit/Project Settings/Fbx Export", priority = 300)]
