@@ -46,7 +46,7 @@ namespace FbxExporters.EditorTools {
                 "Relative path for saving Model Prefabs."));
 
             var pathLabel = ExportSettings.GetRelativeSavePath();
-            if (pathLabel == "./") { pathLabel = "(Assets root)"; }
+            if (pathLabel == ".") { pathLabel = "(Assets root)"; }
             EditorGUILayout.SelectableLabel(pathLabel,
                 EditorStyles.textField,
                 GUILayout.MinWidth(SelectableLabelMinWidth),
@@ -128,7 +128,13 @@ namespace FbxExporters.EditorTools {
 
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
-        /// This is relative to the Application.dataPath
+        ///
+        /// To help teams work together, this is stored to be relative to the
+        /// Application.dataPath, and the path separator is the forward-slash
+        /// (e.g. unix and http, not windows).
+        ///
+        /// Use GetRelativeSavePath / SetRelativeSavePath to get/set this
+        /// value, properly interpreted for the current platform.
         /// </summary>
         [SerializeField]
         string convertToModelSavePath = kDefaultSavePath;
@@ -142,6 +148,18 @@ namespace FbxExporters.EditorTools {
             if (string.IsNullOrEmpty(relativePath)) {
                 relativePath = kDefaultSavePath;
             }
+
+            // Normalize to the platform path separator.
+            relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar,
+                    Path.DirectorySeparatorChar);
+
+            // Trim off trailing slashes. If all we had was slashes, we're at
+            // the root of the Application.dataPath so return "."
+            relativePath = relativePath.TrimEnd(Path.DirectorySeparatorChar);
+            if (string.IsNullOrEmpty(relativePath)) {
+                relativePath = ".";
+            }
+
             return relativePath;
         }
 
@@ -160,7 +178,9 @@ namespace FbxExporters.EditorTools {
         /// This is interpreted as being relative to the Application.dataPath
         /// </summary>
         public static void SetRelativeSavePath(string newPath) {
-            instance.convertToModelSavePath = newPath;
+            instance.convertToModelSavePath = newPath
+                .Replace('\\', '/')
+                .TrimEnd(Path.DirectorySeparatorChar);
         }
 
         [MenuItem("Edit/Project Settings/Fbx Export", priority = 300)]
@@ -204,8 +224,7 @@ namespace FbxExporters.EditorTools {
             // First create.
             if (s_Instance == null)
             {
-                T t = ScriptableObject.CreateInstance<T>();
-                s_Instance = t;
+                s_Instance = ScriptableObject.CreateInstance<T>();
             }
 
             // Then load.
