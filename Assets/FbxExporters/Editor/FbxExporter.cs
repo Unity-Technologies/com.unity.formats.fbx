@@ -30,6 +30,8 @@ namespace FbxExporters
             const string Comments =
                 @"";
 
+            const string ReadmeRelativePath = "FbxExporters/README.txt";
+
             const string MenuItemName = "Assets/Export Model...";
 
             const string FileBaseName = "Untitled";
@@ -79,6 +81,36 @@ namespace FbxExporters
             /// Format for creating unique names
             /// </summary>
             const string UniqueNameFormat = "{0}_{1}";
+
+            private string GetVersionFromReadme()
+            {
+                if (string.IsNullOrEmpty (ReadmeRelativePath)) {
+                    Debug.LogWarning ("Missing relative path to README");
+                    return null;
+                }
+                string absPath = Path.Combine (Application.dataPath, ReadmeRelativePath);
+                if (!File.Exists (absPath)) {
+                    Debug.LogWarning (string.Format("Could not find README.txt at: {0}", absPath));
+                    return null;
+                }
+
+                try{
+                    var versionHeader = "**Version**:";
+                    var lines = File.ReadAllLines (absPath);
+                    foreach (var line in lines) {
+                        if (line.StartsWith(versionHeader)) {
+                            var version = line.Replace (versionHeader, "");
+                            return version.Trim ();
+                        }
+                    }
+                }
+                catch(IOException e){
+                    Debug.LogWarning (string.Format("Error will reading file {0} ({1})", absPath, e));
+                    return null;
+                }
+                Debug.LogWarning (string.Format("Could not find version number in README.txt at: {0}", absPath));
+                return null;
+            }
 
             /// <summary>
             /// return layer for mesh
@@ -845,7 +877,7 @@ namespace FbxExporters
                         // fileFormat must be binary if we are embedding textures
                         int fileFormat = EditorTools.ExportSettings.instance.embedTextures? -1 :
                             fbxManager.GetIOPluginRegistry ().FindWriterIDByDescription ("FBX ascii (*.fbx)");
-
+                        
                         bool status = fbxExporter.Initialize (LastFilePath, fileFormat, fbxManager.GetIOSettings ());
                         // Check that initialization of the fbxExporter was successful
                         if (!status)
@@ -868,6 +900,15 @@ namespace FbxExporters
                         fbxSceneInfo.mRevision = "1.0";
                         fbxSceneInfo.mKeywords = Keywords;
                         fbxSceneInfo.mComment = Comments;
+                        fbxSceneInfo.Original_ApplicationName.Set("Unity FbxExporter Plugin");
+                        // set last saved to be the same as original, as this is a new file.
+                        fbxSceneInfo.LastSaved_ApplicationName.Set(fbxSceneInfo.Original_ApplicationName.Get());
+
+                        var version = GetVersionFromReadme();
+                        if(version != null){
+                            fbxSceneInfo.Original_ApplicationVersion.Set(version);
+                            fbxSceneInfo.LastSaved_ApplicationVersion.Set(fbxSceneInfo.Original_ApplicationVersion.Get());
+                        }
                         fbxScene.SetSceneInfo (fbxSceneInfo);
 
                         // Set up the axes (Y up, Z forward, X to the right) and units (centimeters)
@@ -913,7 +954,6 @@ namespace FbxExporters
                                 }
                             }
                         }
-
                         // Export the scene to the file.
                         status = fbxExporter.Export (fbxScene);
 
