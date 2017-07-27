@@ -966,7 +966,6 @@ namespace FbxExporters
 
                 if (File.Exists (m_tempFilePath)) {
                     Debug.LogWarning ("Failed to delete file: " + m_tempFilePath);
-                    EditorApplication.update -= DeleteTempFile;
                 }
             }
 
