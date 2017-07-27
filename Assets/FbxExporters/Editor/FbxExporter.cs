@@ -395,11 +395,14 @@ namespace FbxExporters
 
                         FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
 
-                        for (int i = 0; i < mesh.subMeshCount; i++) {
-                            var topology = mesh.GetTopology (i);
+                        for (int subMeshIndex = 0; subMeshIndex < mesh.subMeshCount; subMeshIndex++) {
+                            var topology = mesh.GetTopology (subMeshIndex);
                             int polySize;
 
                             switch (topology) {
+                            case MeshTopology.Triangles:
+                                polySize = 3;
+                                break;
                             case MeshTopology.Quads:
                                 polySize = 4;
                                 break;
@@ -412,14 +415,16 @@ namespace FbxExporters
                             case MeshTopology.LineStrip:
                                 throw new System.NotImplementedException();
                                 break;
-                            default: /* MeshTopology.Triangles */
-                                polySize = 3;
+                            default:
+                                throw new System.NotImplementedException ();
                                 break;
                             }
 
-                            var indices = mesh.GetIndices (i);
-                            for (int j = 0; j < indices.Length / polySize; j++) {
-                                fbxElementArray.Add (i);
+                            // Specify the material index for each polygon.
+                            // Material index should match subMeshIndex.
+                            var indices = mesh.GetIndices (subMeshIndex);
+                            for(int j = 0, n = indices.Length / polySize; j < n; j++){
+                                fbxElementArray.Add (subMeshIndex);
                             }
                         }
                     }
@@ -500,9 +505,14 @@ namespace FbxExporters
                     int[] vertOrder;
 
                     switch (topology) {
+                    case MeshTopology.Triangles:
+                        polySize = 3;
+                        // flip winding order so that Maya and Unity import it properly
+                        vertOrder = new int[]{ 0, 2, 1 };
+                        break;
                     case MeshTopology.Quads:
                         polySize = 4;
-                        // vertices have to be reordered as this gets flipped back during import
+                        // flip winding order so that Maya and Unity import it properly
                         vertOrder = new int[]{ 0, 3, 2, 1 };
                         break;
                     case MeshTopology.Lines:
@@ -514,11 +524,8 @@ namespace FbxExporters
                     case MeshTopology.LineStrip:
                         throw new System.NotImplementedException();
                         break;
-                    default: /* MeshTopology.Triangles */
-                        polySize = 3;
-                        // triangle vertices have to be reordered to be 0,2,1 instead
-                        // of 0,1,2, as this gets flipped back during import
-                        vertOrder = new int[]{ 0, 2, 1 };
+                    default: 
+                        throw new System.NotImplementedException ();
                         break;
                     }
 
