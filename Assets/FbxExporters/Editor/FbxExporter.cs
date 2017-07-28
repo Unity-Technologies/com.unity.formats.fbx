@@ -823,7 +823,7 @@ namespace FbxExporters
             /// </summary>
             /// <param name="t">Transform.</param>
             /// <param name="boundsUnion">The Bounds that is the Union of all the bounds on this transform's hierarchy.</param>
-            private void EncapsulateBounds(Transform t, ref Bounds boundsUnion)
+            private static void EncapsulateBounds(Transform t, ref Bounds boundsUnion)
             {
                 var bounds = GetBounds (t);
                 boundsUnion.Encapsulate (bounds);
@@ -840,7 +840,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns>The bounds.</returns>
             /// <param name="t">Transform.</param>
-            private Bounds GetBounds(Transform t)
+            private static Bounds GetBounds(Transform t)
             {
                 var renderer = t.GetComponent<Renderer> ();
                 if (renderer) {
@@ -862,7 +862,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns>Center of gameObjects.</returns>
             /// <param name="gameObjects">Game objects.</param>
-            private Vector3 FindCenter(IEnumerable<GameObject> gameObjects)
+            public static Vector3 FindCenter(IEnumerable<GameObject> gameObjects)
             {
                 Bounds bounds = new Bounds();
                 // Assign the initial bounds to first GameObject's bounds
@@ -884,7 +884,7 @@ namespace FbxExporters
             /// <returns>The recentered translation.</returns>
             /// <param name="t">Transform.</param>
             /// <param name="center">Center point.</param>
-            private Vector3 GetRecenteredTranslation(Transform t, Vector3 center)
+            public static Vector3 GetRecenteredTranslation(Transform t, Vector3 center)
             {
                 return t.position - center;
             }
