@@ -170,6 +170,17 @@ namespace FbxExporters
                 string ext = Path.GetExtension (filename);
 
                 int index = 1;
+
+                // try extracting the current index from the name and incrementing it
+                var result = System.Text.RegularExpressions.Regex.Match(fileWithoutExt, @"\d+$");
+                if (result != null) {
+                    var number = result.Value;
+                    if (int.TryParse (number, out index)) {
+                        fileWithoutExt = fileWithoutExt.Remove (fileWithoutExt.LastIndexOf (number));
+                        index++;
+                    }
+                }
+
                 string file = null;
                 do {
                     file = string.Format ("{0} {1}{2}", fileWithoutExt, index, ext);
