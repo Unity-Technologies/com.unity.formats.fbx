@@ -16,6 +16,13 @@ namespace FbxExporters.UnitTests
     public class DefaultSelectionTest : ExporterTestBase
     {
         protected GameObject m_root;
+		protected bool m_centerObjectsSetting;
+
+		[SetUp]
+		public void Init()
+		{
+			m_centerObjectsSetting = FbxExporters.EditorTools.ExportSettings.instance.centerObjects;
+		}
 
         [TearDown]
         public override void Term ()
@@ -24,6 +31,8 @@ namespace FbxExporters.UnitTests
             if (m_root) {
                 UnityEngine.Object.DestroyImmediate (m_root);
             }
+			// restore original setting
+			FbxExporters.EditorTools.ExportSettings.instance.centerObjects = m_centerObjectsSetting;
         }
 
         [Test]
@@ -41,9 +50,12 @@ namespace FbxExporters.UnitTests
             //  - if there is only one root GameObject being exported
             //    then zero out the root transform, leave all descendants
             //    with local transform
-            //  - if there are multiple root GameObjects, then export
-            //    the global transform of each, and local transform
-            //    of descendants
+            //  - if there are multiple root GameObjects, export
+            //    the global transform of root GameObjects, and local transform
+            //    of descendants.
+			//    if Center Objects is checked in the preferences,
+			//    then export the translations so they are centered
+			//    around the center of the union of the bounding boxes.
 
             m_root = CreateHierarchy ();
             Assert.IsNotNull (m_root);
@@ -76,13 +88,30 @@ namespace FbxExporters.UnitTests
             // Expected result: Parent2, Child3, Child2
             // Expected transform: Child2 and Parent2 maintain global transform
             var parent2 = m_root.transform.Find("Parent2");
-            exportedRoot = ExportSelection (new Object[]{child2, parent2});
+			var exportSet = new Object[]{child2, parent2};
+			// for passing to FindCenter()
+			var goExportSet = new GameObject[]{ child2.gameObject, parent2.gameObject };
 
+			// test without centering objects
+			FbxExporters.EditorTools.ExportSettings.instance.centerObjects = false;
+
+			exportedRoot = ExportSelection (exportSet);
             List<GameObject> children = new List<GameObject> ();
             foreach (Transform child in exportedRoot.transform) {
                 children.Add (child.gameObject);
             }
             CompareHierarchies(new GameObject[]{child2, parent2.gameObject}, children.ToArray());
+
+			// test with centered objects
+			FbxExporters.EditorTools.ExportSettings.instance.centerObjects = true;
+			var newCenter = FbxExporters.Editor.ModelExporter.FindCenter (goExportSet);
+
+			exportedRoot = ExportSelection (exportSet);
+			children = new List<GameObject> ();
+			foreach (Transform child in exportedRoot.transform) {
+				children.Add (child.gameObject);
+			}
+			CompareHierarchies(new GameObject[]{child2, parent2.gameObject}, children.ToArray(), newCenter);
         }
 
         /// <summary>
@@ -92,9 +121,10 @@ namespace FbxExporters.UnitTests
         /// </summary>
         /// <param name="actual">Actual.</param>
         /// <param name="expected">Expected.</param>
-        private void CompareGlobalTransform(Transform actual, Transform expected=null){
+		/// <param name="center">New center for expected transform, if present.</param>
+		private void CompareGlobalTransform(Transform actual, Transform expected=null, Vector3 center=default(Vector3)){
             var actualMatrix = ConstructTRSMatrix (actual);
-            var expectedMatrix = expected == null? new FbxAMatrix() : ConstructTRSMatrix (expected, false);
+            var expectedMatrix = expected == null? new FbxAMatrix() : ConstructTRSMatrix (expected, false, center);
             Assert.AreEqual (expectedMatrix, actualMatrix);
         }
 
@@ -104,10 +134,11 @@ namespace FbxExporters.UnitTests
         /// <returns>The TRS matrix.</returns>
         /// <param name="t">Transform.</param>
         /// <param name="local">If set to <c>true</c> use local transform.</param>
-        private FbxAMatrix ConstructTRSMatrix(Transform t, bool local=true)
+		/// <param name="center">New center for global transform.</param>
+		private FbxAMatrix ConstructTRSMatrix(Transform t, bool local=true, Vector3 center=default(Vector3))
         {
-            var translation = local? t.localPosition : t.position;
-            var rotation = local? t.localEulerAngles : t.eulerAngles;
+			var translation = local? t.localPosition : FbxExporters.Editor.ModelExporter.GetRecenteredTranslation (t, center);
+			var rotation = local? t.localEulerAngles : t.eulerAngles;
             var scale = local? t.localScale : t.lossyScale;
             return new FbxAMatrix (
                 new FbxVector4 (translation.x, translation.y, translation.z),
@@ -116,6 +147,10 @@ namespace FbxExporters.UnitTests
             );
         }
 
+		/// <summary>
+		/// Creates test hierarchy.
+		/// </summary>
+		/// <returns>The hierarchy root.</returns>
         private GameObject CreateHierarchy ()
         {
             // Create the following hierarchy:
@@ -153,12 +188,25 @@ namespace FbxExporters.UnitTests
             return root;
         }
 
+		/// <summary>
+		/// Sets the transform.
+		/// </summary>
+		/// <param name="t">Transform.</param>
+		/// <param name="pos">Position.</param>
+		/// <param name="rot">Rotation.</param>
+		/// <param name="scale">Scale.</param>
         private void SetTransform(Transform t, Vector3 pos, Vector3 rot, Vector3 scale){
             t.localPosition = pos;
             t.localEulerAngles = rot;
             t.localScale = scale;
         }
 
+		/// <summary>
+		/// Creates a GameObject.
+		/// </summary>
+		/// <returns>The created GameObject.</returns>
+		/// <param name="name">Name.</param>
+		/// <param name="parent">Parent.</param>
         private GameObject CreateGameObject(string name, Transform parent = null)
         {
             var go = new GameObject (name);
@@ -166,6 +214,13 @@ namespace FbxExporters.UnitTests
             return go;
         }    
 
+		/// <summary>
+		/// Compares the hierarchies.
+		/// </summary>
+		/// <param name="expectedHierarchy">Expected hierarchy.</param>
+		/// <param name="actualHierarchy">Actual hierarchy.</param>
+		/// <param name="ignoreName">If set to <c>true</c> ignore name.</param>
+		/// <param name="compareTransform">If set to <c>true</c> compare transform.</param>
         private void CompareHierarchies(
             GameObject expectedHierarchy, GameObject actualHierarchy,
             bool ignoreName = false, bool compareTransform = true)
@@ -190,7 +245,13 @@ namespace FbxExporters.UnitTests
             }
         }
 
-        private void CompareHierarchies(GameObject[] expectedHierarchy, GameObject[] actualHierarchy)
+		/// <summary>
+		/// Compares the hierarchies.
+		/// </summary>
+		/// <param name="expectedHierarchy">Expected hierarchy.</param>
+		/// <param name="actualHierarchy">Actual hierarchy.</param>
+		/// <param name="center">New center for global transforms.</param>
+		private void CompareHierarchies(GameObject[] expectedHierarchy, GameObject[] actualHierarchy, Vector3 center=default(Vector3))
         {
             Assert.AreEqual (expectedHierarchy.Length, actualHierarchy.Length);
 
@@ -205,7 +266,7 @@ namespace FbxExporters.UnitTests
                 CompareHierarchies (expectedHierarchy [i], actualHierarchy [i], false, false);
                 // if we are Comparing lists of hierarchies, that means that the transforms
                 // should be the global transform of expected, as there is no zeroed out root
-                CompareGlobalTransform (actualHierarchy [i].transform, expectedHierarchy [i].transform);
+                CompareGlobalTransform (actualHierarchy [i].transform, expectedHierarchy [i].transform, center);
             }
         }
     }
