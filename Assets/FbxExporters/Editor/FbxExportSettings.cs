@@ -183,6 +183,11 @@ namespace FbxExporters.EditorTools {
 
         private static string NormalizeRelativePath(string relativePath)
         {
+            // The empty path is the current directory.
+            if (string.IsNullOrEmpty(relativePath)) {
+                relativePath = ".";
+            }
+
             // Normalize to the platform path separator.
             relativePath = relativePath.Replace(
                     Path.AltDirectorySeparatorChar,
