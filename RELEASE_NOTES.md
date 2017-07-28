@@ -6,8 +6,8 @@ NEW FEATURES
 
 * Export with common center
 
-Added an option to preferences to export the selection centered around a root object (pivot). 
-The root will be the center of the union of the bounding box of selected objects.
+Now if you export multiple root objects, they will export with the world centered around the union of their bounding boxes.
+Added an option to preferences to toggle whether the objects are exported with a common center or not.
 
 * Handle export of Quads
 
