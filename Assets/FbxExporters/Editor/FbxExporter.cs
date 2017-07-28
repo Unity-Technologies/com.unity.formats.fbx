@@ -884,7 +884,7 @@ namespace FbxExporters
             /// <returns>The recentered translation.</returns>
             /// <param name="t">Transform.</param>
             /// <param name="center">Center point.</param>
-			public static Vector3 GetRecenteredTranslation(Transform t, Vector3 center)
+            public static Vector3 GetRecenteredTranslation(Transform t, Vector3 center)
             {
                 return t.position - center;
             }
