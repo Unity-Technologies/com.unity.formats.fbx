@@ -1,5 +1,42 @@
 RELEASE NOTES
 
+**Version**: 0.0.7a 
+
+NEW FEATURES
+
+* Export with common center
+
+Added an option to preferences to export the selection centered around a root object (pivot). 
+The root will be the center of the union of the bounding box of selected objects.
+
+* Handle export of Quads
+
+If submesh has triangle or quad topology in Unity, then it will have same topology in FBX.
+
+* Enforce unique names in exported Fbx
+
+Rename objects with duplicate names when exporting to ensure naming stays consistent, as
+both Maya and Unity rename objects with duplicate names on import. 
+
+* Save Application name and version to Fbx
+
+Save name and version of FbxExporter to file when exporting.
+
+* Added export performance test
+
+Test exporting a large mesh and fail if export takes too long.
+
+FIXES
+
+* Export: Export rotation in XYZ order instead of ZXY so Maya always imports rotation correctly
+* Export: Improved performance by caching Mesh data (i.e. triangles, tangents, vertices, etc.)
+* Export: Set emissive color default to 0 so material does not appear white if no emissive color found.
+* Export: Write first to temporary file to avoid clobbering destination file if export cancelled.
+* Convert to Model: Fixed so "GameObject/Convert to Model" menu item works
+* Convert to Model: Ensure imported model name matches incremented filename
+* Convert to Model: Don't reference embedded materials of original model in new model.
+* Convert to Model: If existing filename ends with a number, increment it instead of appending 1 (i.e. Sphere_1 becomes Sphere_2 instead of Sphere_1 1)
+
 **Version**: 0.0.6a 
 
 NEW FEATURES
