@@ -6,7 +6,7 @@ NEW FEATURES
 
 * Export with common center
 
-Now if you export multiple root objects, they will export with the world centered around the union of their bounding boxes.
+Now if you export multiple root objects, they will export so they are centered around the union of their bounding boxes.
 Added an option to preferences to toggle whether the objects are exported with a common center or not.
 
 * Handle export of Quads
