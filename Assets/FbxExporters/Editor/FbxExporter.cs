@@ -440,16 +440,12 @@ namespace FbxExporters
                                 break;
                             case MeshTopology.Lines:
                                 throw new System.NotImplementedException();
-                                break;
                             case MeshTopology.Points:
                                 throw new System.NotImplementedException();
-                                break;
                             case MeshTopology.LineStrip:
                                 throw new System.NotImplementedException();
-                                break;
                             default:
                                 throw new System.NotImplementedException ();
-                                break;
                             }
 
                             // Specify the material index for each polygon.
@@ -549,16 +545,12 @@ namespace FbxExporters
                         break;
                     case MeshTopology.Lines:
                         throw new System.NotImplementedException();
-                        break;
                     case MeshTopology.Points:
                         throw new System.NotImplementedException();
-                        break;
                     case MeshTopology.LineStrip:
                         throw new System.NotImplementedException();
-                        break;
                     default: 
                         throw new System.NotImplementedException ();
-                        break;
                     }
 
                     for (int f = 0; f < indices.Length / polySize; f++) {
