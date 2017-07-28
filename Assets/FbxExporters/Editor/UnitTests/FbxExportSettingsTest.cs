@@ -10,150 +10,174 @@ namespace FbxExporters.UnitTests
     public class FbxExportSettingsTest {
         ExportSettings m_originalSettings;
 
+        // We read two private fields for the test.
         static System.Reflection.FieldInfo s_InstanceField; // static
         static System.Reflection.FieldInfo s_SavePathField; // member
-        static System.Reflection.MethodInfo s_NormalizeRelativePath; // static
-        static System.Reflection.MethodInfo s_GetRelativePath; // static
 
-		static FbxExportSettingsTest() {
-            var privates = System.Reflection.BindingFlags.NonPublic 
+        static FbxExportSettingsTest() {
+            // all names, private or public, instance or static
+            var privates = System.Reflection.BindingFlags.NonPublic
+                | System.Reflection.BindingFlags.Public
                 | System.Reflection.BindingFlags.Static
-				| System.Reflection.BindingFlags.Instance;
+                | System.Reflection.BindingFlags.Instance;
             var t = typeof(ExportSettings);
 
-			s_SavePathField = t.GetField("convertToModelSavePath", privates);
-			Assert.IsNotNull(s_SavePathField, "convertToModelSavePath");
+            s_SavePathField = t.GetField("convertToModelSavePath", privates);
+            Assert.IsNotNull(s_SavePathField, "convertToModelSavePath");
 
-            s_NormalizeRelativePath = t.GetMethod("NormalizeRelativePath", privates);
-			Assert.IsNotNull(s_NormalizeRelativePath, "NormalizeRelativePath");
-
-            s_GetRelativePath = t.GetMethod("GetRelativePath", privates);
-			Assert.IsNotNull(s_GetRelativePath, "GetRelativePath");
-
-			// static fields can't be found through inheritance with GetField.
-			// if we change the inheritance diagram, we have to change t.BaseType here.
-			s_InstanceField = t.BaseType.GetField("s_Instance", privates);
-			Assert.IsNotNull(s_InstanceField, "s_Instance");
-
-			#if ENABLE_COVERAGE_TEST
-            FbxSdk.CoverageTester.RegisterReflectionCall(
-				typeof(UnitTests).GetMethod("NormalizePath"), s_NormalizeRelativePath);
-            FbxSdk.CoverageTester.RegisterReflectionCall(
-				typeof(UnitTests).GetMethod("GetRelativePath"), s_GetRelativePath);
-			#endif
+            // static fields can't be found through inheritance with GetField.
+            // if we change the inheritance diagram, we have to change t.BaseType here.
+            s_InstanceField = t.BaseType.GetField("s_Instance", privates);
+            Assert.IsNotNull(s_InstanceField, "s_Instance");
         }
 
-		#if ENABLE_COVERAGE_TEST
-		[Test]
-		public void TestCoverage()
-		{
-			FbxSdk.CoverageTester.TestCoverage(typeof(ExportSettings), this.GetType());
-		}
-		#endif
-
-
-        string NormalizePath(string path) {
-            return FbxSdk.Invoker.InvokeStatic<string>(s_NormalizeRelativePath, path);
+#if ENABLE_COVERAGE_TEST
+        [Test]
+        public void TestCoverage()
+        {
+            FbxSdk.CoverageTester.TestCoverage(typeof(ExportSettings), this.GetType());
         }
-
-        string GetRelativePath(string a, string b) {
-			return FbxSdk.Invoker.InvokeStatic<string>(s_GetRelativePath, a, b);
-        }
+#endif
 
         [NUnit.Framework.SetUp]
-            public void SetUp()
-            {
-                var settings = (ExportSettings)s_InstanceField.GetValue(null);
-                m_originalSettings = settings;
+        public void SetUp()
+        {
+            var settings = (ExportSettings)s_InstanceField.GetValue(null);
+            m_originalSettings = settings;
 
-                // Clear out the current instance and create a new one (but keep the original around).
-                s_InstanceField.SetValue(null, null);
-                s_InstanceField.SetValue(null, ScriptableObject.CreateInstance<ExportSettings>());
-            }
+            // Clear out the current instance and create a new one (but keep the original around).
+            s_InstanceField.SetValue(null, null);
+            s_InstanceField.SetValue(null, ScriptableObject.CreateInstance<ExportSettings>());
+        }
 
         [NUnit.Framework.TearDown]
-            public void TearDown()
-            {
-                // Destroy the test settings and restore the original.
-                // The original might be null -- not a problem.
-                var settings = (ExportSettings)s_InstanceField.GetValue(null);
-                ScriptableObject.DestroyImmediate(settings);
+        public void TearDown()
+        {
+            // Destroy the test settings and restore the original.
+            // The original might be null -- not a problem.
+            var settings = (ExportSettings)s_InstanceField.GetValue(null);
+            ScriptableObject.DestroyImmediate(settings);
 
-                s_InstanceField.SetValue(null, m_originalSettings);
-            }
+            s_InstanceField.SetValue(null, m_originalSettings);
+        }
 
-
-        [Test]
-            public void TestNormalizePath()
-            {
-                var path = "/a\\b/c/\\";
-                var norm = NormalizePath(path);
-                Assert.AreEqual(Path.Combine("a", Path.Combine("b", "c")), norm);
-
-                path = "";
-                norm = NormalizePath(path);
-                Assert.AreEqual(".", norm);
-
-                path = "///";
-                norm = NormalizePath(path);
-                Assert.AreEqual(".", norm);
-            }
 
         [Test]
-            public void TestGetRelativePath()
-            {
-                var from = "file:///a/b/c";
-                var to = "http://google.com";
-                var relative = GetRelativePath(from, to);
-                Assert.IsNull(relative);
+        public void TestNormalizePath()
+        {
+            // Test slashes in both directions, and leading and trailing slashes.
+            var path = "/a\\b/c/\\";
+            var norm = ExportSettings.NormalizePath(path, isRelative: true);
+            Assert.AreEqual("a/b/c", norm);
+            norm = ExportSettings.NormalizePath(path, isRelative: false);
+            Assert.AreEqual("/a/b/c", norm);
 
-                from = "file:///a/b/c";
-                to = "file:///a/b/c/d/e";
-                relative = GetRelativePath(from, to);
-                Assert.AreEqual(Path.Combine("d", "e"), relative);
+            // Test empty path. Not actually absolute, so it's treated as a relative path.
+            path = "";
+            norm = ExportSettings.NormalizePath(path, isRelative: true);
+            Assert.AreEqual(".", norm);
+            norm = ExportSettings.NormalizePath(path, isRelative: false);
+            Assert.AreEqual(".", norm);
 
-                from = "file:///a/b/c/";
-                to = "file:///a/b/c/d/e/";
-                relative = GetRelativePath(from, to);
-                Assert.AreEqual(Path.Combine("d", "e"), relative);
+            // Test just a bunch of slashes. Root or . depending on whether it's abs or rel.
+            path = "///";
+            norm = ExportSettings.NormalizePath(path, isRelative: true);
+            Assert.AreEqual(".", norm);
+            norm = ExportSettings.NormalizePath(path, isRelative: false);
+            Assert.AreEqual("/", norm);
 
-			from = "file:///aa/bb/cc/dd/ee";
-                to = "file:///aa/bb/cc";
-                relative = GetRelativePath(from, to);
-                Assert.AreEqual(Path.Combine("..", ".."), relative);
+            // Test handling of .
+            path = "/a/./b/././c/.";
+            norm = ExportSettings.NormalizePath(path, isRelative: true);
+            Assert.AreEqual("a/b/c", norm);
 
-			from = "file:///a/b/c/d/e/";
-			to = "file:///a/b/c/";
-			relative = GetRelativePath(from, to);
-			Assert.AreEqual(Path.Combine("..", ".."), relative);
+            // Test handling of leading ..
+            path = "..";
+            norm = ExportSettings.NormalizePath(path, isRelative: true);
+            Assert.AreEqual("..", norm);
 
-			from = Path.Combine(Application.dataPath, "foo");
-                to = Application.dataPath;
-                relative = GetRelativePath(from, to);
-                Assert.AreEqual("..", relative);
+            path = "../a";
+            norm = ExportSettings.NormalizePath(path, isRelative: true);
+            Assert.AreEqual("../a", norm);
 
-                to = Path.Combine(Application.dataPath, "foo");
-                relative = ExportSettings.ConvertToAssetRelativePath(to);
-                Assert.AreEqual("foo", relative);
-            }
+            // Test two leading ..
+            path = "../../a";
+            norm = ExportSettings.NormalizePath(path, isRelative: true);
+            Assert.AreEqual("../../a", norm);
+
+            // Test .. in the middle and effect on leading /
+            path = "/a/../b";
+            norm = ExportSettings.NormalizePath(path, isRelative: true);
+            Assert.AreEqual("b", norm);
+            norm = ExportSettings.NormalizePath(path, isRelative: false);
+            Assert.AreEqual("/b", norm);
+
+            // Test that we can change the separator
+            norm = ExportSettings.NormalizePath(path, isRelative: false, separator: '\\');
+            Assert.AreEqual("\\b", norm);
+        }
 
         [Test]
-            public void TestGetSetFields()
-            {
-                var defaultRelativePath = ExportSettings.GetRelativeSavePath();
-                Assert.AreEqual(ExportSettings.kDefaultSavePath, defaultRelativePath);
+        public void TestGetRelativePath()
+        {
+            var from = "//a/b/c";
+            var to = "///a/b/c/d/e";
+            var relative = ExportSettings.GetRelativePath(from, to);
+            Assert.AreEqual("d/e", relative);
 
-                var defaultAbsolutePath = ExportSettings.GetAbsoluteSavePath();
-                Assert.AreEqual(Path.Combine(Application.dataPath, ExportSettings.kDefaultSavePath),
-                        defaultAbsolutePath);
+            from = "///a/b/c/";
+            to = "///a/b/c/d/e/";
+            relative = ExportSettings.GetRelativePath(from, to);
+            Assert.AreEqual("d/e", relative);
 
-                // set; check that the saved value is platform-independent,
-                // but the relative save path function is platform-specific.
-                ExportSettings.SetRelativeSavePath("/a\\b/c/\\");
-                var convertToModelSavePath = s_SavePathField.GetValue(ExportSettings.instance);
-                Assert.AreEqual("a/b/c", convertToModelSavePath);
-                var platformPath = Path.Combine("a", Path.Combine("b", "c"));
-                Assert.AreEqual(platformPath, ExportSettings.GetRelativeSavePath());
-            }
+            from = "///aa/bb/cc/dd/ee";
+            to = "///aa/bb/cc";
+            relative = ExportSettings.GetRelativePath(from, to);
+            Assert.AreEqual("../..", relative);
+
+            from = "///a/b/c/d/e/";
+            to = "///a/b/c/";
+            relative = ExportSettings.GetRelativePath(from, to);
+            Assert.AreEqual("../..", relative);
+
+            from = "///a/b/c/d/e/";
+            to = "///a/b/c/";
+            relative = ExportSettings.GetRelativePath(from, to, separator: ':');
+            Assert.AreEqual("..:..", relative);
+
+            from = Path.Combine(Application.dataPath, "foo");
+            to = Application.dataPath;
+            relative = ExportSettings.GetRelativePath(from, to);
+            Assert.AreEqual("..", relative);
+
+            to = Path.Combine(Application.dataPath, "foo");
+            relative = ExportSettings.ConvertToAssetRelativePath(to);
+            Assert.AreEqual("foo", relative);
+
+
+
+        }
+
+        [Test]
+        public void TestGetSetFields()
+        {
+            var defaultRelativePath = ExportSettings.GetRelativeSavePath();
+            Assert.AreEqual(ExportSettings.kDefaultSavePath, defaultRelativePath);
+
+            var defaultAbsolutePath = ExportSettings.GetAbsoluteSavePath();
+            Assert.AreEqual(Path.Combine(Application.dataPath, ExportSettings.kDefaultSavePath),
+                    defaultAbsolutePath);
+
+            // set; check that the saved value is platform-independent,
+            // that the relative path uses / like in unity,
+            // and that the absolute path is platform-specific
+            ExportSettings.SetRelativeSavePath("/a\\b/c/\\");
+            var convertToModelSavePath = s_SavePathField.GetValue(ExportSettings.instance);
+            Assert.AreEqual("a/b/c", convertToModelSavePath);
+            Assert.AreEqual("a/b/c", ExportSettings.GetRelativeSavePath());
+            var platformPath = Path.Combine("a", Path.Combine("b", "c"));
+            Assert.AreEqual(Path.Combine(Application.dataPath, platformPath),
+                    ExportSettings.GetAbsoluteSavePath());
+        }
     }
 }
