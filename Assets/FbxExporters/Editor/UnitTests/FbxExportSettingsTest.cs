@@ -153,9 +153,6 @@ namespace FbxExporters.UnitTests
             to = Path.Combine(Application.dataPath, "foo");
             relative = ExportSettings.ConvertToAssetRelativePath(to);
             Assert.AreEqual("foo", relative);
-
-
-
         }
 
         [Test]
