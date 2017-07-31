@@ -88,10 +88,11 @@ namespace FbxExporters.EditorTools {
     {
         public const string kDefaultSavePath = "Objects";
 
-        public bool weldVertices = true;
-        public bool embedTextures = false;
-        public bool mayaCompatibleNames = true;
-        public bool centerObjects = true;
+        // Note: default values are set in LoadDefaults().
+        public bool weldVertices;
+        public bool embedTextures;
+        public bool mayaCompatibleNames;
+        public bool centerObjects;
 
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
@@ -104,7 +105,16 @@ namespace FbxExporters.EditorTools {
         /// value, properly interpreted for the current platform.
         /// </summary>
         [SerializeField]
-        string convertToModelSavePath = kDefaultSavePath;
+        string convertToModelSavePath;
+
+        protected override void LoadDefaults()
+        {
+            weldVertices = true;
+            embedTextures = false;
+            mayaCompatibleNames = true;
+            centerObjects = true;
+            convertToModelSavePath = kDefaultSavePath;
+        }
 
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
@@ -287,6 +297,7 @@ namespace FbxExporters.EditorTools {
         {
             instance.name = "Fbx Export Settings";
             Selection.activeObject = instance;
+            instance.Load();
         }
 
         public void Save()
@@ -295,7 +306,7 @@ namespace FbxExporters.EditorTools {
         }
     }
 
-    public class ScriptableSingleton<T> : ScriptableObject where T : ScriptableObject
+    public abstract class ScriptableSingleton<T> : ScriptableObject where T : ScriptableSingleton<T>
     {
         private static T s_Instance;
         public static T instance
@@ -304,7 +315,8 @@ namespace FbxExporters.EditorTools {
             {
                 if (s_Instance == null)
                 {
-                    return CreateAndLoad();
+                    s_Instance = ScriptableObject.CreateInstance<T>();
+                    s_Instance.Load();
                 }
                 return s_Instance;
             }
@@ -318,26 +330,23 @@ namespace FbxExporters.EditorTools {
             }
         }
 
-        private static T CreateAndLoad()
-        {
-            // First create.
-            if (s_Instance == null)
-            {
-                s_Instance = ScriptableObject.CreateInstance<T>();
-            }
+        protected abstract void LoadDefaults();
 
-            // Then load.
+        protected virtual void Load()
+        {
             string filePath = GetFilePath();
-            if (System.IO.File.Exists(filePath)) {
+            if (!System.IO.File.Exists(filePath)) {
+                LoadDefaults();
+            } else {
                 try {
                     var fileData = System.IO.File.ReadAllText(filePath);
                     EditorJsonUtility.FromJsonOverwrite(fileData, s_Instance);
                 } catch(Exception xcp) {
-                    // Quash the exception and go on with the default settings.
+                    // Quash the exception and take the default settings.
                     Debug.LogException(xcp);
+                    LoadDefaults();
                 }
             }
-            return s_Instance;
         }
 
         protected virtual void Save(bool saveAsText)
