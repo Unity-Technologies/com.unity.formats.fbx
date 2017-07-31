@@ -168,6 +168,7 @@ namespace FbxExporters
             {
                 string fileWithoutExt = Path.GetFileNameWithoutExtension (filename);
                 string ext = Path.GetExtension (filename);
+                string format = "{0} {1}{2}";
 
                 int index = 1;
 
@@ -175,15 +176,17 @@ namespace FbxExporters
                 var result = System.Text.RegularExpressions.Regex.Match(fileWithoutExt, @"\d+$");
                 if (result != null) {
                     var number = result.Value;
-                    if (int.TryParse (number, out index)) {
+                    int tempIndex;
+                    if (int.TryParse (number, out tempIndex)) {
                         fileWithoutExt = fileWithoutExt.Remove (fileWithoutExt.LastIndexOf (number));
-                        index++;
+                        format = "{0}{1}{2}"; // remove space from format
+                        index = tempIndex+1;
                     }
                 }
 
                 string file = null;
                 do {
-                    file = string.Format ("{0} {1}{2}", fileWithoutExt, index, ext);
+                    file = string.Format (format, fileWithoutExt, index, ext);
                     file = Path.Combine(path, file);
                     index++;
                 } while (File.Exists (file));
