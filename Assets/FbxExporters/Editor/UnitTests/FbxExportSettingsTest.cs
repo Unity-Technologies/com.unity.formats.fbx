@@ -160,9 +160,12 @@ namespace FbxExporters.UnitTests
             var defaultRelativePath = ExportSettings.GetRelativeSavePath();
             Assert.AreEqual(ExportSettings.kDefaultSavePath, defaultRelativePath);
 
+            // the path to Assets but with platform-dependent separators
+            var appDataPath = Application.dataPath.Replace(Path.AltDirectorySeparatorChar,
+                    Path.DirectorySeparatorChar);
+
             var defaultAbsolutePath = ExportSettings.GetAbsoluteSavePath();
-            var dataPath = Path.Combine(Application.dataPath, ExportSettings.kDefaultSavePath)
-                .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            var dataPath = Path.Combine(appDataPath, ExportSettings.kDefaultSavePath);
             Assert.AreEqual(dataPath, defaultAbsolutePath);
 
             // set; check that the saved value is platform-independent,
@@ -173,8 +176,7 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual("a/b/c", convertToModelSavePath);
             Assert.AreEqual("a/b/c", ExportSettings.GetRelativeSavePath());
             var platformPath = Path.Combine("a", Path.Combine("b", "c"));
-            Assert.AreEqual(Path.Combine(Application.dataPath, platformPath),
-                    ExportSettings.GetAbsoluteSavePath());
+            Assert.AreEqual(Path.Combine(appDataPath, platformPath), ExportSettings.GetAbsoluteSavePath());
         }
     }
 }
