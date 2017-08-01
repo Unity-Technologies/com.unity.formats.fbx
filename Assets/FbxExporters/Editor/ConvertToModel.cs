@@ -291,29 +291,34 @@ namespace FbxExporters
                             var toComponent = originalComponents [j];
                             // If component already exists, paste values.
                             if (toComponent.GetType () == components [i].GetType ()) {
-                                // Don't want to copy MeshFilter because then we will replace the
-                                // exported mesh with the old mesh.
-                                if (!(toComponent is MeshFilter)) {
-                                    // Don't want to copy materials over in case the materials are
-                                    // embedded in another model.
-                                    if (toComponent is SkinnedMeshRenderer) {
-                                        var skinnedMesh = toComponent as SkinnedMeshRenderer;
-                                        var sharedMesh = skinnedMesh.sharedMesh;
-                                        var sharedMats = skinnedMesh.sharedMaterials;
-                                        success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
-                                        skinnedMesh.sharedMesh = sharedMesh;
-                                        skinnedMesh.sharedMaterials = sharedMats;
-                                    } else if (toComponent is Renderer) {
-                                        var renderer = toComponent as Renderer;
-                                        var sharedMats = renderer.sharedMaterials;
-                                        success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
-                                        renderer.sharedMaterials = sharedMats;
-                                    } else {
-                                        success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
-                                    }
-                                }
+                                // we have found the component we are looking for, remove it so
+                                // we don't try to copy to it again
                                 originalComponents.RemoveAt (j);
                                 foundComponentOfType = true;
+
+                                // Don't want to copy MeshFilter because then we will replace the
+                                // exported mesh with the old mesh.
+                                if (toComponent is MeshFilter) {
+                                    break;
+                                }
+
+                                // Don't want to copy materials over in case the materials are
+                                // embedded in another model.
+                                if (toComponent is SkinnedMeshRenderer) {
+                                    var skinnedMesh = toComponent as SkinnedMeshRenderer;
+                                    var sharedMesh = skinnedMesh.sharedMesh;
+                                    var sharedMats = skinnedMesh.sharedMaterials;
+                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                    skinnedMesh.sharedMesh = sharedMesh;
+                                    skinnedMesh.sharedMaterials = sharedMats;
+                                } else if (toComponent is Renderer) {
+                                    var renderer = toComponent as Renderer;
+                                    var sharedMats = renderer.sharedMaterials;
+                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                    renderer.sharedMaterials = sharedMats;
+                                } else {
+                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                }
                                 break;
                             }
                         }
