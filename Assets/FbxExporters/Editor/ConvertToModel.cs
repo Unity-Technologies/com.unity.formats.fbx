@@ -76,10 +76,16 @@ namespace FbxExporters
             /// </summary>
             /// <returns>list of instanced Model Prefabs</returns>
             /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
-            /// <param name="path">Path to save Model Prefab</param>
+            /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
             /// <param name="keepOriginal">If set to <c>true</c> keep original gameobject hierarchy.</param>
             public static GameObject[] CreateInstantiatedModelPrefab (GameObject [] unityGameObjectsToConvert, string path = null, bool keepOriginal = true)
             {
+                if (path == null) {
+                    path = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath();
+                } else {
+                    path = Path.GetFullPath(path);
+                }
+
                 List<GameObject> result = new List<GameObject> ();
 
                 var exportSet = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
@@ -90,8 +96,6 @@ namespace FbxExporters
 
                 // find common ancestor root & filePath;
                 string[] filePaths = new string[gosToExport.Length];
-                if (path==null)
-                    path = FbxExporters.EditorTools.ExportSettings.instance.convertToModelSavePath;
 
                 for(int n = 0; n < gosToExport.Length; n++){
                     var filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
@@ -117,17 +121,16 @@ namespace FbxExporters
                         continue;
                     }
 
-                    // make filepath relative to project folder
-                    if (fbxFileName.StartsWith (Application.dataPath, System.StringComparison.CurrentCulture)) 
-                    {
-                        fbxFileName = "Assets" + fbxFileName.Substring (Application.dataPath.Length);
-                    }
+                    // make filepath relative to assets folder
+                    var relativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFileName);
 
                     // refresh the assetdata base so that we can query for the model
                     AssetDatabase.Refresh ();
 
-                    // replace w Model asset
-                    Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath (fbxFileName);
+                    // Replace w Model asset. LoadMainAssetAtPath wants a path
+                    // relative to the project, not relative to the assets
+                    // folder.
+                    Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath("Assets/" + relativePath);
 
                     if (unityMainAsset != null) {
                         Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);
