@@ -61,9 +61,7 @@ namespace FbxExporters.EditorTools {
                 // Unless the user canceled, make sure they chose something in the Assets folder.
                 if (!string.IsNullOrEmpty (fullPath)) {
                     var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
-                    if (string.IsNullOrEmpty(relativePath)
-                            || relativePath == ".."
-                            || relativePath.StartsWith(".." + Path.DirectorySeparatorChar)) {
+                    if (string.IsNullOrEmpty(relativePath)) {
                         Debug.LogWarning ("Please select a location in the Assets folder");
                     } else {
                         ExportSettings.SetRelativeSavePath(relativePath);
@@ -153,10 +151,21 @@ namespace FbxExporters.EditorTools {
         /// get from GetRelativeSavePath.
         ///
         /// This uses '/' as the path separator.
+        ///
+        /// If 'requireSubdirectory' is the default on, return empty-string if the full
+        /// path is not in a subdirectory of assets.
         /// </summary>
-        public static string ConvertToAssetRelativePath(string fullPathInAssets)
+        public static string ConvertToAssetRelativePath(string fullPathInAssets, bool requireSubdirectory = true)
         {
-            return GetRelativePath(Application.dataPath, fullPathInAssets);
+            var relativePath = GetRelativePath(Application.dataPath, fullPathInAssets);
+            if (requireSubdirectory && relativePath.StartsWith("..")) {
+                if (relativePath.Length == 2 || relativePath[2] == '/') {
+                    // The relative path has us pop out to another directory,
+                    // so return an empty string as requested.
+                    return "";
+                }
+            }
+            return relativePath;
         }
 
         /// <summary>

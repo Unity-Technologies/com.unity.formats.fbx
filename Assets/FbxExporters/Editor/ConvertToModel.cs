@@ -130,7 +130,7 @@ namespace FbxExporters
                     // Replace w Model asset. LoadMainAssetAtPath wants a path
                     // relative to the project, not relative to the assets
                     // folder.
-                    Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath(Path.Combine("Assets", relativePath));
+                    Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath("Assets/" + relativePath);
 
                     if (unityMainAsset != null) {
                         Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);

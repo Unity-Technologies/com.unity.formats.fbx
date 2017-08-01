@@ -153,6 +153,13 @@ namespace FbxExporters.UnitTests
             to = Path.Combine(Application.dataPath, "foo");
             relative = ExportSettings.ConvertToAssetRelativePath(to);
             Assert.AreEqual("foo", relative);
+
+            relative = ExportSettings.ConvertToAssetRelativePath("/path/to/somewhere/else");
+            Assert.AreEqual("", relative);
+
+            relative = ExportSettings.ConvertToAssetRelativePath("/path/to/somewhere/else", requireSubdirectory: false);
+            Assert.IsTrue(relative.StartsWith("../"));
+            Assert.IsFalse(relative.Contains("\\"));
         }
 
         [Test]
