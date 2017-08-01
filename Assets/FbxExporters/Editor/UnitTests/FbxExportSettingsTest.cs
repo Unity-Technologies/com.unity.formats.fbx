@@ -31,14 +31,6 @@ namespace FbxExporters.UnitTests
             Assert.IsNotNull(s_InstanceField, "s_Instance");
         }
 
-#if ENABLE_COVERAGE_TEST
-        [Test]
-        public void TestCoverage()
-        {
-            FbxSdk.CoverageTester.TestCoverage(typeof(ExportSettings), this.GetType());
-        }
-#endif
-
         [NUnit.Framework.SetUp]
         public void SetUp()
         {
@@ -169,8 +161,9 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual(ExportSettings.kDefaultSavePath, defaultRelativePath);
 
             var defaultAbsolutePath = ExportSettings.GetAbsoluteSavePath();
-            Assert.AreEqual(Path.Combine(Application.dataPath, ExportSettings.kDefaultSavePath),
-                    defaultAbsolutePath);
+            var dataPath = Path.Combine(Application.dataPath, ExportSettings.kDefaultSavePath)
+                .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            Assert.AreEqual(dataPath, defaultAbsolutePath);
 
             // set; check that the saved value is platform-independent,
             // that the relative path uses / like in unity,
