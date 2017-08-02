@@ -47,15 +47,18 @@ namespace FbxExporters
             private static string GetLastSavedFilePath()
             {
                 string modelPath = FbxExporters.EditorTools.ExportSettings.instance.convertToModelSavePath;
+                System.IO.FileInfo fileInfo = GetLastSavedFile (modelPath);
 
-                return GetLastSavedFile(modelPath).FullName;
+                return (fileInfo!=null) ? fileInfo.FullName : null;
             }
 
             private static void UnloadModel(Object model)
             {
                 if (model) {
                     GameObject unityGo = model as GameObject;
-                    unityGo.SetActive (false);
+
+                    if (unityGo != null)
+                        unityGo.SetActive (false);
 
                     Object.DestroyImmediate (model);
                 }
@@ -65,9 +68,13 @@ namespace FbxExporters
             {
                 Object model = null;
 
-                if (fbxFileName.StartsWith (UnityEngine.Application.dataPath, System.StringComparison.CurrentCulture))
+                fbxFileName = fbxFileName.Replace("\\", "/");
+                string dataPath = UnityEngine.Application.dataPath.Replace ("\\", "/");
+
+                // make relative
+                if (fbxFileName.StartsWith (dataPath, System.StringComparison.CurrentCulture))
                 {
-                    fbxFileName = fbxFileName.Substring (UnityEngine.Application.dataPath.Length+1);
+                    fbxFileName = fbxFileName.Substring (dataPath.Length+1);
                     fbxFileName = System.IO.Path.Combine ("Assets", fbxFileName);
                 }
 
@@ -84,6 +91,8 @@ namespace FbxExporters
             {
                 string fbxFileName = GetLastSavedFilePath();
 
+                if (fbxFileName == null) return;
+                    
                 if (fbxFileName!=LastFilePath || LastModel==null)
                 {
                     Object model = LoadModel(fbxFileName);
@@ -109,16 +118,16 @@ namespace FbxExporters
             {
                 UnityEngine.SceneManagement.Scene scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
 
-                if (scene.name == "")
+                if (scene.name == "") // aka Untitled
                 {
-                    UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene, System.IO.Path.Combine( ScenesPath, SceneName + ".unity" ));
+                    string sceneFilePath = System.IO.Path.Combine (ScenesPath, SceneName + ".unity");
+                    UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene, sceneFilePath);
                 }
 
                 if (AutoUpdateEnabled ()) 
                 {
-                    UnityEditor.EditorApplication.hierarchyWindowChanged += Update;
-
                     UpdateLastSavedModel ();
+                    UnityEditor.EditorApplication.hierarchyWindowChanged += Update;
                 }
             }
 

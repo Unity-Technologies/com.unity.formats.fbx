@@ -56,9 +56,10 @@ def installMenu():
     @ingroup UnityUI
     """
     maya.cmds.menu (kMainWndMenuName, parent='MayaWindow', label=kMainWndMenuLabel, tearOff=True) # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.configureCmd.kShortLabel, command=commands.configureCmd.kScriptCommand)        # @UndefinedVariable
+    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.importCmd.kShortLabel, command=commands.importCmd.kScriptCommand)        # @UndefinedVariable
     maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.reviewCmd.kShortLabel, command=commands.reviewCmd.kScriptCommand)    # @UndefinedVariable
     maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.publishCmd.kShortLabel, command=commands.publishCmd.kScriptCommand)    # @UndefinedVariable
+    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.configureCmd.kShortLabel, command=commands.configureCmd.kScriptCommand)        # @UndefinedVariable
 
 def uninstallMenu():
     """

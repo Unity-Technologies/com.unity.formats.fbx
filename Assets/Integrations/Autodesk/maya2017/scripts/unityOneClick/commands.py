@@ -39,17 +39,17 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     def __init__(self):
         OpenMayaMPx.MPxCommand.__init__(self)
         
-class configureCmd(BaseCommand):
+class importCmd(BaseCommand):
     """
-    Configure Maya Scene for Reviewing and Publishing to Unity
+    Import FBX file from Unity Project and autoconfigure for publishing
     
     @ingroup UnityCommands
     """
-    kLabel = 'Configure Maya to publish and review to a Unity Project'
-    kShortLabel = 'Configure'
-    kCmdName = "{}Configure".format(version.pluginPrefix())
+    kLabel = 'Import FBX file from Unity Project and auto-configure for publishing'
+    kShortLabel = 'Import'
+    kCmdName = "{}Import".format(version.pluginPrefix())
     kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
-    kRuntimeCommand = "UnityOneClickConfigure"
+    kRuntimeCommand = "UnityOneClickImport"
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -68,8 +68,10 @@ class configureCmd(BaseCommand):
         return
     
     def doIt(self, args):
-        self.displayDebug('doIt')
-
+        strCmd = 'Import'
+        self.displayDebug('doIt {0}'.format(strCmd))
+        maya.mel.eval(strCmd)
+        
     @classmethod
     def invoke(cls):
         """
@@ -158,8 +160,10 @@ class publishCmd(BaseCommand):
         return
     
     def doIt(self, args):
-        self.displayDebug('doIt')
-    
+        strCmd = 'SendToUnitySelection'
+        self.displayDebug('doIt {0}'.format(strCmd))
+        maya.mel.eval(strCmd)
+        
     @classmethod
     def invoke(cls):
         """
@@ -169,14 +173,57 @@ class publishCmd(BaseCommand):
         strCmd = '{0};'.format(cls.kCmdName)
         maya.mel.eval(strCmd)   # @UndefinedVariable
 
+class configureCmd(BaseCommand):
+    """
+    Configure Maya Scene for Reviewing and Publishing to Unity
+    
+    @ingroup UnityCommands
+    """
+    kLabel = 'Configure Maya to publish and review to a Unity Project'
+    kShortLabel = 'Configure'
+    kCmdName = "{}Configure".format(version.pluginPrefix())
+    kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
+    kRuntimeCommand = "UnityOneClickConfigure"
+
+    def __init__(self):
+        super(self.__class__, self).__init__()
+
+    @classmethod
+    def creator(cls):
+        return OpenMayaMPx.asMPxPtr(cls())
+
+    @classmethod
+    def syntaxCreator(cls):
+        syntax = OpenMaya.MSyntax()
+        return syntax
+
+    @classmethod
+    def scriptCmd(cls):
+        return
+    
+    def doIt(self, args):
+        strCmd = 'SendToUnitySetProject'
+        self.displayDebug('doIt {0}'.format(strCmd))
+        maya.mel.eval(strCmd)
+        
+    @classmethod
+    def invoke(cls):
+        """
+        Invoke command using mel so that it is executed and logged to script editor log
+        @return: void
+        """
+        strCmd = '{0};'.format(cls.kCmdName)
+        maya.mel.eval(strCmd)   # @UndefinedVariable
+
 def register(pluginFn):
     """
     Register commands for plugin
     @param pluginFn (MFnPlugin): plugin object passed to initializePlugin
     """
-    pluginFn.registerCommand(configureCmd.kCmdName, configureCmd.creator, configureCmd.syntaxCreator)
+    pluginFn.registerCommand(importCmd.kCmdName, importCmd.creator, importCmd.syntaxCreator)
     pluginFn.registerCommand(reviewCmd.kCmdName, reviewCmd.creator, reviewCmd.syntaxCreator)
     pluginFn.registerCommand(publishCmd.kCmdName, publishCmd.creator, publishCmd.syntaxCreator)
+    pluginFn.registerCommand(configureCmd.kCmdName, configureCmd.creator, configureCmd.syntaxCreator)
     
     return
 
@@ -185,9 +232,10 @@ def unregister(pluginFn):
     Unregister commands for plugin
     @param pluginFn (MFnPlugin): plugin object passed to uninitializePlugin
     """
-    pluginFn.deregisterCommand(configureCmd.kCmdName)
+    pluginFn.deregisterCommand(importCmd.kCmdName)
     pluginFn.deregisterCommand(reviewCmd.kCmdName)
     pluginFn.deregisterCommand(publishCmd.kCmdName)
+    pluginFn.deregisterCommand(configureCmd.kCmdName)
     return
 
 #===============================================================================
@@ -211,10 +259,10 @@ class BaseCmdTest(BaseTestCase):
         if self.__cmd__:
             self.__cmd__.invoke()
 
-class configureCmdTestCase(BaseCmdTest):
-    """UnitTest for testing the configureCmd command
+class importCmdTestCase(BaseCmdTest):
+    """UnitTest for testing the importCmd command
     """
-    __cmd__ = configureCmd
+    __cmd__ = importCmd
 
 class reviewCmdTestCase(BaseCmdTest):
     """UnitTest for testing the reviewCmd command
@@ -226,8 +274,13 @@ class publishCmdTestCase(BaseCmdTest):
     """
     __cmd__ = publishCmd
 
+class configureCmdTestCase(BaseCmdTest):
+    """UnitTest for testing the configureCmd command
+    """
+    __cmd__ = configureCmd
+
 # NOTE: update this for test discovery
-test_cases = (configureCmdTestCase, reviewCmdTestCase, publishCmdTestCase,)
+test_cases = (importCmdTestCase, reviewCmdTestCase, publishCmdTestCase, configureCmdTestCase,)
 
 def load_tests(loader, tests, pattern):
     suite = unittest.TestSuite()
