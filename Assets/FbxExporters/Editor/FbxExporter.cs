@@ -30,6 +30,8 @@ namespace FbxExporters
             const string Comments =
                 @"";
 
+            const string ReadmeRelativePath = "FbxExporters/README.txt";
+
             const string MenuItemName = "Assets/Export Model...";
 
             const string FileBaseName = "Untitled";
@@ -68,6 +70,47 @@ namespace FbxExporters
             /// Map the name of a prefab to an FbxMesh (for preserving instances) 
             /// </summary>
             Dictionary<string, FbxMesh> SharedMeshes = new Dictionary<string, FbxMesh>();
+
+            /// <summary>
+            /// Map for the Name of an Object to number of objects with this name.
+            /// Used for enforcing unique names on export.
+            /// </summary>
+            Dictionary<string, int> NameToIndexMap = new Dictionary<string, int> ();
+
+            /// <summary>
+            /// Format for creating unique names
+            /// </summary>
+            const string UniqueNameFormat = "{0}_{1}";
+
+            private string GetVersionFromReadme()
+            {
+                if (string.IsNullOrEmpty (ReadmeRelativePath)) {
+                    Debug.LogWarning ("Missing relative path to README");
+                    return null;
+                }
+                string absPath = Path.Combine (Application.dataPath, ReadmeRelativePath);
+                if (!File.Exists (absPath)) {
+                    Debug.LogWarning (string.Format("Could not find README.txt at: {0}", absPath));
+                    return null;
+                }
+
+                try{
+                    var versionHeader = "**Version**:";
+                    var lines = File.ReadAllLines (absPath);
+                    foreach (var line in lines) {
+                        if (line.StartsWith(versionHeader)) {
+                            var version = line.Replace (versionHeader, "");
+                            return version.Trim ();
+                        }
+                    }
+                }
+                catch(IOException e){
+                    Debug.LogWarning (string.Format("Error will reading file {0} ({1})", absPath, e));
+                    return null;
+                }
+                Debug.LogWarning (string.Format("Could not find version number in README.txt at: {0}", absPath));
+                return null;
+            }
 
             /// <summary>
             /// return layer for mesh
@@ -330,7 +373,7 @@ namespace FbxExporters
 
                 // Copy the flat colours over from Unity standard materials to FBX.
                 fbxMaterial.Diffuse.Set (GetMaterialColor (unityMaterial, "_Color"));
-                fbxMaterial.Emissive.Set (GetMaterialColor (unityMaterial, "_EmissionColor"));
+                fbxMaterial.Emissive.Set (GetMaterialColor (unityMaterial, "_EmissionColor", 0));
                 fbxMaterial.Ambient.Set (new FbxDouble3 ());
 
                 fbxMaterial.BumpFactor.Set (unityMaterial && unityMaterial.HasProperty ("_BumpScale") ? unityMaterial.GetFloat ("_BumpScale") : 0);
@@ -341,7 +384,7 @@ namespace FbxExporters
 
                 // Export the textures from Unity standard materials to FBX.
                 ExportTexture (unityMaterial, "_MainTex", fbxMaterial, FbxSurfaceMaterial.sDiffuse);
-                ExportTexture (unityMaterial, "_EmissionMap", fbxMaterial, "emissive");
+                ExportTexture (unityMaterial, "_EmissionMap", fbxMaterial, FbxSurfaceMaterial.sEmissive);
                 ExportTexture (unityMaterial, "_BumpMap", fbxMaterial, FbxSurfaceMaterial.sNormalMap);
                 if (specular) {
                     ExportTexture (unityMaterial, "_SpecGlosMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
@@ -384,15 +427,32 @@ namespace FbxExporters
 
                         FbxLayerElementArray fbxElementArray = fbxLayerElement.GetIndexArray ();
 
-                        // assuming that each polygon is a triangle
-                        // TODO: Add support for other mesh topologies (e.g. quads)
-                        fbxElementArray.SetCount (mesh.triangles.Length / 3);
+                        for (int subMeshIndex = 0; subMeshIndex < mesh.subMeshCount; subMeshIndex++) {
+                            var topology = mesh.GetTopology (subMeshIndex);
+                            int polySize;
 
-                        for (int i = 0; i < mesh.subMeshCount; i++) {
-                            int start = ((int)mesh.GetIndexStart (i)) / 3;
-                            int count = ((int)mesh.GetIndexCount (i)) / 3;
-                            for (int j = start; j < start + count; j++) {
-                                fbxElementArray.SetAt (j, i);
+                            switch (topology) {
+                            case MeshTopology.Triangles:
+                                polySize = 3;
+                                break;
+                            case MeshTopology.Quads:
+                                polySize = 4;
+                                break;
+                            case MeshTopology.Lines:
+                                throw new System.NotImplementedException();
+                            case MeshTopology.Points:
+                                throw new System.NotImplementedException();
+                            case MeshTopology.LineStrip:
+                                throw new System.NotImplementedException();
+                            default:
+                                throw new System.NotImplementedException ();
+                            }
+
+                            // Specify the material index for each polygon.
+                            // Material index should match subMeshIndex.
+                            var indices = mesh.GetIndices (subMeshIndex);
+                            for(int j = 0, n = indices.Length / polySize; j < n; j++){
+                                fbxElementArray.Add (subMeshIndex);
                             }
                         }
                     }
@@ -462,38 +522,61 @@ namespace FbxExporters
                         fbxNode.AddMaterial (fbxMaterial);
                 }
 
-                /*
-                 * Triangles have to be added in reverse order, 
-                 * or else they will be inverted on import 
-                 * (due to the conversion from left to right handed coords)
-                 */
-                int[] unmergedTriangles = new int[meshInfo.Triangles.Length];
+                int[] unmergedPolygons = new int[meshInfo.Triangles.Length];
                 int current = 0;
-                for (int f = 0; f < meshInfo.Triangles.Length / 3; f++) {
-                    fbxMesh.BeginPolygon ();
+                var mesh = meshInfo.mesh;
+                for (int s = 0; s < mesh.subMeshCount; s++) {
+                    var topology = mesh.GetTopology (s);
+                    var indices = mesh.GetIndices (s);
 
-                    // triangle vertices have to be reordered to be 0,2,1 instead
-                    // of 0,1,2, as this gets flipped back during import
-                    foreach (int val in new int[]{0,2,1}) {
-                        int tri = meshInfo.Triangles [3 * f + val];
+                    int polySize;
+                    int[] vertOrder;
 
-                        // Save the triangle order (without merging vertices) so we
-                        // properly export UVs, normals, binormals, etc.
-                        unmergedTriangles [current] = tri;
-
-                        if (weldVertices) {
-                            tri = ControlPointToIndex [meshInfo.Vertices [tri]];
-                        }
-                        fbxMesh.AddPolygon (tri);
-
-                        current++;
+                    switch (topology) {
+                    case MeshTopology.Triangles:
+                        polySize = 3;
+                        // flip winding order so that Maya and Unity import it properly
+                        vertOrder = new int[]{ 0, 2, 1 };
+                        break;
+                    case MeshTopology.Quads:
+                        polySize = 4;
+                        // flip winding order so that Maya and Unity import it properly
+                        vertOrder = new int[]{ 0, 3, 2, 1 };
+                        break;
+                    case MeshTopology.Lines:
+                        throw new System.NotImplementedException();
+                    case MeshTopology.Points:
+                        throw new System.NotImplementedException();
+                    case MeshTopology.LineStrip:
+                        throw new System.NotImplementedException();
+                    default: 
+                        throw new System.NotImplementedException ();
                     }
-                    fbxMesh.EndPolygon ();
+
+                    for (int f = 0; f < indices.Length / polySize; f++) {
+                        fbxMesh.BeginPolygon ();
+
+                        foreach (int val in vertOrder) {
+                            int polyVert = indices [polySize * f + val];
+
+                            // Save the polygon order (without merging vertices) so we
+                            // properly export UVs, normals, binormals, etc.
+                            unmergedPolygons [current] = polyVert;
+
+                            if (weldVertices) {
+                                polyVert = ControlPointToIndex [meshInfo.Vertices [polyVert]];
+                            }
+                            fbxMesh.AddPolygon (polyVert);
+
+                            current++;
+                        }
+                        fbxMesh.EndPolygon ();
+                    }
                 }
 
                 AssignLayerElementMaterial (fbxMesh, meshInfo.mesh, meshInfo.Materials.Length);
 
-                ExportComponentAttributes (meshInfo, fbxMesh, unmergedTriangles);
+                ExportComponentAttributes (meshInfo, fbxMesh, unmergedPolygons);
 
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
@@ -502,47 +585,70 @@ namespace FbxExporters
                 return fbxMesh;
             }
 
+            /// <summary>
+            /// Takes a Quaternion and returns a Euler with XYZ rotation order.
+            /// Also converts from left (Unity) to righthanded (Maya) coordinates.
+            /// 
+            /// Note: Cannot simply use the FbxQuaternion.DecomposeSphericalXYZ()
+            ///       function as this returns the angle in spherical coordinates 
+            ///       instead of Euler angles, which Maya does not import properly. 
+            /// </summary>
+            /// <returns>Euler with XYZ rotation order.</returns>
+            public static FbxDouble3 QuaternionToXYZEuler(Quaternion q)
+            {
+                FbxQuaternion quat = new FbxQuaternion (q.x, q.y, q.z, q.w);
+                FbxAMatrix m = new FbxAMatrix ();
+                m.SetQ (quat);
+                var vector4 = m.GetR ();
+
+                // Negate the y and z values of the rotation to convert 
+                // from Unity to Maya coordinates (left to righthanded).
+                var result = new FbxDouble3 (vector4.X, -vector4.Y, -vector4.Z);
+
+                return result;
+            }
+
             // get a fbxNode's global default position.
-            protected void ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, TransformExportType exportType)
+            protected void ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, Vector3 newCenter, TransformExportType exportType)
             {
                 // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
                 // This causes issues when converting euler to quaternion, causing the final
                 // rotation to be slighlty off.
-                // Fixed if we set the rotation order to the Unity rotation order in the FBX.
-                fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
+                // Fixed by exporting the rotations as eulers with XYZ rotation order.
+                fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderXYZ);
 
                 UnityEngine.Vector3 unityTranslate;
-                UnityEngine.Vector3 unityRotate;
+                FbxDouble3 unityRotate;
                 UnityEngine.Vector3 unityScale;
 
                 switch (exportType) {
-                case TransformExportType.Zeroed:
+                case TransformExportType.Reset:
                     unityTranslate = Vector3.zero;
-                    unityRotate = Vector3.zero;
+                    unityRotate = new FbxDouble3 (0);
                     unityScale = Vector3.one;
                     break;
                 case TransformExportType.Global:
-                    unityTranslate = unityTransform.position;
-                    unityRotate = unityTransform.rotation.eulerAngles;
+                    unityTranslate = GetRecenteredTranslation(unityTransform, newCenter);
+                    unityRotate = QuaternionToXYZEuler(unityTransform.rotation);
                     unityScale = unityTransform.lossyScale;
                     break;
                 default: /*case TransformExportType.Local*/
                     unityTranslate = unityTransform.localPosition;
-                    unityRotate = unityTransform.localRotation.eulerAngles;
+                    unityRotate = QuaternionToXYZEuler(unityTransform.localRotation);
                     unityScale = unityTransform.localScale;
                     break;
                 }
 
                 // transfer transform data from Unity to Fbx
-                // Negating the x value of the translation, and the y and z values of the rotation
-                // to convert from Unity to Maya coordinates (left to righthanded).
+                // Negating the x value of the translation to convert from Unity
+                // to Maya coordinates (left to righthanded).
                 // Scaling the translation by 100 to convert from m to cm.
                 var fbxTranslate = new FbxDouble3 (
                     -unityTranslate.x*UnitScaleFactor,
                     unityTranslate.y*UnitScaleFactor,
                     unityTranslate.z*UnitScaleFactor
                 );
-                var fbxRotate = new FbxDouble3 (unityRotate.x, -unityRotate.y, -unityRotate.z);
+                var fbxRotate = unityRotate;
                 var fbxScale = new FbxDouble3 (unityScale.x, unityScale.y, unityScale.z);
 
                 // set the local position of fbxNode
@@ -588,11 +694,31 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Ensures that the inputted name is unique.
+            /// If a duplicate name is found, then it is incremented.
+            /// e.g. Sphere becomes Sphere_1
+            /// </summary>
+            /// <returns>Unique name</returns>
+            /// <param name="name">Name</param>
+            private string GetUniqueName(string name)
+            {
+                var uniqueName = name;
+                if (NameToIndexMap.ContainsKey (name)) {
+                    uniqueName = string.Format (UniqueNameFormat, name, NameToIndexMap [name]);
+                    NameToIndexMap [name]++;
+                } else {
+                    NameToIndexMap [name] = 1;
+                }
+                return uniqueName;
+            }
+
+            /// <summary>
             /// Unconditionally export components on this game object
             /// </summary>
             protected int ExportComponents (
                 GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
-                int exportProgress, int objectCount, TransformExportType exportType = TransformExportType.Local)
+                int exportProgress, int objectCount, Vector3 newCenter,
+                TransformExportType exportType = TransformExportType.Local)
             {
                 int numObjectsExported = exportProgress;
 
@@ -601,7 +727,7 @@ namespace FbxExporters
                 }
 
                 // create an FbxNode and add it as a child of parent
-                FbxNode fbxNode = FbxNode.Create (fbxScene, unityGo.name);
+                FbxNode fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
                 NumNodes++;
 
                 numObjectsExported++;
@@ -613,7 +739,7 @@ namespace FbxExporters
                     return -1;
                 }
 
-                ExportTransform ( unityGo.transform, fbxNode, exportType);
+                ExportTransform ( unityGo.transform, fbxNode, newCenter, exportType);
 
                 // try exporting mesh as an instance, export regularly if we cannot
                 if (!ExportInstance (unityGo, fbxNode, fbxScene)) {
@@ -628,7 +754,7 @@ namespace FbxExporters
 
                 // now  unityGo  through our children and recurse
                 foreach (Transform childT in  unityGo.transform) {
-                    numObjectsExported = ExportComponents (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount);
+                    numObjectsExported = ExportComponents (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter);
                 }
                 return numObjectsExported;
             }
@@ -691,7 +817,79 @@ namespace FbxExporters
                 return toExport;
             }
 
-            public enum TransformExportType { Local, Global, Zeroed };
+            /// <summary>
+            /// Recursively go through the hierarchy, unioning the bounding box centers
+            /// of all the children, to find the combined bounds.
+            /// </summary>
+            /// <param name="t">Transform.</param>
+            /// <param name="boundsUnion">The Bounds that is the Union of all the bounds on this transform's hierarchy.</param>
+            private static void EncapsulateBounds(Transform t, ref Bounds boundsUnion)
+            {
+                var bounds = GetBounds (t);
+                boundsUnion.Encapsulate (bounds);
+
+                foreach (Transform child in t) {
+                    EncapsulateBounds (child, ref boundsUnion);
+                }
+            }
+
+            /// <summary>
+            /// Gets the bounds of a transform. 
+            /// Looks first at the Renderer, then Mesh, then Collider.
+            /// Default to a bounds with center transform.position and size zero.
+            /// </summary>
+            /// <returns>The bounds.</returns>
+            /// <param name="t">Transform.</param>
+            private static Bounds GetBounds(Transform t)
+            {
+                var renderer = t.GetComponent<Renderer> ();
+                if (renderer) {
+                    return renderer.bounds;
+                }
+                var mesh = t.GetComponent<Mesh> ();
+                if (mesh) {
+                    return mesh.bounds;
+                }
+                var collider = t.GetComponent<Collider> ();
+                if (collider) {
+                    return collider.bounds;
+                }
+                return new Bounds(t.position, Vector3.zero);
+            }
+
+            /// <summary>
+            /// Finds the center of a group of GameObjects.
+            /// </summary>
+            /// <returns>Center of gameObjects.</returns>
+            /// <param name="gameObjects">Game objects.</param>
+            public static Vector3 FindCenter(IEnumerable<GameObject> gameObjects)
+            {
+                Bounds bounds = new Bounds();
+                // Assign the initial bounds to first GameObject's bounds
+                // (if we initialize the bounds to 0, then 0 will be part of the bounds)
+                foreach (var go in gameObjects) {
+                    var tempBounds = GetBounds (go.transform);
+                    bounds = new Bounds (tempBounds.center, tempBounds.size);
+                    break;
+                }
+                foreach (var go in gameObjects) {
+                    EncapsulateBounds (go.transform, ref bounds);
+                }
+                return bounds.center;
+            }
+
+            /// <summary>
+            /// Gets the recentered translation.
+            /// </summary>
+            /// <returns>The recentered translation.</returns>
+            /// <param name="t">Transform.</param>
+            /// <param name="center">Center point.</param>
+            public static Vector3 GetRecenteredTranslation(Transform t, Vector3 center)
+            {
+                return t.position - center;
+            }
+
+            public enum TransformExportType { Local, Global, Reset };
 
             /// <summary>
             /// Export all the objects in the set.
@@ -699,8 +897,26 @@ namespace FbxExporters
             /// </summary>
             public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet)
             {
+                exportCancelled = false;
                 Verbose = true;
+
+                // Export first to a temporary file
+                // in case the export is cancelled.
+                // This way we won't overwrite existing files.
+                try{
+                    m_tempFilePath = Path.GetTempFileName();
+                }
+                catch(IOException){
+                    return 0;
+                }
+                m_lastFilePath = LastFilePath;
+
+                if (string.IsNullOrEmpty (m_tempFilePath)) {
+                    return 0;
+                }
+
                 try {
+                    bool status = false;
                     // Create the FBX manager
                     using (var fbxManager = FbxManager.Create ()) {
                         // Configure fbx IO settings.
@@ -718,8 +934,8 @@ namespace FbxExporters
                         // fileFormat must be binary if we are embedding textures
                         int fileFormat = EditorTools.ExportSettings.instance.embedTextures? -1 :
                             fbxManager.GetIOPluginRegistry ().FindWriterIDByDescription ("FBX ascii (*.fbx)");
-
-                        bool status = fbxExporter.Initialize (LastFilePath, fileFormat, fbxManager.GetIOSettings ());
+                        
+                        status = fbxExporter.Initialize (m_tempFilePath, fileFormat, fbxManager.GetIOSettings ());
                         // Check that initialization of the fbxExporter was successful
                         if (!status)
                             return 0;
@@ -741,6 +957,15 @@ namespace FbxExporters
                         fbxSceneInfo.mRevision = "1.0";
                         fbxSceneInfo.mKeywords = Keywords;
                         fbxSceneInfo.mComment = Comments;
+                        fbxSceneInfo.Original_ApplicationName.Set("Unity FbxExporter Plugin");
+                        // set last saved to be the same as original, as this is a new file.
+                        fbxSceneInfo.LastSaved_ApplicationName.Set(fbxSceneInfo.Original_ApplicationName.Get());
+
+                        var version = GetVersionFromReadme();
+                        if(version != null){
+                            fbxSceneInfo.Original_ApplicationVersion.Set(version);
+                            fbxSceneInfo.LastSaved_ApplicationVersion.Set(fbxSceneInfo.Original_ApplicationVersion.Get());
+                        }
                         fbxScene.SetSceneInfo (fbxSceneInfo);
 
                         // Set up the axes (Y up, Z forward, X to the right) and units (centimeters)
@@ -764,45 +989,55 @@ namespace FbxExporters
 
                         if(revisedExportSet.Count == 1){
                             foreach(var unityGo in revisedExportSet){
-                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode, exportProgress, count, TransformExportType.Zeroed);
-                                if (exportProgress < 0) {
+                                exportProgress = this.ExportComponents (
+                                    unityGo, fbxScene, fbxRootNode, exportProgress,
+                                    count, Vector3.zero, TransformExportType.Reset);
+                                if (exportCancelled || exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
                                     return 0;
                                 }
                             }
                         }
                         else{
+                            // find the center of the export set
+                            Vector3 center = EditorTools.ExportSettings.instance.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
+
                             foreach (var unityGo in revisedExportSet) {
-                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode, exportProgress, count,
-                                    unityGo.transform.parent == null? TransformExportType.Local : TransformExportType.Global);
-                                if (exportProgress < 0) {
+                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode,
+                                    exportProgress, count, center, TransformExportType.Global);
+                                if (exportCancelled || exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
                                     return 0;
                                 }
                             }
                         }
-
                         // Export the scene to the file.
                         status = fbxExporter.Export (fbxScene);
 
                         // cleanup
                         fbxScene.Destroy ();
                         fbxExporter.Destroy ();
-
-                        if (exportCancelled) {
-                            Debug.LogWarning ("Export Cancelled");
-                            // delete the file that got created
-                            EditorApplication.update += DeleteFile;
-                            return 0;
-                        }
-
-                        return status == true ? NumNodes : 0;
                     }
-                } finally {
+
+                    if (exportCancelled) {
+                        Debug.LogWarning ("Export Cancelled");
+                        return 0;
+                    }
+                    // delete old file, move temp file
+                    ReplaceFile();
+                    AssetDatabase.Refresh();
+
+                    return status == true ? NumNodes : 0;
+                }
+                finally {
                     // You must clear the progress bar when you're done,
                     // otherwise it never goes away and many actions in Unity
                     // are blocked (e.g. you can't quit).
                     EditorUtility.ClearProgressBar ();
+
+                    // make sure the temp file is deleted, no matter
+                    // when we return
+                    DeleteTempFile();
                 }
             }
 
@@ -825,20 +1060,49 @@ namespace FbxExporters
                 return !cancel;
             }
 
-            static void DeleteFile ()
+            /// <summary>
+            /// Deletes the file that got created while exporting.
+            /// </summary>
+            private void DeleteTempFile ()
             {
-                if (File.Exists (LastFilePath)) {
-                    try {
-                        File.Delete (LastFilePath);
-                    } catch (IOException) {
-                    }
+                if (!File.Exists (m_tempFilePath)) {
+                    return;
+                }
 
-                    if (File.Exists (LastFilePath)) {
-                        Debug.LogWarning ("Failed to delete file: " + LastFilePath);
-                    }
-                } else {
-                    EditorApplication.update -= DeleteFile;
-                    AssetDatabase.Refresh ();
+                try {
+                    File.Delete (m_tempFilePath);
+                } catch (IOException) {
+                }
+
+                if (File.Exists (m_tempFilePath)) {
+                    Debug.LogWarning ("Failed to delete file: " + m_tempFilePath);
+                }
+            }
+
+            /// <summary>
+            /// Replaces the file we are overwriting with
+            /// the temp file that was exported to.
+            /// </summary>
+            private void ReplaceFile ()
+            {
+                if (m_tempFilePath.Equals (m_lastFilePath) || !File.Exists (m_tempFilePath)) {
+                    return;
+                }
+                // delete old file
+                try {
+                    File.Delete (m_lastFilePath);
+                } catch (IOException) {
+                }
+
+                if (File.Exists (m_lastFilePath)) {
+                    Debug.LogWarning ("Failed to delete file: " + m_lastFilePath);
+                }
+
+                // rename the new file
+                try{
+                    File.Move(m_tempFilePath, m_lastFilePath);
+                } catch(IOException){
+                    Debug.LogWarning (string.Format("Failed to move file {0} to {1}", m_tempFilePath, m_lastFilePath));
                 }
             }
 
@@ -876,7 +1140,7 @@ namespace FbxExporters
             ///<summary>
             ///Information about the mesh that is important for exporting.
             ///</summary>
-            public struct MeshInfo
+            public class MeshInfo
             {
                 /// <summary>
                 /// The transform of the mesh.
@@ -907,19 +1171,33 @@ namespace FbxExporters
                 /// Ex: if triangles = [3,4,2], then we have one triangle with vertices vertices[3], vertices[4], and vertices[2]
                 /// </summary>
                 /// <value>The triangles.</value>
-                public int [] Triangles { get { return mesh.triangles; } }
+                private int[] m_triangles;
+                public int [] Triangles { get { 
+                        if(m_triangles == null) { m_triangles = mesh.triangles; }
+                        return m_triangles; 
+                    } }
 
                 /// <summary>
                 /// Gets the vertices, represented in local coordinates.
                 /// </summary>
                 /// <value>The vertices.</value>
-                public Vector3 [] Vertices { get { return mesh.vertices; } }
+                private Vector3[] m_vertices;
+                public Vector3 [] Vertices { get { 
+                        if(m_vertices == null) { m_vertices = mesh.vertices; }
+                        return m_vertices; 
+                    } }
 
                 /// <summary>
                 /// Gets the normals for the vertices.
                 /// </summary>
                 /// <value>The normals.</value>
-                public Vector3 [] Normals { get { return mesh.normals; } }
+                private Vector3[] m_normals;
+                public Vector3 [] Normals { get {
+                        if (m_normals == null) {
+                            m_normals = mesh.normals;
+                        }
+                        return m_normals; 
+                    } }
 
                 /// <summary>
                 /// TODO: Gets the binormals for the vertices.
@@ -934,12 +1212,15 @@ namespace FbxExporters
                         ///    => Math.cross (normal, tangent.xyz) * tangent.w
                         if (m_Binormals == null || m_Binormals.Length == 0) 
                         {
-                            m_Binormals = new Vector3 [mesh.normals.Length];
+                            var normals = Normals;
+                            var tangents = Tangents;
 
-                            for (int i = 0; i < mesh.normals.Length; i++)
-                                m_Binormals [i] = Vector3.Cross (mesh.normals [i],
-                                    mesh.tangents [i])
-                                * mesh.tangents [i].w;
+                            m_Binormals = new Vector3 [normals.Length];
+
+                            for (int i = 0; i < normals.Length; i++)
+                                m_Binormals [i] = Vector3.Cross (normals [i],
+                                    tangents [i])
+                                    * tangents [i].w;
 
                         }
                         return m_Binormals;
@@ -950,19 +1231,37 @@ namespace FbxExporters
                 /// TODO: Gets the tangents for the vertices.
                 /// </summary>
                 /// <value>The tangents.</value>
-                public Vector4 [] Tangents { get { return mesh.tangents; } }
+                private Vector4[] m_tangents;
+                public Vector4 [] Tangents { get { 
+                        if (m_tangents == null) {
+                            m_tangents = mesh.tangents;
+                        }
+                        return m_tangents; 
+                    } }
 
                 /// <summary>
-                /// TODO: Gets the tangents for the vertices.
+                /// TODO: Gets the vertex colors for the vertices.
                 /// </summary>
-                /// <value>The tangents.</value>
-                public Color32 [] VertexColors { get { return mesh.colors32; } }
+                /// <value>The vertex colors.</value>
+                private Color32 [] m_vertexColors;
+                public Color32 [] VertexColors { get { 
+                        if (m_vertexColors == null) {
+                            m_vertexColors = mesh.colors32;
+                        }
+                        return m_vertexColors; 
+                    } }
 
                 /// <summary>
                 /// Gets the uvs.
                 /// </summary>
                 /// <value>The uv.</value>
-                public Vector2 [] UV { get { return mesh.uv; } }
+                private Vector2[] m_UVs;
+                public Vector2 [] UV { get { 
+                        if (m_UVs == null) {
+                            m_UVs = mesh.uv;
+                        }
+                        return m_UVs; 
+                    } }
 
                 /// <summary>
                 /// The material used, if any; otherwise null.
@@ -1002,6 +1301,12 @@ namespace FbxExporters
                     this.xform = Matrix4x4.identity;
                     this.unityObject = null;
                     this.m_Binormals = null;
+                    this.m_vertices = null;
+                    this.m_triangles = null;
+                    this.m_normals = null;
+                    this.m_UVs = null;
+                    this.m_vertexColors = null;
+                    this.m_tangents = null;
                 }
 
                 /// <summary>
@@ -1015,6 +1320,12 @@ namespace FbxExporters
                     this.xform = gameObject.transform.localToWorldMatrix;
                     this.unityObject = gameObject;
                     this.m_Binormals = null;
+                    this.m_vertices = null;
+                    this.m_triangles = null;
+                    this.m_normals = null;
+                    this.m_UVs = null;
+                    this.m_vertexColors = null;
+                    this.m_tangents = null;
                 }
             }
 
@@ -1056,7 +1367,7 @@ namespace FbxExporters
                     }
                 }
                 if (!mesh) {
-                    return new MeshInfo ();
+                    return new MeshInfo(null);
                 }
                 return new MeshInfo (gameObject, mesh);
             }
@@ -1089,6 +1400,8 @@ namespace FbxExporters
             /// manage the selection of a filename
             /// </summary>
             static string LastFilePath { get; set; }
+            private string m_tempFilePath { get; set; }
+            private string m_lastFilePath { get; set; }
 
             const string Extension = "fbx";
 

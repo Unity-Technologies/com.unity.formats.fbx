@@ -54,9 +54,12 @@ namespace FbxExporters
             static void OnContextItem (MenuCommand command)
             {
                 if (command == null || command.context == null) {
-                    Debug.LogError ("Error: No GameObject selected");
+                    // We were actually invoked from the top GameObject menu,
+                    // not the context menu, so treat it as such.
+                    OnMenuItem();
                     return;
                 }
+
                 GameObject selected = command.context as GameObject;
                 if (selected == null) {
                     Debug.LogError (string.Format("Error: {0} is not a GameObject and cannot be converted", command.context.name));
@@ -165,11 +168,25 @@ namespace FbxExporters
             {
                 string fileWithoutExt = Path.GetFileNameWithoutExtension (filename);
                 string ext = Path.GetExtension (filename);
+                string format = "{0} {1}{2}";
 
                 int index = 1;
+
+                // try extracting the current index from the name and incrementing it
+                var result = System.Text.RegularExpressions.Regex.Match(fileWithoutExt, @"\d+$");
+                if (result != null) {
+                    var number = result.Value;
+                    int tempIndex;
+                    if (int.TryParse (number, out tempIndex)) {
+                        fileWithoutExt = fileWithoutExt.Remove (fileWithoutExt.LastIndexOf (number));
+                        format = "{0}{1}{2}"; // remove space from format
+                        index = tempIndex+1;
+                    }
+                }
+
                 string file = null;
                 do {
-                    file = string.Format ("{0} {1}{2}", fileWithoutExt, index, ext);
+                    file = string.Format (format, fileWithoutExt, index, ext);
                     file = Path.Combine(path, file);
                     index++;
                 } while (File.Exists (file));
@@ -220,10 +237,6 @@ namespace FbxExporters
                 Transform importedTransform = imported.transform;
                 Transform origTransform = orig.transform;
 
-                // Set the name to be the name of the instantiated asset.
-                // This will get rid of the "(Clone)" if it's added
-                imported.name = orig.name;
-
                 // configure transform and maintain local pose
                 importedTransform.SetParent (origTransform.parent, false);
                 importedTransform.SetSiblingIndex (origTransform.GetSiblingIndex());
@@ -244,7 +257,10 @@ namespace FbxExporters
                         origTransform.hierarchyCount, importedTransform.hierarchyCount));
                 }
                 FixSiblingOrder (orig.transform, imported.transform);
-                CopyComponentsRecursive (orig, imported);
+
+                // the imported GameObject will have the same name as the file to which it was imported from,
+                // which might not be the same name as the original GameObject
+                CopyComponentsRecursive (orig, imported, namesExpectedMatch:false);
             }
 
             private static void FixSiblingOrder(Transform orig, Transform imported){
@@ -262,8 +278,8 @@ namespace FbxExporters
                 }
             }
 
-            private static void CopyComponentsRecursive(GameObject from, GameObject to){
-                if (!to.name.StartsWith(from.name) || from.transform.childCount != to.transform.childCount) {
+            private static void CopyComponentsRecursive(GameObject from, GameObject to, bool namesExpectedMatch = true){
+                if (namesExpectedMatch && !to.name.StartsWith(from.name) || from.transform.childCount != to.transform.childCount) {
                     Debug.LogError (string.Format("Error: hierarchies don't match (From: {0}, To: {1})", from.name, to.name));
                     return;
                 }
@@ -285,21 +301,31 @@ namespace FbxExporters
                     if (success) {
                         // if to already has this component, then copy the values over
                         var toComponent = to.GetComponent (components [i].GetType ());
-                        if (toComponent != null) {
-                            // don't want to copy MeshFilter because then we will replace the
-                            // exported mesh with the old mesh
-                            if (!(toComponent is MeshFilter)) {
-                                if (toComponent is SkinnedMeshRenderer) {
-                                    var skinnedMesh = toComponent as SkinnedMeshRenderer;
-                                    var sharedMesh = skinnedMesh.sharedMesh;
-                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
-                                    skinnedMesh.sharedMesh = sharedMesh;
-                                } else {
-                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
-                                }
-                            }
-                        } else {
+                        if (toComponent == null) {
                             success = UnityEditorInternal.ComponentUtility.PasteComponentAsNew (to);
+                        } else{
+                            // Don't want to copy MeshFilter because then we will replace the
+                            // exported mesh with the old mesh.
+                            if (toComponent is MeshFilter) {
+                                continue;
+                            }
+                            // Don't want to copy materials over either in case the materials are
+                            // embedded in another model.
+                            else if (toComponent is SkinnedMeshRenderer) {
+                                var skinnedMesh = toComponent as SkinnedMeshRenderer;
+                                var sharedMesh = skinnedMesh.sharedMesh;
+                                var sharedMats = skinnedMesh.sharedMaterials;
+                                success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                skinnedMesh.sharedMesh = sharedMesh;
+                                skinnedMesh.sharedMaterials = sharedMats;
+                            } else if (toComponent is Renderer) {
+                                var renderer = toComponent as Renderer;
+                                var sharedMats = renderer.sharedMaterials;
+                                success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                renderer.sharedMaterials = sharedMats;
+                            } else {
+                                success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                            }
                         }
                     }
                     if (!success) {
