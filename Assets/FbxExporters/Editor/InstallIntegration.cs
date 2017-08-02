@@ -68,11 +68,11 @@ namespace FbxExporters
 
             if (location == null)
 #if UNITY_EDITOR_OSX
-            location = string.Format ("/Applications/Autodesk/maya{0}", versionNumber);
+                location = string.Format ("/Applications/Autodesk/maya{0}/Maya.app/Contents", versionNumber);
 #elif UNITY_EDITOR_LINUX
-            location = string.Format ("/usr/autodesk/maya{0}", versionNumber);
+                location = string.Format ("/usr/autodesk/maya{0}", versionNumber);
 #else // WINDOWS
-            location = string.Format ("C:/Program Files/Autodesk/Maya{0}", versionNumber);
+                location = string.Format ("C:/Program Files/Autodesk/Maya{0}", versionNumber);
 #endif
             return location;
         }
@@ -82,7 +82,7 @@ namespace FbxExporters
             string mayaLocation = GetMayaLocation (versionNumber);
 
 #if UNITY_EDITOR_OSX
-            return string.Format ("{0}/Maya.app/Contents/MacOS/maya", mayaLocation);
+            return string.Format ("{0}/MacOS/maya", mayaLocation);
 #elif UNITY_EDITOR_LINUX
             return string.Format ("{0}/bin/maya", mayaLocation);
 #else // WINDOWS
@@ -216,13 +216,12 @@ namespace FbxExporters
 
                 if (!System.IO.File.Exists(mayaPath))
                 {
-                    Debug.LogError (string.Format ("No maya installation found at {0}",mayaPath));
+                    Debug.LogError (string.Format ("No maya installation found at {0}", mayaPath));
                     return -1;
                 }
 
                 string mayaCommandLine = string.Format(@"-command '{0}'", MAYA_COMMANDS);
                 myProcess.StartInfo.Arguments = mayaCommandLine;
-                Debug.Log (myProcess.StartInfo.FileName + " " + myProcess.StartInfo.Arguments);
 
 #elif UNITY_EDITOR_LINUX
                 throw new NotImplementedException();
