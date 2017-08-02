@@ -37,6 +37,11 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     """
     def __init__(self):
         OpenMayaMPx.MPxCommand.__init__(self)
+        LoggerMixin.__init__(self)
+        
+    def __del__(self):
+        LoggerMixin.__del__(self)
+        OpenMayaMPx.MPxCommand.__del__(self)
         
 class configureCmd(BaseCommand):
     """
