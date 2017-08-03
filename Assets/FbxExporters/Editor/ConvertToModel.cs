@@ -76,10 +76,16 @@ namespace FbxExporters
             /// </summary>
             /// <returns>list of instanced Model Prefabs</returns>
             /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
-            /// <param name="path">Path to save Model Prefab</param>
+            /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
             /// <param name="keepOriginal">If set to <c>true</c> keep original gameobject hierarchy.</param>
             public static GameObject[] CreateInstantiatedModelPrefab (GameObject [] unityGameObjectsToConvert, string path = null, bool keepOriginal = true)
             {
+                if (path == null) {
+                    path = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath();
+                } else {
+                    path = Path.GetFullPath(path);
+                }
+
                 List<GameObject> result = new List<GameObject> ();
 
                 var exportSet = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
@@ -90,8 +96,6 @@ namespace FbxExporters
 
                 // find common ancestor root & filePath;
                 string[] filePaths = new string[gosToExport.Length];
-                if (path==null)
-                    path = FbxExporters.EditorTools.ExportSettings.instance.convertToModelSavePath;
 
                 for(int n = 0; n < gosToExport.Length; n++){
                     var filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
@@ -117,22 +121,22 @@ namespace FbxExporters
                         continue;
                     }
 
-                    // make filepath relative to project folder
-                    if (fbxFileName.StartsWith (Application.dataPath, System.StringComparison.CurrentCulture)) 
-                    {
-                        fbxFileName = "Assets" + fbxFileName.Substring (Application.dataPath.Length);
-                    }
+                    // make filepath relative to assets folder
+                    var relativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFileName);
 
                     // refresh the assetdata base so that we can query for the model
                     AssetDatabase.Refresh ();
 
-                    // replace w Model asset
-                    var unityMainAsset = AssetDatabase.LoadMainAssetAtPath (fbxFileName) as GameObject;
+                    // Replace w Model asset. LoadMainAssetAtPath wants a path
+                    // relative to the project, not relative to the assets
+                    // folder.
+                    var unityMainAsset = AssetDatabase.LoadMainAssetAtPath("Assets/" + relativePath) as GameObject;
 
                     if (!unityMainAsset) {
                         continue;
                     }
 
+                    // Instantiate the FBX file.
                     Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);
                     GameObject unityGO = unityObj as GameObject;
                     if (!unityGO) {
@@ -146,7 +150,7 @@ namespace FbxExporters
                     var fbxSource = unityGO.AddComponent<FbxSource>();
                     fbxSource.SetSourceModel(unityMainAsset);
 
-                    // Create a prefab from unityGO.
+                    // Create a prefab from the instantiated and componentized unityGO.
                     var prefabFileName = fbxFileName;
                     if (prefabFileName.EndsWith(".fbx", System.StringComparison.OrdinalIgnoreCase)) {
                         prefabFileName = prefabFileName.Substring(0, prefabFileName.Length - 4);
@@ -184,11 +188,25 @@ namespace FbxExporters
             {
                 string fileWithoutExt = Path.GetFileNameWithoutExtension (filename);
                 string ext = Path.GetExtension (filename);
+                string format = "{0} {1}{2}";
 
                 int index = 1;
+
+                // try extracting the current index from the name and incrementing it
+                var result = System.Text.RegularExpressions.Regex.Match(fileWithoutExt, @"\d+$");
+                if (result != null) {
+                    var number = result.Value;
+                    int tempIndex;
+                    if (int.TryParse (number, out tempIndex)) {
+                        fileWithoutExt = fileWithoutExt.Remove (fileWithoutExt.LastIndexOf (number));
+                        format = "{0}{1}{2}"; // remove space from format
+                        index = tempIndex+1;
+                    }
+                }
+
                 string file = null;
                 do {
-                    file = string.Format ("{0} {1}{2}", fileWithoutExt, index, ext);
+                    file = string.Format (format, fileWithoutExt, index, ext);
                     file = Path.Combine(path, file);
                     index++;
                 } while (File.Exists (file));
@@ -239,10 +257,6 @@ namespace FbxExporters
                 Transform importedTransform = imported.transform;
                 Transform origTransform = orig.transform;
 
-                // Set the name to be the name of the instantiated asset.
-                // This will get rid of the "(Clone)" if it's added
-                imported.name = orig.name;
-
                 // configure transform and maintain local pose
                 importedTransform.SetParent (origTransform.parent, false);
                 importedTransform.SetSiblingIndex (origTransform.GetSiblingIndex());
@@ -263,7 +277,10 @@ namespace FbxExporters
                         origTransform.hierarchyCount, importedTransform.hierarchyCount));
                 }
                 FixSiblingOrder (orig.transform, imported.transform);
-                CopyComponentsRecursive (orig, imported);
+
+                // the imported GameObject will have the same name as the file to which it was imported from,
+                // which might not be the same name as the original GameObject
+                CopyComponentsRecursive (orig, imported, namesExpectedMatch:false);
             }
 
             private static void FixSiblingOrder(Transform orig, Transform imported){
@@ -281,8 +298,8 @@ namespace FbxExporters
                 }
             }
 
-            private static void CopyComponentsRecursive(GameObject from, GameObject to){
-                if (!to.name.StartsWith(from.name) || from.transform.childCount != to.transform.childCount) {
+            private static void CopyComponentsRecursive(GameObject from, GameObject to, bool namesExpectedMatch = true){
+                if (namesExpectedMatch && !to.name.StartsWith(from.name) || from.transform.childCount != to.transform.childCount) {
                     Debug.LogError (string.Format("Error: hierarchies don't match (From: {0}, To: {1})", from.name, to.name));
                     return;
                 }
@@ -294,6 +311,7 @@ namespace FbxExporters
             }
 
             private static void CopyComponents(GameObject from, GameObject to){
+                var originalComponents = new List<Component>(to.GetComponents<Component> ());
                 var components = from.GetComponents<Component> ();
                 for(int i = 0; i < components.Length; i++){
                     if(components[i] == null){
@@ -302,22 +320,45 @@ namespace FbxExporters
                         
                     bool success = UnityEditorInternal.ComponentUtility.CopyComponent (components[i]);
                     if (success) {
-                        // if to already has this component, then copy the values over
-                        var toComponent = to.GetComponent (components [i].GetType ());
-                        if (toComponent != null) {
-                            // don't want to copy MeshFilter because then we will replace the
-                            // exported mesh with the old mesh
-                            if (!(toComponent is MeshFilter)) {
+                        bool foundComponentOfType = false;
+                        for (int j = 0; j < originalComponents.Count; j++) {
+                            var toComponent = originalComponents [j];
+                            // If component already exists, paste values.
+                            if (toComponent.GetType () == components [i].GetType ()) {
+                                // we have found the component we are looking for, remove it so
+                                // we don't try to copy to it again
+                                originalComponents.RemoveAt (j);
+                                foundComponentOfType = true;
+
+                                // Don't want to copy MeshFilter because then we will replace the
+                                // exported mesh with the old mesh.
+                                if (toComponent is MeshFilter) {
+                                    break;
+                                }
+
+                                // Don't want to copy materials over in case the materials are
+                                // embedded in another model.
                                 if (toComponent is SkinnedMeshRenderer) {
                                     var skinnedMesh = toComponent as SkinnedMeshRenderer;
                                     var sharedMesh = skinnedMesh.sharedMesh;
+                                    var sharedMats = skinnedMesh.sharedMaterials;
                                     success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
                                     skinnedMesh.sharedMesh = sharedMesh;
+                                    skinnedMesh.sharedMaterials = sharedMats;
+                                } else if (toComponent is Renderer) {
+                                    var renderer = toComponent as Renderer;
+                                    var sharedMats = renderer.sharedMaterials;
+                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                    renderer.sharedMaterials = sharedMats;
                                 } else {
                                     success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
                                 }
+                                break;
                             }
-                        } else {
+                        }
+
+                        // component was not part of the original components, so add it
+                        if (!foundComponentOfType) {
                             success = UnityEditorInternal.ComponentUtility.PasteComponentAsNew (to);
                         }
                     }

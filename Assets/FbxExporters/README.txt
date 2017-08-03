@@ -5,7 +5,7 @@ Copyright (c) 2017 Unity Technologies. All rights reserved.
 Licensed under the ##LICENSENAME##.
 See LICENSE.md file for full license information.
 
-**Version**: 0.0.6a-sprint17
+**Version**: 0.0.7a
 
 Requirements
 ------------
@@ -45,7 +45,7 @@ else
         echo "Maya2017 not installed"
     else
         # To configure without user interface prepend the following command: optionVar -intValue \"UnityOneClick_Headless\" 1;
-        "${MAYA_PATH}" -command "optionVar -stringValue \"UnityProject\" \"${PROJECT_PATH}\"; loadPlugin unityOneClickPlugin; pluginInfo -edit -autoload true unityOneClickPlugin; quit;"
+        "${MAYA_PATH}" -command "configureUnityOneClick \"${PROJECT_PATH}\";"
     fi
 fi
 
