@@ -33,9 +33,15 @@ namespace FbxExporters
             public static void OnMenuItem ()
             {
                 GameObject [] unityGameObjectsToConvert = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
+                if (unityGameObjectsToConvert.Length <= 0) {
+                    ModelExporter.DisplayNoSelectionDialog ();
+                    return;
+                }
+
                 Object[] result = CreateInstantiatedModelPrefab (unityGameObjectsToConvert);
-                if (result.Length>0)
+                if (result.Length > 0) {
                     Selection.objects = result;
+                }
             }
 
             /// <summary>
