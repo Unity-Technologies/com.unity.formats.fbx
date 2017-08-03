@@ -7,18 +7,7 @@ namespace FbxExporters
 {
     public class FbxPostImportPrefabUpdater : UnityEditor.AssetPostprocessor
     {
-        static bool AssetDependsOn(string assetPath, string otherAssetPath)
-        {
-            var depPaths = AssetDatabase.GetDependencies(assetPath, recursive: false);
-            foreach(var dep in depPaths) {
-                if (dep == otherAssetPath) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        static string FindFbxSourceAssetPath()
+        public static string FindFbxSourceAssetPath()
         {
             var allGuids = AssetDatabase.FindAssets("FbxSource t:MonoScript");
             switch (allGuids.Length) {
@@ -33,88 +22,92 @@ namespace FbxExporters
             }
         }
 
+        public static bool IsFbxAsset(string assetPath) {
+            return assetPath.EndsWith(".fbx");
+        }
+
+        public static bool IsPrefabAsset(string assetPath) {
+            return assetPath.EndsWith(".prefab");
+        }
+
+        /// <summary>
+        /// Return false if the prefab definitely does not have an
+        /// FbxSource component that points to one of the Fbx assets
+        /// that were imported.
+        ///
+        /// May return a false positive. This is a cheap check.
+        /// </summary>
+        public static bool MayHaveFbxSourceToFbxAsset(string prefabPath,
+                string fbxSourceScriptPath, HashSet<string> fbxImported) {
+            var depPaths = AssetDatabase.GetDependencies(prefabPath, recursive: false);
+            bool dependsOnFbxSource = false;
+            bool dependsOnImportedFbx = false;
+            foreach(var dep in depPaths) {
+                if (dep == fbxSourceScriptPath) {
+                    if (dependsOnImportedFbx) { return true; }
+                    dependsOnFbxSource = true;
+                } else if (fbxImported.Contains(dep)) {
+                    if (dependsOnFbxSource) { return true; }
+                    dependsOnImportedFbx = true;
+                }
+            }
+            // Either none or only one of the conditions was true, which
+            // means this prefab certainly doesn't match.
+            return false;
+        }
+
         static void OnPostprocessAllAssets(string [] imported, string [] deleted, string [] moved, string [] movedFrom)
         {
-            //
-            // TODO: lots of optimization potential! On project load right now we're running
-            // an algorithm that takes O(#fbx * (#prefabs + #fbx)).
-            //
-            // Could easily be #prefabs + #fbx only.
-            //
-            // Ideally it'd be even faster: we'd know which prefab points to which FBX, no
-            // searching needed.
-            //
-            var fbxSourceScript = FindFbxSourceAssetPath();
-
+            // Did we import an fbx file at all?
+            // Optimize to not allocate in the common case of 'no'
+            HashSet<string> fbxImported = null;
             foreach(var fbxModel in imported) {
-                if (!fbxModel.EndsWith(".fbx")) {
-                    // This is not the asset type we are looking for.
-                    // Move along.
+                if (IsFbxAsset(fbxModel)) {
+                    if (fbxImported == null) { fbxImported = new HashSet<string>(); }
+                    fbxImported.Add(fbxModel);
+                }
+            }
+            if (fbxImported == null) {
+                return;
+            }
+
+            //
+            // Iterate over all the prefabs that have an FbxSource component that
+            // points to an FBX file that got (re)-imported.
+            //
+            // There's no one-line query to get those, so we search for a much
+            // larger set and whittle it down, hopefully without needing to
+            // load the asset into memory if it's not necessary.
+            //
+            var fbxSourceScriptPath = FindFbxSourceAssetPath();
+            var allObjectGuids = AssetDatabase.FindAssets("t:GameObject");
+            foreach(var guid in allObjectGuids) {
+                var prefabPath = AssetDatabase.GUIDToAssetPath(guid);
+                if (!IsPrefabAsset(prefabPath)) {
+                    continue;
+                }
+                if (!MayHaveFbxSourceToFbxAsset(prefabPath, fbxSourceScriptPath, fbxImported)) {
                     continue;
                 }
 
+                // We're now guaranteed that this is a prefab, and it depends
+                // on the FbxSource script, and it depends on an Fbx file that
+                // was imported.
                 //
-                // Find the prefabs in the project that have an FbxSource
-                // component that points to the reimported model.
-                //
-                var fbxSourcePrefabPaths = new HashSet<string>();
-                Debug.Log("Looking for prefabs that have a " + fbxSourceScript + " component that points to " + fbxModel);
-
-                // First we find all game objects.
-                // Among those we choose those that are prefabs.
-                // Among those we check the immediate references. If they refer
-                // directly to the FbxSource script *and* to the FBX file, choose
-                // it for expensive processing.
-                var allObjectGuids = AssetDatabase.FindAssets("t:GameObject");
-                foreach(var guid in allObjectGuids) {
-                    var pathname = AssetDatabase.GUIDToAssetPath(guid);
-                    if (!pathname.EndsWith(".prefab")) {
-                        continue;
-                    }
-                    Debug.Log("found prefab at " + pathname + " with deps " + string.Join("\n\t", AssetDatabase.GetDependencies(pathname, recursive: false)));
-
-                    if (!AssetDependsOn(pathname, fbxSourceScript)) {
-                        continue;
-                    }
-                    Debug.Log("Has an FbxSource component: " + pathname);
-                    if (!AssetDependsOn(pathname, fbxModel)) {
-                        continue;
-                    }
-                    Debug.Log("Probably linked to " + fbxModel);
-                    fbxSourcePrefabPaths.Add(pathname);
-                }
-                if (fbxSourcePrefabPaths.Count == 0) {
+                // To be sure it has an FbxSource component that points to an
+                // Fbx file, we need to load the asset (which we need to do to
+                // update the prefab anyway).
+                var prefab = AssetDatabase.LoadMainAssetAtPath(prefabPath) as GameObject;
+                if (!prefab) {
+                    Debug.LogWarning("FbxSource reimport: failed to update prefab " + prefabPath);
                     continue;
                 }
-
-                //
-                // Load each prefab we found, see if its FbxSource points to the
-                // FBX file we just imported (we could have both an FbxSource
-                // component and a dependency on the FBX without having the
-                // FbxSource point to the FBX).
-                //
-                // There's no reason why a prefab can't have multiple
-                // FbxSource, nor need it be at the root of the prefab!
-                //
-                foreach(var prefabPath in fbxSourcePrefabPaths) {
-                    var genericObj = AssetDatabase.LoadMainAssetAtPath(prefabPath);
-                    if (!genericObj) {
-                        Debug.Log("failed to load " + prefabPath);
+                foreach(var fbxSourceComponent in prefab.GetComponentsInChildren<FbxSource>()) {
+                    var fbxAssetPath = fbxSourceComponent.GetFbxAssetPath();
+                    if (!fbxImported.Contains(fbxAssetPath)) {
                         continue;
                     }
-                    var gameObj = genericObj as GameObject;
-                    if (!gameObj) {
-                        Debug.Log("loaded but not a game object prefab: " + prefabPath);
-                        continue;
-                    }
-                    foreach(var fbxSourceComponent in gameObj.GetComponentsInChildren<FbxSource>()) {
-                        Debug.Log("looking at " + fbxSourceComponent.gameObject.name);
-                        if (!fbxSourceComponent.MatchesFbxFile(fbxModel)) {
-                            continue;
-                        }
-                        Debug.Log("updating starting at " + fbxSourceComponent.gameObject.name + " in prefab " + prefabPath + " from fbx model " + fbxModel);
-                        fbxSourceComponent.SyncPrefab();
-                    }
+                    fbxSourceComponent.SyncPrefab();
                 }
             }
         }

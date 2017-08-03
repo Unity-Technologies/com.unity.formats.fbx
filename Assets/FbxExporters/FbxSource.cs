@@ -233,15 +233,12 @@ namespace FbxExporters
         }
 
         /// <summary>
-        /// Returns whether the model we're tracking is the same asset as the
-        /// path passed in.
+        /// Returns the asset path of the fbx model we're tracking.
         /// </summary>
-        public bool MatchesFbxFile(string pathname)
+        public string GetFbxAssetPath()
         {
-            Debug.Log("trying to match " + pathname + " to " + m_fbxModel.name);
-            if (!m_fbxModel) { return false; }
-            var fbxpath = UnityEditor.AssetDatabase.GetAssetPath(m_fbxModel);
-            return fbxpath == pathname;
+            if (!m_fbxModel) { return ""; }
+            return UnityEditor.AssetDatabase.GetAssetPath(m_fbxModel);
         }
 
         /// <summary>
