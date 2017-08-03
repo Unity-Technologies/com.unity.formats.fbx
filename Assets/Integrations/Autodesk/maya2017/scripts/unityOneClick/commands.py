@@ -113,10 +113,24 @@ class reviewCmd(BaseCommand):
 
         unityAppPath = maya.cmds.optionVar(q='UnityApp')
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
-        unityTurnTableCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
+        unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
 
-        melCommand = r'system("open -a \"{0}\" --args -projectPath {1} -executeMethod {2}");'\
-            .format(unityAppPath, unityProjectPath, unityTurnTableCommand)
+        if maya.cmds.about(macos=True):
+            # Use 'open -a' to bring app to front if it has already been started.
+            # Note that the unity command will not get called.
+            melCommand = r'system("open -a \"{0}\" --args -projectPath {1} -executeMethod {2}");'\
+                .format(unityAppPath, unityProjectPath, unityCommand)
+
+        elif maya.cmds.about(linux=True):
+            melCommand = r'\"{0}\" -projectPath {1} -executeMethod {2}");'\
+                .format(unityAppPath, unityProjectPath, unityCommand)
+
+        elif maya.cmds.about(windows=True):
+            melCommand = r'\"{0}\" -projectPath {1} -executeMethod {2}");'\
+                .format(unityAppPath, unityProjectPath, unityCommand)
+
+        else:
+            raise NotImplementedError("missing platform implementation for {0}".format(maya.cmds.about(os=True)))
 
         self.displayDebug('doIt({0})'.format(melCommand))
 

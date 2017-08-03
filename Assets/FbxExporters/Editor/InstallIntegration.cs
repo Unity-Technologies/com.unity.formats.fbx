@@ -15,28 +15,20 @@ namespace FbxExporters
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
 
-        // Use verbatim string to define escaped quote
-        // Windows needs the backslash
-#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
-        private const string ESCAPED_QUOTE = @"""";
-#else
-        private const string ESCAPED_QUOTE = @"\""";
-#endif
-
         private static string MAYA_COMMANDS { get { 
-            return string.Format(@"configureUnityOneClick {1}{0}{1} {1}{2}{1} 0; scriptJob -idleEvent quit;", 
-                                 Integrations.GetProjectPath(), ESCAPED_QUOTE, GetUnityPath()); 
+                return string.Format("configureUnityOneClick \"{0}\" \"{1}\" {2}; scriptJob -idleEvent quit;", 
+                                     GetProjectPath(), GetAppPath(), (IsHeadlessInstall()?1:0)); 
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
         private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya"+VERSION_TAG+"/unityoneclick.mod";
 
 #if UNITY_EDITOR_OSX
-        private const string REL_MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/"+VERSION_TAG+"/modules";
 #elif UNITY_EDITOR_LINUX 
-        private const string REL_MAYA_MODULES_PATH = "Maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "Maya/"+VERSION_TAG+"/modules";
 #else
-        private const string REL_MAYA_MODULES_PATH = "maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "maya/"+VERSION_TAG+"/modules";
 #endif
 
         private static string GetUserFolder()
@@ -48,9 +40,14 @@ namespace FbxExporters
 #endif
         }
 
+        private static bool IsHeadlessInstall ()
+        {
+            return false;
+        }
+
         private static string GetModulePath(string version)
         {
-            string result = System.IO.Path.Combine(GetUserFolder(), REL_MAYA_MODULES_PATH);
+            string result = System.IO.Path.Combine(GetUserFolder(), MAYA_MODULES_PATH);
 
             return result.Replace(VERSION_TAG,version);
         }
@@ -88,10 +85,9 @@ namespace FbxExporters
 #else // WINDOWS
             return string.Format ("{0}/bin/maya.exe", mayaLocation);
 #endif
-                         
         }
 
-        public static string GetUnityPath()
+        public static string GetAppPath()
         {
             return EditorApplication.applicationPath.Replace("\\","/");
         }
@@ -220,8 +216,7 @@ namespace FbxExporters
                     return -1;
                 }
 
-                string mayaCommandLine = string.Format(@"-command '{0}'", MAYA_COMMANDS);
-                myProcess.StartInfo.Arguments = mayaCommandLine;
+                myProcess.StartInfo.Arguments = string.Format(@"-command '{0}'", MAYA_COMMANDS);
 
 #elif UNITY_EDITOR_LINUX
                 throw new NotImplementedException();
@@ -337,7 +332,7 @@ namespace FbxExporters
 
                 // TODO: if installation path different
 
-                    // TODO: print message package already installed else where
+                // TODO: print message package already installed else where
             }
 
             return true;
@@ -364,12 +359,12 @@ namespace FbxExporters
             [MenuItem (MenuItemName1, false, 0)]
             public static void OnMenuItem1 ()
             {
-            	if (Integrations.InstallMaya(Integrations.MAYA_VERSION))
-            	{
+                if (Integrations.InstallMaya(Integrations.MAYA_VERSION))
+                {
                     int exitCode = Integrations.ConfigureMaya (Integrations.MAYA_VERSION);
 
                     string title = string.Format("Completed installation of Maya{0} Integration.", Integrations.MAYA_VERSION);
-                    string message = "Maya will close when it has finished configuring integration.";
+                    string message = "Maya will close after it has finished configuring the integration.";
 
                     if (exitCode!=0)
                     {
