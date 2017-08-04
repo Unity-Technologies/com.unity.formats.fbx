@@ -133,7 +133,7 @@ namespace FbxExporters
                     Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath("Assets/" + relativePath);
 
                     if (unityMainAsset != null) {
-                        Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);
+                        Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset, gosToExport[i].scene);
                         GameObject unityGO = unityObj as GameObject;
                         if (unityGO != null) 
                         {
