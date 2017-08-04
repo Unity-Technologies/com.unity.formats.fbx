@@ -25,45 +25,23 @@ namespace FbxExporters.UnitTests
         string m_fbxPath;
         GameObject m_prefab;
         string m_prefabPath;
-        List<GameObject> m_goToDestroy = new List<GameObject>();
-        List<GameObject> m_assetToDestroy = new List<GameObject>();
 
         [SetUp]
         public void Init ()
         {
             var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            m_goToDestroy.Add(capsule);
-            m_fbx = ExportSelection(new Object[] { capsule });
-            m_assetToDestroy.Add(m_fbx);
+            m_fbx = ExportSelection(capsule);
             m_fbxPath = AssetDatabase.GetAssetPath(m_fbx);
 
             // Instantiate the fbx and create a prefab from it.
+            // Delete the object right away (don't even wait for term).
             var fbxInstance = PrefabUtility.InstantiatePrefab(m_fbx) as GameObject;
             fbxInstance.AddComponent<FbxSource>().SetSourceModel(m_fbx);
             m_prefabPath = GetRandomFileNamePath(extName: ".prefab");
             m_prefab = PrefabUtility.CreatePrefab(m_prefabPath, fbxInstance);
-            m_assetToDestroy.Add(m_prefab);
             AssetDatabase.Refresh ();
             Assert.AreEqual(m_prefabPath, AssetDatabase.GetAssetPath(m_prefab));
             GameObject.DestroyImmediate(fbxInstance);
-        }
-
-        [TearDown]
-        public override void Term ()
-        {
-            // Important to first lose all connection to the assets.
-            foreach(var toDestroy in m_goToDestroy) {
-                if (toDestroy) {
-                    UnityEngine.Object.DestroyImmediate (toDestroy);
-                }
-            }
-            foreach(var toDestroy in m_assetToDestroy) {
-                if (toDestroy) {
-                    UnityEngine.Object.DestroyImmediate (toDestroy, true);
-                }
-            }
-
-            base.Term ();
         }
 
         [Test]
@@ -90,18 +68,17 @@ namespace FbxExporters.UnitTests
         {
             // Instantiate the prefab.
             var oldInstance = PrefabUtility.InstantiatePrefab(m_prefab) as GameObject;
-            m_goToDestroy.Add(oldInstance);
             Assert.IsTrue(oldInstance);
 
             // Create a new hierarchy. It's marked for delete already.
             var newHierarchy = CreateHierarchy();
 
             // Export it to the same fbx path.
-            FbxExporters.Editor.ModelExporter.ExportObjects (m_fbxPath, new Object[] { newHierarchy });
+            FbxExporters.Editor.ModelExporter.ExportObject(m_fbxPath, newHierarchy);
+            AssetDatabase.Refresh();
 
             // Verify that a new instance of the prefab got updated.
             var newInstance = PrefabUtility.InstantiatePrefab(m_prefab) as GameObject;
-            m_goToDestroy.Add(newInstance);
             Assert.IsTrue(newInstance);
             AssertSameHierarchy(newHierarchy, newInstance, ignoreRootName: true, ignoreRootTransform: true);
 
@@ -109,73 +86,96 @@ namespace FbxExporters.UnitTests
             AssertSameHierarchy(newHierarchy, oldInstance, ignoreRootName: true, ignoreRootTransform: true);
         }
 
-        /// <summary>
-        /// Creates test hierarchy. It'll be destroyed upon termination.
-        /// </summary>
-        /// <returns>The hierarchy root.</returns>
-        private GameObject CreateHierarchy ()
+    }
+}
+
+namespace FbxExporters.PerformanceTests {
+
+    class FbxPostImportPrefabUpdaterTestPerformance : FbxExporters.UnitTests.ExporterTestBase {
+        [Test]
+        public void ExpensivePerformanceTest ()
         {
-            // Create the following hierarchy:
-            //      Root
-            //      -> Parent1
-            //      ----> Child1
-            //      ----> Child2
-            //      -> Parent2
-            //      ----> Child3
+            const int n = 200;
+            const int NoUpdateTimeLimit = 500; // milliseconds
+            const int OneUpdateTimeLimit = 500; // milliseconds
 
-            var root = CreateGameObject ("Root");
-            SetTransform (root.transform,
-                new Vector3 (3, 4, -6),
-                new Vector3 (45, 10, 34),
-                new Vector3 (2, 1, 3));
+            var stopwatch = new System.Diagnostics.Stopwatch ();
+            stopwatch.Start();
 
-            var parent1 = CreateGameObject ("Parent1", root.transform);
-            SetTransform (parent1.transform,
-                new Vector3 (53, 0, -1),
-                new Vector3 (0, 5, 0),
-                new Vector3 (1, 1, 1));
+            // Create 1000 fbx models and 1000 prefabs.
+            // Each prefab points to an fbx model.
+            //
+            // Then modify one fbx model. Shouldn't take longer than 1s.
+            var hierarchy = CreateGameObject("the_root");
+            var baseName = GetRandomFileNamePath(extName: "");
+            FbxExporters.Editor.ModelExporter.ExportObject(baseName + ".fbx", hierarchy);
 
-            var parent2 = CreateGameObject ("Parent2", root.transform);
-            SetTransform (parent2.transform,
-                new Vector3 (0, 0, 0),
-                new Vector3 (90, 1, 3),
-                new Vector3 (1, 0.3f, 0.5f));
+            // Create N fbx models by copying files. Import them all at once.
+            var names = new string[n];
+            names[0] = baseName;
+            stopwatch.Reset();
+            stopwatch.Start();
+            for(int i = 1; i < n; ++i) {
+                names[i] = GetRandomFileNamePath(extName : "");
+                System.IO.File.Copy(names[0] + ".fbx", names[i] + ".fbx");
+            }
+            Debug.Log("Created fbx files in " + stopwatch.ElapsedMilliseconds);
 
-            parent1.transform.SetAsFirstSibling ();
+            stopwatch.Reset();
+            stopwatch.Start();
+            AssetDatabase.Refresh();
+            Debug.Log("Imported fbx files in " + stopwatch.ElapsedMilliseconds);
 
-            CreateGameObject ("Child1", parent1.transform);
-            CreateGameObject ("Child2", parent1.transform);
-            CreateGameObject ("Child3", parent2.transform);
+            // Create N/2 prefabs, each one depends on one of the fbx assets.
+            // This loop is very slow, which is sad because it's not the point
+            // of the test. That's the only reason we halve n.
+            stopwatch.Reset();
+            stopwatch.Start();
+            var fbxFiles = new GameObject[n / 2];
+            for(int i = 0; i < n / 2; ++i) {
+                fbxFiles[i] = AssetDatabase.LoadMainAssetAtPath(names[i] + ".fbx") as GameObject;
+                Assert.IsTrue(fbxFiles[i]);
+            }
+            Debug.Log("Loaded fbx files in " + stopwatch.ElapsedMilliseconds);
 
-            return root;
-        }
+            stopwatch.Reset();
+            stopwatch.Start();
+            for(int i = 0; i < n / 2; ++i) {
+                var instance = CreateGameObject("prefab_" + i);
+                Assert.IsTrue(instance);
+                var fbxSource = instance.AddComponent<FbxSource>();
+                fbxSource.SetSourceModel(fbxFiles[i]);
+                UnityEditor.PrefabUtility.CreatePrefab(names[i] + ".prefab", fbxFiles[i]);
+            }
+            Debug.Log("Created prefabs in " + stopwatch.ElapsedMilliseconds);
 
-        /// <summary>
-        /// Sets the transform.
-        /// </summary>
-        /// <param name="t">Transform.</param>
-        /// <param name="pos">Position.</param>
-        /// <param name="rot">Rotation.</param>
-        /// <param name="scale">Scale.</param>
-        private void SetTransform (Transform t, Vector3 pos, Vector3 rot, Vector3 scale)
-        {
-            t.localPosition = pos;
-            t.localEulerAngles = rot;
-            t.localScale = scale;
-        }
+            // Export a new hierarchy and update one fbx file.
+            var newHierarchy = CreateHierarchy();
+            try {
+                UnityEngine.Debug.unityLogger.logEnabled = false;
+                stopwatch.Reset ();
+                stopwatch.Start ();
+                FbxExporters.Editor.ModelExporter.ExportObject(names[0] + ".fbx", newHierarchy);
+                AssetDatabase.Refresh(); // force the update right now.
+            } finally {
+                UnityEngine.Debug.unityLogger.logEnabled = true;
+            }
+            Debug.Log("Import (one change) in " + stopwatch.ElapsedMilliseconds);
+            Assert.LessOrEqual(stopwatch.ElapsedMilliseconds, NoUpdateTimeLimit);
 
-        /// <summary>
-        /// Creates a GameObject. The object will be destroyed upon termination.
-        /// </summary>
-        /// <returns>The created GameObject.</returns>
-        /// <param name="name">Name.</param>
-        /// <param name="parent">Parent.</param>
-        private GameObject CreateGameObject (string name, Transform parent = null)
-        {
-            var go = new GameObject (name);
-            go.transform.SetParent (parent);
-            m_goToDestroy.Add(go);
-            return go;
+            // Try what happens when nothing gets updated.
+            try {
+                UnityEngine.Debug.unityLogger.logEnabled = false;
+                stopwatch.Reset ();
+                stopwatch.Start ();
+                string newHierarchyFbxFile = GetRandomFileNamePath(extName : ".fbx");
+                File.Copy(names[0] + ".fbx", newHierarchyFbxFile);
+                AssetDatabase.Refresh(); // force the update right now.
+            } finally {
+                UnityEngine.Debug.unityLogger.logEnabled = true;
+            }
+            Debug.Log("Import (no changes) in " + stopwatch.ElapsedMilliseconds);
+            Assert.LessOrEqual(stopwatch.ElapsedMilliseconds, OneUpdateTimeLimit);
         }
     }
 }
