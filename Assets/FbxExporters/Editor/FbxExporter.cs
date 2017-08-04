@@ -1025,6 +1025,7 @@ namespace FbxExporters
                     }
                     // delete old file, move temp file
                     ReplaceFile();
+                    Debug.Log("refreshing after exporting " + m_lastFilePath);
                     AssetDatabase.Refresh();
 
                     return status == true ? NumNodes : 0;
@@ -1446,7 +1447,7 @@ namespace FbxExporters
             /// Export a list of (Game) objects to FBX file. 
             /// Use the SaveFile panel to allow user to enter a file name.
             /// <summary>
-            public static object ExportObjects (string filePath, UnityEngine.Object[] objects = null)
+            public static string ExportObjects (string filePath, UnityEngine.Object[] objects = null)
             {
                 LastFilePath = filePath;
 
@@ -1466,6 +1467,11 @@ namespace FbxExporters
                     }
                 }
                 return null;
+            }
+
+            public static string ExportObject (string filePath, UnityEngine.Object root)
+            {
+                return ExportObjects(filePath, new Object[] { root } );
             }
 
             private static void EnsureDirectory (string path)
