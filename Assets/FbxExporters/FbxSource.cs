@@ -9,7 +9,6 @@ namespace FbxExporters
     ///
     /// On its own it does nothing; you also need the FbxPostImporterPrefabUpdater.
     /// </summary>
-    [System.Serializable]
     public class FbxSource : MonoBehaviour
     {
         //////////////////////////////////////////////////////////////////////
@@ -33,7 +32,7 @@ namespace FbxExporters
         // None of the code should be included in the build, because this
         // component is really only about the editor.
 #if UNITY_EDITOR
-        class FbxRepresentation
+        public class FbxRepresentation
         {
             public Dictionary<string, FbxRepresentation> c;
 
@@ -126,7 +125,7 @@ namespace FbxExporters
         /// <summary>
         /// Recursively perform the update.
         /// </summary>
-        void TreeDiff(FbxRepresentation oldHistory,
+        public static void TreeDiff(FbxRepresentation oldHistory,
                 Transform newFbx,
                 Transform instance,
                 string indent = "")
@@ -165,25 +164,25 @@ namespace FbxExporters
                 int index = (isOld ? 4 : 0) | (isNew ? 2 : 0) | (isPre ? 1 : 0);
                 switch(index) {
                     case 7:
-                        Debug.Log(indent + "recur into " + name);
+                        //Debug.Log(indent + "recur into " + name);
                         TreeDiff(oldHistory.c[name], newFbx.Find(name), instance.Find(name), indent);
                         break;
                     case 6:
-                        Debug.Log(indent + "skip user-deleted " + name);
+                        //Debug.Log(indent + "skip user-deleted " + name);
                         break;
                     case 5:
-                        Debug.Log(indent + "delete " + name);
+                        //Debug.Log(indent + "delete " + name);
                         GameObject.DestroyImmediate(instance.Find(name).gameObject);
                         break;
                     case 4:
-                        Debug.Log(indent + "skip deleted in both new and instance " + name);
+                        //Debug.Log(indent + "skip deleted in both new and instance " + name);
                         break;
                     case 3:
-                        Debug.Log(indent + "accidental match; recur into " + name);
+                        //Debug.Log(indent + "accidental match; recur into " + name);
                         TreeDiff(null, newFbx.Find(name), instance.Find(name), indent);
                         break;
                     case 2:
-                        Debug.Log(indent + "instantiate into instance " + name);
+                        //Debug.Log(indent + "instantiate into instance " + name);
                         {
                             Transform src = newFbx.Find(name);
                             Transform dst = GameObject.Instantiate(src);
@@ -195,7 +194,7 @@ namespace FbxExporters
                         }
                         break;
                     case 1:
-                        Debug.Log(indent + "skip user-added node " + name);
+                        //Debug.Log(indent + "skip user-added node " + name);
                         break;
                     default:
                         // This shouldn't happen.
@@ -210,23 +209,25 @@ namespace FbxExporters
         void CompareAndUpdate()
         {
             // todo: only instantiate if there's a change
-            var oldRep = FbxRepresentation.FromJson(m_fbxHistory);
+            var oldRep = GetFbxHistory();
             if (oldRep == null || oldRep.c == null) { oldRep = null; }
 
             // Instantiate the prefab and compare & update.
-            var instance = UnityEditor.PrefabUtility.InstantiatePrefab(this.transform) as Transform;
-            TreeDiff(oldRep, m_fbxModel.transform, instance);
+            var instance = UnityEditor.PrefabUtility.InstantiatePrefab(this.gameObject) as GameObject;
+            if (!instance) {
+                throw new System.Exception(string.Format("Failed to instantiate {0}; is it really a prefab?",
+                            this.gameObject));
+            }
+            TreeDiff(oldRep, m_fbxModel.transform, instance.transform);
 
             // Update the representation of the history.
             var fbxSource = instance.GetComponent<FbxSource>();
             var newFbxRep = FbxRepresentation.FromTransform(m_fbxModel.transform);
             var newFbxRepString = newFbxRep.ToJson();
-            Debug.Log("SyncPrefab " + m_fbxModel.name + " => " + newFbxRep.c.Count + " children: " + newFbxRepString);
             fbxSource.m_fbxHistory = newFbxRepString;
 
             // Save the changes back to the prefab.
-            UnityEditor.PrefabUtility.ReplacePrefab(instance.gameObject,
-                    this.transform, UnityEditor.ReplacePrefabOptions.ReplaceNameBased);
+            UnityEditor.PrefabUtility.ReplacePrefab(instance.gameObject, this.transform);
 
             // Destroy the instance.
             GameObject.DestroyImmediate(instance.gameObject);
@@ -239,6 +240,14 @@ namespace FbxExporters
         {
             if (!m_fbxModel) { return ""; }
             return UnityEditor.AssetDatabase.GetAssetPath(m_fbxModel);
+        }
+
+        /// <summary>
+        /// Returns the tree representation of the fbx file as it was last time we sync'd.
+        /// </summary>
+        public FbxRepresentation GetFbxHistory()
+        {
+            return FbxRepresentation.FromJson(m_fbxHistory);
         }
 
         /// <summary>
@@ -256,6 +265,10 @@ namespace FbxExporters
         /// still restart tracking later.
         /// </summary>
         public void SetSourceModel(GameObject fbxModel) {
+            if (string.IsNullOrEmpty(UnityEditor.AssetDatabase.GetAssetPath(fbxModel))) {
+                throw new System.ArgumentException("FbxSource source model must be an asset");
+            }
+
             m_fbxModel = fbxModel;
 
             // Case 0: fbxModel is null and we have no history
