@@ -9,17 +9,17 @@ namespace FbxExporters
     {
         public static string FindFbxSourceAssetPath()
         {
+            // Find guids that are scripts that look like FbxSource.
+            // That catches FbxSourceTest too, so we have to make sure.
             var allGuids = AssetDatabase.FindAssets("FbxSource t:MonoScript");
-            switch (allGuids.Length) {
-                case 0:
-                    Debug.LogError("can't find FbxSource.cs somehow?!?");
-                    return "";
-                case 1:
-                    return AssetDatabase.GUIDToAssetPath(allGuids[0]);
-                default:
-                    Debug.LogWarning(string.Format("{0} versions of FbxSource.cs somehow?!?", allGuids.Length));
-                    return AssetDatabase.GUIDToAssetPath(allGuids[0]);
+            foreach(var guid in allGuids) {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.EndsWith("/FbxSource.cs")) {
+                    return path;
+                }
             }
+            Debug.LogError("can't find FbxSource.cs somehow?!?");
+            return "";
         }
 
         public static bool IsFbxAsset(string assetPath) {
@@ -58,6 +58,8 @@ namespace FbxExporters
 
         static void OnPostprocessAllAssets(string [] imported, string [] deleted, string [] moved, string [] movedFrom)
         {
+            Debug.Log("Postprocessing...");
+
             // Did we import an fbx file at all?
             // Optimize to not allocate in the common case of 'no'
             HashSet<string> fbxImported = null;
@@ -65,9 +67,13 @@ namespace FbxExporters
                 if (IsFbxAsset(fbxModel)) {
                     if (fbxImported == null) { fbxImported = new HashSet<string>(); }
                     fbxImported.Add(fbxModel);
+                    Debug.Log("Tracking fbx asset " + fbxModel);
+                } else {
+                    Debug.Log("Not an fbx asset " + fbxModel);
                 }
             }
             if (fbxImported == null) {
+                Debug.Log("No fbx imported");
                 return;
             }
 
@@ -84,11 +90,14 @@ namespace FbxExporters
             foreach(var guid in allObjectGuids) {
                 var prefabPath = AssetDatabase.GUIDToAssetPath(guid);
                 if (!IsPrefabAsset(prefabPath)) {
+                    Debug.Log("Not a prefab: " + prefabPath);
                     continue;
                 }
                 if (!MayHaveFbxSourceToFbxAsset(prefabPath, fbxSourceScriptPath, fbxImported)) {
+                    Debug.Log("No dependence: " + prefabPath);
                     continue;
                 }
+                Debug.Log("Considering updating prefab " + prefabPath);
 
                 // We're now guaranteed that this is a prefab, and it depends
                 // on the FbxSource script, and it depends on an Fbx file that
@@ -105,8 +114,10 @@ namespace FbxExporters
                 foreach(var fbxSourceComponent in prefab.GetComponentsInChildren<FbxSource>()) {
                     var fbxAssetPath = fbxSourceComponent.GetFbxAssetPath();
                     if (!fbxImported.Contains(fbxAssetPath)) {
+                        Debug.Log("No dependence: " + prefabPath + " via " + fbxAssetPath);
                         continue;
                     }
+                    Debug.Log("Updating " + prefabPath + "...");
                     fbxSourceComponent.SyncPrefab();
                 }
             }
