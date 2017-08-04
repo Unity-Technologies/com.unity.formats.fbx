@@ -15,9 +15,18 @@ namespace FbxExporters
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
 
+
+        // Use string to define escaped quote
+        // Windows needs the backslash
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
+        private const string ESCAPED_QUOTE = "\"";
+#else
+        private const string ESCAPED_QUOTE = "\\\"";
+#endif
+
         private static string MAYA_COMMANDS { get { 
-                return string.Format("configureUnityOneClick \"{0}\" \"{1}\" {2}; scriptJob -idleEvent quit;", 
-                                     GetProjectPath(), GetAppPath(), (IsHeadlessInstall()?1:0)); 
+            return string.Format("configureUnityOneClick {3}{0}{3} {3}{1}{3} {2}; scriptJob -idleEvent quit;", 
+                GetProjectPath(), GetAppPath(), (IsHeadlessInstall()?1:0), ESCAPED_QUOTE); 
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
