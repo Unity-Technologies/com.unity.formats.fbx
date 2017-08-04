@@ -18,8 +18,8 @@ namespace FbxExporters
     {
         public class ConvertToModel : System.IDisposable
         {
-            const string MenuItemName1 = "Assets/Convert To Model";
-            const string MenuItemName2 = "GameObject/Convert To Model";
+            const string MenuItemName1 = "Assets/Convert To Prefab";
+            const string MenuItemName2 = "GameObject/Convert To Prefab";
 
             /// <summary>
             /// Clean up this class on garbage collection
