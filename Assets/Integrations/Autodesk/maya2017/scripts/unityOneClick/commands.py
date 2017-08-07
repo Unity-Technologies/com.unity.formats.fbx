@@ -138,11 +138,11 @@ class reviewCmd(BaseCommand):
                 .format(unityAppPath, unityProjectPath, unityCommand)
 
         elif maya.cmds.about(linux=True):
-            melCommand = r'\"{0}\" -projectPath {1} -executeMethod {2}");'\
+            melCommand = r'system("\"{0}\" -projectPath {1} -executeMethod {2}");'\
                 .format(unityAppPath, unityProjectPath, unityCommand)
 
         elif maya.cmds.about(windows=True):
-            melCommand = r'\"{0}\" -projectPath {1} -executeMethod {2}");'\
+            melCommand = r'system("start \"{0}\" -projectPath {1} -executeMethod {2}");'\
                 .format(unityAppPath, unityProjectPath, unityCommand)
 
         else:
