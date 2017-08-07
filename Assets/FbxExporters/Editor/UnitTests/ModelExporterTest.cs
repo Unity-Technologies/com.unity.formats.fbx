@@ -123,11 +123,19 @@ namespace FbxExporters.UnitTests
             // test invalid filenames
             filename = "?foo**bar///.fbx";
             result = FbxExporters.Editor.ModelExporter.ConvertToValidFilename (filename);
+#if UNITY_EDITOR_WIN
             Assert.AreEqual ("_foo__bar___.fbx", result);
+#else
+            Assert.AreEqual ("?foo**bar___.fbx", result);
+#endif
 
             filename = "foo$?ba%r 2.fbx";
             result = FbxExporters.Editor.ModelExporter.ConvertToValidFilename (filename);
+#if UNITY_EDITOR_WIN
             Assert.AreEqual ("foo$_ba%r 2.fbx", result);
+#else
+            Assert.AreEqual ("foo$?ba%r 2.fbx", result);
+#endif
         }
     }
 }

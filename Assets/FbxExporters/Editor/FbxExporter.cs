@@ -1116,6 +1116,10 @@ namespace FbxExporters
             [MenuItem (MenuItemName, false, 30)]
             static void OnContextItem (MenuCommand command)
             {
+                if (Selection.objects.Length <= 0) {
+                    DisplayNoSelectionDialog ();
+                    return;
+                }
                 OnExport ();
             }
 
@@ -1128,6 +1132,13 @@ namespace FbxExporters
                 return true;
             }
 
+            public static void DisplayNoSelectionDialog()
+            {
+                UnityEditor.EditorUtility.DisplayDialog (
+                    "Fbx Exporter Warning", 
+                    "No GameObjects selected for export.", 
+                    "Ok");
+            }
             //
             // export mesh info from Unity
             //

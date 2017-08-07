@@ -18,7 +18,7 @@ namespace FbxExporters
     {
         public class ConvertToModel : System.IDisposable
         {
-            const string MenuItemName1 = "GameObject/Convert To Model";
+            const string MenuItemName1 = "GameObject/Convert To Prefab";
 
             /// <summary>
             /// Clean up this class on garbage collection
@@ -35,6 +35,10 @@ namespace FbxExporters
                     // We were actually invoked from the top GameObject menu,
                     // not the context menu, so treat it as such.
                     GameObject [] unityGameObjectsToConvert = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
+                    if (unityGameObjectsToConvert.Length <= 0) {
+                    ModelExporter.DisplayNoSelectionDialog ();
+                        return;
+                    }
                     Object[] result = CreateInstantiatedModelPrefab (unityGameObjectsToConvert);
                     if (result.Length>0)
                         Selection.objects = result;
@@ -123,7 +127,7 @@ namespace FbxExporters
                     Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath("Assets/" + relativePath);
 
                     if (unityMainAsset != null) {
-                        Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);
+                        Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset, gosToExport[i].scene);
                         GameObject unityGO = unityObj as GameObject;
                         if (unityGO != null) 
                         {
