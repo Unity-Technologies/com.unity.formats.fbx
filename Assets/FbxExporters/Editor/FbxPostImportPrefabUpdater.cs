@@ -18,7 +18,7 @@ namespace FbxExporters
                     return path;
                 }
             }
-            Debug.LogError("can't find FbxSource.cs somehow?!?");
+            Debug.LogError("FbxSource.cs not found; are you trying to uninstall FbxExporters?");
             return "";
         }
 
@@ -58,7 +58,7 @@ namespace FbxExporters
 
         static void OnPostprocessAllAssets(string [] imported, string [] deleted, string [] moved, string [] movedFrom)
         {
-            Debug.Log("Postprocessing...");
+            //Debug.Log("Postprocessing...");
 
             // Did we import an fbx file at all?
             // Optimize to not allocate in the common case of 'no'
@@ -67,13 +67,13 @@ namespace FbxExporters
                 if (IsFbxAsset(fbxModel)) {
                     if (fbxImported == null) { fbxImported = new HashSet<string>(); }
                     fbxImported.Add(fbxModel);
-                    Debug.Log("Tracking fbx asset " + fbxModel);
+                    //Debug.Log("Tracking fbx asset " + fbxModel);
                 } else {
-                    Debug.Log("Not an fbx asset " + fbxModel);
+                    //Debug.Log("Not an fbx asset " + fbxModel);
                 }
             }
             if (fbxImported == null) {
-                Debug.Log("No fbx imported");
+                //Debug.Log("No fbx imported");
                 return;
             }
 
@@ -90,14 +90,14 @@ namespace FbxExporters
             foreach(var guid in allObjectGuids) {
                 var prefabPath = AssetDatabase.GUIDToAssetPath(guid);
                 if (!IsPrefabAsset(prefabPath)) {
-                    Debug.Log("Not a prefab: " + prefabPath);
+                    //Debug.Log("Not a prefab: " + prefabPath);
                     continue;
                 }
                 if (!MayHaveFbxSourceToFbxAsset(prefabPath, fbxSourceScriptPath, fbxImported)) {
-                    Debug.Log("No dependence: " + prefabPath);
+                    //Debug.Log("No dependence: " + prefabPath);
                     continue;
                 }
-                Debug.Log("Considering updating prefab " + prefabPath);
+                //Debug.Log("Considering updating prefab " + prefabPath);
 
                 // We're now guaranteed that this is a prefab, and it depends
                 // on the FbxSource script, and it depends on an Fbx file that
@@ -108,20 +108,20 @@ namespace FbxExporters
                 // update the prefab anyway).
                 var prefab = AssetDatabase.LoadMainAssetAtPath(prefabPath) as GameObject;
                 if (!prefab) {
-                    Debug.LogWarning("FbxSource reimport: failed to update prefab " + prefabPath);
+                    //Debug.LogWarning("FbxSource reimport: failed to update prefab " + prefabPath);
                     continue;
                 }
                 foreach(var fbxSourceComponent in prefab.GetComponentsInChildren<FbxSource>()) {
                     if (!fbxSourceComponent.WantsAutoUpdate()) {
-                        Debug.Log("Not auto-updating " + prefabPath);
+                        //Debug.Log("Not auto-updating " + prefabPath);
                         continue;
                     }
                     var fbxAssetPath = fbxSourceComponent.GetFbxAssetPath();
                     if (!fbxImported.Contains(fbxAssetPath)) {
-                        Debug.Log("False-positive dependence: " + prefabPath + " via " + fbxAssetPath);
+                        //Debug.Log("False-positive dependence: " + prefabPath + " via " + fbxAssetPath);
                         continue;
                     }
-                    Debug.Log("Updating " + prefabPath + "...");
+                    //Debug.Log("Updating " + prefabPath + "...");
                     fbxSourceComponent.SyncPrefab();
                 }
             }
