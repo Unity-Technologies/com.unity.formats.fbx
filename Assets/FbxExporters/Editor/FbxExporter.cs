@@ -32,7 +32,10 @@ namespace FbxExporters
 
             const string ReadmeRelativePath = "FbxExporters/README.txt";
 
-            const string MenuItemName = "Assets/Export Model...";
+            // NOTE: The ellipsis at the end of the Menu Item name prevents the context
+            //       from being passed to command, thus resulting in OnContextItem()
+            //       being called only once regardless of what is selected.
+            const string MenuItemName = "GameObject/Export Model...";
 
             const string FileBaseName = "Untitled";
 
@@ -1107,10 +1110,11 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// create menu item in the File menu
+            /// Add a menu item to a GameObject's context menu.
             /// </summary>
-            [MenuItem (MenuItemName, false)]
-            public static void OnMenuItem ()
+            /// <param name="command">Command.</param>
+            [MenuItem (MenuItemName, false, 30)]
+            static void OnContextItem (MenuCommand command)
             {
                 if (Selection.objects.Length <= 0) {
                     DisplayNoSelectionDialog ();
@@ -1122,24 +1126,10 @@ namespace FbxExporters
             /// <summary>
             // Validate the menu item defined by the function above.
             /// </summary>
-            [MenuItem (MenuItemName, true)]
+            [MenuItem (MenuItemName, true, 30)]
             public static bool OnValidateMenuItem ()
             {
                 return true;
-            }
-
-            // Add a menu item called "Export Model..." to a GameObject's context menu.
-            // NOTE: The ellipsis at the end of the Menu Item name prevents the context
-            //       from being passed to command, thus resulting in OnContextItem()
-            //       being called only once regardless of what is selected.
-            [MenuItem ("GameObject/Export Model...", false, 30)]
-            static void OnContextItem (MenuCommand command)
-            {
-                if (Selection.objects.Length <= 0) {
-                    DisplayNoSelectionDialog ();
-                    return;
-                }
-                OnExport ();
             }
 
             public static void DisplayNoSelectionDialog()
@@ -1149,7 +1139,6 @@ namespace FbxExporters
                     "No GameObjects selected for export.", 
                     "Ok");
             }
-
             //
             // export mesh info from Unity
             //

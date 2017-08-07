@@ -18,51 +18,30 @@ namespace FbxExporters
     {
         public class ConvertToModel : System.IDisposable
         {
-            const string MenuItemName1 = "Assets/Convert To Prefab";
-            const string MenuItemName2 = "GameObject/Convert To Prefab";
+            const string MenuItemName1 = "GameObject/Convert To Prefab";
 
             /// <summary>
             /// Clean up this class on garbage collection
             /// </summary>
             public void Dispose () { }
 
-            /// <summary>
-            /// create menu item in the File menu
-            /// </summary>
-            [MenuItem (MenuItemName1, false)]
-            public static void OnMenuItem ()
-            {
-                GameObject [] unityGameObjectsToConvert = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
-                if (unityGameObjectsToConvert.Length <= 0) {
-                    ModelExporter.DisplayNoSelectionDialog ();
-                    return;
-                }
-
-                Object[] result = CreateInstantiatedModelPrefab (unityGameObjectsToConvert);
-                if (result.Length > 0) {
-                    Selection.objects = result;
-                }
-            }
-
-            /// <summary>
-            // Validate the menu item defined by the function above.
-            /// </summary>
-            [MenuItem (MenuItemName1, true)]
-            public static bool OnValidateMenuItem ()
-            {
-                return true;
-            }
-
             // Add a menu item called "Export Model..." to a GameObject's context menu.
             // OnContextItem gets called once per selected object 
             // (if the parent and child are selected, then OnContextItem will only be called on the parent)
-            [MenuItem (MenuItemName2, false, 30)]
+            [MenuItem (MenuItemName1, false, 30)]
             static void OnContextItem (MenuCommand command)
             {
                 if (command == null || command.context == null) {
                     // We were actually invoked from the top GameObject menu,
                     // not the context menu, so treat it as such.
-                    OnMenuItem();
+                    GameObject [] unityGameObjectsToConvert = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
+                    if (unityGameObjectsToConvert.Length <= 0) {
+                    ModelExporter.DisplayNoSelectionDialog ();
+                        return;
+                    }
+                    Object[] result = CreateInstantiatedModelPrefab (unityGameObjectsToConvert);
+                    if (result.Length>0)
+                        Selection.objects = result;
                     return;
                 }
 
@@ -71,10 +50,19 @@ namespace FbxExporters
                     Debug.LogError (string.Format("Error: {0} is not a GameObject and cannot be converted", command.context.name));
                     return;
                 }
-                GameObject[] result = CreateInstantiatedModelPrefab (new GameObject[]{selected});
-                if (result.Length>0)
-                    Selection.objects = result;
+                GameObject[] result1 = CreateInstantiatedModelPrefab (new GameObject[]{selected});
+                if (result1.Length>0)
+                    Selection.objects = result1;
 
+            }
+
+            /// <summary>
+            // Validate the menu item defined by the function above.
+            /// </summary>
+            [MenuItem (MenuItemName1, true, 30)]
+            public static bool OnValidateMenuItem ()
+            {
+                return true;
             }
 
             /// <summary>
