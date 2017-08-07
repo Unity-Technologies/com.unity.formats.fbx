@@ -7,7 +7,7 @@ namespace FbxExporters
     {
         class TurnTable 
         {
-            const string MenuItemName = "FbxExporters/Turntable Review/Load Turntable Scene";
+            const string MenuItemName = "FbxExporters/Turntable Review/Autoload Last Saved Prefab";
 
             const string ScenesPath = "Assets";
             const string SceneName = "FbxExporters_TurnTableReview";
@@ -52,7 +52,7 @@ namespace FbxExporters
 
             private static string GetLastSavedFilePath()
             {
-                string modelPath = FbxExporters.EditorTools.ExportSettings.instance.convertToModelSavePath;
+                string modelPath = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath();
                 System.IO.FileInfo fileInfo = GetLastSavedFile (modelPath);
 
                 return (fileInfo!=null) ? fileInfo.FullName : null;
@@ -74,17 +74,10 @@ namespace FbxExporters
             {
                 Object model = null;
 
-                fbxFileName = fbxFileName.Replace("\\", "/");
-                string dataPath = Application.dataPath.Replace ("\\", "/");
+                // make relative to UnityProject folder.
+                string relFileName = System.IO.Path.Combine("Assets", FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFileName));
 
-                // make relative
-                if (fbxFileName.StartsWith (dataPath, System.StringComparison.CurrentCulture))
-                {
-                    fbxFileName = fbxFileName.Substring (dataPath.Length+1);
-                    fbxFileName = System.IO.Path.Combine ("Assets", fbxFileName);
-                }
-
-                Object unityMainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath (fbxFileName);
+                Object unityMainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath (relFileName);
 
                 if (unityMainAsset) {
                     model = UnityEditor.PrefabUtility.InstantiatePrefab (unityMainAsset);

@@ -42,7 +42,7 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         
     def __del__(self):
         LoggerMixin.__del__(self)
-        OpenMayaMPx.MPxCommand.__del__(self)
+        # Note: MPxCommand does not define __del__
 
     def loadPlugin(self, plugin):
         if not maya.cmds.pluginInfo( plugin, query=True, loaded=True ):
@@ -131,7 +131,7 @@ class reviewCmd(BaseCommand):
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
 
-        if maya.cmds.about(macos=True):
+        if maya.cmds.about(macOS=True):
             # Use 'open -a' to bring app to front if it has already been started.
             # Note that the unity command will not get called.
             melCommand = r'system("open -a \"{0}\" --args -projectPath {1} -executeMethod {2}");'\
