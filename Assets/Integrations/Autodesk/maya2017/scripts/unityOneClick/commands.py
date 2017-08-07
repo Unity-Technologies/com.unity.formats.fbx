@@ -38,7 +38,23 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     """
     def __init__(self):
         OpenMayaMPx.MPxCommand.__init__(self)
+        LoggerMixin.__init__(self)
         
+    def __del__(self):
+        LoggerMixin.__del__(self)
+        OpenMayaMPx.MPxCommand.__del__(self)
+
+    def loadPlugin(self, plugin):
+        if not maya.cmds.pluginInfo( plugin, query=True, loaded=True ):
+            maya.cmds.loadPlugin( plugin )
+            if not maya.cmds.pluginInfo( plugin, query=True, loaded=True ):
+                self.displayDebug("Error: Failed to load {0} plugin".format(plugin))
+                return False
+        return True
+
+    def loadDependencies(self):
+          return self.loadPlugin('GamePipeline.mll')
+    
 class importCmd(BaseCommand):
     """
     Import FBX file from Unity Project and autoconfigure for publishing
@@ -174,6 +190,11 @@ class publishCmd(BaseCommand):
         return
     
     def doIt(self, args):
+        
+        # make sure the GamePipeline plugin is loaded
+        if not self.loadDependencies():
+            return
+
         strCmd = 'SendToUnitySelection'
         self.displayDebug('doIt {0}'.format(strCmd))
         maya.mel.eval(strCmd)
@@ -216,6 +237,10 @@ class configureCmd(BaseCommand):
         return
     
     def doIt(self, args):
+        # make sure the GamePipeline plugin is loaded
+        if not self.loadDependencies():
+            return
+        
         strCmd = 'SendToUnitySetProject'
         self.displayDebug('doIt {0}'.format(strCmd))
         maya.mel.eval(strCmd)
