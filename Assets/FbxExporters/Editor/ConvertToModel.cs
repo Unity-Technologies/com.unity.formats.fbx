@@ -48,7 +48,7 @@ namespace FbxExporters
             }
 
             // Add a menu item called "Export Model..." to a GameObject's context menu.
-            // OnContextItem gets called once per selected object 
+            // OnContextItem gets called once per selected object
             // (if the parent and child are selected, then OnContextItem will only be called on the parent)
             [MenuItem (MenuItemName2, false, 30)]
             static void OnContextItem (MenuCommand command)
@@ -121,8 +121,9 @@ namespace FbxExporters
                         continue;
                     }
 
-                    // make filepath relative to assets folder
-                    var relativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFileName);
+                    // make filepath relative
+                    var assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFileName);
+                    var projectRelativePath = "Assets/" + assetRelativePath;
 
                     // refresh the assetdata base so that we can query for the model
                     AssetDatabase.Refresh ();
@@ -130,7 +131,7 @@ namespace FbxExporters
                     // Replace w Model asset. LoadMainAssetAtPath wants a path
                     // relative to the project, not relative to the assets
                     // folder.
-                    var unityMainAsset = AssetDatabase.LoadMainAssetAtPath("Assets/" + relativePath) as GameObject;
+                    var unityMainAsset = AssetDatabase.LoadMainAssetAtPath(projectRelativePath) as GameObject;
 
                     if (!unityMainAsset) {
                         continue;
@@ -150,19 +151,21 @@ namespace FbxExporters
                     var fbxSource = unityGO.AddComponent<FbxSource>();
                     fbxSource.SetSourceModel(unityMainAsset);
 
-                    // Create a prefab from the instantiated and componentized unityGO.
-                    var prefabFileName = fbxFileName;
-                    if (prefabFileName.EndsWith(".fbx", System.StringComparison.OrdinalIgnoreCase)) {
-                        prefabFileName = prefabFileName.Substring(0, prefabFileName.Length - 4);
-                    }
-                    prefabFileName += ".prefab";
-                    var prefab = PrefabUtility.CreatePrefab(prefabFileName, unityGO);
-
-                    // Now make sure that unityGO sources from the prefab, not from the fbx
+                    // Disconnect from the FBX file.
                     PrefabUtility.DisconnectPrefabInstance(unityGO);
+
+                    // Create a prefab from the instantiated and componentized unityGO.
+                    var prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");
+                    var prefab = PrefabUtility.CreatePrefab(prefabFileName, unityGO);
+                    if (!prefab) {
+                        throw new System.Exception(
+                                string.Format("Failed to create prefab asset in [{0}] from fbx [{1}]",
+                                    prefabFileName, fbxFileName));
+                    }
+                    // Connect to the prefab file.
                     PrefabUtility.ConnectGameObjectToPrefab(unityGO, prefab);
 
-                    // remove (now redundant) gameobject
+                    // Remove (now redundant) gameobject
                     if (!keepOriginal) {
                         Object.DestroyImmediate (unityGameObjectsToConvert [i]);
                     } else {
@@ -212,7 +215,7 @@ namespace FbxExporters
                 } while (File.Exists (file));
 
                 return file;
-            } 
+            }
 
             /// <summary>
             /// Enforces that all object names be unique before exporting.
@@ -317,7 +320,7 @@ namespace FbxExporters
                     if(components[i] == null){
                         continue;
                     }
-                        
+
                     bool success = UnityEditorInternal.ComponentUtility.CopyComponent (components[i]);
                     if (success) {
                         bool foundComponentOfType = false;

@@ -73,7 +73,10 @@ namespace FbxExporters.UnitTests
             // Create a new hierarchy. It's marked for delete already.
             var newHierarchy = CreateHierarchy();
 
-            // Export it to the same fbx path.
+            // Export it to the same fbx path. But first, wait one second so
+            // that its timestamp differs enough for Unity to notice it
+            // changed.
+            System.Threading.Thread.Sleep(1000);
             FbxExporters.Editor.ModelExporter.ExportObject(m_fbxPath, newHierarchy);
             AssetDatabase.Refresh();
 

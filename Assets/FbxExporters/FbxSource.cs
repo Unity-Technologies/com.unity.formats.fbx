@@ -26,7 +26,15 @@ namespace FbxExporters
         /// Which FBX file does this refer to?
         /// </summary>
         [SerializeField]
+        [Tooltip("Which FBX file does this refer to?")]
         GameObject m_fbxModel;
+
+        /// <summary>
+        /// Should we auto-update this prefab when the FBX file is updated?
+        /// <summary>
+        [Tooltip("Should we auto-update this prefab when the FBX file is updated?")]
+        [SerializeField]
+        bool m_autoUpdate = true;
 
         //////////////////////////////////////////////////////////////////////
         // None of the code should be included in the build, because this
@@ -201,6 +209,22 @@ namespace FbxExporters
                         throw new System.NotImplementedException();
                 }
             }
+        }
+
+        /// <summary>
+        /// Return whether this FbxSource component requests automatic updates.
+        /// </summary>
+        public bool WantsAutoUpdate() {
+            return m_autoUpdate;
+        }
+
+        /// <summary>
+        /// Set whether this FbxSource component requests automatic updates.
+        ///
+        /// This is mostly useful for unit tests.
+        /// </summary>
+        public void SetAutoUpdate(bool autoUpdate) {
+            m_autoUpdate = autoUpdate;
         }
 
         /// <summary>

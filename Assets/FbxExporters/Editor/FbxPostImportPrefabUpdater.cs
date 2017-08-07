@@ -112,9 +112,13 @@ namespace FbxExporters
                     continue;
                 }
                 foreach(var fbxSourceComponent in prefab.GetComponentsInChildren<FbxSource>()) {
+                    if (!fbxSourceComponent.WantsAutoUpdate()) {
+                        Debug.Log("Not auto-updating " + prefabPath);
+                        continue;
+                    }
                     var fbxAssetPath = fbxSourceComponent.GetFbxAssetPath();
                     if (!fbxImported.Contains(fbxAssetPath)) {
-                        Debug.Log("No dependence: " + prefabPath + " via " + fbxAssetPath);
+                        Debug.Log("False-positive dependence: " + prefabPath + " via " + fbxAssetPath);
                         continue;
                     }
                     Debug.Log("Updating " + prefabPath + "...");
