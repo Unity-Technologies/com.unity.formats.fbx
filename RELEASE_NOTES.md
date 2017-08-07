@@ -1,5 +1,29 @@
 RELEASE NOTES
 
+**Version**: 0.0.8a
+
+NEW FEATURES
+
+* Added Model Exporter unit tests
+
+Added unit tests for frequently used public functions
+
+FIXES
+
+* Export: If nothing selected on export, pop up a dialog saying that nothing is selected
+* Export: Remove menu items from Assets menu
+* Convert to Model: fix issues with file number not incrementing properly (e.g. Sphere_1 would become Sphere_ 2)
+* Convert to Model: Allow copying multiple components of the same type (e.g. GameObject with multiple Box Colliders)
+* Convert to Model: Always add model to same scene as the original GameObject, if multiple scenes open
+* Convert to Model: Rename to "Convert to Prefab"
+* Export Settings: Saved settings weren't getting reloaded
+* Export Settings: Model prefab paths settings fixes
+  * Pressing cancel in the browse dialog no longer prints a warning
+  * Browse dialog opens at previously saved location
+  * Fix so button isn't clipped with default panel width  
+* Maya Integration: fix so destructors are always called
+* Export Unit tests: fix so ConvertToValidFilename tests pass on Mac
+  
 **Version**: 0.0.7a 
 
 NEW FEATURES
