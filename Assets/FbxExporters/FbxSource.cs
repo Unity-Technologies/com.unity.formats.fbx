@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace FbxExporters
 {
@@ -7,7 +8,9 @@ namespace FbxExporters
     /// This component is applied to a prefab. It keeps the prefab sync'd up
     /// with an FBX file.
     ///
-    /// On its own it does nothing; you also need the FbxPostImporterPrefabUpdater.
+    /// Other parts of the ecosystem:
+    ///         FbxSourceInspector
+    ///         FbxPostImporterPrefabUpdater
     /// </summary>
     public class FbxSource : MonoBehaviour
     {
@@ -109,7 +112,7 @@ namespace FbxExporters
                 builder.Append("{");
                 if (c != null) {
                     bool first = true;
-                    foreach(var kvp in c) {
+                    foreach(var kvp in c.OrderBy(kvp => kvp.Key)) {
                         if (!first) { builder.Append(','); }
                         else { first = false; }
 
@@ -220,10 +223,12 @@ namespace FbxExporters
 
         /// <summary>
         /// Set whether this FbxSource component requests automatic updates.
-        ///
-        /// This is mostly useful for unit tests.
         /// </summary>
         public void SetAutoUpdate(bool autoUpdate) {
+            if (!m_autoUpdate && autoUpdate) {
+                // We just turned autoupdate on, so update now!
+                CompareAndUpdate();
+            }
             m_autoUpdate = autoUpdate;
         }
 
@@ -232,6 +237,12 @@ namespace FbxExporters
         /// </summary>
         void CompareAndUpdate()
         {
+            // If we're not tracking anything, stop updating now.
+            // (Typically this is due to a manual update.)
+            if (!m_fbxModel) {
+                return;
+            }
+
             // todo: only instantiate if there's a change
             var oldRep = GetFbxHistory();
             if (oldRep == null || oldRep.c == null) { oldRep = null; }
@@ -255,6 +266,14 @@ namespace FbxExporters
 
             // Destroy the instance.
             GameObject.DestroyImmediate(instance.gameObject);
+        }
+
+        /// <summary>
+        /// Returns the fbx model we're tracking.
+        /// </summary>
+        public GameObject GetFbxAsset()
+        {
+            return m_fbxModel;
         }
 
         /// <summary>
@@ -289,8 +308,9 @@ namespace FbxExporters
         /// still restart tracking later.
         /// </summary>
         public void SetSourceModel(GameObject fbxModel) {
-            if (string.IsNullOrEmpty(UnityEditor.AssetDatabase.GetAssetPath(fbxModel))) {
-                throw new System.ArgumentException("FbxSource source model must be an asset");
+            // Null is OK. But otherwise, fbxModel must be an fbx.
+            if (fbxModel && !UnityEditor.AssetDatabase.GetAssetPath(fbxModel).EndsWith(".fbx")) {
+                throw new System.ArgumentException("FbxSource source model must be an fbx asset");
             }
 
             m_fbxModel = fbxModel;
