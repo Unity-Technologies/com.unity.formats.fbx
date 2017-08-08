@@ -115,21 +115,16 @@ namespace FbxExporters
 
             public static void LastSavedModel()
             {
-                // only update if we're have an Untitled scene or the turntable scene
-                UnityEngine.SceneManagement.Scene scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+                UnityEngine.SceneManagement.Scene scene = 
+                    UnityEngine.SceneManagement.SceneManager.GetSceneByName(SceneName);
 
-                if (scene.name == "") // aka Untitled
-                {
-                    // automatically changes to active scene
-                    UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene, GetSceneFilePath());
+                if (!scene.IsValid ()) {
+                    scene = UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.DefaultGameObjects, 
+                                                                                    UnityEditor.SceneManagement.NewSceneMode.Additive);
+                    UnityEditor.SceneManagement.EditorSceneManager.SaveScene (scene, GetSceneFilePath ());
                 }
-                else
-                {
-                    UnityEngine.SceneManagement.Scene turntableScene = 
-                        UnityEditor.SceneManagement.EditorSceneManager.OpenScene(GetSceneFilePath (), UnityEditor.SceneManagement.OpenSceneMode.Additive);
-                    
-                    UnityEngine.SceneManagement.SceneManager.SetActiveScene(turntableScene);
-                }
+
+                UnityEngine.SceneManagement.SceneManager.SetActiveScene (scene);
 
                 if (AutoUpdateEnabled ()) 
                 {
@@ -148,6 +143,8 @@ namespace FbxExporters
 
             private static void UnsubscribeFromEvents ()
             {
+                UnloadModel(LastModel);
+
                 LastModel = null;
                 LastFilePath = null;
 
