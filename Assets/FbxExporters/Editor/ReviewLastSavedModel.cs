@@ -129,10 +129,10 @@ namespace FbxExporters
                     scenes.Add (toAdd);
                 }
 
-                // if for some reason the turntable scene is missing create an empty scene
+                // if turntable scene not added to list of scenes
                 if (!scene.IsValid ()) 
                 {
-                    // create an empty scene
+                    // and if for some reason the turntable scene is missing create an empty scene
                     // NOTE: we cannot use NewScene because it will force me to save the modified Untitled scene
                     if (!System.IO.File.Exists(GetSceneFilePath ())) 
                     {
@@ -145,10 +145,11 @@ namespace FbxExporters
                     scene = UnityEditor.SceneManagement.EditorSceneManager.OpenScene (GetSceneFilePath (), UnityEditor.SceneManagement.OpenSceneMode.Additive);
                 }
 
-                // save unmodified scenes
+                // save unmodified scenes (but not the untitled or turntable scene)
                 if (UnityEditor.SceneManagement.EditorSceneManager.SaveModifiedScenesIfUserWantsTo (scenes.ToArray ())) 
                 {
-                    // unload all scene except turntable & untitled
+                    // close all scene except turntable & untitled
+                    // NOTE: you cannot unload scene in editor
                     for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++) {
                         UnityEngine.SceneManagement.Scene toUnload = UnityEngine.SceneManagement.SceneManager.GetSceneAt (i);
 
@@ -169,6 +170,7 @@ namespace FbxExporters
                     return;    
                 }
 
+                // make turntable the active scene
                 UnityEngine.SceneManagement.SceneManager.SetActiveScene (scene);
 
                 if (AutoUpdateEnabled ()) {
