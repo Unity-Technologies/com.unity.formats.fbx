@@ -1028,7 +1028,6 @@ namespace FbxExporters
                     }
                     // delete old file, move temp file
                     ReplaceFile();
-                    Debug.Log("refreshing after exporting " + m_lastFilePath);
                     AssetDatabase.Refresh();
 
                     return status == true ? NumNodes : 0;
