@@ -255,7 +255,7 @@ namespace FbxExporters
             }
             TreeDiff(oldRep, m_fbxModel.transform, instance.transform);
 
-            // Update the representation of the history.
+            // Update the representation of the history to match the new fbx.
             var fbxSource = instance.GetComponent<FbxSource>();
             var newFbxRep = FbxRepresentation.FromTransform(m_fbxModel.transform);
             var newFbxRepString = newFbxRep.ToJson();

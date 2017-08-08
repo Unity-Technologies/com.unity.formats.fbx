@@ -141,9 +141,9 @@ namespace FbxExporters
                     // Copy the components over to the instance of the FBX.
                     SetupImportedGameObject (gosToExport [i], unityGO);
 
-                    // Set up the FbxSource component so we can auto-update.
-                    var fbxSource = unityGO.AddComponent<FbxSource>();
-                    fbxSource.SetSourceModel(unityMainAsset);
+                    // Set up the FbxPrefab component so we can auto-update.
+                    var fbxPrefab = unityGO.AddComponent<FbxPrefab>();
+                    fbxPrefab.SetSourceModel(unityMainAsset);
 
                     // Disconnect from the FBX file.
                     PrefabUtility.DisconnectPrefabInstance(unityGO);

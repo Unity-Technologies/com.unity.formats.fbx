@@ -3,31 +3,31 @@ using UnityEditor;
 
 namespace FbxExporters.EditorTools {
 
-    [CustomEditor(typeof(FbxSource))]
-    public class FbxSourceInspector : UnityEditor.Editor {
+    [CustomEditor(typeof(FbxPrefab))]
+    public class FbxPrefabInspector : UnityEditor.Editor {
         public override void OnInspectorGUI() {
-            FbxSource fbxSource = (FbxSource)target;
+            FbxPrefab fbxPrefab = (FbxPrefab)target;
 
-            fbxSource.SetAutoUpdate(EditorGUILayout.Toggle ("Auto-update:", fbxSource.WantsAutoUpdate()));
-            if (!fbxSource.WantsAutoUpdate()) {
+            fbxPrefab.SetAutoUpdate(EditorGUILayout.Toggle ("Auto-update:", fbxPrefab.WantsAutoUpdate()));
+            if (!fbxPrefab.WantsAutoUpdate()) {
                 if (GUILayout.Button("Sync prefab to FBX")) {
-                    fbxSource.SyncPrefab();
+                    fbxPrefab.SyncPrefab();
                 }
             }
 
-            var oldFbxAsset = fbxSource.GetFbxAsset();
+            var oldFbxAsset = fbxPrefab.GetFbxAsset();
             var newFbxAsset = EditorGUILayout.ObjectField("Source Fbx Asset", oldFbxAsset,
                     typeof(GameObject), allowSceneObjects: false) as GameObject;
             if (newFbxAsset && !AssetDatabase.GetAssetPath(newFbxAsset).EndsWith(".fbx")) {
-                Debug.LogError("FbxSource must point to an Fbx asset (or none).");
+                Debug.LogError("FbxPrefab must point to an Fbx asset (or none).");
             } else if (newFbxAsset != oldFbxAsset) {
-                fbxSource.SetSourceModel(newFbxAsset);
+                fbxPrefab.SetSourceModel(newFbxAsset);
             }
 
 #if FBXEXPORTER_DEBUG
             GUILayout.BeginHorizontal();
             GUILayout.Label ("Debug info:");
-            EditorGUILayout.SelectableLabel(fbxSource.GetFbxHistory().ToJson());
+            EditorGUILayout.SelectableLabel(fbxPrefab.GetFbxHistory().ToJson());
             GUILayout.EndHorizontal();
 #endif
         }

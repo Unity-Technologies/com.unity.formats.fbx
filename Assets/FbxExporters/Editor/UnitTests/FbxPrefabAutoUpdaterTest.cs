@@ -19,7 +19,7 @@ namespace FbxExporters.UnitTests
     /// Test that the post-import prefab updater works properly,
     /// by triggering it to run.
     /// </summary>
-    public class FbxPostImportPrefabUpdaterTest : ExporterTestBase
+    public class FbxPrefabAutoUpdaterTest : ExporterTestBase
     {
         GameObject m_fbx;
         string m_fbxPath;
@@ -36,7 +36,7 @@ namespace FbxExporters.UnitTests
             // Instantiate the fbx and create a prefab from it.
             // Delete the object right away (don't even wait for term).
             var fbxInstance = PrefabUtility.InstantiatePrefab(m_fbx) as GameObject;
-            fbxInstance.AddComponent<FbxSource>().SetSourceModel(m_fbx);
+            fbxInstance.AddComponent<FbxPrefab>().SetSourceModel(m_fbx);
             m_prefabPath = GetRandomFileNamePath(extName: ".prefab");
             m_prefab = PrefabUtility.CreatePrefab(m_prefabPath, fbxInstance);
             AssetDatabase.Refresh ();
@@ -47,19 +47,19 @@ namespace FbxExporters.UnitTests
         [Test]
         public void BasicTest ()
         {
-            var fbxSourcePath = FbxPostImportPrefabUpdater.FindFbxSourceAssetPath();
-            Assert.IsFalse(string.IsNullOrEmpty(fbxSourcePath));
-            Assert.IsTrue(fbxSourcePath.EndsWith("FbxSource.cs"));
+            var fbxPrefabPath = FbxPrefabAutoUpdater.FindFbxPrefabAssetPath();
+            Assert.IsFalse(string.IsNullOrEmpty(fbxPrefabPath));
+            Assert.IsTrue(fbxPrefabPath.EndsWith("FbxPrefab.cs"));
 
-            Assert.IsTrue(FbxPostImportPrefabUpdater.IsFbxAsset("Assets/path/to/foo.fbx"));
-            Assert.IsFalse(FbxPostImportPrefabUpdater.IsFbxAsset("Assets/path/to/foo.png"));
+            Assert.IsTrue(FbxPrefabAutoUpdater.IsFbxAsset("Assets/path/to/foo.fbx"));
+            Assert.IsFalse(FbxPrefabAutoUpdater.IsFbxAsset("Assets/path/to/foo.png"));
 
-            Assert.IsTrue(FbxPostImportPrefabUpdater.IsPrefabAsset("Assets/path/to/foo.prefab"));
-            Assert.IsFalse(FbxPostImportPrefabUpdater.IsPrefabAsset("Assets/path/to/foo.fbx"));
-            Assert.IsFalse(FbxPostImportPrefabUpdater.IsPrefabAsset("Assets/path/to/foo.png"));
+            Assert.IsTrue(FbxPrefabAutoUpdater.IsPrefabAsset("Assets/path/to/foo.prefab"));
+            Assert.IsFalse(FbxPrefabAutoUpdater.IsPrefabAsset("Assets/path/to/foo.fbx"));
+            Assert.IsFalse(FbxPrefabAutoUpdater.IsPrefabAsset("Assets/path/to/foo.png"));
 
             var imported = new HashSet<string>( new string [] { "Assets/path/to/foo.fbx", m_fbxPath } );
-            Assert.IsTrue(FbxPostImportPrefabUpdater.MayHaveFbxSourceToFbxAsset(m_prefabPath, fbxSourcePath,
+            Assert.IsTrue(FbxPrefabAutoUpdater.MayHaveFbxPrefabToFbxAsset(m_prefabPath, fbxPrefabPath,
                         imported));
         }
 
@@ -94,7 +94,7 @@ namespace FbxExporters.UnitTests
 
 namespace FbxExporters.PerformanceTests {
 
-    class FbxPostImportPrefabUpdaterTestPerformance : FbxExporters.UnitTests.ExporterTestBase {
+    class FbxPrefabAutoUpdaterTestPerformance : FbxExporters.UnitTests.ExporterTestBase {
         [Test]
         public void ExpensivePerformanceTest ()
         {
@@ -146,19 +146,22 @@ namespace FbxExporters.PerformanceTests {
             for(int i = 0; i < n / 2; ++i) {
                 var instance = CreateGameObject("prefab_" + i);
                 Assert.IsTrue(instance);
-                var fbxSource = instance.AddComponent<FbxSource>();
-                fbxSource.SetSourceModel(fbxFiles[i]);
+                var fbxPrefab = instance.AddComponent<FbxPrefab>();
+                fbxPrefab.SetSourceModel(fbxFiles[i]);
                 UnityEditor.PrefabUtility.CreatePrefab(names[i] + ".prefab", fbxFiles[i]);
             }
             Debug.Log("Created prefabs in " + stopwatch.ElapsedMilliseconds);
 
             // Export a new hierarchy and update one fbx file.
+            // Make sure we're timing just the assetdatabase refresh by
+            // creating a file and then copying it, and not the FbxExporter.
             var newHierarchy = CreateHierarchy();
+            FbxExporters.Editor.ModelExporter.ExportObject(names[0] + "_new.fbx", newHierarchy);
             try {
                 UnityEngine.Debug.unityLogger.logEnabled = false;
                 stopwatch.Reset ();
                 stopwatch.Start ();
-                FbxExporters.Editor.ModelExporter.ExportObject(names[0] + ".fbx", newHierarchy);
+                File.Copy(names[0] + "_new.fbx", names[0] + ".fbx", overwrite: true);
                 AssetDatabase.Refresh(); // force the update right now.
             } finally {
                 UnityEngine.Debug.unityLogger.logEnabled = true;
