@@ -1,9 +1,16 @@
-global proc configureUnityOneClick(string $unityProject)
+global proc configureUnityOneClick(string $unityProject, string $unityApp, int $headless)
 {
-    optionVar -stringValue "UnityProject" "{0}";
-    loadPlugin unityOneClickPlugin;
-    pluginInfo -edit -autoload true unityOneClickPlugin;
-    scriptJob -idleEvent quit;
+    // configure plugin settings
+    optionVar -stringValue "UnityApp" $unityApp;
+    optionVar -stringValue "UnityProject" $unityProject;
+    optionVar -intValue "UnityOneClick_Headless" $headless;
+
+    // configure auto load of plugin
+    if (`pluginInfo -q -loaded unityOneClickPlugin` == false)
+    {
+        loadPlugin -quiet unityOneClickPlugin;
+        pluginInfo -edit -autoload true unityOneClickPlugin;
+    }
 
     return;
 }

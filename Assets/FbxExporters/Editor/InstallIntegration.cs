@@ -14,25 +14,30 @@ namespace FbxExporters
         private const string VERSION_FIELD = "**Version**";
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
-        private static string MAYA_COMMANDS { get { 
-#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX 
-            return string.Format(@"configureUnityOneClick {1}{0}{1};", 
-                Integrations.GetProjectPath(), @"" + (char) 34); 
+
+
+        // Use string to define escaped quote
+        // Windows needs the backslash
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
+        private const string ESCAPED_QUOTE = "\"";
 #else
-            return string.Format("configureUnityOneClick \\{1}{0}\\{1};", 
-                Integrations.GetProjectPath().Replace("\\","/"), @"" + (char) 34); 
+        private const string ESCAPED_QUOTE = "\\\"";
 #endif
+
+        private static string MAYA_COMMANDS { get { 
+            return string.Format("configureUnityOneClick {3}{0}{3} {3}{1}{3} {2}; scriptJob -idleEvent quit;", 
+                GetProjectPath(), GetAppPath(), (IsHeadlessInstall()?1:0), ESCAPED_QUOTE); 
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
         private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya"+VERSION_TAG+"/unityoneclick.mod";
 
 #if UNITY_EDITOR_OSX
-        private const string REL_MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/"+VERSION_TAG+"/modules";
 #elif UNITY_EDITOR_LINUX 
-        private const string REL_MAYA_MODULES_PATH = "Maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "Maya/"+VERSION_TAG+"/modules";
 #else
-        private const string REL_MAYA_MODULES_PATH = "maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "maya/"+VERSION_TAG+"/modules";
 #endif
 
         private static string GetUserFolder()
@@ -44,9 +49,14 @@ namespace FbxExporters
 #endif
         }
 
+        private static bool IsHeadlessInstall ()
+        {
+            return false;
+        }
+
         private static string GetModulePath(string version)
         {
-            string result = System.IO.Path.Combine(GetUserFolder(), REL_MAYA_MODULES_PATH);
+            string result = System.IO.Path.Combine(GetUserFolder(), MAYA_MODULES_PATH);
 
             return result.Replace(VERSION_TAG,version);
         }
@@ -58,9 +68,42 @@ namespace FbxExporters
             return result.Replace(VERSION_TAG,version);
         }
 
+        public static string GetMayaLocation (string versionNumber)
+        {
+            string location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
+
+            if (location == null)
+#if UNITY_EDITOR_OSX
+                location = string.Format ("/Applications/Autodesk/maya{0}/Maya.app/Contents", versionNumber);
+#elif UNITY_EDITOR_LINUX
+                location = string.Format ("/usr/autodesk/maya{0}", versionNumber);
+#else // WINDOWS
+                location = string.Format ("C:/Program Files/Autodesk/Maya{0}", versionNumber);
+#endif
+            return location;
+        }
+
+        public static string GetMayaPath (string versionNumber)
+        {
+            string mayaLocation = GetMayaLocation (versionNumber);
+
+#if UNITY_EDITOR_OSX
+            return string.Format ("{0}/MacOS/maya", mayaLocation);
+#elif UNITY_EDITOR_LINUX
+            return string.Format ("{0}/bin/maya", mayaLocation);
+#else // WINDOWS
+            return string.Format ("{0}/bin/maya.exe", mayaLocation);
+#endif
+        }
+
+        public static string GetAppPath()
+        {
+            return EditorApplication.applicationPath.Replace("\\","/");
+        }
+
         public static string GetProjectPath()
         {
-            return System.IO.Directory.GetParent(Application.dataPath).FullName;
+            return System.IO.Directory.GetParent(Application.dataPath).FullName.Replace("\\","/");
         }
 
         private static string GetPackagePath()
@@ -83,7 +126,7 @@ namespace FbxExporters
                 // Continue to read until you reach end of file
                 while (line != null)
                 {
-                    if (line.StartsWith(VERSION_FIELD))
+                    if (line.StartsWith(VERSION_FIELD, StringComparison.CurrentCulture))
                     {
                         string[] fields = line.Split(FIELD_SEPARATORS);
 
@@ -173,21 +216,21 @@ namespace FbxExporters
                 myProcess.StartInfo.UseShellExecute = false;
 
 #if UNITY_EDITOR_OSX
-                myProcess.StartInfo.FileName = "open";
-                string mayaPath = string.Format ("/Applications/Autodesk/maya{0}/Maya.app", version);
+                string mayaPath = GetMayaPath(version);
+                myProcess.StartInfo.FileName = mayaPath;
 
-                if (!System.IO.Directory.Exists(mayaPath))
+                if (!System.IO.File.Exists(mayaPath))
                 {
-                    Debug.LogError (string.Format ("No maya installation found at {0}",mayaPath));
+                    Debug.LogError (string.Format ("No maya installation found at {0}", mayaPath));
                     return -1;
                 }
 
-                string mayaCommandLine = string.Format(@"{0} --args -command '{1}'", mayaPath, MAYA_COMMANDS);
-                myProcess.StartInfo.Arguments = "-a " + mayaCommandLine;
+                myProcess.StartInfo.Arguments = string.Format(@"-command '{0}'", MAYA_COMMANDS);
+
 #elif UNITY_EDITOR_LINUX
                 throw new NotImplementedException();
 #else
-                string mayaPath = string.Format ("C:/Program Files/Autodesk/Maya{0}/bin/maya.exe", version);
+                string mayaPath = GetMayaPath(version);
 
                 if (!System.IO.File.Exists(mayaPath))
                 {
@@ -298,7 +341,7 @@ namespace FbxExporters
 
                 // TODO: if installation path different
 
-                    // TODO: print message package already installed else where
+                // TODO: print message package already installed else where
             }
 
             return true;
@@ -325,12 +368,12 @@ namespace FbxExporters
             [MenuItem (MenuItemName1, false, 0)]
             public static void OnMenuItem1 ()
             {
-            	if (Integrations.InstallMaya(Integrations.MAYA_VERSION))
-            	{
+                if (Integrations.InstallMaya(Integrations.MAYA_VERSION))
+                {
                     int exitCode = Integrations.ConfigureMaya (Integrations.MAYA_VERSION);
 
                     string title = string.Format("Completed installation of Maya{0} Integration.", Integrations.MAYA_VERSION);
-                    string message = "Maya will close when it has finished configuring integration.";
+                    string message = "Maya will close after it has finished configuring the integration.";
 
                     if (exitCode!=0)
                     {

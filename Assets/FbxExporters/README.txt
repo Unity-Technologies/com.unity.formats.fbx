@@ -5,7 +5,7 @@ Copyright (c) 2017 Unity Technologies. All rights reserved.
 Licensed under the ##LICENSENAME##.
 See LICENSE.md file for full license information.
 
-**Version**: 0.0.8a
+**Version**: 0.0.9a-sprint20
 
 Requirements
 ------------
@@ -44,8 +44,8 @@ else
     if [ ! -f "${MAYA_PATH}" ]; then
         echo "Maya2017 not installed"
     else
-        # To configure without user interface prepend the following command: optionVar -intValue \"UnityOneClick_Headless\" 1;
-        "${MAYA_PATH}" -command "configureUnityOneClick \"${PROJECT_PATH}\";"
+        # To configure without user interface change the last argument to 1 instead of 0
+        "${MAYA_PATH}" -command "configureUnityOneClick \"${PROJECT_PATH}\" \"${UNITY3D_PATH}\" 0; scriptJob -idleEvent quit;"
     fi
 fi
 
