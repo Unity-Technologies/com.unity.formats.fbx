@@ -11,7 +11,7 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.IO;
 using System.Collections.Generic;
-using FbxSdk;
+using Unity.FbxSdk;
 
 namespace FbxExporters.UnitTests
 {
