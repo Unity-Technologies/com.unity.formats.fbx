@@ -34,6 +34,7 @@ if test `uname -s` = 'Darwin' ; then
 else
   UNITY_EDITOR_PATH=/opt/Unity/Editor/Unity/Unity
 fi
+rm -rf "${PROJECT_PATH}/Assets/FbxSdk"
 "${UNITY_EDITOR_PATH}" -projectPath "${PROJECT_PATH}" -importPackage "${FBXSDK_PACKAGE_PATH}" -quit
 "${UNITY_EDITOR_PATH}" -batchmode -projectPath "${PROJECT_PATH}" -exportPackage Assets/FbxExporters Assets/FbxSdk Assets/Integrations "${PROJECT_PATH}/FbxExporters_${PACKAGE_VERSION}.unitypackage" -quit
 ```
@@ -50,6 +51,7 @@ set PACKAGE_NAME=FbxExporters
 set PACKAGE_VERSION=0.0.5a
 set FBXSDK_PACKAGE_PATH=/path/to/FbxSdk.unitypackage
 
+rmdir /s "%PROJECT_PATH%/Assets/FbxSdk"
 %UNITY3D_PATH% -projectPath "%PROJECT_PATH%" -importPackage %FBXSDK_PACKAGE_PATH% -quit
 %UNITY3D_PATH% -batchmode -projectPath "%PROJECT_PATH%" -exportPackage Assets/FbxExporters Assets/FbxSdk Assets/Integrations %PROJECT_PATH%/%PACKAGE_NAME%_%PACKAGE_VERSION%.unitypackage -quit
 ```
