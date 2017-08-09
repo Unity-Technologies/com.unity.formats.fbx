@@ -156,47 +156,6 @@ namespace FbxExporters.UnitTests
         }
 
         /// <summary>
-        /// Creates test hierarchy.
-        /// </summary>
-        /// <returns>The hierarchy root.</returns>
-        private GameObject CreateHierarchy ()
-        {
-            // Create the following hierarchy:
-            //      Root
-            //      -> Parent1
-            //      ----> Child1
-            //      ----> Child2
-            //      -> Parent2
-            //      ----> Child3
-
-            var root = CreateGameObject ("Root");
-            SetTransform (root.transform,
-                new Vector3 (3, 4, -6),
-                new Vector3 (45, 10, 34),
-                new Vector3 (2, 1, 3));
-
-            var parent1 = CreateGameObject ("Parent1", root.transform);
-            SetTransform (parent1.transform,
-                new Vector3 (53, 0, -1),
-                new Vector3 (0, 5, 0),
-                new Vector3 (1, 1, 1));
-            
-            var parent2 = CreateGameObject ("Parent2", root.transform);
-            SetTransform (parent2.transform,
-                new Vector3 (0, 0, 0),
-                new Vector3 (90, 1, 3),
-                new Vector3 (1, 0.3f, 0.5f));
-            
-            parent1.transform.SetAsFirstSibling ();
-
-            CreateGameObject ("Child1", parent1.transform);
-            CreateGameObject ("Child2", parent1.transform);
-            CreateGameObject ("Child3", parent2.transform);
-
-            return root;
-        }
-
-        /// <summary>
         /// Sets the transform.
         /// </summary>
         /// <param name="t">Transform.</param>
@@ -208,19 +167,6 @@ namespace FbxExporters.UnitTests
             t.localPosition = pos;
             t.localEulerAngles = rot;
             t.localScale = scale;
-        }
-
-        /// <summary>
-        /// Creates a GameObject.
-        /// </summary>
-        /// <returns>The created GameObject.</returns>
-        /// <param name="name">Name.</param>
-        /// <param name="parent">Parent.</param>
-        private GameObject CreateGameObject (string name, Transform parent = null)
-        {
-            var go = new GameObject (name);
-            go.transform.SetParent (parent);
-            return go;
         }
 
         /// <summary>

@@ -9,7 +9,6 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.TestTools;
 using NUnit.Framework;
-using System.Collections;
 using System.IO;
 using Unity.FbxSdk;
 
@@ -17,8 +16,17 @@ namespace FbxExporters.UnitTests
 {
     public abstract class ExporterTestBase
     {
-        private string _filePath;
-        protected string filePath       { get { return string.IsNullOrEmpty(_filePath) ? Application.dataPath : _filePath; } set { _filePath = value; } }
+        private string _testDirectory;
+        protected string filePath {
+            get {
+                if (string.IsNullOrEmpty(_testDirectory)) {
+                    // Create a directory in the asset path.
+                    _testDirectory = GetRandomFileNamePath("Assets", extName: "");
+                    System.IO.Directory.CreateDirectory(_testDirectory);
+                }
+                return _testDirectory;
+            }
+        }
 
         private string _fileNamePrefix;
         protected string fileNamePrefix { get { return string.IsNullOrEmpty(_fileNamePrefix) ? "_safe_to_delete__" : _fileNamePrefix; }
@@ -45,14 +53,9 @@ namespace FbxExporters.UnitTests
         {
             string temp;
 
-            if (pathName==null)
+            if (pathName == null) {
                 pathName = this.filePath;
-
-            if (prefixName==null)
-                prefixName = this.fileNamePrefix;
-
-            if (extName==null)
-                extName = this.fileNameExt;
+            }
 
             // repeat until you find a file that does not already exist
             do {
@@ -63,12 +66,94 @@ namespace FbxExporters.UnitTests
             return temp;
         }
 
+        /// <summary>
+        /// Creates a test hierarchy.
+        ///
+        /// No two nodes in the hierarchy have the same name.
+        /// </summary>
+        /// <returns>The hierarchy root.</returns>
+        public GameObject CreateHierarchy (string rootname = "Root")
+        {
+            // Create the following hierarchy:
+            //      Root
+            //      -> Parent1
+            //      ----> Child1
+            //      ----> Child2
+            //      -> Parent2
+            //      ----> Child3
+
+            var root = CreateGameObject (rootname);
+            SetTransform (root.transform,
+                new Vector3 (3, 4, -6),
+                new Vector3 (45, 10, 34),
+                new Vector3 (2, 1, 3));
+
+            var parent1 = CreateGameObject ("Parent1", root.transform);
+            SetTransform (parent1.transform,
+                new Vector3 (53, 0, -1),
+                new Vector3 (0, 5, 0),
+                new Vector3 (1, 1, 1));
+
+            var parent2 = CreateGameObject ("Parent2", root.transform);
+            SetTransform (parent2.transform,
+                new Vector3 (0, 0, 0),
+                new Vector3 (90, 1, 3),
+                new Vector3 (1, 0.3f, 0.5f));
+
+            parent1.transform.SetAsFirstSibling ();
+
+            CreateGameObject ("Child1", parent1.transform);
+            CreateGameObject ("Child2", parent1.transform);
+            CreateGameObject ("Child3", parent2.transform);
+
+            return root;
+        }
+
+        /// <summary>
+        /// Sets the transform.
+        /// </summary>
+        /// <param name="t">Transform.</param>
+        /// <param name="pos">Position.</param>
+        /// <param name="rot">Rotation.</param>
+        /// <param name="scale">Scale.</param>
+        private void SetTransform (Transform t, Vector3 pos, Vector3 rot, Vector3 scale)
+        {
+            t.localPosition = pos;
+            t.localEulerAngles = rot;
+            t.localScale = scale;
+        }
+
+        /// <summary>
+        /// Creates a GameObject.
+        /// </summary>
+        /// <returns>The created GameObject.</returns>
+        /// <param name="name">Name.</param>
+        /// <param name="parent">Parent.</param>
+        public GameObject CreateGameObject (string name, Transform parent = null)
+        {
+            var go = new GameObject (name);
+            go.transform.SetParent (parent);
+            return go;
+        }
+
+        // Helper for the tear-down. This is run from the editor's update loop.
+        void DeleteOnNextUpdate()
+        {
+            Directory.Delete(filePath, recursive: true);
+            AssetDatabase.Refresh();
+            EditorApplication.update -= DeleteOnNextUpdate;
+        }
+
         [TearDown]
         public virtual void Term ()
         {
-            foreach (string file in Directory.GetFiles (this.filePath, MakeFileName("*"))) {
-                File.Delete (file);
+            if (string.IsNullOrEmpty(_testDirectory)) {
+                return;
             }
+
+            // Delete the directory on the next editor update.  Otherwise,
+            // prefabs don't get deleted and the directory delete fails.
+            EditorApplication.update += DeleteOnNextUpdate;
         }
 
         /// <summary>
@@ -76,7 +161,7 @@ namespace FbxExporters.UnitTests
         /// </summary>
         /// <returns>Root of Model Prefab.</returns>
         /// <param name="selected">Objects to export.</param>
-        protected virtual GameObject ExportSelection(Object[] selected)
+        protected virtual GameObject ExportSelection(params Object[] selected)
         {
             // export selected to a file, then return the root
             var filename = GetRandomFileNamePath();
@@ -88,7 +173,7 @@ namespace FbxExporters.UnitTests
             Assert.IsNotNull (fbxFileName);
 
             // make filepath relative to project folder
-            if (fbxFileName.StartsWith (Application.dataPath, System.StringComparison.CurrentCulture)) 
+            if (fbxFileName.StartsWith (Application.dataPath, System.StringComparison.CurrentCulture))
             {
                 fbxFileName = "Assets" + fbxFileName.Substring (Application.dataPath.Length);
             }
@@ -100,6 +185,35 @@ namespace FbxExporters.UnitTests
 
             Assert.IsNotNull (fbxRoot);
             return fbxRoot;
+        }
+
+        /// <summary>
+        /// Compares two hierarchies, asserts that they match precisely.
+        /// The root can be allowed to mismatch. That's normal with
+        /// GameObject.Instantiate.
+        /// </summary>
+        public static void AssertSameHierarchy (
+            GameObject expectedHierarchy, GameObject actualHierarchy,
+            bool ignoreRootName = false, bool ignoreRootTransform = false)
+        {
+            if (!ignoreRootName) {
+                Assert.AreEqual (expectedHierarchy.name, actualHierarchy.name);
+            }
+
+            var expectedTransform = expectedHierarchy.transform;
+            var actualTransform = actualHierarchy.transform;
+
+            if (!ignoreRootTransform) {
+                Assert.AreEqual (expectedTransform, actualTransform);
+            }
+
+            Assert.AreEqual (expectedTransform.childCount, actualTransform.childCount);
+
+            foreach (Transform expectedChild in expectedTransform) {
+                var actualChild = actualTransform.Find (expectedChild.name);
+                Assert.IsNotNull (actualChild);
+                AssertSameHierarchy (expectedChild.gameObject, actualChild.gameObject);
+            }
         }
     }
 }

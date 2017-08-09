@@ -26,7 +26,7 @@ namespace FbxExporters
             public void Dispose () { }
 
             // Add a menu item called "Export Model..." to a GameObject's context menu.
-            // OnContextItem gets called once per selected object 
+            // OnContextItem gets called once per selected object
             // (if the parent and child are selected, then OnContextItem will only be called on the parent)
             [MenuItem (MenuItemName1, false, 30)]
             static void OnContextItem (MenuCommand command)
@@ -115,8 +115,9 @@ namespace FbxExporters
                         continue;
                     }
 
-                    // make filepath relative to assets folder
-                    var relativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFileName);
+                    // make filepath relative
+                    var assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFileName);
+                    var projectRelativePath = "Assets/" + assetRelativePath;
 
                     // refresh the assetdata base so that we can query for the model
                     AssetDatabase.Refresh ();
@@ -124,32 +125,51 @@ namespace FbxExporters
                     // Replace w Model asset. LoadMainAssetAtPath wants a path
                     // relative to the project, not relative to the assets
                     // folder.
-                    Object unityMainAsset = AssetDatabase.LoadMainAssetAtPath("Assets/" + relativePath);
+                    var unityMainAsset = AssetDatabase.LoadMainAssetAtPath(projectRelativePath) as GameObject;
 
-                    if (unityMainAsset != null) {
-                        Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset, gosToExport[i].scene);
-                        GameObject unityGO = unityObj as GameObject;
-                        if (unityGO != null) 
-                        {
-                            SetupImportedGameObject (gosToExport [i], unityGO);
-
-
-                            // remove (now redundant) gameobject
-                            if (!keepOriginal) {
-                                Object.DestroyImmediate (unityGameObjectsToConvert [i]);
-                            } 
-                            else 
-                            {
-                                // rename and put under scene root in case we need to check values
-                                gosToExport [i].name = "_safe_to_delete_" + gosToExport [i].name;
-                                gosToExport [i].SetActive (false);
-                            }
-
-                            // add the instanced Model Prefab
-                            result.Add (unityGO);
-                        }
+                    if (!unityMainAsset) {
+                        continue;
                     }
 
+                    // Instantiate the FBX file.
+                    Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);
+                    GameObject unityGO = unityObj as GameObject;
+                    if (!unityGO) {
+                        continue;
+                    }
+
+                    // Copy the components over to the instance of the FBX.
+                    SetupImportedGameObject (gosToExport [i], unityGO);
+
+                    // Set up the FbxPrefab component so we can auto-update.
+                    var fbxPrefab = unityGO.AddComponent<FbxPrefab>();
+                    fbxPrefab.SetSourceModel(unityMainAsset);
+
+                    // Disconnect from the FBX file.
+                    PrefabUtility.DisconnectPrefabInstance(unityGO);
+
+                    // Create a prefab from the instantiated and componentized unityGO.
+                    var prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");
+                    var prefab = PrefabUtility.CreatePrefab(prefabFileName, unityGO);
+                    if (!prefab) {
+                        throw new System.Exception(
+                                string.Format("Failed to create prefab asset in [{0}] from fbx [{1}]",
+                                    prefabFileName, fbxFileName));
+                    }
+                    // Connect to the prefab file.
+                    PrefabUtility.ConnectGameObjectToPrefab(unityGO, prefab);
+
+                    // Remove (now redundant) gameobject
+                    if (!keepOriginal) {
+                        Object.DestroyImmediate (unityGameObjectsToConvert [i]);
+                    } else {
+                        // rename and put under scene root in case we need to check values
+                        gosToExport [i].name = "_safe_to_delete_" + gosToExport [i].name;
+                        gosToExport [i].SetActive (false);
+                    }
+
+                    // add the instanced prefab
+                    result.Add (unityGO);
                 }
 
                 return result.ToArray ();
@@ -189,7 +209,7 @@ namespace FbxExporters
                 } while (File.Exists (file));
 
                 return file;
-            } 
+            }
 
             /// <summary>
             /// Enforces that all object names be unique before exporting.
@@ -294,7 +314,7 @@ namespace FbxExporters
                     if(components[i] == null){
                         continue;
                     }
-                        
+
                     bool success = UnityEditorInternal.ComponentUtility.CopyComponent (components[i]);
                     if (success) {
                         bool foundComponentOfType = false;
