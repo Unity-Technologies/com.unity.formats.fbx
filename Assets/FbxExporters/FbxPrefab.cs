@@ -9,10 +9,10 @@ namespace FbxExporters
     /// with an FBX file.
     ///
     /// Other parts of the ecosystem:
-    ///         FbxSourceInspector
-    ///         FbxPostImporterPrefabUpdater
+    ///         FbxPrefabInspector
+    ///         FbxPrefabAutoUpdater
     /// </summary>
-    public class FbxSource : MonoBehaviour
+    public class FbxPrefab : MonoBehaviour
     {
         //////////////////////////////////////////////////////////////////////
         // TODO: Fields included in editor must be included in player, or it doesn't
@@ -76,7 +76,6 @@ namespace FbxExporters
                         return false;
                     }
                 }
-
             }
 
             static FbxRepresentation FromJsonHelper(string json, ref int index) {
@@ -131,14 +130,44 @@ namespace FbxExporters
                 ToJsonHelper(builder);
                 return builder.ToString();
             }
+
+            public static bool IsLeaf(FbxRepresentation rep) {
+                return rep == null || rep.c == null;
+            }
+
+            public static HashSet<string> CopyKeySet(FbxRepresentation rep) {
+                if (IsLeaf(rep)) {
+                    return new HashSet<string>();
+                } else {
+                    return new HashSet<string>(rep.c.Keys);
+                }
+            }
+
+            public static FbxRepresentation Find(FbxRepresentation rep, string key) {
+                if (IsLeaf(rep)) { return null; }
+
+                FbxRepresentation child;
+                if (rep.c.TryGetValue(key, out child)) {
+                    return child;
+                }
+                return null;
+            }
         }
 
         /// <summary>
         /// Recursively perform the update.
+        ///
+        /// In terms of a 3-way merge, "oldFbx" is the "base".
+        /// "newFbx" and "prefabInstance" are "theirs" and "ours".
+        ///
+        /// Whether the fbx or the prefab counts as "ours" depends on who the
+        /// user is: a 3d modeler that updated the FBX, or the game programmer
+        /// who's updating the prefab.
+        /// So we don't use 3-way merge terminology.
         /// </summary>
-        public static void TreeDiff(FbxRepresentation oldHistory,
+        public static void TreeDiff(FbxRepresentation oldFbx,
                 Transform newFbx,
-                Transform instance,
+                Transform prefabInstance,
                 string indent = "")
         {
             // TODO: a better tree diff algorithm, e.g. Demaine et al 2009.
@@ -158,51 +187,45 @@ namespace FbxExporters
             //    2- !old and new and !prefab => instantiate the new into the prefab
             //    1- !old and !new and prefab => skip (added by user)
             //    0- !old and !new and !prefab  => not possible given the loop
-            var names = new HashSet<string>();
-            if (oldHistory == null || oldHistory.c == null) {
-                oldHistory = null;
-            } else {
-                foreach(var name in oldHistory.c.Keys) { names.Add(name); }
-            }
+            var names = FbxRepresentation.CopyKeySet(oldFbx);
             foreach(Transform child in newFbx) { names.Add(child.name); }
-            foreach(Transform child in instance) { names.Add(child.name); }
+            foreach(Transform child in prefabInstance) { names.Add(child.name); }
 
             indent += "  ";
             foreach(var name in names) {
-                var isOld = (oldHistory == null) ? false : oldHistory.c.ContainsKey(name);
-                var isNew = newFbx.Find(name) != null;
-                var isPre = instance.Find(name) != null;
-                int index = (isOld ? 4 : 0) | (isNew ? 2 : 0) | (isPre ? 1 : 0);
+                var oldChild = FbxRepresentation.Find(oldFbx, name);
+                var newChild = newFbx.Find(name);
+                var prefabChild = prefabInstance.Find(name);
+                int index = ((oldChild == null) ? 0 : 4)
+                    | ((newChild == null) ? 0 : 2)
+                    | ((prefabChild == null) ? 0 : 1);
                 switch(index) {
                     case 7:
                         //Debug.Log(indent + "recur into " + name);
-                        TreeDiff(oldHistory.c[name], newFbx.Find(name), instance.Find(name), indent);
+                        TreeDiff(oldChild, newChild, prefabChild, indent);
                         break;
                     case 6:
                         //Debug.Log(indent + "skip user-deleted " + name);
                         break;
                     case 5:
                         //Debug.Log(indent + "delete " + name);
-                        GameObject.DestroyImmediate(instance.Find(name).gameObject);
+                        GameObject.DestroyImmediate(prefabChild.gameObject);
                         break;
                     case 4:
-                        //Debug.Log(indent + "skip deleted in both new and instance " + name);
+                        //Debug.Log(indent + "skip deleted in both new and prefabInstance " + name);
                         break;
                     case 3:
                         //Debug.Log(indent + "accidental match; recur into " + name);
-                        TreeDiff(null, newFbx.Find(name), instance.Find(name), indent);
+                        TreeDiff(oldChild, newChild, prefabChild, indent);
                         break;
                     case 2:
-                        //Debug.Log(indent + "instantiate into instance " + name);
-                        {
-                            Transform src = newFbx.Find(name);
-                            Transform dst = GameObject.Instantiate(src);
-                            dst.parent = instance;
-                            dst.name = src.name;
-                            dst.localPosition = src.localPosition;
-                            dst.localRotation = src.localRotation;
-                            dst.localScale = src.localScale;
-                        }
+                        //Debug.Log(indent + "instantiate into prefabInstance " + name);
+                        prefabChild = GameObject.Instantiate(newChild);
+                        prefabChild.parent = prefabInstance;
+                        prefabChild.name = newChild.name;
+                        prefabChild.localPosition = newChild.localPosition;
+                        prefabChild.localRotation = newChild.localRotation;
+                        prefabChild.localScale = newChild.localScale;
                         break;
                     case 1:
                         //Debug.Log(indent + "skip user-added node " + name);
@@ -215,14 +238,14 @@ namespace FbxExporters
         }
 
         /// <summary>
-        /// Return whether this FbxSource component requests automatic updates.
+        /// Return whether this FbxPrefab component requests automatic updates.
         /// </summary>
         public bool WantsAutoUpdate() {
             return m_autoUpdate;
         }
 
         /// <summary>
-        /// Set whether this FbxSource component requests automatic updates.
+        /// Set whether this FbxPrefab component requests automatic updates.
         /// </summary>
         public void SetAutoUpdate(bool autoUpdate) {
             if (!m_autoUpdate && autoUpdate) {
@@ -248,24 +271,24 @@ namespace FbxExporters
             if (oldRep == null || oldRep.c == null) { oldRep = null; }
 
             // Instantiate the prefab and compare & update.
-            var instance = UnityEditor.PrefabUtility.InstantiatePrefab(this.gameObject) as GameObject;
-            if (!instance) {
+            var prefabInstance = UnityEditor.PrefabUtility.InstantiatePrefab(this.gameObject) as GameObject;
+            if (!prefabInstance) {
                 throw new System.Exception(string.Format("Failed to instantiate {0}; is it really a prefab?",
                             this.gameObject));
             }
-            TreeDiff(oldRep, m_fbxModel.transform, instance.transform);
+            TreeDiff(oldRep, m_fbxModel.transform, prefabInstance.transform);
 
             // Update the representation of the history to match the new fbx.
-            var fbxSource = instance.GetComponent<FbxSource>();
+            var fbxPrefab = prefabInstance.GetComponent<FbxPrefab>();
             var newFbxRep = FbxRepresentation.FromTransform(m_fbxModel.transform);
             var newFbxRepString = newFbxRep.ToJson();
-            fbxSource.m_fbxHistory = newFbxRepString;
+            fbxPrefab.m_fbxHistory = newFbxRepString;
 
             // Save the changes back to the prefab.
-            UnityEditor.PrefabUtility.ReplacePrefab(instance.gameObject, this.transform);
+            UnityEditor.PrefabUtility.ReplacePrefab(prefabInstance.gameObject, this.transform);
 
-            // Destroy the instance.
-            GameObject.DestroyImmediate(instance.gameObject);
+            // Destroy the prefabInstance.
+            GameObject.DestroyImmediate(prefabInstance.gameObject);
         }
 
         /// <summary>
@@ -310,7 +333,7 @@ namespace FbxExporters
         public void SetSourceModel(GameObject fbxModel) {
             // Null is OK. But otherwise, fbxModel must be an fbx.
             if (fbxModel && !UnityEditor.AssetDatabase.GetAssetPath(fbxModel).EndsWith(".fbx")) {
-                throw new System.ArgumentException("FbxSource source model must be an fbx asset");
+                throw new System.ArgumentException("FbxPrefab source model must be an fbx asset");
             }
 
             m_fbxModel = fbxModel;
