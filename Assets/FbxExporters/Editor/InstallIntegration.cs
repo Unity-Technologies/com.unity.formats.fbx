@@ -30,7 +30,7 @@ namespace FbxExporters
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
-        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya"+VERSION_TAG+"/unityoneclick.mod";
+        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya"+VERSION_TAG+"/unityoneclick.txt";
 
 #if UNITY_EDITOR_OSX
         private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/"+VERSION_TAG+"/modules";
