@@ -2,10 +2,9 @@
 
 Copyright (c) 2017 Unity Technologies. All rights reserved.
 
-Licensed under the ##LICENSENAME##.
-See LICENSE.md file for full license information.
+See LICENSE.txt file for full license information.
 
-**Version**: 0.0.9a-sprint20
+**Version**: 0.0.9a
 
 Requirements
 ------------
@@ -20,14 +19,19 @@ You can install the package and integrations from the command-line using the fol
 MacOS:
 
 # Configure where Unity is installed
-# UNITY3D_VERSION=" 2017.1.0f3"
-UNITY3D_PATH="/Applications/Unity${UNITY3D_VERSION}/Unity.app/Contents/MacOS/Unity"
+if [ ! -f "${UNITY3D_PATH}" ]; then
+    UNITY3D_PATH="/Applications/Unity/Unity.app/Contents/MacOS/Unity"
+fi
 
 # Configure where unitypackage is located
-PACKAGE_PATH=`ls -t ~/Development/FbxExporters/FbxExporters_*.unitypackage | head -1`
+if [ ! -f "${PACKAGE_PATH}" ]; then
+    PACKAGE_PATH=`ls -t ~/Development/FbxExporters/FbxExporters_*.unitypackage | head -1`
+fi
 
 # Configure which Unity project to install package
-PROJECT_PATH=~/Development/FbxExporters
+if [ ! -f "${PROJECT_PATH}" ]; then
+    PROJECT_PATH=~/Development/FbxExporters
+fi
 
 if [ ! -f "${UNITY3D_PATH}" ]; then
     echo "Unity is not installed"
