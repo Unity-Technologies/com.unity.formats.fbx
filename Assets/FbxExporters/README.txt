@@ -19,8 +19,8 @@ You can install the package and integrations from the command-line using the fol
 MacOS:
 
 # Configure where Unity is installed
-if [ ! -f "${UNITY3D_PATH}" ]; then
-    UNITY3D_PATH="/Applications/Unity/Unity.app/Contents/MacOS/Unity"
+if [ ! -f "${UNITY_EDITOR_PATH}" ]; then
+    UNITY_EDITOR_PATH="/Applications/Unity/Unity.app/Contents/MacOS/Unity"
 fi
 
 # Configure where unitypackage is located
@@ -33,14 +33,14 @@ if [ ! -f "${PROJECT_PATH}" ]; then
     PROJECT_PATH=~/Development/FbxExporters
 fi
 
-if [ ! -f "${UNITY3D_PATH}" ]; then
+if [ ! -f "${UNITY_EDITOR_PATH}" ]; then
     echo "Unity is not installed"
 else
     # Install FbxExporters package
-    "${UNITY3D_PATH}" -projectPath "${PROJECT_PATH}" -importPackage ${PACKAGE_PATH} -quit
+    "${UNITY_EDITOR_PATH}" -projectPath "${PROJECT_PATH}" -importPackage ${PACKAGE_PATH} -quit
 
     # Install Maya2017 Integration
-    "${UNITY3D_PATH}" -batchMode -projectPath "${PROJECT_PATH}" -executeMethod FbxExporters.Integrations.InstallMaya2017 -quit
+    "${UNITY_EDITOR_PATH}" -batchMode -projectPath "${PROJECT_PATH}" -executeMethod FbxExporters.Integrations.InstallMaya2017 -quit
 
     # Configuring Maya2017 to auto-load integration
     MAYA_PATH=/Applications/Autodesk/maya2017/Maya.app/Contents/bin/maya
@@ -49,7 +49,7 @@ else
         echo "Maya2017 not installed"
     else
         # To configure without user interface change the last argument to 1 instead of 0
-        "${MAYA_PATH}" -command "configureUnityOneClick \"${PROJECT_PATH}\" \"${UNITY3D_PATH}\" 0; scriptJob -idleEvent quit;"
+        "${MAYA_PATH}" -command "configureUnityOneClick \"${PROJECT_PATH}\" \"${UNITY_EDITOR_PATH}\" 0; scriptJob -idleEvent quit;"
     fi
 fi
 
