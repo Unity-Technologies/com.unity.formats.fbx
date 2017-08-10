@@ -62,7 +62,7 @@ namespace FbxExporters.UnitTests
         {
             Assert.IsNotNull (m_toExport);
 
-            var filename = GetRandomFileNamePath();
+            var filename = GetRandomFbxFilePath();
 
             UnityEngine.Debug.unityLogger.logEnabled = false;
 

@@ -7,11 +7,9 @@
 
 using UnityEngine;
 using UnityEditor;
-using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.IO;
 using System.Collections.Generic;
-using Unity.FbxSdk;
 
 namespace FbxExporters.UnitTests
 {
@@ -37,7 +35,7 @@ namespace FbxExporters.UnitTests
             // Delete the object right away (don't even wait for term).
             var fbxInstance = PrefabUtility.InstantiatePrefab(m_fbx) as GameObject;
             fbxInstance.AddComponent<FbxPrefab>().SetSourceModel(m_fbx);
-            m_prefabPath = GetRandomFileNamePath(extName: ".prefab");
+            m_prefabPath = GetRandomPrefabAssetPath();
             m_prefab = PrefabUtility.CreatePrefab(m_prefabPath, fbxInstance);
             AssetDatabase.Refresh ();
             Assert.AreEqual(m_prefabPath, AssetDatabase.GetAssetPath(m_prefab));
@@ -110,8 +108,8 @@ namespace FbxExporters.PerformanceTests {
             //
             // Then modify one fbx model. Shouldn't take longer than 1s.
             var hierarchy = CreateGameObject("the_root");
-            var baseName = GetRandomFileNamePath(extName: "");
-            FbxExporters.Editor.ModelExporter.ExportObject(baseName + ".fbx", hierarchy);
+            var baseName = GetRandomFbxFilePath();
+            FbxExporters.Editor.ModelExporter.ExportObject(baseName, hierarchy);
 
             // Create N fbx models by copying files. Import them all at once.
             var names = new string[n];
@@ -119,8 +117,8 @@ namespace FbxExporters.PerformanceTests {
             stopwatch.Reset();
             stopwatch.Start();
             for(int i = 1; i < n; ++i) {
-                names[i] = GetRandomFileNamePath(extName : "");
-                System.IO.File.Copy(names[0] + ".fbx", names[i] + ".fbx");
+                names[i] = GetRandomFbxFilePath();
+                System.IO.File.Copy(names[0], names[i]);
             }
             Debug.Log("Created fbx files in " + stopwatch.ElapsedMilliseconds);
 
@@ -136,7 +134,7 @@ namespace FbxExporters.PerformanceTests {
             stopwatch.Start();
             var fbxFiles = new GameObject[n / 2];
             for(int i = 0; i < n / 2; ++i) {
-                fbxFiles[i] = AssetDatabase.LoadMainAssetAtPath(names[i] + ".fbx") as GameObject;
+                fbxFiles[i] = AssetDatabase.LoadMainAssetAtPath(names[i]) as GameObject;
                 Assert.IsTrue(fbxFiles[i]);
             }
             Debug.Log("Loaded fbx files in " + stopwatch.ElapsedMilliseconds);
@@ -148,7 +146,7 @@ namespace FbxExporters.PerformanceTests {
                 Assert.IsTrue(instance);
                 var fbxPrefab = instance.AddComponent<FbxPrefab>();
                 fbxPrefab.SetSourceModel(fbxFiles[i]);
-                UnityEditor.PrefabUtility.CreatePrefab(names[i] + ".prefab", fbxFiles[i]);
+                PrefabUtility.CreatePrefab(GetRandomPrefabAssetPath(), fbxFiles[i]);
             }
             Debug.Log("Created prefabs in " + stopwatch.ElapsedMilliseconds);
 
@@ -156,12 +154,13 @@ namespace FbxExporters.PerformanceTests {
             // Make sure we're timing just the assetdatabase refresh by
             // creating a file and then copying it, and not the FbxExporter.
             var newHierarchy = CreateHierarchy();
-            FbxExporters.Editor.ModelExporter.ExportObject(names[0] + "_new.fbx", newHierarchy);
+            var newHierarchyName = GetRandomFbxFilePath();
+            FbxExporters.Editor.ModelExporter.ExportObject(newHierarchyName, newHierarchy);
             try {
                 UnityEngine.Debug.unityLogger.logEnabled = false;
                 stopwatch.Reset ();
                 stopwatch.Start ();
-                File.Copy(names[0] + "_new.fbx", names[0] + ".fbx", overwrite: true);
+                File.Copy(newHierarchyName, names[0], overwrite: true);
                 AssetDatabase.Refresh(); // force the update right now.
             } finally {
                 UnityEngine.Debug.unityLogger.logEnabled = true;
@@ -169,13 +168,13 @@ namespace FbxExporters.PerformanceTests {
             Debug.Log("Import (one change) in " + stopwatch.ElapsedMilliseconds);
             Assert.LessOrEqual(stopwatch.ElapsedMilliseconds, NoUpdateTimeLimit);
 
-            // Try what happens when nothing gets updated.
+            // Try what happens when no prefab gets updated.
             try {
                 UnityEngine.Debug.unityLogger.logEnabled = false;
                 stopwatch.Reset ();
                 stopwatch.Start ();
-                string newHierarchyFbxFile = GetRandomFileNamePath(extName : ".fbx");
-                File.Copy(names[0] + ".fbx", newHierarchyFbxFile);
+                string newHierarchyFbxFile = GetRandomFbxFilePath();
+                File.Copy(names[0], newHierarchyFbxFile);
                 AssetDatabase.Refresh(); // force the update right now.
             } finally {
                 UnityEngine.Debug.unityLogger.logEnabled = true;

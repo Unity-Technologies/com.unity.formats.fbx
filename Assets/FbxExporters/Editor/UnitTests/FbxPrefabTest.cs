@@ -35,7 +35,7 @@ namespace FbxExporters.UnitTests
             // Convert it to FBX. The asset file will be deleted automatically
             // on termination.
             var fbxAsset = FbxExporters.Editor.ModelExporter.ExportObject(
-                    GetRandomFileNamePath(), m_original);
+                    GetRandomFbxFilePath(), m_original);
             m_source = AssetDatabase.LoadMainAssetAtPath(fbxAsset) as GameObject;
             Assert.IsTrue(m_source);
 
@@ -46,7 +46,7 @@ namespace FbxExporters.UnitTests
                 fbxPrefab.SetSourceModel(m_source);
                 fbxPrefab.SetAutoUpdate(true);
                 m_autoPrefab = PrefabUtility.CreatePrefab(
-                        GetRandomFileNamePath(extName: ".prefab"),
+                        GetRandomPrefabAssetPath(),
                         prefabInstance);
             }
 
@@ -57,7 +57,7 @@ namespace FbxExporters.UnitTests
                 fbxPrefab.SetSourceModel(m_source);
                 fbxPrefab.SetAutoUpdate(false);
                 m_manualPrefab = PrefabUtility.CreatePrefab(
-                        GetRandomFileNamePath(extName: ".prefab"),
+                        GetRandomPrefabAssetPath(),
                         prefabInstance);
             }
         }
@@ -148,7 +148,7 @@ namespace FbxExporters.UnitTests
             // (but is a totally different file). This will cause an update
             // immediately.
             var fbxAsset = FbxExporters.Editor.ModelExporter.ExportObject(
-                    GetRandomFileNamePath(), m_original);
+                    GetRandomFbxFilePath(), m_original);
             var newSource = AssetDatabase.LoadMainAssetAtPath(fbxAsset) as GameObject;
             Assert.IsTrue(newSource);
             manualPrefabComponent.SetSourceModel(newSource);
