@@ -23,14 +23,14 @@ if [ ! -f "${UNITY3D_PATH}" ]; then
     UNITY3D_PATH="/Applications/Unity/Unity.app/Contents/MacOS/Unity"
 fi
 
-# Configure where unitypackage is located
-if [ ! -f "${PACKAGE_PATH}" ]; then
-    PACKAGE_PATH=`ls -t ~/Development/FbxExporters/FbxExporters_*.unitypackage | head -1`
-fi
-
 # Configure which Unity project to install package
 if [ ! -d "${PROJECT_PATH}" ]; then
     PROJECT_PATH=~/Development/FbxExporters
+fi
+
+# Configure where unitypackage is located
+if [ ! -f "${PACKAGE_PATH}" ]; then
+    PACKAGE_PATH=`ls -t ${PROJECT_PATH}/FbxExporters_*.unitypackage | head -1`
 fi
 
 if [ ! -f "${UNITY3D_PATH}" ]; then
