@@ -70,7 +70,7 @@ namespace FbxExporters
 
             private static Object LoadModel (string fbxFileName)
             {
-                Object model = null;
+                GameObject modelGO = null;
 
                 // make relative to UnityProject folder.
                 string relFileName = System.IO.Path.Combine ("Assets", FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath (fbxFileName));
@@ -78,11 +78,17 @@ namespace FbxExporters
                 Object unityMainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath (relFileName);
 
                 if (unityMainAsset) {
-                    model = UnityEditor.PrefabUtility.InstantiatePrefab (unityMainAsset);
+                    modelGO = UnityEditor.PrefabUtility.InstantiatePrefab (unityMainAsset) as GameObject;
+
+                    GameObject turntableGO = GameObject.Find ("TurnTable");
+                    if (turntableGO!=null)
+                    {
+                        modelGO.transform.parent = turntableGO.transform;
+                    }
                 }
                 UnityEditor.Selection.objects = new Object[]{model};
 
-                return model;
+                return modelGO as Object;
             }
 
             private static void LoadLastSavedModel ()

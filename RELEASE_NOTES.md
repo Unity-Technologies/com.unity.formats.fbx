@@ -1,5 +1,21 @@
 RELEASE NOTES
 
+**Version**: 0.0.9a
+
+* Auto updater for instanced prefabs
+
+Convert To Prefab will now create both a .prefab file and a FBX file from the selected GameObject hierarchy. The newly instanced prefab will automatically update whenever the FBX file changes. The instanced prefab will now include updates whenever objects are added or removed from the source FBX file.
+
+* Maya-to-Unity turntable review workflow
+
+Unity One Click integration for Maya 2017 now includes a "Review in Unity" feature.
+
+You can review how your Model looks in Unity by clicking "Unity->Review" menu Item. This will start Unity and your Model will be loaded into "FbxExporters_TurnTableReview" scene. If the scene cannot be found then an empty scene will be created for you. If the scene contains a "Turntable" object then your model will be parented under that object.
+
+While Unity has the "FbxExporters_TurnTableReview" scene active it will automatically update each time you publish a Model. If you've changed the active scene and want to go back to the reviewing you can run the command "FbxExporters->Turntable Review->Auto Load Last Saved Prefab". If you have unmodified scene changes in a previously saved scene then you'll be prompted to save these changes before the active scene is switched for you. If the scene is an Untitled but modified scene then these changes will be left as-is and the active scene will be switched.
+
+* FBXSDK C# unitypackage with docs ready for release
+
 **Version**: 0.0.8a
 
 NEW FEATURES

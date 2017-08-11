@@ -37,8 +37,11 @@ namespace FbxExporters.UnitTests
 
         private string MakeFileName(string baseName = null, string prefixName = null, string extName = null)
         {
-            if (baseName==null)
-                baseName = Path.GetRandomFileName();
+            if (baseName==null) {
+                // GetRandomFileName makes a random 8.3 filename
+                // We don't want the extension.
+                baseName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+            }
 
             if (prefixName==null)
                 prefixName = this.fileNamePrefix;
@@ -49,7 +52,31 @@ namespace FbxExporters.UnitTests
             return prefixName + baseName + extName;
         }
 
-        protected string GetRandomFileNamePath(string pathName = null, string prefixName = null, string extName = null)
+        /// <summary>
+        /// Create a random path for a file.
+        ///
+        /// By default the pathName is null, which defaults to a particular
+        /// folder in the Assets folder that will be deleted on termination of
+        /// this test.
+        ///
+        /// By default the prefix is a fixed string. You can set it differently if you care.
+        ///
+        /// By default the extension is ".fbx". You can set it differently if you care.
+        ///
+        /// By default we use platform path separators. If you want a random
+        /// asset path e.g. for AssetDatabase.LoadMainAssetAtPath or for
+        /// PrefabUtility.CreatePrefab, you need to use the '/' as separator
+        /// (even on windows).
+        ///
+        /// See also convenience functions like:
+        ///     GetRandomPrefabAssetPath()
+        ///     GetRandomFbxFilePath()
+        /// </summary>
+        protected string GetRandomFileNamePath(
+                string pathName = null,
+                string prefixName = null,
+                string extName = null,
+                bool unityPathSeparator = false)
         {
             string temp;
 
@@ -60,10 +87,30 @@ namespace FbxExporters.UnitTests
             // repeat until you find a file that does not already exist
             do {
                 temp = Path.Combine (pathName, MakeFileName(prefixName: prefixName, extName: extName));
-
             } while(File.Exists (temp));
 
+            // Unity asset paths need a slash on all platforms.
+            if (unityPathSeparator) {
+                temp = temp.Replace('\\', '/');
+            }
+
             return temp;
+        }
+
+        /// <summary>
+        /// Return a random .fbx path that you can use in
+        /// the File APIs.
+        /// </summary>
+        protected string GetRandomFbxFilePath() {
+            return GetRandomFileNamePath(extName: ".fbx", unityPathSeparator: false);
+        }
+
+        /// <summary>
+        /// Return a random .prefab path that you can use in
+        /// PrefabUtility.CreatePrefab.
+        /// </summary>
+        protected string GetRandomPrefabAssetPath() {
+            return GetRandomFileNamePath(extName: ".prefab", unityPathSeparator: true);
         }
 
         /// <summary>
