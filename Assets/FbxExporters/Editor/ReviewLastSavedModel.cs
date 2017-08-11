@@ -87,7 +87,22 @@ namespace FbxExporters
                     }
                 }
 
+                FrameCameraOnModel (modelGO);
+
                 return modelGO as Object;
+            }
+
+            private static void FrameCameraOnModel(GameObject modelGO)
+            {
+                // Set so camera frames model
+                // Note: this code assumes the model is at 0,0,0
+                Vector3 boundsSize = modelGO.GetComponent<Renderer>().bounds.size;
+                float distance = Mathf.Max(boundsSize.x, boundsSize.y, boundsSize.z);
+                distance /= (2.0f * Mathf.Tan(0.5f * Camera.main.fieldOfView * Mathf.Deg2Rad));
+                Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y, -distance * 2.0f);
+
+                // rotate camera towards model
+                Camera.main.transform.LookAt(modelGO.transform.position);
             }
 
             private static void LoadLastSavedModel ()
@@ -178,6 +193,20 @@ namespace FbxExporters
 
                 // make turntable the active scene
                 UnityEngine.SceneManagement.SceneManager.SetActiveScene (scene);
+
+                // create camera and light if none
+                if (Camera.main == null) {
+                    GameObject camera = new GameObject ("MainCamera");
+                    camera.AddComponent<Camera> ();
+                    camera.tag = "MainCamera";
+
+                    GameObject light = new GameObject ("Light");
+                    light.transform.localEulerAngles = new Vector3 (50, -30, 0);
+                    Light lightComp = light.AddComponent<Light> ();
+                    lightComp.type = LightType.Directional;
+                    lightComp.intensity = 1;
+                    lightComp.shadows = LightShadows.Soft;
+                }
 
                 if (AutoUpdateEnabled ()) {
                     LoadLastSavedModel ();
