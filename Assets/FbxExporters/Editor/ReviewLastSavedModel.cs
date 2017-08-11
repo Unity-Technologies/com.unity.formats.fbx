@@ -80,6 +80,7 @@ namespace FbxExporters
                 if (unityMainAsset) {
                     model = UnityEditor.PrefabUtility.InstantiatePrefab (unityMainAsset);
                 }
+                UnityEditor.Selection.objects = new Object[]{model};
 
                 return model;
             }
@@ -172,6 +173,11 @@ namespace FbxExporters
 
                 // make turntable the active scene
                 UnityEngine.SceneManagement.SceneManager.SetActiveScene (scene);
+
+                // find Scene window
+                var sceneWindow = UnityEditor.EditorWindow.GetWindow<UnityEditor.SceneView>(title:null, focus:true);
+                //sceneWindow.maximized = true;
+                sceneWindow.FrameSelected ();
 
                 if (AutoUpdateEnabled ()) {
                     LoadLastSavedModel ();
