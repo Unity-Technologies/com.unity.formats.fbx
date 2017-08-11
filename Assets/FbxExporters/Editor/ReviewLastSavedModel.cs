@@ -50,7 +50,7 @@ namespace FbxExporters
 
             private static string GetLastSavedFilePath ()
             {
-                string modelPath = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath ();
+                string modelPath = Application.dataPath + "/_safe_to_delete";
                 System.IO.FileInfo fileInfo = GetLastSavedFile (modelPath);
 
                 return (fileInfo != null) ? fileInfo.FullName : null;
