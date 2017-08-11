@@ -86,7 +86,6 @@ namespace FbxExporters
                         modelGO.transform.parent = turntableGO.transform;
                     }
                 }
-                UnityEditor.Selection.objects = new Object[]{model};
 
                 return modelGO as Object;
             }
@@ -180,16 +179,26 @@ namespace FbxExporters
                 // make turntable the active scene
                 UnityEngine.SceneManagement.SceneManager.SetActiveScene (scene);
 
-                // find Scene window
-                var sceneWindow = UnityEditor.EditorWindow.GetWindow<UnityEditor.SceneView>(title:null, focus:true);
-                //sceneWindow.maximized = true;
-                sceneWindow.FrameSelected ();
+                // maximize game window and start playing
+                var gameWindow = GetMainGameView();
+                if (gameWindow) {
+                    gameWindow.maximized = true;
+                    UnityEditor.EditorApplication.isPlaying = true;
+                }
 
                 if (AutoUpdateEnabled ()) {
                     LoadLastSavedModel ();
 
                     SubscribeToEvents ();
                 }
+            }
+
+            public static UnityEditor.EditorWindow GetMainGameView()
+            {
+                System.Reflection.Assembly assembly = typeof(UnityEditor.EditorWindow).Assembly;
+                System.Type type = assembly.GetType("UnityEditor.GameView");
+                UnityEditor.EditorWindow gameview = UnityEditor.EditorWindow.GetWindow(type, false, null, true);
+                return gameview;
             }
 
             private static void SubscribeToEvents ()
