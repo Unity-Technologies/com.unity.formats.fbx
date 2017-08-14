@@ -1,8 +1,9 @@
-global proc configureUnityOneClick(string $unityProject, string $unityApp, int $headless)
+global proc configureUnityOneClick(string $unityProject, string $unityApp, string $unityTempSavePath, int $headless)
 {
     // configure plugin settings
     optionVar -stringValue "UnityApp" $unityApp;
     optionVar -stringValue "UnityProject" $unityProject;
+    optionVar -stringValue "UnityTempSavePath" $unityTempSavePath;
     optionVar -intValue "UnityOneClick_Headless" $headless;
 
     // configure auto load of plugin

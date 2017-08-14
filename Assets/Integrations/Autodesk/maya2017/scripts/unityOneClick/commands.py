@@ -129,12 +129,13 @@ class reviewCmd(BaseCommand):
 
         unityAppPath = maya.cmds.optionVar(q='UnityApp')
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
+        unityTempSavePath = maya.cmds.optionVar(q='UnityTempSavePath')
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
 
         # make sure the GamePipeline and fbxmaya plugins are loaded
         if self.loadDependencies() and self.loadPlugin('fbxmaya.mll'):
             # save fbx to Assets/_safe_to_delete/
-            savePath = "{0}/Assets/_safe_to_delete".format(unityProjectPath)
+            savePath = unityTempSavePath
             maya.cmds.sysFile(savePath, makeDir=True)
             savePath = savePath + "/TurnTableModel.fbx"
             maya.mel.eval(r'file -force -options "" -typ "FBX export" -pr -es "{0}"'.format(savePath));
