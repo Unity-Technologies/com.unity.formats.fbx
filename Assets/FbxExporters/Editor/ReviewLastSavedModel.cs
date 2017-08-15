@@ -5,7 +5,8 @@ namespace FbxExporters
 {
     namespace Review
     {
-        class TurnTable
+        [UnityEditor.InitializeOnLoad]
+        public class TurnTable
         {
             const string MenuItemName = "FbxExporters/Turntable Review/Autoload Last Saved Prefab";
 
@@ -19,6 +20,10 @@ namespace FbxExporters
             public static void OnMenu ()
             {
                 LastSavedModel ();
+            }
+
+            static TurnTable(){
+                SubscribeToEvents();
             }
 
             private static System.IO.FileInfo GetLastSavedFile (string directoryPath, string ext = ".fbx")
@@ -206,6 +211,9 @@ namespace FbxExporters
                 // ensure we only subscribe once
                 UnityEditor.EditorApplication.hierarchyWindowChanged -= UpdateLastSavedModel;
                 UnityEditor.EditorApplication.hierarchyWindowChanged += UpdateLastSavedModel;
+
+                UnityEditor.EditorApplication.playmodeStateChanged -= OnPlay;
+                UnityEditor.EditorApplication.playmodeStateChanged += OnPlay;
             }
 
             private static void UnsubscribeFromEvents ()
@@ -216,6 +224,7 @@ namespace FbxExporters
                 LastFilePath = null;
 
                 UnityEditor.EditorApplication.hierarchyWindowChanged -= UpdateLastSavedModel;
+                UnityEditor.EditorApplication.playmodeStateChanged -= OnPlay;
             }
 
             private static bool AutoUpdateEnabled ()
@@ -225,11 +234,24 @@ namespace FbxExporters
 
             private static void UpdateLastSavedModel ()
             {
-
-                if (AutoUpdateEnabled ()) {
-                    LoadLastSavedModel ();
-                } else {
+                if (!AutoUpdateEnabled ()) {
                     UnsubscribeFromEvents ();
+                    return;
+                }
+
+                LoadLastSavedModel ();
+            }
+
+            private static void OnPlay()
+            {
+                if (!AutoUpdateEnabled ()) {
+                    UnsubscribeFromEvents ();
+                    return;
+                }
+
+                if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode && !UnityEditor.EditorApplication.isPlaying) {
+                    UnloadModel (LastModel);
+                    LastModel = null;
                 }
             }
         }
