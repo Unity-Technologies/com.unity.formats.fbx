@@ -184,6 +184,8 @@ namespace FbxExporters
                 if (gameWindow) {
                     gameWindow.maximized = true;
                     UnityEditor.EditorApplication.isPlaying = true;
+                } else {
+                    Debug.LogWarning ("Failed to access Game Window, please restart Unity to try again.");
                 }
 
                 if (AutoUpdateEnabled ()) {
