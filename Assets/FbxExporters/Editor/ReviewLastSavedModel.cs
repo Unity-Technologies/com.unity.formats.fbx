@@ -249,7 +249,11 @@ namespace FbxExporters
                     return;
                 }
 
+                // Right before we enter playmode, unload the last saved model if there is one.
+                // Unsubscribe from hierarchy window changed event so that unloading the model doesn't
+                // trigger a new one to be added right before playing.
                 if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode && !UnityEditor.EditorApplication.isPlaying) {
+                    UnityEditor.EditorApplication.hierarchyWindowChanged -= UpdateLastSavedModel;
                     UnloadModel (LastModel);
                     LastModel = null;
                 }
