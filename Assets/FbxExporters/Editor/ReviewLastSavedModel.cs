@@ -81,9 +81,11 @@ namespace FbxExporters
                     modelGO = UnityEditor.PrefabUtility.InstantiatePrefab (unityMainAsset) as GameObject;
 
                     GameObject turntableGO = GameObject.Find ("TurnTable");
-                    if (turntableGO!=null)
-                    {
+                    if (turntableGO != null) {
                         modelGO.transform.parent = turntableGO.transform;
+                        turntableGO.AddComponent<RotateModel> ();
+                    } else {
+                        modelGO.AddComponent<RotateModel> ();
                     }
                 }
 
