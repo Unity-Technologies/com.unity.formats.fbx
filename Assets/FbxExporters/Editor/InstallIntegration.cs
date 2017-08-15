@@ -25,8 +25,8 @@ namespace FbxExporters
 #endif
 
         private static string MAYA_COMMANDS { get { 
-                return string.Format("configureUnityOneClick {4}{0}{4} {4}{1}{4} {4}{2}{4} {3}; scriptJob -idleEvent quit;", 
-                    GetProjectPath(), GetAppPath(), GetTempSavePath(), (IsHeadlessInstall()?1:0), ESCAPED_QUOTE); 
+                return string.Format("configureUnityOneClick {0}{1}{0} {0}{2}{0} {0}{3}{0} {4}; scriptJob -idleEvent quit;", 
+                    ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(), (IsHeadlessInstall()?1:0)); 
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
@@ -111,9 +111,9 @@ namespace FbxExporters
             return System.IO.Path.Combine(Application.dataPath, PACKAGE_NAME);
         }
 
-        private static string GetTempSavePath()
+        public static string GetTempSavePath()
         {
-            return Application.dataPath + "/" + FbxExporters.Review.TurnTable.TempSavePath;
+            return System.IO.Path.Combine(Application.dataPath, FbxExporters.Review.TurnTable.TempSavePath).Replace("\\", "/");
         }
 
         private static string GetPackageVersion()
