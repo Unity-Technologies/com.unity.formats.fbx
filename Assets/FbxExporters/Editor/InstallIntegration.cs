@@ -368,7 +368,7 @@ namespace FbxExporters.Editor
             return ExitCode;
         }
 
-        public static bool InstallMaya(MayaVersion version, bool verbose = true)
+        public static bool InstallMaya(MayaVersion version = null, bool verbose = false)
         {
             // What's happening here is that we copy the module template to
             // the module path, basically:
@@ -376,6 +376,9 @@ namespace FbxExporters.Editor
             // - search-and-replace its tags
             // - done.
             // But it's complicated because we can't trust any files actually exist.
+            if (version == null) {
+                version = new MayaVersion();
+            }
 
             string moduleTemplatePath = GetModuleTemplatePath(version.Version);
             if (!System.IO.File.Exists(moduleTemplatePath))
