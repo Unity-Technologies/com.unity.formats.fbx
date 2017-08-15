@@ -199,7 +199,9 @@ namespace FbxExporters
                     GameObject camera = new GameObject ("MainCamera");
                     camera.AddComponent<Camera> ();
                     camera.tag = "MainCamera";
-
+                }
+                
+                if(!Object.FindObjectOfType<Light>()){
                     GameObject light = new GameObject ("Light");
                     light.transform.localEulerAngles = new Vector3 (50, -30, 0);
                     Light lightComp = light.AddComponent<Light> ();
