@@ -210,11 +210,28 @@ namespace FbxExporters
                     lightComp.shadows = LightShadows.Soft;
                 }
 
+                // maximize game window and start playing
+                var gameWindow = GetMainGameView();
+                if (gameWindow) {
+                    gameWindow.maximized = true;
+                    UnityEditor.EditorApplication.isPlaying = true;
+                } else {
+                    Debug.LogWarning ("Failed to access Game Window, please restart Unity to try again.");
+                }
+
                 if (AutoUpdateEnabled ()) {
                     LoadLastSavedModel ();
 
                     SubscribeToEvents ();
                 }
+            }
+
+            public static UnityEditor.EditorWindow GetMainGameView()
+            {
+                System.Reflection.Assembly assembly = typeof(UnityEditor.EditorWindow).Assembly;
+                System.Type type = assembly.GetType("UnityEditor.GameView");
+                UnityEditor.EditorWindow gameview = UnityEditor.EditorWindow.GetWindow(type, false, null, true);
+                return gameview;
             }
 
             private static void SubscribeToEvents ()
