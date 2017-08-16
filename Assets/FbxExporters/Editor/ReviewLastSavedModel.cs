@@ -12,6 +12,8 @@ namespace FbxExporters
             const string ScenesPath = "Assets";
             const string SceneName = "FbxExporters_TurnTableReview";
 
+            public const string TempSavePath = "_safe_to_delete";
+
             static string LastFilePath = null;
             static Object LastModel = null;
 
@@ -50,7 +52,7 @@ namespace FbxExporters
 
             private static string GetLastSavedFilePath ()
             {
-                string modelPath = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath ();
+                string modelPath = FbxExporters.Integrations.GetTempSavePath ();
                 System.IO.FileInfo fileInfo = GetLastSavedFile (modelPath);
 
                 return (fileInfo != null) ? fileInfo.FullName : null;
