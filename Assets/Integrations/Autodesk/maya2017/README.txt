@@ -13,17 +13,28 @@
 #
 ########################################################################
 
+Automatic Installation
+===================
+
+The easiest installation method is to launch Unity and use the
+        FbxExporters -> Install Maya Integration
+option.
+
+It will choose the most recent version of Maya installed in the default
+installation location. To choose a particular version of Maya or to handle
+non-default installation locations, set the MAYA_LOCATION environment variable.
+
 Manual Installation
 ===================
 
 Instructions for installing if you don't use the unity package installer
-and your installing in a none-default location.
+and your installing in a non-default location.
 
 1. copy unityoneclick.mod to user folder
 
     MacOS & Ubuntu: ~/MayaProjects/modules
     Windows:        C:\Program Files\Autodesk\Maya2017\modules
-    
+
 2. configure path within unityoneclick.mod to point to integration installation folder
 
     {UnityProject}/Assets/Integrations/Autodesk/maya2017
