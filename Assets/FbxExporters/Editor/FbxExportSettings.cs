@@ -68,6 +68,7 @@ namespace FbxExporters.EditorTools {
                     }
                 }
             }
+            GUILayout.EndHorizontal ();
             GUILayout.BeginHorizontal ();
 
             GUILayout.Label (new GUIContent (
