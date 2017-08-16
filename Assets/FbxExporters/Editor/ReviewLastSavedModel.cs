@@ -135,6 +135,13 @@ namespace FbxExporters
                 System.Collections.Generic.List<UnityEngine.SceneManagement.Scene> scenes
                       = new System.Collections.Generic.List<UnityEngine.SceneManagement.Scene> ();
 
+                var desiredScene = FbxExporters.EditorTools.ExportSettings.instance.turntableScene;
+                string desiredSceneName = null;
+                if (desiredScene) {
+                    desiredSceneName = desiredScene.name;
+                }
+
+                bool foundScene = false;
                 for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++) {
                     UnityEngine.SceneManagement.Scene toAdd = UnityEngine.SceneManagement.SceneManager.GetSceneAt (i);
 
@@ -142,7 +149,13 @@ namespace FbxExporters
                     // The Untitled scene cannot be unloaded, if modified, and we don't want to force the user to save it.
                     if (toAdd.name == "") continue;
 
-                    if (toAdd.name == SceneName) 
+                    if (desiredSceneName != null && toAdd.name == desiredSceneName) {
+                        scene = toAdd;
+                        foundScene = true;
+                        continue;
+                    }
+
+                    if (!foundScene && toAdd.name == SceneName) 
                     {
                         scene = toAdd;
                         continue;
@@ -153,17 +166,24 @@ namespace FbxExporters
                 // if turntable scene not added to list of scenes
                 if (!scene.IsValid ()) 
                 {
-                    // and if for some reason the turntable scene is missing create an empty scene
-                    // NOTE: we cannot use NewScene because it will force me to save the modified Untitled scene
-                    if (!System.IO.File.Exists(GetSceneFilePath ())) 
-                    {
-                        var writer = System.IO.File.CreateText (GetSceneFilePath ());
-                        writer.WriteLine ("%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:");
-                        writer.Close ();
-                        UnityEditor.AssetDatabase.Refresh ();
+                    string scenePath = null;
+                    if (desiredScene) {
+                        scenePath = UnityEditor.AssetDatabase.GetAssetPath (desiredScene);
+                        Debug.LogWarning (scenePath);
+                    } else {
+                        
+                        // and if for some reason the turntable scene is missing create an empty scene
+                        // NOTE: we cannot use NewScene because it will force me to save the modified Untitled scene
+                        if (!System.IO.File.Exists (GetSceneFilePath ())) {
+                            var writer = System.IO.File.CreateText (GetSceneFilePath ());
+                            writer.WriteLine ("%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:");
+                            writer.Close ();
+                            UnityEditor.AssetDatabase.Refresh ();
+                        }
+                        scenePath = GetSceneFilePath ();
                     }
 
-                    scene = UnityEditor.SceneManagement.EditorSceneManager.OpenScene (GetSceneFilePath (), UnityEditor.SceneManagement.OpenSceneMode.Additive);
+                    scene = UnityEditor.SceneManagement.EditorSceneManager.OpenScene (scenePath, UnityEditor.SceneManagement.OpenSceneMode.Additive);
                 }
 
                 // save unmodified scenes (but not the untitled or turntable scene)
