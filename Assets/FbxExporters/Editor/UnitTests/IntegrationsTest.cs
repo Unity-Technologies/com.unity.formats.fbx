@@ -28,7 +28,7 @@ namespace FbxExporters.UnitTests
         [Test]
         public void BasicTest() {
             // Note: This test assumes that Maya is actually installed in a default location.
-            Assert.IsTrue(Directory.Exists(Editor.Integrations.MayaVersion.GetAdskRoot()));
+            Assert.IsTrue(Directory.Exists(Editor.Integrations.MayaVersion.AdskRoot));
 
             var maya = new Editor.Integrations.MayaVersion();
 
@@ -38,8 +38,8 @@ namespace FbxExporters.UnitTests
 
             Assert.IsFalse(Editor.Integrations.IsHeadlessInstall());
 
-            LogNonEmptyString("module path", Editor.Integrations.GetModulePath("2017"));
-            LogNonEmptyString("module template path", Editor.Integrations.GetModuleTemplatePath("2017"));
+            LogNonEmptyString("module path (2017)", Editor.Integrations.GetModulePath("2017"));
+            LogNonEmptyString("module template path (2017)", Editor.Integrations.GetModuleTemplatePath("2017"));
             Assert.That( () => Editor.Integrations.GetModuleTemplatePath("bad version"),
                     Throws.Exception.TypeOf<Editor.Integrations.MayaException>());
 

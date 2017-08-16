@@ -32,6 +32,8 @@ namespace FbxExporters.Editor
                 // If the location is given by the environment, use it.
                 Location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
                 if (!string.IsNullOrEmpty(Location)) {
+                    Location = Location.TrimEnd('/');
+                    Debug.Log("Using maya set by MAYA_LOCATION: " + Location);
                     return;
                 }
 
@@ -39,7 +41,7 @@ namespace FbxExporters.Editor
                 // either the newest version, or the exact version we wanted.
                 string mayaRoot = "";
                 string bestVersion = "";
-                var adskRoot = new System.IO.DirectoryInfo(GetAdskRoot());
+                var adskRoot = new System.IO.DirectoryInfo(AdskRoot);
                 foreach(var productDir in adskRoot.GetDirectories()) {
                     var product = productDir.Name;
 
@@ -71,22 +73,27 @@ namespace FbxExporters.Editor
                                 "Unable to find any version of maya. Set MAYA_LOCATION."));
                 }
 
-                Location = GetAdskRoot() + "/" + mayaRoot;
+                Location = AdskRoot + "/" + mayaRoot;
+                if (string.IsNullOrEmpty(desiredVersion)) {
+                    Debug.Log("Using latest version of maya found in: " + Location);
+                } else {
+                    Debug.Log(string.Format("Using maya {0} found in: {1}", desiredVersion, Location));
+                }
             }
 
             /// <summary>
             /// The path where all the different versions of Maya are installed
             /// by default. Depends on the platform.
             /// </summary>
-            public static string GetAdskRoot() {
+            public const string AdskRoot =
 #if UNITY_EDITOR_OSX
-                return "/Applications/Autodesk";
+                "/Applications/Autodesk"
 #elif UNITY_EDITOR_LINUX
-                return "/usr/autodesk";
+                "/usr/autodesk"
 #else // WINDOWS
-                return "C:/Program Files/Autodesk";
+                "C:/Program Files/Autodesk"
 #endif
-            }
+            ;
 
             /// <summary>
             /// The value that you might set MAYA_LOCATION to if you wanted to
@@ -100,9 +107,13 @@ namespace FbxExporters.Editor
             public string MayaExe {
                 get {
 #if UNITY_EDITOR_OSX
-                    // MAYA_LOCATION on mac might be the app bundle itself, or
-                    // the directory in which the app bundle is stored.
-                    if (Location.EndsWith(".app")) {
+                    // MAYA_LOCATION on mac is set by Autodesk to be the
+                    // Contents directory. But let's make it easier on people
+                    // and allow just having it be the app bundle or a
+                    // directory that holds the app bundle.
+                    if (Location.EndsWith(".app/Contents")) {
+                        return Location + "/MacOS/Maya";
+                    } else if (Location.EndsWith(".app")) {
                         return Location + "/Contents/MacOS/Maya";
                     } else {
                         return Location + "/Maya.app/Contents/MacOS/Maya";
