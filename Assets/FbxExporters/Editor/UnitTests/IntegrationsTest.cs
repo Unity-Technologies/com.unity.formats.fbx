@@ -47,6 +47,7 @@ namespace FbxExporters.UnitTests
             LogNonEmptyString("project path", Editor.Integrations.GetProjectPath());
             LogNonEmptyString("package path", Editor.Integrations.GetPackagePath());
             LogNonEmptyString("package version", Editor.Integrations.GetPackageVersion());
+            LogNonEmptyString("temp path", Editor.Integrations.GetTempSavePath());
         }
     }
 }
