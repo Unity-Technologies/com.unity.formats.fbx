@@ -505,11 +505,11 @@ namespace FbxExporters.Editor
 
                 string title, message;
                 if (exitCode != 0) {
-                    title = string.Format("Failed to install Maya{0} Integration", mayaVersion.Version);
-                    message = string.Format("Failed to configure Maya, please check logs (exitcode={0})", exitCode);
+                    title = string.Format("Failed to install Maya {0} Integration.", mayaVersion.Version);
+                    message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
                 } else {
-                    title = string.Format("Completed installation of Maya{0} Integration.", mayaVersion.Version);
-                    message = "";
+                    title = string.Format("Completed installation of Maya {0} Integration.", mayaVersion.Version);
+                    message = string.Format("Enjoy the new \"Unity\" menu in Maya {0}.", mayaVersion.Version);
                 }
                 UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
             }
