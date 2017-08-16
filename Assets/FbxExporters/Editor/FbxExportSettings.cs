@@ -68,6 +68,15 @@ namespace FbxExporters.EditorTools {
                     }
                 }
             }
+            GUILayout.BeginHorizontal ();
+
+            GUILayout.Label (new GUIContent (
+                "Turn Table Scene:",
+                "Scene to use for reviewing models. If none, a scene will be created on review."));
+            
+            exportSettings.turntableScene = EditorGUILayout.ObjectField (
+                exportSettings.turntableScene, typeof(SceneAsset), false
+            );
 
             GUILayout.EndHorizontal ();
             GUILayout.FlexibleSpace ();
@@ -91,6 +100,9 @@ namespace FbxExporters.EditorTools {
         public bool embedTextures;
         public bool mayaCompatibleNames;
         public bool centerObjects;
+
+        [SerializeField]
+        public UnityEngine.Object turntableScene;
 
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
