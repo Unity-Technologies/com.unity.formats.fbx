@@ -96,13 +96,12 @@ namespace FbxExporters
                         turntableGO = turnTableBase.gameObject;
                     }
 
-                    if (turntableGO != null) {
-                        modelGO.transform.parent = turntableGO.transform;
-                    } else {
-                        if (!modelGO.GetComponent<RotateModel> ()) {
-                            modelGO.AddComponent<RotateModel> ();
-                        }
+                    if (turntableGO == null) {
+                        turntableGO = new GameObject ("TurnTableBase");
+                        turntableGO.AddComponent<FbxTurnTableBase> ();
                     }
+
+                    modelGO.transform.parent = turntableGO.transform;
                 }
 
                 FrameCameraOnModel (modelGO);
