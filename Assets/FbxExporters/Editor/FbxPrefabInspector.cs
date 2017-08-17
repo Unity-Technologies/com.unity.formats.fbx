@@ -8,8 +8,16 @@ namespace FbxExporters.EditorTools {
         public override void OnInspectorGUI() {
             FbxPrefab fbxPrefab = (FbxPrefab)target;
 
+            // We can only change these settings when applied to a prefab.
+            bool isDisabled = AssetDatabase.GetAssetPath(fbxPrefab) == "";
+            if (isDisabled) {
+                EditorGUILayout.HelpBox("Please select a prefab. You can't edit an instance in the scene.",
+                        MessageType.Info);
+            }
+            EditorGUI.BeginDisabledGroup(isDisabled);
+
             fbxPrefab.SetAutoUpdate(EditorGUILayout.Toggle ("Auto-update:", fbxPrefab.WantsAutoUpdate()));
-            if (!fbxPrefab.WantsAutoUpdate()) {
+            if (!isDisabled && !fbxPrefab.WantsAutoUpdate()) {
                 if (GUILayout.Button("Sync prefab to FBX")) {
                     fbxPrefab.SyncPrefab();
                 }
@@ -30,6 +38,8 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.SelectableLabel(fbxPrefab.GetFbxHistory().ToJson());
             GUILayout.EndHorizontal();
 #endif
+
+            EditorGUI.EndDisabledGroup();
         }
     }
 }
