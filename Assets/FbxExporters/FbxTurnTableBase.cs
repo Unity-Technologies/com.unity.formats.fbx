@@ -11,16 +11,8 @@ using UnityEngine;
 
 namespace FbxExporters.Review
 {
-    public class RotateModel : MonoBehaviour
+    public class FbxTurnTableBase : RotateModel
     {
 
-        [Tooltip ("Rotation speed in degrees/second")]
-        [SerializeField]
-        private float speed = 10f;
-
-        void Update ()
-        {
-            transform.Rotate (Vector3.up, speed * Time.deltaTime, Space.World);	
-        }
     }
 }

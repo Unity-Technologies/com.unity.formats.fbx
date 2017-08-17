@@ -1,3 +1,9 @@
+// ***********************************************************************
+// Copyright (c) 2017 Unity Technologies. All rights reserved.
+//
+// Licensed under the ##LICENSENAME##.
+// See LICENSE.md file in the project root for full license information.
+// ***********************************************************************
 
 using UnityEngine;
 
@@ -10,7 +16,7 @@ namespace FbxExporters
             const string MenuItemName = "FbxExporters/Turntable Review/Autoload Last Saved Prefab";
 
             const string ScenesPath = "Assets";
-            const string SceneName = "FbxExporters_TurnTableReview";
+            static string SceneName = "FbxExporters_TurnTableReview";
 
             public const string TempSavePath = "_safe_to_delete";
 
@@ -82,12 +88,18 @@ namespace FbxExporters
                 if (unityMainAsset) {
                     modelGO = UnityEditor.PrefabUtility.InstantiatePrefab (unityMainAsset) as GameObject;
 
-                    GameObject turntableGO = GameObject.Find ("TurnTable");
+                    var turnTableBase = GameObject.FindObjectOfType<FbxTurnTableBase> ();
+                    GameObject turntableGO = null;
+                    if (turnTableBase != null) {
+                        turntableGO = turnTableBase.gameObject;
+                    }
+
                     if (turntableGO != null) {
                         modelGO.transform.parent = turntableGO.transform;
-                        turntableGO.AddComponent<RotateModel> ();
                     } else {
-                        modelGO.AddComponent<RotateModel> ();
+                        if (!modelGO.GetComponent<RotateModel> ()) {
+                            modelGO.AddComponent<RotateModel> ();
+                        }
                     }
                 }
 
@@ -173,7 +185,6 @@ namespace FbxExporters
                     string scenePath = null;
                     if (desiredScene) {
                         scenePath = UnityEditor.AssetDatabase.GetAssetPath (desiredScene);
-                        Debug.LogWarning (scenePath);
                     } else {
                         
                         // and if for some reason the turntable scene is missing create an empty scene
@@ -189,6 +200,8 @@ namespace FbxExporters
 
                     scene = UnityEditor.SceneManagement.EditorSceneManager.OpenScene (scenePath, UnityEditor.SceneManagement.OpenSceneMode.Additive);
                 }
+
+                SceneName = scene.name;
 
                 // save unmodified scenes (but not the untitled or turntable scene)
                 if (UnityEditor.SceneManagement.EditorSceneManager.SaveModifiedScenesIfUserWantsTo (scenes.ToArray ())) 
