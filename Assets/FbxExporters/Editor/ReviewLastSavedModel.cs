@@ -13,6 +13,8 @@ namespace FbxExporters
             const string ScenesPath = "Assets";
             const string SceneName = "FbxExporters_TurnTableReview";
 
+            public const string TempSavePath = "_safe_to_delete";
+
             static string LastFilePath = null;
             static Object LastModel = null;
 
@@ -55,7 +57,7 @@ namespace FbxExporters
 
             private static string GetLastSavedFilePath ()
             {
-                string modelPath = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath ();
+                string modelPath = FbxExporters.Editor.Integrations.GetTempSavePath ();
                 System.IO.FileInfo fileInfo = GetLastSavedFile (modelPath);
 
                 return (fileInfo != null) ? fileInfo.FullName : null;
@@ -86,13 +88,30 @@ namespace FbxExporters
                     modelGO = UnityEditor.PrefabUtility.InstantiatePrefab (unityMainAsset) as GameObject;
 
                     GameObject turntableGO = GameObject.Find ("TurnTable");
-                    if (turntableGO!=null)
-                    {
+                    if (turntableGO != null) {
                         modelGO.transform.parent = turntableGO.transform;
+                        turntableGO.AddComponent<RotateModel> ();
+                    } else {
+                        modelGO.AddComponent<RotateModel> ();
                     }
                 }
 
+                FrameCameraOnModel (modelGO);
+
                 return modelGO as Object;
+            }
+
+            private static void FrameCameraOnModel(GameObject modelGO)
+            {
+                // Set so camera frames model
+                // Note: this code assumes the model is at 0,0,0
+                Vector3 boundsSize = modelGO.GetComponent<Renderer>().bounds.size;
+                float distance = Mathf.Max(boundsSize.x, boundsSize.y, boundsSize.z);
+                distance /= (2.0f * Mathf.Tan(0.5f * Camera.main.fieldOfView * Mathf.Deg2Rad));
+                Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y, -distance * 2.0f);
+
+                // rotate camera towards model
+                Camera.main.transform.LookAt(modelGO.transform.position);
             }
 
             private static void LoadLastSavedModel ()
@@ -184,11 +203,29 @@ namespace FbxExporters
                 // make turntable the active scene
                 UnityEngine.SceneManagement.SceneManager.SetActiveScene (scene);
 
+                // create camera and light if none
+                if (Camera.main == null) {
+                    GameObject camera = new GameObject ("MainCamera");
+                    camera.AddComponent<Camera> ();
+                    camera.tag = "MainCamera";
+                }
+                
+                if(!Object.FindObjectOfType<Light>()){
+                    GameObject light = new GameObject ("Light");
+                    light.transform.localEulerAngles = new Vector3 (50, -30, 0);
+                    Light lightComp = light.AddComponent<Light> ();
+                    lightComp.type = LightType.Directional;
+                    lightComp.intensity = 1;
+                    lightComp.shadows = LightShadows.Soft;
+                }
+
                 // maximize game window and start playing
                 var gameWindow = GetMainGameView();
                 if (gameWindow) {
                     gameWindow.maximized = true;
                     UnityEditor.EditorApplication.isPlaying = true;
+                } else {
+                    Debug.LogWarning ("Failed to access Game Window, please restart Unity to try again.");
                 }
 
                 if (AutoUpdateEnabled ()) {
