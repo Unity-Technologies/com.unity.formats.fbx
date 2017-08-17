@@ -125,6 +125,21 @@ namespace FbxExporters.EditorTools {
             mayaCompatibleNames = true;
             centerObjects = true;
             convertToModelSavePath = kDefaultSavePath;
+            turntableScene = null;
+        }
+
+        public static string GetTurnTableSceneName(){
+            if (instance.turntableScene) {
+                return instance.turntableScene.name;
+            }
+            return null;
+        }
+
+        public static string GetTurnTableScenePath(){
+            if (instance.turntableScene) {
+                return AssetDatabase.GetAssetPath (instance.turntableScene);
+            }
+            return null;
         }
 
         /// <summary>

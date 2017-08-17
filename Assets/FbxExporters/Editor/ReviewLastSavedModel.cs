@@ -15,7 +15,9 @@ namespace FbxExporters
         {
             const string MenuItemName = "FbxExporters/Turntable Review/Autoload Last Saved Prefab";
 
-            const string ScenesPath = "Assets";
+            const string DefaultScenesPath = "Assets";
+            const string DefaultSceneName = "FbxExporters_TurnTableReview";
+
             static string SceneName = "FbxExporters_TurnTableReview";
 
             public const string TempSavePath = "_safe_to_delete";
@@ -53,7 +55,7 @@ namespace FbxExporters
 
             private static string GetSceneFilePath ()
             {
-                return System.IO.Path.Combine (ScenesPath, SceneName + ".unity");
+                return System.IO.Path.Combine (DefaultScenesPath, DefaultSceneName + ".unity");
             }
 
             private static string GetLastSavedFilePath ()
@@ -151,13 +153,11 @@ namespace FbxExporters
                 System.Collections.Generic.List<UnityEngine.SceneManagement.Scene> scenes
                       = new System.Collections.Generic.List<UnityEngine.SceneManagement.Scene> ();
 
-                var desiredScene = FbxExporters.EditorTools.ExportSettings.instance.turntableScene;
-                string desiredSceneName = null;
-                if (desiredScene) {
-                    desiredSceneName = desiredScene.name;
+                string desiredSceneName = FbxExporters.EditorTools.ExportSettings.GetTurnTableSceneName ();
+                if (string.IsNullOrEmpty (desiredSceneName)) {
+                    desiredSceneName = DefaultSceneName;
                 }
 
-                bool foundScene = false;
                 for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++) {
                     UnityEngine.SceneManagement.Scene toAdd = UnityEngine.SceneManagement.SceneManager.GetSceneAt (i);
 
@@ -165,28 +165,19 @@ namespace FbxExporters
                     // The Untitled scene cannot be unloaded, if modified, and we don't want to force the user to save it.
                     if (toAdd.name == "") continue;
 
-                    if (desiredSceneName != null && toAdd.name == desiredSceneName) {
+                    if (toAdd.name == desiredSceneName) {
                         scene = toAdd;
-                        foundScene = true;
                         continue;
                     }
 
-                    if (!foundScene && toAdd.name == SceneName) 
-                    {
-                        scene = toAdd;
-                        continue;
-                    }
                     scenes.Add (toAdd);
                 }
 
                 // if turntable scene not added to list of scenes
-                if (!scene.IsValid ()) 
+                if (!scene.IsValid () || !scene.isLoaded) 
                 {
-                    string scenePath = null;
-                    if (desiredScene) {
-                        scenePath = UnityEditor.AssetDatabase.GetAssetPath (desiredScene);
-                    } else {
-                        
+                    string scenePath = FbxExporters.EditorTools.ExportSettings.GetTurnTableScenePath ();
+                    if (string.IsNullOrEmpty(scenePath)) {
                         // and if for some reason the turntable scene is missing create an empty scene
                         // NOTE: we cannot use NewScene because it will force me to save the modified Untitled scene
                         if (!System.IO.File.Exists (GetSceneFilePath ())) {
