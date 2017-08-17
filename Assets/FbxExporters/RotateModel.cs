@@ -23,9 +23,14 @@ namespace FbxExporters.Review
             return speed;
         }
 
+        public void Rotate()
+        {
+            transform.Rotate (Vector3.up, speed * Time.deltaTime, Space.World); 
+        }
+
         void Update ()
         {
-            transform.Rotate (Vector3.up, speed * Time.deltaTime, Space.World);	
+            Rotate ();
         }
     }
 }

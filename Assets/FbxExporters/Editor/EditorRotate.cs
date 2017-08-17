@@ -35,7 +35,7 @@ namespace FbxExporters.Review
             if (model == null || EditorApplication.isPlaying) {
                 return;
             }
-            model.transform.Rotate (Vector3.up, model.GetSpeed() * Time.deltaTime, Space.World); 
+            model.Rotate ();
         }
     }
 }
