@@ -22,8 +22,6 @@ namespace FbxExporters.Review
         private float timeOfLastUpdate = float.MaxValue;
 #endif
 
-        private float deltaTime = 0;
-
         public float GetSpeed()
         {
             return speed;
@@ -31,6 +29,7 @@ namespace FbxExporters.Review
 
         public void Rotate()
         {
+            float deltaTime = 0;
 #if UNITY_EDITOR
             deltaTime = Time.realtimeSinceStartup - timeOfLastUpdate;
             if(deltaTime <= 0){
