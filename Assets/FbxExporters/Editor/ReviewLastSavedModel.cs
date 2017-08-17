@@ -5,7 +5,8 @@ namespace FbxExporters
 {
     namespace Review
     {
-        class TurnTable
+        [UnityEditor.InitializeOnLoad]
+        public class TurnTable
         {
             const string MenuItemName = "FbxExporters/Turntable Review/Autoload Last Saved Prefab";
 
@@ -86,8 +87,11 @@ namespace FbxExporters
                     if (turntableGO != null) {
                         modelGO.transform.parent = turntableGO.transform;
                         turntableGO.AddComponent<RotateModel> ();
+
+                        UnityEditor.Selection.objects = new GameObject[]{ turntableGO };
                     } else {
                         modelGO.AddComponent<RotateModel> ();
+                        UnityEditor.Selection.objects = new GameObject[]{ modelGO };
                     }
                 }
 
@@ -214,11 +218,10 @@ namespace FbxExporters
                     lightComp.shadows = LightShadows.Soft;
                 }
 
-                // maximize game window and start playing
+                // maximize game window
                 var gameWindow = GetMainGameView();
                 if (gameWindow) {
                     gameWindow.maximized = true;
-                    UnityEditor.EditorApplication.isPlaying = true;
                 } else {
                     Debug.LogWarning ("Failed to access Game Window, please restart Unity to try again.");
                 }
@@ -262,12 +265,12 @@ namespace FbxExporters
 
             private static void UpdateLastSavedModel ()
             {
-
-                if (AutoUpdateEnabled ()) {
-                    LoadLastSavedModel ();
-                } else {
+                if (!AutoUpdateEnabled ()) {
                     UnsubscribeFromEvents ();
+                    return;
                 }
+
+                LoadLastSavedModel ();
             }
         }
     }
