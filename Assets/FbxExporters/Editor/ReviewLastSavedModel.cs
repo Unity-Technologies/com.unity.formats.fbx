@@ -24,10 +24,6 @@ namespace FbxExporters
                 LastSavedModel ();
             }
 
-            static TurnTable(){
-                SubscribeToEvents();
-            }
-
             private static System.IO.FileInfo GetLastSavedFile (string directoryPath, string ext = ".fbx")
             {
                 System.IO.DirectoryInfo directoryInfo = new System.IO.DirectoryInfo (directoryPath);
@@ -91,8 +87,11 @@ namespace FbxExporters
                     if (turntableGO != null) {
                         modelGO.transform.parent = turntableGO.transform;
                         turntableGO.AddComponent<RotateModel> ();
+
+                        UnityEditor.Selection.objects = new GameObject[]{ turntableGO };
                     } else {
                         modelGO.AddComponent<RotateModel> ();
+                        UnityEditor.Selection.objects = new GameObject[]{ modelGO };
                     }
                 }
 
@@ -219,11 +218,10 @@ namespace FbxExporters
                     lightComp.shadows = LightShadows.Soft;
                 }
 
-                // maximize game window and start playing
+                // maximize game window
                 var gameWindow = GetMainGameView();
                 if (gameWindow) {
                     gameWindow.maximized = true;
-                    UnityEditor.EditorApplication.isPlaying = true;
                 } else {
                     Debug.LogWarning ("Failed to access Game Window, please restart Unity to try again.");
                 }
@@ -248,9 +246,6 @@ namespace FbxExporters
                 // ensure we only subscribe once
                 UnityEditor.EditorApplication.hierarchyWindowChanged -= UpdateLastSavedModel;
                 UnityEditor.EditorApplication.hierarchyWindowChanged += UpdateLastSavedModel;
-
-                UnityEditor.EditorApplication.playmodeStateChanged -= OnPlay;
-                UnityEditor.EditorApplication.playmodeStateChanged += OnPlay;
             }
 
             private static void UnsubscribeFromEvents ()
@@ -261,7 +256,6 @@ namespace FbxExporters
                 LastFilePath = null;
 
                 UnityEditor.EditorApplication.hierarchyWindowChanged -= UpdateLastSavedModel;
-                UnityEditor.EditorApplication.playmodeStateChanged -= OnPlay;
             }
 
             private static bool AutoUpdateEnabled ()
@@ -277,23 +271,6 @@ namespace FbxExporters
                 }
 
                 LoadLastSavedModel ();
-            }
-
-            private static void OnPlay()
-            {
-                if (!AutoUpdateEnabled ()) {
-                    UnsubscribeFromEvents ();
-                    return;
-                }
-
-                // Right before we enter playmode, unload the last saved model if there is one.
-                // Unsubscribe from hierarchy window changed event so that unloading the model doesn't
-                // trigger a new one to be added right before playing.
-                if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode && !UnityEditor.EditorApplication.isPlaying) {
-                    UnityEditor.EditorApplication.hierarchyWindowChanged -= UpdateLastSavedModel;
-                    UnloadModel (LastModel);
-                    LastModel = null;
-                }
             }
         }
     }
