@@ -18,9 +18,27 @@ namespace FbxExporters.Review
         [SerializeField]
         private float speed = 10f;
 
-        void Update ()
+#if UNITY_EDITOR
+        private float timeOfLastUpdate = float.MaxValue;
+#endif
+
+        public void Rotate()
         {
-            transform.Rotate (Vector3.up, speed * Time.deltaTime, Space.World);	
+            float deltaTime = 0;
+#if UNITY_EDITOR
+            deltaTime = Time.realtimeSinceStartup - timeOfLastUpdate;
+            if(deltaTime <= 0){
+                deltaTime = 0.001f;
+            }
+            timeOfLastUpdate = Time.realtimeSinceStartup;
+#else
+            deltaTime = Time.deltaTime;
+#endif
+            transform.Rotate (Vector3.up, speed * deltaTime, Space.World); 
+        }
+
+        void Update () {
+            Rotate ();
         }
     }
 }
