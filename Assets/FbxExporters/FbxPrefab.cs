@@ -155,85 +155,266 @@ namespace FbxExporters
         }
 
         /// <summary>
-        /// Recursively perform the update.
+        /// This class is responsible for figuring out what work needs to be done
+        /// during an update. It's also responsible for actually doing the work.
         ///
-        /// In terms of a 3-way merge, "oldFbx" is the "base".
-        /// "newFbx" and "prefabInstance" are "theirs" and "ours".
+        /// Key assumption: upon importing, the names in the fbx model are unique.
         ///
-        /// Whether the fbx or the prefab counts as "ours" depends on who the
-        /// user is: a 3d modeler that updated the FBX, or the game programmer
-        /// who's updating the prefab.
-        /// So we don't use 3-way merge terminology.
+        /// TODO: handle conflicts. For now, we just clobber the prefab.
         /// </summary>
-        public static void TreeDiff(FbxRepresentation oldFbx,
-                Transform newFbx,
-                Transform prefabInstance,
-                string indent = "")
+        public class UpdateList
         {
-            // TODO: a better tree diff algorithm, e.g. Demaine et al 2009.
-            //
-            // For now we half-ass it: there's no possibility of handling
-            //   renaming other than delete-and-add. Demaine handles it.
-            // There's also no possibility of nicely handling hierarchy
-            //   changes, but that's essentially impossible (NP-hard, no PTAS),
-            //   so it's not likely worth even trying unless we feel like doing
-            //   serious algorithmics.
-            // 1. For each child in the union of the old, new, and prefab:
-            //    7- old and new and prefab   => recur.
-            //    6- old and new and !prefab  => skip (deleted by user)
-            //    5- old and !new and prefab  => delete from prefab
-            //    4- old and !new and !prefab => skip, we happen to match
-            //    3- !old and new and prefab  => recur, we happen to match
-            //    2- !old and new and !prefab => instantiate the new into the prefab
-            //    1- !old and !new and prefab => skip (added by user)
-            //    0- !old and !new and !prefab  => not possible given the loop
-            var names = FbxRepresentation.CopyKeySet(oldFbx);
-            foreach(Transform child in newFbx) { names.Add(child.name); }
-            foreach(Transform child in prefabInstance) { names.Add(child.name); }
 
-            indent += "  ";
-            foreach(var name in names) {
-                var oldChild = FbxRepresentation.Find(oldFbx, name);
-                var newChild = newFbx.Find(name);
-                var prefabChild = prefabInstance.Find(name);
-                int index = ((oldChild == null) ? 0 : 4)
-                    | ((newChild == null) ? 0 : 2)
-                    | ((prefabChild == null) ? 0 : 1);
-                switch(index) {
-                    case 7:
-                        //Debug.Log(indent + "recur into " + name);
-                        TreeDiff(oldChild, newChild, prefabChild, indent);
-                        break;
-                    case 6:
-                        //Debug.Log(indent + "skip user-deleted " + name);
-                        break;
-                    case 5:
-                        //Debug.Log(indent + "delete " + name);
-                        GameObject.DestroyImmediate(prefabChild.gameObject);
-                        break;
-                    case 4:
-                        //Debug.Log(indent + "skip deleted in both new and prefabInstance " + name);
-                        break;
-                    case 3:
-                        //Debug.Log(indent + "accidental match; recur into " + name);
-                        TreeDiff(oldChild, newChild, prefabChild, indent);
-                        break;
-                    case 2:
-                        //Debug.Log(indent + "instantiate into prefabInstance " + name);
-                        prefabChild = GameObject.Instantiate(newChild);
-                        prefabChild.parent = prefabInstance;
-                        prefabChild.name = newChild.name;
-                        prefabChild.localPosition = newChild.localPosition;
-                        prefabChild.localRotation = newChild.localRotation;
-                        prefabChild.localScale = newChild.localScale;
-                        break;
-                    case 1:
-                        //Debug.Log(indent + "skip user-added node " + name);
-                        break;
-                    default:
-                        // This shouldn't happen.
-                        throw new System.NotImplementedException();
+            // We build up a flat list of names for the nodes of the old fbx,
+            // the new fbx, and the prefab. We also figure out the parents.
+            class Data {
+                Dictionary<string, string> m_parents;
+
+                public Data() {
+                    m_parents = new Dictionary<string, string>();
                 }
+
+                public void AddNode(string name, string parent) {
+                    m_parents.Add(name, parent);
+                }
+
+                public bool HasNode(string name) {
+                    return m_parents.ContainsKey(name);
+                }
+
+                public string GetParent(string name) {
+                    string parent;
+                    if (m_parents.TryGetValue(name, out parent)) {
+                        return parent;
+                    } else {
+                        return null;
+                    }
+                }
+
+                public static HashSet<string> GetAllNames(params Data [] data) {
+                    var names = new HashSet<string>();
+                    foreach(var d in data) {
+                        foreach(var k in d.m_parents.Keys) {
+                            names.Add(k);
+                        }
+                    }
+                    return names;
+                }
+            }
+
+            /// <summary>
+            /// Data for the hierarchy of the old fbx file, the new fbx file, and the prefab.
+            /// </summary>
+            Data m_old, m_new, m_prefab;
+
+            /// <summary>
+            /// Names of all nodes -- old, new, or prefab.
+            /// </summary>
+            HashSet<string> m_allNames = new HashSet<string>();
+
+            /// <summary>
+            /// Names of the new nodes to create in step 1.
+            /// </summary>
+            HashSet<string> m_nodesToCreate = new HashSet<string>();
+
+            /// <summary>
+            /// Information about changes in parenting for step 2.
+            /// Map from name of node in the prefab to name of node in prefab or newNodes.
+            /// This is all the nodes in the prefab that need to be reparented.
+            /// </summary>
+            Dictionary<string,string> m_reparentings = new Dictionary<string, string>();
+
+            /// <summary>
+            /// Names of the nodes to destroy in step 3.
+            /// Actually calculated early.
+            /// </summary>
+            HashSet<string> m_nodesToDestroy = new HashSet<string>();
+
+            /// <summary>
+            /// Components to destroy in step 4a.
+            /// The string is the name in the prefab; we destroy the first
+            /// component that matches the type.
+            /// </summary>
+            //Dictionary<string, List<System.Type>> m_componentsToDestroy = new Dictionary<string, List<System.Type>>();
+
+            /// <summary>
+            /// List of components to update or create in steps 4b and 4c.
+            /// The string is the name in the prefab.
+            /// The component is a pointer to the component in the FBX.
+            /// If the component doesn't exist in the prefab, we create it.
+            /// If the component exists in the prefab, we update it.
+            /// TODO: handle conflicts!
+            /// </summary>
+            //Dictionary<string, List<Component>> m_componentsToUpdate = new Dictionary<string, List<Component>>();
+
+            void SetupOld(FbxRepresentation oldFbx, string parent = null) {
+                if (m_old == null) { m_old = new Data(); }
+                foreach(var name in FbxRepresentation.CopyKeySet(oldFbx)) {
+                    m_old.AddNode(name, parent);
+                    SetupOld(FbxRepresentation.Find(oldFbx, name), name);
+                }
+            }
+
+            static void SetupFromTransform(Data data, Transform xfo, string parent) {
+                foreach(Transform child in xfo) {
+                    data.AddNode(child.name, parent);
+                    SetupFromTransform(data, child, child.name);
+                }
+            }
+
+            void SetupNew(Transform newFbx) {
+                m_new = new Data();
+                SetupFromTransform(m_new, newFbx, null);
+            }
+
+            void SetupPrefab(FbxPrefab prefab) {
+                m_prefab = new Data();
+                SetupFromTransform(m_prefab, prefab.transform, null);
+            }
+
+            void ClassifyDestroyCreateNodes()
+            {
+                foreach(var name in m_allNames) {
+                    var isOld = m_old.HasNode(name);
+                    var isNew = m_new.HasNode(name);
+                    var isPrefab = m_prefab.HasNode(name);
+                    if (isOld && !isNew && isPrefab) {
+                        // This node got deleted in the DCC, so delete it.
+                        m_nodesToDestroy.Add(name);
+                    } else if (!isOld && isNew && !isPrefab) {
+                        // This node was created in the DCC but not in Unity, so create it.
+                        m_nodesToCreate.Add(name);
+                    }
+                }
+            }
+            bool ShouldDestroy(string name) {
+                return m_nodesToDestroy.Contains(name);
+            }
+            bool ShouldCreate(string name) {
+                return m_nodesToCreate.Contains(name);
+            }
+
+            /// <summary>
+            /// Discover what needs to happen.
+            ///
+            /// Four-step program:
+            /// 1. Figure out what nodes exist (we have that data, just need to
+            ///    make it more convenient to query).
+            /// 2. Figure out what nodes we need to create, and what nodes we
+            ///    need to destroy.
+            /// 3. Figure out what nodes we need to reparent.
+            /// todo 4. Figure out what nodes we need to update or add components to.
+            /// </summary>
+            public UpdateList(
+                    FbxRepresentation oldFbx,
+                    Transform newFbx,
+                    FbxPrefab prefab)
+            {
+                SetupOld(oldFbx);
+                SetupNew(newFbx);
+                SetupPrefab(prefab);
+                m_allNames = Data.GetAllNames(m_old, m_new, m_prefab);
+
+                // Set up m_nodesToDestroy and m_nodesToCreate.
+                ClassifyDestroyCreateNodes();
+
+                // Among prefab nodes we're not destroying, see if we need to change their parent.
+                // Cases for the parent:
+                //   old  new  prefab
+                //    a    a     a   => no action
+                //    a    x     a   => doesn't matter (a is being destroyed)
+                //    a    b     a   => switch to b
+                //    a    b     c   => conflict! switch to b for now (todo!)
+                //    x    a     x   => create, and parent to a. This is the second loop below.
+                //    x    a     a   => no action
+                //    x    a     b   => conflict! switch to a for now (todo!)
+                //    x    x     a   => no action. Todo: what if a is being destroyed? conflict!
+                foreach(var name in Data.GetAllNames(m_prefab)) {
+                    var prefabParent = m_prefab.GetParent(name);
+                    var oldParent = m_old.GetParent(name);
+                    var newParent = m_new.GetParent(name);
+
+                    if (oldParent != newParent && prefabParent != newParent) {
+                        // Conflict in this case, we'll need to resolve it:
+                        // if (oldParent != prefabParent && !ShouldDestroy(prefabParent))
+
+                        // But unconditionally switch to the new parent for
+                        // now, unless we're already there.
+                        m_reparentings.Add(name, newParent);
+                    }
+                }
+                // All new nodes need to be reparented (we didn't loop over them because we
+                // only looped over the stuff in the prefab now).
+                foreach(var name in m_nodesToCreate) {
+                    m_reparentings.Add(name, m_new.GetParent(name));
+                }
+            }
+
+            public bool NeedsUpdates() {
+                return m_nodesToDestroy.Count > 0
+                    || m_nodesToCreate.Count > 0
+                    || m_reparentings.Count > 0
+                    // || m_componentsToDestroy.Count > 0
+                    // || m_comopnentsToUpdate.Count > 0
+                    ;
+            }
+
+            /// <summary>
+            /// Then we act -- in a slightly different order:
+            /// 1. Create all the new nodes we need to create.
+            /// 2. Reparent as needed.
+            /// 3. Delete the nodes that are no longer needed.
+            /// todo 4. Update the components:
+            ///    4a. delete components no longer used
+            ///    4b. create new components
+            ///    4c. update component values
+            ///    (A) and (B) are largely about meshfilter/meshrenderer,
+            ///    (C) is about transforms (and materials?)
+            /// </summary>
+            public void ImplementUpdates(FbxPrefab prefabInstance)
+            {
+                // Gather up all the nodes in the prefab.
+                var prefabNodes = new Dictionary<string, Transform>();
+                foreach(var node in prefabInstance.GetComponentsInChildren<Transform>()) {
+                    prefabNodes.Add(node.name, node);
+                }
+
+                // Create new nodes.
+                foreach(var name in m_nodesToCreate) {
+                    prefabNodes.Add(name, new GameObject(name).transform);
+                    Debug.Log("Created " + name);
+                }
+
+                // Implement the reparenting in two phases to avoid making loops, e.g.
+                // if we're flipping from a -> b to b -> a, we don't want to
+                // have a->b->a in the intermediate stage.
+
+                // First set the parents to null.
+                foreach(var kvp in m_reparentings) {
+                    var name = kvp.Key;
+                    prefabNodes[name].parent = null;
+                }
+
+                // Then set the parents to the intended value.
+                foreach(var kvp in m_reparentings) {
+                    var name = kvp.Key;
+                    var parent = kvp.Value;
+                    Transform parentNode;
+                    if (parent == null) {
+                        parentNode = prefabInstance.transform;
+                    } else {
+                        parentNode = prefabNodes[parent];
+                    }
+                    prefabNodes[name].parent = parentNode;
+                    Debug.Log("Parented " + name + " under " + parentNode.name);
+                }
+
+                // Destroy the old nodes.
+                foreach(var toDestroy in m_nodesToDestroy) {
+                    GameObject.DestroyImmediate(prefabNodes[toDestroy].gameObject);
+                }
+
+                // TODO: update components!
             }
         }
 
@@ -266,29 +447,34 @@ namespace FbxExporters
                 return;
             }
 
-            // todo: only instantiate if there's a change
-            var oldRep = GetFbxHistory();
-            if (oldRep == null || oldRep.c == null) { oldRep = null; }
+            // First write down what we want to do.
+            var updates = new UpdateList(GetFbxHistory(), m_fbxModel.transform, this);
 
-            // Instantiate the prefab and compare & update.
+            // If we don't need to do anything, jump out now.
+            if (!updates.NeedsUpdates()) {
+                return;
+            }
+
+            // We want to do something, so instantiate the prefab, work on the instance, then copy back.
             var prefabInstance = UnityEditor.PrefabUtility.InstantiatePrefab(this.gameObject) as GameObject;
             if (!prefabInstance) {
                 throw new System.Exception(string.Format("Failed to instantiate {0}; is it really a prefab?",
                             this.gameObject));
             }
-            TreeDiff(oldRep, m_fbxModel.transform, prefabInstance.transform);
+            var fbxPrefab = prefabInstance.GetComponent<FbxPrefab>();
+
+            updates.ImplementUpdates(fbxPrefab);
 
             // Update the representation of the history to match the new fbx.
-            var fbxPrefab = prefabInstance.GetComponent<FbxPrefab>();
             var newFbxRep = FbxRepresentation.FromTransform(m_fbxModel.transform);
             var newFbxRepString = newFbxRep.ToJson();
             fbxPrefab.m_fbxHistory = newFbxRepString;
 
             // Save the changes back to the prefab.
-            UnityEditor.PrefabUtility.ReplacePrefab(prefabInstance.gameObject, this.transform);
+            UnityEditor.PrefabUtility.ReplacePrefab(prefabInstance, this.transform);
 
             // Destroy the prefabInstance.
-            GameObject.DestroyImmediate(prefabInstance.gameObject);
+            GameObject.DestroyImmediate(prefabInstance);
         }
 
         /// <summary>
