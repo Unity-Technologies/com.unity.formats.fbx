@@ -14,7 +14,7 @@ The Game window is maximized so that it takes up most of the layout.
 
 Model rotates either when selected in the editor or in play mode.
 
-* Turntable Review publishes to temporary location
+* Maya Integration: Turntable Review publishes to temporary location
 
 Running Unity -> Review command in Maya publishes the asset to a temporary location inside the Unity project.
 
