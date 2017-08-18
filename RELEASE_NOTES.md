@@ -1,5 +1,39 @@
 RELEASE NOTES
 
+**Version**: 0.0.10a
+
+NEW FEATURES
+
+* Turntable Review shows minimal Unity window
+
+The Game window is maximized so that it takes up most of the layout.
+
+* Turntable Review frames camera onto model
+
+* Turntable Review rotates model
+
+Model rotates either when selected in the editor or in play mode.
+
+* Turntable Review publishes to temporary location
+
+Running Unity -> Review command in Maya publishes the asset to a temporary location inside the Unity project.
+
+* Maya Integration: Added support for multiple Maya versions
+
+* Set Turntable scene from Project Settings
+
+Scene to use for Turntable review can be selected in Project Settings.
+
+* Select Turntable Base GameObject by attaching FbxTurnTableBase script
+
+Attaching the FbxTurnTableBase script to a GameObject will parent the model being reviewed under this GameObject.
+If none present, an empty GameObject will be used as the base.
+
+FIXES
+
+* FbxPrefab: Don't allow settings to be changed on prefab instance
+* Maya Integration: Fix so review brings Unity window to front on Windows if already open
+
 **Version**: 0.0.9a
 
 * Auto updater for instanced prefabs
