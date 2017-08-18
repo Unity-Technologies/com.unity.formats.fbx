@@ -11,7 +11,8 @@ namespace FbxExporters
 {
     namespace Review
     {
-        class TurnTable
+        [UnityEditor.InitializeOnLoad]
+        public class TurnTable
         {
             const string MenuItemName = "FbxExporters/Turntable Review/Autoload Last Saved Prefab";
 
@@ -60,7 +61,7 @@ namespace FbxExporters
 
             private static string GetLastSavedFilePath ()
             {
-                string modelPath = FbxExporters.Integrations.GetTempSavePath ();
+                string modelPath = FbxExporters.Editor.Integrations.GetTempSavePath ();
                 System.IO.FileInfo fileInfo = GetLastSavedFile (modelPath);
 
                 return (fileInfo != null) ? fileInfo.FullName : null;
@@ -102,6 +103,8 @@ namespace FbxExporters
                     }
 
                     modelGO.transform.parent = turntableGO.transform;
+
+                    UnityEditor.Selection.objects = new GameObject[]{ turntableGO };
                 }
 
                 FrameCameraOnModel (modelGO);
@@ -237,11 +240,10 @@ namespace FbxExporters
                     lightComp.shadows = LightShadows.Soft;
                 }
 
-                // maximize game window and start playing
+                // maximize game window
                 var gameWindow = GetMainGameView();
                 if (gameWindow) {
                     gameWindow.maximized = true;
-                    UnityEditor.EditorApplication.isPlaying = true;
                 } else {
                     Debug.LogWarning ("Failed to access Game Window, please restart Unity to try again.");
                 }
@@ -285,12 +287,12 @@ namespace FbxExporters
 
             private static void UpdateLastSavedModel ()
             {
-
-                if (AutoUpdateEnabled ()) {
-                    LoadLastSavedModel ();
-                } else {
+                if (!AutoUpdateEnabled ()) {
                     UnsubscribeFromEvents ();
+                    return;
                 }
+
+                LoadLastSavedModel ();
             }
         }
     }
