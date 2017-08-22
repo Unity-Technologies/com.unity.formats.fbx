@@ -98,11 +98,7 @@ class importCmd(BaseCommand):
         
         # Get or create the Unity Fbx Export Set
         allSets = maya.cmds.listSets(allSets=True)
-        if self._exportSet in allSets:
-            if maya.cmds.sets(self._exportSet, size=True, q=True) > 0:
-                self.displayDebug('Set {0} is not empty, cannot update'.format(self._exportSet))
-                return
-        else:
+        if not self._exportSet in allSets:
             # couldn't find export set so create it
             maya.cmds.sets(name=self._exportSet)
         
