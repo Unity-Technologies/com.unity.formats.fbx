@@ -42,6 +42,7 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     def __init__(self):
         OpenMayaMPx.MPxCommand.__init__(self)
         LoggerMixin.__init__(self)
+        self._exportSet = "UnityFbxExportSet"
         
     def __del__(self):
         LoggerMixin.__del__(self)
@@ -107,14 +108,29 @@ class importCmd(BaseCommand):
     
         callbackId = OpenMaya.MSceneMessage.addCheckFileCallback(OpenMaya.MSceneMessage.kBeforeImportCheck, self.beforeImport)
         callbackId2 = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterImport, self.afterImport)
-    
+
+        # Gather everything that is in the scene
+        origItemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
+            
         strCmd = 'Import'
         self.displayDebug('doIt {0}'.format(strCmd))
-        maya.mel.eval(strCmd)
+        result = maya.cmds.Import()
         
+        # figure out what has been added after import
+        itemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
+        newItems = list(set(itemsInScene) - set(origItemsInScene))
+
+        # Get or create the Unity Fbx Export Set
+        allSets = maya.cmds.listSets(allSets=True)
+        if not self._exportSet in allSets:
+            # couldn't find export set so create it
+            maya.cmds.sets(name=self._exportSet)
+        
+        maya.cmds.sets(newItems, add=self._exportSet)    
+
         OpenMaya.MMessage.removeCallback(callbackId)
         OpenMaya.MMessage.removeCallback(callbackId2)
-        
+                
     @classmethod
     def invoke(cls):
         """
