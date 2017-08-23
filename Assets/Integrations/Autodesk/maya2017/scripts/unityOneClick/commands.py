@@ -32,6 +32,8 @@ import ctypes
 ctypes.pythonapi.PyCObject_AsVoidPtr.restype = ctypes.c_void_p
 ctypes.pythonapi.PyCObject_AsVoidPtr.argtypes = [ctypes.py_object]
 
+import os
+
 UNITY_FBX_FILE_PATH = None
 UNITY_FBX_FILE_NAME = None
 
@@ -57,7 +59,25 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         return True
 
     def loadDependencies(self):
-          return self.loadPlugin('GamePipeline.mll')
+        return self.loadPlugin('GamePipeline.mll') and self.loadPlugin('fbxmaya.mll')
+    
+    def loadUnityFbxExportSettings(self):
+        """
+        Load the Export Settings from file
+        """
+        file = maya.cmds.optionVar(q="UnityFbxExportSettings")
+        #unityProjectPath = maya.cmds.optionVar(q='UnityProject')
+        #file = unityProjectPath + "/Integrations/Autodesk/maya2017/scripts/unityFbxExportSettings.mel"
+        if not os.path.isfile(file):
+            maya.cmds.error("Failed to find Unity Fbx Export Settings at: {0}".format(file))
+            return False
+            
+        with open(file) as f:
+            contents = f.read()
+            
+        maya.mel.eval(contents)
+        return True
+        
     
 class importCmd(BaseCommand):
     """
@@ -103,6 +123,8 @@ class importCmd(BaseCommand):
         UNITY_FBX_FILE_NAME = self._tempName
     
     def doIt(self, args):
+        self.loadDependencies()
+    
         self._tempPath = None
         self._tempName = None
     
@@ -174,9 +196,12 @@ class reviewCmd(BaseCommand):
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
         unityTempSavePath = maya.cmds.optionVar(q='UnityTempSavePath')
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
+        
+        if not self.loadUnityFbxExportSettings():
+            return
 
         # make sure the GamePipeline and fbxmaya plugins are loaded
-        if self.loadDependencies() and self.loadPlugin('fbxmaya.mll'):
+        if self.loadDependencies():
             # save fbx to Assets/_safe_to_delete/
             savePath = unityTempSavePath
             maya.cmds.sysFile(savePath, makeDir=True)
@@ -247,6 +272,9 @@ class publishCmd(BaseCommand):
         if not self.loadDependencies():
             return
 
+        if not self.loadUnityFbxExportSettings():
+            return
+            
         global UNITY_FBX_FILE_PATH
         global UNITY_FBX_FILE_NAME
         if UNITY_FBX_FILE_PATH and UNITY_FBX_FILE_NAME:

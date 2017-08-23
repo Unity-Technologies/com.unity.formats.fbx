@@ -14,6 +14,8 @@ namespace FbxExporters.Editor
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
 
+        private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya2017/scripts/unityFbxExportSettings.mel";
+
         public class MayaException : System.Exception {
             public MayaException() { }
             public MayaException(string message) : base(message) { }
@@ -175,8 +177,8 @@ namespace FbxExporters.Editor
 #endif
 
         private static string MAYA_COMMANDS { get {
-            return string.Format("configureUnityOneClick {0}{1}{0} {0}{2}{0} {0}{3}{0} {4}; scriptJob -idleEvent quit;",
-                    ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(), (IsHeadlessInstall()?1:0));
+                return string.Format("configureUnityOneClick {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {5}; scriptJob -idleEvent quit;",
+                    ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(), GetExportSettingsPath(), (IsHeadlessInstall()?1:0));
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
@@ -247,6 +249,12 @@ namespace FbxExporters.Editor
         public static string GetTempSavePath()
         {
             return System.IO.Path.Combine(Application.dataPath, FbxExporters.Review.TurnTable.TempSavePath).Replace("\\", "/");
+        }
+
+        public static string GetExportSettingsPath()
+        {
+            return System.IO.Path.Combine (Application.dataPath,
+                FBX_EXPORT_SETTINGS_PATH).Replace ("\\", "/");
         }
 
         public static string GetPackageVersion()

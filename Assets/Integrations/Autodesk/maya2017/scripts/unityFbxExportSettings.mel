@@ -1,0 +1,68 @@
+// Geometry
+FBXExportSmoothingGroups -v false;
+FBXExportTangents -v false;
+FBXExportSmoothMesh -v false; 
+FBXExportInstances -v true; 
+FBXExportReferencedAssetsContent -v false;
+FBXExportTriangulate -v false;
+
+// Animation
+FBXExportAnimationOnly -v false;
+
+// Animation: Extra Options
+FBXExportUseSceneName -v false;
+FBXExportQuaternion -v resample;
+
+// Animation: Bake Animation
+FBXExportBakeComplexAnimation -v true;
+FBXExportBakeComplexStart -v 1;
+FBXExportBakeComplexEnd -v 200;
+FBXExportBakeComplexStep -v 1;
+FBXExportBakeResampleAnimation -v false;
+
+// Animation: Deformed Models
+FBXExportSkins -v true;
+FBXExportShapes -v true;
+
+FBXExportApplyConstantKeyReducer -v false;
+
+// Geometry Cache File(s)
+FBXExportCacheFile -v false;
+//FBXExportQuickSelectSetAsCache –v "";
+
+// Constraints
+FBXExportConstraints -v false;
+FBXExportSkeletonDefinitions -v false;
+
+FBXExportCameras -v false; 
+FBXExportLights -v false; 
+
+FBXExportEmbeddedTextures -v false;
+FBXExportInputConnections -v true; 
+
+// Units
+FBXExportScaleFactor 1;
+FBXExportConvertUnitString cm;
+
+// Axis Conversion
+FBXExportUpAxis y;
+
+FBXExportGenerateLog -v true;
+
+// FBX file format
+FBXExportInAscii -v false; 
+FBXExportFileVersion -v FBX201600;
+
+// Misc
+FBXExportHardEdges -v false;
+FBXExportAxisConversionMethod none;
+
+FBXExportColladaFrameRate 30;
+FBXExportColladaSingleMatrix false;
+FBXExportColladaTriangulate false;
+
+// Mac and Linux only
+if (`about -linux` || `about -macOS`){
+    FBXExportDxfTriangulate false; 
+    FBXExportDxfDeformation false;
+}
