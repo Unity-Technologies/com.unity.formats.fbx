@@ -65,6 +65,11 @@ namespace FbxExporters.EditorTools {
                         Debug.LogWarning ("Please select a location in the Assets folder");
                     } else {
                         ExportSettings.SetRelativeSavePath(relativePath);
+
+                        // Make sure focus is removed from the selectable label
+                        // otherwise it won't update
+                        GUIUtility.hotControl = 0;
+                        GUIUtility.keyboardControl = 0;
                     }
                 }
             }
