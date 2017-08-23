@@ -32,6 +32,9 @@ import ctypes
 ctypes.pythonapi.PyCObject_AsVoidPtr.restype = ctypes.c_void_p
 ctypes.pythonapi.PyCObject_AsVoidPtr.argtypes = [ctypes.py_object]
 
+UNITY_FBX_FILE_PATH = None
+UNITY_FBX_FILE_NAME = None
+
 class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     """
     Base class for UnityOneClick Plugin Commands.
@@ -69,6 +72,10 @@ class importCmd(BaseCommand):
 
     def __init__(self):
         super(self.__class__, self).__init__()
+        
+        # temporarily store the path and name of the imported FBX
+        self._tempPath = None
+        self._tempName = None
 
     @classmethod
     def creator(cls):
@@ -83,10 +90,30 @@ class importCmd(BaseCommand):
     def scriptCmd(cls):
         return
     
+    def beforeImport(self, retCode, file, clientData):
+        # store path and filename
+        self._tempPath = file.resolvedFullName()
+        self._tempName = file.resolvedName()
+        
+    def afterImport(self, *args, **kwargs):
+        global UNITY_FBX_FILE_PATH
+        global UNITY_FBX_FILE_NAME
+        UNITY_FBX_FILE_PATH = self._tempPath
+        UNITY_FBX_FILE_NAME = self._tempName
+    
     def doIt(self, args):
+        self._tempPath = None
+        self._tempName = None
+    
+        callbackId = OpenMaya.MSceneMessage.addCheckFileCallback(OpenMaya.MSceneMessage.kBeforeImportCheck, self.beforeImport)
+        callbackId2 = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterImport, self.afterImport)
+    
         strCmd = 'Import'
         self.displayDebug('doIt {0}'.format(strCmd))
         maya.mel.eval(strCmd)
+        
+        OpenMaya.MMessage.removeCallback(callbackId)
+        OpenMaya.MMessage.removeCallback(callbackId2)
         
     @classmethod
     def invoke(cls):
@@ -204,7 +231,11 @@ class publishCmd(BaseCommand):
         if not self.loadDependencies():
             return
 
-        strCmd = 'SendToUnitySelection'
+        global UNITY_FBX_FILE_PATH
+        if UNITY_FBX_FILE_PATH:
+            strCmd = r'file -force -options "" -typ "FBX export" -pr -es "{0}"'.format(UNITY_FBX_FILE_PATH);    
+        else:   
+            strCmd = 'SendToUnitySelection'
         self.displayDebug('doIt {0}'.format(strCmd))
         maya.mel.eval(strCmd)
         
