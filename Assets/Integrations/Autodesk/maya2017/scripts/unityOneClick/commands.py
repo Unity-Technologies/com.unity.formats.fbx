@@ -92,7 +92,7 @@ class importCmd(BaseCommand):
     
     def beforeImport(self, retCode, file, clientData):
         # store path and filename
-        self._tempPath = file.resolvedFullName()
+        self._tempPath = file.resolvedPath()
         self._tempName = file.resolvedName()
         
     def afterImport(self, *args, **kwargs):
@@ -232,8 +232,9 @@ class publishCmd(BaseCommand):
             return
 
         global UNITY_FBX_FILE_PATH
-        if UNITY_FBX_FILE_PATH:
-            strCmd = r'file -force -options "" -typ "FBX export" -pr -es "{0}"'.format(UNITY_FBX_FILE_PATH);    
+        global UNITY_FBX_FILE_NAME
+        if UNITY_FBX_FILE_PATH and UNITY_FBX_FILE_NAME:
+            strCmd = r'file -force -options "" -typ "FBX export" -pr -es "{0}{1}"'.format(UNITY_FBX_FILE_PATH, UNITY_FBX_FILE_NAME);    
         else:   
             strCmd = 'SendToUnitySelection'
         self.displayDebug('doIt {0}'.format(strCmd))
