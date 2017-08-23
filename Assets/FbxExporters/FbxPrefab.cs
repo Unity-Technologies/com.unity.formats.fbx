@@ -43,6 +43,17 @@ namespace FbxExporters
         // None of the code should be included in the build, because this
         // component is really only about the editor.
 #if UNITY_EDITOR
+
+        /// <summary>
+        /// Exception that denotes a likely programming error.
+        /// </summary>
+        public class FbxPrefabException : System.Exception
+        {
+            public FbxPrefabException() { }
+            public FbxPrefabException(string message) : base(message) { }
+            public FbxPrefabException(string message, System.Exception inner) : base(message, inner) { }
+        }
+
         public class FbxRepresentation
         {
             /// <summary>
@@ -57,7 +68,7 @@ namespace FbxExporters
             /// The key is the name of the type of the Component. We accept that there may be several.
             /// The value is the json for the component, to be decoded with EditorJsonUtility.
             /// </summary>
-            Dictionary<string, List<string>> components;
+            public Dictionary<string, List<string>> components { get; private set; }
 
             public static FbxRepresentation FromTransform(Transform xfo) {
                 var children = new Dictionary<string, FbxRepresentation>();
@@ -223,7 +234,7 @@ namespace FbxExporters
                 return rep == null || rep.children == null;
             }
 
-            public static HashSet<string> CopyKeySet(FbxRepresentation rep) {
+            public static HashSet<string> GetChildren(FbxRepresentation rep) {
                 if (IsLeaf(rep)) {
                     return new HashSet<string>();
                 } else {
@@ -252,17 +263,88 @@ namespace FbxExporters
         /// </summary>
         public class UpdateList
         {
+            /// <summary>
+            /// Utility function: create the object, which must be null.
+            /// </summary>
+            /// <param name="item">Item.</param>
+            /// <typeparam name="T">The 1st type parameter.</typeparam>
+            public static void Initialize<T>(ref T item) where T: new()
+            {
+                if (item != null) { throw new FbxPrefabException(); }
+                item = new T();
+            }
+
+            /// <summary>
+            /// Utility function: append an item to a list.
+            /// If the list is null, create it.
+            /// </summary>
+            public static void Append<T>(ref List<T> thelist, T item)
+            {
+                if (thelist == null) {
+                    thelist = new List<T>();
+                }
+                thelist.Add(item);
+            }
+
+            /// <summary>
+            /// Utility function: append an item to a list in a dictionary of lists.
+            /// Create all the entries needed to append to the list.
+            /// The dictionary must not be null.
+            /// </summary>
+            public static void Append<K, V>(Dictionary<K, List<V>> thedict, K key, V item)
+            {
+                List<V> thelist;
+                if (!thedict.TryGetValue(key, out thelist) || (thelist == null)) {
+                    thelist = new List<V>();
+                    thedict[key] = thelist;
+                }
+                thelist.Add(item);
+            }
+
+            /// <summary>
+            /// Utility function: append an item to a list in a 2-level dictionary of lists.
+            /// Create all the entries needed to append to the list.
+            /// The dictionary must not be null.
+            /// </summary>
+            public static void Append<K1, K2, V>(Dictionary<K1, Dictionary<K2, List<V>>> thedict, K1 key1, K2 key2, V item)
+            {
+                Dictionary<K2, List<V>> thesubmap;
+                if (!thedict.TryGetValue(key1, out thesubmap) || thesubmap == null) {
+                    thesubmap = new Dictionary<K2, List<V>>();
+                    thedict[key1] = thesubmap;
+                }
+                Append(thesubmap, key2, item);
+            }
+
             // We build up a flat list of names for the nodes of the old fbx,
             // the new fbx, and the prefab. We also figure out the parents.
             class Data {
+                // Parent of each node, by name.
+                // Value (parent) may be null, key (node) is never null.
                 Dictionary<string, string> m_parents;
+
+                // Component value by name and type, with multiplicity.
+                // name -> type -> list of value
+                Dictionary<string, Dictionary<string, List<string>>> m_components;
 
                 public Data() {
                     m_parents = new Dictionary<string, string>();
+                    m_components = new Dictionary<string, Dictionary<string, List<string>>>();
                 }
 
                 public void AddNode(string name, string parent) {
                     m_parents.Add(name, parent);
+                }
+
+                public void AddComponent(string name, string typename, string jsonValue) {
+                    Append(m_components, name, typename, jsonValue);
+                }
+
+                public void AddComponents(string name, string typename, IEnumerable<string> jsonValues) {
+                    // todo: optimize this if needed. We only need to look up through the maps once.
+                    foreach(var jsonValue in jsonValues) {
+                        AddComponent(name, typename, jsonValue);
+                    }
                 }
 
                 public bool HasNode(string name) {
@@ -278,12 +360,35 @@ namespace FbxExporters
                     }
                 }
 
+                public IEnumerable<string> GetComponentTypes(string name)
+                {
+                    Dictionary<string, List<string>> components;
+                    if (!m_components.TryGetValue(name, out components)) {
+                        // node doesn't exist => it has no components
+                        return new string[0];
+                    }
+                    return components.Keys;
+                }
+
+                public List<string> GetComponentValues(string name, string typename)
+                {
+                    Dictionary<string, List<string>> components;
+                    if (!m_components.TryGetValue(name, out components)) {
+                        return new List<string>();
+                    }
+                    List<string> jsonValues;
+                    if (!components.TryGetValue(typename, out jsonValues)) {
+                        return new List<string>();
+                    }
+                    return jsonValues;
+                }
+
+
                 public static HashSet<string> GetAllNames(params Data [] data) {
                     var names = new HashSet<string>();
                     foreach(var d in data) {
-                        foreach(var k in d.m_parents.Keys) {
-                            names.Add(k);
-                        }
+                        // the names are the keys of the name -> parent map
+                        names.UnionWith(d.m_parents.Keys);
                     }
                     return names;
                 }
@@ -295,73 +400,71 @@ namespace FbxExporters
             Data m_old, m_new, m_prefab;
 
             /// <summary>
-            /// Names of all nodes -- old, new, or prefab.
-            /// </summary>
-            HashSet<string> m_allNames = new HashSet<string>();
-
-            /// <summary>
             /// Names of the new nodes to create in step 1.
             /// </summary>
-            HashSet<string> m_nodesToCreate = new HashSet<string>();
+            HashSet<string> m_nodesToCreate;
 
             /// <summary>
             /// Information about changes in parenting for step 2.
             /// Map from name of node in the prefab to name of node in prefab or newNodes.
             /// This is all the nodes in the prefab that need to be reparented.
             /// </summary>
-            Dictionary<string,string> m_reparentings = new Dictionary<string, string>();
+            Dictionary<string,string> m_reparentings;
 
             /// <summary>
-            /// Names of the nodes to destroy in step 3.
+            /// Names of the nodes in the prefab to destroy in step 3.
             /// Actually calculated early.
             /// </summary>
-            HashSet<string> m_nodesToDestroy = new HashSet<string>();
+            HashSet<string> m_nodesToDestroy;
+
+            /// <summary>
+            /// Names of the nodes that the prefab will have after we implement
+            /// steps 1, 2, and 3.
+            /// </summary>
+            HashSet<string> m_nodesInUpdatedPrefab;
 
             /// <summary>
             /// Components to destroy in step 4a.
             /// The string is the name in the prefab; we destroy the first
             /// component that matches the type.
             /// </summary>
-            //Dictionary<string, List<System.Type>> m_componentsToDestroy = new Dictionary<string, List<System.Type>>();
+            Dictionary<string, List<System.Type>> m_componentsToDestroy;
 
             /// <summary>
             /// List of components to update or create in steps 4b and 4c.
             /// The string is the name in the prefab.
             /// The component is a pointer to the component in the FBX.
             /// If the component doesn't exist in the prefab, we create it.
-            /// If the component exists in the prefab, we update it.
-            /// TODO: handle conflicts!
+            /// If the component exists in the prefab, we update the first
+            ///   match (without repetition).
             /// </summary>
-            //Dictionary<string, List<Component>> m_componentsToUpdate = new Dictionary<string, List<Component>>();
+            Dictionary<string, List<Component>> m_componentsToUpdate;
 
-            void SetupOld(FbxRepresentation oldFbx, string parent = null) {
-                if (m_old == null) { m_old = new Data(); }
-                foreach(var name in FbxRepresentation.CopyKeySet(oldFbx)) {
-                    m_old.AddNode(name, parent);
-                    SetupOld(FbxRepresentation.Find(oldFbx, name), name);
+            static void SetupDataHelper(Data data, FbxRepresentation fbxrep, string parent)
+            {
+                foreach(var child in FbxRepresentation.GetChildren(fbxrep)) {
+                    data.AddNode(child, parent);
+                    foreach(var kvp in fbxrep.components) {
+                        var typename = kvp.Key;
+                        var jsonValues = kvp.Value;
+                        data.AddComponents(child, typename, jsonValues);
+                    }
+                    SetupDataHelper(data, FbxRepresentation.Find(fbxrep, child), child);
                 }
             }
 
-            static void SetupFromTransform(Data data, Transform xfo, string parent) {
-                foreach(Transform child in xfo) {
-                    data.AddNode(child.name, parent);
-                    SetupFromTransform(data, child, child.name);
-                }
-            }
-
-            void SetupNew(Transform newFbx) {
-                m_new = new Data();
-                SetupFromTransform(m_new, newFbx, null);
-            }
-
-            void SetupPrefab(FbxPrefab prefab) {
-                m_prefab = new Data();
-                SetupFromTransform(m_prefab, prefab.transform, null);
+            static void SetupData(ref Data data, FbxRepresentation fbxrep)
+            {
+                Initialize(ref data);
+                SetupDataHelper(data, fbxrep, null);
             }
 
             void ClassifyDestroyCreateNodes()
             {
-                foreach(var name in m_allNames) {
+                // Figure out which nodes to add to the prefab, which nodes in the prefab to destroy.
+                Initialize(ref m_nodesToCreate);
+                Initialize(ref m_nodesToDestroy);
+                foreach(var name in Data.GetAllNames(m_old, m_new, m_prefab)) {
                     var isOld = m_old.HasNode(name);
                     var isNew = m_new.HasNode(name);
                     var isPrefab = m_prefab.HasNode(name);
@@ -373,37 +476,20 @@ namespace FbxExporters
                         m_nodesToCreate.Add(name);
                     }
                 }
-            }
-            bool ShouldDestroy(string name) {
-                return m_nodesToDestroy.Contains(name);
-            }
-            bool ShouldCreate(string name) {
-                return m_nodesToCreate.Contains(name);
+
+                // Figure out what nodes will exist after we create and destroy.
+                Initialize(ref m_nodesInUpdatedPrefab);
+                foreach(var node in Data.GetAllNames(m_prefab).Union(m_nodesToCreate)) {
+                    if (m_nodesToDestroy.Contains(node)) {
+                        continue;
+                    }
+                    m_nodesInUpdatedPrefab.Add(node);
+                }
             }
 
-            /// <summary>
-            /// Discover what needs to happen.
-            ///
-            /// Four-step program:
-            /// 1. Figure out what nodes exist (we have that data, just need to
-            ///    make it more convenient to query).
-            /// 2. Figure out what nodes we need to create, and what nodes we
-            ///    need to destroy.
-            /// 3. Figure out what nodes we need to reparent.
-            /// todo 4. Figure out what nodes we need to update or add components to.
-            /// </summary>
-            public UpdateList(
-                    FbxRepresentation oldFbx,
-                    Transform newFbx,
-                    FbxPrefab prefab)
+            void ClassifyReparenting()
             {
-                SetupOld(oldFbx);
-                SetupNew(newFbx);
-                SetupPrefab(prefab);
-                m_allNames = Data.GetAllNames(m_old, m_new, m_prefab);
-
-                // Set up m_nodesToDestroy and m_nodesToCreate.
-                ClassifyDestroyCreateNodes();
+                Initialize(ref m_reparentings);
 
                 // Among prefab nodes we're not destroying, see if we need to change their parent.
                 // Cases for the parent:
@@ -417,32 +503,187 @@ namespace FbxExporters
                 //    x    a     b   => conflict! switch to a for now (todo!)
                 //    x    x     a   => no action. Todo: what if a is being destroyed? conflict!
                 foreach(var name in Data.GetAllNames(m_prefab)) {
+                    if (m_nodesToDestroy.Contains(name)) {
+                        // Reparent to null. This is to avoid the nuisance of
+                        // trying to destroy objects that are already destroyed
+                        // because a parent got there first. Maybe there's a
+                        // faster way to do it, but performance seems OK.
+                        m_reparentings.Add(name, null);
+                        continue;
+                    }
+
                     var prefabParent = m_prefab.GetParent(name);
                     var oldParent = m_old.GetParent(name);
                     var newParent = m_new.GetParent(name);
 
                     if (oldParent != newParent && prefabParent != newParent) {
-                        // Conflict in this case, we'll need to resolve it:
+                        // Conflict in this case:
                         // if (oldParent != prefabParent && !ShouldDestroy(prefabParent))
 
-                        // But unconditionally switch to the new parent for
-                        // now, unless we're already there.
+                        // For now, 'newParent' always wins:
                         m_reparentings.Add(name, newParent);
                     }
                 }
-                // All new nodes need to be reparented (we didn't loop over them because we
-                // only looped over the stuff in the prefab now).
+
+                // All new nodes need to be reparented no matter what.
+                // We're guaranteed we didn't already add them because we only
+                // looped over what exists in the prefab now.
                 foreach(var name in m_nodesToCreate) {
                     m_reparentings.Add(name, m_new.GetParent(name));
                 }
+            }
+
+            static void SetupComponentsMap(Transform newFbx,
+                    Dictionary<string, Dictionary<string, List<Component>>> nameMap)
+            {
+                foreach(var component in newFbx.GetComponents<Component>()) {
+                    Append(nameMap, newFbx.name, component.GetType().ToString(), component);
+                }
+                foreach(Transform child in newFbx) {
+                    SetupComponentsMap(child, nameMap);
+                }
+            }
+
+            void ClassifyComponents(Transform newFbx)
+            {
+                Initialize(ref m_componentsToDestroy);
+                Initialize(ref m_componentsToUpdate);
+
+                // Flatten the list of components in the transform hierarchy so we can remember what to copy.
+                var components = new Dictionary<string, Dictionary<string, List<Component>>>();
+                SetupComponentsMap(newFbx, components);
+
+                // What's the logic?
+                // First check if a component is present or absent. It's
+                // present if the node exists and has that component; it's
+                // absent if the node doesn't exist, or the node exists but
+                // doesn't have that component:
+                //   old  new  prefab
+                //    x    x      x   => ignore
+                //    x    x      y   => ignore
+                //    x    y      x   => create a new component, copy from new
+                //    x    y      y   => ignore
+                //    y    x      x   => ignore
+                //    y    x      y   => destroy the component
+                //    y    y      x   => ignore
+                //    y    y      y   => check if we need to update
+                //
+                // In that last case, check whether we need to update the values:
+                //    a    a      a   => ignore
+                //    a    a      b   => ignore
+                //    a    a      c   => ignore (indistinguishable from aab case)
+                //    a    b      a   => update to b
+                //    a    b      b   => ignore (already matches)
+                //    a    b      c   => conflict, update to b
+                //
+                // Big question: how do we handle multiplicity? I'll skip it for today...
+
+                // We only care about nodes in the prefab after creating/destroying.
+                foreach(var name in m_nodesInUpdatedPrefab)
+                {
+                    if (!m_new.HasNode(name)) {
+                        // It's not in the FBX, so clearly we're not updating any components.
+                        continue;
+                    }
+                    var allTypes = m_old.GetComponentTypes(name).Union(
+                            m_new.GetComponentTypes(name).Union(
+                                m_prefab.GetComponentTypes(name)));
+
+                    List<string> typesToDestroy = null;
+                    List<string> typesToUpdate = null;
+
+                    foreach(var typename in allTypes) {
+                        var oldValues = m_old.GetComponentValues(name, typename);
+                        var newValues = m_new.GetComponentValues(name, typename);
+                        var prefabValues = m_prefab.GetComponentValues(name, typename);
+
+                        Debug.Log(string.Format("type {0}: {1} old / {2} new / {3} prefab",
+                            typename, oldValues.Count, newValues.Count, prefabValues.Count));
+
+                        // TODO: handle multiplicity! The algorithm is eluding me right now...
+                        // We'll need to do some kind of 3-way matching.
+                        if (oldValues.Count == 0 && newValues.Count != 0 && prefabValues.Count == 0) {
+                            if (newValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + newValues.Count); }
+                            Append(ref typesToUpdate, typename);
+                        }
+                        else if (oldValues.Count != 0 && newValues.Count == 0 && prefabValues.Count != 0) {
+                            if (oldValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + oldValues.Count); }
+                            if (prefabValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + prefabValues.Count); }
+                            Append(ref typesToDestroy, typename);
+                        }
+                        else if (oldValues.Count != 0 && newValues.Count != 0 && prefabValues.Count != 0) {
+                            if (oldValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + oldValues.Count); }
+                            if (newValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + newValues.Count); }
+                            if (prefabValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + prefabValues.Count); }
+
+                            // Check whether we need to update.
+                            var oldValue = oldValues[0];
+                            var newValue = newValues[0];
+                            var prefabValue = prefabValues[0];
+
+                            if (oldValue != newValue) {
+                                // if oldValue == prefabValue, update.
+                                // if oldValue != prefabValue, conflict =>
+                                //      resolve in favor of Chris, so update
+                                //      anyway.
+                                Append(ref typesToUpdate, typename);
+                            }
+                        }
+                    }
+
+                    // Figure out the types so we can destroy them.
+                    if (typesToDestroy != null) {
+                        var unityEngine = typeof(Component).Assembly;
+                        foreach (var typename in typesToDestroy) {
+                            var thetype = unityEngine.GetType (typename);
+                            Append (m_componentsToDestroy, name, thetype);
+                        }
+                    }
+
+                    // Find the actual components in the new fbx so we can copy them.
+                    if (typesToUpdate != null) {
+                        foreach (var typename in typesToUpdate) {
+                            if (components [name] [typename].Count > 1) {
+                                Debug.LogError (string.Format("todo: multiplicity {0} on {1}:{2}",
+                                    components [name] [typename].Count, name, typename));
+                            }
+                            Append (m_componentsToUpdate, name, components [name] [typename] [0]);
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Discover what needs to happen.
+            ///
+            /// Four-step program:
+            /// 1. Figure out what nodes exist (we have that data, just need to
+            ///    make it more convenient to query).
+            /// 2. Figure out what nodes we need to create, and what nodes we
+            ///    need to destroy.
+            /// 3. Figure out what nodes we need to reparent.
+            /// 4. Figure out what nodes we need to update or add components to.
+            /// </summary>
+            public UpdateList(
+                    FbxRepresentation oldFbx,
+                    Transform newFbx,
+                    FbxPrefab prefab)
+            {
+                SetupData(ref m_old, oldFbx);
+                SetupData(ref m_new, FbxRepresentation.FromTransform(newFbx));
+                SetupData(ref m_prefab, FbxRepresentation.FromTransform(prefab.transform));
+
+                ClassifyDestroyCreateNodes();
+                ClassifyReparenting();
+                ClassifyComponents(newFbx);
             }
 
             public bool NeedsUpdates() {
                 return m_nodesToDestroy.Count > 0
                     || m_nodesToCreate.Count > 0
                     || m_reparentings.Count > 0
-                    // || m_componentsToDestroy.Count > 0
-                    // || m_comopnentsToUpdate.Count > 0
+                    || m_componentsToDestroy.Count > 0
+                    || m_componentsToUpdate.Count > 0
                     ;
             }
 
@@ -469,7 +710,7 @@ namespace FbxExporters
                 // Create new nodes.
                 foreach(var name in m_nodesToCreate) {
                     prefabNodes.Add(name, new GameObject(name).transform);
-                    Debug.Log("Created " + name);
+                    Debug.Log(name + ": Created");
                 }
 
                 // Implement the reparenting in two phases to avoid making loops, e.g.
@@ -493,15 +734,63 @@ namespace FbxExporters
                         parentNode = prefabNodes[parent];
                     }
                     prefabNodes[name].parent = parentNode;
-                    Debug.Log("Parented " + name + " under " + parentNode.name);
+                    Debug.Log(name + ": Changed parent to " + parentNode.name);
                 }
 
                 // Destroy the old nodes.
                 foreach(var toDestroy in m_nodesToDestroy) {
                     GameObject.DestroyImmediate(prefabNodes[toDestroy].gameObject);
+                    Debug.Log(toDestroy + ": Destroyed");
                 }
 
-                // TODO: update components!
+                // Destroy the old components.
+                foreach(var kvp in prefabNodes) {
+                    var name = kvp.Key;
+                    var xfo = kvp.Value;
+                    List<System.Type> typesToDestroy;
+                    if (m_componentsToDestroy.TryGetValue(name, out typesToDestroy)) {
+                        foreach(var componentType in typesToDestroy) {
+                            var component = xfo.GetComponent(componentType);
+                            if (component != null) {
+                                Object.DestroyImmediate(component);
+                                Debug.Log(name + ": Destroyed obsolete component " + componentType);
+                            }
+                        }
+                    }
+                }
+
+                // Create or update the new components.
+                foreach(var kvp in prefabNodes) {
+                    var name = kvp.Key;
+                    var prefabXfo = kvp.Value;
+                    List<Component> fbxComponents;
+                    if (m_componentsToUpdate.TryGetValue(name, out fbxComponents)) {
+                        // Copy the components once so we can match them up even if there's multiple fbxComponents.
+                        List<Component> prefabComponents = new List<Component>(prefabXfo.GetComponents<Component>());
+
+                        foreach(var fbxComponent in fbxComponents) {
+                            int index = prefabComponents.FindIndex(x => x.GetType() == fbxComponent.GetType());
+                            if (index >= 0) {
+                                // Don't match this index again.
+                                Component prefabComponent = prefabComponents[index];
+                                prefabComponents.RemoveAt(index);
+
+                                // Now update it.
+                                if (UnityEditorInternal.ComponentUtility.CopyComponent(fbxComponent)) {
+                                    UnityEditorInternal.ComponentUtility.PasteComponentValues(prefabComponent);
+                                    Debug.Log(name + ": updated component " + fbxComponent.GetType());
+
+                                }
+                            } else {
+                                // We didn't find a match, so create the component as new.
+                                if (UnityEditorInternal.ComponentUtility.CopyComponent(fbxComponent)) {
+                                    UnityEditorInternal.ComponentUtility.PasteComponentAsNew(prefabXfo.gameObject);
+                                    Debug.Log(name + ": added component " + fbxComponent.GetType());
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
