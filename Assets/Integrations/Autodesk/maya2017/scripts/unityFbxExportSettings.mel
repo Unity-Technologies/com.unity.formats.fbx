@@ -1,3 +1,7 @@
+// FBX file format
+FBXExportInAscii -v false; 
+FBXExportFileVersion -v FBX201600;
+
 // Geometry
 FBXExportSmoothingGroups -v false;
 FBXExportTangents -v false;
@@ -28,7 +32,7 @@ FBXExportApplyConstantKeyReducer -v false;
 
 // Geometry Cache File(s)
 FBXExportCacheFile -v false;
-//FBXExportQuickSelectSetAsCache –v "";
+//FBXExportQuickSelectSetAsCache -v "";
 
 // Constraints
 FBXExportConstraints -v false;
@@ -48,10 +52,6 @@ FBXExportConvertUnitString cm;
 FBXExportUpAxis y;
 
 FBXExportGenerateLog -v true;
-
-// FBX file format
-FBXExportInAscii -v false; 
-FBXExportFileVersion -v FBX201600;
 
 // Misc
 FBXExportHardEdges -v false;

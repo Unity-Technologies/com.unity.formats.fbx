@@ -34,8 +34,11 @@ ctypes.pythonapi.PyCObject_AsVoidPtr.argtypes = [ctypes.py_object]
 
 import os
 
-UNITY_FBX_FILE_PATH = None
-UNITY_FBX_FILE_NAME = None
+# Global variables set on import, to be used for publishing.
+# The variables are set in the afterImport function (a callback for OpenMaya.MSceneMessage.kAfterImport)
+# in the importCmd class, and used by the publishCmd.doIt() function.
+unity_fbx_file_path = None
+unity_fbx_file_name = None
 
 class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     """
@@ -65,14 +68,12 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         """
         Load the Export Settings from file
         """
-        file = maya.cmds.optionVar(q="UnityFbxExportSettings")
-        #unityProjectPath = maya.cmds.optionVar(q='UnityProject')
-        #file = unityProjectPath + "/Integrations/Autodesk/maya2017/scripts/unityFbxExportSettings.mel"
-        if not os.path.isfile(file):
-            maya.cmds.error("Failed to find Unity Fbx Export Settings at: {0}".format(file))
+        fileName = maya.cmds.optionVar(q="UnityFbxExportSettings")
+        if not os.path.isfile(fileName):
+            maya.cmds.error("Failed to find Unity Fbx Export Settings at: {0}".format(fileName))
             return False
             
-        with open(file) as f:
+        with open(fileName) as f:
             contents = f.read()
             
         maya.mel.eval(contents)
@@ -117,10 +118,10 @@ class importCmd(BaseCommand):
         self._tempName = file.resolvedName()
         
     def afterImport(self, *args, **kwargs):
-        global UNITY_FBX_FILE_PATH
-        global UNITY_FBX_FILE_NAME
-        UNITY_FBX_FILE_PATH = self._tempPath
-        UNITY_FBX_FILE_NAME = self._tempName
+        global unity_fbx_file_path
+        global unity_fbx_file_name
+        unity_fbx_file_path = self._tempPath
+        unity_fbx_file_name = self._tempName
     
     def doIt(self, args):
         self.loadDependencies()
@@ -133,7 +134,7 @@ class importCmd(BaseCommand):
 
         # Gather everything that is in the scene
         origItemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
-            
+        
         strCmd = 'Import'
         self.displayDebug('doIt {0}'.format(strCmd))
         result = maya.cmds.Import()
@@ -275,10 +276,10 @@ class publishCmd(BaseCommand):
         if not self.loadUnityFbxExportSettings():
             return
             
-        global UNITY_FBX_FILE_PATH
-        global UNITY_FBX_FILE_NAME
-        if UNITY_FBX_FILE_PATH and UNITY_FBX_FILE_NAME:
-            strCmd = r'file -force -options "" -typ "FBX export" -pr -es "{0}{1}"'.format(UNITY_FBX_FILE_PATH, UNITY_FBX_FILE_NAME);    
+        global unity_fbx_file_path
+        global unity_fbx_file_name
+        if unity_fbx_file_path and unity_fbx_file_name:
+            strCmd = r'file -force -options "" -typ "FBX export" -pr -es "{0}{1}"'.format(unity_fbx_file_path, unity_fbx_file_name);    
         else:   
             strCmd = 'SendToUnitySelection'
         self.displayDebug('doIt {0}'.format(strCmd))
