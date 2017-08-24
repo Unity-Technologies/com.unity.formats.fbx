@@ -281,6 +281,13 @@ class publishCmd(BaseCommand):
                 unity_fbx_file_path = maya.cmds.getAttr("{0}.{1}".format(self._exportSet, self._unityFbxFilePathAttr))
                 unity_fbx_file_name = maya.cmds.getAttr("{0}.{1}".format(self._exportSet, self._unityFbxFileNameAttr))
         
+        
+        # select the export set for export, if it exists,
+        # otherwise take what is currently selected
+        allSets = maya.cmds.listSets(allSets=True)
+        if self._exportSet in allSets:
+            maya.cmds.select(self._exportSet, r=True, ne=True)
+        
         if unity_fbx_file_path and unity_fbx_file_name:
             strCmd = r'file -force -options "" -typ "FBX export" -pr -es "{0}{1}"'.format(unity_fbx_file_path, unity_fbx_file_name);    
         else:   
