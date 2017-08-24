@@ -34,12 +34,6 @@ ctypes.pythonapi.PyCObject_AsVoidPtr.argtypes = [ctypes.py_object]
 
 import os
 
-# Global variables set on import, to be used for publishing.
-# The variables are set in the afterImport function (a callback for OpenMaya.MSceneMessage.kAfterImport)
-# in the importCmd class, and used by the publishCmd.doIt() function.
-unity_fbx_file_path = None
-unity_fbx_file_name = None
-
 class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     """
     Base class for UnityOneClick Plugin Commands.
@@ -48,6 +42,8 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         OpenMayaMPx.MPxCommand.__init__(self)
         LoggerMixin.__init__(self)
         self._exportSet = "UnityFbxExportSet"
+        self._unityFbxFilePathAttr = "unityFbxFilePath"
+        self._unityFbxFileNameAttr = "unityFbxFileName"
         
     def __del__(self):
         LoggerMixin.__del__(self)
@@ -118,16 +114,26 @@ class importCmd(BaseCommand):
         self._tempName = file.resolvedName()
         
     def afterImport(self, *args, **kwargs):
-        global unity_fbx_file_path
-        global unity_fbx_file_name
-        unity_fbx_file_path = self._tempPath
-        unity_fbx_file_name = self._tempName
+        if self._tempPath:
+            if not maya.mel.eval('attributeExists "{0}" "{1}"'.format(self._unityFbxFilePathAttr, self._exportSet)):
+                maya.cmds.addAttr(self._exportSet, shortName=self._unityFbxFilePathAttr, storable=True, dataType="string")
+            maya.cmds.setAttr("{0}.{1}".format(self._exportSet, self._unityFbxFilePathAttr), self._tempPath, type="string")
+        if self._tempName:
+            if not maya.mel.eval('attributeExists "{0}" "{1}"'.format(self._unityFbxFileNameAttr, self._exportSet)):
+                maya.cmds.addAttr(self._exportSet, shortName=self._unityFbxFileNameAttr, storable=True, dataType="string")
+            maya.cmds.setAttr("{0}.{1}".format(self._exportSet, self._unityFbxFileNameAttr), self._tempName, type="string")
     
     def doIt(self, args):
         self.loadDependencies()
     
         self._tempPath = None
         self._tempName = None
+    
+        # Get or create the Unity Fbx Export Set
+        allSets = maya.cmds.listSets(allSets=True)
+        if not self._exportSet in allSets:
+            # couldn't find export set so create it
+            maya.cmds.sets(name=self._exportSet)
     
         callbackId = OpenMaya.MSceneMessage.addCheckFileCallback(OpenMaya.MSceneMessage.kBeforeImportCheck, self.beforeImport)
         callbackId2 = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterImport, self.afterImport)
@@ -142,14 +148,8 @@ class importCmd(BaseCommand):
         # figure out what has been added after import
         itemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
         newItems = list(set(itemsInScene) - set(origItemsInScene))
-
-        # Get or create the Unity Fbx Export Set
-        allSets = maya.cmds.listSets(allSets=True)
-        if not self._exportSet in allSets:
-            # couldn't find export set so create it
-            maya.cmds.sets(name=self._exportSet)
         
-        maya.cmds.sets(newItems, add=self._exportSet)    
+        maya.cmds.sets(newItems, add=self._exportSet)
 
         OpenMaya.MMessage.removeCallback(callbackId)
         OpenMaya.MMessage.removeCallback(callbackId2)
@@ -276,8 +276,11 @@ class publishCmd(BaseCommand):
         if not self.loadUnityFbxExportSettings():
             return
             
-        global unity_fbx_file_path
-        global unity_fbx_file_name
+        if maya.mel.eval('attributeExists "{0}" "{1}"'.format(self._unityFbxFilePathAttr, self._exportSet)) and \
+           maya.mel.eval('attributeExists "{0}" "{1}"'.format(self._unityFbxFileNameAttr, self._exportSet)):
+                unity_fbx_file_path = maya.cmds.getAttr("{0}.{1}".format(self._exportSet, self._unityFbxFilePathAttr))
+                unity_fbx_file_name = maya.cmds.getAttr("{0}.{1}".format(self._exportSet, self._unityFbxFileNameAttr))
+        
         if unity_fbx_file_path and unity_fbx_file_name:
             strCmd = r'file -force -options "" -typ "FBX export" -pr -es "{0}{1}"'.format(unity_fbx_file_path, unity_fbx_file_name);    
         else:   
