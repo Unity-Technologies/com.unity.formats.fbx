@@ -67,6 +67,24 @@ namespace FbxExporters
             thelist.Add(item);
         }
 
+        public static void Add<K,V>(ref Dictionary<K,V> thedict, K key, V value)
+        {
+            if (thedict == null) {
+                thedict = new Dictionary<K, V>();
+            }
+            thedict.Add(key, value);
+        }
+
+        public static V GetOrCreate<K,V>(Dictionary<K,V> thedict, K key) where V : new()
+        {
+            V value;
+            if (!thedict.TryGetValue(key, out value)) {
+                value = new V();
+                thedict[key] = value;
+            }
+            return value;
+        }
+
         /// <summary>
         /// Utility function: append an item to a list in a dictionary of lists.
         /// Create all the entries needed to append to the list.
@@ -77,12 +95,12 @@ namespace FbxExporters
             if (thedict == null) {
                 thedict = new Dictionary<K, List<V>>();
             }
-            List<V> thelist;
-            if (!thedict.TryGetValue(key, out thelist) || (thelist == null)) {
-                thelist = new List<V>();
-                thedict[key] = thelist;
-            }
-            thelist.Add(item);
+            GetOrCreate(thedict, key).Add(item);
+        }
+
+        public static void Append<K, V>(Dictionary<K, List<V>> thedict, K key, V item)
+        {
+            GetOrCreate(thedict, key).Add(item);
         }
 
         /// <summary>
@@ -95,12 +113,8 @@ namespace FbxExporters
             if (thedict == null) {
                 thedict = new Dictionary<K1, Dictionary<K2, List<V>>>();
             }
-            Dictionary<K2, List<V>> thesubmap;
-            if (!thedict.TryGetValue(key1, out thesubmap) || thesubmap == null) {
-                thesubmap = new Dictionary<K2, List<V>>();
-                thedict[key1] = thesubmap;
-            }
-            Append(ref thesubmap, key2, item);
+            var thesubmap = GetOrCreate(thedict, key1);
+            Append(thesubmap, key2, item);
         }
 
         /// <summary>
@@ -120,30 +134,29 @@ namespace FbxExporters
             /// The key is the name, which is assumed to be unique.
             /// The value is, recursively, the representation of that subtree.
             /// </summary>
-            Dictionary<string, FbxRepresentation> children;
+            Dictionary<string, FbxRepresentation> m_children;
 
             /// <summary>
             /// Children of this node.
             /// The key is the name of the type of the Component. We accept that there may be several.
             /// The value is the json for the component, to be decoded with EditorJsonUtility.
             /// </summary>
-            public Dictionary<string, List<string>> components { get; private set; }
+            Dictionary<string, List<string>> m_components;
 
-            public static FbxRepresentation FromTransform(Transform xfo) {
-                var children = new Dictionary<string, FbxRepresentation>();
+            /// <summary>
+            /// Build a hierarchical representation based on a transform.
+            /// </summary>
+            public FbxRepresentation(Transform xfo)
+            {
+                m_children = new Dictionary<string, FbxRepresentation>();
                 foreach(Transform child in xfo) {
-                    children.Add(child.name, FromTransform(child));
+                    m_children.Add(child.name, new FbxRepresentation(child));
                 }
-                Dictionary<string, List<string>> components = null;
                 foreach(var component in xfo.GetComponents<Component>()) {
                     var typeName = component.GetType().ToString();
                     var jsonValue = UnityEditor.EditorJsonUtility.ToJson(component);
-                    Append(ref components, typeName, jsonValue);
+                    Append(ref m_components, typeName, jsonValue);
                 }
-                var fbxrep = new FbxRepresentation();
-                fbxrep.children = children;
-                fbxrep.components = components;
-                return fbxrep;
             }
 
             // todo: use a real json parser
@@ -195,14 +208,13 @@ namespace FbxExporters
                 return builder.ToString();
             }
 
-            static FbxRepresentation FromJsonHelper(string json, ref int index) {
+            void InitFromJson(string json, ref int index)
+            {
                 Consume('{', json, ref index);
                 if (Consume('}', json, ref index, required: false)) {
                     // this is a leaf; we're done.
-                    return new FbxRepresentation();
+                    return;
                 } else {
-                    Dictionary<string, FbxRepresentation> children = null;
-                    Dictionary<string, List<string>> components = null;
                     do {
                         Consume('"', json, ref index);
                         int nameStart = index;
@@ -214,9 +226,8 @@ namespace FbxExporters
                         // component (which can't start with a - because it's
                         // the name of a C# type)
                         if (name[0] == '-') {
-                            var subrep = FromJsonHelper(json, ref index);
-                            if (children == null) { children = new Dictionary<string, FbxRepresentation>(); }
-                            children.Add(name.Substring(1), subrep);
+                            var subrep = new FbxRepresentation(json, ref index);
+                            Add(ref m_children, name.Substring(1), subrep);
                         } else {
                             // Read the string. It won't have any quote marks
                             // in it, because we escape them using %-encoding
@@ -231,29 +242,28 @@ namespace FbxExporters
                             // json parsers), now undo that.
                             var jsonComponent =
                                 UnEscapeString(json, componentStart, index - componentStart);
-                            Append(ref components, name, jsonComponent);
+                            Append(ref m_components, name, jsonComponent);
                         }
                     } while(Consume(',', json, ref index, required: false));
                     Consume('}', json, ref index);
-
-                    var fbxrep = new FbxRepresentation();
-                    fbxrep.children = children;
-                    fbxrep.components = components;
-                    return fbxrep;
                 }
             }
 
-            public static FbxRepresentation FromJson(string json) {
-                if (json.Length == 0) { return new FbxRepresentation(); }
+            public FbxRepresentation(string json, ref int index) {
+                InitFromJson(json, ref index);
+            }
+
+            public FbxRepresentation(string json) {
+                if (json.Length == 0) { return; }
                 int index = 0;
-                return FromJsonHelper(json, ref index);
+                InitFromJson(json, ref index);
             }
 
             void ToJsonHelper(System.Text.StringBuilder builder) {
                 builder.Append("{");
                 bool first = true;
-                if (children != null) {
-                    foreach(var kvp in children.OrderBy(kvp => kvp.Key)) {
+                if (m_children != null) {
+                    foreach(var kvp in m_children.OrderBy(kvp => kvp.Key)) {
                         if (!first) { builder.Append(','); }
                         else { first = false; }
 
@@ -262,8 +272,8 @@ namespace FbxExporters
                         kvp.Value.ToJsonHelper(builder);
                     }
                 }
-                if (components != null) {
-                    foreach(var kvp in components.OrderBy(kvp => kvp.Key)) {
+                if (m_components != null) {
+                    foreach(var kvp in m_components.OrderBy(kvp => kvp.Key)) {
                         var name = kvp.Key;
                         foreach(var componentValue in kvp.Value) {
                             if (!first) { builder.Append(','); }
@@ -286,14 +296,22 @@ namespace FbxExporters
             }
 
             public static bool IsLeaf(FbxRepresentation rep) {
-                return rep == null || rep.children == null;
+                return rep == null || rep.m_children == null;
             }
 
             public static HashSet<string> GetChildren(FbxRepresentation rep) {
                 if (IsLeaf(rep)) {
                     return new HashSet<string>();
                 } else {
-                    return new HashSet<string>(rep.children.Keys);
+                    return new HashSet<string>(rep.m_children.Keys);
+                }
+            }
+
+            public static IEnumerable<KeyValuePair<string, List<string>>> GetComponents(FbxRepresentation rep) {
+                if (rep == null || rep.m_components == null) {
+                    return new KeyValuePair<string, List<string>>[0];
+                } else {
+                    return rep.m_components;
                 }
             }
 
@@ -301,7 +319,7 @@ namespace FbxExporters
                 if (IsLeaf(rep)) { return null; }
 
                 FbxRepresentation child;
-                if (rep.children.TryGetValue(key, out child)) {
+                if (rep.m_children.TryGetValue(key, out child)) {
                     return child;
                 }
                 return null;
@@ -323,7 +341,7 @@ namespace FbxExporters
             // the new fbx, and the prefab. We also figure out the parents.
             class Data {
                 // Parent of each node, by name.
-                // Value (parent) may be null, key (node) is never null.
+                // The empty-string name is the root of the prefab/fbx.
                 Dictionary<string, string> m_parents;
 
                 // Component value by name and type, with multiplicity.
@@ -359,7 +377,7 @@ namespace FbxExporters
                     if (m_parents.TryGetValue(name, out parent)) {
                         return parent;
                     } else {
-                        return null;
+                        return "";
                     }
                 }
 
@@ -445,10 +463,10 @@ namespace FbxExporters
 
             static void SetupDataHelper(Data data, FbxRepresentation fbxrep, string parent)
             {
-                foreach(var kvp in fbxrep.components) {
+                foreach(var kvp in FbxRepresentation.GetComponents(fbxrep)) {
                     var typename = kvp.Key;
                     var jsonValues = kvp.Value;
-                    data.AddComponents(parent == null ? "" : parent, typename, jsonValues);
+                    data.AddComponents(parent, typename, jsonValues);
                 }
                 foreach(var child in FbxRepresentation.GetChildren(fbxrep)) {
                     data.AddNode(child, parent);
@@ -459,7 +477,7 @@ namespace FbxExporters
             static void SetupData(ref Data data, FbxRepresentation fbxrep)
             {
                 Initialize(ref data);
-                SetupDataHelper(data, fbxrep, null);
+                SetupDataHelper(data, fbxrep, "");
             }
 
             void ClassifyDestroyCreateNodes()
@@ -512,7 +530,7 @@ namespace FbxExporters
                         // trying to destroy objects that are already destroyed
                         // because a parent got there first. Maybe there's a
                         // faster way to do it, but performance seems OK.
-                        m_reparentings.Add(name, null);
+                        m_reparentings.Add(name, "");
                         continue;
                     }
 
@@ -638,6 +656,10 @@ namespace FbxExporters
 
                     // Figure out the types so we can destroy them.
                     if (typesToDestroy != null) {
+                        // TODO: handle monobehaviour in other assemblies
+                        // Sample use: using custom attributes in fbx to drive
+                        // unity behaviour by adding a monobehaviour in an
+                        // assetpostprocessor.
                         var unityEngine = typeof(Component).Assembly;
                         foreach (var typename in typesToDestroy) {
                             var thetype = unityEngine.GetType (typename);
@@ -675,8 +697,8 @@ namespace FbxExporters
                     FbxPrefab prefab)
             {
                 SetupData(ref m_old, oldFbx);
-                SetupData(ref m_new, FbxRepresentation.FromTransform(newFbx));
-                SetupData(ref m_prefab, FbxRepresentation.FromTransform(prefab.transform));
+                SetupData(ref m_new, new FbxRepresentation(newFbx));
+                SetupData(ref m_prefab, new FbxRepresentation(prefab.transform));
 
                 ClassifyDestroyCreateNodes();
                 ClassifyReparenting();
@@ -733,7 +755,7 @@ namespace FbxExporters
                     var name = kvp.Key;
                     var parent = kvp.Value;
                     Transform parentNode;
-                    if (parent == null) {
+                    if (string.IsNullOrEmpty(parent)) {
                         parentNode = prefabInstance.transform;
                     } else {
                         parentNode = prefabNodes[parent];
@@ -847,7 +869,7 @@ namespace FbxExporters
             updates.ImplementUpdates(fbxPrefab);
 
             // Update the representation of the history to match the new fbx.
-            var newFbxRep = FbxRepresentation.FromTransform(m_fbxModel.transform);
+            var newFbxRep = new FbxRepresentation(m_fbxModel.transform);
             var newFbxRepString = newFbxRep.ToJson();
             fbxPrefab.m_fbxHistory = newFbxRepString;
 
@@ -880,7 +902,7 @@ namespace FbxExporters
         /// </summary>
         public FbxRepresentation GetFbxHistory()
         {
-            return FbxRepresentation.FromJson(m_fbxHistory);
+            return new FbxRepresentation(m_fbxHistory);
         }
 
         /// <summary>
@@ -937,7 +959,7 @@ namespace FbxExporters
                 // This is the first time we've seen the FBX file. Assume that
                 // it's the original FBX. Further assume that the user is happy
                 // with the prefab as it is now, so don't update it to match the FBX.
-                m_fbxHistory = FbxRepresentation.FromTransform(m_fbxModel.transform).ToJson();
+                m_fbxHistory = new FbxRepresentation(m_fbxModel.transform).ToJson();
             } else {
                 // Case 3.
                 // User wants to reconnect or change the connection.

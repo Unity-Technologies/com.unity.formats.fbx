@@ -63,7 +63,7 @@ namespace FbxExporters.UnitTests
         }
 
         FbxPrefab.FbxRepresentation Rep(GameObject go) {
-            return FbxPrefab.FbxRepresentation.FromTransform(go.transform);
+            return new FbxPrefab.FbxRepresentation(go.transform);
         }
 
         FbxPrefab.FbxRepresentation History(GameObject go) {
