@@ -132,7 +132,7 @@ namespace FbxExporters
                     }
 
                     // Instantiate the FBX file.
-                    Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset);
+                    Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset, gosToExport[i].scene);
                     GameObject unityGO = unityObj as GameObject;
                     if (!unityGO) {
                         continue;
