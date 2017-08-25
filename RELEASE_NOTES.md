@@ -1,5 +1,32 @@
 RELEASE NOTES
 
+**Version**: 0.0.11a
+
+NEW FEATURES
+
+* Maya Integration: Store path and filename of imported FBX, publish to stored path
+
+On Unity->Import, store the path and filename of the imported FBX as attributes on the export set.
+On Unity->Publish, if path and filename attributes are set, publish directly to this location without prompting user.
+
+* Maya Integration: Unity->Import creates export set containing imported objects
+
+If an export set already exists, replace its contents with newly imported objects
+
+* Maya Integration: Unity->Publish exports what is in the export set
+
+Export contents of export set, or if there is no export set, then the current selection will be exported.
+
+* Maya Integration: Exporting from the Unity plugin first loads export settings saved in Unity project
+
+Export settings stored in Integrations/Autodesk/maya2017/scripts/unityFbxExportSettings.mel are loaded into Maya before
+exporting either with Unity->Review or Unity->Publish.
+
+FIXES
+
+* Export Settings: fix export path doesn't refresh if selectable text box selected
+* Convert to Prefab: fix model added to wrong scene if multiple scenes open
+
 **Version**: 0.0.10a
 
 NEW FEATURES
