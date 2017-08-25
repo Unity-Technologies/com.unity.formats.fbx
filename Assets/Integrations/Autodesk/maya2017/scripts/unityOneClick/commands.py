@@ -222,12 +222,19 @@ class reviewCmd(BaseCommand):
             return
 
         # make sure the GamePipeline and fbxmaya plugins are loaded
-        if self.loadDependencies():
-            # save fbx to Assets/_safe_to_delete/
-            savePath = unityTempSavePath
-            maya.cmds.sysFile(savePath, makeDir=True)
-            savePath = savePath + "/TurnTableModel.fbx"
-            maya.mel.eval(r'file -force -options "" -typ "FBX export" -pr -es "{0}"'.format(savePath));
+        if not self.loadDependencies():
+            return
+            
+        # select the export set for export, if it exists,
+        # otherwise take what is currently selected
+        if self.setExists(self._exportSet):
+            maya.cmds.select(self._exportSet, r=True, ne=True)
+        
+        # save fbx to Assets/_safe_to_delete/
+        savePath = unityTempSavePath
+        maya.cmds.sysFile(savePath, makeDir=True)
+        savePath = savePath + "/TurnTableModel.fbx"
+        maya.mel.eval(r'file -force -options "" -typ "FBX export" -pr -es "{0}"'.format(savePath));
         
         if maya.cmds.about(macOS=True):
             # Use 'open -a' to bring app to front if it has already been started.
