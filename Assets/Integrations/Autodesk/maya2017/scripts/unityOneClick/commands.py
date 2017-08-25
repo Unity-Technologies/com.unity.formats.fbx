@@ -127,7 +127,6 @@ class importCmd(BaseCommand):
         # store path and filename
         self._tempPath = file.resolvedPath()
         self._tempName = file.resolvedName()
-        self.displayDebug("about to import " + self._tempName)
 
         # Gather everything that is in the scene
         self._origItemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
@@ -148,7 +147,6 @@ class importCmd(BaseCommand):
         OpenMaya.MScriptUtil.setBool(retCode, True)
 
     def afterImport(self, *args, **kwargs):
-        self.displayDebug("did import " + self._tempName)
         if self._tempPath:
             self.storeAttribute(self._exportSet, self._unityFbxFilePathAttr, self._tempPath)
         if self._tempName:
@@ -175,7 +173,6 @@ class importCmd(BaseCommand):
         strCmd = 'Import'
         self.displayDebug('doIt {0}'.format(strCmd))
         maya.cmds.Import()
-        self.displayDebug('didIt {0}'.format(strCmd))
 
         OpenMaya.MMessage.removeCallback(callbackId)
         OpenMaya.MMessage.removeCallback(callbackId2)
