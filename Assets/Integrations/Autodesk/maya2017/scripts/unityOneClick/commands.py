@@ -32,6 +32,8 @@ import ctypes
 ctypes.pythonapi.PyCObject_AsVoidPtr.restype = ctypes.c_void_p
 ctypes.pythonapi.PyCObject_AsVoidPtr.argtypes = [ctypes.py_object]
 
+import os
+
 class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     """
     Base class for UnityOneClick Plugin Commands.
@@ -40,6 +42,8 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         OpenMayaMPx.MPxCommand.__init__(self)
         LoggerMixin.__init__(self)
         self._exportSet = "UnityFbxExportSet"
+        self._unityFbxFilePathAttr = "unityFbxFilePath"
+        self._unityFbxFileNameAttr = "unityFbxFileName"
         
     def __del__(self):
         LoggerMixin.__del__(self)
@@ -54,7 +58,35 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         return True
 
     def loadDependencies(self):
-          return self.loadPlugin('GamePipeline.mll')
+        return self.loadPlugin('GamePipeline.mll') and self.loadPlugin('fbxmaya.mll')
+    
+    def loadUnityFbxExportSettings(self):
+        """
+        Load the Export Settings from file
+        """
+        fileName = maya.cmds.optionVar(q="UnityFbxExportSettings")
+        if not os.path.isfile(fileName):
+            maya.cmds.error("Failed to find Unity Fbx Export Settings at: {0}".format(fileName))
+            return False
+            
+        with open(fileName) as f:
+            contents = f.read()
+            
+        maya.mel.eval(contents)
+        return True
+        
+    def storeAttribute(self, node, attr, attrValue, attrType="string"):
+        if not maya.mel.eval('attributeExists "{0}" "{1}"'.format(attr, node)):
+            maya.cmds.addAttr(node, shortName=attr, storable=True, dataType=attrType)
+        maya.cmds.setAttr("{0}.{1}".format(node, attr), attrValue, type=attrType)
+
+    def getAttribute(self, node, attr):
+        if maya.mel.eval('attributeExists "{0}" "{1}"'.format(attr, node)):
+            return maya.cmds.getAttr("{0}.{1}".format(node, attr))
+        return None
+        
+    def setExists(self, setName):
+        return setName in maya.cmds.listSets(allSets=True)    
     
 class importCmd(BaseCommand):
     """
@@ -70,6 +102,13 @@ class importCmd(BaseCommand):
 
     def __init__(self):
         super(self.__class__, self).__init__()
+        
+        # temporarily store the path and name of the imported FBX
+        self._tempPath = None
+        self._tempName = None
+        
+        # temporarily store items in scene before import
+        self._origItemsInScene = []
 
     @classmethod
     def creator(cls):
@@ -84,26 +123,57 @@ class importCmd(BaseCommand):
     def scriptCmd(cls):
         return
     
-    def doIt(self, args):
+    def beforeImport(self, retCode, file, clientData):
+        # store path and filename
+        self._tempPath = file.resolvedPath()
+        self._tempName = file.resolvedName()
+        
         # Gather everything that is in the scene
-        origItemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
-        
-        strCmd = 'Import'
-        self.displayDebug('doIt {0}'.format(strCmd))
-        result = maya.cmds.Import()
-        
-        # figure out what has been added after import
-        itemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
-        newItems = list(set(itemsInScene) - set(origItemsInScene))
+        self._origItemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
         
         # Get or create the Unity Fbx Export Set
-        allSets = maya.cmds.listSets(allSets=True)
-        if not self._exportSet in allSets:
+        if not self.setExists(self._exportSet):
             # couldn't find export set so create it
             maya.cmds.sets(name=self._exportSet)
+        else:    
+            # remove all items from set
+            maya.cmds.sets(clear=self._exportSet)
         
-        maya.cmds.sets(newItems, add=self._exportSet)    
+        # reset attribute values, in case import fails
+        self.storeAttribute(self._exportSet, self._unityFbxFilePathAttr, "")
+        self.storeAttribute(self._exportSet, self._unityFbxFileNameAttr, "")
         
+    def afterImport(self, *args, **kwargs):
+        if self._tempPath:
+            self.storeAttribute(self._exportSet, self._unityFbxFilePathAttr, self._tempPath)
+        if self._tempName:
+            self.storeAttribute(self._exportSet, self._unityFbxFileNameAttr, self._tempName)
+    
+        if self.setExists(self._exportSet):
+            # figure out what has been added after import
+            itemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
+            newItems = list(set(itemsInScene) - set(self._origItemsInScene))
+            
+            # add newly imported items to set
+            maya.cmds.sets(newItems, add=self._exportSet)
+    
+    def doIt(self, args):
+        self.loadDependencies()
+    
+        self._tempPath = None
+        self._tempName = None
+        self._origItemsInScene = []
+        
+        callbackId = OpenMaya.MSceneMessage.addCheckFileCallback(OpenMaya.MSceneMessage.kBeforeImportCheck, self.beforeImport)
+        callbackId2 = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterImport, self.afterImport)
+
+        strCmd = 'Import'
+        self.displayDebug('doIt {0}'.format(strCmd))
+        maya.cmds.Import()
+
+        OpenMaya.MMessage.removeCallback(callbackId)
+        OpenMaya.MMessage.removeCallback(callbackId2)
+                
     @classmethod
     def invoke(cls):
         """
@@ -147,9 +217,12 @@ class reviewCmd(BaseCommand):
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
         unityTempSavePath = maya.cmds.optionVar(q='UnityTempSavePath')
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
+        
+        if not self.loadUnityFbxExportSettings():
+            return
 
         # make sure the GamePipeline and fbxmaya plugins are loaded
-        if self.loadDependencies() and self.loadPlugin('fbxmaya.mll'):
+        if self.loadDependencies():
             # save fbx to Assets/_safe_to_delete/
             savePath = unityTempSavePath
             maya.cmds.sysFile(savePath, makeDir=True)
@@ -220,7 +293,16 @@ class publishCmd(BaseCommand):
         if not self.loadDependencies():
             return
 
-        strCmd = 'SendToUnitySelection'
+        if not self.loadUnityFbxExportSettings():
+            return
+            
+        unity_fbx_file_path = self.getAttribute(self._exportSet, self._unityFbxFilePathAttr)
+        unity_fbx_file_name = self.getAttribute(self._exportSet, self._unityFbxFileNameAttr)
+        
+        if unity_fbx_file_path and unity_fbx_file_name:
+            strCmd = r'file -force -options "" -typ "FBX export" -pr -es "{0}{1}"'.format(unity_fbx_file_path, unity_fbx_file_name);    
+        else:   
+            strCmd = 'SendToUnitySelection'
         self.displayDebug('doIt {0}'.format(strCmd))
         maya.mel.eval(strCmd)
         
