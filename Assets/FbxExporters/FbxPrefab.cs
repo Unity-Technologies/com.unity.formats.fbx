@@ -173,36 +173,53 @@ namespace FbxExporters
                         index++;
                         return true;
                     } else if (required) {
-                        throw new System.Exception("expected " + expected + " at index " + index);
+                        throw new FbxPrefabException(string.Format(
+                                    "expected {0} at index {1} in [{2}]",
+                                    expected, index, json));
                     } else {
                         return false;
                     }
                 }
             }
 
-            // %-escape a string to make sure that " and \ are set up to be easy to parse
+            static string ReadString(string json, ref int index) {
+                int startIndex = index;
+                Consume('"', json, ref index);
+                var builder = new System.Text.StringBuilder();
+                while (json[index] != '"') {
+                    if (index == json.Length) {
+                        throw new FbxPrefabException(
+                                string.Format("Unterminated quote in string starting at index {0}: [{1}]",
+                               startIndex, json));
+
+                    }
+                    if (json[index] == '\\') {
+                        // A backslash followed by a backslash or a quote outputs the
+                        // next character. Otherwise it outputs itself.
+                        if (index + 1 < json.Length) {
+                            switch(json[index + 1]) {
+                                case '\\':
+                                case '"':
+                                    index++;
+                                    break;
+                            }
+                        }
+                    }
+                    builder.Append(json[index]);
+                    index++;
+                }
+                Consume('"', json, ref index);
+                return builder.ToString();
+            }
+
+            // Escape a string so that ReadString can read it.
             static string EscapeString(string str) {
                 var builder = new System.Text.StringBuilder();
                 foreach(var c in str) {
                     switch(c) {
-                        case '%': builder.Append("%25"); break;
-                        case '\\': builder.Append("%5c"); break;
-                        case '"': builder.Append("%22"); break;
+                        case '\\': builder.Append("\\\\"); break;
+                        case '"': builder.Append("\\\""); break;
                         default: builder.Append(c); break;
-                    }
-                }
-                return builder.ToString();
-            }
-
-            static string UnEscapeString(string str, int index, int len) {
-                var builder = new System.Text.StringBuilder();
-                for(int i = index; i < index + len; ++i) {
-                    if (str[i] != '%') {
-                        builder.Append(str[i]);
-                    } else {
-                        string number = str.Substring(i + 1, 2);
-                        int ord = System.Convert.ToInt32(number, 16);
-                        builder.Append( (char) ord );
                     }
                 }
                 return builder.ToString();
@@ -216,32 +233,18 @@ namespace FbxExporters
                     return;
                 } else {
                     do {
-                        Consume('"', json, ref index);
-                        int nameStart = index;
-                        while (json[index] != '"') { index++; }
-                        string name = json.Substring(nameStart, index - nameStart);
-                        index++;
+                        string name = ReadString(json, ref index);
                         Consume(':', json, ref index);
-                        // if name starts with - it's a child; otherwise it's a
-                        // component (which can't start with a - because it's
-                        // the name of a C# type)
-                        if (name[0] == '-') {
+
+                        // hack: If the name starts with a '-' it's the name
+                        // of a gameobject, and we parse it recursively. Otherwise
+                        // it's the name of a component, and we store its value as a string.
+                        bool isChild = (name.Length > 0) && (name[0] == '-');
+                        if (isChild) {
                             var subrep = new FbxRepresentation(json, ref index);
                             Add(ref m_children, name.Substring(1), subrep);
                         } else {
-                            // Read the string. It won't have any quote marks
-                            // in it, because we escape them using %-encoding
-                            // like in a URL.
-                            Consume('"', json, ref index);
-                            int componentStart = index;
-                            while (json[index] != '"') { index++; }
-                            index++;
-
-                            // We %-escaped the string so there would be no
-                            // quotes (nor backslashes that might confuse other
-                            // json parsers), now undo that.
-                            var jsonComponent =
-                                UnEscapeString(json, componentStart, index - componentStart);
+                            string jsonComponent = ReadString(json, ref index);
                             Append(ref m_components, name, jsonComponent);
                         }
                     } while(Consume(',', json, ref index, required: false));
@@ -625,20 +628,17 @@ namespace FbxExporters
 
                         // TODO: handle multiplicity! The algorithm is eluding me right now...
                         // We'll need to do some kind of 3-way matching.
+                        if (oldValues.Count > 1) { Debug.LogError("TODO: handle multiplicity " + oldValues.Count); }
+                        if (newValues.Count > 1) { Debug.LogError("TODO: handle multiplicity " + newValues.Count); }
+                        if (prefabValues.Count > 1) { Debug.LogError("TODO: handle multiplicity " + prefabValues.Count); }
+
                         if (oldValues.Count == 0 && newValues.Count != 0 && prefabValues.Count == 0) {
-                            if (newValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + newValues.Count); }
                             Append(ref typesToUpdate, typename);
                         }
                         else if (oldValues.Count != 0 && newValues.Count == 0 && prefabValues.Count != 0) {
-                            if (oldValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + oldValues.Count); }
-                            if (prefabValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + prefabValues.Count); }
                             Append(ref typesToDestroy, typename);
                         }
                         else if (oldValues.Count != 0 && newValues.Count != 0 && prefabValues.Count != 0) {
-                            if (oldValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + oldValues.Count); }
-                            if (newValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + newValues.Count); }
-                            if (prefabValues.Count != 1) { Debug.LogError("TODO: handle multiplicity " + prefabValues.Count); }
-
                             // Check whether we need to update.
                             var oldValue = oldValues[0];
                             var newValue = newValues[0];
@@ -649,6 +649,7 @@ namespace FbxExporters
                                 // if oldValue != prefabValue, conflict =>
                                 //      resolve in favor of Chris, so update
                                 //      anyway.
+                                Debug.Log(string.Format("{0}\n{1}\nDiffer", oldValue, newValue));
                                 Append(ref typesToUpdate, typename);
                             }
                         }
