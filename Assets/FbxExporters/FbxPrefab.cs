@@ -45,6 +45,65 @@ namespace FbxExporters
 #if UNITY_EDITOR
 
         /// <summary>
+        /// Utility function: create the object, which must be null.
+        /// </summary>
+        /// <param name="item">Item.</param>
+        /// <typeparam name="T">The 1st type parameter.</typeparam>
+        public static void Initialize<T>(ref T item) where T: new()
+        {
+            if (item != null) { throw new FbxPrefabException(); }
+            item = new T();
+        }
+
+        /// <summary>
+        /// Utility function: append an item to a list.
+        /// If the list is null, create it.
+        /// </summary>
+        public static void Append<T>(ref List<T> thelist, T item)
+        {
+            if (thelist == null) {
+                thelist = new List<T>();
+            }
+            thelist.Add(item);
+        }
+
+        /// <summary>
+        /// Utility function: append an item to a list in a dictionary of lists.
+        /// Create all the entries needed to append to the list.
+        /// The dictionary must not be null.
+        /// </summary>
+        public static void Append<K, V>(ref Dictionary<K, List<V>> thedict, K key, V item)
+        {
+            if (thedict == null) {
+                thedict = new Dictionary<K, List<V>>();
+            }
+            List<V> thelist;
+            if (!thedict.TryGetValue(key, out thelist) || (thelist == null)) {
+                thelist = new List<V>();
+                thedict[key] = thelist;
+            }
+            thelist.Add(item);
+        }
+
+        /// <summary>
+        /// Utility function: append an item to a list in a 2-level dictionary of lists.
+        /// Create all the entries needed to append to the list.
+        /// The dictionary must not be null.
+        /// </summary>
+        public static void Append<K1, K2, V>(ref Dictionary<K1, Dictionary<K2, List<V>>> thedict, K1 key1, K2 key2, V item)
+        {
+            if (thedict == null) {
+                thedict = new Dictionary<K1, Dictionary<K2, List<V>>>();
+            }
+            Dictionary<K2, List<V>> thesubmap;
+            if (!thedict.TryGetValue(key1, out thesubmap) || thesubmap == null) {
+                thesubmap = new Dictionary<K2, List<V>>();
+                thedict[key1] = thesubmap;
+            }
+            Append(ref thesubmap, key2, item);
+        }
+
+        /// <summary>
         /// Exception that denotes a likely programming error.
         /// </summary>
         public class FbxPrefabException : System.Exception
@@ -75,15 +134,11 @@ namespace FbxExporters
                 foreach(Transform child in xfo) {
                     children.Add(child.name, FromTransform(child));
                 }
-                var components = new Dictionary<string, List<string>>();
+                Dictionary<string, List<string>> components = null;
                 foreach(var component in xfo.GetComponents<Component>()) {
                     var typeName = component.GetType().ToString();
-                    List<string> comps;
-                    if (!components.TryGetValue(typeName, out comps)) {
-                        comps = new List<string>();
-                        components[typeName] = comps;
-                    }
-                    comps.Add(UnityEditor.EditorJsonUtility.ToJson(component));
+                    var jsonValue = UnityEditor.EditorJsonUtility.ToJson(component);
+                    Append(ref components, typeName, jsonValue);
                 }
                 var fbxrep = new FbxRepresentation();
                 fbxrep.children = children;
@@ -142,14 +197,12 @@ namespace FbxExporters
 
             static FbxRepresentation FromJsonHelper(string json, ref int index) {
                 Consume('{', json, ref index);
-                var fbxrep = new FbxRepresentation();
                 if (Consume('}', json, ref index, required: false)) {
                     // this is a leaf; we're done.
+                    return new FbxRepresentation();
                 } else {
-                    // this is a node with important data
-                    fbxrep.children = new Dictionary<string, FbxRepresentation>();
-                    fbxrep.components = new Dictionary<string, List<string>>();
-
+                    Dictionary<string, FbxRepresentation> children = null;
+                    Dictionary<string, List<string>> components = null;
                     do {
                         Consume('"', json, ref index);
                         int nameStart = index;
@@ -162,7 +215,8 @@ namespace FbxExporters
                         // the name of a C# type)
                         if (name[0] == '-') {
                             var subrep = FromJsonHelper(json, ref index);
-                            fbxrep.children.Add(name.Substring(1), subrep);
+                            if (children == null) { children = new Dictionary<string, FbxRepresentation>(); }
+                            children.Add(name.Substring(1), subrep);
                         } else {
                             // Read the string. It won't have any quote marks
                             // in it, because we escape them using %-encoding
@@ -175,17 +229,18 @@ namespace FbxExporters
                             // We %-escaped the string so there would be no
                             // quotes (nor backslashes that might confuse other
                             // json parsers), now undo that.
-                            List<string> comps;
-                            if (!fbxrep.components.TryGetValue(name, out comps)) {
-                                comps = new List<string>();
-                                fbxrep.components[name] = comps;
-                            }
-                            comps.Add(UnEscapeString(json, componentStart, index - componentStart));
+                            var jsonComponent =
+                                UnEscapeString(json, componentStart, index - componentStart);
+                            Append(ref components, name, jsonComponent);
                         }
                     } while(Consume(',', json, ref index, required: false));
                     Consume('}', json, ref index);
+
+                    var fbxrep = new FbxRepresentation();
+                    fbxrep.children = children;
+                    fbxrep.components = components;
+                    return fbxrep;
                 }
-                return fbxrep;
             }
 
             public static FbxRepresentation FromJson(string json) {
@@ -263,58 +318,6 @@ namespace FbxExporters
         /// </summary>
         public class UpdateList
         {
-            /// <summary>
-            /// Utility function: create the object, which must be null.
-            /// </summary>
-            /// <param name="item">Item.</param>
-            /// <typeparam name="T">The 1st type parameter.</typeparam>
-            public static void Initialize<T>(ref T item) where T: new()
-            {
-                if (item != null) { throw new FbxPrefabException(); }
-                item = new T();
-            }
-
-            /// <summary>
-            /// Utility function: append an item to a list.
-            /// If the list is null, create it.
-            /// </summary>
-            public static void Append<T>(ref List<T> thelist, T item)
-            {
-                if (thelist == null) {
-                    thelist = new List<T>();
-                }
-                thelist.Add(item);
-            }
-
-            /// <summary>
-            /// Utility function: append an item to a list in a dictionary of lists.
-            /// Create all the entries needed to append to the list.
-            /// The dictionary must not be null.
-            /// </summary>
-            public static void Append<K, V>(Dictionary<K, List<V>> thedict, K key, V item)
-            {
-                List<V> thelist;
-                if (!thedict.TryGetValue(key, out thelist) || (thelist == null)) {
-                    thelist = new List<V>();
-                    thedict[key] = thelist;
-                }
-                thelist.Add(item);
-            }
-
-            /// <summary>
-            /// Utility function: append an item to a list in a 2-level dictionary of lists.
-            /// Create all the entries needed to append to the list.
-            /// The dictionary must not be null.
-            /// </summary>
-            public static void Append<K1, K2, V>(Dictionary<K1, Dictionary<K2, List<V>>> thedict, K1 key1, K2 key2, V item)
-            {
-                Dictionary<K2, List<V>> thesubmap;
-                if (!thedict.TryGetValue(key1, out thesubmap) || thesubmap == null) {
-                    thesubmap = new Dictionary<K2, List<V>>();
-                    thedict[key1] = thesubmap;
-                }
-                Append(thesubmap, key2, item);
-            }
 
             // We build up a flat list of names for the nodes of the old fbx,
             // the new fbx, and the prefab. We also figure out the parents.
@@ -337,7 +340,7 @@ namespace FbxExporters
                 }
 
                 public void AddComponent(string name, string typename, string jsonValue) {
-                    Append(m_components, name, typename, jsonValue);
+                    Append(ref m_components, name, typename, jsonValue);
                 }
 
                 public void AddComponents(string name, string typename, IEnumerable<string> jsonValues) {
@@ -442,13 +445,13 @@ namespace FbxExporters
 
             static void SetupDataHelper(Data data, FbxRepresentation fbxrep, string parent)
             {
+                foreach(var kvp in fbxrep.components) {
+                    var typename = kvp.Key;
+                    var jsonValues = kvp.Value;
+                    data.AddComponents(parent == null ? "" : parent, typename, jsonValues);
+                }
                 foreach(var child in FbxRepresentation.GetChildren(fbxrep)) {
                     data.AddNode(child, parent);
-                    foreach(var kvp in fbxrep.components) {
-                        var typename = kvp.Key;
-                        var jsonValues = kvp.Value;
-                        data.AddComponents(child, typename, jsonValues);
-                    }
                     SetupDataHelper(data, FbxRepresentation.Find(fbxrep, child), child);
                 }
             }
@@ -479,6 +482,7 @@ namespace FbxExporters
 
                 // Figure out what nodes will exist after we create and destroy.
                 Initialize(ref m_nodesInUpdatedPrefab);
+                m_nodesInUpdatedPrefab.Add(""); // the root is nameless
                 foreach(var node in Data.GetAllNames(m_prefab).Union(m_nodesToCreate)) {
                     if (m_nodesToDestroy.Contains(node)) {
                         continue;
@@ -533,17 +537,6 @@ namespace FbxExporters
                 }
             }
 
-            static void SetupComponentsMap(Transform newFbx,
-                    Dictionary<string, Dictionary<string, List<Component>>> nameMap)
-            {
-                foreach(var component in newFbx.GetComponents<Component>()) {
-                    Append(nameMap, newFbx.name, component.GetType().ToString(), component);
-                }
-                foreach(Transform child in newFbx) {
-                    SetupComponentsMap(child, nameMap);
-                }
-            }
-
             void ClassifyComponents(Transform newFbx)
             {
                 Initialize(ref m_componentsToDestroy);
@@ -551,7 +544,19 @@ namespace FbxExporters
 
                 // Flatten the list of components in the transform hierarchy so we can remember what to copy.
                 var components = new Dictionary<string, Dictionary<string, List<Component>>>();
-                SetupComponentsMap(newFbx, components);
+                var builder = new System.Text.StringBuilder();
+                foreach(var component in newFbx.GetComponentsInChildren<Component>()) {
+                    string name;
+                    if (component.transform == newFbx) {
+                        name = "";
+                    } else {
+                        name = component.name;
+                    }
+                    var typename = component.GetType().ToString();
+                    builder.AppendFormat("\t{0}:{1}\n", name, typename);
+                    Append(ref components, name, typename, component);
+                }
+                Debug.Log("Component map:\n" + builder.ToString());
 
                 // What's the logic?
                 // First check if a component is present or absent. It's
@@ -597,8 +602,8 @@ namespace FbxExporters
                         var newValues = m_new.GetComponentValues(name, typename);
                         var prefabValues = m_prefab.GetComponentValues(name, typename);
 
-                        Debug.Log(string.Format("type {0}: {1} old / {2} new / {3} prefab",
-                            typename, oldValues.Count, newValues.Count, prefabValues.Count));
+                        Debug.Log(string.Format("{4} - type {0}: {1} old / {2} new / {3} prefab",
+                            typename, oldValues.Count, newValues.Count, prefabValues.Count, name));
 
                         // TODO: handle multiplicity! The algorithm is eluding me right now...
                         // We'll need to do some kind of 3-way matching.
@@ -636,7 +641,7 @@ namespace FbxExporters
                         var unityEngine = typeof(Component).Assembly;
                         foreach (var typename in typesToDestroy) {
                             var thetype = unityEngine.GetType (typename);
-                            Append (m_componentsToDestroy, name, thetype);
+                            Append (ref m_componentsToDestroy, name, thetype);
                         }
                     }
 
@@ -647,7 +652,7 @@ namespace FbxExporters
                                 Debug.LogError (string.Format("todo: multiplicity {0} on {1}:{2}",
                                     components [name] [typename].Count, name, typename));
                             }
-                            Append (m_componentsToUpdate, name, components [name] [typename] [0]);
+                            Append (ref m_componentsToUpdate, name, components [name] [typename] [0]);
                         }
                     }
                 }
