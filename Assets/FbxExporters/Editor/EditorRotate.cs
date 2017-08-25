@@ -13,14 +13,14 @@ using UnityEditor;
 
 namespace FbxExporters.Review
 {
-    [CustomEditor (typeof(RotateModel))]
+    [CustomEditor (typeof(FbxTurnTableBase))]
     public class EditorRotate : UnityEditor.Editor
     {
-        RotateModel model;
+        FbxTurnTableBase model;
 
         public void OnEnable ()
         {
-            model = (RotateModel)target;
+            model = (FbxTurnTableBase)target;
             EditorApplication.update += Update;
         }
 

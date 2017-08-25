@@ -48,6 +48,13 @@ namespace FbxExporters.UnitTests
             LogNonEmptyString("package path", Editor.Integrations.GetPackagePath());
             LogNonEmptyString("package version", Editor.Integrations.GetPackageVersion());
             LogNonEmptyString("temp path", Editor.Integrations.GetTempSavePath());
+            LogNonEmptyString("export settings path", Editor.Integrations.GetExportSettingsPath ());
+
+            // test that the paths don't contain backslashes
+            Assert.IsFalse(Editor.Integrations.GetAppPath().Contains("\\"));
+            Assert.IsFalse(Editor.Integrations.GetProjectPath().Contains("\\"));
+            Assert.IsFalse(Editor.Integrations.GetTempSavePath().Contains("\\"));
+            Assert.IsFalse(Editor.Integrations.GetExportSettingsPath ().Contains("\\"));
         }
     }
 }

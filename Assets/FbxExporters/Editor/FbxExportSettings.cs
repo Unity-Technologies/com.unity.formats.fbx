@@ -65,9 +65,24 @@ namespace FbxExporters.EditorTools {
                         Debug.LogWarning ("Please select a location in the Assets folder");
                     } else {
                         ExportSettings.SetRelativeSavePath(relativePath);
+
+                        // Make sure focus is removed from the selectable label
+                        // otherwise it won't update
+                        GUIUtility.hotControl = 0;
+                        GUIUtility.keyboardControl = 0;
                     }
                 }
             }
+            GUILayout.EndHorizontal ();
+            GUILayout.BeginHorizontal ();
+
+            GUILayout.Label (new GUIContent (
+                "Turn Table Scene:",
+                "Scene to use for reviewing models. If none, a scene will be created on review."));
+            
+            exportSettings.turntableScene = EditorGUILayout.ObjectField (
+                exportSettings.turntableScene, typeof(SceneAsset), false
+            );
 
             GUILayout.EndHorizontal ();
             GUILayout.FlexibleSpace ();
@@ -92,6 +107,9 @@ namespace FbxExporters.EditorTools {
         public bool mayaCompatibleNames;
         public bool centerObjects;
 
+        [SerializeField]
+        public UnityEngine.Object turntableScene;
+
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
         ///
@@ -112,6 +130,21 @@ namespace FbxExporters.EditorTools {
             mayaCompatibleNames = true;
             centerObjects = true;
             convertToModelSavePath = kDefaultSavePath;
+            turntableScene = null;
+        }
+
+        public static string GetTurnTableSceneName(){
+            if (instance.turntableScene) {
+                return instance.turntableScene.name;
+            }
+            return null;
+        }
+
+        public static string GetTurnTableScenePath(){
+            if (instance.turntableScene) {
+                return AssetDatabase.GetAssetPath (instance.turntableScene);
+            }
+            return null;
         }
 
         /// <summary>

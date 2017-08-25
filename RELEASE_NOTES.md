@@ -1,5 +1,66 @@
 RELEASE NOTES
 
+**Version**: 0.0.11a
+
+NEW FEATURES
+
+* Maya Integration: Publish automatically writes to the same file you imported from.
+
+On Unity->Import, store the path and filename of the imported FBX as attributes on the export set.
+On Unity->Publish, if path and filename attributes are set, publish directly to this location without prompting user.
+
+* Maya Integration: Unity->Import creates export set containing imported objects
+
+If an export set already exists, replace its contents with newly imported objects
+
+* Maya Integration: Unity->Publish exports what is in the export set
+
+Export contents of export set, or if there is no export set, then the current selection will be exported.
+
+* Maya Integration: Fbx export options are set from a file in the Unity project
+
+Export settings stored in Integrations/Autodesk/maya2017/scripts/unityFbxExportSettings.mel are loaded into Maya before
+exporting either with Unity->Review or Unity->Publish.
+
+FIXES
+
+* Export Settings: fix export path doesn't refresh if selectable text box selected
+* Convert to Prefab: fix model added to wrong scene if multiple scenes open
+
+**Version**: 0.0.10a
+
+NEW FEATURES
+
+* Turntable Review shows minimal Unity window
+
+The Game window is maximized so that it takes up most of the layout.
+
+* Turntable Review frames camera onto model
+
+* Turntable Review rotates model
+
+Model rotates either when selected in the editor or in play mode.
+
+* Maya Integration: Turntable Review publishes to temporary location
+
+Running Unity -> Review command in Maya publishes the asset to a temporary location inside the Unity project.
+
+* Maya Integration: Added support for multiple Maya versions
+
+* Set Turntable scene from Project Settings
+
+Scene to use for Turntable review can be selected in Project Settings.
+
+* Select Turntable Base GameObject by attaching FbxTurnTableBase script
+
+Attaching the FbxTurnTableBase script to a GameObject will parent the model being reviewed under this GameObject.
+If none present, an empty GameObject will be used as the base.
+
+FIXES
+
+* FbxPrefab: Don't allow settings to be changed on prefab instance
+* Maya Integration: Fix so review brings Unity window to front on Windows if already open
+
 **Version**: 0.0.9a
 
 * Auto updater for instanced prefabs

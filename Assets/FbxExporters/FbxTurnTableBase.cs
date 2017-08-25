@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace FbxExporters.Review
 {
-    public class RotateModel : MonoBehaviour
+    public class FbxTurnTableBase : MonoBehaviour
     {
 
         [Tooltip ("Rotation speed in degrees/second")]
@@ -21,11 +21,6 @@ namespace FbxExporters.Review
 #if UNITY_EDITOR
         private float timeOfLastUpdate = float.MaxValue;
 #endif
-
-        public float GetSpeed()
-        {
-            return speed;
-        }
 
         public void Rotate()
         {
@@ -42,8 +37,7 @@ namespace FbxExporters.Review
             transform.Rotate (Vector3.up, speed * deltaTime, Space.World); 
         }
 
-        void Update ()
-        {
+        void Update () {
             Rotate ();
         }
     }

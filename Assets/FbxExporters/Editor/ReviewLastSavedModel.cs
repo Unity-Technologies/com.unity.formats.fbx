@@ -1,3 +1,9 @@
+// ***********************************************************************
+// Copyright (c) 2017 Unity Technologies. All rights reserved.
+//
+// Licensed under the ##LICENSENAME##.
+// See LICENSE.md file in the project root for full license information.
+// ***********************************************************************
 
 using UnityEngine;
 
@@ -10,8 +16,10 @@ namespace FbxExporters
         {
             const string MenuItemName = "FbxExporters/Turntable Review/Autoload Last Saved Prefab";
 
-            const string ScenesPath = "Assets";
-            const string SceneName = "FbxExporters_TurnTableReview";
+            const string DefaultScenesPath = "Assets";
+            const string DefaultSceneName = "FbxExporters_TurnTableReview";
+
+            static string SceneName = "FbxExporters_TurnTableReview";
 
             public const string TempSavePath = "_safe_to_delete";
 
@@ -48,7 +56,7 @@ namespace FbxExporters
 
             private static string GetSceneFilePath ()
             {
-                return System.IO.Path.Combine (ScenesPath, SceneName + ".unity");
+                return System.IO.Path.Combine (DefaultScenesPath, DefaultSceneName + ".unity");
             }
 
             private static string GetLastSavedFilePath ()
@@ -83,16 +91,20 @@ namespace FbxExporters
                 if (unityMainAsset) {
                     modelGO = UnityEditor.PrefabUtility.InstantiatePrefab (unityMainAsset) as GameObject;
 
-                    GameObject turntableGO = GameObject.Find ("TurnTable");
-                    if (turntableGO != null) {
-                        modelGO.transform.parent = turntableGO.transform;
-                        turntableGO.AddComponent<RotateModel> ();
-
-                        UnityEditor.Selection.objects = new GameObject[]{ turntableGO };
-                    } else {
-                        modelGO.AddComponent<RotateModel> ();
-                        UnityEditor.Selection.objects = new GameObject[]{ modelGO };
+                    var turnTableBase = GameObject.FindObjectOfType<FbxTurnTableBase> ();
+                    GameObject turntableGO = null;
+                    if (turnTableBase != null) {
+                        turntableGO = turnTableBase.gameObject;
                     }
+
+                    if (turntableGO == null) {
+                        turntableGO = new GameObject ("TurnTableBase");
+                        turntableGO.AddComponent<FbxTurnTableBase> ();
+                    }
+
+                    modelGO.transform.parent = turntableGO.transform;
+
+                    UnityEditor.Selection.objects = new GameObject[]{ turntableGO };
                 }
 
                 FrameCameraOnModel (modelGO);
@@ -100,11 +112,24 @@ namespace FbxExporters
                 return modelGO as Object;
             }
 
+            private static Bounds GetRendererBounds(GameObject modelGO)
+            {
+                var renderers = modelGO.GetComponentsInChildren<Renderer> ();
+                if (renderers.Length > 0) {
+                    var bounds = renderers [0].bounds;
+                    for (int i = 1; i < renderers.Length; i++) {
+                        bounds.Encapsulate (renderers [i].bounds);
+                    }
+                    return bounds;
+                }
+                return new Bounds ();
+            }
+
             private static void FrameCameraOnModel(GameObject modelGO)
             {
                 // Set so camera frames model
                 // Note: this code assumes the model is at 0,0,0
-                Vector3 boundsSize = modelGO.GetComponent<Renderer>().bounds.size;
+                Vector3 boundsSize = GetRendererBounds(modelGO).size;
                 float distance = Mathf.Max(boundsSize.x, boundsSize.y, boundsSize.z);
                 distance /= (2.0f * Mathf.Tan(0.5f * Camera.main.fieldOfView * Mathf.Deg2Rad));
                 Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y, -distance * 2.0f);
@@ -143,6 +168,11 @@ namespace FbxExporters
                 System.Collections.Generic.List<UnityEngine.SceneManagement.Scene> scenes
                       = new System.Collections.Generic.List<UnityEngine.SceneManagement.Scene> ();
 
+                string desiredSceneName = FbxExporters.EditorTools.ExportSettings.GetTurnTableSceneName ();
+                if (string.IsNullOrEmpty (desiredSceneName)) {
+                    desiredSceneName = DefaultSceneName;
+                }
+
                 for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++) {
                     UnityEngine.SceneManagement.Scene toAdd = UnityEngine.SceneManagement.SceneManager.GetSceneAt (i);
 
@@ -150,29 +180,34 @@ namespace FbxExporters
                     // The Untitled scene cannot be unloaded, if modified, and we don't want to force the user to save it.
                     if (toAdd.name == "") continue;
 
-                    if (toAdd.name == SceneName) 
-                    {
+                    if (toAdd.name == desiredSceneName) {
                         scene = toAdd;
                         continue;
                     }
+
                     scenes.Add (toAdd);
                 }
 
                 // if turntable scene not added to list of scenes
-                if (!scene.IsValid ()) 
+                if (!scene.IsValid () || !scene.isLoaded) 
                 {
-                    // and if for some reason the turntable scene is missing create an empty scene
-                    // NOTE: we cannot use NewScene because it will force me to save the modified Untitled scene
-                    if (!System.IO.File.Exists(GetSceneFilePath ())) 
-                    {
-                        var writer = System.IO.File.CreateText (GetSceneFilePath ());
-                        writer.WriteLine ("%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:");
-                        writer.Close ();
-                        UnityEditor.AssetDatabase.Refresh ();
+                    string scenePath = FbxExporters.EditorTools.ExportSettings.GetTurnTableScenePath ();
+                    if (string.IsNullOrEmpty(scenePath)) {
+                        // and if for some reason the turntable scene is missing create an empty scene
+                        // NOTE: we cannot use NewScene because it will force me to save the modified Untitled scene
+                        if (!System.IO.File.Exists (GetSceneFilePath ())) {
+                            var writer = System.IO.File.CreateText (GetSceneFilePath ());
+                            writer.WriteLine ("%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:");
+                            writer.Close ();
+                            UnityEditor.AssetDatabase.Refresh ();
+                        }
+                        scenePath = GetSceneFilePath ();
                     }
 
-                    scene = UnityEditor.SceneManagement.EditorSceneManager.OpenScene (GetSceneFilePath (), UnityEditor.SceneManagement.OpenSceneMode.Additive);
+                    scene = UnityEditor.SceneManagement.EditorSceneManager.OpenScene (scenePath, UnityEditor.SceneManagement.OpenSceneMode.Additive);
                 }
+
+                SceneName = scene.name;
 
                 // save unmodified scenes (but not the untitled or turntable scene)
                 if (UnityEditor.SceneManagement.EditorSceneManager.SaveModifiedScenesIfUserWantsTo (scenes.ToArray ())) 
