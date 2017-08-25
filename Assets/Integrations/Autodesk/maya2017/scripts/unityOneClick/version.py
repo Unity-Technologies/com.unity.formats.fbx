@@ -32,7 +32,7 @@ def versionName():
     Return version string for the unityOneClick plugin
     @ingroup UnityOneClickPluginVersion
     """
-    return '0.0.10a'
+    return '0.0.11a'
 
 def pluginName():
     """

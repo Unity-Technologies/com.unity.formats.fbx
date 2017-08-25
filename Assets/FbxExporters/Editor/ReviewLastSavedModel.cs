@@ -112,11 +112,24 @@ namespace FbxExporters
                 return modelGO as Object;
             }
 
+            private static Bounds GetRendererBounds(GameObject modelGO)
+            {
+                var renderers = modelGO.GetComponentsInChildren<Renderer> ();
+                if (renderers.Length > 0) {
+                    var bounds = renderers [0].bounds;
+                    for (int i = 1; i < renderers.Length; i++) {
+                        bounds.Encapsulate (renderers [i].bounds);
+                    }
+                    return bounds;
+                }
+                return new Bounds ();
+            }
+
             private static void FrameCameraOnModel(GameObject modelGO)
             {
                 // Set so camera frames model
                 // Note: this code assumes the model is at 0,0,0
-                Vector3 boundsSize = modelGO.GetComponent<Renderer>().bounds.size;
+                Vector3 boundsSize = GetRendererBounds(modelGO).size;
                 float distance = Mathf.Max(boundsSize.x, boundsSize.y, boundsSize.z);
                 distance /= (2.0f * Mathf.Tan(0.5f * Camera.main.fieldOfView * Mathf.Deg2Rad));
                 Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y, -distance * 2.0f);
