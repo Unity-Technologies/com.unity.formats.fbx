@@ -295,7 +295,12 @@ class publishCmd(BaseCommand):
 
         if not self.loadUnityFbxExportSettings():
             return
-            
+        
+        # select the export set for export, if it exists,
+        # otherwise take what is currently selected
+        if self.setExists(self._exportSet):
+            maya.cmds.select(self._exportSet, r=True, ne=True)
+        
         unity_fbx_file_path = self.getAttribute(self._exportSet, self._unityFbxFilePathAttr)
         unity_fbx_file_name = self.getAttribute(self._exportSet, self._unityFbxFileNameAttr)
         
