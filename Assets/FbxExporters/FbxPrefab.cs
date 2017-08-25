@@ -45,10 +45,21 @@ namespace FbxExporters
 #if UNITY_EDITOR
 
         /// <summary>
+        /// Utility function: log a message, make clear it's the prefab update.
+        /// </summary>
+        [System.Diagnostics.Conditional("FBXEXPORTER_DEBUG")]
+        public static void Log(string message) {
+            Debug.Log("Fbx prefab update: " + message);
+        }
+
+        [System.Diagnostics.Conditional("FBXEXPORTER_DEBUG")]
+        public static void Log(string format, params object[] p) {
+            Log(string.Format(format, p));
+        }
+
+        /// <summary>
         /// Utility function: create the object, which must be null.
         /// </summary>
-        /// <param name="item">Item.</param>
-        /// <typeparam name="T">The 1st type parameter.</typeparam>
         public static void Initialize<T>(ref T item) where T: new()
         {
             if (item != null) { throw new FbxPrefabException(); }
@@ -577,7 +588,6 @@ namespace FbxExporters
                     builder.AppendFormat("\t{0}:{1}\n", name, typename);
                     Append(ref components, name, typename, component);
                 }
-                Debug.Log("Component map:\n" + builder.ToString());
 
                 // What's the logic?
                 // First check if a component is present or absent. It's
@@ -623,9 +633,6 @@ namespace FbxExporters
                         var newValues = m_new.GetComponentValues(name, typename);
                         var prefabValues = m_prefab.GetComponentValues(name, typename);
 
-                        Debug.Log(string.Format("{4} - type {0}: {1} old / {2} new / {3} prefab",
-                            typename, oldValues.Count, newValues.Count, prefabValues.Count, name));
-
                         // TODO: handle multiplicity! The algorithm is eluding me right now...
                         // We'll need to do some kind of 3-way matching.
                         if (oldValues.Count > 1) { Debug.LogError("TODO: handle multiplicity " + oldValues.Count); }
@@ -649,7 +656,6 @@ namespace FbxExporters
                                 // if oldValue != prefabValue, conflict =>
                                 //      resolve in favor of Chris, so update
                                 //      anyway.
-                                Debug.Log(string.Format("{0}\n{1}\nDiffer", oldValue, newValue));
                                 Append(ref typesToUpdate, typename);
                             }
                         }
@@ -738,7 +744,7 @@ namespace FbxExporters
                 // Create new nodes.
                 foreach(var name in m_nodesToCreate) {
                     prefabNodes.Add(name, new GameObject(name).transform);
-                    Debug.Log(name + ": Created");
+                    Log("{0}: created new GameObject", name);
                 }
 
                 // Implement the reparenting in two phases to avoid making loops, e.g.
@@ -762,13 +768,13 @@ namespace FbxExporters
                         parentNode = prefabNodes[parent];
                     }
                     prefabNodes[name].parent = parentNode;
-                    Debug.Log(name + ": Changed parent to " + parentNode.name);
+                    Log("changed {0} parent to {1}", name, parentNode.name);
                 }
 
                 // Destroy the old nodes.
                 foreach(var toDestroy in m_nodesToDestroy) {
                     GameObject.DestroyImmediate(prefabNodes[toDestroy].gameObject);
-                    Debug.Log(toDestroy + ": Destroyed");
+                    Log("destroyed {0}", toDestroy);
                 }
 
                 // Destroy the old components.
@@ -781,7 +787,7 @@ namespace FbxExporters
                             var component = xfo.GetComponent(componentType);
                             if (component != null) {
                                 Object.DestroyImmediate(component);
-                                Debug.Log(name + ": Destroyed obsolete component " + componentType);
+                                Log("destroyed component {0}:{1}", xfo.name, componentType);
                             }
                         }
                     }
@@ -806,14 +812,14 @@ namespace FbxExporters
                                 // Now update it.
                                 if (UnityEditorInternal.ComponentUtility.CopyComponent(fbxComponent)) {
                                     UnityEditorInternal.ComponentUtility.PasteComponentValues(prefabComponent);
-                                    Debug.Log(name + ": updated component " + fbxComponent.GetType());
+                                    Log("updated component {0}:{1}", name, fbxComponent.GetType());
 
                                 }
                             } else {
                                 // We didn't find a match, so create the component as new.
                                 if (UnityEditorInternal.ComponentUtility.CopyComponent(fbxComponent)) {
                                     UnityEditorInternal.ComponentUtility.PasteComponentAsNew(prefabXfo.gameObject);
-                                    Debug.Log(name + ": added component " + fbxComponent.GetType());
+                                    Log("added new component {0}:{1}", name, fbxComponent.GetType());
                                 }
                             }
                         }
