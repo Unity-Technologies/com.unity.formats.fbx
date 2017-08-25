@@ -127,7 +127,7 @@ class importCmd(BaseCommand):
         # store path and filename
         self._tempPath = file.resolvedPath()
         self._tempName = file.resolvedName()
-        
+
         # Gather everything that is in the scene
         self._origItemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
         
@@ -142,7 +142,10 @@ class importCmd(BaseCommand):
         # reset attribute values, in case import fails
         self.storeAttribute(self._exportSet, self._unityFbxFilePathAttr, "")
         self.storeAttribute(self._exportSet, self._unityFbxFileNameAttr, "")
-        
+
+        # Let Maya know we're OK with importing this file.
+        OpenMaya.MScriptUtil.setBool(retCode, True)
+
     def afterImport(self, *args, **kwargs):
         if self._tempPath:
             self.storeAttribute(self._exportSet, self._unityFbxFilePathAttr, self._tempPath)
@@ -156,7 +159,7 @@ class importCmd(BaseCommand):
             
             # add newly imported items to set
             maya.cmds.sets(newItems, add=self._exportSet)
-    
+
     def doIt(self, args):
         self.loadDependencies()
     
