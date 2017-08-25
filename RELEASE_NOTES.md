@@ -4,7 +4,7 @@ RELEASE NOTES
 
 NEW FEATURES
 
-* Maya Integration: Store path and filename of imported FBX, publish to stored path
+* Maya Integration: Publish automatically writes to the same file you imported from.
 
 On Unity->Import, store the path and filename of the imported FBX as attributes on the export set.
 On Unity->Publish, if path and filename attributes are set, publish directly to this location without prompting user.
@@ -17,7 +17,7 @@ If an export set already exists, replace its contents with newly imported object
 
 Export contents of export set, or if there is no export set, then the current selection will be exported.
 
-* Maya Integration: Exporting from the Unity plugin first loads export settings saved in Unity project
+* Maya Integration: Fbx export options are set from a file in the Unity project
 
 Export settings stored in Integrations/Autodesk/maya2017/scripts/unityFbxExportSettings.mel are loaded into Maya before
 exporting either with Unity->Review or Unity->Publish.
