@@ -145,25 +145,34 @@ namespace FbxExporters
             /// The key is the name, which is assumed to be unique.
             /// The value is, recursively, the representation of that subtree.
             /// </summary>
-            Dictionary<string, FbxRepresentation> m_children;
+            Dictionary<string, FbxRepresentation> m_children = new Dictionary<string, FbxRepresentation>();
 
             /// <summary>
-            /// Children of this node.
+            /// Components of this node.
             /// The key is the name of the type of the Component. We accept that there may be several.
             /// The value is the json for the component, to be decoded with EditorJsonUtility.
+            ///
+            /// Note that we skip the FbxPrefab component because we never want to update that
+            /// automatically.
             /// </summary>
-            Dictionary<string, List<string>> m_components;
+            Dictionary<string, List<string>> m_components = new Dictionary<string, List<string>>();
 
             /// <summary>
             /// Build a hierarchical representation based on a transform.
             /// </summary>
-            public FbxRepresentation(Transform xfo)
+            public FbxRepresentation(Transform xfo, bool isRoot = true)
             {
                 m_children = new Dictionary<string, FbxRepresentation>();
                 foreach(Transform child in xfo) {
-                    m_children.Add(child.name, new FbxRepresentation(child));
+                    m_children.Add(child.name, new FbxRepresentation(child, isRoot: false));
                 }
                 foreach(var component in xfo.GetComponents<Component>()) {
+                    // Don't save the prefab link, to avoid a logic loop.
+                    if (component is FbxPrefab) { continue; }
+
+                    // Don't save the root transform, to allow importing at a place other than zero.
+                    if (isRoot && component is Transform) { continue; }
+
                     var typeName = component.GetType().ToString();
                     var jsonValue = UnityEditor.EditorJsonUtility.ToJson(component);
                     Append(ref m_components, typeName, jsonValue);
@@ -309,32 +318,22 @@ namespace FbxExporters
                 return builder.ToString();
             }
 
-            public static bool IsLeaf(FbxRepresentation rep) {
-                return rep == null || rep.m_children == null;
-            }
+            public HashSet<string> ChildNames { get { return new HashSet<string> (m_children.Keys); } }
 
-            public static HashSet<string> GetChildren(FbxRepresentation rep) {
-                if (IsLeaf(rep)) {
-                    return new HashSet<string>();
-                } else {
-                    return new HashSet<string>(rep.m_children.Keys);
-                }
-            }
-
-            public static IEnumerable<KeyValuePair<string, List<string>>> GetComponents(FbxRepresentation rep) {
-                if (rep == null || rep.m_components == null) {
-                    return new KeyValuePair<string, List<string>>[0];
-                } else {
-                    return rep.m_components;
-                }
-            }
-
-            public static FbxRepresentation Find(FbxRepresentation rep, string key) {
-                if (IsLeaf(rep)) { return null; }
-
+            public FbxRepresentation GetChild(string childName) {
                 FbxRepresentation child;
-                if (rep.m_children.TryGetValue(key, out child)) {
+                if (m_children.TryGetValue(childName, out child)) {
                     return child;
+                }
+                return null;
+            }
+
+            public HashSet<string> ComponentTypes { get { return new HashSet<string> (m_components.Keys); } }
+
+            public List<string> GetComponentValues(string componentType) {
+                List<string> jsonValues;
+                if (m_components.TryGetValue(componentType, out jsonValues)) {
+                    return jsonValues;
                 }
                 return null;
             }
@@ -475,22 +474,23 @@ namespace FbxExporters
             /// </summary>
             Dictionary<string, List<Component>> m_componentsToUpdate;
 
-            static void SetupDataHelper(Data data, FbxRepresentation fbxrep, string parent)
+            static void SetupDataHelper(Data data, FbxRepresentation fbxrep, string nodeName)
             {
-                foreach(var kvp in FbxRepresentation.GetComponents(fbxrep)) {
-                    var typename = kvp.Key;
-                    var jsonValues = kvp.Value;
-                    data.AddComponents(parent, typename, jsonValues);
+                foreach(var typename in fbxrep.ComponentTypes) {
+                    var jsonValues = fbxrep.GetComponentValues(typename);
+                    data.AddComponents(nodeName, typename, jsonValues);
                 }
-                foreach(var child in FbxRepresentation.GetChildren(fbxrep)) {
-                    data.AddNode(child, parent);
-                    SetupDataHelper(data, FbxRepresentation.Find(fbxrep, child), child);
+                foreach(var child in fbxrep.ChildNames) {
+                    data.AddNode(child, nodeName);
+                    SetupDataHelper(data, fbxrep.GetChild(child), child);
                 }
             }
 
             static void SetupData(ref Data data, FbxRepresentation fbxrep)
             {
                 Initialize(ref data);
+
+                // The root node has no name
                 SetupDataHelper(data, fbxrep, "");
             }
 
