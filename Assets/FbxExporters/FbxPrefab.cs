@@ -179,8 +179,16 @@ namespace FbxExporters
                 }
             }
 
-            // todo: use a real json parser
-            static bool Consume(char expected, string json, ref int index, bool required = true) {
+            /// <summary>
+            /// Read an expected character from a stream (represented as string
+            /// + index), skipping whitespace. Leaves the index just past the
+            /// character that we read.
+            ///
+            /// If the character isn't found, leaves the index at the
+            /// mismatched character. By default, it throws an exception;
+            /// set 'required' to false to get a false return value instead.
+            /// </summary>
+            public static bool Consume(char expected, string json, ref int index, bool required = true) {
                 while (true) { // loop breaks if index == json.Length
                     switch(json[index]) {
                         case ' ':
@@ -202,7 +210,11 @@ namespace FbxExporters
                 }
             }
 
-            static string ReadString(string json, ref int index) {
+            /// <summary>
+            /// Read a string from a stream (represented as string + index).
+            /// Leaves the index just past the close-quote character.
+            /// </summary>
+            public static string ReadString(string json, ref int index) {
                 int startIndex = index;
                 Consume('"', json, ref index);
                 var builder = new System.Text.StringBuilder();
@@ -232,8 +244,14 @@ namespace FbxExporters
                 return builder.ToString();
             }
 
-            // Escape a string so that ReadString can read it.
-            static string EscapeString(string str) {
+            /// <summary>
+            /// Escape a string so that ReadString can read it if we put it in
+            /// quotes.
+            ///
+            /// This just encodes backslashes and quotes in the normal json way.
+            /// It does *not* surround str with quotes.
+            /// </summary>
+            public static string EscapeString(string str) {
                 var builder = new System.Text.StringBuilder();
                 foreach(var c in str) {
                     switch(c) {

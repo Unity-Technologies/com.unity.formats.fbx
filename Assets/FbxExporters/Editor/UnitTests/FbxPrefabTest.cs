@@ -232,4 +232,159 @@ namespace FbxExporters.UnitTests
             AssertAreIdentical(newHierarchy, History(m_manualPrefab));
         }
     }
+
+    public class FbxPrefabHelpersTest
+    {
+        class AClass { }
+
+        [Test]
+        public void TestStatics()
+        {
+            {
+                // Test Initialize semantics.
+                AClass anItem = null;
+                Assert.That(() => FbxPrefab.Initialize(ref anItem), Throws.Nothing);
+                Assert.IsNotNull(anItem);
+                Assert.That(() => FbxPrefab.Initialize(ref anItem), Throws.Exception);
+            }
+
+            {
+                // Test list append helper.
+                List<string> thelist = null;
+                Assert.That(() => FbxPrefab.Append(ref thelist, "hi"), Throws.Nothing);
+                Assert.IsNotNull(thelist);
+                Assert.AreEqual(1, thelist.Count);
+                Assert.AreEqual("hi", thelist[0]);
+                Assert.That(() => FbxPrefab.Append(ref thelist, "bye"), Throws.Nothing);
+                Assert.IsNotNull(thelist);
+                Assert.AreEqual(2, thelist.Count);
+                Assert.AreEqual("hi", thelist[0]);
+                Assert.AreEqual("bye", thelist[1]);
+            }
+
+            {
+                // Test normal dictionary helpers.
+                Dictionary<string, AClass> thedict = null;
+                Dictionary<string, AClass> expected = null;
+
+                AClass A = new AClass();
+                AClass B = new AClass();
+
+                Assert.That(() => FbxPrefab.Add(ref thedict, "a", A), Throws.Nothing);
+                expected = new Dictionary<string, AClass>();
+                expected["a"] = A;
+                Assert.IsNotNull(thedict);
+                Assert.AreEqual(expected, thedict);
+
+                Assert.That(() => FbxPrefab.Add(ref thedict, "b", B), Throws.Nothing);
+                expected["b"] = B;
+                Assert.IsNotNull(thedict);
+                Assert.AreEqual(expected, thedict);
+
+                Assert.That(() => FbxPrefab.Add(ref thedict, "b", B), Throws.Exception);
+
+                var b = FbxPrefab.GetOrCreate(thedict, "b"); // actually gets
+                Assert.AreEqual(B, b);
+
+                var c = FbxPrefab.GetOrCreate(thedict, "c"); // actually doesn't get
+                Assert.IsNotNull(c);
+            }
+
+            {
+                // Test dictionary-of-lists helpers.
+                Dictionary<string, List<string>> thedict = null;
+                Dictionary<string, List<string>> expected = null;
+
+                Assert.That(() => FbxPrefab.Append(/* not ref */ thedict, "a", "1"), Throws.Exception);
+                Assert.That(() => FbxPrefab.Append(ref thedict, "a", "1"), Throws.Nothing);
+                expected = new Dictionary<string, List<string>>();
+                expected["a"] = new List<string>( new string [] { "1" });
+                Assert.AreEqual(expected, thedict);
+
+                Assert.That(() => FbxPrefab.Append(ref thedict, "a", "2"), Throws.Nothing);
+                expected["a"].Add("2");
+                Assert.AreEqual(expected, thedict);
+
+                Assert.That(() => FbxPrefab.Append(ref thedict, "b", "3"), Throws.Nothing);
+                expected["b"] = new List<string>( new string [] { "3" });
+                Assert.AreEqual(expected, thedict);
+            }
+
+            {
+                // Test dict-of-dict-of-list helpers.
+                Dictionary<string, Dictionary<string, List<string>>> thedict = null;
+                Dictionary<string, Dictionary<string, List<string>>> expected = null;
+
+                Assert.That(() => FbxPrefab.Append(ref thedict, "a", "1", "yo"), Throws.Nothing);
+                expected = new Dictionary<string, Dictionary<string, List<string>>>();
+                expected["a"] = new Dictionary<string, List<string>>();
+                expected["a"]["1"] = new List<string>(new string[] { "yo" });
+                Assert.AreEqual(expected, thedict);
+
+                Assert.That(() => FbxPrefab.Append(ref thedict, "a", "1", "yoyo"), Throws.Nothing);
+                expected["a"]["1"].Add("yoyo");
+                Assert.AreEqual(expected, thedict);
+
+                Assert.That(() => FbxPrefab.Append(ref thedict, "a", "2", "bar"), Throws.Nothing);
+                expected["a"]["2"] = new List<string>(new string[] { "bar" });
+                Assert.AreEqual(expected, thedict);
+            }
+
+            {
+                // Test FbxRepresentation parsing function: consume.
+                string testString = "abc  \n\tdefg\nhij\tkl m";
+                int index = 0;
+                Assert.IsTrue(FbxPrefab.FbxRepresentation.Consume('a', testString, ref index));
+                Assert.AreEqual(1, index);
+                index = 2;
+                Assert.IsTrue(FbxPrefab.FbxRepresentation.Consume('c', testString, ref index));
+                Assert.AreEqual(3, index);
+                Assert.That(() => FbxPrefab.FbxRepresentation.Consume('c', testString, ref index), Throws.Exception);
+                Assert.AreEqual(7, index);
+                Assert.IsFalse(FbxPrefab.FbxRepresentation.Consume('c', testString, ref index, required: false));
+                Assert.AreEqual(7, index);
+                Assert.IsTrue(FbxPrefab.FbxRepresentation.Consume('d', testString, ref index));
+                Assert.AreEqual(8, index);
+                index = testString.Length - 1;
+                Assert.IsTrue(FbxPrefab.FbxRepresentation.Consume('m', testString, ref index));
+                Assert.AreEqual(testString.Length, index);
+                Assert.That(() => FbxPrefab.FbxRepresentation.Consume('w', testString, ref index), Throws.Exception);
+                index = testString.Length;
+                Assert.That(() => FbxPrefab.FbxRepresentation.Consume('w', testString, ref index, required: false), Throws.Exception);
+                index = testString.Length - 1;
+                Assert.IsFalse(FbxPrefab.FbxRepresentation.Consume('n', testString, ref index, required: false));
+                Assert.AreEqual(testString.Length - 1, index);
+            }
+
+            {
+                // Test FbxRepresentation parsing function: readString.
+                string noQuotes = " \"this string has no quotes\" ";
+                string quotes = " \"this string has \\\"quotes\\\" and backslashes \\\\ and \\ nonsense\" ";
+                string badEnd = "\"this string has a quote but doesn't end.";
+                string badStart = "this string has a quote but doesn't start.\"";
+                int index = 1;
+
+                Assert.AreEqual("this string has no quotes", FbxPrefab.FbxRepresentation.ReadString(noQuotes, ref index));
+                Assert.AreEqual(index, noQuotes.LastIndexOf('"') + 1);
+
+                index = 1;
+                Assert.AreEqual("this string has \"quotes\" and backslashes \\ and \\ nonsense",
+                        FbxPrefab.FbxRepresentation.ReadString(quotes, ref index));
+                Assert.AreEqual(index, quotes.LastIndexOf('"') + 1);
+
+                index = 0;
+                Assert.That(() => FbxPrefab.FbxRepresentation.ReadString(badEnd, ref index), Throws.Exception);
+                Assert.AreEqual(badEnd.Length, index);
+                index = 0;
+                Assert.That(() => FbxPrefab.FbxRepresentation.ReadString(badStart, ref index), Throws.Exception);
+                Assert.AreEqual(0, index);
+            }
+
+            {
+                string unquoted = " \"this string has backslashes \\ and quotes\" ";
+                string quoted = " \\\"this string has backslashes \\\\ and quotes\\\" ";
+                Assert.AreEqual(quoted, FbxPrefab.FbxRepresentation.EscapeString(unquoted));
+            }
+        }
+    }
 }
