@@ -78,6 +78,10 @@ namespace FbxExporters
             thelist.Add(item);
         }
 
+        /// <summary>
+        /// Utility function: add an item to a dictionary.
+        /// If the dictionary is null, create it.
+        /// </summary>
         public static void Add<K,V>(ref Dictionary<K,V> thedict, K key, V value)
         {
             if (thedict == null) {
@@ -86,6 +90,11 @@ namespace FbxExporters
             thedict.Add(key, value);
         }
 
+        /// <summary>
+        /// Utility function: get an entry in the dictionary, or create it,
+        /// and return it.
+        /// The dictionary must not be null.
+        /// </summary>
         public static V GetOrCreate<K,V>(Dictionary<K,V> thedict, K key) where V : new()
         {
             V value;
@@ -99,7 +108,7 @@ namespace FbxExporters
         /// <summary>
         /// Utility function: append an item to a list in a dictionary of lists.
         /// Create all the entries needed to append to the list.
-        /// The dictionary must not be null.
+        /// The dictionary will be allocated if it's null.
         /// </summary>
         public static void Append<K, V>(ref Dictionary<K, List<V>> thedict, K key, V item)
         {
@@ -109,6 +118,11 @@ namespace FbxExporters
             GetOrCreate(thedict, key).Add(item);
         }
 
+        /// <summary>
+        /// Utility function: append an item to a list in a dictionary of lists.
+        /// Create all the entries needed to append to the list.
+        /// The dictionary must not be null.
+        /// </summary>
         public static void Append<K, V>(Dictionary<K, List<V>> thedict, K key, V item)
         {
             GetOrCreate(thedict, key).Add(item);
@@ -117,7 +131,7 @@ namespace FbxExporters
         /// <summary>
         /// Utility function: append an item to a list in a 2-level dictionary of lists.
         /// Create all the entries needed to append to the list.
-        /// The dictionary must not be null.
+        /// The dictionary will be allocated if it's null.
         /// </summary>
         public static void Append<K1, K2, V>(ref Dictionary<K1, Dictionary<K2, List<V>>> thedict, K1 key1, K2 key2, V item)
         {
@@ -138,6 +152,12 @@ namespace FbxExporters
             public FbxPrefabException(string message, System.Exception inner) : base(message, inner) { }
         }
 
+        /// <summary>
+        /// Representation of a hierarchy with components.
+        ///
+        /// Converts to/from json for serialization, or initialize it from a
+        /// Unity Transform.
+        /// </summary>
         public class FbxRepresentation
         {
             /// <summary>
