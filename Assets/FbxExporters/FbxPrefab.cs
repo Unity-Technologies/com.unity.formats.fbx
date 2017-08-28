@@ -530,6 +530,16 @@ namespace FbxExporters
             /// </summary>
             Dictionary<string, List<System.Type>> m_componentsToDestroy;
 
+            struct ComponentValue {
+                public System.Type t;
+                public string jsonValue;
+
+                public ComponentValue(System.Type t, string jsonValue) {
+                    this.t = t;
+                    this.jsonValue = jsonValue;
+                }
+            }
+
             /// <summary>
             /// List of components to update or create in steps 4b and 4c.
             /// The string is the name in the prefab.
@@ -538,7 +548,7 @@ namespace FbxExporters
             /// If the component exists in the prefab, we update the first
             ///   match (without repetition).
             /// </summary>
-            Dictionary<string, List<Component>> m_componentsToUpdate;
+            Dictionary<string, List<ComponentValue>> m_componentsToUpdate;
 
             void ClassifyDestroyCreateNodes()
             {
@@ -617,119 +627,84 @@ namespace FbxExporters
                 }
             }
 
-            void ClassifyComponents(Transform newFbx)
+            void ClassifyComponents(Transform newFbx, Transform prefab)
             {
                 Initialize(ref m_componentsToDestroy);
                 Initialize(ref m_componentsToUpdate);
 
-                // Flatten the list of components in the transform hierarchy so we can remember what to copy.
-                var components = new Dictionary<string, Dictionary<string, List<Component>>>();
-                var builder = new System.Text.StringBuilder();
+                // Figure out how to map from type names to System.Type values,
+                // without going through reflection APIs. This allows us to handle
+                // components from various assemblies.
+                //
+                // We're going to be adding from the newFbx, and deleting from the prefab,
+                // so we don't need to know about all the types that oldFbx might have.
+                var componentTypes = new Dictionary<string, System.Type>();
                 foreach(var component in newFbx.GetComponentsInChildren<Component>()) {
-                    string name;
-                    if (component.transform == newFbx) {
-                        name = "";
-                    } else {
-                        name = component.name;
-                    }
-                    var typename = component.GetType().ToString();
-                    builder.AppendFormat("\t{0}:{1}\n", name, typename);
-                    Append(ref components, name, typename, component);
+                    var componentType = component.GetType();
+                    componentTypes[componentType.ToString()] = componentType;
+                }
+                foreach(var component in prefab.GetComponentsInChildren<Component>()) {
+                    var componentType = component.GetType();
+                    componentTypes[componentType.ToString()] = componentType;
                 }
 
-                // What's the logic?
-                // First check if a component is present or absent. It's
-                // present if the node exists and has that component; it's
-                // absent if the node doesn't exist, or the node exists but
-                // doesn't have that component:
-                //   old  new  prefab
-                //    x    x      x   => ignore
-                //    x    x      y   => ignore
-                //    x    y      x   => create a new component, copy from new
-                //    x    y      y   => ignore
-                //    y    x      x   => ignore
-                //    y    x      y   => destroy the component
-                //    y    y      x   => ignore
-                //    y    y      y   => check if we need to update
+                // For each node in the prefab (after adding any new nodes):
+                // 1. If a component is in the old but not the new, remove it from
+                //    the prefab.
+                // 2. If it's in the new but not the old, add it to the prefab.
+                // 3. If it's in both the old and new, but with different values,
+                //    update the prefab values.
+                // If a component type is repeated (e.g. two BoxCollider on the
+                // same node), we line up the components in the order they
+                // appear. This never happens in stock Unity, someone must have
+                // added an AssetPostprocessor for it to occur.
+                // TODO: do something smarter.
                 //
-                // In that last case, check whether we need to update the values:
-                //    a    a      a   => ignore
-                //    a    a      b   => ignore
-                //    a    a      c   => ignore (indistinguishable from aab case)
-                //    a    b      a   => update to b
-                //    a    b      b   => ignore (already matches)
-                //    a    b      c   => conflict, update to b
-                //
-                // Big question: how do we handle multiplicity? I'll skip it for today...
-
-                // We only care about nodes in the prefab after creating/destroying.
+                // If the node isn't going to be in the prefab, we don't care
+                // about what components might be on it.
                 foreach(var name in m_nodesInUpdatedPrefab)
                 {
                     if (!m_new.HasNode(name)) {
                         // It's not in the FBX, so clearly we're not updating any components.
+                        // We don't need to check if it's in m_prefab because
+                        // we're only iterating over those.
                         continue;
                     }
                     var allTypes = m_old.GetComponentTypes(name).Union(
-                            m_new.GetComponentTypes(name).Union(
-                                m_prefab.GetComponentTypes(name)));
-
-                    List<string> typesToDestroy = null;
-                    List<string> typesToUpdate = null;
+                            m_new.GetComponentTypes(name));
 
                     foreach(var typename in allTypes) {
                         var oldValues = m_old.GetComponentValues(name, typename);
                         var newValues = m_new.GetComponentValues(name, typename);
-                        var prefabValues = m_prefab.GetComponentValues(name, typename);
+                        List<string> prefabValues = null; // get them only if we need them.
 
-                        // TODO: handle multiplicity! The algorithm is eluding me right now...
-                        // We'll need to do some kind of 3-way matching.
-                        if (oldValues.Count > 1) { Debug.LogError("TODO: handle multiplicity " + oldValues.Count); }
-                        if (newValues.Count > 1) { Debug.LogError("TODO: handle multiplicity " + newValues.Count); }
-                        if (prefabValues.Count > 1) { Debug.LogError("TODO: handle multiplicity " + prefabValues.Count); }
-
-                        if (oldValues.Count == 0 && newValues.Count != 0 && prefabValues.Count == 0) {
-                            Append(ref typesToUpdate, typename);
-                        }
-                        else if (oldValues.Count != 0 && newValues.Count == 0 && prefabValues.Count != 0) {
-                            Append(ref typesToDestroy, typename);
-                        }
-                        else if (oldValues.Count != 0 && newValues.Count != 0 && prefabValues.Count != 0) {
-                            // Check whether we need to update.
-                            var oldValue = oldValues[0];
-                            var newValue = newValues[0];
-                            var prefabValue = prefabValues[0];
-
-                            if (oldValue != newValue) {
-                                // if oldValue == prefabValue, update.
-                                // if oldValue != prefabValue, conflict =>
-                                //      resolve in favor of Chris, so update
-                                //      anyway.
-                                Append(ref typesToUpdate, typename);
+                        // If we have multiple identical-type components, match them up by index.
+                        // TODO: match them up to minimize the diff instead.
+                        int oldN = oldValues.Count;
+                        int newN = newValues.Count;
+                        for(int i = 0, n = System.Math.Max(oldN, newN); i < n; ++i) {
+                            if (/* isNew */ i < newN) {
+                                var newValue = newValues[i];
+                                if (/* isOld */ i < oldN && oldValues[i] == newValue) {
+                                    // No change from the old => skip.
+                                    continue;
+                                }
+                                if (prefabValues == null) { prefabValues = m_prefab.GetComponentValues(name, typename); }
+                                if (i < prefabValues.Count && prefabValues[i] == newValue) {
+                                    // Already updated => skip.
+                                    continue;
+                                }
+                                Append (m_componentsToUpdate, name,
+                                        new ComponentValue(componentTypes[typename], newValue));
+                            } else {
+                                // Not in the new, but is in the old, so delete
+                                // it if it's not already deleted from the
+                                // prefab.
+                                if (prefabValues == null) { prefabValues = m_prefab.GetComponentValues(name, typename); }
+                                if (i < prefabValues.Count) {
+                                    Append (m_componentsToDestroy, name, componentTypes[typename]);
+                                }
                             }
-                        }
-                    }
-
-                    // Figure out the types so we can destroy them.
-                    if (typesToDestroy != null) {
-                        // TODO: handle monobehaviour in other assemblies
-                        // Sample use: using custom attributes in fbx to drive
-                        // unity behaviour by adding a monobehaviour in an
-                        // assetpostprocessor.
-                        var unityEngine = typeof(Component).Assembly;
-                        foreach (var typename in typesToDestroy) {
-                            var thetype = unityEngine.GetType (typename);
-                            Append (ref m_componentsToDestroy, name, thetype);
-                        }
-                    }
-
-                    // Find the actual components in the new fbx so we can copy them.
-                    if (typesToUpdate != null) {
-                        foreach (var typename in typesToUpdate) {
-                            if (components [name] [typename].Count > 1) {
-                                Debug.LogError (string.Format("todo: multiplicity {0} on {1}:{2}",
-                                    components [name] [typename].Count, name, typename));
-                            }
-                            Append (ref m_componentsToUpdate, name, components [name] [typename] [0]);
                         }
                     }
                 }
@@ -757,7 +732,7 @@ namespace FbxExporters
 
                 ClassifyDestroyCreateNodes();
                 ClassifyReparenting();
-                ClassifyComponents(newFbx);
+                ClassifyComponents(newFbx, prefab.transform);
             }
 
             public bool NeedsUpdates() {
@@ -842,35 +817,30 @@ namespace FbxExporters
                 }
 
                 // Create or update the new components.
-                foreach(var kvp in prefabNodes) {
-                    var name = kvp.Key;
-                    var prefabXfo = kvp.Value;
-                    List<Component> fbxComponents;
-                    if (m_componentsToUpdate.TryGetValue(name, out fbxComponents)) {
-                        // Copy the components once so we can match them up even if there's multiple fbxComponents.
-                        List<Component> prefabComponents = new List<Component>(prefabXfo.GetComponents<Component>());
+                foreach(var kvp in m_componentsToUpdate) {
+                    var nodeName = kvp.Key;
+                    var fbxComponents = kvp.Value;
+                    var prefabXfo = prefabNodes[nodeName];
 
-                        foreach(var fbxComponent in fbxComponents) {
-                            int index = prefabComponents.FindIndex(x => x.GetType() == fbxComponent.GetType());
-                            if (index >= 0) {
-                                // Don't match this index again.
-                                Component prefabComponent = prefabComponents[index];
-                                prefabComponents.RemoveAt(index);
+                    // Copy the components once so we can match them up even if there's multiple fbxComponents.
+                    List<Component> prefabComponents = new List<Component>(prefabXfo.GetComponents<Component>());
 
-                                // Now update it.
-                                if (UnityEditorInternal.ComponentUtility.CopyComponent(fbxComponent)) {
-                                    UnityEditorInternal.ComponentUtility.PasteComponentValues(prefabComponent);
-                                    Log("updated component {0}:{1}", name, fbxComponent.GetType());
-
-                                }
-                            } else {
-                                // We didn't find a match, so create the component as new.
-                                if (UnityEditorInternal.ComponentUtility.CopyComponent(fbxComponent)) {
-                                    UnityEditorInternal.ComponentUtility.PasteComponentAsNew(prefabXfo.gameObject);
-                                    Log("added new component {0}:{1}", name, fbxComponent.GetType());
-                                }
-                            }
+                    foreach(var fbxComponent in fbxComponents) {
+                        // Find or create the component to update.
+                        int index = prefabComponents.FindIndex(x => x.GetType() == fbxComponent.t);
+                        Component prefabComponent;
+                        if (index >= 0) {
+                            // Don't match this index again.
+                            prefabComponent = prefabComponents[index];
+                            prefabComponents.RemoveAt(index);
+                            Log("updated component {0}:{1}", nodeName, fbxComponent.t);
+                        } else {
+                            prefabComponent = prefabXfo.gameObject.AddComponent(fbxComponent.t);
+                            Log("created component {0}:{1}", nodeName, fbxComponent.t);
                         }
+
+                        // Now set the values.
+                        UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponent.jsonValue, prefabComponent);
                     }
                 }
             }
