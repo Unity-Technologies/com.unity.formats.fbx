@@ -85,7 +85,7 @@ namespace FbxExporters
             /// </summary>
             const string UniqueNameFormat = "{0}_{1}";
 
-            private string GetVersionFromReadme()
+            public static string GetVersionFromReadme()
             {
                 if (string.IsNullOrEmpty (ReadmeRelativePath)) {
                     Debug.LogWarning ("Missing relative path to README");

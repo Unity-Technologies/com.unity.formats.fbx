@@ -21,6 +21,12 @@ namespace FbxExporters.EditorTools {
 
             scrollPos = GUILayout.BeginScrollView (scrollPos);
 
+            var version = FbxExporters.Editor.ModelExporter.GetVersionFromReadme ();
+            if (!string.IsNullOrEmpty(version)) {
+                GUILayout.Label ("Version: " + version, EditorStyles.centeredGreyMiniLabel);
+                EditorGUILayout.Space ();
+            }
+
             exportSettings.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", exportSettings.weldVertices);
             exportSettings.embedTextures = EditorGUILayout.Toggle ("Embed Textures:", exportSettings.embedTextures);
             exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
