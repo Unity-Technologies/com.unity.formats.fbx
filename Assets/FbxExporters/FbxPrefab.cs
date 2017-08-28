@@ -59,6 +59,11 @@ namespace FbxExporters
 
         /// <summary>
         /// Utility function: create the object, which must be null.
+        ///
+        /// Used to make sure that we don't use fields before they're
+        /// initialized (for UpdateList): init the fields to null so
+        /// we get an NRE if we try to read them before they're set,
+        /// or an FPE here if we set them before we were supposed to.
         /// </summary>
         public static void Initialize<T>(ref T item) where T: new()
         {
@@ -387,42 +392,66 @@ namespace FbxExporters
         /// </summary>
         public class UpdateList
         {
-
             // We build up a flat list of names for the nodes of the old fbx,
             // the new fbx, and the prefab. We also figure out the parents.
             class Data {
                 // Parent of each node, by name.
                 // The empty-string name is the root of the prefab/fbx.
-                Dictionary<string, string> m_parents;
+                // Never null.
+                Dictionary<string, string> m_parents = new Dictionary<string, string>();
 
                 // Component value by name and type, with multiplicity.
-                // name -> type -> list of value
-                Dictionary<string, Dictionary<string, List<string>>> m_components;
+                // name -> type -> list of value. Never null.
+                Dictionary<string, Dictionary<string, List<string>>> m_components
+                    = new Dictionary<string, Dictionary<string, List<string>>>();
 
-                public Data() {
-                    m_parents = new Dictionary<string, string>();
-                    m_components = new Dictionary<string, Dictionary<string, List<string>>>();
-                }
-
-                public void AddNode(string name, string parent) {
-                    m_parents.Add(name, parent);
-                }
-
-                public void AddComponent(string name, string typename, string jsonValue) {
-                    Append(ref m_components, name, typename, jsonValue);
-                }
-
-                public void AddComponents(string name, string typename, IEnumerable<string> jsonValues) {
-                    // todo: optimize this if needed. We only need to look up through the maps once.
-                    foreach(var jsonValue in jsonValues) {
-                        AddComponent(name, typename, jsonValue);
+                /// <summary>
+                /// Recursively explore the hierarchical representation and
+                /// store it with flat indices.
+                /// </summary>
+                void InitHelper(FbxRepresentation fbxrep, string nodeName)
+                {
+                    foreach(var typename in fbxrep.ComponentTypes) {
+                        var jsonValues = fbxrep.GetComponentValues(typename);
+                        foreach(var jsonValue in jsonValues) {
+                            Append(ref m_components, nodeName, typename, jsonValue);
+                        }
+                    }
+                    foreach(var child in fbxrep.ChildNames) {
+                        m_parents.Add(child, nodeName);
+                        InitHelper(fbxrep.GetChild(child), child);
                     }
                 }
 
+                public Data(FbxRepresentation fbxrep) {
+                    InitHelper(fbxrep, "");
+                }
+
+                public Data(Transform xfo) : this (new FbxRepresentation(xfo)) {
+                }
+
+                /// <summary>
+                /// Get the set of node names.
+                /// </summary>
+                public IEnumerable<string> NodeNames {
+                    get {
+                        // the names are the keys of the name -> parent map
+                        return new HashSet<string>(m_parents.Keys);
+                    }
+                }
+
+                /// <summary>
+                /// Does this data set have a node of this name?
+                /// </summary>
                 public bool HasNode(string name) {
                     return m_parents.ContainsKey(name);
                 }
 
+                /// <summary>
+                /// Get the parent of the node.
+                /// If the parent is the root of the fbx or the prefab,
+                /// returns the empty string.
+                /// </summary>
                 public string GetParent(string name) {
                     string parent;
                     if (m_parents.TryGetValue(name, out parent)) {
@@ -432,6 +461,10 @@ namespace FbxExporters
                     }
                 }
 
+                /// <summary>
+                /// Get all the component types for a given node.
+                /// e.g. UnityEngine.Transform, UnityEngine.BoxCollider, etc.
+                /// </summary>
                 public IEnumerable<string> GetComponentTypes(string name)
                 {
                     Dictionary<string, List<string>> components;
@@ -442,6 +475,11 @@ namespace FbxExporters
                     return components.Keys;
                 }
 
+                /// <summary>
+                /// Get all the component values of a given type for a given node.
+                ///
+                /// Don't modify the list that gets returned.
+                /// </summary>
                 public List<string> GetComponentValues(string name, string typename)
                 {
                     Dictionary<string, List<string>> components;
@@ -453,16 +491,6 @@ namespace FbxExporters
                         return new List<string>();
                     }
                     return jsonValues;
-                }
-
-
-                public static HashSet<string> GetAllNames(params Data [] data) {
-                    var names = new HashSet<string>();
-                    foreach(var d in data) {
-                        // the names are the keys of the name -> parent map
-                        names.UnionWith(d.m_parents.Keys);
-                    }
-                    return names;
                 }
             }
 
@@ -512,48 +540,30 @@ namespace FbxExporters
             /// </summary>
             Dictionary<string, List<Component>> m_componentsToUpdate;
 
-            static void SetupDataHelper(Data data, FbxRepresentation fbxrep, string nodeName)
-            {
-                foreach(var typename in fbxrep.ComponentTypes) {
-                    var jsonValues = fbxrep.GetComponentValues(typename);
-                    data.AddComponents(nodeName, typename, jsonValues);
-                }
-                foreach(var child in fbxrep.ChildNames) {
-                    data.AddNode(child, nodeName);
-                    SetupDataHelper(data, fbxrep.GetChild(child), child);
-                }
-            }
-
-            static void SetupData(ref Data data, FbxRepresentation fbxrep)
-            {
-                Initialize(ref data);
-
-                // The root node has no name
-                SetupDataHelper(data, fbxrep, "");
-            }
-
             void ClassifyDestroyCreateNodes()
             {
                 // Figure out which nodes to add to the prefab, which nodes in the prefab to destroy.
                 Initialize(ref m_nodesToCreate);
                 Initialize(ref m_nodesToDestroy);
-                foreach(var name in Data.GetAllNames(m_old, m_new, m_prefab)) {
+                foreach(var name in m_old.NodeNames.Union(m_new.NodeNames)) {
                     var isOld = m_old.HasNode(name);
                     var isNew = m_new.HasNode(name);
-                    var isPrefab = m_prefab.HasNode(name);
-                    if (isOld && !isNew && isPrefab) {
-                        // This node got deleted in the DCC, so delete it.
-                        m_nodesToDestroy.Add(name);
-                    } else if (!isOld && isNew && !isPrefab) {
-                        // This node was created in the DCC but not in Unity, so create it.
-                        m_nodesToCreate.Add(name);
+                    if (isOld != isNew) {
+                        // A node was added or deleted in the DCC.
+                        // Do the same in Unity if it wasn't already done.
+                        var isPrefab = m_prefab.HasNode(name);
+                        if (!isNew && isPrefab) {
+                            m_nodesToDestroy.Add(name);
+                        } else if (isNew && !isPrefab) {
+                            m_nodesToCreate.Add(name);
+                        }
                     }
                 }
 
                 // Figure out what nodes will exist after we create and destroy.
                 Initialize(ref m_nodesInUpdatedPrefab);
                 m_nodesInUpdatedPrefab.Add(""); // the root is nameless
-                foreach(var node in Data.GetAllNames(m_prefab).Union(m_nodesToCreate)) {
+                foreach(var node in m_prefab.NodeNames.Union(m_nodesToCreate)) {
                     if (m_nodesToDestroy.Contains(node)) {
                         continue;
                     }
@@ -576,7 +586,7 @@ namespace FbxExporters
                 //    x    a     a   => no action
                 //    x    a     b   => conflict! switch to a for now (todo!)
                 //    x    x     a   => no action. Todo: what if a is being destroyed? conflict!
-                foreach(var name in Data.GetAllNames(m_prefab)) {
+                foreach(var name in m_prefab.NodeNames) {
                     if (m_nodesToDestroy.Contains(name)) {
                         // Reparent to null. This is to avoid the nuisance of
                         // trying to destroy objects that are already destroyed
@@ -741,9 +751,9 @@ namespace FbxExporters
                     Transform newFbx,
                     FbxPrefab prefab)
             {
-                SetupData(ref m_old, oldFbx);
-                SetupData(ref m_new, new FbxRepresentation(newFbx));
-                SetupData(ref m_prefab, new FbxRepresentation(prefab.transform));
+                m_old = new Data(oldFbx);
+                m_new = new Data(newFbx);
+                m_prefab = new Data(prefab.transform);
 
                 ClassifyDestroyCreateNodes();
                 ClassifyReparenting();
