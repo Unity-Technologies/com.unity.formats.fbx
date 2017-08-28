@@ -74,7 +74,7 @@ namespace FbxExporters.UnitTests
             // Export it to the same fbx path. But first, wait one second so
             // that its timestamp differs enough for Unity to notice it
             // changed.
-            System.Threading.Thread.Sleep(1000);
+            SleepForFileTimestamp();
             FbxExporters.Editor.ModelExporter.ExportObject(m_fbxPath, newHierarchy);
             AssetDatabase.Refresh();
 
@@ -103,7 +103,7 @@ namespace FbxExporters.PerformanceTests {
             var stopwatch = new System.Diagnostics.Stopwatch ();
             stopwatch.Start();
 
-            // Create 1000 fbx models and 1000 prefabs.
+            // Create N fbx models and N/2 prefabs.
             // Each prefab points to an fbx model.
             //
             // Then modify one fbx model. Shouldn't take longer than 1s.

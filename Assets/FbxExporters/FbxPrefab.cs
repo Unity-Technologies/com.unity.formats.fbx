@@ -424,6 +424,7 @@ namespace FbxExporters
                 }
 
                 public Data(FbxRepresentation fbxrep) {
+                    m_parents.Add("", ""); // the root points to itself
                     InitHelper(fbxrep, "");
                 }
 
@@ -597,8 +598,12 @@ namespace FbxExporters
                 //    x    a     b   => conflict! switch to a for now (todo!)
                 //    x    x     a   => no action. Todo: what if a is being destroyed? conflict!
                 foreach(var name in m_prefab.NodeNames) {
+                    if (name == "") {
+                        // Don't reparent the root.
+                        continue;
+                    }
                     if (m_nodesToDestroy.Contains(name)) {
-                        // Reparent to null. This is to avoid the nuisance of
+                        // Reparent to the root. This is to avoid the nuisance of
                         // trying to destroy objects that are already destroyed
                         // because a parent got there first. Maybe there's a
                         // faster way to do it, but performance seems OK.
@@ -758,10 +763,18 @@ namespace FbxExporters
             /// </summary>
             public void ImplementUpdates(FbxPrefab prefabInstance)
             {
-                // Gather up all the nodes in the prefab.
+                Log("{0}: performing updates", prefabInstance.name);
+
+                // Gather up all the nodes in the prefab so we can look up
+                // nodes. We use the empty string for the root node.
+                var prefabRoot = prefabInstance.transform;
                 var prefabNodes = new Dictionary<string, Transform>();
                 foreach(var node in prefabInstance.GetComponentsInChildren<Transform>()) {
-                    prefabNodes.Add(node.name, node);
+                    if (node == prefabRoot) {
+                        prefabNodes[""] = node;
+                    } else {
+                        prefabNodes.Add(node.name, node);
+                    }
                 }
 
                 // Create new nodes.
@@ -786,7 +799,7 @@ namespace FbxExporters
                     var parent = kvp.Value;
                     Transform parentNode;
                     if (string.IsNullOrEmpty(parent)) {
-                        parentNode = prefabInstance.transform;
+                        parentNode = prefabRoot;
                     } else {
                         parentNode = prefabNodes[parent];
                     }
@@ -801,17 +814,17 @@ namespace FbxExporters
                 }
 
                 // Destroy the old components.
-                foreach(var kvp in prefabNodes) {
-                    var name = kvp.Key;
-                    var xfo = kvp.Value;
-                    List<System.Type> typesToDestroy;
-                    if (m_componentsToDestroy.TryGetValue(name, out typesToDestroy)) {
-                        foreach(var componentType in typesToDestroy) {
-                            var component = xfo.GetComponent(componentType);
-                            if (component != null) {
-                                Object.DestroyImmediate(component);
-                                Log("destroyed component {0}:{1}", xfo.name, componentType);
-                            }
+                foreach(var kvp in m_componentsToDestroy) {
+                    Log("destroying components on {0}", kvp.Key);
+                    var nodeName = kvp.Key;
+                    var typesToDestroy = kvp.Value;
+                    var prefabXfo = prefabNodes[nodeName];
+
+                    foreach(var componentType in typesToDestroy) {
+                        var component = prefabXfo.GetComponent(componentType);
+                        if (component != null) {
+                            Object.DestroyImmediate(component);
+                            Log("destroyed component {0}:{1}", nodeName, componentType);
                         }
                     }
                 }
@@ -880,6 +893,7 @@ namespace FbxExporters
 
             // If we don't need to do anything, jump out now.
             if (!updates.NeedsUpdates()) {
+                Log("{0}: no updates needed", transform.name);
                 return;
             }
 

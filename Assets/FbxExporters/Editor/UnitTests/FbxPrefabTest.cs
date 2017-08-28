@@ -138,7 +138,7 @@ namespace FbxExporters.UnitTests
             // Sleep one second first to make sure the timestamp differs
             // enough, so the asset database knows to reload it. I was getting
             // test failures otherwise.
-            System.Threading.Thread.Sleep(1000);
+            SleepForFileTimestamp();
             FbxExporters.Editor.ModelExporter.ExportObjects (
                     AssetDatabase.GetAssetPath(m_source),
                     new Object[] { newModel } );
@@ -230,6 +230,54 @@ namespace FbxExporters.UnitTests
             m_manualPrefab.GetComponent<FbxPrefab>().SetAutoUpdate(true);
             AssertAreIdentical(newHierarchy, Rep(m_manualPrefab));
             AssertAreIdentical(newHierarchy, History(m_manualPrefab));
+        }
+    }
+
+    public class FbxPrefabRegressions : ExporterTestBase
+    {
+        [Ignore("ConvertToModel return value is messed up.")]
+        [Test]
+        public void TestCubeAtRoot()
+        {
+            // vkovec found a bug when removing a mesh at the root.
+            // bhudson fixed it, let's make sure it stays fixed:
+            // 1. Make a cube
+            // 2. Convert to model
+            // 3. In Maya, make a null named 'Cube' and put it at the root.
+            // 4. Update => meshfilter and meshrenderer should be gone
+
+            // Make a cube.
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.name = "Cube";
+            var cubeAssetPath = GetRandomFbxFilePath();
+            var autoPrefab = FbxExporters.Editor.ConvertToModel.CreateInstantiatedModelPrefab(
+                new GameObject[] { cube }, path: cubeAssetPath)[0];
+            Assert.IsTrue(autoPrefab);
+
+            // Make a maya locator.
+            var locator = new GameObject("Cube");
+            var locatorAssetPath = FbxExporters.Editor.ModelExporter.ExportObject(
+                GetRandomFbxFilePath(), locator);
+
+            // Check the prefab has all the default stuff it should have.
+            Assert.IsNotNull(autoPrefab.GetComponent<MeshFilter>());
+            Assert.IsNotNull(autoPrefab.GetComponent<MeshRenderer>());
+            Assert.IsNotNull(autoPrefab.GetComponent<BoxCollider>());
+
+            // Now copy the locator over and refresh.
+            SleepForFileTimestamp();
+            System.IO.File.Copy(locatorAssetPath, cubeAssetPath, overwrite: true);
+            AssetDatabase.Refresh();
+
+            // Check the prefab lost its mesh filter and renderer.
+            Assert.IsNull(autoPrefab.GetComponent<MeshFilter>());
+            Assert.IsNull(autoPrefab.GetComponent<MeshRenderer>());
+
+            // The box collider is controversial: it got generated
+            // automatically, so shouldn't it be deleted automatically? But
+            // right now it doesn't get deleted, so let's test to make sure a
+            // change in behaviour isn't accidental.
+            Assert.IsNotNull(autoPrefab.GetComponent<BoxCollider>());
         }
     }
 
