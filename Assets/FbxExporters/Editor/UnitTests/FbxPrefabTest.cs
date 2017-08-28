@@ -386,5 +386,62 @@ namespace FbxExporters.UnitTests
                 Assert.AreEqual(quoted, FbxPrefab.FbxRepresentation.EscapeString(unquoted));
             }
         }
+
+        static void TestFbxRepresentationMatches(FbxPrefab.FbxRepresentation repA)
+        {
+            // Look at the top of TestFbxRepresentation for the construction.
+
+            // The root doesn't have the fbxprefab or transform stored -- just the collider
+            Assert.That(repA.ChildNames, Is.EquivalentTo(new string[] { "b" }));
+            Assert.That(repA.ComponentTypes, Is.EquivalentTo(new string[] { "UnityEngine.CapsuleCollider" }));
+            Assert.IsNull(repA.GetComponentValues("UnityEngine.Transform"));
+            Assert.IsNull(repA.GetComponentValues("UnityEngine.FbxPrefab"));
+            Assert.AreEqual(1, repA.GetComponentValues("UnityEngine.CapsuleCollider").Count);
+
+            // The child does have the transform.
+            var repB = repA.GetChild("b");
+            Assert.That(repB.ChildNames, Is.EquivalentTo(new string[] { }));
+            Assert.That(repB.ComponentTypes, Is.EquivalentTo(new string[] {
+                        "UnityEngine.Transform",
+                        "UnityEngine.BoxCollider" }));
+            Assert.AreEqual(1, repB.GetComponentValues("UnityEngine.Transform").Count);
+            Assert.AreEqual(1, repB.GetComponentValues("UnityEngine.BoxCollider").Count);
+
+            // The transform better have the right values.
+            var c = new GameObject("c");
+            EditorJsonUtility.FromJsonOverwrite(
+                    repB.GetComponentValues("UnityEngine.Transform")[0],
+                    c.transform);
+            Assert.AreEqual(new Vector3(1,2,3), c.transform.localPosition);
+
+            // The capsule collider too.
+            var capsule = c.AddComponent<CapsuleCollider>();
+            EditorJsonUtility.FromJsonOverwrite(
+                    repA.GetComponentValues("UnityEngine.CapsuleCollider")[0],
+                    capsule);
+            Assert.AreEqual(4, capsule.height);
+        }
+
+        [Test]
+        public void TestFbxRepresentation()
+        {
+            var a = new GameObject("a");
+            a.AddComponent<FbxPrefab>();
+            var acapsule = a.AddComponent<CapsuleCollider>();
+            acapsule.height = 4;
+
+            var b = new GameObject("b");
+            b.transform.parent = a.transform;
+            b.transform.localPosition = new Vector3(1,2,3);
+            b.AddComponent<BoxCollider>();
+
+            var repA = new FbxPrefab.FbxRepresentation(a.transform);
+            TestFbxRepresentationMatches(repA);
+
+            // Test that we can round-trip through a string.
+            var json = repA.ToJson();
+            var repAstring = new FbxPrefab.FbxRepresentation(json);
+            TestFbxRepresentationMatches(repAstring);
+        }
     }
 }
