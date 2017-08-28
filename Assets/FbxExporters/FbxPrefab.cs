@@ -295,7 +295,7 @@ namespace FbxExporters
             }
 
             public FbxRepresentation(string json) {
-                if (json.Length == 0) { return; }
+                if (string.IsNullOrEmpty(json)) { return; }
                 int index = 0;
                 InitFromJson(json, ref index);
             }
