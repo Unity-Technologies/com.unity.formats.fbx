@@ -54,6 +54,13 @@ namespace FbxExporters.EditorTools {
 
             if (GUILayout.Button ("Browse", EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
                 string initialPath = ExportSettings.GetAbsoluteSavePath();
+
+                // if the directory doesn't exist, set it to the default save path
+                // so we don't open somewhere unexpected
+                if (!System.IO.Directory.Exists (initialPath)) {
+                    initialPath = Application.dataPath;
+                }
+
                 string fullPath = EditorUtility.OpenFolderPanel (
                         "Select Model Prefabs Path", initialPath, null
                         );
@@ -99,7 +106,7 @@ namespace FbxExporters.EditorTools {
     [FilePath("ProjectSettings/FbxExportSettings.asset",FilePathAttribute.Location.ProjectFolder)]
     public class ExportSettings : ScriptableSingleton<ExportSettings>
     {
-        public const string kDefaultSavePath = "Objects";
+        public const string kDefaultSavePath = ".";
 
         // Note: default values are set in LoadDefaults().
         public bool weldVertices;
