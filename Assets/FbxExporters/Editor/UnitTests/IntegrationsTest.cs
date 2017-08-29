@@ -38,7 +38,11 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual (0, exitCode);
 
             // run + quit maya in batch mode
-            RunMaya (mayaVersion.MayaExe);
+            // make sure the plugin loads before quit
+            RunMaya (mayaVersion.MayaExe, "loadPlugin -quiet unityOneClickPlugin");
+
+            // run import command in batch mode
+            RunMaya (mayaVersion.MayaExe, "loadPlugin -quiet unityOneClickPlugin; unityImport");
         }
 
         private void RunMaya(string mayaExe, string command = null, bool batchMode = true)
@@ -49,7 +53,7 @@ namespace FbxExporters.UnitTests
             myProcess.StartInfo.CreateNoWindow = true;
             myProcess.StartInfo.UseShellExecute = false;
 
-            string commands = string.IsNullOrEmpty (command) ? "" : command + "; " + "scriptJob -idleEvent quit;";
+            string commands = (string.IsNullOrEmpty (command) ? "" : command + "; ") + "scriptJob -idleEvent quit;";
             string arguments = (batchMode ? "-batch" : "") + " -command ";
 
 #if UNITY_EDITOR_OSX
