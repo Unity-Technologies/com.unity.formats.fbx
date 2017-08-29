@@ -58,7 +58,10 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         return True
 
     def loadDependencies(self):
-        return self.loadPlugin('GamePipeline.mll') and self.loadPlugin('fbxmaya.mll')
+        if maya.cmds.about(macOS=True):
+            return self.loadPlugin('GamePipeline.bundle') and self.loadPlugin('fbxmaya.bundle')
+        else:
+            return self.loadPlugin('GamePipeline.mll') and self.loadPlugin('fbxmaya.mll')
     
     def loadUnityFbxExportSettings(self):
         """
