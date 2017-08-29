@@ -61,7 +61,7 @@ namespace FbxExporters
 
             private static string GetLastSavedFilePath ()
             {
-                string modelPath = FbxExporters.Editor.Integrations.GetTempSavePath ();
+                string modelPath = Application.dataPath + "/" + TempSavePath;
                 System.IO.FileInfo fileInfo = GetLastSavedFile (modelPath);
 
                 return (fileInfo != null) ? fileInfo.FullName : null;

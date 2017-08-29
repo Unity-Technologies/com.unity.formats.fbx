@@ -64,7 +64,8 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         """
         Load the Export Settings from file
         """
-        fileName = maya.cmds.optionVar(q="UnityFbxExportSettings")
+        projectPath = maya.cmds.optionVar(q="UnityProject")
+        fileName = "{0}/Assets/{1}".format(projectPath, maya.cmds.optionVar(q="UnityFbxExportSettings"))
         if not os.path.isfile(fileName):
             maya.cmds.error("Failed to find Unity Fbx Export Settings at: {0}".format(fileName))
             return False
@@ -149,6 +150,18 @@ class importCmd(BaseCommand):
     def afterImport(self, *args, **kwargs):
         if self._tempPath:
             self.storeAttribute(self._exportSet, self._unityFbxFilePathAttr, self._tempPath)
+            
+            # Change Unity project if fbx is from a different Unity project.
+            # Get the project based on the folder structure (i.e. folder above Assets)
+            splitPath = os.path.split(self._tempPath)
+            # Check that we are not at the root directory.
+            while len(splitPath) == 2 and splitPath[0] and os.path.dirname(splitPath[0]) != splitPath[0]:
+                if splitPath[1] == "Assets" and os.path.exists(splitPath[0]):
+                    # this is a valid Unity project, so set it
+                    maya.cmds.optionVar(sv=('UnityProject', splitPath[0]))
+                    break
+                splitPath = os.path.split(splitPath[0])
+                
         if self._tempName:
             self.storeAttribute(self._exportSet, self._unityFbxFileNameAttr, self._tempName)
     
@@ -218,7 +231,7 @@ class reviewCmd(BaseCommand):
 
         unityAppPath = maya.cmds.optionVar(q='UnityApp')
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
-        unityTempSavePath = maya.cmds.optionVar(q='UnityTempSavePath')
+        unityTempSavePath = "{0}/Assets/{1}".format(unityProjectPath, maya.cmds.optionVar(q='UnityTempSavePath'))
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
         
         if not self.loadUnityFbxExportSettings():
