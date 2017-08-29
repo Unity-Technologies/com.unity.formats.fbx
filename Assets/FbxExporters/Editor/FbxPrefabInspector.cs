@@ -32,14 +32,19 @@ namespace FbxExporters.EditorTools {
                 fbxPrefab.SetSourceModel(newFbxAsset);
             }
 
+            EditorGUI.EndDisabledGroup();
+
 #if FBXEXPORTER_DEBUG
             GUILayout.BeginHorizontal();
             GUILayout.Label ("Debug info:");
-            EditorGUILayout.SelectableLabel(fbxPrefab.GetFbxHistory().ToJson());
+            try {
+                fbxPrefab.GetFbxHistory().ToJson();
+            } catch(System.Exception xcp) {
+                Debug.LogException(xcp);
+            }
+            EditorGUILayout.SelectableLabel(fbxPrefab.GetFbxHistoryString());
             GUILayout.EndHorizontal();
 #endif
-
-            EditorGUI.EndDisabledGroup();
         }
     }
 }
