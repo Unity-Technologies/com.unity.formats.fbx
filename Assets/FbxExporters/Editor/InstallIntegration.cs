@@ -14,7 +14,7 @@ namespace FbxExporters.Editor
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
 
-        private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya2017/scripts/unityFbxExportSettings.mel";
+        private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
 
         public class MayaException : System.Exception {
             public MayaException() { }
@@ -182,7 +182,7 @@ namespace FbxExporters.Editor
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
-        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya"+VERSION_TAG+"/" + MODULE_FILENAME + ".txt";
+        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
 
 #if UNITY_EDITOR_OSX
         private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/"+VERSION_TAG+"/modules";
