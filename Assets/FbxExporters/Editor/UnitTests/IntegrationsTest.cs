@@ -26,6 +26,47 @@ namespace FbxExporters.UnitTests
         }
 
         [Test]
+        public void BatchModeTest() {
+            // test that the commands work in batch mode
+
+            // install maya integration
+            var mayaVersion = new Editor.Integrations.MayaVersion();
+            bool result = Editor.Integrations.InstallMaya (mayaVersion, verbose: true);
+            Assert.IsTrue (result);
+
+            int exitCode = Editor.Integrations.ConfigureMaya (mayaVersion);
+            Assert.AreEqual (0, exitCode);
+
+            // run + quit maya in batch mode
+            RunMaya (mayaVersion.MayaExe);
+        }
+
+        private void RunMaya(string mayaExe, string command = null, bool batchMode = true)
+        {
+            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+            myProcess.StartInfo.FileName = mayaExe;
+            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            myProcess.StartInfo.CreateNoWindow = true;
+            myProcess.StartInfo.UseShellExecute = false;
+
+            string commands = string.IsNullOrEmpty (command) ? "" : command + "; " + "scriptJob -idleEvent quit;";
+            string arguments = (batchMode ? "-batch" : "") + " -command ";
+
+#if UNITY_EDITOR_OSX
+            myProcess.StartInfo.Arguments = string.Format(arguments + "'{0}'", commands);
+#elif UNITY_EDITOR_LINUX
+            throw new NotImplementedException();
+#else // UNITY_EDITOR_WINDOWS
+            myProcess.StartInfo.Arguments = string.Format(arguments + "\"{0}\"", commands);
+#endif
+            myProcess.EnableRaisingEvents = true;
+            myProcess.Start();
+            myProcess.WaitForExit();
+            int exitCode = myProcess.ExitCode;
+            Assert.AreEqual (0, exitCode);
+        }
+
+        [Test]
         public void BasicTest() {
             // Note: This test assumes that Maya is actually installed in a default location.
             Assert.IsTrue(Directory.Exists(Editor.Integrations.MayaVersion.AdskRoot));
