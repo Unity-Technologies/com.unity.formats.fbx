@@ -504,10 +504,15 @@ namespace FbxExporters.Editor
         class IntegrationsUI
         {
             const string MenuItemName1 = "FbxExporters/Install Maya Integration";
+            const string IntegrationZipPath = "FbxExporters/unityoneclick_for_maya.zip";
 
             [MenuItem (MenuItemName1, false, 0)]
             public static void OnMenuItem1 ()
             {
+                // unzip Integration folder
+                DecompressZip(Application.dataPath + "/" + IntegrationZipPath, Application.dataPath + "/TestIntegrations");
+                return;
+
                 var mayaVersion = new Integrations.MayaVersion();
                 if (!Integrations.InstallMaya(mayaVersion, verbose: true)) {
                     return;
@@ -524,6 +529,22 @@ namespace FbxExporters.Editor
                     message = string.Format("Enjoy the new \"Unity\" menu in Maya {0}.", mayaVersion.Version);
                 }
                 UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
+            }
+
+            public static void DecompressZip(string zipPath, string destPath){
+                System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+                myProcess.StartInfo.FileName = string.Format("\"{0}\"", EditorApplication.applicationContentsPath + "/Tools/7z.exe");
+                myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                myProcess.StartInfo.CreateNoWindow = true;
+                myProcess.StartInfo.UseShellExecute = false;
+
+                myProcess.StartInfo.Arguments = string.Format("x \"{0}\" -o\"{1}\" -r -y", zipPath, destPath);
+                myProcess.EnableRaisingEvents = true;
+                myProcess.Start();
+                myProcess.WaitForExit();
+
+                Debug.Log ("ran: " + myProcess.StartInfo.FileName + " " + myProcess.StartInfo.Arguments);
+                Debug.Log ("exported to: " + destPath);
             }
         }
     }
