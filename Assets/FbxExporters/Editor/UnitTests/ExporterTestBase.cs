@@ -121,22 +121,18 @@ namespace FbxExporters.UnitTests
         }
 
         /// <summary>
-        /// Creates a test hierarchy.
-        ///
-        /// No two nodes in the hierarchy have the same name.
+        /// Creates a test hierarchy of cubes.
+        ///      Root
+        ///      -> Parent1
+        ///      ----> Child1
+        ///      ----> Child2
+        ///      -> Parent2
+        ///      ----> Child3
         /// </summary>
         /// <returns>The hierarchy root.</returns>
         public GameObject CreateHierarchy (string rootname = "Root")
         {
-            // Create the following hierarchy:
-            //      Root
-            //      -> Parent1
-            //      ----> Child1
-            //      ----> Child2
-            //      -> Parent2
-            //      ----> Child3
-
-            var root = CreateGameObject (rootname);
+            var root = new GameObject (rootname);
             SetTransform (root.transform,
                 new Vector3 (3, 4, -6),
                 new Vector3 (45, 10, 34),
@@ -180,12 +176,10 @@ namespace FbxExporters.UnitTests
         /// <summary>
         /// Creates a GameObject.
         /// </summary>
-        /// <returns>The created GameObject.</returns>
-        /// <param name="name">Name.</param>
-        /// <param name="parent">Parent.</param>
-        public GameObject CreateGameObject (string name, Transform parent = null)
+        public GameObject CreateGameObject (string name, Transform parent = null, PrimitiveType type = PrimitiveType.Cube)
         {
-            var go = new GameObject (name);
+            var go = GameObject.CreatePrimitive (type);
+            go.name = name;
             go.transform.SetParent (parent);
             return go;
         }
@@ -193,9 +187,13 @@ namespace FbxExporters.UnitTests
         // Helper for the tear-down. This is run from the editor's update loop.
         void DeleteOnNextUpdate()
         {
-            Directory.Delete(filePath, recursive: true);
-            AssetDatabase.Refresh();
             EditorApplication.update -= DeleteOnNextUpdate;
+            try {
+                Directory.Delete(filePath, recursive: true);
+                AssetDatabase.Refresh();
+            } catch(IOException xcp) {
+                // ignore -- something else must have deleted this.
+            }
         }
 
         [TearDown]
