@@ -191,7 +191,7 @@ namespace FbxExporters.UnitTests
             try {
                 Directory.Delete(filePath, recursive: true);
                 AssetDatabase.Refresh();
-            } catch(IOException xcp) {
+            } catch(IOException) {
                 // ignore -- something else must have deleted this.
             }
         }
