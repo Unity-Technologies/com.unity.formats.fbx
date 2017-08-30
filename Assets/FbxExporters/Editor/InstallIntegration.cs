@@ -499,32 +499,26 @@ namespace FbxExporters.Editor
         }
     }
 
-    namespace Editors
+    class IntegrationsUI
     {
-        class IntegrationsUI
+        public static void InstallMayaIntegration ()
         {
-            const string MenuItemName1 = "FbxExporters/Install Maya Integration";
-
-            [MenuItem (MenuItemName1, false, 0)]
-            public static void OnMenuItem1 ()
-            {
-                var mayaVersion = new Integrations.MayaVersion();
-                if (!Integrations.InstallMaya(mayaVersion, verbose: true)) {
-                    return;
-                }
-
-                int exitCode = Integrations.ConfigureMaya (mayaVersion);
-
-                string title, message;
-                if (exitCode != 0) {
-                    title = string.Format("Failed to install Maya {0} Integration.", mayaVersion.Version);
-                    message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
-                } else {
-                    title = string.Format("Completed installation of Maya {0} Integration.", mayaVersion.Version);
-                    message = string.Format("Enjoy the new \"Unity\" menu in Maya {0}.", mayaVersion.Version);
-                }
-                UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
+            var mayaVersion = new Integrations.MayaVersion();
+            if (!Integrations.InstallMaya(mayaVersion, verbose: true)) {
+                return;
             }
+
+            int exitCode = Integrations.ConfigureMaya (mayaVersion);
+
+            string title, message;
+            if (exitCode != 0) {
+                title = string.Format("Failed to install Maya {0} Integration.", mayaVersion.Version);
+                message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
+            } else {
+                title = string.Format("Completed installation of Maya {0} Integration.", mayaVersion.Version);
+                message = string.Format("Enjoy the new \"Unity\" menu in Maya {0}.", mayaVersion.Version);
+            }
+            UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
     }
 }

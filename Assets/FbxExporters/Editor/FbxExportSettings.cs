@@ -98,6 +98,13 @@ namespace FbxExporters.EditorTools {
             );
 
             GUILayout.EndHorizontal ();
+
+
+            EditorGUILayout.Space ();
+            if (GUILayout.Button ("Install Maya Integration")) {
+                FbxExporters.Editor.IntegrationsUI.InstallMayaIntegration ();
+            }
+
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
 
