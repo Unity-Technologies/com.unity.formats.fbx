@@ -185,11 +185,11 @@ namespace FbxExporters.Editor
         private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya"+VERSION_TAG+"/" + MODULE_FILENAME + ".txt";
 
 #if UNITY_EDITOR_OSX
-        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
 #elif UNITY_EDITOR_LINUX
-        private const string MAYA_MODULES_PATH = "Maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "Maya/modules";
 #else
-        private const string MAYA_MODULES_PATH = "maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "maya/modules";
 #endif
 
         private static string GetUserFolder()
