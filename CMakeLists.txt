@@ -73,8 +73,10 @@ add_custom_target(
 set(MAYA_INTEGRATION_TARGET zip_maya_integration)
 set(MAYA_INTEGRATION_ZIP_NAME "unityoneclick_for_maya.zip")
 add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
-        COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
-           "${CMAKE_SOURCE_DIR}/Assets/Integrations"
+    COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
+       "${CMAKE_SOURCE_DIR}/Assets/Integrations"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets
+    COMMENT "Zipping Maya Integration folder"
 )
 add_custom_target(${MAYA_INTEGRATION_TARGET} DEPENDS ${MAYA_INTEGRATION_ZIP_NAME})
 
@@ -88,7 +90,7 @@ add_custom_command(
         COMMENT "Creating Unity Package ${PACKAGE_PATH}"
         DEPENDS ${MAYA_INTEGRATION_TARGET}
     )
-add_custom_target(unitypackage ALL DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET})
+add_custom_target(unitypackage ALL DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${MAYA_INTEGRATION_TARGET})
 
 enable_testing()
 add_test(NAME run-all COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} runEditorTests -quit)
