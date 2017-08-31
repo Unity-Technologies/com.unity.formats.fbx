@@ -603,11 +603,7 @@ namespace FbxExporters
                         continue;
                     }
                     if (m_nodesToDestroy.Contains(name)) {
-                        // Reparent to the root. This is to avoid the nuisance of
-                        // trying to destroy objects that are already destroyed
-                        // because a parent got there first. Maybe there's a
-                        // faster way to do it, but performance seems OK.
-                        m_reparentings.Add(name, "");
+                        // Don't bother reparenting, we'll be destroying this anyway.
                         continue;
                     }
 
@@ -754,16 +750,22 @@ namespace FbxExporters
             /// 1. Create all the new nodes we need to create.
             /// 2. Reparent as needed.
             /// 3. Delete the nodes that are no longer needed.
-            /// todo 4. Update the components:
+            /// 4. Update the components:
             ///    4a. delete components no longer used
             ///    4b. create new components
             ///    4c. update component values
             ///    (A) and (B) are largely about meshfilter/meshrenderer,
             ///    (C) is about transforms (and materials?)
+            ///
+            /// Return the set of GameObject that were created or reparented
+            /// in 1 and 2; or that were updated in 4. Does not return the destroyed
+            /// GameObjects -- they've been destroyed!
             /// </summary>
-            public void ImplementUpdates(FbxPrefab prefabInstance)
+            public HashSet<GameObject> ImplementUpdates(FbxPrefab prefabInstance)
             {
                 Log("{0}: performing updates", prefabInstance.name);
+
+                var updatedNodes = new HashSet<GameObject>();
 
                 // Gather up all the nodes in the prefab so we can look up
                 // nodes. We use the empty string for the root node.
@@ -779,8 +781,11 @@ namespace FbxExporters
 
                 // Create new nodes.
                 foreach(var name in m_nodesToCreate) {
-                    prefabNodes.Add(name, new GameObject(name).transform);
+                    var newNode = new GameObject(name);
+                    prefabNodes.Add(name, newNode.transform);
+
                     Log("{0}: created new GameObject", name);
+                    updatedNodes.Add(newNode);
                 }
 
                 // Implement the reparenting in two phases to avoid making loops, e.g.
@@ -803,14 +808,22 @@ namespace FbxExporters
                     } else {
                         parentNode = prefabNodes[parent];
                     }
-                    prefabNodes[name].parent = parentNode;
+                    var childNode = prefabNodes[name];
+                    childNode.parent = parentNode;
+
                     Log("changed {0} parent to {1}", name, parentNode.name);
+                    updatedNodes.Add(childNode.gameObject);
                 }
 
-                // Destroy the old nodes.
-                foreach(var toDestroy in m_nodesToDestroy) {
-                    GameObject.DestroyImmediate(prefabNodes[toDestroy].gameObject);
-                    Log("destroyed {0}", toDestroy);
+                // Destroy the old nodes. Remember that DestroyImmediate recursively
+                // destroys, so avoid errors.
+                foreach(var nameToDestroy in m_nodesToDestroy) {
+                    var xfoToDestroy = prefabNodes[nameToDestroy];
+                    if (xfoToDestroy) {
+                        GameObject.DestroyImmediate(xfoToDestroy.gameObject);
+                    }
+                    Log("destroyed {0}", nameToDestroy);
+                    prefabNodes.Remove(nameToDestroy);
                 }
 
                 // Destroy the old components.
@@ -819,6 +832,7 @@ namespace FbxExporters
                     var nodeName = kvp.Key;
                     var typesToDestroy = kvp.Value;
                     var prefabXfo = prefabNodes[nodeName];
+                    updatedNodes.Add(prefabXfo.gameObject);
 
                     foreach(var componentType in typesToDestroy) {
                         var component = prefabXfo.GetComponent(componentType);
@@ -834,6 +848,7 @@ namespace FbxExporters
                     var nodeName = kvp.Key;
                     var fbxComponents = kvp.Value;
                     var prefabXfo = prefabNodes[nodeName];
+                    updatedNodes.Add(prefabXfo.gameObject);
 
                     // Copy the components once so we can match them up even if there's multiple fbxComponents.
                     List<Component> prefabComponents = new List<Component>(prefabXfo.GetComponents<Component>());
@@ -856,7 +871,9 @@ namespace FbxExporters
                         UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponent.jsonValue, prefabComponent);
                     }
                 }
+                return updatedNodes;
             }
+
         }
 
         /// <summary>
@@ -903,14 +920,20 @@ namespace FbxExporters
                 throw new System.Exception(string.Format("Failed to instantiate {0}; is it really a prefab?",
                             this.gameObject));
             }
-            var fbxPrefab = prefabInstance.GetComponent<FbxPrefab>();
+            var fbxPrefabInstance = prefabInstance.GetComponent<FbxPrefab>();
 
-            updates.ImplementUpdates(fbxPrefab);
+            // Do ALL the things!
+            var updatedObjects = updates.ImplementUpdates(fbxPrefabInstance);
+
+            // Tell listeners about it. They're free to make adjustments now.
+            if (OnUpdate != null) {
+                OnUpdate(fbxPrefabInstance, updatedObjects);
+            }
 
             // Update the representation of the history to match the new fbx.
             var newFbxRep = new FbxRepresentation(m_fbxModel.transform);
             var newFbxRepString = newFbxRep.ToJson();
-            fbxPrefab.m_fbxHistory = newFbxRepString;
+            fbxPrefabInstance.m_fbxHistory = newFbxRepString;
 
             // Save the changes back to the prefab.
             UnityEditor.PrefabUtility.ReplacePrefab(prefabInstance, this.transform);
@@ -1006,6 +1029,31 @@ namespace FbxExporters
                 CompareAndUpdate();
             }
         }
+
+        //////////////////////////////////////////////////////////////////////////
+        // Event handling for updates.
+
+        /// <summary>
+        /// Handler for an OnUpdate event.
+        ///
+        /// The update is performed on a temporary instance, which, shortly after
+        /// this handler is invoked, will be applied to the prefab.
+        ///
+        /// The event handler can make changes to any objects in the hierarchy rooted
+        /// by the updatedInstance. Those changes will be applied to the prefab.
+        ///
+        /// The updatedObjects include all objects in the temporary instance
+        /// that were created, plus all objects which had a component get
+        /// created, destroyed, or updated. You get notification for objects
+        /// that were destroyed.
+        /// </summary>
+        public delegate void HandleUpdate(FbxPrefab updatedInstance, IEnumerable<GameObject> updatedObjects);
+
+        /// <summary>
+        /// OnUpdate is raised once when an FbxPrefab gets updated, after all the changes
+        /// have been done.
+        /// </summary>
+        public static event HandleUpdate OnUpdate;
 #endif
     }
 }
