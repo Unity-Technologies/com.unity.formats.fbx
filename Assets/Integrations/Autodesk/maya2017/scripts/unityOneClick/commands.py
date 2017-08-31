@@ -135,9 +135,6 @@ class importCmd(BaseCommand):
         if not self.setExists(self._exportSet):
             # couldn't find export set so create it
             maya.cmds.sets(name=self._exportSet)
-        else:    
-            # remove all items from set
-            maya.cmds.sets(clear=self._exportSet)
         
         # reset attribute values, in case import fails
         self.storeAttribute(self._exportSet, self._unityFbxFilePathAttr, "")
@@ -155,10 +152,12 @@ class importCmd(BaseCommand):
         if self.setExists(self._exportSet):
             # figure out what has been added after import
             itemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
+
             newItems = list(set(itemsInScene) - set(self._origItemsInScene))
             
             # add newly imported items to set
-            maya.cmds.sets(newItems, add=self._exportSet)
+            if len(newItems) > 0:
+                maya.cmds.sets(newItems, include=self._exportSet)
 
     def doIt(self, args):
         self.loadDependencies()
