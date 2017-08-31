@@ -13,4 +13,4 @@
 #
 ########################################################################
 
-+ unityoneclick {Version} {UnityProject}/Assets/Integrations/Autodesk/maya2017
++ unityoneclick {Version} {UnityProject}/Assets/Integrations/Autodesk/maya
