@@ -873,7 +873,6 @@ namespace FbxExporters
                 }
                 return updatedNodes;
             }
-
         }
 
         /// <summary>

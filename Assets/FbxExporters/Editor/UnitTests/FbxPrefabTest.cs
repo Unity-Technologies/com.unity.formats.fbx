@@ -137,10 +137,6 @@ namespace FbxExporters.UnitTests
                 m_autoPrefab = PrefabUtility.CreatePrefab(
                         GetRandomPrefabAssetPath(),
                         prefabInstance);
-
-                // Add an event listener to store the name of auto-updated nodes,
-                // if it's the autoPrefab.
-
             }
 
             // Create an FbxPrefab linked to the same Fbx file. Make it NOT auto-update.
@@ -153,8 +149,6 @@ namespace FbxExporters.UnitTests
                         GetRandomPrefabAssetPath(),
                         prefabInstance);
             }
-
-
         }
 
         FbxPrefab.FbxRepresentation Rep(GameObject go) {
