@@ -1,5 +1,52 @@
 RELEASE NOTES
 
+**Version**: 0.0.12a
+
+NEW FEATURES
+
+* Show FbxExporter package version in Fbx Export Settings
+
+* Fbx Prefab auto-updater updates transforms and components
+
+* Move Autoload Last Saved Prefab menu item to Fbx Export Settings
+
+Now loading the turntable scene with the latest prefab can be done via a button
+in the Fbx Export Settings
+
+* Maya Integration: Unity->Import starting directory is Unity Project
+
+Instead of opening in the default Maya project
+
+* Maya Integration: Install Maya Integration menu item moved into Fbx Export Settings
+
+Now installing the maya integration can be done via a button
+in the Fbx Export Settings
+
+* Maya Integration: Hide Configure button, guess Unity project on Unity->Import
+
+On Unity->Import try to guess which Unity project we are loading the fbx from (if any), set it to be the project we
+use in Maya if found, do nothing otherwise.
+
+* Fbx Exporter: Allow GameObjects and/or components to specify the mesh to export
+
+Added callbacks to allow the GameObject or components to specify the mesh that should be exported, fallback
+to using the MeshFilter or SkinnedMeshRenderer meshes.
+
+* Fbx Prefab: Added on update event that returns which GameObjects were updated
+
+The returned objects include all objects in the temporary instance that were created, changed parent, or had a component
+that was created, destroyed, or updated. 
+The event happens before changes are applied to the prefab, so any further modification of the returned GameObjects
+will be applied as well.
+
+FIXES
+
+* Export Settings: make sure export path always points to an existing folder in assets
+* Maya Integration: fix using Unity->Import to import the same model twice clears export set the second time
+* Maya Integration: fix fbxmaya and GamePipeline plugins not being autoloaded on Mac
+* Maya Integration: remove version number from maya integration folder
+* Maya Integration: module file installed into Maya version independent location
+
 **Version**: 0.0.11a
 
 NEW FEATURES
