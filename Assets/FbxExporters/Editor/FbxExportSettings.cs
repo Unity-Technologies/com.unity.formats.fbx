@@ -98,6 +98,13 @@ namespace FbxExporters.EditorTools {
             );
 
             GUILayout.EndHorizontal ();
+
+            EditorGUILayout.Space ();
+            if (GUILayout.Button (new GUIContent ("Auto Review",
+                "Opens turntable review of last saved prefab."))) {
+                FbxExporters.Review.TurnTable.LastSavedModel ();
+            }
+
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
 

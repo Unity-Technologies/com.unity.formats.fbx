@@ -14,8 +14,6 @@ namespace FbxExporters
         [UnityEditor.InitializeOnLoad]
         public class TurnTable
         {
-            const string MenuItemName = "FbxExporters/Turntable Review/Autoload Last Saved Prefab";
-
             const string DefaultScenesPath = "Assets";
             const string DefaultSceneName = "FbxExporters_TurnTableReview";
 
@@ -25,12 +23,6 @@ namespace FbxExporters
 
             static string LastFilePath = null;
             static Object LastModel = null;
-
-            [UnityEditor.MenuItem (MenuItemName, false, 10)]
-            public static void OnMenu ()
-            {
-                LastSavedModel ();
-            }
 
             private static System.IO.FileInfo GetLastSavedFile (string directoryPath, string ext = ".fbx")
             {
