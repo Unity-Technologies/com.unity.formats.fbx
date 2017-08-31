@@ -208,6 +208,7 @@ namespace FbxExporters.UnitTests
                 AssertAreIdentical(m_originalRep, History(m_manualPrefab));
 
                 // Make sure we got the right changes.
+                Assert.AreEqual (1, updateSet.NumUpdates);
                 Assert.That (updateSet.Updated, Is.EquivalentTo (new string [] {
                     // TODO: UNI-24579 - we should only be seeing Parent3 here,
                     // the other two are for transform changes, but

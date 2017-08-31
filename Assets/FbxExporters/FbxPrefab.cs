@@ -1042,9 +1042,11 @@ namespace FbxExporters
         /// by the updatedInstance. Those changes will be applied to the prefab.
         ///
         /// The updatedObjects include all objects in the temporary instance
-        /// that were created, plus all objects which had a component get
-        /// created, destroyed, or updated. You get notification for objects
-        /// that were destroyed.
+        /// that were:
+        /// - created, or
+        /// - changed parent, or
+        /// - had a component that was created, destroyed, or updated.
+        /// There is no notification for entire objects that were destroyed.
         /// </summary>
         public delegate void HandleUpdate(FbxPrefab updatedInstance, IEnumerable<GameObject> updatedObjects);
 
