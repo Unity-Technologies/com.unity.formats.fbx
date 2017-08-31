@@ -177,6 +177,12 @@ class importCmd(BaseCommand):
 
     def doIt(self, args):
         self.loadDependencies()
+        
+        # set Unity project as the current workspace
+        currWorkspace = maya.cmds.workspace(o=True, q=True)
+        unityProject = maya.cmds.optionVar(q='UnityProject')
+        if unityProject:
+            maya.cmds.workspace(unityProject, o=True)
     
         self._tempPath = None
         self._tempName = None
@@ -191,6 +197,9 @@ class importCmd(BaseCommand):
 
         OpenMaya.MMessage.removeCallback(callbackId)
         OpenMaya.MMessage.removeCallback(callbackId2)
+        
+        if currWorkspace:
+            maya.cmds.workspace(currWorkspace, o=True)
                 
     @classmethod
     def invoke(cls):

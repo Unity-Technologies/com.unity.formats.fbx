@@ -8,9 +8,6 @@ global proc configureUnityOneClick(
     optionVar -stringValue "UnityTempSavePath" $unityTempSavePath;
     optionVar -stringValue "UnityFbxExportSettings" $unityFbxExportSettings;
     optionVar -intValue "UnityOneClick_Headless" $headless;
-    
-    // set project as the current workspace
-    workspace -o $unityProject;
 
     // configure auto load of plugin
     if (`pluginInfo -q -loaded unityOneClickPlugin` == false)
