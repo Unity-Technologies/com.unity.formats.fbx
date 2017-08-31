@@ -8,6 +8,10 @@ NEW FEATURES
 
 * Fbx Prefab auto-updater updates transforms and components
 
+If components are added/removed in Maya, the changes will be reflected in Unity (e.g. if a mesh is removed from a node,
+the MeshFilter and MeshRenderer components will be removed in Unity as well.
+Updating the translation/rotation/scale of a transform in Maya will update the transform in the Unity prefab.
+
 * Move Autoload Last Saved Prefab menu item to Fbx Export Settings
 
 Now loading the turntable scene with the latest prefab can be done via a button
