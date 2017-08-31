@@ -153,14 +153,16 @@ class importCmd(BaseCommand):
             
             # Change Unity project if fbx is from a different Unity project.
             # Get the project based on the folder structure (i.e. folder above Assets)
-            splitPath = os.path.split(self._tempPath)
+            head,tail = os.path.split(self._tempPath)
             # Check that we are not at the root directory.
-            while len(splitPath) == 2 and splitPath[0] and os.path.dirname(splitPath[0]) != splitPath[0]:
-                if splitPath[1] == "Assets" and os.path.exists(splitPath[0]):
+            # os.path.dirname(head) returns the last directory name in the path, 
+            # or head if head is the root directory.
+            while head and os.path.dirname(head) != head:
+                if tail == "Assets":
                     # this is a valid Unity project, so set it
-                    maya.cmds.optionVar(sv=('UnityProject', splitPath[0]))
+                    maya.cmds.optionVar(sv=('UnityProject', head))
                     break
-                splitPath = os.path.split(splitPath[0])
+                head,tail = os.path.split(head)
                 
         if self._tempName:
             self.storeAttribute(self._exportSet, self._unityFbxFileNameAttr, self._tempName)
