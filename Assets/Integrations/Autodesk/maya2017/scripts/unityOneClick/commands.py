@@ -58,10 +58,18 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         return True
 
     def loadDependencies(self):
+        # GamePipeline plugin 'SendToUnitySelection' command used in Publish
+        pluginsToLoad = ['GamePipeline', 'fbxmaya']
+        
+        ext = "mll"
         if maya.cmds.about(macOS=True):
-            return self.loadPlugin('GamePipeline.bundle') and self.loadPlugin('fbxmaya.bundle')
-        else:
-            return self.loadPlugin('GamePipeline.mll') and self.loadPlugin('fbxmaya.mll')
+            ext = "bundle"
+            
+        # iterate over all the plugins, loading them with extenstion ext, and combining the results
+        # to return if any of the loads failed
+        return reduce((lambda result, plugin: result and self.loadPlugin("{0}.{1}".format(plugin, ext))),
+                        pluginsToLoad,
+                        True)
     
     def loadUnityFbxExportSettings(self):
         """
