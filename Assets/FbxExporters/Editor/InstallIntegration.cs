@@ -185,11 +185,11 @@ namespace FbxExporters.Editor
         private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
 
 #if UNITY_EDITOR_OSX
-        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
 #elif UNITY_EDITOR_LINUX
-        private const string MAYA_MODULES_PATH = "Maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "Maya/modules";
 #else
-        private const string MAYA_MODULES_PATH = "maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "maya/modules";
 #endif
 
         private static string GetUserFolder()
@@ -248,17 +248,17 @@ namespace FbxExporters.Editor
 
         public static string GetTempSavePath()
         {
-            return System.IO.Path.Combine(Application.dataPath, FbxExporters.Review.TurnTable.TempSavePath).Replace("\\", "/");
+            return FbxExporters.Review.TurnTable.TempSavePath.Replace("\\", "/");
         }
 
         /// <summary>
         /// Gets the path to the export settings file.
-        /// Returns an absolute path with forward slashes as path separators.
+        /// Returns a relative path with forward slashes as path separators.
         /// </summary>
         /// <returns>The export settings path.</returns>
         public static string GetExportSettingsPath()
         {
-            return Application.dataPath + '/' + FBX_EXPORT_SETTINGS_PATH;
+            return FBX_EXPORT_SETTINGS_PATH;
         }
 
         public static string GetPackageVersion()
@@ -499,32 +499,26 @@ namespace FbxExporters.Editor
         }
     }
 
-    namespace Editors
+    class IntegrationsUI
     {
-        class IntegrationsUI
+        public static void InstallMayaIntegration ()
         {
-            const string MenuItemName1 = "FbxExporters/Install Maya Integration";
-
-            [MenuItem (MenuItemName1, false, 0)]
-            public static void OnMenuItem1 ()
-            {
-                var mayaVersion = new Integrations.MayaVersion();
-                if (!Integrations.InstallMaya(mayaVersion, verbose: true)) {
-                    return;
-                }
-
-                int exitCode = Integrations.ConfigureMaya (mayaVersion);
-
-                string title, message;
-                if (exitCode != 0) {
-                    title = string.Format("Failed to install Maya {0} Integration.", mayaVersion.Version);
-                    message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
-                } else {
-                    title = string.Format("Completed installation of Maya {0} Integration.", mayaVersion.Version);
-                    message = string.Format("Enjoy the new \"Unity\" menu in Maya {0}.", mayaVersion.Version);
-                }
-                UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
+            var mayaVersion = new Integrations.MayaVersion();
+            if (!Integrations.InstallMaya(mayaVersion, verbose: true)) {
+                return;
             }
+
+            int exitCode = Integrations.ConfigureMaya (mayaVersion);
+
+            string title, message;
+            if (exitCode != 0) {
+                title = string.Format("Failed to install Maya {0} Integration.", mayaVersion.Version);
+                message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
+            } else {
+                title = string.Format("Completed installation of Maya {0} Integration.", mayaVersion.Version);
+                message = string.Format("Enjoy the new \"Unity\" menu in Maya {0}.", mayaVersion.Version);
+            }
+            UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
     }
 }
