@@ -59,6 +59,11 @@ namespace FbxExporters
                 return System.IO.Path.Combine (DefaultScenesPath, DefaultSceneName + ".unity");
             }
 
+            /// <summary>
+            /// Gets the last saved file path as a Unity-style (only forward slashes)
+            /// absolute path.
+            /// </summary>
+            /// <returns>The last saved file path.</returns>
             private static string GetLastSavedFilePath ()
             {
                 string modelPath = Application.dataPath + "/" + TempSavePath;

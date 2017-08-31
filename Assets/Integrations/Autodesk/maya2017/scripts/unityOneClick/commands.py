@@ -65,7 +65,7 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         Load the Export Settings from file
         """
         projectPath = maya.cmds.optionVar(q="UnityProject")
-        fileName = "{0}/Assets/{1}".format(projectPath, maya.cmds.optionVar(q="UnityFbxExportSettings"))
+        fileName = os.path.join(projectPath,"Assets", maya.cmds.optionVar(q="UnityFbxExportSettings"))
         if not os.path.isfile(fileName):
             maya.cmds.error("Failed to find Unity Fbx Export Settings at: {0}".format(fileName))
             return False
@@ -231,7 +231,7 @@ class reviewCmd(BaseCommand):
 
         unityAppPath = maya.cmds.optionVar(q='UnityApp')
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
-        unityTempSavePath = "{0}/Assets/{1}".format(unityProjectPath, maya.cmds.optionVar(q='UnityTempSavePath'))
+        unityTempSavePath = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityTempSavePath'))
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
         
         if not self.loadUnityFbxExportSettings():
@@ -249,8 +249,10 @@ class reviewCmd(BaseCommand):
         # save fbx to Assets/_safe_to_delete/
         savePath = unityTempSavePath
         maya.cmds.sysFile(savePath, makeDir=True)
-        savePath = savePath + "/TurnTableModel.fbx"
-        maya.mel.eval(r'file -force -options "" -typ "FBX export" -pr -es "{0}"'.format(savePath));
+        savePath = os.path.join(savePath, "TurnTableModel.fbx")
+        savePath = os.path.abspath(savePath)
+        
+        maya.cmds.file(savePath, force=True, options="", typ="FBX export", pr=True, es=True)
         
         if maya.cmds.about(macOS=True):
             # Use 'open -a' to bring app to front if it has already been started.
