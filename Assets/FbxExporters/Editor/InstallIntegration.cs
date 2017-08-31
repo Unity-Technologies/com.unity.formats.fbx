@@ -248,17 +248,17 @@ namespace FbxExporters.Editor
 
         public static string GetTempSavePath()
         {
-            return System.IO.Path.Combine(Application.dataPath, FbxExporters.Review.TurnTable.TempSavePath).Replace("\\", "/");
+            return FbxExporters.Review.TurnTable.TempSavePath.Replace("\\", "/");
         }
 
         /// <summary>
         /// Gets the path to the export settings file.
-        /// Returns an absolute path with forward slashes as path separators.
+        /// Returns a relative path with forward slashes as path separators.
         /// </summary>
         /// <returns>The export settings path.</returns>
         public static string GetExportSettingsPath()
         {
-            return Application.dataPath + '/' + FBX_EXPORT_SETTINGS_PATH;
+            return FBX_EXPORT_SETTINGS_PATH;
         }
 
         public static string GetPackageVersion()
