@@ -19,12 +19,15 @@ in the Fbx Export Settings
 
 * Maya Integration: Unity->Import starting directory is Unity Project
 
-Instead of opening in the default Maya project
+Instead of opening in the default Maya project. A side effect of this is that a workspace.mel file
+gets added to the Unity project root.
 
 * Maya Integration: Install Maya Integration menu item moved into Fbx Export Settings
 
 Now installing the maya integration can be done via a button
 in the Fbx Export Settings
+
+* Fbx Exporter menu removed from main menu bar
 
 * Maya Integration: Hide Configure button, guess Unity project on Unity->Import
 
@@ -36,7 +39,7 @@ use in Maya if found, do nothing otherwise.
 Added callbacks to allow the GameObject or components to specify the mesh that should be exported, fallback
 to using the MeshFilter or SkinnedMeshRenderer meshes.
 
-* Fbx Prefab: Added on update event that returns which GameObjects were updated
+* Fbx Prefab: Added OnUpdate event that returns which GameObjects were updated
 
 The returned objects include all objects in the temporary instance that were created, changed parent, or had a component
 that was created, destroyed, or updated. 
