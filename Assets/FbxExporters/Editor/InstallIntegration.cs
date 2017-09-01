@@ -182,7 +182,7 @@ namespace FbxExporters.Editor
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
-        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
+        public const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
 
 #if UNITY_EDITOR_OSX
         private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
@@ -508,18 +508,7 @@ namespace FbxExporters.Editor
 
         public static void InstallMayaIntegration ()
         {
-            // prompt user to enter location to unzip file
-            var unzipFolder = EditorUtility.OpenFolderPanel("Select Location to Save Maya Integration",LastIntegrationSavePath,"");
-            Debug.Log (unzipFolder);
-
-            // check that this is a valid location to unzip the file
-
-
-            // if file already unzipped in this location, then prompt user
-            // if they would like to continue unzipping or use what is there
-
-            // unzip Integration folder
-            DecompressZip(Application.dataPath + "/" + IntegrationZipPath, Application.dataPath + "/TestIntegrations");
+            DecompressIntegrationZipFile ();
             return;
 
             var mayaVersion = new Integrations.MayaVersion();
@@ -540,19 +529,74 @@ namespace FbxExporters.Editor
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
 
-        private static bool hasWriteAccessToFolder(string folderPath)
+        private static void DecompressIntegrationZipFile()
         {
-            try
-            {
-                // Attempt to get a list of security permissions from the folder. 
-                // This will raise an exception if the path is read only or do not have access to view the permissions. 
-                System.Security.AccessControl.DirectorySecurity ds = System.IO.Directory.GetAccessControl(folderPath);
-                return true;
+            // prompt user to enter location to unzip file
+            var unzipFolder = EditorUtility.OpenFolderPanel("Select Location to Save Maya Integration",LastIntegrationSavePath,"");
+            Debug.Log (unzipFolder);
+
+            // check that this is a valid location to unzip the file
+            if (!DirectoryHasWritePermission (unzipFolder)) {
+                // display dialog to try again or cancel
+                var result = UnityEditor.EditorUtility.DisplayDialog ("No Write Permission",
+                    string.Format("Directory \"{0}\" does not have write access", unzipFolder),
+                    "Select another Directory", 
+                    "Cancel"
+                );
+
+                if (result) {
+                    InstallMayaIntegration ();
+                } else {
+                    return;
+                }
             }
-            catch (UnauthorizedAccessException)
-            {
+
+            LastIntegrationSavePath = unzipFolder;
+
+            // if file already unzipped in this location, then prompt user
+            // if they would like to continue unzipping or use what is there
+            if (FolderAlreadyUnzippedAtPath (unzipFolder)) {
+                var result = UnityEditor.EditorUtility.DisplayDialogComplex ("Integrations Exist at Path",
+                    string.Format ("Directory \"{0}\" already contains the decompressed integration", unzipFolder),
+                    "Overwrite", 
+                    "Use Existing",
+                    "Cancel"
+                );
+
+                if (result == 0) {
+                    DecompressZip (Application.dataPath + "/" + IntegrationZipPath, unzipFolder);
+                } else if (result == 2) {
+                    return;
+                }
+            } else {
+                // unzip Integration folder
+                DecompressZip (Application.dataPath + "/" + IntegrationZipPath, unzipFolder);
+            }
+        }
+
+        /// <summary>
+        /// Determines if folder is already unzipped at the specified path
+        /// by checking if unityoneclick.txt exists at expected location.
+        /// </summary>
+        /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
+        /// <param name="path">Path.</param>
+        public static bool FolderAlreadyUnzippedAtPath(string path)
+        {
+            return System.IO.File.Exists (System.IO.Path.Combine (path, Integrations.MODULE_TEMPLATE_PATH));
+        }
+
+        /// <summary>
+        /// Check if the directory has write permission.
+        /// TODO: find a way to do this that works in Unity
+        /// </summary>
+        /// <returns><c>true</c>, if has write permission was directoryed, <c>false</c> otherwise.</returns>
+        /// <param name="path">Path.</param>
+        public static bool DirectoryHasWritePermission(string path)
+        {
+            if (!System.IO.Directory.Exists (path)) {
                 return false;
             }
+            return true;
         }
 
         public static void DecompressZip(string zipPath, string destPath){
