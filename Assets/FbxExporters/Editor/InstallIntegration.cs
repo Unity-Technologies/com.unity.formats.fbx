@@ -623,13 +623,15 @@ namespace FbxExporters.Editor
             myProcess.StartInfo.CreateNoWindow = true;
             myProcess.StartInfo.UseShellExecute = false;
 
+            // Command line flags used:
+            // x : extract the zip contents so that they maintain the file hierarchy
+            // -o : specify where to extract contents
+            // -r : recurse subdirectories
+            // -y : auto yes to all questions (without this Unity freezes as the process waits for a response)
             myProcess.StartInfo.Arguments = string.Format("x \"{0}\" -o\"{1}\" -r -y", zipPath, destPath);
             myProcess.EnableRaisingEvents = true;
             myProcess.Start();
             myProcess.WaitForExit();
-
-            Debug.Log ("ran: " + myProcess.StartInfo.FileName + " " + myProcess.StartInfo.Arguments);
-            Debug.Log ("exported to: " + destPath);
         }
     }
 }
