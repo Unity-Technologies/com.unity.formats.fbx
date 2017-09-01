@@ -13,44 +13,8 @@ using System.Collections.Generic;
 
 namespace FbxExporters.UnitTests
 {
-    public class ModelExporterTest
+    public class ModelExporterTest : ExporterTestBase
     {
-        // add any GameObject that gets created to this list
-        // so that it gets deleted in the TearDown
-        private List<GameObject> m_createdObjects;
-
-        [SetUp]
-        public void Init()
-        {
-            m_createdObjects = new List<GameObject> ();
-        }
-
-        [TearDown]
-        public void Term()
-        {
-            foreach (var obj in m_createdObjects) {
-                GameObject.DestroyImmediate (obj);
-            }
-        }
-
-        /// <summary>
-        /// Creates a GameObject.
-        /// Adds the object to the list of objects to be deleted
-        /// on TearDown.
-        /// </summary>
-        /// <returns>The game object.</returns>
-        /// <param name="name">Name.</param>
-        /// <param name="parent">Parent.</param>
-        /// <param name="type">Primitive Type.</param>
-        private GameObject CreateGameObject (string name, Transform parent = null, PrimitiveType type = PrimitiveType.Cube)
-        {
-            var go = GameObject.CreatePrimitive (type);
-            go.name = name;
-            go.transform.SetParent (parent);
-            m_createdObjects.Add (go);
-            return go;
-        }
-
         [Test]
         public void TestFindCenter ()
         {
@@ -136,6 +100,149 @@ namespace FbxExporters.UnitTests
 #else
             Assert.AreEqual ("foo$?ba%r 2.fbx", result);
 #endif
+        }
+
+        class CallbackTester {
+            public string filename;
+            public Transform tree;
+
+            int componentCalls;
+            int objectCalls;
+            bool objectResult;
+
+            public CallbackTester(Transform t, string f) {
+                filename = f;
+                tree = t;
+            }
+
+            public bool CallbackForFbxPrefab(FbxPrefab component, out Mesh mesh) {
+                componentCalls++;
+                mesh = null;
+                return true;
+            }
+
+            public bool CallbackForObject(GameObject go, out Mesh mesh) {
+                objectCalls++;
+                mesh = null;
+                return objectResult;
+            }
+
+            public void Verify(int cCalls, int goCalls, bool objectResult = false) {
+                componentCalls = 0;
+                objectCalls = 0;
+                this.objectResult = objectResult;
+
+                FbxExporters.Editor.ModelExporter.ExportObject(filename, tree);
+
+                Assert.AreEqual(cCalls, componentCalls);
+                Assert.AreEqual(goCalls, objectCalls);
+            }
+        }
+
+        [Test]
+        public void TestExporterCallbacks()
+        {
+            var tree = CreateHierarchy();
+            var tester = new CallbackTester(tree.transform, GetRandomFbxFilePath());
+            var n = tree.GetComponentsInChildren<Transform>().Length;
+
+            // No callbacks registered => no calls.
+            tester.Verify(0, 0);
+
+            FbxExporters.Editor.ModelExporter.RegisterMeshObjectCallback(tester.CallbackForObject);
+            FbxExporters.Editor.ModelExporter.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab);
+
+            // No fbprefab => no component calls, but every object called.
+            tester.Verify(0, n);
+
+            // Add a fbxprefab, check every object called and the prefab called.
+            tree.transform.Find("Parent1").gameObject.AddComponent<FbxPrefab>();
+            tester.Verify(1, n);
+
+            // Make the object report it's replacing everything => no component calls.
+            tester.Verify(0, n, objectResult: true);
+
+            // Make sure we can't register for a component twice, but we can
+            // for an object.  Register twice for an object means two calls per
+            // object.
+            Assert.That( () => FbxExporters.Editor.ModelExporter.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab),
+                    Throws.Exception);
+            FbxExporters.Editor.ModelExporter.RegisterMeshObjectCallback(tester.CallbackForObject);
+            tester.Verify(1, 2 * n);
+
+            // Register twice but return true => only one call per object.
+            tester.Verify(0, n, objectResult: true);
+
+            // Unregister once => only one call per object, and no more for the prefab.
+            FbxExporters.Editor.ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
+            FbxExporters.Editor.ModelExporter.UnRegisterMeshCallback(tester.CallbackForObject);
+            tester.Verify(0, n);
+
+            // Legal to unregister if already unregistered.
+            FbxExporters.Editor.ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
+            tester.Verify(0, n);
+
+            // Register same callback twice gets back to original state.
+            FbxExporters.Editor.ModelExporter.UnRegisterMeshCallback(tester.CallbackForObject);
+            tester.Verify(0, 0);
+
+            // Legal to unregister if already unregistered.
+            FbxExporters.Editor.ModelExporter.UnRegisterMeshCallback(tester.CallbackForObject);
+            tester.Verify(0, 0);
+
+            ///////////////////////
+            // Test that the callbacks not only get called, but can replace
+            // meshes.
+            var sphere = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            var sphereMesh = sphere.GetComponent<MeshFilter>().sharedMesh;
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var cubeMesh = cube.GetComponent<MeshFilter>().sharedMesh;
+
+            // Pick on the fbxprefab to output a sphere in place of the cube.
+            // the fbxprefab is on parent1.
+            string filename;
+            GameObject asset;
+            Mesh assetMesh;
+
+            FbxExporters.Editor.ModelExporter.GetMeshForComponent<FbxPrefab> prefabCallback =
+                (FbxPrefab component, out Mesh mesh) => {
+                    mesh = sphereMesh;
+                    return true;
+                };
+            FbxExporters.Editor.ModelExporter.RegisterMeshCallback(prefabCallback);
+            filename = GetRandomFbxFilePath();
+            FbxExporters.Editor.ModelExporter.ExportObject(filename, tree);
+            FbxExporters.Editor.ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
+
+            asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            assetMesh = asset.transform.Find("Parent1").GetComponent<MeshFilter>().sharedMesh;
+            Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
+            assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
+            Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
+
+            // Try again, but this time pick on Parent2 by name (different just
+            // to make sure we don't pass if the previous pass didn't
+            // actually unregister).
+            filename = GetRandomFbxFilePath();
+            FbxExporters.Editor.ModelExporter.GetMeshForObject callback =
+                (GameObject gameObject, out Mesh mesh) => {
+                    if (gameObject.name == "Parent2") {
+                        mesh = sphereMesh;
+                        return true;
+                    } else {
+                        mesh = null;
+                        return false;
+                    }
+                };
+            FbxExporters.Editor.ModelExporter.RegisterMeshObjectCallback(callback);
+            FbxExporters.Editor.ModelExporter.ExportObject(filename, tree);
+            FbxExporters.Editor.ModelExporter.UnRegisterMeshCallback(callback);
+
+            asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            assetMesh = asset.transform.Find("Parent1").GetComponent<MeshFilter>().sharedMesh;
+            Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
+            assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
+            Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
         }
     }
 }

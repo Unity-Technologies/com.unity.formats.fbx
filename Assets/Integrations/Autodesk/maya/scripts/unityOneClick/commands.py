@@ -58,13 +58,25 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         return True
 
     def loadDependencies(self):
-        return self.loadPlugin('GamePipeline.mll') and self.loadPlugin('fbxmaya.mll')
+        # GamePipeline plugin 'SendToUnitySelection' command used in Publish
+        pluginsToLoad = ['GamePipeline', 'fbxmaya']
+        
+        ext = "mll"
+        if maya.cmds.about(macOS=True):
+            ext = "bundle"
+            
+        # iterate over all the plugins, loading them with extenstion ext, and combining the results
+        # to return if any of the loads failed
+        return reduce((lambda result, plugin: result and self.loadPlugin("{0}.{1}".format(plugin, ext))),
+                        pluginsToLoad,
+                        True)
     
     def loadUnityFbxExportSettings(self):
         """
         Load the Export Settings from file
         """
-        fileName = maya.cmds.optionVar(q="UnityFbxExportSettings")
+        projectPath = maya.cmds.optionVar(q="UnityProject")
+        fileName = os.path.join(projectPath,"Assets", maya.cmds.optionVar(q="UnityFbxExportSettings"))
         if not os.path.isfile(fileName):
             maya.cmds.error("Failed to find Unity Fbx Export Settings at: {0}".format(fileName))
             return False
@@ -135,9 +147,6 @@ class importCmd(BaseCommand):
         if not self.setExists(self._exportSet):
             # couldn't find export set so create it
             maya.cmds.sets(name=self._exportSet)
-        else:    
-            # remove all items from set
-            maya.cmds.sets(clear=self._exportSet)
         
         # reset attribute values, in case import fails
         self.storeAttribute(self._exportSet, self._unityFbxFilePathAttr, "")
@@ -149,19 +158,41 @@ class importCmd(BaseCommand):
     def afterImport(self, *args, **kwargs):
         if self._tempPath:
             self.storeAttribute(self._exportSet, self._unityFbxFilePathAttr, self._tempPath)
+            
+            # Change Unity project if fbx is from a different Unity project.
+            # Get the project based on the folder structure (i.e. folder above Assets)
+            head,tail = os.path.split(self._tempPath)
+            # Check that we are not at the root directory.
+            # os.path.dirname(head) returns the last directory name in the path, 
+            # or head if head is the root directory.
+            while head and os.path.dirname(head) != head:
+                if tail == "Assets":
+                    # this is a valid Unity project, so set it
+                    maya.cmds.optionVar(sv=('UnityProject', head))
+                    break
+                head,tail = os.path.split(head)
+                
         if self._tempName:
             self.storeAttribute(self._exportSet, self._unityFbxFileNameAttr, self._tempName)
     
         if self.setExists(self._exportSet):
             # figure out what has been added after import
             itemsInScene = maya.cmds.ls(tr=True, o=True, r=True)
+
             newItems = list(set(itemsInScene) - set(self._origItemsInScene))
             
             # add newly imported items to set
-            maya.cmds.sets(newItems, add=self._exportSet)
+            if len(newItems) > 0:
+                maya.cmds.sets(newItems, include=self._exportSet)
 
     def doIt(self, args):
         self.loadDependencies()
+        
+        # set Unity project as the current workspace
+        currWorkspace = maya.cmds.workspace(o=True, q=True)
+        unityProject = maya.cmds.optionVar(q='UnityProject')
+        if unityProject:
+            maya.cmds.workspace(unityProject, o=True)
     
         self._tempPath = None
         self._tempName = None
@@ -176,6 +207,9 @@ class importCmd(BaseCommand):
 
         OpenMaya.MMessage.removeCallback(callbackId)
         OpenMaya.MMessage.removeCallback(callbackId2)
+        
+        if currWorkspace:
+            maya.cmds.workspace(currWorkspace, o=True)
                 
     @classmethod
     def invoke(cls):
@@ -218,7 +252,7 @@ class reviewCmd(BaseCommand):
 
         unityAppPath = maya.cmds.optionVar(q='UnityApp')
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
-        unityTempSavePath = maya.cmds.optionVar(q='UnityTempSavePath')
+        unityTempSavePath = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityTempSavePath'))
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
         
         if not self.loadUnityFbxExportSettings():
@@ -236,8 +270,10 @@ class reviewCmd(BaseCommand):
         # save fbx to Assets/_safe_to_delete/
         savePath = unityTempSavePath
         maya.cmds.sysFile(savePath, makeDir=True)
-        savePath = savePath + "/TurnTableModel.fbx"
-        maya.mel.eval(r'file -force -options "" -typ "FBX export" -pr -es "{0}"'.format(savePath));
+        savePath = os.path.join(savePath, "TurnTableModel.fbx")
+        savePath = os.path.abspath(savePath)
+        
+        maya.cmds.file(savePath, force=True, options="", typ="FBX export", pr=True, es=True)
         
         if maya.cmds.about(macOS=True):
             # Use 'open -a' to bring app to front if it has already been started.

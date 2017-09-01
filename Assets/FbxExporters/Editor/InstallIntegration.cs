@@ -14,7 +14,7 @@ namespace FbxExporters.Editor
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
 
-        private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya2017/scripts/unityFbxExportSettings.mel";
+        private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
 
         public class MayaException : System.Exception {
             public MayaException() { }
@@ -182,14 +182,14 @@ namespace FbxExporters.Editor
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
-        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya"+VERSION_TAG+"/" + MODULE_FILENAME + ".txt";
+        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
 
 #if UNITY_EDITOR_OSX
-        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
 #elif UNITY_EDITOR_LINUX
-        private const string MAYA_MODULES_PATH = "Maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "Maya/modules";
 #else
-        private const string MAYA_MODULES_PATH = "maya/"+VERSION_TAG+"/modules";
+        private const string MAYA_MODULES_PATH = "maya/modules";
 #endif
 
         private static string GetUserFolder()
@@ -248,17 +248,17 @@ namespace FbxExporters.Editor
 
         public static string GetTempSavePath()
         {
-            return System.IO.Path.Combine(Application.dataPath, FbxExporters.Review.TurnTable.TempSavePath).Replace("\\", "/");
+            return FbxExporters.Review.TurnTable.TempSavePath.Replace("\\", "/");
         }
 
         /// <summary>
         /// Gets the path to the export settings file.
-        /// Returns an absolute path with forward slashes as path separators.
+        /// Returns a relative path with forward slashes as path separators.
         /// </summary>
         /// <returns>The export settings path.</returns>
         public static string GetExportSettingsPath()
         {
-            return Application.dataPath + '/' + FBX_EXPORT_SETTINGS_PATH;
+            return FBX_EXPORT_SETTINGS_PATH;
         }
 
         public static string GetPackageVersion()
@@ -499,81 +499,76 @@ namespace FbxExporters.Editor
         }
     }
 
-    namespace Editors
+    class IntegrationsUI
     {
-        class IntegrationsUI
+        const string IntegrationZipPath = "FbxExporters/unityoneclick_for_maya.zip";
+
+        private static string DefaultIntegrationSavePath = Application.dataPath;
+        private static string LastIntegrationSavePath = DefaultIntegrationSavePath;
+
+        public static void InstallMayaIntegration ()
         {
-            const string MenuItemName1 = "FbxExporters/Install Maya Integration";
-            const string IntegrationZipPath = "FbxExporters/unityoneclick_for_maya.zip";
+            // prompt user to enter location to unzip file
+            var unzipFolder = EditorUtility.OpenFolderPanel("Select Location to Save Maya Integration",LastIntegrationSavePath,"");
+            Debug.Log (unzipFolder);
 
-            private static string DefaultIntegrationSavePath = Application.dataPath;
-            private static string LastIntegrationSavePath = DefaultIntegrationSavePath;
-
-            [MenuItem (MenuItemName1, false, 0)]
-            public static void OnMenuItem1 ()
-            {
-                // prompt user to enter location to unzip file
-                var unzipFolder = EditorUtility.OpenFolderPanel("Select Location to Save Maya Integration",LastIntegrationSavePath,"");
-                Debug.Log (unzipFolder);
-
-                // check that this is a valid location to unzip the file
+            // check that this is a valid location to unzip the file
 
 
-                // if file already unzipped in this location, then prompt user
-                // if they would like to continue unzipping or use what is there
+            // if file already unzipped in this location, then prompt user
+            // if they would like to continue unzipping or use what is there
 
-                // unzip Integration folder
-                DecompressZip(Application.dataPath + "/" + IntegrationZipPath, Application.dataPath + "/TestIntegrations");
+            // unzip Integration folder
+            DecompressZip(Application.dataPath + "/" + IntegrationZipPath, Application.dataPath + "/TestIntegrations");
+            return;
+
+            var mayaVersion = new Integrations.MayaVersion();
+            if (!Integrations.InstallMaya(mayaVersion, verbose: true)) {
                 return;
-
-                var mayaVersion = new Integrations.MayaVersion();
-                if (!Integrations.InstallMaya(mayaVersion, verbose: true)) {
-                    return;
-                }
-
-                int exitCode = Integrations.ConfigureMaya (mayaVersion);
-
-                string title, message;
-                if (exitCode != 0) {
-                    title = string.Format("Failed to install Maya {0} Integration.", mayaVersion.Version);
-                    message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
-                } else {
-                    title = string.Format("Completed installation of Maya {0} Integration.", mayaVersion.Version);
-                    message = string.Format("Enjoy the new \"Unity\" menu in Maya {0}.", mayaVersion.Version);
-                }
-                UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
             }
 
-            private static bool hasWriteAccessToFolder(string folderPath)
+            int exitCode = Integrations.ConfigureMaya (mayaVersion);
+
+            string title, message;
+            if (exitCode != 0) {
+                title = string.Format("Failed to install Maya {0} Integration.", mayaVersion.Version);
+                message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
+            } else {
+                title = string.Format("Completed installation of Maya {0} Integration.", mayaVersion.Version);
+                message = string.Format("Enjoy the new \"Unity\" menu in Maya {0}.", mayaVersion.Version);
+            }
+            UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
+        }
+
+        private static bool hasWriteAccessToFolder(string folderPath)
+        {
+            try
             {
-                try
-                {
-                    // Attempt to get a list of security permissions from the folder. 
-                    // This will raise an exception if the path is read only or do not have access to view the permissions. 
-                    System.Security.AccessControl.DirectorySecurity ds = System.IO.Directory.GetAccessControl(folderPath);
-                    return true;
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    return false;
-                }
+                // Attempt to get a list of security permissions from the folder. 
+                // This will raise an exception if the path is read only or do not have access to view the permissions. 
+                System.Security.AccessControl.DirectorySecurity ds = System.IO.Directory.GetAccessControl(folderPath);
+                return true;
             }
-
-            public static void DecompressZip(string zipPath, string destPath){
-                System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
-                myProcess.StartInfo.FileName = string.Format("\"{0}\"", EditorApplication.applicationContentsPath + "/Tools/7z.exe");
-                myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                myProcess.StartInfo.CreateNoWindow = true;
-                myProcess.StartInfo.UseShellExecute = false;
-
-                myProcess.StartInfo.Arguments = string.Format("x \"{0}\" -o\"{1}\" -r -y", zipPath, destPath);
-                myProcess.EnableRaisingEvents = true;
-                myProcess.Start();
-                myProcess.WaitForExit();
-
-                Debug.Log ("ran: " + myProcess.StartInfo.FileName + " " + myProcess.StartInfo.Arguments);
-                Debug.Log ("exported to: " + destPath);
+            catch (UnauthorizedAccessException)
+            {
+                return false;
             }
+        }
+
+        public static void DecompressZip(string zipPath, string destPath){
+            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+            myProcess.StartInfo.FileName = string.Format("\"{0}\"", EditorApplication.applicationContentsPath + "/Tools/7z.exe");
+            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            myProcess.StartInfo.CreateNoWindow = true;
+            myProcess.StartInfo.UseShellExecute = false;
+
+            myProcess.StartInfo.Arguments = string.Format("x \"{0}\" -o\"{1}\" -r -y", zipPath, destPath);
+            myProcess.EnableRaisingEvents = true;
+            myProcess.Start();
+            myProcess.WaitForExit();
+
+            Debug.Log ("ran: " + myProcess.StartInfo.FileName + " " + myProcess.StartInfo.Arguments);
+            Debug.Log ("exported to: " + destPath);
         }
     }
 }
