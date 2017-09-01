@@ -16,6 +16,8 @@ namespace FbxExporters.Editor
 
         private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
 
+        public static string INTEGRATION_FOLDER_PATH = Application.dataPath;
+
         public class MayaException : System.Exception {
             public MayaException() { }
             public MayaException(string message) : base(message) { }
@@ -223,7 +225,7 @@ namespace FbxExporters.Editor
 
         public static string GetModuleTemplatePath(string version)
         {
-            string result = System.IO.Path.Combine(Application.dataPath, MODULE_TEMPLATE_PATH);
+            string result = System.IO.Path.Combine(INTEGRATION_FOLDER_PATH, MODULE_TEMPLATE_PATH);
             if (!ModuleTemplateCompatibility.TryGetValue(version, out version)) {
                 throw new MayaException("FbxExporters does not support Maya version " + version);
             }
@@ -508,8 +510,12 @@ namespace FbxExporters.Editor
 
         public static void InstallMayaIntegration ()
         {
-            DecompressIntegrationZipFile ();
-            return;
+            // decompress zip file if it exists, otherwise try using default location
+            if (System.IO.File.Exists (GetIntegrationZipFullPath())) {
+                DecompressIntegrationZipFile ();
+            } else {
+                Integrations.INTEGRATION_FOLDER_PATH = DefaultIntegrationSavePath;
+            }
 
             var mayaVersion = new Integrations.MayaVersion();
             if (!Integrations.InstallMaya(mayaVersion, verbose: true)) {
@@ -564,14 +570,25 @@ namespace FbxExporters.Editor
                 );
 
                 if (result == 0) {
-                    DecompressZip (Application.dataPath + "/" + IntegrationZipPath, unzipFolder);
+                    DecompressZip (GetIntegrationZipFullPath(), unzipFolder);
                 } else if (result == 2) {
                     return;
                 }
             } else {
                 // unzip Integration folder
-                DecompressZip (Application.dataPath + "/" + IntegrationZipPath, unzipFolder);
+                DecompressZip (GetIntegrationZipFullPath(), unzipFolder);
             }
+
+            Integrations.INTEGRATION_FOLDER_PATH = unzipFolder;
+        }
+
+        /// <summary>
+        /// Gets the integration zip full path as an absolute Unity-style path.
+        /// </summary>
+        /// <returns>The integration zip full path.</returns>
+        private static string GetIntegrationZipFullPath()
+        {
+            return Application.dataPath + "/" + IntegrationZipPath;
         }
 
         /// <summary>
