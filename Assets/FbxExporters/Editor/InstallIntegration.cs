@@ -506,9 +506,22 @@ namespace FbxExporters.Editor
             const string MenuItemName1 = "FbxExporters/Install Maya Integration";
             const string IntegrationZipPath = "FbxExporters/unityoneclick_for_maya.zip";
 
+            private static string DefaultIntegrationSavePath = Application.dataPath;
+            private static string LastIntegrationSavePath = DefaultIntegrationSavePath;
+
             [MenuItem (MenuItemName1, false, 0)]
             public static void OnMenuItem1 ()
             {
+                // prompt user to enter location to unzip file
+                var unzipFolder = EditorUtility.OpenFolderPanel("Select Location to Save Maya Integration",LastIntegrationSavePath,"");
+                Debug.Log (unzipFolder);
+
+                // check that this is a valid location to unzip the file
+
+
+                // if file already unzipped in this location, then prompt user
+                // if they would like to continue unzipping or use what is there
+
                 // unzip Integration folder
                 DecompressZip(Application.dataPath + "/" + IntegrationZipPath, Application.dataPath + "/TestIntegrations");
                 return;
@@ -529,6 +542,21 @@ namespace FbxExporters.Editor
                     message = string.Format("Enjoy the new \"Unity\" menu in Maya {0}.", mayaVersion.Version);
                 }
                 UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
+            }
+
+            private static bool hasWriteAccessToFolder(string folderPath)
+            {
+                try
+                {
+                    // Attempt to get a list of security permissions from the folder. 
+                    // This will raise an exception if the path is read only or do not have access to view the permissions. 
+                    System.Security.AccessControl.DirectorySecurity ds = System.IO.Directory.GetAccessControl(folderPath);
+                    return true;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return false;
+                }
             }
 
             public static void DecompressZip(string zipPath, string destPath){
