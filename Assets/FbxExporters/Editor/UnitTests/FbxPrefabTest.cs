@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FbxExporters.UnitTests
 {
@@ -12,6 +13,8 @@ namespace FbxExporters.UnitTests
         FbxPrefab.FbxRepresentation m_originalRep;
 
         GameObject m_source; // the fbx model
+        FbxPrefab.FbxRepresentation m_originalHistory;
+
         GameObject m_autoPrefab; // prefab that auto-updates
         GameObject m_manualPrefab; // prefab that doesn't auto-update
 
@@ -49,61 +52,87 @@ namespace FbxExporters.UnitTests
             }
         }
 
+        static KeyValuePair<string, FbxPrefab.FbxRepresentation> StackItem(
+                string name, FbxPrefab.FbxRepresentation rep)
+        {
+            return new KeyValuePair<string, FbxPrefab.FbxRepresentation>(name, rep);
+        }
+
         public static void AssertAreIdentical(
                 FbxPrefab.FbxRepresentation a,
                 FbxPrefab.FbxRepresentation b) {
             // A bit of a laborious comparison scheme. This is due to the
             // round-trip through FBX causing tiny errors in the transforms.
-            var astack = new List<FbxPrefab.FbxRepresentation> ();
-            astack.Add(a);
-            var bstack = new List<FbxPrefab.FbxRepresentation> ();
-            bstack.Add(b);
+            var astack = new List<KeyValuePair<string, FbxPrefab.FbxRepresentation>> ();
+            astack.Add(StackItem("(root)", a));
+            var bstack = new List<KeyValuePair<string, FbxPrefab.FbxRepresentation>> ();
+            bstack.Add(StackItem("(root)", b));
 
             var aDummy = new GameObject("aDummy").transform;
             var bDummy = new GameObject("bDummy").transform;
             while (astack.Count > 0) {
                 Assert.AreEqual(astack.Count, bstack.Count); // should never fail
-                a = astack[astack.Count - 1]; astack.RemoveAt(astack.Count - 1);
-                b = bstack[bstack.Count - 1]; bstack.RemoveAt(bstack.Count - 1);
+                var aKvp = astack[astack.Count - 1]; astack.RemoveAt(astack.Count - 1);
+                var bKvp = bstack[bstack.Count - 1]; bstack.RemoveAt(bstack.Count - 1);
+
+                var aName = aKvp.Key;
+                var bName = bKvp.Key;
+                Assert.AreEqual(aName, bName);
+
+                a = aKvp.Value;
+                b = bKvp.Value;
 
                 // Verify that they have the same children (by name).
                 var achildren = a.ChildNames;
                 var bchildren = b.ChildNames;
-                Assert.That(achildren, Is.EquivalentTo(bchildren));
+                Assert.That(bchildren, Is.EquivalentTo(achildren), aName + " children");
 
-                // Add the children to each stack.
+                // Add the children to each stack. It's important to get the
+                // same order for both stacks.
                 foreach(var child in achildren) {
-                    astack.Add(a.GetChild(child));
-                    bstack.Add(b.GetChild(child));
+                    astack.Add(StackItem(child, a.GetChild(child)));
+                    bstack.Add(StackItem(child, b.GetChild(child)));
                 }
 
                 // Verify that they have the same components.
                 var atypes = a.ComponentTypes;
                 var btypes = b.ComponentTypes;
-                Assert.That(atypes, Is.EquivalentTo(btypes));
+
+                Assert.That(btypes, Is.EquivalentTo(atypes), aName + " component types");
 
                 foreach(var t in atypes) {
                     var avalues = a.GetComponentValues(t);
                     var bvalues = b.GetComponentValues(t);
-                    Assert.AreEqual(avalues.Count, bvalues.Count);
+                    Assert.AreEqual(avalues.Count, bvalues.Count, aName + " component multiplicity");
 
-                    if (t != "UnityEngine.Transform") {
-                        Assert.AreEqual(avalues, bvalues);
-                    } else {
+                    //
+                    // TODO: test that the values match up.
+                    // Exceptions:
+                    // - Transforms we expect small changes.
+                    // - MeshFilter and MeshRenderer we expect guids to change
+                    //
+                    if (t == "UnityEngine.MeshFilter") {
+                        // TODO: test that everything but the guid matches
+                    } else if (t == "UnityEngine.MeshRenderer") {
+                        // TODO: test that everything but the guid matches
+                    } else if (t == "UnityEngine.Transform") {
                         // Verify that the transforms are nearly (but don't require bitwise) equal.
                         EditorJsonUtility.FromJsonOverwrite(avalues[0], aDummy);
                         EditorJsonUtility.FromJsonOverwrite(bvalues[0], bDummy);
                         var dist = Vector3.Distance(aDummy.localPosition, bDummy.localPosition);
-                        Assert.That(dist, Is.LessThan(1e-6), () => string.Format("position {0} vs {1} dist {2}",
-                                aDummy.localPosition, bDummy.localPosition, dist));
+                        Assert.That(dist, Is.LessThan(1e-6), () => string.Format("{3}: position {0} vs {1} dist {2}",
+                                aDummy.localPosition, bDummy.localPosition, dist, aName));
 
                         dist = Vector3.Distance(aDummy.localScale, bDummy.localScale);
-                        Assert.That(dist, Is.LessThan(1e-6), () => string.Format("scale {0} vs {1} dist {2}",
-                                aDummy.localScale, bDummy.localScale, dist));
+                        Assert.That(dist, Is.LessThan(1e-6), () => string.Format("{3}: scale {0} vs {1} dist {2}",
+                                aDummy.localScale, bDummy.localScale, dist, aName));
 
                         dist = Quaternion.Angle(aDummy.localRotation, bDummy.localRotation);
-                        Assert.That(dist, Is.LessThan(1e-6), () => string.Format("rotation {0} vs {1} angle {2}",
-                                aDummy.localRotation.eulerAngles, bDummy.localRotation.eulerAngles, dist));
+                        Assert.That(dist, Is.LessThan(1e-6), () => string.Format("{3}: rotation {0} vs {1} angle {2}",
+                                aDummy.localRotation.eulerAngles, bDummy.localRotation.eulerAngles, dist, aName));
+                    } else {
+                        // Default: test that the components are precisely identical.
+                        Assert.AreEqual(avalues, bvalues, string.Format("{0}: type {1}", aName, t));
                     }
                 }
             }
@@ -126,6 +155,7 @@ namespace FbxExporters.UnitTests
             var fbxAsset = FbxExporters.Editor.ModelExporter.ExportObject(
                     GetRandomFbxFilePath(), m_original);
             m_source = AssetDatabase.LoadMainAssetAtPath(fbxAsset) as GameObject;
+            m_originalHistory = Rep(m_source);
             Assert.IsTrue(m_source);
 
             // Create an FbxPrefab linked to the Fbx file. Make it auto-update.
@@ -161,12 +191,19 @@ namespace FbxExporters.UnitTests
 
         GameObject ModifySourceFbx()
         {
-            // Modify the source fbx file:
+            // Generate this change:
             // - delete parent1
+            // - move parent2
             // - add parent3
-            var newModel = PrefabUtility.InstantiatePrefab(m_source) as GameObject;
+            // Simulate that we're doing this in Maya, so parent3 doesn't come
+            // with a collider.
+            var newModel = CreateHierarchy();
             GameObject.DestroyImmediate(newModel.transform.Find("Parent1").gameObject);
-            CreateGameObject("Parent3", newModel.transform);
+            var parent3 = CreateGameObject("Parent3", newModel.transform);
+            Object.DestroyImmediate(parent3.GetComponent<BoxCollider>());
+
+            var parent2 = newModel.transform.Find("Parent2");
+            parent2.localPosition += new Vector3(1,2,3);
 
             // Export it to clobber the old FBX file.
             // Sleep one second first to make sure the timestamp differs
@@ -183,39 +220,40 @@ namespace FbxExporters.UnitTests
 
         [Test]
         public void BasicTest() {
-            // Check the history is good at the start
+            // Verify we start in the right place.
             AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
             AssertAreIdentical(m_originalRep, Rep(m_autoPrefab));
-            AssertAreIdentical(m_originalRep, History(m_manualPrefab));
-            AssertAreIdentical(m_originalRep, History(m_autoPrefab));
+
+            // Verify history is as we expect. It differs from the originalRep
+            // in that it doesn't have box colliders.
+            AssertAreIdentical(m_originalHistory, History(m_manualPrefab));
+            AssertAreIdentical(m_originalHistory, History(m_autoPrefab));
 
             FbxPrefab.FbxRepresentation newHierarchy;
+            FbxPrefab.FbxRepresentation newHistory;
             using(var updateSet = new UpdateListener(m_autoPrefab)) {
                 Debug.Log("Testing auto update");
                 newHierarchy = Rep(ModifySourceFbx());
+                newHistory = Rep(m_source);
                 AssertAreDifferent(m_originalRep, newHierarchy);
 
-                // Make sure the fbx source changed.
-                AssertAreDifferent(m_originalRep, Rep(m_source));
-                AssertAreIdentical(newHierarchy, Rep(m_source));
+                // Make sure the fbx source changed (testing the test).
+                AssertAreDifferent(m_originalHistory, Rep(m_source));
+
+                // Make sure the manual-update prefab didn't change.
+                AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
+                AssertAreIdentical(m_originalHistory, History(m_manualPrefab));
+
+                // Make sure we got the right changes. Parent2 got its
+                // transform changed, Parent3 was created.
+                Assert.AreEqual (1, updateSet.NumUpdates);
+                Assert.That (updateSet.Updated, Is.EquivalentTo (new string [] {
+                    "Parent2", "Parent3"
+                }
+                ));
 
                 // Make sure the auto-update prefab changed.
                 AssertAreIdentical(newHierarchy, Rep(m_autoPrefab));
-                AssertAreIdentical(newHierarchy, History(m_autoPrefab));
-
-                // Make sure the manual-update prefab didn't.
-                AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
-                AssertAreIdentical(m_originalRep, History(m_manualPrefab));
-
-                // Make sure we got the right changes.
-                Assert.AreEqual (1, updateSet.NumUpdates);
-                Assert.That (updateSet.Updated, Is.EquivalentTo (new string [] {
-                    // TODO: UNI-24579 - we should only be seeing Parent3 here,
-                    // the other two are for transform changes, but
-                    // they shouldn't have changed at all
-                    "Parent2", "Parent3", "Child3"
-                }
-                ));
             }
 
             // Manual update, make sure it updated.
@@ -223,7 +261,7 @@ namespace FbxExporters.UnitTests
             var manualPrefabComponent = m_manualPrefab.GetComponent<FbxPrefab>();
             manualPrefabComponent.SyncPrefab();
             AssertAreIdentical(newHierarchy, Rep(m_manualPrefab));
-            AssertAreIdentical(newHierarchy, History(m_manualPrefab));
+            AssertAreIdentical(newHistory, History(m_manualPrefab));
 
             // Check some corner cases.
             Assert.AreEqual(m_source, manualPrefabComponent.GetFbxAsset());
@@ -245,10 +283,10 @@ namespace FbxExporters.UnitTests
             Assert.That( () => manualPrefabComponent.SetSourceModel(null), Throws.Nothing );
             Assert.IsNull(manualPrefabComponent.GetFbxAsset());
             AssertAreIdentical(newHierarchy, Rep(m_manualPrefab));
-            AssertAreIdentical(newHierarchy, History(m_manualPrefab));
+            AssertAreIdentical(newHistory, History(m_manualPrefab));
             Assert.That( () => manualPrefabComponent.SyncPrefab(), Throws.Nothing );
             AssertAreIdentical(newHierarchy, Rep(m_manualPrefab));
-            AssertAreIdentical(newHierarchy, History(m_manualPrefab));
+            AssertAreIdentical(newHistory, History(m_manualPrefab));
 
             // Switch to some other model, which looks like the original model
             // (but is a totally different file). This will cause an update
@@ -259,24 +297,41 @@ namespace FbxExporters.UnitTests
             Assert.IsTrue(newSource);
             Debug.Log("Testing SetSourceModel relink");
             manualPrefabComponent.SetSourceModel(newSource);
-            AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
-            AssertAreIdentical(m_originalRep, History(m_manualPrefab));
+
+            // Generate the answer we expect: the original but Parent1 and
+            // hierarchy are without collider. That's because we deleted them,
+            // and got them back. Parent2 should be back to the origin.
+            var expectedHierarchy = GameObject.Instantiate(m_original);
+            var parent1 = expectedHierarchy.transform.Find("Parent1");
+            foreach(var collider in parent1.GetComponentsInChildren<BoxCollider>()) {
+                Object.DestroyImmediate(collider);
+            }
+            var expectedRep = Rep(expectedHierarchy);
+            var expectedHistory = m_originalHistory;
+
+            AssertAreIdentical(expectedHistory, History(m_manualPrefab));
+            AssertAreIdentical(expectedRep, Rep(m_manualPrefab));
         }
 
         [Test]
         public void ManualToAuto() {
             // Check what happens when we go from manual to auto-update.
+            Debug.Log("ManualToAuto: modifying source");
             var newHierarchy = Rep(ModifySourceFbx());
-            AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
-            AssertAreIdentical(m_originalRep, History(m_manualPrefab));
+            var newHistory = Rep(m_source);
 
+            AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
+            AssertAreIdentical(m_originalHistory, History(m_manualPrefab));
+
+            Debug.Log("ManualToAuto: setting manual to manual");
             m_manualPrefab.GetComponent<FbxPrefab>().SetAutoUpdate(false);
             AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
-            AssertAreIdentical(m_originalRep, History(m_manualPrefab));
+            AssertAreIdentical(m_originalHistory, History(m_manualPrefab));
 
+            Debug.Log("ManualToAuto: setting manual to auto");
             m_manualPrefab.GetComponent<FbxPrefab>().SetAutoUpdate(true);
             AssertAreIdentical(newHierarchy, Rep(m_manualPrefab));
-            AssertAreIdentical(newHierarchy, History(m_manualPrefab));
+            AssertAreIdentical(newHistory, History(m_manualPrefab));
         }
     }
 
