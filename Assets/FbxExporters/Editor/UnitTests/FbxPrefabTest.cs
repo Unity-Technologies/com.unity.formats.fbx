@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FbxExporters.UnitTests
 {
@@ -84,7 +85,7 @@ namespace FbxExporters.UnitTests
                 // Verify that they have the same children (by name).
                 var achildren = a.ChildNames;
                 var bchildren = b.ChildNames;
-                Assert.That(achildren, Is.EquivalentTo(bchildren), aName + " children");
+                Assert.That(bchildren, Is.EquivalentTo(achildren), aName + " children");
 
                 // Add the children to each stack. It's important to get the
                 // same order for both stacks.
@@ -96,7 +97,8 @@ namespace FbxExporters.UnitTests
                 // Verify that they have the same components.
                 var atypes = a.ComponentTypes;
                 var btypes = b.ComponentTypes;
-                Assert.That(atypes, Is.EquivalentTo(btypes), aName + " component types");
+
+                Assert.That(btypes, Is.EquivalentTo(atypes), aName + " component types");
 
                 foreach(var t in atypes) {
                     var avalues = a.GetComponentValues(t);
@@ -189,15 +191,14 @@ namespace FbxExporters.UnitTests
 
         GameObject ModifySourceFbx()
         {
-            // Modify the source fbx file:
+            // Generate this change:
             // - delete parent1
             // - add parent3
-            var newModel = PrefabUtility.InstantiatePrefab(m_source) as GameObject;
+            // Simulate that we're doing this in Maya, so parent3 doesn't come
+            // with a collider.
+            var newModel = CreateHierarchy();
             GameObject.DestroyImmediate(newModel.transform.Find("Parent1").gameObject);
             var parent3 = CreateGameObject("Parent3", newModel.transform);
-
-            // We're not doing an apply operation, so the collider isn't
-            // supposed to get to the prefab, so don't test that it does.
             Object.DestroyImmediate(parent3.GetComponent<BoxCollider>());
 
             // Export it to clobber the old FBX file.
@@ -235,25 +236,21 @@ namespace FbxExporters.UnitTests
                 // Make sure the fbx source changed (testing the test).
                 AssertAreDifferent(m_originalHistory, Rep(m_source));
 
-                // Make sure the auto-update prefab changed.
-                Debug.Log(string.Format("source: {0}\nprefab: {1}",
-                            newHierarchy.ToJson(), Rep(m_autoPrefab).ToJson()));
-                AssertAreIdentical(newHierarchy, Rep(m_autoPrefab));
-                AssertAreIdentical(newHierarchy, Rep(m_source));
-
-                // Make sure the manual-update prefab didn't.
+                // Make sure the manual-update prefab didn't change.
                 AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
                 AssertAreIdentical(m_originalHistory, History(m_manualPrefab));
 
                 // Make sure we got the right changes.
                 Assert.AreEqual (1, updateSet.NumUpdates);
                 Assert.That (updateSet.Updated, Is.EquivalentTo (new string [] {
-                    // TODO: UNI-24579 - we should only be seeing Parent3 here,
-                    // the other two are for transform changes, but
-                    // they shouldn't have changed at all
-                    "Parent2", "Parent3", "Child3"
+                    // TODO: UNI-24579 - we should only be seeing Parent3 here.
+                    // Parent2 is for a transform change, but it shouldn't have changed.
+                    "Parent2", "Parent3"
                 }
                 ));
+
+                // Make sure the auto-update prefab changed.
+                AssertAreIdentical(newHierarchy, Rep(m_autoPrefab));
             }
 
             // Manual update, make sure it updated.
@@ -290,16 +287,27 @@ namespace FbxExporters.UnitTests
 
             // Switch to some other model, which looks like the original model
             // (but is a totally different file). This will cause an update
-            // immediately. We expect to have lost the colliders on the objects
-            // that were deleted in the interim.
+            // immediately.
             var fbxAsset = FbxExporters.Editor.ModelExporter.ExportObject(
                     GetRandomFbxFilePath(), m_original);
             var newSource = AssetDatabase.LoadMainAssetAtPath(fbxAsset) as GameObject;
             Assert.IsTrue(newSource);
             Debug.Log("Testing SetSourceModel relink");
             manualPrefabComponent.SetSourceModel(newSource);
-            AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
-            AssertAreIdentical(m_originalHistory, History(m_manualPrefab));
+
+            // Generate the answer we expect: the original but Parent1 and
+            // hierarchy are without collider. That's because we deleted them,
+            // and got them back.
+            var expectedHierarchy = GameObject.Instantiate(m_original);
+            var parent1 = expectedHierarchy.transform.Find("Parent1");
+            foreach(var collider in parent1.GetComponentsInChildren<BoxCollider>()) {
+                Object.DestroyImmediate(collider);
+            }
+            var expectedRep = Rep(expectedHierarchy);
+            var expectedHistory = m_originalHistory;
+
+            AssertAreIdentical(expectedHistory, History(m_manualPrefab));
+            AssertAreIdentical(expectedRep, Rep(m_manualPrefab));
         }
 
         [Test]
