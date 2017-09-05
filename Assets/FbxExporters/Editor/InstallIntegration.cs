@@ -634,14 +634,32 @@ namespace FbxExporters.Editor
         }
 
         /// <summary>
-        /// Check if the directory has write permission.
-        /// TODO: find a way to do this that works in Unity
+        /// Make sure we can write to this directory.
+        /// Try creating a file in path directory, if it raises an error, then we can't
+        /// write here.
+        /// TODO: find a more reliable way to check this
         /// </summary>
-        /// <returns><c>true</c>, if has write permission was directoryed, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c>, if possible to write to path, <c>false</c> otherwise.</returns>
         /// <param name="path">Path.</param>
         public static bool DirectoryHasWritePermission(string path)
         {
-            return System.IO.Directory.Exists (path);
+            try
+            {
+                using (System.IO.FileStream fs = System.IO.File.Create(
+                    System.IO.Path.Combine(
+                        path, 
+                        System.IO.Path.GetRandomFileName()
+                    ), 
+                    1,
+                    System.IO.FileOptions.DeleteOnClose)
+                )
+                { }
+                return true;
+            }
+            catch(Exception)
+            {
+                return false;
+            }
         }
 
         public static void DecompressZip(string zipPath, string destPath){
