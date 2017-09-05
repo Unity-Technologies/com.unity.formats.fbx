@@ -505,7 +505,13 @@ namespace FbxExporters.Editor
     {
         const string IntegrationZipPath = "FbxExporters/unityoneclick_for_maya.zip";
 
-        private static string DefaultIntegrationSavePath = Application.dataPath;
+        private static string DefaultIntegrationSavePath
+        {
+            get{
+                return Application.dataPath;
+            }
+        }
+
         private static string LastIntegrationSavePath = DefaultIntegrationSavePath;
 
         public static void InstallMayaIntegration ()
