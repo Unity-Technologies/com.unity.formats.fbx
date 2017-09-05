@@ -28,7 +28,7 @@ namespace FbxExporters.EditorTools {
             }
 
             exportSettings.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", exportSettings.weldVertices);
-            exportSettings.embedTextures = EditorGUILayout.Toggle ("Embed Textures:", exportSettings.embedTextures);
+
             exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
                 new GUIContent ("Convert to Maya Compatible Naming:",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
@@ -122,7 +122,6 @@ namespace FbxExporters.EditorTools {
 
         // Note: default values are set in LoadDefaults().
         public bool weldVertices;
-        public bool embedTextures;
         public bool mayaCompatibleNames;
         public bool centerObjects;
 
@@ -145,7 +144,6 @@ namespace FbxExporters.EditorTools {
         protected override void LoadDefaults()
         {
             weldVertices = true;
-            embedTextures = false;
             mayaCompatibleNames = true;
             centerObjects = true;
             convertToModelSavePath = kDefaultSavePath;
