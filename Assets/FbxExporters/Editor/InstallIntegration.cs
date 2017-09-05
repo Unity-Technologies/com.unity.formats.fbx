@@ -518,7 +518,11 @@ namespace FbxExporters.Editor
         {
             // decompress zip file if it exists, otherwise try using default location
             if (System.IO.File.Exists (GetIntegrationZipFullPath())) {
-                DecompressIntegrationZipFile ();
+                var result = DecompressIntegrationZipFile ();
+                if (!result) {
+                    // could not find integration
+                    return;
+                }
             } else {
                 Integrations.INTEGRATION_FOLDER_PATH = DefaultIntegrationSavePath;
             }
@@ -541,11 +545,14 @@ namespace FbxExporters.Editor
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
 
-        private static void DecompressIntegrationZipFile()
+        private static bool DecompressIntegrationZipFile()
         {
             // prompt user to enter location to unzip file
             var unzipFolder = EditorUtility.OpenFolderPanel("Select Location to Save Maya Integration",LastIntegrationSavePath,"");
-            Debug.Log (unzipFolder);
+            if (string.IsNullOrEmpty (unzipFolder)) {
+                // user has cancelled, do nothing
+                return false;
+            }
 
             // check that this is a valid location to unzip the file
             if (!DirectoryHasWritePermission (unzipFolder)) {
@@ -559,7 +566,7 @@ namespace FbxExporters.Editor
                 if (result) {
                     InstallMayaIntegration ();
                 } else {
-                    return;
+                    return false;
                 }
             }
 
@@ -578,7 +585,7 @@ namespace FbxExporters.Editor
                 if (result == 0) {
                     DecompressZip (GetIntegrationZipFullPath(), unzipFolder);
                 } else if (result == 2) {
-                    return;
+                    return false;
                 }
             } else {
                 // unzip Integration folder
@@ -586,6 +593,8 @@ namespace FbxExporters.Editor
             }
 
             Integrations.INTEGRATION_FOLDER_PATH = unzipFolder;
+
+            return true;
         }
 
         /// <summary>
@@ -616,10 +625,7 @@ namespace FbxExporters.Editor
         /// <param name="path">Path.</param>
         public static bool DirectoryHasWritePermission(string path)
         {
-            if (!System.IO.Directory.Exists (path)) {
-                return false;
-            }
-            return true;
+            return System.IO.Directory.Exists (path);
         }
 
         public static void DecompressZip(string zipPath, string destPath){
