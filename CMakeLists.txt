@@ -17,10 +17,6 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 message(STATUS "Building for ${CMAKE_BUILD_TYPE}")
 
-# has to be done before project is set, or else CMAKE_INSTALL_PREFIX will already be set to a default value
-SET(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE PATH "Install path prefix")
-MESSAGE(STATUS "CMAKE_INSTALL_PREFIX is: " ${CMAKE_INSTALL_PREFIX})
-
 if (NOT DEFINED PACKAGE_VERSION)
     set(PACKAGE_VERSION "0.0.10a")
 endif()
@@ -33,8 +29,6 @@ if (NOT DEFINED FBXSDK_PACKAGE_PATH)
     # TODO: store the FbxSdk directly in this project
     set(FBXSDK_PACKAGE_PATH "${CMAKE_SOURCE_DIR}/../FbxSharpBuild/FbxSdk_${PACKAGE_VERSION}.unitypackage")
 endif()
-
-project (UnityFbxExporter)
 
 # promote warnings to errors
 if(MSVC)
@@ -72,6 +66,10 @@ add_custom_target(
 # Zip integrations folder
 set(MAYA_INTEGRATION_TARGET zip_maya_integration)
 set(MAYA_INTEGRATION_ZIP_NAME "unityoneclick_for_maya.zip")
+
+# remove existing zip file
+file(REMOVE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME}")
+
 add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
     COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
        "${CMAKE_SOURCE_DIR}/Assets/Integrations"
@@ -82,8 +80,6 @@ add_custom_target(${MAYA_INTEGRATION_TARGET} DEPENDS ${MAYA_INTEGRATION_ZIP_NAME
 
 ###########################################################################
 # Add target for creating a package
-# TODO: synthesize the right project depending on configuration.
-# Make install does the right thing in all cases but it's overkill in release.
 add_custom_command(
         OUTPUT ${PACKAGE_PATH}
         COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} -exportPackage Assets/FbxExporters Assets/FbxSdk ${PACKAGE_PATH} -quit
