@@ -157,7 +157,7 @@ namespace FbxExporters
                                     prefabFileName, fbxFileName));
                     }
                     // Connect to the prefab file.
-                    PrefabUtility.ConnectGameObjectToPrefab(unityGO, prefab);
+                    unityGO = PrefabUtility.ConnectGameObjectToPrefab(unityGO, prefab);
 
                     // Remove (now redundant) gameobject
                     if (!keepOriginal) {
