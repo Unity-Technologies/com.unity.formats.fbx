@@ -925,18 +925,12 @@ namespace FbxExporters
                         // Configure fbx IO settings.
                         fbxManager.SetIOSettings (FbxIOSettings.Create (fbxManager, Globals.IOSROOT));
 
-                        // Export texture as embedded
-                        if(EditorTools.ExportSettings.instance.embedTextures){
-                            fbxManager.GetIOSettings ().SetBoolProp (Globals.EXP_FBX_EMBEDDED, true);
-                        }
-
                         // Create the exporter
                         var fbxExporter = FbxExporter.Create (fbxManager, "Exporter");
 
                         // Initialize the exporter.
                         // fileFormat must be binary if we are embedding textures
-                        int fileFormat = EditorTools.ExportSettings.instance.embedTextures? -1 :
-                            fbxManager.GetIOPluginRegistry ().FindWriterIDByDescription ("FBX ascii (*.fbx)");
+                        int fileFormat = fbxManager.GetIOPluginRegistry ().FindWriterIDByDescription ("FBX ascii (*.fbx)");
                         
                         status = fbxExporter.Initialize (m_tempFilePath, fileFormat, fbxManager.GetIOSettings ());
                         // Check that initialization of the fbxExporter was successful
