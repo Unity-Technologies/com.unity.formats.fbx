@@ -193,6 +193,7 @@ namespace FbxExporters.UnitTests
         {
             // Generate this change:
             // - delete parent1
+            // - move parent2
             // - add parent3
             // Simulate that we're doing this in Maya, so parent3 doesn't come
             // with a collider.
@@ -200,6 +201,9 @@ namespace FbxExporters.UnitTests
             GameObject.DestroyImmediate(newModel.transform.Find("Parent1").gameObject);
             var parent3 = CreateGameObject("Parent3", newModel.transform);
             Object.DestroyImmediate(parent3.GetComponent<BoxCollider>());
+
+            var parent2 = newModel.transform.Find("Parent2");
+            parent2.localPosition += new Vector3(1,2,3);
 
             // Export it to clobber the old FBX file.
             // Sleep one second first to make sure the timestamp differs
@@ -240,11 +244,10 @@ namespace FbxExporters.UnitTests
                 AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
                 AssertAreIdentical(m_originalHistory, History(m_manualPrefab));
 
-                // Make sure we got the right changes.
+                // Make sure we got the right changes. Parent2 got its
+                // transform changed, Parent3 was created.
                 Assert.AreEqual (1, updateSet.NumUpdates);
                 Assert.That (updateSet.Updated, Is.EquivalentTo (new string [] {
-                    // TODO: UNI-24579 - we should only be seeing Parent3 here.
-                    // Parent2 is for a transform change, but it shouldn't have changed.
                     "Parent2", "Parent3"
                 }
                 ));
@@ -297,7 +300,7 @@ namespace FbxExporters.UnitTests
 
             // Generate the answer we expect: the original but Parent1 and
             // hierarchy are without collider. That's because we deleted them,
-            // and got them back.
+            // and got them back. Parent2 should be back to the origin.
             var expectedHierarchy = GameObject.Instantiate(m_original);
             var parent1 = expectedHierarchy.transform.Find("Parent1");
             foreach(var collider in parent1.GetComponentsInChildren<BoxCollider>()) {
