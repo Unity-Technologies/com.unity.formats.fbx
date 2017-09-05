@@ -15,6 +15,40 @@ namespace FbxExporters.UnitTests
         GameObject m_autoPrefab; // prefab that auto-updates
         GameObject m_manualPrefab; // prefab that doesn't auto-update
 
+        class UpdateListener : System.IDisposable
+        {
+            public List<string> Updated { get ; private set; }
+            public int NumUpdates { get ; private set; }
+
+            GameObject m_prefabToAttachTo;
+
+            public UpdateListener(GameObject prefabToAttachTo) {
+                m_prefabToAttachTo = prefabToAttachTo;
+                Updated = new List<string>();
+                NumUpdates = 0;
+                FbxPrefab.OnUpdate += OnUpdate;
+            }
+
+            ~UpdateListener() {
+                FbxPrefab.OnUpdate -= OnUpdate;
+            }
+
+            public void Dispose() {
+                FbxPrefab.OnUpdate -= OnUpdate;
+            }
+
+            void OnUpdate(FbxPrefab prefabInstance, IEnumerable<GameObject> updated)
+            {
+                if (prefabInstance.name != m_prefabToAttachTo.name) {
+                    return;
+                }
+                NumUpdates++;
+                foreach(var go in updated) {
+                    Updated.Add(go.name);
+                }
+            }
+        }
+
         public static void AssertAreIdentical(
                 FbxPrefab.FbxRepresentation a,
                 FbxPrefab.FbxRepresentation b) {
@@ -155,21 +189,34 @@ namespace FbxExporters.UnitTests
             AssertAreIdentical(m_originalRep, History(m_manualPrefab));
             AssertAreIdentical(m_originalRep, History(m_autoPrefab));
 
-            Debug.Log("Testing auto update");
-            var newHierarchy = Rep(ModifySourceFbx());
-            AssertAreDifferent(m_originalRep, newHierarchy);
+            FbxPrefab.FbxRepresentation newHierarchy;
+            using(var updateSet = new UpdateListener(m_autoPrefab)) {
+                Debug.Log("Testing auto update");
+                newHierarchy = Rep(ModifySourceFbx());
+                AssertAreDifferent(m_originalRep, newHierarchy);
 
-            // Make sure the fbx source changed.
-            AssertAreDifferent(m_originalRep, Rep(m_source));
-            AssertAreIdentical(newHierarchy, Rep(m_source));
+                // Make sure the fbx source changed.
+                AssertAreDifferent(m_originalRep, Rep(m_source));
+                AssertAreIdentical(newHierarchy, Rep(m_source));
 
-            // Make sure the auto-update prefab changed.
-            AssertAreIdentical(newHierarchy, Rep(m_autoPrefab));
-            AssertAreIdentical(newHierarchy, History(m_autoPrefab));
+                // Make sure the auto-update prefab changed.
+                AssertAreIdentical(newHierarchy, Rep(m_autoPrefab));
+                AssertAreIdentical(newHierarchy, History(m_autoPrefab));
 
-            // Make sure the manual-update prefab didn't.
-            AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
-            AssertAreIdentical(m_originalRep, History(m_manualPrefab));
+                // Make sure the manual-update prefab didn't.
+                AssertAreIdentical(m_originalRep, Rep(m_manualPrefab));
+                AssertAreIdentical(m_originalRep, History(m_manualPrefab));
+
+                // Make sure we got the right changes.
+                Assert.AreEqual (1, updateSet.NumUpdates);
+                Assert.That (updateSet.Updated, Is.EquivalentTo (new string [] {
+                    // TODO: UNI-24579 - we should only be seeing Parent3 here,
+                    // the other two are for transform changes, but
+                    // they shouldn't have changed at all
+                    "Parent2", "Parent3", "Child3"
+                }
+                ));
+            }
 
             // Manual update, make sure it updated.
             Debug.Log("Testing manual update");

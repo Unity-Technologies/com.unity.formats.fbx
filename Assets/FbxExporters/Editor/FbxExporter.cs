@@ -1353,24 +1353,192 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Get a mesh renderer's mesh.
+            /// If your MonoBehaviour knows about some custom geometry that
+            /// isn't in a MeshFilter or SkinnedMeshRenderer, use
+            /// RegisterMeshCallback to get a callback when the exporter tries
+            /// to export your component.
+            ///
+            /// The callback should return true, and output the mesh you want.
+            ///
+            /// Return false if you don't want to drive this game object.
+            ///
+            /// Return true and output a null mesh if you don't want the
+            /// exporter to output anything.
             /// </summary>
-            private MeshInfo GetMeshInfo (GameObject gameObject, bool requireRenderer = true)
+            public delegate bool GetMeshForComponent<T>(T component, out Mesh mesh) where T : MonoBehaviour;
+            public delegate bool GetMeshForComponent(MonoBehaviour component, out Mesh mesh);
+
+            /// <summary>
+            /// Map from type (must be a MonoBehaviour) to callback.
+            /// The type safety is lost; the caller must ensure it at run-time.
+            /// </summary>
+            static Dictionary<System.Type, GetMeshForComponent> MeshForComponentCallbacks
+                = new Dictionary<System.Type, GetMeshForComponent>();
+
+            /// <summary>
+            /// Register a callback to invoke if the object has a component of type T.
+            ///
+            /// This function is prefered over the other mesh callback
+            /// registration methods because it's type-safe, efficient, and
+            /// invocation order between types can be controlled in the UI by
+            /// reordering the components.
+            ///
+            /// It's an error to register a callback for a component that
+            /// already has one, unless 'replace' is set to true.
+            /// </summary>
+            public static void RegisterMeshCallback<T>(GetMeshForComponent<T> callback, bool replace = false)
+                where T: UnityEngine.MonoBehaviour
             {
-                // Two possibilities: it's a skinned mesh, or we have a mesh filter.
-                Mesh mesh;
-                var meshFilter = gameObject.GetComponent<MeshFilter> ();
-                if (meshFilter) {
-                    mesh = meshFilter.sharedMesh;
-                } else {
-                    var renderer = gameObject.GetComponent<SkinnedMeshRenderer> ();
-                    if (!renderer) {
-                        mesh = null;
-                    } else {
-                        mesh = new Mesh ();
-                        renderer.BakeMesh (mesh);
+                // Under the hood we lose type safety, but don't let the user notice!
+                RegisterMeshCallback(typeof(T),
+                        (MonoBehaviour component, out Mesh mesh) => callback((T)component, out mesh),
+                        replace);
+            }
+
+            /// <summary>
+            /// Register a callback to invoke if the object has a component of type T.
+            ///
+            /// The callback will be invoked with an argument of type T, it's
+            /// safe to downcast.
+            ///
+            /// Normally you'll want to use the generic form, but this one is
+            /// easier to use with reflection.
+            /// </summary>
+            public static void RegisterMeshCallback(System.Type t,
+                    GetMeshForComponent callback,
+                    bool replace = false)
+            {
+                if (!t.IsSubclassOf(typeof(MonoBehaviour))) {
+                    throw new System.Exception("Registering a callback for a type that isn't derived from MonoBehaviour: " + t);
+                }
+                if (!replace && MeshForComponentCallbacks.ContainsKey(t)) {
+                    throw new System.Exception("Replacing a callback for type " + t);
+                }
+                MeshForComponentCallbacks[t] = callback;
+            }
+
+            /// <summary>
+            /// Delegate used to convert a GameObject into a mesh.
+            ///
+            /// This is useful if you want to have broader control over
+            /// the export process than the GetMeshForComponent callbacks
+            /// provide. But it's less efficient because you'll get a callback
+            /// on every single GameObject.
+            /// </summary>
+            public delegate bool GetMeshForObject(GameObject gameObject, out Mesh mesh);
+
+            static List<GetMeshForObject> MeshForObjectCallbacks = new List<GetMeshForObject>();
+
+            /// <summary>
+            /// Register a callback to invoke on every GameObject we export.
+            ///
+            /// Avoid doing this if you can use a callback that depends on type.
+            ///
+            /// The GameObject-based callbacks are checked before the
+            /// component-based ones.
+            ///
+            /// Multiple GameObject-based callbacks can be registered; they are
+            /// checked in order of registration.
+            /// </summary>
+            public static void RegisterMeshObjectCallback(GetMeshForObject callback)
+            {
+                MeshForObjectCallbacks.Add(callback);
+            }
+
+            /// <summary>
+            /// Forget the callback linked to a component of type T.
+            /// </summary>
+            public static void UnRegisterMeshCallback<T>()
+            {
+                MeshForComponentCallbacks.Remove(typeof(T));
+            }
+
+            /// <summary>
+            /// Forget the callback linked to a component of type T.
+            /// </summary>
+            public static void UnRegisterMeshCallback(System.Type t)
+            {
+                MeshForComponentCallbacks.Remove(t);
+            }
+
+            /// <summary>
+            /// Forget a GameObject-based callback.
+            /// </summary>
+            public static void UnRegisterMeshCallback(GetMeshForObject callback)
+            {
+                MeshForObjectCallbacks.Remove(callback);
+            }
+
+            /// <summary>
+            /// Get the mesh we want to use for a GameObject.
+            /// May be null.
+            /// </summary>
+            Mesh ChooseMeshForObject(GameObject gameObject)
+            {
+                // First allow the object-based callbacks to have a hack at it.
+                foreach(var callback in MeshForObjectCallbacks) {
+                    Mesh mesh;
+                    if (callback(gameObject, out mesh)) {
+                        return mesh;
                     }
                 }
+
+                // Next iterate over components and allow the component-based
+                // callbacks to have a hack at it. This is complicated by the
+                // potential of subclassing.
+                Mesh defaultMesh = null;
+                foreach(var component in gameObject.GetComponents<Component>()) {
+                    if (!component) {
+                        continue;
+                    }
+                    var monoBehaviour = component as MonoBehaviour;
+                    if (!monoBehaviour) {
+                        // Check for default handling. But don't commit yet.
+                        if (defaultMesh) {
+                            continue;
+                        }
+                        var meshFilter = component as MeshFilter;
+                        if (meshFilter) {
+                            defaultMesh = (component as MeshFilter).sharedMesh;
+                            continue;
+                        }
+                        var smr = component as SkinnedMeshRenderer;
+                        if (smr) {
+                            defaultMesh = new Mesh();
+                            smr.BakeMesh(defaultMesh);
+                            continue;
+                        }
+                    } else {
+                        // Check if we have custom behaviour for this component type, or
+                        // one of its base classes.
+                        if (!monoBehaviour.enabled) {
+                            continue;
+                        }
+                        var componentType = monoBehaviour.GetType ();
+                        do {
+                            GetMeshForComponent callback;
+                            if (MeshForComponentCallbacks.TryGetValue (componentType, out callback)) {
+                                Mesh mesh;
+                                if (callback (monoBehaviour, out mesh)) {
+                                    return mesh;
+                                }
+                            }
+                            componentType = componentType.BaseType;
+                        } while(componentType.IsSubclassOf (typeof(MonoBehaviour)));
+                    }
+                }
+
+                // If we're here, custom handling didn't work.
+                // Revert to default handling.
+                return defaultMesh;
+            }
+
+            /// <summary>
+            /// Get the mesh for an object in an easy-to-use format.
+            /// </summary>
+            private MeshInfo GetMeshInfo (GameObject gameObject)
+            {
+                var mesh = ChooseMeshForObject(gameObject);
                 if (!mesh) {
                     return new MeshInfo(null);
                 }

@@ -165,7 +165,7 @@ namespace FbxExporters.UnitTests
                     Path.DirectorySeparatorChar);
 
             var defaultAbsolutePath = ExportSettings.GetAbsoluteSavePath();
-            var dataPath = Path.Combine(appDataPath, ExportSettings.kDefaultSavePath);
+            var dataPath = Path.GetFullPath(Path.Combine(appDataPath, ExportSettings.kDefaultSavePath));
             Assert.AreEqual(dataPath, defaultAbsolutePath);
 
             // set; check that the saved value is platform-independent,
