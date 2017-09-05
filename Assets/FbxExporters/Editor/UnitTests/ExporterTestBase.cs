@@ -21,7 +21,7 @@ namespace FbxExporters.UnitTests
         /// timestamp on an fbx will change.
         /// </summary>
         public void SleepForFileTimestamp() {
-            System.Threading.Thread.Sleep(100);
+            System.Threading.Thread.Sleep(1000);
         }
 
         private string _testDirectory;
