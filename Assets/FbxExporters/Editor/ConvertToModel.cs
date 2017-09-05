@@ -181,7 +181,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns>new file name.</returns>
             /// <param name="filename">Filename.</param>
-            private static string IncrementFileName(string path, string filename)
+            public static string IncrementFileName(string path, string filename)
             {
                 string fileWithoutExt = Path.GetFileNameWithoutExtension (filename);
                 string ext = Path.GetExtension (filename);
@@ -217,7 +217,7 @@ namespace FbxExporters
             /// e.g. Sphere becomes Sphere 1
             /// </summary>
             /// <param name="exportSet">Export set.</param>
-            private static void EnforceUniqueNames(GameObject[] exportSet)
+            public static void EnforceUniqueNames(GameObject[] exportSet)
             {
                 Dictionary<string, int> NameToIndexMap = new Dictionary<string, int> ();
                 string format = "{0} {1}";
@@ -249,7 +249,7 @@ namespace FbxExporters
             /// </summary>
             /// <param name="orig">Original GameObject.</param>
             /// <param name="imported">Imported GameObject.</param>
-            private static void SetupImportedGameObject(GameObject orig, GameObject imported)
+            public static void SetupImportedGameObject(GameObject orig, GameObject imported)
             {
                 Transform importedTransform = imported.transform;
                 Transform origTransform = orig.transform;
@@ -257,16 +257,6 @@ namespace FbxExporters
                 // configure transform and maintain local pose
                 importedTransform.SetParent (origTransform.parent, false);
                 importedTransform.SetSiblingIndex (origTransform.GetSiblingIndex());
-
-                // set the transform to be the same as before
-                bool success = UnityEditorInternal.ComponentUtility.CopyComponent (origTransform);
-                if (success) {
-                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues(importedTransform);
-                }
-                if (!success) {
-                    Debug.LogWarning (string.Format ("Warning: Failed to copy component Transform from {0} to {1}",
-                        imported.name, origTransform.name));
-                }
 
                 // copy the components over, assuming that the hierarchy order is unchanged
                 if (origTransform.hierarchyCount != importedTransform.hierarchyCount) {
@@ -280,7 +270,7 @@ namespace FbxExporters
                 CopyComponentsRecursive (orig, imported, namesExpectedMatch:false);
             }
 
-            private static void FixSiblingOrder(Transform orig, Transform imported){
+            public static void FixSiblingOrder(Transform orig, Transform imported){
                 foreach (Transform origChild in orig) {
                     Transform importedChild = imported.Find (origChild.name);
                     if (importedChild == null) {
@@ -307,16 +297,16 @@ namespace FbxExporters
                 }
             }
 
-            private static void CopyComponents(GameObject from, GameObject to){
+            public static void CopyComponents(GameObject from, GameObject to){
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
                 var components = from.GetComponents<Component> ();
-                for(int i = 0; i < components.Length; i++){
-                    if(components[i] == null){
+                for(int i = 0, n = components.Length; i < n; ++i) {
+                    if (!components [i]) {
                         continue;
                     }
 
-                    bool success = UnityEditorInternal.ComponentUtility.CopyComponent (components[i]);
-                    if (success) {
+                    var json = EditorJsonUtility.ToJson(components[i]);
+                    {
                         bool foundComponentOfType = false;
                         for (int j = 0; j < originalComponents.Count; j++) {
                             var toComponent = originalComponents [j];
@@ -327,28 +317,32 @@ namespace FbxExporters
                                 originalComponents.RemoveAt (j);
                                 foundComponentOfType = true;
 
-                                // Don't want to copy MeshFilter because then we will replace the
-                                // exported mesh with the old mesh.
+                                // Don't want to copy MeshFilter because then
+                                // we will replace the exported mesh with the
+                                // old mesh. TODO: just remove some entries
+                                // from the json.
                                 if (toComponent is MeshFilter) {
                                     break;
-                                }
-
-                                // Don't want to copy materials over in case the materials are
-                                // embedded in another model.
-                                if (toComponent is SkinnedMeshRenderer) {
+                                } else if (toComponent is SkinnedMeshRenderer) {
+                                    // Don't want to copy materials over in
+                                    // case the materials are embedded in
+                                    // another model.
                                     var skinnedMesh = toComponent as SkinnedMeshRenderer;
                                     var sharedMesh = skinnedMesh.sharedMesh;
                                     var sharedMats = skinnedMesh.sharedMaterials;
-                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                    EditorJsonUtility.FromJsonOverwrite(json, toComponent);
                                     skinnedMesh.sharedMesh = sharedMesh;
                                     skinnedMesh.sharedMaterials = sharedMats;
                                 } else if (toComponent is Renderer) {
+                                    // Don't want to copy materials over in
+                                    // case the materials are embedded in
+                                    // another model.
                                     var renderer = toComponent as Renderer;
                                     var sharedMats = renderer.sharedMaterials;
-                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                    EditorJsonUtility.FromJsonOverwrite(json, toComponent);
                                     renderer.sharedMaterials = sharedMats;
                                 } else {
-                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
+                                    EditorJsonUtility.FromJsonOverwrite(json, toComponent);
                                 }
                                 break;
                             }
@@ -356,12 +350,9 @@ namespace FbxExporters
 
                         // component was not part of the original components, so add it
                         if (!foundComponentOfType) {
-                            success = UnityEditorInternal.ComponentUtility.PasteComponentAsNew (to);
+                            var toComponent = to.AddComponent(components[i].GetType());
+                            EditorJsonUtility.FromJsonOverwrite(json, toComponent);
                         }
-                    }
-                    if (!success) {
-                        Debug.LogWarning (string.Format ("Warning: Failed to copy component {0} from {1} to {2}",
-                            components[i].GetType().Name, from.name, to.name));
                     }
                 }
             }
