@@ -16,7 +16,23 @@ namespace FbxExporters.Editor
 
         private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
 
-        public static string INTEGRATION_FOLDER_PATH = Application.dataPath;
+        private static string m_integrationFolderPath = null;
+        public static string INTEGRATION_FOLDER_PATH
+        {
+            get{
+                if (string.IsNullOrEmpty (m_integrationFolderPath)) {
+                    m_integrationFolderPath = Application.dataPath;
+                }
+                return m_integrationFolderPath;
+            }
+            set{
+                if (!string.IsNullOrEmpty (value) && System.IO.Directory.Exists (value)) {
+                    m_integrationFolderPath = value;
+                } else {
+                    Debug.LogError (string.Format("Failed to set integration folder path, invalid directory \"{0}\"", value));
+                }
+            }
+        }
 
         public class MayaException : System.Exception {
             public MayaException() { }
