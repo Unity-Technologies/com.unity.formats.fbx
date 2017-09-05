@@ -84,7 +84,7 @@ namespace FbxExporters.UnitTests
             }
 
             // Test CopyComponents
-            if (false){
+            {
                 var a = new GameObject("a");
                 var b = new GameObject("b");
                 a.AddComponent<BoxCollider>();

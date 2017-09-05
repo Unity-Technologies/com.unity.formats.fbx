@@ -299,58 +299,52 @@ namespace FbxExporters
 
             public static void CopyComponents(GameObject from, GameObject to){
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
-                var components = from.GetComponents<Component> ();
-                for(int i = 0, n = components.Length; i < n; ++i) {
-                    if (!components [i]) {
-                        continue;
+                foreach(var component in from.GetComponents<Component> ()) {
+                    var json = EditorJsonUtility.ToJson(component);
+
+                    System.Type expectedType = component.GetType();
+                    Component toComponent = null;
+
+                    // Find the component to copy to.
+                    for (int i = 0, n = originalComponents.Count; i < n; i++) {
+                        if (originalComponents[i].GetType() == expectedType) {
+                            // We have found the component we are looking for,
+                            // remove it so we don't try to copy to it again
+                            toComponent = originalComponents[i];
+                            originalComponents.RemoveAt (i);
+                            break;
+                        }
                     }
 
-                    var json = EditorJsonUtility.ToJson(components[i]);
-                    {
-                        bool foundComponentOfType = false;
-                        for (int j = 0; j < originalComponents.Count; j++) {
-                            var toComponent = originalComponents [j];
-                            // If component already exists, paste values.
-                            if (toComponent.GetType () == components [i].GetType ()) {
-                                // we have found the component we are looking for, remove it so
-                                // we don't try to copy to it again
-                                originalComponents.RemoveAt (j);
-                                foundComponentOfType = true;
+                    if (!toComponent) {
+                        // It doesn't exist => create and copy.
+                        toComponent = to.AddComponent(component.GetType());
+                        EditorJsonUtility.FromJsonOverwrite(json, toComponent);
+                    } else {
+                        // It exists => copy.
+                        // But we want to override that behaviour in a few
+                        // cases, to avoid clobbering references to the new FBX
+                        // TODO: just modify the json directly.
 
-                                // Don't want to copy MeshFilter because then
-                                // we will replace the exported mesh with the
-                                // old mesh. TODO: just remove some entries
-                                // from the json.
-                                if (toComponent is MeshFilter) {
-                                    break;
-                                } else if (toComponent is SkinnedMeshRenderer) {
-                                    // Don't want to copy materials over in
-                                    // case the materials are embedded in
-                                    // another model.
-                                    var skinnedMesh = toComponent as SkinnedMeshRenderer;
-                                    var sharedMesh = skinnedMesh.sharedMesh;
-                                    var sharedMats = skinnedMesh.sharedMaterials;
-                                    EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                                    skinnedMesh.sharedMesh = sharedMesh;
-                                    skinnedMesh.sharedMaterials = sharedMats;
-                                } else if (toComponent is Renderer) {
-                                    // Don't want to copy materials over in
-                                    // case the materials are embedded in
-                                    // another model.
-                                    var renderer = toComponent as Renderer;
-                                    var sharedMats = renderer.sharedMaterials;
-                                    EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                                    renderer.sharedMaterials = sharedMats;
-                                } else {
-                                    EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                                }
-                                break;
-                            }
-                        }
-
-                        // component was not part of the original components, so add it
-                        if (!foundComponentOfType) {
-                            var toComponent = to.AddComponent(components[i].GetType());
+                        if (toComponent is MeshFilter) {
+                            // Don't copy the mesh. But there's nothing else to
+                            // copy, so just don't copy anything.
+                        } else if (toComponent is SkinnedMeshRenderer) {
+                            // Don't want to clobber materials or the mesh.
+                            var skinnedMesh = toComponent as SkinnedMeshRenderer;
+                            var sharedMesh = skinnedMesh.sharedMesh;
+                            var sharedMats = skinnedMesh.sharedMaterials;
+                            EditorJsonUtility.FromJsonOverwrite(json, toComponent);
+                            skinnedMesh.sharedMesh = sharedMesh;
+                            skinnedMesh.sharedMaterials = sharedMats;
+                        } else if (toComponent is Renderer) {
+                            // Don't want to clobber materials.
+                            var renderer = toComponent as Renderer;
+                            var sharedMats = renderer.sharedMaterials;
+                            EditorJsonUtility.FromJsonOverwrite(json, toComponent);
+                            renderer.sharedMaterials = sharedMats;
+                        } else {
+                            // Normal case: copy everything.
                             EditorJsonUtility.FromJsonOverwrite(json, toComponent);
                         }
                     }
