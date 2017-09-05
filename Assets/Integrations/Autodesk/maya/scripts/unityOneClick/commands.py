@@ -188,22 +188,37 @@ class importCmd(BaseCommand):
     def doIt(self, args):
         self.loadDependencies()
         
-        # set Unity project as the current workspace
-        currWorkspace = maya.cmds.workspace(o=True, q=True)
-        unityProject = maya.cmds.optionVar(q='UnityProject')
-        if unityProject:
-            maya.cmds.workspace(unityProject, o=True)
-    
         self._tempPath = None
         self._tempName = None
         self._origItemsInScene = []
+        currWorkspace = None
         
         callbackId = OpenMaya.MSceneMessage.addCheckFileCallback(OpenMaya.MSceneMessage.kBeforeImportCheck, self.beforeImport)
-        callbackId2 = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterImport, self.afterImport)
+        callbackId2 = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterImport, self.afterImport)    
+        
+        # Check if the path was specified on the command line
+        syntax = OpenMaya.MSyntax()
+        syntax.addFlag("-p", "-path", OpenMaya.MSyntax.kString)
+        parser = OpenMaya.MArgParser(syntax, args)
+        
+        filePath = None
+        if parser.isFlagSet("-p"):
+            filePath = parser.flagArgumentString("-p", 0)
+            
+        # If a valid path was specified, then use it.
+        # Path is valid if the file exists and it is an FBX
+        if filePath and os.path.isfile(filePath) and os.path.splitext(filePath)[1].lower() == ".fbx":
+            maya.cmds.file(filePath, i=True, type="FBX", ignoreVersion=True, ra=True, mergeNamespacesOnClash=False, pr=True)
+        else:
+            # set Unity project as the current workspace
+            currWorkspace = maya.cmds.workspace(o=True, q=True)
+            unityProject = maya.cmds.optionVar(q='UnityProject')
+            if unityProject:
+                maya.cmds.workspace(unityProject, o=True)
 
-        strCmd = 'Import'
-        self.displayDebug('doIt {0}'.format(strCmd))
-        maya.cmds.Import()
+            strCmd = 'Import'
+            self.displayDebug('doIt {0}'.format(strCmd))
+            maya.cmds.Import()
 
         OpenMaya.MMessage.removeCallback(callbackId)
         OpenMaya.MMessage.removeCallback(callbackId2)
