@@ -337,7 +337,6 @@ namespace FbxExporters.UnitTests
 
     public class FbxPrefabRegressions : ExporterTestBase
     {
-        [Ignore("ConvertToModel return value is messed up.")]
         [Test]
         public void TestCubeAtRoot()
         {
@@ -352,8 +351,8 @@ namespace FbxExporters.UnitTests
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.name = "Cube";
             var cubeAssetPath = GetRandomFbxFilePath();
-            var autoPrefab = FbxExporters.Editor.ConvertToModel.CreateInstantiatedModelPrefab(
-                new GameObject[] { cube }, path: cubeAssetPath)[0];
+            var autoPrefab = FbxExporters.Editor.ConvertToModel.CreateInstantiatedModelPrefab(cube,
+                fbxFullPath: cubeAssetPath);
             Assert.IsTrue(autoPrefab);
 
             // Make a maya locator.
