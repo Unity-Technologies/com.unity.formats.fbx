@@ -198,18 +198,23 @@ class importCmd(BaseCommand):
         self._tempName = None
         self._origItemsInScene = []
         
-        callbackId = OpenMaya.MSceneMessage.addCheckFileCallback(OpenMaya.MSceneMessage.kBeforeImportCheck, self.beforeImport)
-        callbackId2 = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterImport, self.afterImport)
+        callbackId = None
+        callbackId2 = None
+        try:
+            callbackId = OpenMaya.MSceneMessage.addCheckFileCallback(OpenMaya.MSceneMessage.kBeforeImportCheck, self.beforeImport)
+            callbackId2 = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterImport, self.afterImport)
 
-        strCmd = 'Import'
-        self.displayDebug('doIt {0}'.format(strCmd))
-        maya.cmds.Import()
-
-        OpenMaya.MMessage.removeCallback(callbackId)
-        OpenMaya.MMessage.removeCallback(callbackId2)
-        
-        if currWorkspace:
-            maya.cmds.workspace(currWorkspace, o=True)
+            strCmd = 'Import'
+            self.displayDebug('doIt {0}'.format(strCmd))
+            maya.cmds.Import()
+        finally:
+            if currWorkspace:
+                maya.cmds.workspace(currWorkspace, o=True)
+                
+            if callbackId:
+                OpenMaya.MMessage.removeCallback(callbackId)
+            if callbackId2:
+                OpenMaya.MMessage.removeCallback(callbackId2)
                 
     @classmethod
     def invoke(cls):
