@@ -104,8 +104,13 @@ namespace FbxExporters
             /// </summary>
             /// <returns>The instance that replaces 'toConvert' in the scene.</returns>
             /// <param name="toConvert">GameObject hierarchy to replace with a prefab.</param>
-            /// <param name="fbxFullPath">Absolute platform-specific path to the fbx file. May be null, in which case we construct a path from the object name and the directoryFullPath.</param>
-            /// <param name="directoryFullPath">Absolute platform-specific path to a directory in which to put the fbx file. Ignored if fbxFullPath is specified. May be null, in which case we use the export settings.</param>
+            /// <param name="fbxFullPath">Absolute platform-specific path to
+            /// the fbx file. May be null, in which case we construct a path from
+            /// the object name and the directoryFullPath.</param>
+            /// <param name="directoryFullPath">Absolute platform-specific path
+            /// to a directory in which to put the fbx file. Ignored if
+            /// fbxFullPath is specified. May be null, in which case we use the
+            /// export settings.</param>
             /// <param name="keepOriginal">If set to <c>true</c>, keep the original in the scene.</param>
             public static GameObject CreateInstantiatedModelPrefab (
                 GameObject toConvert,
@@ -134,7 +139,9 @@ namespace FbxExporters
                 }
 
                 // Make sure that the object names in the hierarchy are unique.
-                // The import back in to Unity would do this automatically but we prefer to control it so that the Maya artist can see the same names as exist in Unity.
+                // The import back in to Unity would do this automatically but
+                // we prefer to control it so that the Maya artist can see the
+                // same names as exist in Unity.
                 EnforceUniqueNames (new GameObject[] {toConvert});
 
                 // Export to FBX. It refreshes the database.
@@ -145,13 +152,8 @@ namespace FbxExporters
                     }
                 }
 
-                // Munge the path: we'll be using APIs that need a path relative to the assets folder.
-
-
                 // Replace w Model asset. LoadMainAssetAtPath wants a path
-                // relative to the project, not relative to the assets
-                // folder.
-                Debug.Log(projectRelativePath);
+                // relative to the project, not relative to the assets folder.
                 var unityMainAsset = AssetDatabase.LoadMainAssetAtPath (projectRelativePath) as GameObject;
                 if (!unityMainAsset) {
                     throw new System.Exception ("Failed to convert " + toConvert.name);;
@@ -182,6 +184,7 @@ namespace FbxExporters
                         string.Format("Failed to create prefab asset in [{0}] from fbx [{1}]",
                             prefabFileName, fbxFullPath));
                 }
+
                 // Connect to the prefab file.
                 unityGO = PrefabUtility.ConnectGameObjectToPrefab(unityGO, prefab);
 
@@ -292,6 +295,13 @@ namespace FbxExporters
                 CopyComponentsRecursive (orig, imported, namesExpectedMatch:false);
             }
 
+            /// <summary>
+            /// Given two hierarchies of nodes whose names match up,
+            /// make the 'imported' hierarchy have its children be in the same
+            /// order as the 'orig' hierarchy.
+            ///
+            /// The 'orig' hierarchy is not modified.
+            /// </summary>
             public static void FixSiblingOrder(Transform orig, Transform imported){
                 foreach (Transform origChild in orig) {
                     Transform importedChild = imported.Find (origChild.name);
@@ -319,6 +329,16 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Copy components on the 'from' object which is the object in the
+            /// scene we exported, over to the 'to' object which is the object
+            /// in the scene that we imported from the FBX.
+            ///
+            /// Exception: don't copy the references to assets in the scene that
+            /// were also exported, in particular the meshes and materials.
+            ///
+            /// The 'from' hierarchy is not modified.
+            /// </summary>
             public static void CopyComponents(GameObject from, GameObject to){
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
                 foreach(var component in from.GetComponents<Component> ()) {
@@ -346,7 +366,9 @@ namespace FbxExporters
                         // It exists => copy.
                         // But we want to override that behaviour in a few
                         // cases, to avoid clobbering references to the new FBX
-                        // TODO: just modify the json directly.
+                        // TODO: interpret the object or the json more directly
+                        // TODO: be more generic
+                        // TODO: handle references to other objects in the same hierarchy
 
                         if (toComponent is MeshFilter) {
                             // Don't copy the mesh. But there's nothing else to
