@@ -26,29 +26,29 @@ namespace FbxExporters
             [MenuItem (MenuItemName1, false, 30)]
             static void OnContextItem (MenuCommand command)
             {
+                GameObject [] selection = null;
+
                 if (command == null || command.context == null) {
-                    // We were actually invoked from the top GameObject menu,
-                    // not the context menu, so treat it as such.
-                    GameObject [] unityGameObjectsToConvert = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
-                    if (unityGameObjectsToConvert.Length <= 0) {
-                    ModelExporter.DisplayNoSelectionDialog ();
-                        return;
+                    // We were actually invoked from the top GameObject menu, so use the selection.
+                    selection = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
+                } else {
+                    // We were invoked from the right-click menu, so use the context of the context menu.
+                    var selected = command.context as GameObject;
+                    if (selected) {
+                        selection = new GameObject[] { selected };
                     }
-                    Object[] result = CreateInstantiatedModelPrefab (unityGameObjectsToConvert);
-                    if (result.Length>0)
-                        Selection.objects = result;
+                }
+
+                if (selection == null || selection.Length == 0) {
+                    ModelExporter.DisplayNoSelectionDialog ();
                     return;
                 }
 
-                GameObject selected = command.context as GameObject;
-                if (selected == null) {
-                    Debug.LogError (string.Format("Error: {0} is not a GameObject and cannot be converted", command.context.name));
-                    return;
+                try {
+                    Selection.objects = CreateInstantiatedModelPrefab (selection);
+                } catch (System.Exception xcp) {
+                    Debug.LogException (xcp);
                 }
-                GameObject[] result1 = CreateInstantiatedModelPrefab (new GameObject[]{selected});
-                if (result1.Length>0)
-                    Selection.objects = result1;
-
             }
 
             /// <summary>
@@ -83,7 +83,7 @@ namespace FbxExporters
                 var wasExported = new List<GameObject>();
                 foreach(var go in toExport) {
                     try {
-                        wasExported.Add(CreateInstantiatedModelPrefab(go,
+                        wasExported.Add(Convert(go,
                             directoryFullPath: directoryFullPath,
                             keepOriginal: keepOriginal));
                     } catch(System.Exception xcp) {
@@ -112,7 +112,7 @@ namespace FbxExporters
             /// fbxFullPath is specified. May be null, in which case we use the
             /// export settings.</param>
             /// <param name="keepOriginal">If set to <c>true</c>, keep the original in the scene.</param>
-            public static GameObject CreateInstantiatedModelPrefab (
+            public static GameObject Convert (
                 GameObject toConvert,
                 string directoryFullPath = null,
                 string fbxFullPath = null,

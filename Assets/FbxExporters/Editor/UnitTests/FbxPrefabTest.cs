@@ -351,7 +351,7 @@ namespace FbxExporters.UnitTests
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.name = "Cube";
             var cubeAssetPath = GetRandomFbxFilePath();
-            var autoPrefab = FbxExporters.Editor.ConvertToModel.CreateInstantiatedModelPrefab(cube,
+            var autoPrefab = FbxExporters.Editor.ConvertToModel.Convert(cube,
                 fbxFullPath: cubeAssetPath);
             Assert.IsTrue(autoPrefab);
 

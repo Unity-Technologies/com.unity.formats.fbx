@@ -133,7 +133,7 @@ namespace FbxExporters.UnitTests
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
             // Convert it to a prefab.
-            var cubePrefabInstance = ConvertToModel.CreateInstantiatedModelPrefab(cube,
+            var cubePrefabInstance = ConvertToModel.Convert(cube,
                 directoryFullPath: path, keepOriginal: true);
 
             // Make sure it's what we expect.
