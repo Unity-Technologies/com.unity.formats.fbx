@@ -29,6 +29,7 @@ from unityOneClick import (commands)
 # User Interface
 # ======================================================================'
 
+kMayaVersionAdded = '2017'
 kMenuName = 'UnityOneClick'
 kMenuDivider = 'UnityOneClickDivider'
 kMenuLabel = 'UNITY'
@@ -64,12 +65,12 @@ def installMenu():
     """
     parentMenu = getParentMenu()
 
-    maya.cmds.menuItem(kMenuDivider, divider=True, longDivider=False, insertAfter=kMenuInsertAfter, parent=parentMenu)
-    maya.cmds.menuItem(kMenuName, parent=parentMenu, insertAfter=kMenuDivider, subMenu=True, label=kMenuLabel, tearOff=True)
+    maya.cmds.menuItem(kMenuDivider, divider=True, longDivider=False, insertAfter=kMenuInsertAfter, parent=parentMenu, version=kMayaVersionAdded)
+    maya.cmds.menuItem(kMenuName, parent=parentMenu, insertAfter=kMenuDivider, subMenu=True, label=kMenuLabel, tearOff=True, version=kMayaVersionAdded)
 
-    maya.cmds.menuItem(parent=kMenuName, label=commands.importCmd.kShortLabel, command=commands.importCmd.kScriptCommand)        # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMenuName, label=commands.reviewCmd.kShortLabel, command=commands.reviewCmd.kScriptCommand)    # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMenuName, label=commands.publishCmd.kShortLabel, command=commands.publishCmd.kScriptCommand)    # @UndefinedVariable
+    maya.cmds.menuItem(parent=kMenuName, label=commands.importCmd.kShortLabel, command=commands.importCmd.kScriptCommand, version=kMayaVersionAdded)
+    maya.cmds.menuItem(parent=kMenuName, label=commands.reviewCmd.kShortLabel, command=commands.reviewCmd.kScriptCommand, version=kMayaVersionAdded)
+    maya.cmds.menuItem(parent=kMenuName, label=commands.publishCmd.kShortLabel, command=commands.publishCmd.kScriptCommand, version=kMayaVersionAdded)
 
 def uninstallMenu():
     """
