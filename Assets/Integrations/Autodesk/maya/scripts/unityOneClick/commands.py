@@ -38,6 +38,8 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     """
     Base class for UnityOneClick Plugin Commands.
     """
+    kDefaultIcon = 'unity_100.png'
+    
     def __init__(self):
         OpenMayaMPx.MPxCommand.__init__(self)
         LoggerMixin.__init__(self)
@@ -86,6 +88,14 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
             
         maya.mel.eval(contents)
         return True
+    
+    @classmethod
+    def iconPath(cls):
+        return ""
+    
+    @classmethod
+    def familyIconPath(cls):
+        return maya.mel.eval('$tempPath = languageResourcePath("{0}");'.format(cls.kDefaultIcon))
         
     def storeAttribute(self, node, attr, attrValue, attrType="string"):
         if not maya.mel.eval('attributeExists "{0}" "{1}"'.format(attr, node)):

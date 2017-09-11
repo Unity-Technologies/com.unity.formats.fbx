@@ -65,12 +65,39 @@ def installMenu():
     """
     parentMenu = getParentMenu()
 
-    maya.cmds.menuItem(kMenuDivider, divider=True, longDivider=False, insertAfter=kMenuInsertAfter, parent=parentMenu, version=kMayaVersionAdded)
-    maya.cmds.menuItem(kMenuName, parent=parentMenu, insertAfter=kMenuDivider, subMenu=True, label=kMenuLabel, tearOff=True, version=kMayaVersionAdded)
+    maya.cmds.menuItem(kMenuDivider, 
+                       divider=True, 
+                       longDivider=False, 
+                       insertAfter=kMenuInsertAfter, 
+                       parent=parentMenu, 
+                       version=kMayaVersionAdded)
+    maya.cmds.menuItem(kMenuName, 
+                       parent=parentMenu, 
+                       insertAfter=kMenuDivider, 
+                       image=commands.importCmd.familyIconPath(),
+                       subMenu=True, 
+                       label=kMenuLabel, 
+                       tearOff=True, 
+                       version=kMayaVersionAdded)
 
-    maya.cmds.menuItem(parent=kMenuName, label=commands.importCmd.kShortLabel, command=commands.importCmd.kScriptCommand, version=kMayaVersionAdded)
-    maya.cmds.menuItem(parent=kMenuName, label=commands.reviewCmd.kShortLabel, command=commands.reviewCmd.kScriptCommand, version=kMayaVersionAdded)
-    maya.cmds.menuItem(parent=kMenuName, label=commands.publishCmd.kShortLabel, command=commands.publishCmd.kScriptCommand, version=kMayaVersionAdded)
+    maya.cmds.menuItem(parent=kMenuName, 
+                       label=commands.importCmd.kShortLabel, 
+                       annotation=commands.importCmd.kLabel, 
+                       command=commands.importCmd.kScriptCommand,
+                       image=commands.importCmd.iconPath(),
+                       version=kMayaVersionAdded)
+    maya.cmds.menuItem(parent=kMenuName, 
+                       label=commands.reviewCmd.kShortLabel, 
+                       annotation=commands.reviewCmd.kLabel, 
+                       command=commands.reviewCmd.kScriptCommand, 
+                       image=commands.importCmd.iconPath(),
+                       version=kMayaVersionAdded)
+    maya.cmds.menuItem(parent=kMenuName, 
+                       label=commands.publishCmd.kShortLabel, 
+                       annotation=commands.publishCmd.kLabel, 
+                       command=commands.publishCmd.kScriptCommand, 
+                       image=commands.importCmd.iconPath(),
+                       version=kMayaVersionAdded)
 
 def uninstallMenu():
     """
