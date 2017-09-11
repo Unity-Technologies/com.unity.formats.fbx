@@ -107,8 +107,9 @@ namespace FbxExporters
             /// <returns>The instance that replaces 'toConvert' in the scene.</returns>
             /// <param name="toConvert">GameObject hierarchy to replace with a prefab.</param>
             /// <param name="fbxFullPath">Absolute platform-specific path to
-            /// the fbx file. May be null, in which case we construct a path from
-            /// the object name and the directoryFullPath.</param>
+            /// the fbx file. May be null, in which case we construct a unique
+            /// filename from the object name and the
+            /// directoryFullPath.</param>
             /// <param name="directoryFullPath">Absolute platform-specific path
             /// to a directory in which to put the fbx file. Ignored if
             /// fbxFullPath is specified. May be null, in which case we use the
@@ -120,8 +121,8 @@ namespace FbxExporters
                 string fbxFullPath = null,
                 bool keepOriginal = true)
             {
-                // Generate a unique filename.
                 if (string.IsNullOrEmpty(fbxFullPath)) {
+                    // Generate a unique filename.
                     if (string.IsNullOrEmpty (directoryFullPath)) {
                         directoryFullPath = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath ();
                     } else {
