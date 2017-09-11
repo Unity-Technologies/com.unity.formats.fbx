@@ -349,79 +349,10 @@ namespace FbxExporters.Editor
             ;
 
         /// <summary>
-        /// Find the Maya installation that has your desired version, or
-        /// the newest version if the 'desired' is an empty string.
-        ///
-        /// If MAYA_LOCATION is set, the desired version is ignored.
-        /// </summary>
-        public static string GetMayaLocation(string desiredVersion = "") {
-
-            // if there is UI (i.e. we aren't in batchmode), then pop up a dialog
-            // for the Maya location
-            if(UnityEditorInternal.InternalEditorUtility.isHumanControllingUs
-                && !UnityEditorInternal.InternalEditorUtility.inBatchMode){
-
-                return EditorUtility.OpenFolderPanel ("Select Maya Root Folder", DefaultAdskRoot, "");
-            }
-
-            // If the location is given by the environment, use it.
-            var location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
-            if (!string.IsNullOrEmpty(location)) {
-                location = location.TrimEnd('/');
-                Debug.Log("Using maya set by MAYA_LOCATION: " + location);
-                return location;
-            }
-
-            // List that directory and find the right version:
-            // either the newest version, or the exact version we wanted.
-            string mayaRoot = "";
-            string bestVersion = "";
-            var adskRoot = new System.IO.DirectoryInfo(DefaultAdskRoot);
-            foreach(var productDir in adskRoot.GetDirectories()) {
-                var product = productDir.Name;
-
-                // Only accept those that start with 'maya' in either case.
-                if (!product.StartsWith("maya", StringComparison.InvariantCultureIgnoreCase)) {
-                    continue;
-                }
-                // Reject MayaLT -- it doesn't have plugins.
-                if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
-                    continue;
-                }
-                // Parse the version number at the end. Check if it matches,
-                // or if it's newer than the best so far.
-                string thisNumber = product.Substring("maya".Length);
-                if (thisNumber == desiredVersion) {
-                    mayaRoot = product;
-                    bestVersion = thisNumber;
-                    break;
-                } else if (thisNumber.CompareTo(bestVersion) > 0) {
-                    mayaRoot = product;
-                    bestVersion = thisNumber;
-                }
-            }
-            if (!string.IsNullOrEmpty(desiredVersion) && bestVersion != desiredVersion) {
-                throw new Integrations.MayaException(string.Format(
-                    "Unable to find maya {0} in its default installation path. Set MAYA_LOCATION.", desiredVersion));
-            } else if (string.IsNullOrEmpty(bestVersion)) {
-                throw new Integrations.MayaException(string.Format(
-                    "Unable to find any version of maya. Set MAYA_LOCATION."));
-            }
-
-            location = DefaultAdskRoot + "/" + mayaRoot;
-            if (string.IsNullOrEmpty(desiredVersion)) {
-                Debug.Log("Using latest version of maya found in: " + location);
-            } else {
-                Debug.Log(string.Format("Using maya {0} found in: {1}", desiredVersion, location));
-            }
-            return location;
-        }
-
-        /// <summary>
         /// The path of the Maya executable.
         /// </summary>
-        public static string GetMayaExe (string desiredVersion = "") {
-            var location = GetMayaLocation (desiredVersion);
+        public static string GetMayaExe () {
+            var location = EditorUtility.OpenFolderPanel ("Select Maya Root Folder", DefaultAdskRoot, "");
             if (string.IsNullOrEmpty(location)) {
                 return null;
             }
