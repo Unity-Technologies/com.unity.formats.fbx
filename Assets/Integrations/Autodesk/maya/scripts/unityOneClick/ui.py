@@ -31,6 +31,7 @@ from unityOneClick import (commands)
 
 kMainWndMenuName = 'UnityOneClick'
 kMainWndMenuLabel = 'Unity'
+kMayaVersionAdded = '2017'
 
 def register(pluginFn):
     """
@@ -55,10 +56,10 @@ def installMenu():
     install menu into main window 
     @ingroup UnityUI
     """
-    maya.cmds.menu (kMainWndMenuName, parent='MayaWindow', label=kMainWndMenuLabel, tearOff=True) # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.importCmd.kShortLabel, command=commands.importCmd.kScriptCommand)        # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.reviewCmd.kShortLabel, command=commands.reviewCmd.kScriptCommand)    # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.publishCmd.kShortLabel, command=commands.publishCmd.kScriptCommand)    # @UndefinedVariable
+    maya.cmds.menu (kMainWndMenuName, parent='MayaWindow', label=kMainWndMenuLabel, tearOff=True, version=kMayaVersionAdded) # @UndefinedVariable
+    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.importCmd.kShortLabel, command=commands.importCmd.kScriptCommand, version=kMayaVersionAdded)        # @UndefinedVariable
+    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.reviewCmd.kShortLabel, command=commands.reviewCmd.kScriptCommand, version=kMayaVersionAdded)    # @UndefinedVariable
+    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.publishCmd.kShortLabel, command=commands.publishCmd.kScriptCommand, version=kMayaVersionAdded)    # @UndefinedVariable
 
 def uninstallMenu():
     """
