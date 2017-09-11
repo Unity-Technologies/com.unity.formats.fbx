@@ -11,10 +11,19 @@ namespace FbxExporters.Editor
         private const string PACKAGE_NAME = "FbxExporters";
         private const string VERSION_FILENAME = "README.txt";
         private const string VERSION_FIELD = "**Version**";
-        private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
 
         private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
+
+        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
+
+#if UNITY_EDITOR_OSX
+        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
+#elif UNITY_EDITOR_LINUX
+        private const string MAYA_MODULES_PATH = "Maya/modules";
+#else
+        private const string MAYA_MODULES_PATH = "maya/modules";
+#endif
 
         public class MayaException : System.Exception {
             public MayaException() { }
@@ -182,16 +191,6 @@ namespace FbxExporters.Editor
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
-        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
-
-#if UNITY_EDITOR_OSX
-        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
-#elif UNITY_EDITOR_LINUX
-        private const string MAYA_MODULES_PATH = "Maya/modules";
-#else
-        private const string MAYA_MODULES_PATH = "maya/modules";
-#endif
-
         private static string GetUserFolder()
         {
 #if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
@@ -208,27 +207,12 @@ namespace FbxExporters.Editor
 
         public static string GetModulePath(string version)
         {
-            string result = System.IO.Path.Combine(GetUserFolder(), MAYA_MODULES_PATH);
-
-            return result.Replace(VERSION_TAG,version);
+            return System.IO.Path.Combine(GetUserFolder(), MAYA_MODULES_PATH);
         }
-
-        // GetModuleTemplatePath can support multiple versions of Maya in case
-        // of changes in API.  But most versions are compatible with each
-        // other, so just register one and make a mapping.
-        static Dictionary<string, string> ModuleTemplateCompatibility = new Dictionary<string, string>() {
-            { "2017", "2017" },
-            { "2018", "2017" },
-        };
 
         public static string GetModuleTemplatePath(string version)
         {
-            string result = System.IO.Path.Combine(Application.dataPath, MODULE_TEMPLATE_PATH);
-            if (!ModuleTemplateCompatibility.TryGetValue(version, out version)) {
-                throw new MayaException("FbxExporters does not support Maya version " + version);
-            }
-
-            return result.Replace(VERSION_TAG,version);
+            return System.IO.Path.Combine(Application.dataPath, MODULE_TEMPLATE_PATH);
         }
 
         public static string GetAppPath()
@@ -468,7 +452,6 @@ namespace FbxExporters.Editor
             {
                 Dictionary<string,string> Tokens = new Dictionary<string,string>()
                 {
-                    {VERSION_TAG, GetPackageVersion() },
                     {PROJECT_TAG, GetProjectPath() }
                  };
 
