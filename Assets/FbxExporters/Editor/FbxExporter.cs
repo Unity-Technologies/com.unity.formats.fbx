@@ -897,6 +897,8 @@ namespace FbxExporters
             /// <summary>
             /// Export all the objects in the set.
             /// Return the number of objects in the set that we exported.
+            ///
+            /// This refreshes the asset database.
             /// </summary>
             public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet)
             {
