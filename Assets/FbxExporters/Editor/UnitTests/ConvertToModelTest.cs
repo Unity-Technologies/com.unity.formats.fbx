@@ -137,17 +137,18 @@ namespace FbxExporters.UnitTests
                 directoryFullPath: path, keepOriginal: true);
 
             // Make sure it's what we expect.
-            Assert.IsTrue(cube); // we kept the original
-            Assert.IsTrue(cubePrefabInstance); // we got the new
+            Assert.That(cube); // we kept the original
+            Assert.That(cubePrefabInstance); // we got the new
             Assert.AreEqual("Cube", cubePrefabInstance.name); // it has the right name
-            Assert.IsFalse(EditorUtility.IsPersistent(cubePrefabInstance));
+            Assert.That(!EditorUtility.IsPersistent(cubePrefabInstance));
             var cubePrefabAsset = PrefabUtility.GetPrefabParent(cubePrefabInstance);
+            Assert.That(cubePrefabAsset);
 
             // it's a different mesh instance, but the same mesh
             Assert.AreNotEqual(
                 cube.GetComponent<MeshFilter>().sharedMesh,
                 cubePrefabInstance.GetComponent<MeshFilter>().sharedMesh);
-            Assert.IsTrue(cubePrefabInstance.GetComponent<FbxPrefab>());
+            Assert.That(cubePrefabInstance.GetComponent<FbxPrefab>());
 
             // Should be all the same triangles. But it isn't. TODO.
             // At least the indices should match in multiplicity.
