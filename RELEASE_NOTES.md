@@ -10,6 +10,7 @@ FIXES
 * Remove "Auto Review" button from the Fbx Export Settings
 * Maya Integration Plugin : the Unity menu is now submenu of the File menu
 * Maya Integration Plugin : add Unity icon to Unity menu item
+* Convert to Prefab : Add more unit tests
 
 **Version**: 0.0.12a
 
