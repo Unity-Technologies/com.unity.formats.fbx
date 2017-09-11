@@ -56,10 +56,30 @@ def installMenu():
     install menu into main window 
     @ingroup UnityUI
     """
-    maya.cmds.menu (kMainWndMenuName, parent='MayaWindow', label=kMainWndMenuLabel, tearOff=True, version=kMayaVersionAdded) # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.importCmd.kShortLabel, command=commands.importCmd.kScriptCommand, version=kMayaVersionAdded)        # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.reviewCmd.kShortLabel, command=commands.reviewCmd.kScriptCommand, version=kMayaVersionAdded)    # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.publishCmd.kShortLabel, command=commands.publishCmd.kScriptCommand, version=kMayaVersionAdded)    # @UndefinedVariable
+    maya.cmds.menu(kMainWndMenuName, 
+                   parent='MayaWindow', 
+                   label=kMainWndMenuLabel, tearOff=True, 
+                   version=kMayaVersionAdded, 
+                   familyImage=commands.importCmd.familyIconPath)
+    
+    maya.cmds.menuItem(parent=kMainWndMenuName, 
+                       label=commands.importCmd.kShortLabel, 
+                       annotation=commands.importCmd.kLabel, 
+                       command=commands.importCmd.kScriptCommand,
+                       image=commands.importCmd.iconPath,
+                       version=kMayaVersionAdded)
+    maya.cmds.menuItem(parent=kMainWndMenuName, 
+                       label=commands.reviewCmd.kShortLabel, 
+                       annotation=commands.reviewCmd.kLabel, 
+                       command=commands.reviewCmd.kScriptCommand, 
+                       image=commands.importCmd.iconPath,
+                       version=kMayaVersionAdded)
+    maya.cmds.menuItem(parent=kMainWndMenuName, 
+                       label=commands.publishCmd.kShortLabel, 
+                       annotation=commands.publishCmd.kLabel, 
+                       command=commands.publishCmd.kScriptCommand, 
+                       image=commands.importCmd.iconPath,
+                       version=kMayaVersionAdded)
 
 def uninstallMenu():
     """
