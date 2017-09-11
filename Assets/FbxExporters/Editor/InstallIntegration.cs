@@ -31,113 +31,6 @@ namespace FbxExporters.Editor
             public MayaException(string message, System.Exception inner) : base(message, inner) { }
         }
 
-        public class MayaLocation {
-
-            /// <summary>
-            /// Find the Maya installation that has your desired version, or
-            /// the newest version if the 'desired' is an empty string.
-            ///
-            /// If MAYA_LOCATION is set, the desired version is ignored.
-            /// </summary>
-            public MayaLocation(string desiredVersion = "") {
-                // If the location is given by the environment, use it.
-                Location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
-                if (!string.IsNullOrEmpty(Location)) {
-                    Location = Location.TrimEnd('/');
-                    Debug.Log("Using maya set by MAYA_LOCATION: " + Location);
-                    return;
-                }
-
-                // List that directory and find the right version:
-                // either the newest version, or the exact version we wanted.
-                string mayaRoot = "";
-                string bestVersion = "";
-                var adskRoot = new System.IO.DirectoryInfo(AdskRoot);
-                foreach(var productDir in adskRoot.GetDirectories()) {
-                    var product = productDir.Name;
-
-                    // Only accept those that start with 'maya' in either case.
-                    if (!product.StartsWith("maya", StringComparison.InvariantCultureIgnoreCase)) {
-                        continue;
-                    }
-                    // Reject MayaLT -- it doesn't have plugins.
-                    if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
-                        continue;
-                    }
-                    // Parse the version number at the end. Check if it matches,
-                    // or if it's newer than the best so far.
-                    string thisNumber = product.Substring("maya".Length);
-                    if (thisNumber == desiredVersion) {
-                        mayaRoot = product;
-                        bestVersion = thisNumber;
-                        break;
-                    } else if (thisNumber.CompareTo(bestVersion) > 0) {
-                        mayaRoot = product;
-                        bestVersion = thisNumber;
-                    }
-                }
-                if (!string.IsNullOrEmpty(desiredVersion) && bestVersion != desiredVersion) {
-                    throw new MayaException(string.Format(
-                                "Unable to find maya {0} in its default installation path. Set MAYA_LOCATION.", desiredVersion));
-                } else if (string.IsNullOrEmpty(bestVersion)) {
-                    throw new MayaException(string.Format(
-                                "Unable to find any version of maya. Set MAYA_LOCATION."));
-                }
-
-                Location = AdskRoot + "/" + mayaRoot;
-                if (string.IsNullOrEmpty(desiredVersion)) {
-                    Debug.Log("Using latest version of maya found in: " + Location);
-                } else {
-                    Debug.Log(string.Format("Using maya {0} found in: {1}", desiredVersion, Location));
-                }
-            }
-
-            /// <summary>
-            /// The path where all the different versions of Maya are installed
-            /// by default. Depends on the platform.
-            /// </summary>
-            public const string AdskRoot =
-#if UNITY_EDITOR_OSX
-                "/Applications/Autodesk"
-#elif UNITY_EDITOR_LINUX
-                "/usr/autodesk"
-#else // WINDOWS
-                "C:/Program Files/Autodesk"
-#endif
-            ;
-
-            /// <summary>
-            /// The value that you might set MAYA_LOCATION to if you wanted to
-            /// use this version of Maya.
-            /// </summary>
-            public string Location { get; private set; }
-
-            /// <summary>
-            /// The path of the Maya executable.
-            /// </summary>
-            public string MayaExe {
-                get {
-#if UNITY_EDITOR_OSX
-                    // MAYA_LOCATION on mac is set by Autodesk to be the
-                    // Contents directory. But let's make it easier on people
-                    // and allow just having it be the app bundle or a
-                    // directory that holds the app bundle.
-                    if (Location.EndsWith(".app/Contents")) {
-                        return Location + "/MacOS/Maya";
-                    } else if (Location.EndsWith(".app")) {
-                        return Location + "/Contents/MacOS/Maya";
-                    } else {
-                        return Location + "/Maya.app/Contents/MacOS/Maya";
-                    }
-#elif UNITY_EDITOR_LINUX
-                    return Location + "/bin/maya";
-#else // WINDOWS
-                    return Location + "/bin/maya.exe";
-#endif
-                }
-            }
-        };
-
         // Use string to define escaped quote
         // Windows needs the backslash
 #if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
@@ -301,12 +194,11 @@ namespace FbxExporters.Editor
             }
         }
 
-        public static int ConfigureMaya(MayaLocation mayaLoc)
+        public static int ConfigureMaya(string mayaPath)
         {
              int ExitCode = 0;
 
              try {
-                string mayaPath = mayaLoc.MayaExe;
                 if (!System.IO.File.Exists(mayaPath))
                 {
                     Debug.LogError (string.Format ("No maya installation found at {0}", mayaPath));
@@ -442,14 +334,129 @@ namespace FbxExporters.Editor
 
     class IntegrationsUI
     {
+        /// <summary>
+        /// The path where all the different versions of Maya are installed
+        /// by default. Depends on the platform.
+        /// </summary>
+        public const string DefaultAdskRoot =
+#if UNITY_EDITOR_OSX
+            "/Applications/Autodesk"
+#elif UNITY_EDITOR_LINUX
+            "/usr/autodesk"
+#else // WINDOWS
+            "C:/Program Files/Autodesk"
+#endif
+            ;
+
+        /// <summary>
+        /// Find the Maya installation that has your desired version, or
+        /// the newest version if the 'desired' is an empty string.
+        ///
+        /// If MAYA_LOCATION is set, the desired version is ignored.
+        /// </summary>
+        public static string GetMayaLocation(string desiredVersion = "") {
+
+            // if there is UI (i.e. we aren't in batchmode), then pop up a dialog
+            // for the Maya location
+            if(UnityEditorInternal.InternalEditorUtility.isHumanControllingUs
+                && !UnityEditorInternal.InternalEditorUtility.inBatchMode){
+
+                return EditorUtility.OpenFolderPanel ("Select Maya Root Folder", DefaultAdskRoot, "");
+            }
+
+            // If the location is given by the environment, use it.
+            var location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
+            if (!string.IsNullOrEmpty(location)) {
+                location = location.TrimEnd('/');
+                Debug.Log("Using maya set by MAYA_LOCATION: " + location);
+                return location;
+            }
+
+            // List that directory and find the right version:
+            // either the newest version, or the exact version we wanted.
+            string mayaRoot = "";
+            string bestVersion = "";
+            var adskRoot = new System.IO.DirectoryInfo(DefaultAdskRoot);
+            foreach(var productDir in adskRoot.GetDirectories()) {
+                var product = productDir.Name;
+
+                // Only accept those that start with 'maya' in either case.
+                if (!product.StartsWith("maya", StringComparison.InvariantCultureIgnoreCase)) {
+                    continue;
+                }
+                // Reject MayaLT -- it doesn't have plugins.
+                if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
+                    continue;
+                }
+                // Parse the version number at the end. Check if it matches,
+                // or if it's newer than the best so far.
+                string thisNumber = product.Substring("maya".Length);
+                if (thisNumber == desiredVersion) {
+                    mayaRoot = product;
+                    bestVersion = thisNumber;
+                    break;
+                } else if (thisNumber.CompareTo(bestVersion) > 0) {
+                    mayaRoot = product;
+                    bestVersion = thisNumber;
+                }
+            }
+            if (!string.IsNullOrEmpty(desiredVersion) && bestVersion != desiredVersion) {
+                throw new Integrations.MayaException(string.Format(
+                    "Unable to find maya {0} in its default installation path. Set MAYA_LOCATION.", desiredVersion));
+            } else if (string.IsNullOrEmpty(bestVersion)) {
+                throw new Integrations.MayaException(string.Format(
+                    "Unable to find any version of maya. Set MAYA_LOCATION."));
+            }
+
+            location = DefaultAdskRoot + "/" + mayaRoot;
+            if (string.IsNullOrEmpty(desiredVersion)) {
+                Debug.Log("Using latest version of maya found in: " + location);
+            } else {
+                Debug.Log(string.Format("Using maya {0} found in: {1}", desiredVersion, location));
+            }
+            return location;
+        }
+
+        /// <summary>
+        /// The path of the Maya executable.
+        /// </summary>
+        public static string GetMayaExe (string desiredVersion = "") {
+            var location = GetMayaLocation (desiredVersion);
+            if (string.IsNullOrEmpty(location)) {
+                return null;
+            }
+
+#if UNITY_EDITOR_OSX
+                // MAYA_LOCATION on mac is set by Autodesk to be the
+                // Contents directory. But let's make it easier on people
+                // and allow just having it be the app bundle or a
+                // directory that holds the app bundle.
+                if (location.EndsWith(".app/Contents")) {
+                return location + "/MacOS/Maya";
+                } else if (location.EndsWith(".app")) {
+                return location + "/Contents/MacOS/Maya";
+                } else {
+                return location + "/Maya.app/Contents/MacOS/Maya";
+                }
+#elif UNITY_EDITOR_LINUX
+                return location + "/bin/maya";
+#else // WINDOWS
+                return location + "/bin/maya.exe";
+#endif
+        }
+
         public static void InstallMayaIntegration ()
         {
+            var mayaExe = GetMayaExe ();
+            if (string.IsNullOrEmpty (mayaExe)) {
+                return;
+            }
+
             if (!Integrations.InstallMaya(verbose: true)) {
                 return;
             }
 
-            var mayaLoc = new Integrations.MayaLocation();
-            int exitCode = Integrations.ConfigureMaya (mayaLoc);
+            int exitCode = Integrations.ConfigureMaya (mayaExe);
 
             string title, message;
             if (exitCode != 0) {
