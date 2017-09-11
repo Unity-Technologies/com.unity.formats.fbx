@@ -29,9 +29,11 @@ from unityOneClick import (commands)
 # User Interface
 # ======================================================================'
 
-kMainWndMenuName = 'UnityOneClick'
-kMainWndMenuLabel = 'Unity'
 kMayaVersionAdded = '2017'
+kMenuName = 'UnityOneClick'
+kMenuDivider = 'UnityOneClickDivider'
+kMenuLabel = 'UNITY'
+kMenuInsertAfter = 'exportActiveFileOptions'
 
 def register(pluginFn):
     """
@@ -51,20 +53,31 @@ def unregister(pluginFn):
     
     return
 
+def getParentMenu():
+    result = maya.mel.eval('$tempVar = $gMainFileMenu;')
+    maya.mel.eval("buildFileMenu")
+    return result
+
 def installMenu():
     """
     install menu into main window 
     @ingroup UnityUI
     """
-    maya.cmds.menu (kMainWndMenuName, parent='MayaWindow', label=kMainWndMenuLabel, tearOff=True, version=kMayaVersionAdded) # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.importCmd.kShortLabel, command=commands.importCmd.kScriptCommand, version=kMayaVersionAdded)        # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.reviewCmd.kShortLabel, command=commands.reviewCmd.kScriptCommand, version=kMayaVersionAdded)    # @UndefinedVariable
-    maya.cmds.menuItem(parent=kMainWndMenuName, label=commands.publishCmd.kShortLabel, command=commands.publishCmd.kScriptCommand, version=kMayaVersionAdded)    # @UndefinedVariable
+    parentMenu = getParentMenu()
+
+    maya.cmds.menuItem(kMenuDivider, divider=True, longDivider=False, insertAfter=kMenuInsertAfter, parent=parentMenu, version=kMayaVersionAdded)
+    maya.cmds.menuItem(kMenuName, parent=parentMenu, insertAfter=kMenuDivider, subMenu=True, label=kMenuLabel, tearOff=True, version=kMayaVersionAdded)
+
+    maya.cmds.menuItem(parent=kMenuName, label=commands.importCmd.kShortLabel, command=commands.importCmd.kScriptCommand, version=kMayaVersionAdded)
+    maya.cmds.menuItem(parent=kMenuName, label=commands.reviewCmd.kShortLabel, command=commands.reviewCmd.kScriptCommand, version=kMayaVersionAdded)
+    maya.cmds.menuItem(parent=kMenuName, label=commands.publishCmd.kShortLabel, command=commands.publishCmd.kScriptCommand, version=kMayaVersionAdded)
 
 def uninstallMenu():
     """
     uninstall the unityOneClick menu from main window
     @ingroup UnityUI
     """
-    if maya.cmds.menu(kMainWndMenuName, exists=True):     # @UndefinedVariable
-        maya.cmds.deleteUI(kMainWndMenuName, menu=True)   # @UndefinedVariable
+    if maya.cmds.menu(kMenuName, exists=True):     # @UndefinedVariable
+        maya.cmds.deleteUI(kMenuDivider, menuItem=True)
+        maya.cmds.deleteUI(kMenuName, menuItem=True)
+        maya.cmds.deleteUI(kMenuName, menu=True)   # @UndefinedVariable
