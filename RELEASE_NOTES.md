@@ -1,5 +1,15 @@
 RELEASE NOTES
 
+**Version**: 0.0.13a
+
+FIXES
+
+* Updated license to Unity Companion License 1.0 
+* Hide "auto-update" feature of FbxPrefab component from the Unity Inspector
+* Remove "Embedded Textures" option from the Fbx Export Settings
+* Remove "Auto Review" button from the Fbx Export Settings
+* Maya Integration Plugin : the Unity menu is now submenu of the File menu
+
 **Version**: 0.0.12a
 
 NEW FEATURES
