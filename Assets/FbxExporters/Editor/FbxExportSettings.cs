@@ -207,6 +207,9 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         public static string ConvertToAssetRelativePath(string fullPathInAssets, bool requireSubdirectory = true)
         {
+            if (!Path.IsPathRooted(fullPathInAssets)) {
+                fullPathInAssets = Path.GetFullPath(fullPathInAssets);
+            }
             var relativePath = GetRelativePath(Application.dataPath, fullPathInAssets);
             if (requireSubdirectory && relativePath.StartsWith("..")) {
                 if (relativePath.Length == 2 || relativePath[2] == '/') {
