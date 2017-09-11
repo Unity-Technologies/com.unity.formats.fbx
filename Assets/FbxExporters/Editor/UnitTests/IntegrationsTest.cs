@@ -34,14 +34,11 @@ namespace FbxExporters.UnitTests
 
             LogNonEmptyString("location", maya.Location);
             LogNonEmptyString("binary  ", maya.MayaExe);
-            LogNonEmptyString("version ", maya.Version);
 
             Assert.IsFalse(Editor.Integrations.IsHeadlessInstall());
 
-            LogNonEmptyString("module path (2017)", Editor.Integrations.GetModulePath("2017"));
-            LogNonEmptyString("module template path (2017)", Editor.Integrations.GetModuleTemplatePath("2017"));
-            Assert.That( () => Editor.Integrations.GetModuleTemplatePath("bad version"),
-                    Throws.Exception.TypeOf<Editor.Integrations.MayaException>());
+            LogNonEmptyString("module path", Editor.Integrations.GetModulePath());
+            LogNonEmptyString("module template path", Editor.Integrations.GetModuleTemplatePath());
 
             LogNonEmptyString("app path", Editor.Integrations.GetAppPath());
             LogNonEmptyString("project path", Editor.Integrations.GetProjectPath());

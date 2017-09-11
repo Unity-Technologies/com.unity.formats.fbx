@@ -31,7 +31,7 @@ namespace FbxExporters.Editor
             public MayaException(string message, System.Exception inner) : base(message, inner) { }
         }
 
-        public class MayaVersion {
+        public class MayaLocation {
 
             /// <summary>
             /// Find the Maya installation that has your desired version, or
@@ -39,7 +39,7 @@ namespace FbxExporters.Editor
             ///
             /// If MAYA_LOCATION is set, the desired version is ignored.
             /// </summary>
-            public MayaVersion(string desiredVersion = "") {
+            public MayaLocation(string desiredVersion = "") {
                 // If the location is given by the environment, use it.
                 Location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
                 if (!string.IsNullOrEmpty(Location)) {
@@ -136,45 +136,6 @@ namespace FbxExporters.Editor
 #endif
                 }
             }
-
-            /// <summary>
-            /// The version number.
-            ///
-            /// This may involve running Maya so it can be expensive (a few
-            /// seconds).
-            /// </summary>
-            public string Version {
-                get {
-                    if (string.IsNullOrEmpty(m_version)) {
-                        m_version = AskVersion(MayaExe);
-                    }
-                    return m_version;
-                }
-            }
-            string m_version;
-
-            /// <summary>
-            /// Ask the version number by running maya.
-            /// </summary>
-            static string AskVersion(string exePath) {
-                System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
-                myProcess.StartInfo.FileName = exePath;
-                myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                myProcess.StartInfo.CreateNoWindow = true;
-                myProcess.StartInfo.UseShellExecute = false;
-                myProcess.StartInfo.RedirectStandardOutput = true;
-                myProcess.StartInfo.Arguments = "-v";
-                myProcess.EnableRaisingEvents = true;
-                myProcess.Start();
-                string resultString = myProcess.StandardOutput.ReadToEnd();
-                myProcess.WaitForExit();
-
-                // Output is like: Maya 2018, Cut Number 201706261615
-                // We want the stuff after 'Maya ' and before the comma.
-                // TODO: less brittle! Consider also the mel command "about -version".
-                var commaIndex = resultString.IndexOf(',');
-                return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
-            }
         };
 
         // Use string to define escaped quote
@@ -205,12 +166,12 @@ namespace FbxExporters.Editor
             return false;
         }
 
-        public static string GetModulePath(string version)
+        public static string GetModulePath()
         {
             return System.IO.Path.Combine(GetUserFolder(), MAYA_MODULES_PATH);
         }
 
-        public static string GetModuleTemplatePath(string version)
+        public static string GetModuleTemplatePath()
         {
             return System.IO.Path.Combine(Application.dataPath, MODULE_TEMPLATE_PATH);
         }
@@ -340,12 +301,12 @@ namespace FbxExporters.Editor
             }
         }
 
-        public static int ConfigureMaya(MayaVersion version)
+        public static int ConfigureMaya(MayaLocation mayaLoc)
         {
              int ExitCode = 0;
 
              try {
-                string mayaPath = version.MayaExe;
+                string mayaPath = mayaLoc.MayaExe;
                 if (!System.IO.File.Exists(mayaPath))
                 {
                     Debug.LogError (string.Format ("No maya installation found at {0}", mayaPath));
@@ -380,7 +341,7 @@ namespace FbxExporters.Editor
             return ExitCode;
         }
 
-        public static bool InstallMaya(MayaVersion version = null, bool verbose = false)
+        public static bool InstallMaya(bool verbose = false)
         {
             // What's happening here is that we copy the module template to
             // the module path, basically:
@@ -388,19 +349,16 @@ namespace FbxExporters.Editor
             // - search-and-replace its tags
             // - done.
             // But it's complicated because we can't trust any files actually exist.
-            if (version == null) {
-                version = new MayaVersion();
-            }
 
-            string moduleTemplatePath = GetModuleTemplatePath(version.Version);
+            string moduleTemplatePath = GetModuleTemplatePath();
             if (!System.IO.File.Exists(moduleTemplatePath))
             {
-                Debug.LogError(string.Format("FbxExporters package doesn't have support for " + version.Version));
+                Debug.LogError(string.Format("Missing Maya module file"));
                 return false;
             }
 
             // Create the {USER} modules folder and empty it so it's ready to set up.
-            string modulePath = GetModulePath(version.Version);
+            string modulePath = GetModulePath();
             string moduleFilePath = System.IO.Path.Combine(modulePath, MODULE_FILENAME + ".mod");
             bool installed = false;
 
@@ -486,20 +444,20 @@ namespace FbxExporters.Editor
     {
         public static void InstallMayaIntegration ()
         {
-            var mayaVersion = new Integrations.MayaVersion();
-            if (!Integrations.InstallMaya(mayaVersion, verbose: true)) {
+            if (!Integrations.InstallMaya(verbose: true)) {
                 return;
             }
 
-            int exitCode = Integrations.ConfigureMaya (mayaVersion);
+            var mayaLoc = new Integrations.MayaLocation();
+            int exitCode = Integrations.ConfigureMaya (mayaLoc);
 
             string title, message;
             if (exitCode != 0) {
-                title = string.Format("Failed to install Maya {0} Integration.", mayaVersion.Version);
+                title = "Failed to install Maya Integration.";
                 message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
             } else {
-                title = string.Format("Completed installation of Maya {0} Integration.", mayaVersion.Version);
-                message = string.Format("Enjoy the new \"Unity\" menu in Maya {0}.", mayaVersion.Version);
+                title = "Completed installation of Maya Integration.";
+                message = "Enjoy the new \"Unity\" menu in Maya.";
             }
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
