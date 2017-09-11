@@ -85,6 +85,9 @@ namespace FbxExporters
             /// </summary>
             const string UniqueNameFormat = "{0}_{1}";
 
+            /// <summary>
+            /// Gets the version number of the FbxExporters plugin from the readme.
+            /// </summary>
             public static string GetVersionFromReadme()
             {
                 if (string.IsNullOrEmpty (ReadmeRelativePath)) {
@@ -119,10 +122,10 @@ namespace FbxExporters
             /// return layer for mesh
             /// </summary>
             /// 
-            private FbxLayer GetLayer(FbxMesh fbxMesh, int layer = 0 /* default layer */)
+            public static FbxLayer GetOrCreateLayer(FbxMesh fbxMesh, int layer = 0 /* default layer */)
             {
                 FbxLayer fbxLayer = fbxMesh.GetLayer (layer);
-                if (fbxLayer == null) {
+                while (fbxLayer == null) {
                     fbxMesh.CreateLayer ();
                     fbxLayer = fbxMesh.GetLayer (layer);
                 }
@@ -135,7 +138,7 @@ namespace FbxExporters
             public void ExportComponentAttributes (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
             {
                 // Set the normals on Layer 0.
-                FbxLayer fbxLayer = GetLayer(fbxMesh);
+                FbxLayer fbxLayer = GetOrCreateLayer(fbxMesh);
 
                 using (var fbxLayerElement = FbxLayerElementNormal.Create (fbxMesh, "Normals")) {
                     fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
@@ -228,7 +231,7 @@ namespace FbxExporters
             /// <param name="fbxMesh">Fbx mesh.</param>
             /// <param name="mesh">Mesh.</param>
             /// <param name="unmergedTriangles">Unmerged triangles.</param>
-            protected void ExportUVs(FbxMesh fbxMesh, MeshInfo mesh, int[] unmergedTriangles)
+            protected static void ExportUVs(FbxMesh fbxMesh, MeshInfo mesh, int[] unmergedTriangles)
             {
                 Vector2[][] uvs = new Vector2[][] {
                     mesh.UV,
@@ -243,7 +246,7 @@ namespace FbxExporters
                         continue; // don't have these UV's, so skip
                     }
 
-                    FbxLayer fbxLayer = GetLayer (fbxMesh, k);
+                    FbxLayer fbxLayer = GetOrCreateLayer (fbxMesh, k);
                     using (var fbxLayerElement = FbxLayerElementUV.Create (fbxMesh, "UVSet" + i))
                     {
                         fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
@@ -276,7 +279,7 @@ namespace FbxExporters
             /// Helper for ExportComponentAttributes()
             /// </summary>
             /// <returns>The right-handed FbxVector4.</returns>
-            private FbxVector4 CreateRightHandedFbxVector4(Vector3 leftHandedVector)
+            private static FbxVector4 CreateRightHandedFbxVector4(Vector3 leftHandedVector)
             {
                 // negating the x component of the vector converts it from left to right handed coordinates
                 return new FbxVector4 (

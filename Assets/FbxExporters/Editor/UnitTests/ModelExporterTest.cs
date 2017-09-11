@@ -10,11 +10,29 @@ using UnityEditor;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections.Generic;
+using Unity.FbxSdk;
+using FbxExporters.Editor;
 
 namespace FbxExporters.UnitTests
 {
     public class ModelExporterTest : ExporterTestBase
     {
+        [Test]
+        public void TestBasics ()
+        {
+            Assert.That(!string.IsNullOrEmpty(ModelExporter.GetVersionFromReadme()));
+
+            using (var fbxManager = FbxManager.Create()) {
+                var fbxMesh = FbxMesh.Create(fbxManager, "name");
+                var layer0 = ModelExporter.GetOrCreateLayer(fbxMesh);
+                Assert.That(layer0, Is.Not.Null);
+                Assert.That(ModelExporter.GetOrCreateLayer(fbxMesh), Is.EqualTo(layer0));
+                var layer5 = ModelExporter.GetOrCreateLayer(fbxMesh, layer: 5);
+                Assert.That(layer5, Is.Not.Null);
+                Assert.That(layer5, Is.Not.EqualTo(layer0));
+            }
+        }
+
         [Test]
         public void TestFindCenter ()
         {
