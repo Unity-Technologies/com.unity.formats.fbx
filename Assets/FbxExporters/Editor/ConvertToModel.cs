@@ -20,9 +20,15 @@ namespace FbxExporters
         {
             const string MenuItemName1 = "GameObject/Convert To Prefab";
 
-            // Add a menu item called "Export Model..." to a GameObject's context menu.
-            // OnContextItem gets called once per selected object
-            // (if the parent and child are selected, then OnContextItem will only be called on the parent)
+            /// <summary>
+            /// OnContextItem is called either:
+            /// * when the user selects the menu item via the top menu (with a null MenuCommand), or
+            /// * when the user selects the menu item via the context menu (in which case there's a context)
+            ///
+            /// OnContextItem gets called once per selected object (if the
+            /// parent and child are selected, then OnContextItem will only be
+            /// called on the parent)
+            /// </summary>
             [MenuItem (MenuItemName1, false, 30)]
             static void OnContextItem (MenuCommand command)
             {
@@ -44,11 +50,7 @@ namespace FbxExporters
                     return;
                 }
 
-                try {
-                    Selection.objects = CreateInstantiatedModelPrefab (selection);
-                } catch (System.Exception xcp) {
-                    Debug.LogException (xcp);
-                }
+                Selection.objects = CreateInstantiatedModelPrefab (selection);
             }
 
             /// <summary>
