@@ -313,7 +313,8 @@ class reviewCmd(BaseCommand):
         maya.mel.eval(melCommand)
         
         if origSelection:
-            maya.cmds.select(origSelection, add=True)
+            maya.cmds.select(cl=True)
+            maya.cmds.select(origSelection, add=True, ne=True)
 
     @classmethod
     def invoke(cls):
@@ -378,7 +379,8 @@ class publishCmd(BaseCommand):
         maya.mel.eval(strCmd)
         
         if origSelection:
-            maya.cmds.select(origSelection, add=True)
+            maya.cmds.select(cl=True)
+            maya.cmds.select(origSelection, add=True, ne=True)
         
     @classmethod
     def invoke(cls):
