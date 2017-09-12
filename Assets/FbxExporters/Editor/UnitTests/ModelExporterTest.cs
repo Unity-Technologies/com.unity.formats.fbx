@@ -22,6 +22,7 @@ namespace FbxExporters.UnitTests
         {
             Assert.That(!string.IsNullOrEmpty(ModelExporter.GetVersionFromReadme()));
 
+            // Test GetOrCreateLayer
             using (var fbxManager = FbxManager.Create()) {
                 var fbxMesh = FbxMesh.Create(fbxManager, "name");
                 var layer0 = ModelExporter.GetOrCreateLayer(fbxMesh);
@@ -31,6 +32,27 @@ namespace FbxExporters.UnitTests
                 Assert.That(layer5, Is.Not.Null);
                 Assert.That(layer5, Is.Not.EqualTo(layer0));
             }
+
+            // Test axis conversion: a x b in left-handed is the same as b x a
+            // in right-handed (that's why we need to flip the winding order).
+            var a = new Vector3(1,0,0);
+            var b = new Vector3(0,0,1);
+            var crossLeft = Vector3.Cross(a,b);
+
+            var afbx = ModelExporter.ConvertNormalToRightHanded(a);
+            var bfbx = ModelExporter.ConvertNormalToRightHanded(b);
+            Assert.AreEqual(ModelExporter.ConvertNormalToRightHanded(crossLeft), bfbx.CrossProduct(afbx));
+
+            // Test scale conversion. Nothing complicated here...
+            var afbxPosition = ModelExporter.ConvertPositionToRightHanded(a);
+            Assert.AreEqual(100, afbxPosition.Length());
+
+            // Test rotation conversion.
+            var q = Quaternion.Euler(new Vector3(0, 90, 0));
+            var fbxAngles = ModelExporter.ConvertQuaternionToXYZEuler(q);
+            Assert.AreEqual(fbxAngles.X, 0);
+            Assert.That(fbxAngles.Y, Is.InRange(-90.001, -89.999));
+            Assert.AreEqual(fbxAngles.Z, 0);
         }
 
         [Test]

@@ -52,9 +52,9 @@ namespace FbxExporters
             const int UnitScaleFactor = 100;
 
             /// <summary>
-            /// Create instance of example
+            /// Create instance of exporter.
             /// </summary>
-            public static ModelExporter Create ()
+            static ModelExporter Create ()
             {
                 return new ModelExporter ();
             }
@@ -119,7 +119,8 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// return layer for mesh
+            /// Get a layer (to store UVs, normals, etc) on the mesh.
+            /// If it doesn't exist yet, create it.
             /// </summary>
             /// 
             public static FbxLayer GetOrCreateLayer(FbxMesh fbxMesh, int layer = 0 /* default layer */)
@@ -135,7 +136,7 @@ namespace FbxExporters
             /// <summary>
             /// Export the mesh's attributes using layer 0.
             /// </summary>
-            public void ExportComponentAttributes (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
+            void ExportComponentAttributes (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
             {
                 // Set the normals on Layer 0.
                 FbxLayer fbxLayer = GetOrCreateLayer(fbxMesh);
@@ -149,11 +150,11 @@ namespace FbxExporters
 
                     for (int n = 0; n < unmergedTriangles.Length; n++) {
                         int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (CreateRightHandedFbxVector4 (mesh.Normals [unityTriangle]));
+                        fbxElementArray.Add (ConvertNormalToRightHanded (mesh.Normals [unityTriangle]));
                     }
 
-					fbxLayer.SetNormals (fbxLayerElement);
-				}
+                    fbxLayer.SetNormals (fbxLayerElement);
+                }
 
                 /// Set the binormals on Layer 0. 
                 using (var fbxLayerElement = FbxLayerElementBinormal.Create (fbxMesh, "Binormals")) 
@@ -166,7 +167,7 @@ namespace FbxExporters
 
                     for (int n = 0; n < unmergedTriangles.Length; n++) {
                         int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (CreateRightHandedFbxVector4 (mesh.Binormals [unityTriangle]));
+                        fbxElementArray.Add (ConvertNormalToRightHanded (mesh.Binormals [unityTriangle]));
                     }
                     fbxLayer.SetBinormals (fbxLayerElement);
                 }
@@ -182,7 +183,7 @@ namespace FbxExporters
 
                     for (int n = 0; n < unmergedTriangles.Length; n++) {
                         int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (CreateRightHandedFbxVector4(
+                        fbxElementArray.Add (ConvertNormalToRightHanded(
                             new Vector3(
                                 mesh.Tangents[unityTriangle][0],
                                 mesh.Tangents[unityTriangle][1],
@@ -231,7 +232,7 @@ namespace FbxExporters
             /// <param name="fbxMesh">Fbx mesh.</param>
             /// <param name="mesh">Mesh.</param>
             /// <param name="unmergedTriangles">Unmerged triangles.</param>
-            protected static void ExportUVs(FbxMesh fbxMesh, MeshInfo mesh, int[] unmergedTriangles)
+            static void ExportUVs(FbxMesh fbxMesh, MeshInfo mesh, int[] unmergedTriangles)
             {
                 Vector2[][] uvs = new Vector2[][] {
                     mesh.UV,
@@ -275,11 +276,15 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Takes in a left-handed Vector3, and returns a right-handed FbxVector4.
-            /// Helper for ExportComponentAttributes()
+            /// Takes in a left-handed UnityEngine.Vector3 denoting a normal,
+            /// returns a right-handed FbxVector4.
+            ///
+            /// Unity is left-handed, Maya and Max are right-handed.
+            /// The FbxSdk conversion routines can't handle changing handedness.
+            ///
+            /// Remember you also need to flip the winding order on your polygons.
             /// </summary>
-            /// <returns>The right-handed FbxVector4.</returns>
-            private static FbxVector4 CreateRightHandedFbxVector4(Vector3 leftHandedVector)
+            public static FbxVector4 ConvertNormalToRightHanded(Vector3 leftHandedVector)
             {
                 // negating the x component of the vector converts it from left to right handed coordinates
                 return new FbxVector4 (
@@ -289,8 +294,30 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Export an Unity Texture
+            /// Takes in a left-handed UnityEngine.Vector3 denoting a position,
+            /// returns a right-handed FbxVector4.
+            ///
+            /// Unity is left-handed, Maya and Max are right-handed.
+            /// The FbxSdk conversion routines can't handle changing handedness.
+            ///
+            /// Remember you also need to flip the winding order on your polygons.
             /// </summary>
+            public static FbxVector4 ConvertPositionToRightHanded(Vector3 leftHandedVector)
+            {
+                return UnitScaleFactor * ConvertNormalToRightHanded(leftHandedVector);
+            }
+
+            /// <summary>
+            /// Exports a texture from Unity to FBX.
+            /// The texture must be a property on the unityMaterial; it gets
+            /// linked to the FBX via a property on the fbxMaterial.
+            ///
+            /// The texture file must be a file on disk; it is not embedded within the FBX.
+            /// </summary>
+            /// <param name="unityMaterial">Unity material.</param>
+            /// <param name="unityPropName">Unity property name, e.g. "_MainTex".</param>
+            /// <param name="fbxMaterial">Fbx material.</param>
+            /// <param name="fbxPropName">Fbx property name, e.g. <c>FbxSurfaceMaterial.sDiffuse</c>.</param>
             public void ExportTexture (Material unityMaterial, string unityPropName,
                                        FbxSurfaceMaterial fbxMaterial, string fbxPropName)
             {
@@ -316,8 +343,9 @@ namespace FbxExporters
                 // get absolute filepath to texture
                 textureSourceFullPath = Path.GetFullPath (textureSourceFullPath);
 
-                if (Verbose)
+                if (Verbose) {
                     Debug.Log (string.Format ("{2}.{1} setting texture path {0}", textureSourceFullPath, fbxPropName, fbxMaterial.GetName ()));
+                }
 
                 // Find the corresponding property on the fbx material.
                 var fbxMaterialProperty = fbxMaterial.FindProperty (fbxPropName);
@@ -467,13 +495,13 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Unconditionally export this mesh object to the file.
-            /// We have decided; this mesh is definitely getting exported.
+            /// Export this mesh object to the file.
             /// </summary>
-            public FbxMesh ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene, bool weldVertices = true)
+            FbxMesh ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, FbxScene fbxScene, bool weldVertices = true)
             {
-                if (!meshInfo.IsValid)
+                if (!meshInfo.IsValid) {
                     return null;
+                }
 
                 NumMeshes++;
                 NumTriangles += meshInfo.Triangles.Length / 3;
@@ -496,15 +524,9 @@ namespace FbxExporters
                     }
                     fbxMesh.InitControlPoints (NumControlPoints);
 
-                    // Copy control point data from Unity to FBX.
-                    // As we do so, scale the points by 100 to convert
-                    // from m to cm.
                     foreach (var controlPoint in ControlPointToIndex.Keys) {
-                        fbxMesh.SetControlPointAt (new FbxVector4 (
-                            -controlPoint.x*UnitScaleFactor,
-                            controlPoint.y*UnitScaleFactor,
-                            controlPoint.z*UnitScaleFactor
-                        ), ControlPointToIndex [controlPoint]);
+                        fbxMesh.SetControlPointAt (ConvertPositionToRightHanded(controlPoint),
+                            ControlPointToIndex [controlPoint]);
                     }
                 } else {
                     NumControlPoints = meshInfo.VertexCount;
@@ -513,12 +535,7 @@ namespace FbxExporters
                     // copy control point data from Unity to FBX
                     for (int v = 0; v < NumControlPoints; v++)
                     {
-                        // convert from left to right-handed by negating x (Unity negates x again on import)
-                        fbxMesh.SetControlPointAt(new FbxVector4 (
-                            -meshInfo.Vertices [v].x*UnitScaleFactor,
-                            meshInfo.Vertices [v].y*UnitScaleFactor,
-                            meshInfo.Vertices [v].z*UnitScaleFactor
-                        ), v);
+                        fbxMesh.SetControlPointAt(ConvertPositionToRightHanded(meshInfo.Vertices[v]), v);
                     }
                 }
 
@@ -600,7 +617,7 @@ namespace FbxExporters
             ///       instead of Euler angles, which Maya does not import properly. 
             /// </summary>
             /// <returns>Euler with XYZ rotation order.</returns>
-            public static FbxDouble3 QuaternionToXYZEuler(Quaternion q)
+            public static FbxDouble3 ConvertQuaternionToXYZEuler(Quaternion q)
             {
                 FbxQuaternion quat = new FbxQuaternion (q.x, q.y, q.z, q.w);
                 FbxAMatrix m = new FbxAMatrix ();
@@ -624,41 +641,33 @@ namespace FbxExporters
                 fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderXYZ);
 
                 UnityEngine.Vector3 unityTranslate;
-                FbxDouble3 unityRotate;
+                FbxDouble3 fbxRotate;
                 UnityEngine.Vector3 unityScale;
 
                 switch (exportType) {
                 case TransformExportType.Reset:
                     unityTranslate = Vector3.zero;
-                    unityRotate = new FbxDouble3 (0);
+                    fbxRotate = new FbxDouble3 (0);
                     unityScale = Vector3.one;
                     break;
                 case TransformExportType.Global:
                     unityTranslate = GetRecenteredTranslation(unityTransform, newCenter);
-                    unityRotate = QuaternionToXYZEuler(unityTransform.rotation);
+                    fbxRotate = ConvertQuaternionToXYZEuler(unityTransform.rotation);
                     unityScale = unityTransform.lossyScale;
                     break;
                 default: /*case TransformExportType.Local*/
                     unityTranslate = unityTransform.localPosition;
-                    unityRotate = QuaternionToXYZEuler(unityTransform.localRotation);
+                    fbxRotate = ConvertQuaternionToXYZEuler(unityTransform.localRotation);
                     unityScale = unityTransform.localScale;
                     break;
                 }
 
-                // transfer transform data from Unity to Fbx
-                // Negating the x value of the translation to convert from Unity
-                // to Maya coordinates (left to righthanded).
-                // Scaling the translation by 100 to convert from m to cm.
-                var fbxTranslate = new FbxDouble3 (
-                    -unityTranslate.x*UnitScaleFactor,
-                    unityTranslate.y*UnitScaleFactor,
-                    unityTranslate.z*UnitScaleFactor
-                );
-                var fbxRotate = unityRotate;
+                // Transfer transform data from Unity to Fbx
+                var fbxTranslate = ConvertPositionToRightHanded(unityTranslate);
                 var fbxScale = new FbxDouble3 (unityScale.x, unityScale.y, unityScale.z);
 
                 // set the local position of fbxNode
-                fbxNode.LclTranslation.Set (fbxTranslate);
+                fbxNode.LclTranslation.Set (new FbxDouble3(fbxTranslate.X, fbxTranslate.Y, fbxTranslate.Z));
                 fbxNode.LclRotation.Set (fbxRotate);
                 fbxNode.LclScaling.Set (fbxScale);
 
@@ -1144,7 +1153,7 @@ namespace FbxExporters
             ///<summary>
             ///Information about the mesh that is important for exporting.
             ///</summary>
-            public class MeshInfo
+            class MeshInfo
             {
                 /// <summary>
                 /// The transform of the mesh.
