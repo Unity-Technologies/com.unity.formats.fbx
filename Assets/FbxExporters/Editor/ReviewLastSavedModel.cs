@@ -24,6 +24,20 @@ namespace FbxExporters
             static string LastFilePath = null;
             static Object LastModel = null;
 
+            static TurnTable(){
+                UnityEditor.EditorApplication.update -= OnEditorUpdate;
+                UnityEditor.EditorApplication.update += OnEditorUpdate;
+            }
+
+            private static void OnEditorUpdate()
+            {
+                string instructionFile = FbxExporters.Editor.Integrations.GetFullMayaInstructionPath ();
+                if(System.IO.File.Exists(instructionFile)){
+                    LastSavedModel ();
+                    System.IO.File.Delete (instructionFile);
+                }
+            }
+
             private static System.IO.FileInfo GetLastSavedFile (string directoryPath, string ext = ".fbx")
             {
                 System.IO.DirectoryInfo directoryInfo = new System.IO.DirectoryInfo (directoryPath);
@@ -100,11 +114,7 @@ namespace FbxExporters
                     }
 
                     modelGO.transform.parent = turntableGO.transform;
-
-                    UnityEditor.Selection.objects = new GameObject[]{ turntableGO };
                 }
-
-                FrameCameraOnModel (modelGO);
 
                 return modelGO as Object;
             }
@@ -124,6 +134,10 @@ namespace FbxExporters
 
             private static void FrameCameraOnModel(GameObject modelGO)
             {
+                if (modelGO == null) {
+                    return;
+                }
+
                 // Set so camera frames model
                 // Note: this code assumes the model is at 0,0,0
                 Vector3 boundsSize = GetRendererBounds(modelGO).size;
@@ -153,6 +167,14 @@ namespace FbxExporters
                         LastFilePath = fbxFileName;
                     } else {
                         Debug.LogWarning (string.Format ("failed to load model : {0}", fbxFileName));
+                    }
+                }
+                if (LastModel != null) {
+                    var model = LastModel as GameObject;
+                    if (model != null) {
+                        var turntable = model.transform.parent.gameObject;
+                        UnityEditor.Selection.objects = new GameObject[]{ turntable };
+                        FrameCameraOnModel (turntable);
                     }
                 }
             }

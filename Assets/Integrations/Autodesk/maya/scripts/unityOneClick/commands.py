@@ -269,6 +269,7 @@ class reviewCmd(BaseCommand):
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
         unityTempSavePath = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityTempSavePath'))
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
+        instructionFile = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityInstructionPath'))
         
         if not self.loadUnityFbxExportSettings():
             return
@@ -289,6 +290,10 @@ class reviewCmd(BaseCommand):
         savePath = os.path.abspath(savePath)
         
         maya.cmds.file(savePath, force=True, options="", typ="FBX export", pr=True, es=True)
+        
+        # create temp file in _safe_to_delete/
+        with open(instructionFile,"w+") as f:
+            pass
         
         if maya.cmds.about(macOS=True):
             # Use 'open -a' to bring app to front if it has already been started.
