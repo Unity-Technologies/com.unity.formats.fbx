@@ -12,7 +12,7 @@ namespace FbxExporters
     namespace Review
     {
         [UnityEditor.InitializeOnLoad]
-        public class TurnTable
+        public class TurnTable : UnityEditor.AssetPostprocessor
         {
             const string DefaultScenesPath = "Assets";
             const string DefaultSceneName = "FbxExporters_TurnTableReview";
@@ -24,17 +24,22 @@ namespace FbxExporters
             static string LastFilePath = null;
             static Object LastModel = null;
 
-            static TurnTable(){
-                UnityEditor.EditorApplication.update -= OnEditorUpdate;
-                UnityEditor.EditorApplication.update += OnEditorUpdate;
-            }
-
-            private static void OnEditorUpdate()
+            static void OnPostprocessAllAssets(
+                string[] importedAssets, string[] deletedAssets, 
+                string[] movedAssets, string[] movedFromAssetPaths)
             {
-                string instructionFile = FbxExporters.Editor.Integrations.GetFullMayaInstructionPath ();
-                if(System.IO.File.Exists(instructionFile)){
-                    LastSavedModel ();
-                    System.IO.File.Delete (instructionFile);
+                // check if a turntable model was potentially imported
+                var tempSavePath = "Assets/" + TempSavePath;
+                foreach (var assetPath in importedAssets) {
+                    if (assetPath.StartsWith(tempSavePath) && assetPath.EndsWith(".fbx")) {
+                        // if the instruction file exists, then run the turntable and delete the file
+                        string instructionFile = FbxExporters.Editor.Integrations.GetFullMayaInstructionPath ();
+                        if(System.IO.File.Exists(instructionFile)){
+                            LastSavedModel ();
+                            System.IO.File.Delete (instructionFile);
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -112,7 +117,6 @@ namespace FbxExporters
                         turntableGO = new GameObject ("TurnTableBase");
                         turntableGO.AddComponent<FbxTurnTableBase> ();
                     }
-
                     modelGO.transform.parent = turntableGO.transform;
                 }
 
@@ -169,12 +173,17 @@ namespace FbxExporters
                         Debug.LogWarning (string.Format ("failed to load model : {0}", fbxFileName));
                     }
                 }
+
+                // focus onto model
                 if (LastModel != null) {
                     var model = LastModel as GameObject;
                     if (model != null) {
-                        var turntable = model.transform.parent.gameObject;
-                        UnityEditor.Selection.objects = new GameObject[]{ turntable };
-                        FrameCameraOnModel (turntable);
+                        var turntable = model.transform.parent;
+                        if (turntable != null) {
+                            var turntableGO = turntable.gameObject;
+                            UnityEditor.Selection.objects = new GameObject[]{ turntableGO };
+                            FrameCameraOnModel (turntableGO);
+                        }
                     }
                 }
             }
