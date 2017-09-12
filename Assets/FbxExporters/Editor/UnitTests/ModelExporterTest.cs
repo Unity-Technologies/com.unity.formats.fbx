@@ -84,6 +84,17 @@ namespace FbxExporters.UnitTests
                 Assert.That(cubeNode.GetMesh(), Is.Not.Null);
                 Assert.That(cubeNode.GetMesh().GetControlPointsCount(), Is.EqualTo(8));
             }
+
+            // Test exporting a skinned-mesh. Make sure it doesn't leak (it did at one point)
+            {
+                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                var character = new GameObject();
+                var smr = character.AddComponent<SkinnedMeshRenderer>();
+                smr.sharedMesh = cube.GetComponent<MeshFilter>().sharedMesh;
+                var meshCount = Object.FindObjectsOfType<Mesh>().Length;
+                ModelExporter.ExportObject(GetRandomFbxFilePath(), character);
+                Assert.AreEqual(meshCount, Object.FindObjectsOfType<Mesh>().Length);
+            }
         }
 
         [Test]
