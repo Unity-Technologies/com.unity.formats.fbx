@@ -306,8 +306,10 @@ class reviewCmd(BaseCommand):
                 .format(unityAppPath, unityProjectPath, unityCommand)
 
         elif maya.cmds.about(windows=True):
-            melCommand = r'system("start \"{0}\" \"{1}\" \"-projectPath {2} -executeMethod {3}\"");'\
-                .format(unityProjectPath + "/Assets/Integrations/BringToFront.exe", unityAppPath, unityProjectPath, unityCommand)
+            melCommand = r'system("start \"{0}\" \"{1}\" \"{2}\" \"-projectPath {3} -executeMethod {4}\"");'\
+                .format(unityProjectPath + "/Assets/Integrations/BringToFront.exe", 
+                        os.path.basename(unityProjectPath), unityAppPath,
+                        unityProjectPath, unityCommand)
 
         else:
             raise NotImplementedError("missing platform implementation for {0}".format(maya.cmds.about(os=True)))
