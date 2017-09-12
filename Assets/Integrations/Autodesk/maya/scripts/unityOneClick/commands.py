@@ -279,6 +279,7 @@ class reviewCmd(BaseCommand):
             
         # select the export set for export, if it exists,
         # otherwise take what is currently selected
+        origSelection = maya.cmds.ls(sl=True)
         if self.setExists(self._exportSet):
             maya.cmds.select(self._exportSet, r=True, ne=True)
         
@@ -310,6 +311,9 @@ class reviewCmd(BaseCommand):
         self.displayDebug('doIt({0})'.format(melCommand))
 
         maya.mel.eval(melCommand)
+        
+        if origSelection:
+            maya.cmds.select(origSelection, add=True)
 
     @classmethod
     def invoke(cls):
@@ -359,6 +363,7 @@ class publishCmd(BaseCommand):
         
         # select the export set for export, if it exists,
         # otherwise take what is currently selected
+        origSelection = maya.cmds.ls(sl=True)
         if self.setExists(self._exportSet):
             maya.cmds.select(self._exportSet, r=True, ne=True)
         
@@ -371,6 +376,9 @@ class publishCmd(BaseCommand):
             strCmd = 'SendToUnitySelection'
         self.displayDebug('doIt {0}'.format(strCmd))
         maya.mel.eval(strCmd)
+        
+        if origSelection:
+            maya.cmds.select(origSelection, add=True)
         
     @classmethod
     def invoke(cls):
