@@ -145,15 +145,24 @@ namespace FbxExporters
             /// Get a layer (to store UVs, normals, etc) on the mesh.
             /// If it doesn't exist yet, create it.
             /// </summary>
-            /// 
             public static FbxLayer GetOrCreateLayer(FbxMesh fbxMesh, int layer = 0 /* default layer */)
             {
-                FbxLayer fbxLayer = fbxMesh.GetLayer (layer);
-                while (fbxLayer == null) {
-                    fbxMesh.CreateLayer ();
-                    fbxLayer = fbxMesh.GetLayer (layer);
+                int maxLayerIndex = fbxMesh.GetLayerCount() - 1;
+                while (layer > maxLayerIndex) {
+                    // We'll have to create the layer (potentially several).
+                    // Make sure to avoid infinite loops even if there's an
+                    // FbxSdk bug.
+                    int newLayerIndex = fbxMesh.CreateLayer();
+                    if (newLayerIndex <= maxLayerIndex) {
+                        // Error!
+                        throw new System.Exception(
+                                "Internal error: Unable to create mesh layer "
+                                + (maxLayerIndex + 1)
+                                + " on mesh " + fbxMesh.GetName());
+                    }
+                    maxLayerIndex = newLayerIndex;
                 }
-                return fbxLayer;
+                return fbxMesh.GetLayer (layer);
             }
 
             /// <summary>
