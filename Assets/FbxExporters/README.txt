@@ -14,7 +14,7 @@ Requirements
 Installing Maya Integration
 --------------------------------------------
 
-The easy way to install the Maya integration is from the menu option in Unity.
+The easiest way to install the Maya integration is from the menu option in Unity.
 
         FbxExporters -> Install Maya Integration
 
@@ -23,5 +23,5 @@ to specify a custom version or location then set your MAYA_LOCATION environment
 before running Unity.
 
 Alternately, you can install the package and integrations from the command-line
-using the script, an example of which can be found in the scripts folder in the 
-Maya integration. The MacOS file is called install_maya_plugin.bsh.
+using a script, an example of which can be found in the scripts folder of the 
+Maya integration. The version for MacOS is called install_maya_plugin.bsh.
