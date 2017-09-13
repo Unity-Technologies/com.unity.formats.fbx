@@ -1,3 +1,4 @@
+#! /bin/sh
 ########################################################################
 # Copyright (c) 2017 Unity Technologies. All rights reserved.
 # NOTICE: All information contained herein is, and remains
@@ -12,7 +13,6 @@
 #         Unity Technologies Aps.
 #
 ########################################################################
-#!/bin/bash
 
 # Configure where Unity is installed
 if [ ! -f "${UNITY_EDITOR_PATH}" ]; then
