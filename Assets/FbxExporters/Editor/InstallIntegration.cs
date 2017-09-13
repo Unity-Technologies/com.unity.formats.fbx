@@ -254,6 +254,11 @@ namespace FbxExporters.Editor
             return FbxExporters.Review.TurnTable.TempSavePath.Replace("\\", "/");
         }
 
+        /// <summary>
+        /// Gets the maya instruction path relative to the Assets folder.
+        /// Assets folder is not included in the path.
+        /// </summary>
+        /// <returns>The relative maya instruction path.</returns>
         public static string GetMayaInstructionPath()
         {
             return MAYA_INSTRUCTION_FILENAME;

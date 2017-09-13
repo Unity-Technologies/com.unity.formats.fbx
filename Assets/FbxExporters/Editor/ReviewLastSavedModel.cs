@@ -138,7 +138,7 @@ namespace FbxExporters
 
             private static void FrameCameraOnModel(GameObject modelGO)
             {
-                if (modelGO == null) {
+                if (!modelGO) {
                     return;
                 }
 
@@ -175,11 +175,11 @@ namespace FbxExporters
                 }
 
                 // focus onto model
-                if (LastModel != null) {
+                if (LastModel) {
                     var model = LastModel as GameObject;
-                    if (model != null) {
+                    if (model) {
                         var turntable = model.transform.parent;
-                        if (turntable != null) {
+                        if (turntable) {
                             var turntableGO = turntable.gameObject;
                             UnityEditor.Selection.objects = new GameObject[]{ turntableGO };
                             FrameCameraOnModel (turntableGO);
