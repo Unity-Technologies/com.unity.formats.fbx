@@ -39,6 +39,7 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     Base class for UnityOneClick Plugin Commands.
     """
     kDefaultIcon = 'unity_100.png'
+    kFamilyLabel = "The UnityOneClick plugin allows you to reliably exchange and review your work between Maya and Unity."
     
     def __init__(self):
         OpenMayaMPx.MPxCommand.__init__(self)
