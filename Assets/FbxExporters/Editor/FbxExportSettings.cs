@@ -116,7 +116,11 @@ namespace FbxExporters.EditorTools {
             int oldValue = exportSettings.selectedMayaApp;
             exportSettings.selectedMayaApp = EditorGUILayout.Popup(exportSettings.selectedMayaApp, options);
             if (exportSettings.selectedMayaApp == options.Length - 1) {
-                string mayaPath = EditorUtility.OpenFilePanel ("Select Maya Application", ExportSettings.kDefaultAdskRoot, "exe");
+                var ext = "exe";
+#if UNITY_EDITOR_OSX
+                ext = "app";
+#endif
+                string mayaPath = EditorUtility.OpenFilePanel ("Select Maya Application", ExportSettings.kDefaultAdskRoot, ext);
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (mayaPath) &&
