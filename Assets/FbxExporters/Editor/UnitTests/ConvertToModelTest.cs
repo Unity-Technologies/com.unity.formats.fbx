@@ -174,7 +174,7 @@ namespace FbxExporters.UnitTests
             Assert.That(cubePrefabInstance2.GetComponents<FbxPrefab>().Length, Is.EqualTo(1));
 
             // Create another cube, make sure the export settings drive whether we keep the cube or not.
-            var cubePrefabInstance3 = ConvertToModel.Convert(cube, directoryFullPath: path,
+            ConvertToModel.Convert(cube, directoryFullPath: path,
                     keepOriginal: ConvertToModel.KeepOriginal.Default);
             if (ConvertToModel.ExportSettings.keepOriginalAfterConvert) {
                 Assert.IsTrue(cube);
