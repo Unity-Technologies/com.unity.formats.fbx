@@ -100,6 +100,32 @@ namespace FbxExporters.EditorTools {
             GUILayout.EndHorizontal ();
 
             EditorGUILayout.Space ();
+
+            GUILayout.BeginHorizontal ();
+            GUILayout.Label (new GUIContent (
+                "Maya Application:",
+                "Maya location to install plugins to."));
+
+            // dropdown to select Maya version to use
+            var options = ExportSettings.GetMayaOptions();
+            // make sure we never initially have browse selected
+            if (exportSettings.selectedMayaApp == options.Length - 1) {
+                exportSettings.selectedMayaApp = 0;
+            }
+            int result = EditorGUILayout.Popup(exportSettings.selectedMayaApp, options);
+            if (result == options.Length - 1) {
+                string mayaPath = EditorUtility.OpenFilePanel ("Select Maya Application", ExportSettings.kDefaultAdskRoot, "exe");
+                if (!string.IsNullOrEmpty (mayaPath)) {
+                    ExportSettings.AddMayaOption (mayaPath);
+                    Repaint ();
+                }
+            } else {
+                exportSettings.selectedMayaApp = result;
+            }
+
+
+            GUILayout.EndHorizontal ();
+
             if (GUILayout.Button ("Install Maya Integration")) {
                 FbxExporters.Editor.IntegrationsUI.InstallMayaIntegration ();
             }
@@ -120,10 +146,26 @@ namespace FbxExporters.EditorTools {
     {
         public const string kDefaultSavePath = ".";
 
+        /// <summary>
+        /// The path where all the different versions of Maya are installed
+        /// by default. Depends on the platform.
+        /// </summary>
+        public const string kDefaultAdskRoot =
+#if UNITY_EDITOR_OSX
+            "/Applications/Autodesk"
+#elif UNITY_EDITOR_LINUX
+            "/usr/autodesk"
+#else // WINDOWS
+            "C:/Program Files/Autodesk"
+#endif
+            ;
+
         // Note: default values are set in LoadDefaults().
         public bool weldVertices;
         public bool mayaCompatibleNames;
         public bool centerObjects;
+
+        public int selectedMayaApp = 0;
 
         [SerializeField]
         public UnityEngine.Object turntableScene;
@@ -141,6 +183,13 @@ namespace FbxExporters.EditorTools {
         [SerializeField]
         string convertToModelSavePath;
 
+        //[SerializeField]
+        // List of paths in order that they appear in the option list
+        private System.Collections.Generic.List<string> mayaOptionPaths;
+        //[SerializeField]
+        // Dictionary of path -> display name
+        private System.Collections.Generic.Dictionary<string, string> mayaAppOptions;
+
         protected override void LoadDefaults()
         {
             weldVertices = true;
@@ -148,6 +197,38 @@ namespace FbxExporters.EditorTools {
             centerObjects = true;
             convertToModelSavePath = kDefaultSavePath;
             turntableScene = null;
+            mayaAppOptions = null;
+        }
+
+        public static GUIContent[] GetMayaOptions(){
+            if (instance.mayaAppOptions == null) {
+                instance.mayaAppOptions = new System.Collections.Generic.Dictionary<string, string> ();
+                instance.mayaAppOptions.Add ("c:/", "Maya2017");
+                instance.mayaAppOptions.Add ("d:/", "Maya2018");
+
+                instance.mayaOptionPaths = new System.Collections.Generic.List<string> (){ "c:/", "d:/" };
+            }
+            GUIContent[] optionArray = new GUIContent[instance.mayaAppOptions.Count+1];
+            for(int i = 0; i < instance.mayaOptionPaths.Count; i++){
+                optionArray [i] = new GUIContent(
+                    instance.mayaAppOptions [instance.mayaOptionPaths [i]],
+                    instance.mayaOptionPaths[i]
+                );
+            }
+            optionArray [optionArray.Length - 1] = new GUIContent("Browse");
+
+            return optionArray;
+        }
+
+        public static void AddMayaOption(string newOption){
+            var mayaAppOptions = instance.mayaAppOptions;
+            if (mayaAppOptions.ContainsKey (newOption)) {
+                instance.selectedMayaApp = instance.mayaOptionPaths.IndexOf (newOption);
+                return;
+            }
+            mayaAppOptions.Add (newOption, "Custom Maya Location");
+            instance.mayaOptionPaths.Add (newOption);
+            instance.selectedMayaApp = instance.mayaOptionPaths.Count - 1;
         }
 
         public static string GetTurnTableSceneName(){
