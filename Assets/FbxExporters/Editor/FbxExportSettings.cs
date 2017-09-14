@@ -129,7 +129,7 @@ namespace FbxExporters.EditorTools {
             }
             GUILayout.EndHorizontal ();
 
-            if (GUILayout.Button ("Install Maya Integration")) {
+            if (GUILayout.Button ("Install Unity Integration")) {
                 FbxExporters.Editor.IntegrationsUI.InstallMayaIntegration ();
             }
 
