@@ -200,13 +200,49 @@ namespace FbxExporters.EditorTools {
             mayaAppOptions = null;
         }
 
+        /// <summary>
+        /// Find Maya installations at default install path.
+        /// Add results to given dictionary.
+        /// 
+        /// If MAYA_LOCATION is set, add this to the list as well.
+        /// </summary>
+        private static System.Collections.Generic.Dictionary<string, string> FindMayaInstalls() {
+            System.Collections.Generic.Dictionary<string, string> mayaAppOptions = 
+                new System.Collections.Generic.Dictionary<string, string> ();
+
+            // If the location is given by the environment, use it.
+            var location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
+            if (!string.IsNullOrEmpty(location)) {
+                location = location.TrimEnd('/');
+                mayaAppOptions.Add (location, "MAYA_LOCATION");
+            }
+
+            // List that directory and find the right version:
+            // either the newest version, or the exact version we wanted.
+            var adskRoot = new System.IO.DirectoryInfo(kDefaultAdskRoot);
+            foreach(var productDir in adskRoot.GetDirectories()) {
+                var product = productDir.Name;
+
+                // Only accept those that start with 'maya' in either case.
+                if (!product.StartsWith("maya", StringComparison.InvariantCultureIgnoreCase)) {
+                    continue;
+                }
+                // Reject MayaLT -- it doesn't have plugins.
+                if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
+                    continue;
+                }
+                mayaAppOptions.Add (productDir.FullName, product);
+            }
+            return mayaAppOptions;
+        }
+
         public static GUIContent[] GetMayaOptions(){
             if (instance.mayaAppOptions == null) {
-                instance.mayaAppOptions = new System.Collections.Generic.Dictionary<string, string> ();
-                instance.mayaAppOptions.Add ("c:/", "Maya2017");
-                instance.mayaAppOptions.Add ("d:/", "Maya2018");
-
-                instance.mayaOptionPaths = new System.Collections.Generic.List<string> (){ "c:/", "d:/" };
+                instance.mayaAppOptions = FindMayaInstalls ();
+                instance.mayaOptionPaths = new System.Collections.Generic.List<string> ();
+                foreach (var key in instance.mayaAppOptions.Keys) {
+                    instance.mayaOptionPaths.Add (key);
+                }
             }
             GUIContent[] optionArray = new GUIContent[instance.mayaAppOptions.Count+1];
             for(int i = 0; i < instance.mayaOptionPaths.Count; i++){
