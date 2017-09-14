@@ -11,6 +11,7 @@ namespace FbxExporters.Editor
         private const string PACKAGE_NAME = "FbxExporters";
         private const string VERSION_FILENAME = "README.txt";
         private const string VERSION_FIELD = "**Version**";
+        private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
 
         private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
@@ -302,6 +303,7 @@ namespace FbxExporters.Editor
             {
                 Dictionary<string,string> Tokens = new Dictionary<string,string>()
                 {
+                    {VERSION_TAG, GetPackageVersion() },
                     {PROJECT_TAG, GetProjectPath() }
                  };
 
