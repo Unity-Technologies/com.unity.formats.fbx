@@ -85,6 +85,7 @@ def installMenu():
                        image=commands.importCmd.familyIconPath(),
                        subMenu=True, 
                        label=kMenuLabel, 
+                       annotation=commands.importCmd.kFamilyLabel, 
                        tearOff=True, 
                        version=whatsNewVersion())
 
