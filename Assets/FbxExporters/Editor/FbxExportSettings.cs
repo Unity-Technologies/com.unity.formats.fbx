@@ -3,6 +3,7 @@ using System.IO;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
 namespace FbxExporters.EditorTools {
 
@@ -112,22 +113,20 @@ namespace FbxExporters.EditorTools {
             if (exportSettings.selectedMayaApp == options.Length - 1) {
                 exportSettings.selectedMayaApp = 0;
             }
-            int result = EditorGUILayout.Popup(exportSettings.selectedMayaApp, options);
-            if (result == options.Length - 1) {
+            int oldValue = exportSettings.selectedMayaApp;
+            exportSettings.selectedMayaApp = EditorGUILayout.Popup(exportSettings.selectedMayaApp, options);
+            if (exportSettings.selectedMayaApp == options.Length - 1) {
                 string mayaPath = EditorUtility.OpenFilePanel ("Select Maya Application", ExportSettings.kDefaultAdskRoot, "exe");
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (mayaPath) &&
-                    Path.GetFileNameWithoutExtension(mayaPath).ToLower().Equals("maya")
-                ) {
+                    Path.GetFileNameWithoutExtension (mayaPath).ToLower ().Equals ("maya")) {
                     ExportSettings.AddMayaOption (mayaPath);
                     Repaint ();
+                } else {
+                    exportSettings.selectedMayaApp = oldValue;
                 }
-            } else {
-                exportSettings.selectedMayaApp = result;
             }
-
-
             GUILayout.EndHorizontal ();
 
             if (GUILayout.Button ("Install Maya Integration")) {
@@ -187,12 +186,12 @@ namespace FbxExporters.EditorTools {
         [SerializeField]
         string convertToModelSavePath;
 
+        // List of names in order that they appear in option list
         [SerializeField]
+        private List<string> mayaOptionNames;
         // List of paths in order that they appear in the option list
-        private System.Collections.Generic.List<string> mayaOptionPaths;
         [SerializeField]
-        // Dictionary of path -> display name
-        private System.Collections.Generic.Dictionary<string, string> mayaAppOptions;
+        private List<string> mayaOptionPaths;
 
         protected override void LoadDefaults()
         {
@@ -201,7 +200,8 @@ namespace FbxExporters.EditorTools {
             centerObjects = true;
             convertToModelSavePath = kDefaultSavePath;
             turntableScene = null;
-            mayaAppOptions = null;
+            mayaOptionPaths = null;
+            mayaOptionNames = null;
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace FbxExporters.EditorTools {
         /// <returns>The unique name.</returns>
         /// <param name="name">Name.</param>
         private static string GetUniqueName(string name){
-            if (!instance.mayaAppOptions.ContainsValue (name)) {
+            if (!instance.mayaOptionNames.Contains(name)) {
                 return name;
             }
             var format = "{1} ({0})";
@@ -231,7 +231,7 @@ namespace FbxExporters.EditorTools {
             do {
                 uniqueName = string.Format (format, index, name);
                 index++;
-            } while (File.Exists (uniqueName));
+            } while (instance.mayaOptionNames.Contains(name));
 
             return uniqueName;
         }
@@ -243,16 +243,17 @@ namespace FbxExporters.EditorTools {
         /// If MAYA_LOCATION is set, add this to the list as well.
         /// </summary>
         private static void FindMayaInstalls() {
-            if (instance.mayaAppOptions == null) {
-                instance.mayaAppOptions = new System.Collections.Generic.Dictionary<string, string> ();
-            }
-            var mayaAppOptions = instance.mayaAppOptions;
+            instance.mayaOptionPaths = new List<string> ();
+            instance.mayaOptionNames = new List<string> ();
+            var mayaOptionName = instance.mayaOptionNames;
+            var mayaOptionPath = instance.mayaOptionPaths;
 
             // If the location is given by the environment, use it.
             var location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
             if (!string.IsNullOrEmpty(location)) {
                 location = location.TrimEnd('/');
-                mayaAppOptions.Add (GetMayaExePath(location.Replace("\\","/")), "MAYA_LOCATION");
+                mayaOptionPath.Add (GetMayaExePath (location.Replace ("\\", "/")));
+                mayaOptionName.Add ("MAYA_LOCATION");
             }
 
             // List that directory and find the right version:
@@ -269,7 +270,8 @@ namespace FbxExporters.EditorTools {
                 if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
                     continue;
                 }
-                mayaAppOptions.Add (GetMayaExePath(productDir.FullName.Replace("\\","/")), GetUniqueName(product));
+                mayaOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
+                mayaOptionName.Add (GetUniqueName(product));
             }
         }
 
@@ -300,17 +302,32 @@ namespace FbxExporters.EditorTools {
         }
 
         public static GUIContent[] GetMayaOptions(){
-            if (instance.mayaAppOptions == null) {
+            if (instance.mayaOptionNames == null ||
+                instance.mayaOptionNames.Count != instance.mayaOptionPaths.Count ||
+                instance.mayaOptionNames.Count == 0) {
                 FindMayaInstalls ();
-                instance.mayaOptionPaths = new System.Collections.Generic.List<string> ();
-                foreach (var key in instance.mayaAppOptions.Keys) {
-                    instance.mayaOptionPaths.Add (key);
+            }
+
+            // remove options that no longer exist
+            List<int> toDelete = new List<int>();
+            for(int i = 0; i < instance.mayaOptionPaths.Count; i++) {
+                var mayaPath = instance.mayaOptionPaths [i];
+                if (!File.Exists (mayaPath)) {
+                    if (i == instance.selectedMayaApp) {
+                        instance.selectedMayaApp = 0;
+                    }
+                    instance.mayaOptionNames.RemoveAt (i);
+                    toDelete.Add (i);
                 }
             }
-            GUIContent[] optionArray = new GUIContent[instance.mayaAppOptions.Count+1];
+            foreach (var index in toDelete) {
+                instance.mayaOptionPaths.RemoveAt (index);
+            }
+
+            GUIContent[] optionArray = new GUIContent[instance.mayaOptionPaths.Count+1];
             for(int i = 0; i < instance.mayaOptionPaths.Count; i++){
                 optionArray [i] = new GUIContent(
-                    instance.mayaAppOptions [instance.mayaOptionPaths [i]],
+                    instance.mayaOptionNames[i],
                     instance.mayaOptionPaths[i]
                 );
             }
@@ -320,17 +337,17 @@ namespace FbxExporters.EditorTools {
         }
 
         public static void AddMayaOption(string newOption){
-            var mayaAppOptions = instance.mayaAppOptions;
-            if (mayaAppOptions.ContainsKey (newOption)) {
-                instance.selectedMayaApp = instance.mayaOptionPaths.IndexOf (newOption);
+            var mayaOptionPaths = instance.mayaOptionPaths;
+            if (mayaOptionPaths.Contains(newOption)) {
+                instance.selectedMayaApp = mayaOptionPaths.IndexOf (newOption);
                 return;
             }
 
             // get the version
             var version = AskMayaVersion(newOption);
-            mayaAppOptions.Add (newOption, GetUniqueName("Maya"+version));
-            instance.mayaOptionPaths.Add (newOption);
-            instance.selectedMayaApp = instance.mayaOptionPaths.Count - 1;
+            instance.mayaOptionNames.Add (GetUniqueName("Maya"+version));
+            mayaOptionPaths.Add (newOption);
+            instance.selectedMayaApp = mayaOptionPaths.Count - 1;
         }
 
         /// <summary>
