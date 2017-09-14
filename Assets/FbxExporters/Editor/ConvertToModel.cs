@@ -218,6 +218,7 @@ namespace FbxExporters
             {
                 string fileWithoutExt = Path.GetFileNameWithoutExtension (filename);
                 string ext = Path.GetExtension (filename);
+                // file, space, number, extension.
                 string format = "{0} {1}{2}";
 
                 int index = 1;
@@ -226,10 +227,15 @@ namespace FbxExporters
                 var result = System.Text.RegularExpressions.Regex.Match(fileWithoutExt, @"\d+$");
                 if (result != null) {
                     var number = result.Value;
+
+                    // Parse the number.
                     int tempIndex;
                     if (int.TryParse (number, out tempIndex)) {
                         fileWithoutExt = fileWithoutExt.Remove (fileWithoutExt.LastIndexOf (number));
-                        format = "{0}{1}{2}"; // remove space from format
+                        // Change the format to remove the extra space we'd add
+                        // if there weren't already a number. Also, try to use the
+                        // same width (so Cube001 increments to Cube002, not Cube2).
+                        format = "{0}{1:D" + number.Length + "}{2}"; // file, number with padding, extension
                         index = tempIndex+1;
                     }
                 }

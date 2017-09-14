@@ -25,17 +25,23 @@ namespace FbxExporters.UnitTests
             {
                 var tempPath = Path.GetTempPath ();
                 var basename = Path.GetFileNameWithoutExtension (Path.GetRandomFileName ());
+                basename = basename + "yo"; // add some non-numeric stuff
 
-                var filename1 = basename + " 1.fbx";
-                var filename2 = Path.Combine(tempPath, basename + " 2.fbx");
+                var filename1 = basename + ".fbx";
+                var filename2 = Path.Combine(tempPath, basename + " 1.fbx");
+                Assert.AreEqual (filename2, ConvertToModel.IncrementFileName (tempPath, filename1));
+
+                filename1 = basename + " 1.fbx";
+                filename2 = Path.Combine(tempPath, basename + " 2.fbx");
                 Assert.AreEqual (filename2, ConvertToModel.IncrementFileName (tempPath, filename1));
 
                 filename1 = basename + "1.fbx";
                 filename2 = Path.Combine(tempPath, basename + "2.fbx");
                 Assert.AreEqual (filename2, ConvertToModel.IncrementFileName (tempPath, filename1));
 
-                filename1 = basename + "k.fbx";
-                filename2 = Path.Combine(tempPath, basename + "k 1.fbx");
+                // UNI-25513: bug was that Cube01.fbx => Cube2.fbx
+                filename1 = basename + "01.fbx";
+                filename2 = Path.Combine(tempPath, basename + "02.fbx");
                 Assert.AreEqual (filename2, ConvertToModel.IncrementFileName (tempPath, filename1));
             }
 
