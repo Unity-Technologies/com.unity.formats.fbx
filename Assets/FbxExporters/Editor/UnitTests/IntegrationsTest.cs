@@ -27,9 +27,6 @@ namespace FbxExporters.UnitTests
 
         [Test]
         public void BasicTest() {
-            // Note: This test assumes that Maya is actually installed in a default location.
-            Assert.IsTrue(Directory.Exists(Editor.IntegrationsUI.DefaultAdskRoot));
-
             Assert.IsFalse(Editor.Integrations.IsHeadlessInstall());
 
             LogNonEmptyString("module path", Editor.Integrations.GetModulePath());

@@ -115,7 +115,11 @@ namespace FbxExporters.EditorTools {
             int result = EditorGUILayout.Popup(exportSettings.selectedMayaApp, options);
             if (result == options.Length - 1) {
                 string mayaPath = EditorUtility.OpenFilePanel ("Select Maya Application", ExportSettings.kDefaultAdskRoot, "exe");
-                if (!string.IsNullOrEmpty (mayaPath)) {
+
+                // check that the path is valid and references the maya executable
+                if (!string.IsNullOrEmpty (mayaPath) &&
+                    Path.GetFileNameWithoutExtension(mayaPath).ToLower().Equals("maya")
+                ) {
                     ExportSettings.AddMayaOption (mayaPath);
                     Repaint ();
                 }
@@ -183,10 +187,10 @@ namespace FbxExporters.EditorTools {
         [SerializeField]
         string convertToModelSavePath;
 
-        //[SerializeField]
+        [SerializeField]
         // List of paths in order that they appear in the option list
         private System.Collections.Generic.List<string> mayaOptionPaths;
-        //[SerializeField]
+        [SerializeField]
         // Dictionary of path -> display name
         private System.Collections.Generic.Dictionary<string, string> mayaAppOptions;
 
@@ -201,14 +205,48 @@ namespace FbxExporters.EditorTools {
         }
 
         /// <summary>
+        /// Increments the name if there is a duplicate in MayaAppOptions dictionary.
+        /// </summary>
+        /// <returns>The unique name.</returns>
+        /// <param name="name">Name.</param>
+        private static string GetUniqueName(string name){
+            if (!instance.mayaAppOptions.ContainsValue (name)) {
+                return name;
+            }
+            var format = "{1} ({0})";
+            int index = 1;
+            // try extracting the current index from the name and incrementing it
+            var result = System.Text.RegularExpressions.Regex.Match(name, @"\((?<number>\d+?)\)$");
+            if (result != null) {
+                var number = result.Groups["number"].Value;
+                int tempIndex;
+                if (int.TryParse (number, out tempIndex)) {
+                    var indexOfNumber = name.LastIndexOf (number);
+                    format = name.Remove (indexOfNumber, number.Length).Insert (indexOfNumber, "{0}");
+                    index = tempIndex+1;
+                }
+            }
+
+            string uniqueName = null;
+            do {
+                uniqueName = string.Format (format, index, name);
+                index++;
+            } while (File.Exists (uniqueName));
+
+            return uniqueName;
+        }
+
+        /// <summary>
         /// Find Maya installations at default install path.
         /// Add results to given dictionary.
         /// 
         /// If MAYA_LOCATION is set, add this to the list as well.
         /// </summary>
-        private static System.Collections.Generic.Dictionary<string, string> FindMayaInstalls() {
-            System.Collections.Generic.Dictionary<string, string> mayaAppOptions = 
-                new System.Collections.Generic.Dictionary<string, string> ();
+        private static void FindMayaInstalls() {
+            if (instance.mayaAppOptions == null) {
+                instance.mayaAppOptions = new System.Collections.Generic.Dictionary<string, string> ();
+            }
+            var mayaAppOptions = instance.mayaAppOptions;
 
             // If the location is given by the environment, use it.
             var location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
@@ -231,9 +269,8 @@ namespace FbxExporters.EditorTools {
                 if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
                     continue;
                 }
-                mayaAppOptions.Add (GetMayaExePath(productDir.FullName.Replace("\\","/")), product);
+                mayaAppOptions.Add (GetMayaExePath(productDir.FullName.Replace("\\","/")), GetUniqueName(product));
             }
-            return mayaAppOptions;
         }
 
         /// <summary>
@@ -264,7 +301,7 @@ namespace FbxExporters.EditorTools {
 
         public static GUIContent[] GetMayaOptions(){
             if (instance.mayaAppOptions == null) {
-                instance.mayaAppOptions = FindMayaInstalls ();
+                FindMayaInstalls ();
                 instance.mayaOptionPaths = new System.Collections.Generic.List<string> ();
                 foreach (var key in instance.mayaAppOptions.Keys) {
                     instance.mayaOptionPaths.Add (key);
@@ -288,9 +325,40 @@ namespace FbxExporters.EditorTools {
                 instance.selectedMayaApp = instance.mayaOptionPaths.IndexOf (newOption);
                 return;
             }
-            mayaAppOptions.Add (newOption, "Custom Maya Location");
+
+            // get the version
+            var version = AskMayaVersion(newOption);
+            mayaAppOptions.Add (newOption, GetUniqueName("Maya"+version));
             instance.mayaOptionPaths.Add (newOption);
             instance.selectedMayaApp = instance.mayaOptionPaths.Count - 1;
+        }
+
+        /// <summary>
+        /// Ask the version number by running maya.
+        /// </summary>
+        static string AskMayaVersion(string exePath) {
+            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+            myProcess.StartInfo.FileName = exePath;
+            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            myProcess.StartInfo.CreateNoWindow = true;
+            myProcess.StartInfo.UseShellExecute = false;
+            myProcess.StartInfo.RedirectStandardOutput = true;
+            myProcess.StartInfo.Arguments = "-v";
+            myProcess.EnableRaisingEvents = true;
+            myProcess.Start();
+            string resultString = myProcess.StandardOutput.ReadToEnd();
+            myProcess.WaitForExit();
+
+            // Output is like: Maya 2018, Cut Number 201706261615
+            // We want the stuff after 'Maya ' and before the comma.
+            // TODO: less brittle! Consider also the mel command "about -version".
+            var commaIndex = resultString.IndexOf(',');
+            return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
+        }
+
+        public static string GetSelectedMayaPath()
+        {
+            return instance.mayaOptionPaths [instance.selectedMayaApp];
         }
 
         public static string GetTurnTableSceneName(){

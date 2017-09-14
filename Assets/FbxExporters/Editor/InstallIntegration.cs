@@ -335,45 +335,10 @@ namespace FbxExporters.Editor
     class IntegrationsUI
     {
         /// <summary>
-        /// The path where all the different versions of Maya are installed
-        /// by default. Depends on the platform.
-        /// </summary>
-        public const string DefaultAdskRoot =
-#if UNITY_EDITOR_OSX
-            "/Applications/Autodesk"
-#elif UNITY_EDITOR_LINUX
-            "/usr/autodesk"
-#else // WINDOWS
-            "C:/Program Files/Autodesk"
-#endif
-            ;
-
-        /// <summary>
         /// The path of the Maya executable.
         /// </summary>
         public static string GetMayaExe () {
-            var location = EditorUtility.OpenFolderPanel ("Select Maya Root Folder", DefaultAdskRoot, "");
-            if (string.IsNullOrEmpty(location)) {
-                return null;
-            }
-
-#if UNITY_EDITOR_OSX
-                // MAYA_LOCATION on mac is set by Autodesk to be the
-                // Contents directory. But let's make it easier on people
-                // and allow just having it be the app bundle or a
-                // directory that holds the app bundle.
-                if (location.EndsWith(".app/Contents")) {
-                return location + "/MacOS/Maya";
-                } else if (location.EndsWith(".app")) {
-                return location + "/Contents/MacOS/Maya";
-                } else {
-                return location + "/Maya.app/Contents/MacOS/Maya";
-                }
-#elif UNITY_EDITOR_LINUX
-                return location + "/bin/maya";
-#else // WINDOWS
-                return location + "/bin/maya.exe";
-#endif
+            return FbxExporters.EditorTools.ExportSettings.GetSelectedMayaPath ();
         }
 
         public static void InstallMayaIntegration ()
