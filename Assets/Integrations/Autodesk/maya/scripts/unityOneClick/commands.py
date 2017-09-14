@@ -270,7 +270,11 @@ class reviewCmd(BaseCommand):
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
         unityTempSavePath = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityTempSavePath'))
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
-        instructionFile = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityInstructionPath'))
+        if maya.cmds.optionVar(exists='UnityInstructionPath'):
+            instructionFile = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityInstructionPath'))
+        else:
+            self.displayError("Missing Unity instruction file path, please re-install integration.")
+            return
         
         if not self.loadUnityFbxExportSettings():
             return
