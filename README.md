@@ -36,6 +36,7 @@ else
 fi
 rm -rf "${PROJECT_PATH}/Assets/FbxExporters/FbxSdk"
 "${UNITY_EDITOR_PATH}" -projectPath "${PROJECT_PATH}" -importPackage "${FBXSDK_PACKAGE_PATH}" -quit
+mv "%PROJECT_PATH%/Assets/FbxSdk" "%PROJECT_PATH%/Assets/FbxExporters"
 "${UNITY_EDITOR_PATH}" -batchmode -projectPath "${PROJECT_PATH}" -exportPackage Assets/FbxExporters "${PROJECT_PATH}/FbxExporters_${PACKAGE_VERSION}.unitypackage" -quit
 ```
 
@@ -53,5 +54,6 @@ set FBXSDK_PACKAGE_PATH=/path/to/FbxSdk.unitypackage
 
 rmdir /s "%PROJECT_PATH%/Assets/FbxExporters/FbxSdk"
 %UNITY3D_PATH% -projectPath "%PROJECT_PATH%" -importPackage %FBXSDK_PACKAGE_PATH% -quit
+move "%PROJECT_PATH%/Assets/FbxSdk" "%PROJECT_PATH%/Assets/FbxExporters"
 %UNITY3D_PATH% -batchmode -projectPath "%PROJECT_PATH%" -exportPackage Assets/FbxExporters %PROJECT_PATH%/%PACKAGE_NAME%_%PACKAGE_VERSION%.unitypackage -quit
 ```
