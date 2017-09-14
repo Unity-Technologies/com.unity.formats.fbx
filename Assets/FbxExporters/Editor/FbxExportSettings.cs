@@ -27,8 +27,6 @@ namespace FbxExporters.EditorTools {
                 EditorGUILayout.Space ();
             }
 
-            exportSettings.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", exportSettings.weldVertices);
-
             exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
                 new GUIContent ("Convert to Maya Compatible Naming:",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
@@ -121,7 +119,9 @@ namespace FbxExporters.EditorTools {
         public const string kDefaultSavePath = ".";
 
         // Note: default values are set in LoadDefaults().
+        [HideInInspector]
         public bool weldVertices;
+
         public bool mayaCompatibleNames;
         public bool centerObjects;
 
