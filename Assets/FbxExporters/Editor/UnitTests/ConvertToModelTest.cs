@@ -165,6 +165,11 @@ namespace FbxExporters.UnitTests
             var assetFullPath = Path.GetFullPath(Path.Combine(Application.dataPath,
                 "../" + assetRelativePath));
             Assert.AreEqual(Path.GetFullPath(path), Path.GetDirectoryName(assetFullPath));
+
+            // Convert it again, make sure there's only one FbxPrefab (see UNI-25528).
+            var cubePrefabInstance2 = ConvertToModel.Convert(cubePrefabInstance,
+                    directoryFullPath: path, keepOriginal: false);
+            Assert.That(cubePrefabInstance2.GetComponents<FbxPrefab>().Length, Is.EqualTo(1));
         }
     }
 }
