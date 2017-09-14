@@ -119,9 +119,6 @@ namespace FbxExporters.EditorTools {
         public const string kDefaultSavePath = ".";
 
         // Note: default values are set in LoadDefaults().
-        [HideInInspector]
-        public bool weldVertices;
-
         public bool mayaCompatibleNames;
         public bool centerObjects;
 
@@ -150,7 +147,6 @@ namespace FbxExporters.EditorTools {
 
         protected override void LoadDefaults()
         {
-            weldVertices = true;
             mayaCompatibleNames = true;
             centerObjects = true;
             keepOriginalAfterConvert = false;
