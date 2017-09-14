@@ -123,8 +123,26 @@ namespace FbxExporters.EditorTools {
                 string mayaPath = EditorUtility.OpenFilePanel ("Select Maya Application", ExportSettings.kDefaultAdskRoot, ext);
 
                 // check that the path is valid and references the maya executable
-                if (!string.IsNullOrEmpty (mayaPath) &&
-                    Path.GetFileNameWithoutExtension (mayaPath).ToLower ().Equals ("maya")) {
+                if (!string.IsNullOrEmpty (mayaPath)) {
+                    if (!Path.GetFileNameWithoutExtension (mayaPath).ToLower ().Equals ("maya")) {
+                        // clicked on the wrong application, try to see if we can still find
+                        // maya in this directory.
+                        var mayaDir = new DirectoryInfo(Path.GetDirectoryName(mayaPath));
+                        var files = mayaDir.GetFiles ("*." + ext);
+                        bool foundMaya = false;
+                        foreach (var file in files) {
+                            var filename = Path.GetFileNameWithoutExtension (file.Name).ToLower ();
+                            if (filename.Equals ("maya")) {
+                                mayaPath = file.FullName.Replace("\\","/");
+                                foundMaya = true;
+                                break;
+                            }
+                        }
+                        if (!foundMaya) {
+                            Debug.LogError (string.Format("Could not find Maya at: \"{0}\"", mayaDir.FullName));
+                            return;
+                        }
+                    }
                     ExportSettings.AddMayaOption (mayaPath);
                     Repaint ();
                 } else {
