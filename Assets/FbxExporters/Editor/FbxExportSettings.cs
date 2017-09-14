@@ -342,12 +342,16 @@ namespace FbxExporters.EditorTools {
         }
 
         public static void AddMayaOption(string newOption){
+            // on OSX we get a path ending in .app, which is not quite the exe
+#if UNITY_EDITOR_OSX
+            newOption = GetMayaExePath(newOption);
+#endif
+
             var mayaOptionPaths = instance.mayaOptionPaths;
             if (mayaOptionPaths.Contains(newOption)) {
                 instance.selectedMayaApp = mayaOptionPaths.IndexOf (newOption);
                 return;
             }
-
             // get the version
             var version = AskMayaVersion(newOption);
             instance.mayaOptionNames.Add (GetUniqueName("Maya "+version));
