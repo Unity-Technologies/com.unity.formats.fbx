@@ -214,7 +214,7 @@ namespace FbxExporters.EditorTools {
             var location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
             if (!string.IsNullOrEmpty(location)) {
                 location = location.TrimEnd('/');
-                mayaAppOptions.Add (location, "MAYA_LOCATION");
+                mayaAppOptions.Add (GetMayaExePath(location.Replace("\\","/")), "MAYA_LOCATION");
             }
 
             // List that directory and find the right version:
@@ -231,9 +231,35 @@ namespace FbxExporters.EditorTools {
                 if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
                     continue;
                 }
-                mayaAppOptions.Add (productDir.FullName, product);
+                mayaAppOptions.Add (GetMayaExePath(productDir.FullName.Replace("\\","/")), product);
             }
             return mayaAppOptions;
+        }
+
+        /// <summary>
+        /// Gets the maya exe at Maya install location.
+        /// </summary>
+        /// <returns>The maya exe path.</returns>
+        /// <param name="location">Location of Maya install.</param>
+        private static string GetMayaExePath(string location)
+        {
+#if UNITY_EDITOR_OSX
+            // MAYA_LOCATION on mac is set by Autodesk to be the
+            // Contents directory. But let's make it easier on people
+            // and allow just having it be the app bundle or a
+            // directory that holds the app bundle.
+            if (location.EndsWith(".app/Contents")) {
+            return location + "/MacOS/Maya";
+            } else if (location.EndsWith(".app")) {
+            return location + "/Contents/MacOS/Maya";
+            } else {
+            return location + "/Maya.app/Contents/MacOS/Maya";
+            }
+#elif UNITY_EDITOR_LINUX
+            return location + "/bin/maya";
+#else // WINDOWS
+            return location + "/bin/maya.exe";
+#endif
         }
 
         public static GUIContent[] GetMayaOptions(){
