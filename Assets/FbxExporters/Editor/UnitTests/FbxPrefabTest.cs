@@ -380,6 +380,58 @@ namespace FbxExporters.UnitTests
             // change in behaviour isn't accidental.
             Assert.IsNotNull(autoPrefab.GetComponent<BoxCollider>());
         }
+
+        [Test]
+        public void TestTransformAndReparenting()
+        {
+            // UNI-25526
+            // We have an fbx with nodes:
+            //          building2 -> building3
+            // Both have non-identity transforms.
+            // Then we switch to:
+            //          building2_renamed -> building3
+            // Joel Fortin noticed that the building3 transform got messed up.
+            // That's because reparenting changes the transform under the hood.
+
+            // Build the original hierarchy and convert it to a prefab.
+            var root = new GameObject("root");
+            var building2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            building2.name = "building2";
+            var building3 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            building3.name = "building3";
+
+            building2.transform.parent = root.transform;
+            building2.transform.localScale = new Vector3(2, 2, 2);
+            building3.transform.parent = building2.transform;
+            building3.transform.localScale = new Vector3(.5f, .5f, .5f);
+
+            var original = FbxExporters.Editor.ConvertToModel.Convert (root,
+                               fbxFullPath: GetRandomFbxFilePath (), keepOriginal: true);
+
+            // Make sure it's OK.
+            Assert.That (original.transform.GetChild (0).name, Is.EqualTo ("building2"));
+            Assert.That (original.transform.GetChild (0).localScale, Is.EqualTo (new Vector3 (2, 2, 2)));
+            Assert.That (original.transform.GetChild (0).GetChild (0).name, Is.EqualTo ("building3"));
+            Assert.That (original.transform.GetChild (0).GetChild (0).localScale, Is.EqualTo (new Vector3 (.5f, .5f, .5f)));
+
+            // Modify the hierarchy, export to a new FBX, then copy the FBX under the prefab.
+            root.SetActive(true);
+            building2.name = "building2_renamed";
+            var newCopyPath = FbxExporters.Editor.ModelExporter.ExportObject(
+                GetRandomFbxFilePath(), root);
+            SleepForFileTimestamp();
+            System.IO.File.Copy(
+                newCopyPath,
+                original.GetComponent<FbxPrefab>().GetFbxAssetPath(),
+                overwrite: true);
+            AssetDatabase.Refresh();
+
+            // Make sure the update took.
+            Assert.That (original.transform.GetChild (0).name, Is.EqualTo ("building2_renamed"));
+            Assert.That (original.transform.GetChild (0).localScale, Is.EqualTo (new Vector3 (2, 2, 2)));
+            Assert.That (original.transform.GetChild (0).GetChild (0).name, Is.EqualTo ("building3"));
+            Assert.That (original.transform.GetChild (0).GetChild (0).localScale, Is.EqualTo (new Vector3 (.5f, .5f, .5f)));
+        }
     }
 
     public class FbxPrefabHelpersTest
