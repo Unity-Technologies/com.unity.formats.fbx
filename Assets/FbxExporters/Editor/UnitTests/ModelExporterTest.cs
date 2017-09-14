@@ -10,11 +10,93 @@ using UnityEditor;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections.Generic;
+using Unity.FbxSdk;
+using FbxExporters.Editor;
 
 namespace FbxExporters.UnitTests
 {
     public class ModelExporterTest : ExporterTestBase
     {
+        [Test]
+        public void TestBasics ()
+        {
+            Assert.That(!string.IsNullOrEmpty(ModelExporter.GetVersionFromReadme()));
+
+            // Test GetOrCreateLayer
+            using (var fbxManager = FbxManager.Create()) {
+                var fbxMesh = FbxMesh.Create(fbxManager, "name");
+                var layer0 = ModelExporter.GetOrCreateLayer(fbxMesh);
+                Assert.That(layer0, Is.Not.Null);
+                Assert.That(ModelExporter.GetOrCreateLayer(fbxMesh), Is.EqualTo(layer0));
+                var layer5 = ModelExporter.GetOrCreateLayer(fbxMesh, layer: 5);
+                Assert.That(layer5, Is.Not.Null);
+                Assert.That(layer5, Is.Not.EqualTo(layer0));
+            }
+
+            // Test axis conversion: a x b in left-handed is the same as b x a
+            // in right-handed (that's why we need to flip the winding order).
+            var a = new Vector3(1,0,0);
+            var b = new Vector3(0,0,1);
+            var crossLeft = Vector3.Cross(a,b);
+
+            var afbx = ModelExporter.ConvertNormalToRightHanded(a);
+            var bfbx = ModelExporter.ConvertNormalToRightHanded(b);
+            Assert.AreEqual(ModelExporter.ConvertNormalToRightHanded(crossLeft), bfbx.CrossProduct(afbx));
+
+            // Test scale conversion. Nothing complicated here...
+            var afbxPosition = ModelExporter.ConvertPositionToRightHanded(a);
+            Assert.AreEqual(100, afbxPosition.Length());
+
+            // Test rotation conversion.
+            var q = Quaternion.Euler(new Vector3(0, 90, 0));
+            var fbxAngles = ModelExporter.ConvertQuaternionToXYZEuler(q);
+            Assert.AreEqual(fbxAngles.X, 0);
+            Assert.That(fbxAngles.Y, Is.InRange(-90.001, -89.999));
+            Assert.AreEqual(fbxAngles.Z, 0);
+
+            Assert.That(ModelExporter.DefaultMaterial);
+
+            // Test non-static functions.
+            using (var fbxManager = FbxManager.Create()) {
+                var fbxScene = FbxScene.Create(fbxManager, "scene");
+                var exporter = new ModelExporter();
+
+                // Test ExportMaterial: it exports and it re-exports
+                var fbxMaterial = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene)
+                    as FbxSurfaceLambert;
+                Assert.That(fbxMaterial, Is.Not.Null);
+                var fbxMaterial2 = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene);
+                Assert.AreEqual(fbxMaterial, fbxMaterial2);
+
+                // Test ExportTexture: it finds the same texture for the default-material (it doesn't create a new one)
+                var fbxMaterialNew = FbxSurfaceLambert.Create(fbxScene, "lambert");
+                exporter.ExportTexture(ModelExporter.DefaultMaterial, "_MainTex",
+                    fbxMaterialNew, FbxSurfaceLambert.sBump);
+                Assert.AreEqual(
+                    fbxMaterial.FindProperty(FbxSurfaceLambert.sDiffuse).GetSrcObject(),
+                    fbxMaterialNew.FindProperty(FbxSurfaceLambert.sBump).GetSrcObject()
+                );
+
+                // Test ExportMesh: make sure we exported a mesh with welded vertices.
+                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                var cubeNode = FbxNode.Create(fbxScene, "cube");
+                exporter.ExportMesh(cube.GetComponent<MeshFilter>().sharedMesh, cubeNode);
+                Assert.That(cubeNode.GetMesh(), Is.Not.Null);
+                Assert.That(cubeNode.GetMesh().GetControlPointsCount(), Is.EqualTo(8));
+            }
+
+            // Test exporting a skinned-mesh. Make sure it doesn't leak (it did at one point)
+            {
+                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                var character = new GameObject();
+                var smr = character.AddComponent<SkinnedMeshRenderer>();
+                smr.sharedMesh = cube.GetComponent<MeshFilter>().sharedMesh;
+                var meshCount = Object.FindObjectsOfType<Mesh>().Length;
+                ModelExporter.ExportObject(GetRandomFbxFilePath(), character);
+                Assert.AreEqual(meshCount, Object.FindObjectsOfType<Mesh>().Length);
+            }
+        }
+
         [Test]
         public void TestFindCenter ()
         {
@@ -115,15 +197,13 @@ namespace FbxExporters.UnitTests
                 tree = t;
             }
 
-            public bool CallbackForFbxPrefab(FbxPrefab component, out Mesh mesh) {
+            public bool CallbackForFbxPrefab(ModelExporter exporter, FbxPrefab component, FbxNode fbxNode) {
                 componentCalls++;
-                mesh = null;
                 return true;
             }
 
-            public bool CallbackForObject(GameObject go, out Mesh mesh) {
+            public bool CallbackForObject(ModelExporter exporter, GameObject go, FbxNode fbxNode) {
                 objectCalls++;
-                mesh = null;
                 return objectResult;
             }
 
@@ -205,8 +285,8 @@ namespace FbxExporters.UnitTests
             Mesh assetMesh;
 
             FbxExporters.Editor.ModelExporter.GetMeshForComponent<FbxPrefab> prefabCallback =
-                (FbxPrefab component, out Mesh mesh) => {
-                    mesh = sphereMesh;
+                (ModelExporter exporter, FbxPrefab component, FbxNode node) => {
+                    exporter.ExportMesh(sphereMesh, node);
                     return true;
                 };
             FbxExporters.Editor.ModelExporter.RegisterMeshCallback(prefabCallback);
@@ -225,12 +305,11 @@ namespace FbxExporters.UnitTests
             // actually unregister).
             filename = GetRandomFbxFilePath();
             FbxExporters.Editor.ModelExporter.GetMeshForObject callback =
-                (GameObject gameObject, out Mesh mesh) => {
+                (ModelExporter exporter, GameObject gameObject, FbxNode node) => {
                     if (gameObject.name == "Parent2") {
-                        mesh = sphereMesh;
+                        exporter.ExportMesh(sphereMesh, node);
                         return true;
                     } else {
-                        mesh = null;
                         return false;
                     }
                 };
