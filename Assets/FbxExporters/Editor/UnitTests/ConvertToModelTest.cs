@@ -39,10 +39,9 @@ namespace FbxExporters.UnitTests
                 filename2 = Path.Combine(tempPath, basename + "2.fbx");
                 Assert.AreEqual (filename2, ConvertToModel.IncrementFileName (tempPath, filename1));
 
-                // UNI-25513 spots this lovely behaviour.
-                // Maybe we should detect zeroes and use them as padding?
+                // UNI-25513: bug was that Cube01.fbx => Cube2.fbx
                 filename1 = basename + "01.fbx";
-                filename2 = Path.Combine(tempPath, basename + "2.fbx");
+                filename2 = Path.Combine(tempPath, basename + "02.fbx");
                 Assert.AreEqual (filename2, ConvertToModel.IncrementFileName (tempPath, filename1));
             }
 
