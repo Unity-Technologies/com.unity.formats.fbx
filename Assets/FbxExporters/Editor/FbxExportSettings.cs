@@ -105,7 +105,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "Maya Application:",
-                "Maya location to install plugins to."));
+                "Select the version of Maya where you would like to install the Unity integration."));
 
             // dropdown to select Maya version to use
             var options = ExportSettings.GetMayaOptions();
@@ -270,8 +270,9 @@ namespace FbxExporters.EditorTools {
                 if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
                     continue;
                 }
+                string version = product.Substring ("maya".Length);
                 mayaOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
-                mayaOptionName.Add (GetUniqueName(product));
+                mayaOptionName.Add (GetUniqueName("Maya " + version));
             }
         }
 
@@ -331,7 +332,7 @@ namespace FbxExporters.EditorTools {
                     instance.mayaOptionPaths[i]
                 );
             }
-            optionArray [optionArray.Length - 1] = new GUIContent("Browse");
+            optionArray [optionArray.Length - 1] = new GUIContent("Browse...");
 
             return optionArray;
         }
@@ -345,7 +346,7 @@ namespace FbxExporters.EditorTools {
 
             // get the version
             var version = AskMayaVersion(newOption);
-            instance.mayaOptionNames.Add (GetUniqueName("Maya"+version));
+            instance.mayaOptionNames.Add (GetUniqueName("Maya "+version));
             mayaOptionPaths.Add (newOption);
             instance.selectedMayaApp = mayaOptionPaths.Count - 1;
         }

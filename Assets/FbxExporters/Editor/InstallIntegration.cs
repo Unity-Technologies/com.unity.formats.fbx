@@ -245,7 +245,7 @@ namespace FbxExporters.Editor
             string moduleTemplatePath = GetModuleTemplatePath();
             if (!System.IO.File.Exists(moduleTemplatePath))
             {
-                Debug.LogError(string.Format("Missing Maya module file"));
+                Debug.LogError(string.Format("Missing Maya module file at: \"{0}\"", moduleTemplatePath));
                 return false;
             }
 
