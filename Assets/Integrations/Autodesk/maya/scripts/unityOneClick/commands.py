@@ -39,6 +39,7 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     Base class for UnityOneClick Plugin Commands.
     """
     kDefaultIcon = 'unity_100.png'
+    kFamilyLabel = "The UnityOneClick plugin allows you to reliably exchange and review your work between Maya and Unity."
     
     def __init__(self):
         OpenMayaMPx.MPxCommand.__init__(self)
@@ -280,6 +281,7 @@ class reviewCmd(BaseCommand):
             
         # select the export set for export, if it exists,
         # otherwise take what is currently selected
+        origSelection = maya.cmds.ls(sl=True)
         if self.setExists(self._exportSet):
             maya.cmds.select(self._exportSet, r=True, ne=True)
         
@@ -317,6 +319,10 @@ class reviewCmd(BaseCommand):
         self.displayDebug('doIt({0})'.format(melCommand))
 
         maya.mel.eval(melCommand)
+        
+        if origSelection:
+            maya.cmds.select(cl=True)
+            maya.cmds.select(origSelection, add=True, ne=True)
 
     @classmethod
     def invoke(cls):
@@ -366,6 +372,7 @@ class publishCmd(BaseCommand):
         
         # select the export set for export, if it exists,
         # otherwise take what is currently selected
+        origSelection = maya.cmds.ls(sl=True)
         if self.setExists(self._exportSet):
             maya.cmds.select(self._exportSet, r=True, ne=True)
         
@@ -378,6 +385,10 @@ class publishCmd(BaseCommand):
             strCmd = 'SendToUnitySelection'
         self.displayDebug('doIt {0}'.format(strCmd))
         maya.mel.eval(strCmd)
+        
+        if origSelection:
+            maya.cmds.select(cl=True)
+            maya.cmds.select(origSelection, add=True, ne=True)
         
     @classmethod
     def invoke(cls):

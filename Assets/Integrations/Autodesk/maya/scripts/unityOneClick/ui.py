@@ -29,7 +29,6 @@ from unityOneClick import (commands)
 # User Interface
 # ======================================================================'
 
-kMayaVersionAdded = '2017'
 kMenuName = 'UnityOneClick'
 kMenuDivider = 'UnityOneClickDivider'
 kMenuLabel = 'UNITY'
@@ -54,9 +53,18 @@ def unregister(pluginFn):
     return
 
 def getParentMenu():
+    """
+    Return the name of the parent menu for the Unity menu
+    """
     result = maya.mel.eval('$tempVar = $gMainFileMenu;')
     maya.mel.eval("buildFileMenu")
     return result
+
+def whatsNewVersion():
+    """
+    Return the name of Maya version to be considered 'new' e.g. "2018"
+    """
+    return maya.cmds.about(q=True, version=True)
 
 def installMenu():
     """
@@ -70,34 +78,35 @@ def installMenu():
                        longDivider=False, 
                        insertAfter=kMenuInsertAfter, 
                        parent=parentMenu, 
-                       version=kMayaVersionAdded)
+                       version=whatsNewVersion())
     maya.cmds.menuItem(kMenuName, 
                        parent=parentMenu, 
                        insertAfter=kMenuDivider, 
                        image=commands.importCmd.familyIconPath(),
                        subMenu=True, 
                        label=kMenuLabel, 
+                       annotation=commands.importCmd.kFamilyLabel, 
                        tearOff=True, 
-                       version=kMayaVersionAdded)
+                       version=whatsNewVersion())
 
     maya.cmds.menuItem(parent=kMenuName, 
                        label=commands.importCmd.kShortLabel, 
                        annotation=commands.importCmd.kLabel, 
                        command=commands.importCmd.kScriptCommand,
                        image=commands.importCmd.iconPath(),
-                       version=kMayaVersionAdded)
+                       version=whatsNewVersion())
     maya.cmds.menuItem(parent=kMenuName, 
                        label=commands.reviewCmd.kShortLabel, 
                        annotation=commands.reviewCmd.kLabel, 
                        command=commands.reviewCmd.kScriptCommand, 
                        image=commands.importCmd.iconPath(),
-                       version=kMayaVersionAdded)
+                       version=whatsNewVersion())
     maya.cmds.menuItem(parent=kMenuName, 
                        label=commands.publishCmd.kShortLabel, 
                        annotation=commands.publishCmd.kLabel, 
                        command=commands.publishCmd.kScriptCommand, 
                        image=commands.importCmd.iconPath(),
-                       version=kMayaVersionAdded)
+                       version=whatsNewVersion())
 
 def uninstallMenu():
     """

@@ -907,13 +907,10 @@ namespace FbxExporters
             // First write down what we want to do.
             var updates = new UpdateList(GetFbxHistory(), m_fbxModel.transform, this);
 
-            // If we don't need to do anything, jump out now.
-            if (!updates.NeedsUpdates()) {
-                Log("{0}: no updates needed", transform.name);
-                return;
-            }
-
-            // We want to do something, so instantiate the prefab, work on the instance, then copy back.
+            // Instantiate the prefab, work on the instance, then copy back.
+            // We could optimize this out if we had nothing to do, but then the
+            // OnUpdate handler wouldn't always get called, and that makes for
+            // confusing API.
             var prefabInstance = UnityEditor.PrefabUtility.InstantiatePrefab(this.gameObject) as GameObject;
             if (!prefabInstance) {
                 throw new System.Exception(string.Format("Failed to instantiate {0}; is it really a prefab?",
@@ -921,7 +918,7 @@ namespace FbxExporters
             }
             var fbxPrefabInstance = prefabInstance.GetComponent<FbxPrefab>();
 
-            // Do ALL the things!
+            // Do ALL the things (potentially nothing).
             var updatedObjects = updates.ImplementUpdates(fbxPrefabInstance);
 
             // Tell listeners about it. They're free to make adjustments now.
