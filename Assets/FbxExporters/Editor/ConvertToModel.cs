@@ -389,6 +389,15 @@ namespace FbxExporters
             public static void CopyComponents(GameObject from, GameObject to){
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
                 foreach(var component in from.GetComponents<Component> ()) {
+                    // UNI-24379: we don't support SkinnedMeshRenderer right
+                    // now: we just bake the mesh into its current pose. So
+                    // don't copy the SMR over. There will already be a
+                    // MeshFilter and MeshRenderer due to the static mesh.
+                    // Remove this code when we support skinning.
+                    if (component is SkinnedMeshRenderer) {
+                        continue;
+                    }
+
                     var json = EditorJsonUtility.ToJson(component);
 
                     System.Type expectedType = component.GetType();
