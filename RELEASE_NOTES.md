@@ -33,6 +33,7 @@ FIXES
 * Maya Integration: Rename "Review" to "Preview", and "Publish" to "Export"
 * Convert to Prefab: Don't copy SkinnedMeshRenderer component to FbxPrefab (as we currently do not support skinned mesh export)
 * Convert to Prefab: Rename "Convert to Prefab" to "Convert To Linked Prefab Instance"
+* Fbx Export: fix memory leak with SkinnedMeshRenderer creating a temporary mesh and not destroying it.
 
 **Version**: 0.0.13a
 
