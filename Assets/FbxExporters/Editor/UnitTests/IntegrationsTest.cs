@@ -38,6 +38,8 @@ namespace FbxExporters.UnitTests
             LogNonEmptyString("package version", Editor.Integrations.GetPackageVersion());
             LogNonEmptyString("temp path", Editor.Integrations.GetTempSavePath());
             LogNonEmptyString("export settings path", Editor.Integrations.GetExportSettingsPath ());
+            LogNonEmptyString ("instruction path", Editor.Integrations.GetMayaInstructionPath ());
+            LogNonEmptyString ("full instruction path", Editor.Integrations.GetFullMayaInstructionPath ());
 
             // test that the paths don't contain backslashes
             Assert.IsFalse(Editor.Integrations.GetAppPath().Contains("\\"));

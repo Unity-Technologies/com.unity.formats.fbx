@@ -270,6 +270,11 @@ class reviewCmd(BaseCommand):
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
         unityTempSavePath = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityTempSavePath'))
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
+        if maya.cmds.optionVar(exists='UnityInstructionPath'):
+            instructionFile = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityInstructionPath'))
+        else:
+            self.displayError("Missing Unity instruction file path, please re-install integration.")
+            return
         
         if not self.loadUnityFbxExportSettings():
             return
@@ -292,19 +297,25 @@ class reviewCmd(BaseCommand):
         
         maya.cmds.file(savePath, force=True, options="", typ="FBX export", pr=True, es=True)
         
+        # create temp file in _safe_to_delete/
+        with open(instructionFile,"w+") as f:
+            pass
+        
         if maya.cmds.about(macOS=True):
             # Use 'open -a' to bring app to front if it has already been started.
             # Note that the unity command will not get called.
-            melCommand = r'system("open -a \"{0}\" --args -projectPath {1} -executeMethod {2}");'\
+            melCommand = r'system("open -a \"{0}\" --args -projectPath \"{1}\" -executeMethod {2}");'\
                 .format(unityAppPath, unityProjectPath, unityCommand)
 
         elif maya.cmds.about(linux=True):
-            melCommand = r'system("\"{0}\" -projectPath {1} -executeMethod {2}");'\
+            melCommand = r'system("\"{0}\" -projectPath \"{1}\" -executeMethod {2}");'\
                 .format(unityAppPath, unityProjectPath, unityCommand)
 
         elif maya.cmds.about(windows=True):
-            melCommand = r'system("start \"{0}\" \"{1}\" \"-projectPath {2} -executeMethod {3}\"");'\
-                .format(unityProjectPath + "/Assets/Integrations/BringToFront.exe", unityAppPath, unityProjectPath, unityCommand)
+            melCommand = r'system("start \"{0}\" \"{1}\" \"{2}\" \"-projectPath {3} -executeMethod {4}\"");'\
+                .format(unityProjectPath + "/Assets/Integrations/BringToFront.exe", 
+                        os.path.basename(unityProjectPath), unityAppPath,
+                        unityProjectPath, unityCommand)
 
         else:
             raise NotImplementedError("missing platform implementation for {0}".format(maya.cmds.about(os=True)))
