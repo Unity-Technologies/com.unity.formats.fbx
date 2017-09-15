@@ -19,6 +19,9 @@ FIXES
 * Convert to Prefab: fix so zeros are kept when incrementing (e.g. Cube001.fbx becomes Cube002.fbx instead of Cube2.fbx)
 * Convert to Prefab: Weld vertices by default, remove option from export settings
 * Convert to Prefab: By default delete original GameObject after converting
+* Export Settings: Reword center objects tooltip
+* Maya Integration: Handle projects with spaces in the path
+* Maya Integration: Run turntable review with Unity project already open
 
 **Version**: 0.0.13a
 
