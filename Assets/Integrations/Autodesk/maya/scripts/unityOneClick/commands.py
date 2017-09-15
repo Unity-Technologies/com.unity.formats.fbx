@@ -276,11 +276,11 @@ class reviewCmd(BaseCommand):
             self.displayError("Missing Unity instruction file path, please re-install integration.")
             return
         
-        if not self.loadUnityFbxExportSettings():
-            return
-
         # make sure the GamePipeline and fbxmaya plugins are loaded
         if not self.loadDependencies():
+            return
+            
+        if not self.loadUnityFbxExportSettings():
             return
             
         # select the export set for export, if it exists,
