@@ -920,12 +920,20 @@ namespace FbxExporters
             // We could optimize this out if we had nothing to do, but then the
             // OnUpdate handler wouldn't always get called, and that makes for
             // confusing API.
-            var prefabInstance = UnityEditor.PrefabUtility.InstantiatePrefab(this.gameObject) as GameObject;
-            if (!prefabInstance) {
+
+            // This FbxPrefab may not be at the root of its prefab. We instantiate the root of the prefab, then
+            // we find the corresponding FbxPrefab.
+            var prefabRoot = UnityEditor.PrefabUtility.FindPrefabRoot(this.gameObject);
+            var prefabInstanceRoot = UnityEditor.PrefabUtility.InstantiatePrefab(prefabRoot) as GameObject;
+            if (!prefabInstanceRoot) {
                 throw new System.Exception(string.Format("Failed to instantiate {0}; is it really a prefab?",
                             this.gameObject));
             }
-            var fbxPrefabInstance = prefabInstance.GetComponent<FbxPrefab>();
+            var fbxPrefabInstance = prefabInstanceRoot.GetComponentsInChildren<FbxPrefab>().FirstOrDefault(
+                fbxPrefab => UnityEditor.PrefabUtility.GetPrefabParent(fbxPrefab) == this);
+            if (!fbxPrefabInstance) {
+                throw new System.Exception(string.Format("Internal error: couldn't find the right FbxPrefab after instantiating."));
+            }
 
             // Do ALL the things (potentially nothing).
             var updatedObjects = updates.ImplementUpdates(fbxPrefabInstance);
@@ -941,10 +949,10 @@ namespace FbxExporters
             fbxPrefabInstance.m_fbxHistory = newFbxRepString;
 
             // Save the changes back to the prefab.
-            UnityEditor.PrefabUtility.ReplacePrefab(prefabInstance, this.transform);
+            UnityEditor.PrefabUtility.ReplacePrefab(prefabInstanceRoot, prefabRoot);
 
             // Destroy the prefabInstance.
-            GameObject.DestroyImmediate(prefabInstance);
+            GameObject.DestroyImmediate(prefabInstanceRoot);
         }
 
         /// <summary>
