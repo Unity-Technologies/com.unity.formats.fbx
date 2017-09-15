@@ -38,7 +38,8 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     """
     Base class for UnityOneClick Plugin Commands.
     """
-    kDefaultIcon = 'unity_100.png'
+    kIconPath = ""
+    kFamilyIcon = 'unity.png'
     kFamilyLabel = "The UnityOneClick plugin allows you to reliably exchange and review your work between Maya and Unity."
     
     def __init__(self):
@@ -92,11 +93,11 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     
     @classmethod
     def iconPath(cls):
-        return ""
+        return cls.kIconPath
     
     @classmethod
     def familyIconPath(cls):
-        return maya.mel.eval('$tempPath = languageResourcePath("{0}");'.format(cls.kDefaultIcon))
+        return maya.mel.eval('$tempPath = languageResourcePath("{0}");'.format(cls.kFamilyIcon))
         
     def storeAttribute(self, node, attr, attrValue, attrType="string"):
         if not maya.mel.eval('attributeExists "{0}" "{1}"'.format(attr, node)):
@@ -117,6 +118,7 @@ class importCmd(BaseCommand):
     
     @ingroup UnityCommands
     """
+    kIconPath = "import.png"
     kLabel = 'Import FBX file from Unity Project and auto-configure for exporting'
     kShortLabel = 'Import'
     kCmdName = "{}Import".format(version.pluginPrefix())
@@ -145,7 +147,7 @@ class importCmd(BaseCommand):
     @classmethod
     def scriptCmd(cls):
         return
-    
+
     def beforeImport(self, retCode, file, clientData):
         # store path and filename
         self._tempPath = file.resolvedPath()
@@ -242,6 +244,7 @@ class previewCmd(BaseCommand):
         
     @ingroup UnityCommands
     """
+    kIconPath = "preview.png"
     kLabel = 'Preview Model in Unity window'
     kShortLabel = 'Preview'
     kCmdName = "{}Preview".format(version.pluginPrefix())
@@ -343,6 +346,7 @@ class exportCmd(BaseCommand):
         
     @ingroup UnityCommands
     """
+    kIconPath = "export.png"
     kLabel = 'Export Model to Unity'
     kShortLabel = 'Export'
     kCmdName = "{}Export".format(version.pluginPrefix())
