@@ -14,11 +14,11 @@ namespace FbxExporters.Editor
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
 
-        private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
+        private const string FBX_EXPORT_SETTINGS_PATH = "FbxExporters/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
 
         private const string MAYA_INSTRUCTION_FILENAME = "_safe_to_delete/_temp.txt";
 
-        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
+        private const string MODULE_TEMPLATE_PATH = "FbxExporters/Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
 
 #if UNITY_EDITOR_OSX
         private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
