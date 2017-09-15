@@ -3,6 +3,7 @@ using System.IO;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
 namespace FbxExporters.EditorTools {
 
@@ -98,8 +99,63 @@ namespace FbxExporters.EditorTools {
             GUILayout.EndHorizontal ();
 
             EditorGUILayout.Space ();
-            var installIntegrationContent = new GUIContent(
-                    "Install Maya Integration",
+
+            GUILayout.BeginHorizontal ();
+            GUILayout.Label (new GUIContent (
+                "Maya Application:",
+                "Select the version of Maya where you would like to install the Unity integration."));
+
+            // dropdown to select Maya version to use
+            var options = ExportSettings.GetMayaOptions();
+            // make sure we never initially have browse selected
+            if (exportSettings.selectedMayaApp == options.Length - 1) {
+                exportSettings.selectedMayaApp = 0;
+            }
+            int oldValue = exportSettings.selectedMayaApp;
+            exportSettings.selectedMayaApp = EditorGUILayout.Popup(exportSettings.selectedMayaApp, options);
+            if (exportSettings.selectedMayaApp == options.Length - 1) {
+                var ext = "exe";
+#if UNITY_EDITOR_OSX
+                ext = "app";
+#endif
+                string mayaPath = EditorUtility.OpenFilePanel ("Select Maya Application", ExportSettings.kDefaultAdskRoot, ext);
+
+                // check that the path is valid and references the maya executable
+                if (!string.IsNullOrEmpty (mayaPath)) {
+                    if (!Path.GetFileNameWithoutExtension (mayaPath).ToLower ().Equals ("maya")) {
+                        // clicked on the wrong application, try to see if we can still find
+                        // maya in this directory.
+                        var mayaDir = new DirectoryInfo(Path.GetDirectoryName(mayaPath));
+#if UNITY_EDITOR_OSX
+                        var files = mayaDir.GetDirectories("*." + ext);
+#else
+                        var files = mayaDir.GetFiles ("*." + ext);
+#endif
+                        bool foundMaya = false;
+                        foreach (var file in files) {
+                            var filename = Path.GetFileNameWithoutExtension (file.Name).ToLower ();
+                            if (filename.Equals ("maya")) {
+                                mayaPath = file.FullName.Replace("\\","/");
+                                foundMaya = true;
+                                break;
+                            }
+                        }
+                        if (!foundMaya) {
+                            Debug.LogError (string.Format("Could not find Maya at: \"{0}\"", mayaDir.FullName));
+                            exportSettings.selectedMayaApp = oldValue;
+                            return;
+                        }
+                    }
+                    ExportSettings.AddMayaOption (mayaPath);
+                    Repaint ();
+                } else {
+                    exportSettings.selectedMayaApp = oldValue;
+                }
+            }
+            GUILayout.EndHorizontal ();
+
+			var installIntegrationContent = new GUIContent(
+                    "Install Unity Integration",
                     "Install and configure the Unity integration for Maya so that you can import and export directly to this project.");
             if (GUILayout.Button (installIntegrationContent)) {
                 FbxExporters.Editor.IntegrationsUI.InstallMayaIntegration ();
@@ -121,6 +177,20 @@ namespace FbxExporters.EditorTools {
     {
         public const string kDefaultSavePath = ".";
 
+        /// <summary>
+        /// The path where all the different versions of Maya are installed
+        /// by default. Depends on the platform.
+        /// </summary>
+        public const string kDefaultAdskRoot =
+#if UNITY_EDITOR_OSX
+            "/Applications/Autodesk"
+#elif UNITY_EDITOR_LINUX
+            "/usr/autodesk"
+#else // WINDOWS
+            "C:/Program Files/Autodesk"
+#endif
+            ;
+
         // Note: default values are set in LoadDefaults().
         public bool mayaCompatibleNames;
         public bool centerObjects;
@@ -131,6 +201,8 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         [HideInInspector]
         public bool keepOriginalAfterConvert;
+
+        public int selectedMayaApp = 0;
 
         [SerializeField]
         public UnityEngine.Object turntableScene;
@@ -148,6 +220,13 @@ namespace FbxExporters.EditorTools {
         [SerializeField]
         string convertToModelSavePath;
 
+        // List of names in order that they appear in option list
+        [SerializeField]
+        private List<string> mayaOptionNames;
+        // List of paths in order that they appear in the option list
+        [SerializeField]
+        private List<string> mayaOptionPaths;
+
         protected override void LoadDefaults()
         {
             mayaCompatibleNames = true;
@@ -155,6 +234,187 @@ namespace FbxExporters.EditorTools {
             keepOriginalAfterConvert = false;
             convertToModelSavePath = kDefaultSavePath;
             turntableScene = null;
+            mayaOptionPaths = null;
+            mayaOptionNames = null;
+        }
+
+        /// <summary>
+        /// Increments the name if there is a duplicate in MayaAppOptions dictionary.
+        /// </summary>
+        /// <returns>The unique name.</returns>
+        /// <param name="name">Name.</param>
+        private static string GetUniqueName(string name){
+            if (!instance.mayaOptionNames.Contains(name)) {
+                return name;
+            }
+            var format = "{1} ({0})";
+            int index = 1;
+            // try extracting the current index from the name and incrementing it
+            var result = System.Text.RegularExpressions.Regex.Match(name, @"\((?<number>\d+?)\)$");
+            if (result != null) {
+                var number = result.Groups["number"].Value;
+                int tempIndex;
+                if (int.TryParse (number, out tempIndex)) {
+                    var indexOfNumber = name.LastIndexOf (number);
+                    format = name.Remove (indexOfNumber, number.Length).Insert (indexOfNumber, "{0}");
+                    index = tempIndex+1;
+                }
+            }
+
+            string uniqueName = null;
+            do {
+                uniqueName = string.Format (format, index, name);
+                index++;
+            } while (instance.mayaOptionNames.Contains(name));
+
+            return uniqueName;
+        }
+
+        /// <summary>
+        /// Find Maya installations at default install path.
+        /// Add results to given dictionary.
+        /// 
+        /// If MAYA_LOCATION is set, add this to the list as well.
+        /// </summary>
+        private static void FindMayaInstalls() {
+            instance.mayaOptionPaths = new List<string> ();
+            instance.mayaOptionNames = new List<string> ();
+            var mayaOptionName = instance.mayaOptionNames;
+            var mayaOptionPath = instance.mayaOptionPaths;
+
+            // If the location is given by the environment, use it.
+            var location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
+            if (!string.IsNullOrEmpty(location)) {
+                location = location.TrimEnd('/');
+                mayaOptionPath.Add (GetMayaExePath (location.Replace ("\\", "/")));
+                mayaOptionName.Add ("MAYA_LOCATION");
+            }
+
+            // List that directory and find the right version:
+            // either the newest version, or the exact version we wanted.
+            var adskRoot = new System.IO.DirectoryInfo(kDefaultAdskRoot);
+            foreach(var productDir in adskRoot.GetDirectories()) {
+                var product = productDir.Name;
+
+                // Only accept those that start with 'maya' in either case.
+                if (!product.StartsWith("maya", StringComparison.InvariantCultureIgnoreCase)) {
+                    continue;
+                }
+                // Reject MayaLT -- it doesn't have plugins.
+                if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
+                    continue;
+                }
+                string version = product.Substring ("maya".Length);
+                mayaOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
+                mayaOptionName.Add (GetUniqueName("Maya " + version));
+            }
+        }
+
+        /// <summary>
+        /// Gets the maya exe at Maya install location.
+        /// </summary>
+        /// <returns>The maya exe path.</returns>
+        /// <param name="location">Location of Maya install.</param>
+        private static string GetMayaExePath(string location)
+        {
+#if UNITY_EDITOR_OSX
+            // MAYA_LOCATION on mac is set by Autodesk to be the
+            // Contents directory. But let's make it easier on people
+            // and allow just having it be the app bundle or a
+            // directory that holds the app bundle.
+            if (location.EndsWith(".app/Contents")) {
+            return location + "/MacOS/Maya";
+            } else if (location.EndsWith(".app")) {
+            return location + "/Contents/MacOS/Maya";
+            } else {
+            return location + "/Maya.app/Contents/MacOS/Maya";
+            }
+#elif UNITY_EDITOR_LINUX
+            return location + "/bin/maya";
+#else // WINDOWS
+            return location + "/bin/maya.exe";
+#endif
+        }
+
+        public static GUIContent[] GetMayaOptions(){
+            if (instance.mayaOptionNames == null ||
+                instance.mayaOptionNames.Count != instance.mayaOptionPaths.Count ||
+                instance.mayaOptionNames.Count == 0) {
+                FindMayaInstalls ();
+            }
+
+            // remove options that no longer exist
+            List<int> toDelete = new List<int>();
+            for(int i = 0; i < instance.mayaOptionPaths.Count; i++) {
+                var mayaPath = instance.mayaOptionPaths [i];
+                if (!File.Exists (mayaPath)) {
+                    if (i == instance.selectedMayaApp) {
+                        instance.selectedMayaApp = 0;
+                    }
+                    instance.mayaOptionNames.RemoveAt (i);
+                    toDelete.Add (i);
+                }
+            }
+            foreach (var index in toDelete) {
+                instance.mayaOptionPaths.RemoveAt (index);
+            }
+
+            GUIContent[] optionArray = new GUIContent[instance.mayaOptionPaths.Count+1];
+            for(int i = 0; i < instance.mayaOptionPaths.Count; i++){
+                optionArray [i] = new GUIContent(
+                    instance.mayaOptionNames[i],
+                    instance.mayaOptionPaths[i]
+                );
+            }
+            optionArray [optionArray.Length - 1] = new GUIContent("Browse...");
+
+            return optionArray;
+        }
+
+        public static void AddMayaOption(string newOption){
+            // on OSX we get a path ending in .app, which is not quite the exe
+#if UNITY_EDITOR_OSX
+            newOption = GetMayaExePath(newOption);
+#endif
+
+            var mayaOptionPaths = instance.mayaOptionPaths;
+            if (mayaOptionPaths.Contains(newOption)) {
+                instance.selectedMayaApp = mayaOptionPaths.IndexOf (newOption);
+                return;
+            }
+            // get the version
+            var version = AskMayaVersion(newOption);
+            instance.mayaOptionNames.Add (GetUniqueName("Maya "+version));
+            mayaOptionPaths.Add (newOption);
+            instance.selectedMayaApp = mayaOptionPaths.Count - 1;
+        }
+
+        /// <summary>
+        /// Ask the version number by running maya.
+        /// </summary>
+        static string AskMayaVersion(string exePath) {
+            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+            myProcess.StartInfo.FileName = exePath;
+            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            myProcess.StartInfo.CreateNoWindow = true;
+            myProcess.StartInfo.UseShellExecute = false;
+            myProcess.StartInfo.RedirectStandardOutput = true;
+            myProcess.StartInfo.Arguments = "-v";
+            myProcess.EnableRaisingEvents = true;
+            myProcess.Start();
+            string resultString = myProcess.StandardOutput.ReadToEnd();
+            myProcess.WaitForExit();
+
+            // Output is like: Maya 2018, Cut Number 201706261615
+            // We want the stuff after 'Maya ' and before the comma.
+            // TODO: less brittle! Consider also the mel command "about -version".
+            var commaIndex = resultString.IndexOf(',');
+            return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
+        }
+
+        public static string GetSelectedMayaPath()
+        {
+            return instance.mayaOptionPaths [instance.selectedMayaApp];
         }
 
         public static string GetTurnTableSceneName(){
