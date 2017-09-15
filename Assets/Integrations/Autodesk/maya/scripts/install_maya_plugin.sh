@@ -58,10 +58,11 @@ else
     # Configure Maya Integration
     TEMP_SAVE_PATH="_safe_to_delete"
     EXPORT_SETTINGS_PATH="Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel"
+    MAYA_INSTRUCTION_PATH="_safe_to_delete/_temp.txt"
     HEADLESS=1
 
     # NOTE: we need start Maya in UI mode so that we can correctly configure the auto-load of the plugin.
-    "${MAYA_PATH}" -command "configureUnityOneClick \"${PROJECT_PATH}\" \"${UNITY_EDITOR_PATH}\" \"${TEMP_SAVE_PATH}\" \"${EXPORT_SETTINGS_PATH}\" ${HEADLESS}; scriptJob -idleEvent quit;"
+    "${MAYA_PATH}" -command "configureUnityOneClick \"${PROJECT_PATH}\" \"${UNITY_EDITOR_PATH}\" \"${TEMP_SAVE_PATH}\" \"${EXPORT_SETTINGS_PATH}\" \"${MAYA_INSTRUCTION_PATH}\" ${HEADLESS}; scriptJob -idleEvent quit;"
 fi
 
 exit 0
