@@ -144,6 +144,7 @@ namespace FbxExporters.EditorTools {
                         }
                         if (!foundMaya) {
                             Debug.LogError (string.Format("Could not find Maya at: \"{0}\"", mayaDir.FullName));
+                            exportSettings.selectedMayaApp = oldValue;
                             return;
                         }
                     }
