@@ -18,7 +18,7 @@ namespace FbxExporters
     {
         public static class ConvertToModel
         {
-            const string MenuItemName1 = "GameObject/Convert To Prefab";
+            const string MenuItemName1 = "GameObject/Convert To Linked Prefab Instance";
 
             /// <summary>
             /// OnContextItem is called either:
