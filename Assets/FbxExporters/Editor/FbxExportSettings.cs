@@ -98,7 +98,10 @@ namespace FbxExporters.EditorTools {
             GUILayout.EndHorizontal ();
 
             EditorGUILayout.Space ();
-            if (GUILayout.Button ("Install Maya Integration")) {
+            var installIntegrationContent = new GUIContent(
+                    "Install Maya Integration",
+                    "Install and configure the Unity integration for Maya so that you can import and export directly to this project.");
+            if (GUILayout.Button (installIntegrationContent)) {
                 FbxExporters.Editor.IntegrationsUI.InstallMayaIntegration ();
             }
 
