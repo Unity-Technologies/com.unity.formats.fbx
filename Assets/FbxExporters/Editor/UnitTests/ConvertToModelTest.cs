@@ -188,5 +188,30 @@ namespace FbxExporters.UnitTests
                 Assert.IsFalse(cube);
             }
         }
+
+        [Test]
+        public void SkinnedMeshTest()
+        {
+            // UNI-24379: in the first release, the plugin only handles static
+            // meshes, not skinned meshes. Rewrite this test when we add that
+            // feature.
+
+            // Create a cube with a bogus skinned-mesh rather than a static
+            // mesh setup.
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.AddComponent<SkinnedMeshRenderer>();
+            var meshFilter = cube.GetComponent<MeshFilter>();
+            var meshRender = cube.GetComponent<MeshRenderer>();
+            Object.DestroyImmediate(meshRender);
+            Object.DestroyImmediate(meshFilter);
+
+            // Convert it. Make sure it gets deleted, to avoid a useless error about internal consistency.
+            var cubeInstance = ConvertToModel.Convert(cube, fbxFullPath: GetRandomFbxFilePath());
+            if (cube) { Object.DestroyImmediate(cube); }
+
+            // Make sure it doesn't have a skinned mesh renderer on it.
+            // In the future we'll want to assert the opposite!
+            Assert.That(cubeInstance.GetComponentsInChildren<SkinnedMeshRenderer>(), Is.Empty);
+        }
     }
 }
