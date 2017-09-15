@@ -1,5 +1,5 @@
 <!DOCTYPE RCC><RCC version="1.0">
 	<qresource>
-		<file alias="unity.png">cone_200.png</file>
+		<file alias="unity.png">unity_200.png</file>
 	</qresource>
 </RCC>
