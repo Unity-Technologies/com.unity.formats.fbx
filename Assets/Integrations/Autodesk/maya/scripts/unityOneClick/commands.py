@@ -295,11 +295,11 @@ class reviewCmd(BaseCommand):
         if maya.cmds.about(macOS=True):
             # Use 'open -a' to bring app to front if it has already been started.
             # Note that the unity command will not get called.
-            melCommand = r'system("open -a \"{0}\" --args -projectPath {1} -executeMethod {2}");'\
+            melCommand = r'system("open -a \"{0}\" --args -projectPath \"{1}\" -executeMethod {2}");'\
                 .format(unityAppPath, unityProjectPath, unityCommand)
 
         elif maya.cmds.about(linux=True):
-            melCommand = r'system("\"{0}\" -projectPath {1} -executeMethod {2}");'\
+            melCommand = r'system("\"{0}\" -projectPath \"{1}\" -executeMethod {2}");'\
                 .format(unityAppPath, unityProjectPath, unityCommand)
 
         elif maya.cmds.about(windows=True):
