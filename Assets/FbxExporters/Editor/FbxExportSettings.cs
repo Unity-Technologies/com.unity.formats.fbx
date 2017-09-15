@@ -27,8 +27,6 @@ namespace FbxExporters.EditorTools {
                 EditorGUILayout.Space ();
             }
 
-            exportSettings.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", exportSettings.weldVertices);
-
             exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
                 new GUIContent ("Convert to Maya Compatible Naming:",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
@@ -121,9 +119,15 @@ namespace FbxExporters.EditorTools {
         public const string kDefaultSavePath = ".";
 
         // Note: default values are set in LoadDefaults().
-        public bool weldVertices;
         public bool mayaCompatibleNames;
         public bool centerObjects;
+
+        /// <summary>
+        /// In Convert-to-model, by default we delete the original object.
+        /// This option lets you override that.
+        /// </summary>
+        [HideInInspector]
+        public bool keepOriginalAfterConvert;
 
         [SerializeField]
         public UnityEngine.Object turntableScene;
@@ -143,9 +147,9 @@ namespace FbxExporters.EditorTools {
 
         protected override void LoadDefaults()
         {
-            weldVertices = true;
             mayaCompatibleNames = true;
             centerObjects = true;
+            keepOriginalAfterConvert = false;
             convertToModelSavePath = kDefaultSavePath;
             turntableScene = null;
         }
