@@ -1,5 +1,25 @@
 RELEASE NOTES
 
+**Version**: 0.0.14a
+
+NEW FEATURES
+
+* Fbx Export: Third party software can add FbxMesh to FbxNode directly through delegate instead of passing exporter a mesh
+
+* Maya Integration: Added script for installing Maya integration through the command line
+
+
+FIXES
+
+* Maya Integration: always show plugin as new regardless of Maya version
+* Convert to Prefab: Handle Convert to Prefab on an FbxPrefab
+* FbxPrefab: Fire OnUpdate event even if there is no obvious change to the Fbx
+* Maya Integration: restore selection after publish
+* FbxPrefab: fix so that renaming parent doesn't affect child transform
+* Convert to Prefab: fix so zeros are kept when incrementing (e.g. Cube001.fbx becomes Cube002.fbx instead of Cube2.fbx)
+* Convert to Prefab: Weld vertices by default, remove option from export settings
+* Convert to Prefab: By default delete original GameObject after converting
+
 **Version**: 0.0.13a
 
 FIXES
