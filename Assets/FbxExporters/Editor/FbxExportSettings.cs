@@ -128,7 +128,11 @@ namespace FbxExporters.EditorTools {
                         // clicked on the wrong application, try to see if we can still find
                         // maya in this directory.
                         var mayaDir = new DirectoryInfo(Path.GetDirectoryName(mayaPath));
+#if UNITY_EDITOR_OSX
+                        var files = mayaDir.GetDirectories("*." + ext);
+#else
                         var files = mayaDir.GetFiles ("*." + ext);
+#endif
                         bool foundMaya = false;
                         foreach (var file in files) {
                             var filename = Path.GetFileNameWithoutExtension (file.Name).ToLower ();
