@@ -316,7 +316,7 @@ class previewCmd(BaseCommand):
 
         elif maya.cmds.about(windows=True):
             melCommand = r'system("start \"{0}\" \"{1}\" \"{2}\" \"-projectPath {3} -executeMethod {4}\"");'\
-                .format(unityProjectPath + "/Assets/Integrations/BringToFront.exe", 
+                .format(unityProjectPath + "/Assets/FbxExporters/Integrations/BringToFront.exe", 
                         os.path.basename(unityProjectPath), unityAppPath,
                         unityProjectPath, unityCommand)
 
