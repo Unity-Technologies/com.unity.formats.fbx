@@ -8,6 +8,12 @@ NEW FEATURES
 
 * Maya Integration: Added script for installing Maya integration through the command line
 
+* Maya Integration: Added dropdown to select Maya version to use for installation
+
+Tries to find all Maya versions installed in default install location. Also contains browse option to select Maya installed
+in custom location.
+
+* Maya Integration: Added icons for Import, Preview, and Export
 
 FIXES
 
@@ -22,6 +28,9 @@ FIXES
 * Export Settings: Reword center objects tooltip
 * Maya Integration: Handle projects with spaces in the path
 * Maya Integration: Run turntable review with Unity project already open
+* Maya Integration: Rename "Review" to "Preview", and "Publish" to "Export"
+* Convert to Prefab: Don't copy SkinnedMeshRenderer component to FbxPrefab (as we currently do not support skinned mesh export)
+* Convert to Prefab: Rename "Convert to Prefab" to "Convert To Linked Prefab Instance"
 
 **Version**: 0.0.13a
 
