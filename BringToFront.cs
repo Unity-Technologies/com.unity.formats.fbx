@@ -47,16 +47,20 @@ namespace FbxExporters
             {
                 if (!String.IsNullOrEmpty(process.MainWindowTitle))
                 {
+                    if(args.Length > 0 && !process.MainWindowTitle.Contains(args[0]))
+                    {
+                        continue;
+                    }
                     bringToFront(process.MainWindowTitle);
                     found = true;
                 }
             }
             
-            if(!found){
+            if(!found && args.Length > 1){
                 Process myProcess = new Process();
-                myProcess.StartInfo.FileName = args[0];
-                if(args.Length > 1){
-                    myProcess.StartInfo.Arguments = args[1]; 
+                myProcess.StartInfo.FileName = args[1];
+                if(args.Length > 2){
+                    myProcess.StartInfo.Arguments = args[2]; 
                 }
                 myProcess.Start();
             }

@@ -686,12 +686,21 @@ namespace FbxExporters
                         for(int i = 0, n = System.Math.Max(oldN, newN); i < n; ++i) {
                             if (/* isNew */ i < newN) {
                                 var newValue = newValues[i];
-                                if (/* isOld */ i < oldN && oldValues[i] == newValue) {
+
+                                // Special case on Transform: if we reparented
+                                // this node then always update the transform
+                                // (UNI-25526). That's because when we do the
+                                // reparenting, it changes the 'prefabValue' in
+                                // a complicated way.
+                                var isReparentedTransform = (typename == "UnityEngine.Transform"
+                                        && m_reparentings.ContainsKey(name));
+
+                                if (/* isOld */ i < oldN && oldValues[i] == newValue && !isReparentedTransform) {
                                     // No change from the old => skip.
                                     continue;
                                 }
                                 if (prefabValues == null) { prefabValues = m_prefab.GetComponentValues(name, typename); }
-                                if (i < prefabValues.Count && prefabValues[i] == newValue) {
+                                if (i < prefabValues.Count && prefabValues[i] == newValue && !isReparentedTransform) {
                                     // Already updated => skip.
                                     continue;
                                 }
