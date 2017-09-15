@@ -96,16 +96,16 @@ def installMenu():
                        image=commands.importCmd.iconPath(),
                        version=whatsNewVersion())
     maya.cmds.menuItem(parent=kMenuName, 
-                       label=commands.reviewCmd.kShortLabel, 
-                       annotation=commands.reviewCmd.kLabel, 
-                       command=commands.reviewCmd.kScriptCommand, 
-                       image=commands.reviewCmd.iconPath(),
+                       label=commands.previewCmd.kShortLabel, 
+                       annotation=commands.previewCmd.kLabel, 
+                       command=commands.previewCmd.kScriptCommand, 
+                       image=commands.previewCmd.iconPath(),
                        version=whatsNewVersion())
     maya.cmds.menuItem(parent=kMenuName, 
-                       label=commands.publishCmd.kShortLabel, 
-                       annotation=commands.publishCmd.kLabel, 
-                       command=commands.publishCmd.kScriptCommand, 
-                       image=commands.publishCmd.iconPath(),
+                       label=commands.exportCmd.kShortLabel, 
+                       annotation=commands.exportCmd.kLabel, 
+                       command=commands.exportCmd.kScriptCommand, 
+                       image=commands.exportCmd.iconPath(),
                        version=whatsNewVersion())
 
 def uninstallMenu():
