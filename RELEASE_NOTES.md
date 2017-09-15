@@ -15,6 +15,8 @@ in custom location.
 
 * Maya Integration: Added icons for Import, Preview, and Export
 
+* Moved Integrations and FbxSdk folders under FbxExporters in Unity package
+
 FIXES
 
 * Maya Integration: always show plugin as new regardless of Maya version
