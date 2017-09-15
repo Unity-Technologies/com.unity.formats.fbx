@@ -25,17 +25,23 @@ namespace FbxExporters.UnitTests
             {
                 var tempPath = Path.GetTempPath ();
                 var basename = Path.GetFileNameWithoutExtension (Path.GetRandomFileName ());
+                basename = basename + "yo"; // add some non-numeric stuff
 
-                var filename1 = basename + " 1.fbx";
-                var filename2 = Path.Combine(tempPath, basename + " 2.fbx");
+                var filename1 = basename + ".fbx";
+                var filename2 = Path.Combine(tempPath, basename + " 1.fbx");
+                Assert.AreEqual (filename2, ConvertToModel.IncrementFileName (tempPath, filename1));
+
+                filename1 = basename + " 1.fbx";
+                filename2 = Path.Combine(tempPath, basename + " 2.fbx");
                 Assert.AreEqual (filename2, ConvertToModel.IncrementFileName (tempPath, filename1));
 
                 filename1 = basename + "1.fbx";
                 filename2 = Path.Combine(tempPath, basename + "2.fbx");
                 Assert.AreEqual (filename2, ConvertToModel.IncrementFileName (tempPath, filename1));
 
-                filename1 = basename + "k.fbx";
-                filename2 = Path.Combine(tempPath, basename + "k 1.fbx");
+                // UNI-25513: bug was that Cube01.fbx => Cube2.fbx
+                filename1 = basename + "01.fbx";
+                filename2 = Path.Combine(tempPath, basename + "02.fbx");
                 Assert.AreEqual (filename2, ConvertToModel.IncrementFileName (tempPath, filename1));
             }
 
@@ -132,9 +138,9 @@ namespace FbxExporters.UnitTests
             // Create a cube.
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-            // Convert it to a prefab.
+            // Convert it to a prefab -- but keep the cube.
             var cubePrefabInstance = ConvertToModel.Convert(cube,
-                directoryFullPath: path, keepOriginal: true);
+                directoryFullPath: path, keepOriginal: ConvertToModel.KeepOriginal.Keep);
 
             // Make sure it's what we expect.
             Assert.That(cube); // we kept the original
@@ -167,9 +173,20 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual(Path.GetFullPath(path), Path.GetDirectoryName(assetFullPath));
 
             // Convert it again, make sure there's only one FbxPrefab (see UNI-25528).
+            // Also make sure we deleted.
             var cubePrefabInstance2 = ConvertToModel.Convert(cubePrefabInstance,
-                    directoryFullPath: path, keepOriginal: false);
+                directoryFullPath: path, keepOriginal: ConvertToModel.KeepOriginal.Delete);
+            Assert.IsFalse(cubePrefabInstance);
             Assert.That(cubePrefabInstance2.GetComponents<FbxPrefab>().Length, Is.EqualTo(1));
+
+            // Create another cube, make sure the export settings drive whether we keep the cube or not.
+            ConvertToModel.Convert(cube, directoryFullPath: path,
+                    keepOriginal: ConvertToModel.KeepOriginal.Default);
+            if (ConvertToModel.ExportSettings.keepOriginalAfterConvert) {
+                Assert.IsTrue(cube);
+            } else {
+                Assert.IsFalse(cube);
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
+using FbxExporters.Editor;
 
 namespace FbxExporters.UnitTests
 {
@@ -152,7 +153,7 @@ namespace FbxExporters.UnitTests
 
             // Convert it to FBX. The asset file will be deleted automatically
             // on termination.
-            var fbxAsset = FbxExporters.Editor.ModelExporter.ExportObject(
+            var fbxAsset = ModelExporter.ExportObject(
                     GetRandomFbxFilePath(), m_original);
             m_source = AssetDatabase.LoadMainAssetAtPath(fbxAsset) as GameObject;
             m_originalHistory = Rep(m_source);
@@ -210,7 +211,7 @@ namespace FbxExporters.UnitTests
             // enough, so the asset database knows to reload it. I was getting
             // test failures otherwise.
             SleepForFileTimestamp();
-            FbxExporters.Editor.ModelExporter.ExportObjects (
+            ModelExporter.ExportObjects (
                     AssetDatabase.GetAssetPath(m_source),
                     new Object[] { newModel } );
             AssetDatabase.Refresh();
@@ -291,7 +292,7 @@ namespace FbxExporters.UnitTests
             // Switch to some other model, which looks like the original model
             // (but is a totally different file). This will cause an update
             // immediately.
-            var fbxAsset = FbxExporters.Editor.ModelExporter.ExportObject(
+            var fbxAsset = ModelExporter.ExportObject(
                     GetRandomFbxFilePath(), m_original);
             var newSource = AssetDatabase.LoadMainAssetAtPath(fbxAsset) as GameObject;
             Assert.IsTrue(newSource);
@@ -351,13 +352,13 @@ namespace FbxExporters.UnitTests
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.name = "Cube";
             var cubeAssetPath = GetRandomFbxFilePath();
-            var autoPrefab = FbxExporters.Editor.ConvertToModel.Convert(cube,
+            var autoPrefab = ConvertToModel.Convert(cube,
                 fbxFullPath: cubeAssetPath);
             Assert.IsTrue(autoPrefab);
 
             // Make a maya locator.
             var locator = new GameObject("Cube");
-            var locatorAssetPath = FbxExporters.Editor.ModelExporter.ExportObject(
+            var locatorAssetPath = ModelExporter.ExportObject(
                 GetRandomFbxFilePath(), locator);
 
             // Check the prefab has all the default stuff it should have.
@@ -405,8 +406,9 @@ namespace FbxExporters.UnitTests
             building3.transform.parent = building2.transform;
             building3.transform.localScale = new Vector3(.5f, .5f, .5f);
 
-            var original = FbxExporters.Editor.ConvertToModel.Convert (root,
-                               fbxFullPath: GetRandomFbxFilePath (), keepOriginal: true);
+            var original = ConvertToModel.Convert (root,
+                fbxFullPath: GetRandomFbxFilePath (),
+                keepOriginal: ConvertToModel.KeepOriginal.Keep);
 
             // Make sure it's OK.
             Assert.That (original.transform.GetChild (0).name, Is.EqualTo ("building2"));
@@ -417,7 +419,7 @@ namespace FbxExporters.UnitTests
             // Modify the hierarchy, export to a new FBX, then copy the FBX under the prefab.
             root.SetActive(true);
             building2.name = "building2_renamed";
-            var newCopyPath = FbxExporters.Editor.ModelExporter.ExportObject(
+            var newCopyPath = ModelExporter.ExportObject(
                 GetRandomFbxFilePath(), root);
             SleepForFileTimestamp();
             System.IO.File.Copy(

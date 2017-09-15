@@ -63,6 +63,23 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// After a convert-to-model, we normally delete the original object.
+            /// That can be overridden.
+            /// </summary>
+            public enum KeepOriginal {
+                Default, // Use the export settings.
+                Keep, // Don't delete, just rename it.
+                Delete, // Delete the original hierarchy.
+            }
+
+            /// <summary>
+            /// Gets the export settings.
+            /// </summary>
+            public static EditorTools.ExportSettings ExportSettings {
+                get { return EditorTools.ExportSettings.instance; }
+            }
+
+            /// <summary>
             /// Create instantiated model prefabs from a selection of objects.
             ///
             /// Every hierarchy in the selection will be exported, under the name of the root.
@@ -73,7 +90,10 @@ namespace FbxExporters
             /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
             /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
             /// <param name="keepOriginal">If set to <c>true</c> keep original gameobject hierarchy.</param>
-            public static GameObject[] CreateInstantiatedModelPrefab (GameObject [] unityGameObjectsToConvert, string directoryFullPath = null, bool keepOriginal = true)
+            public static GameObject[] CreateInstantiatedModelPrefab (
+                GameObject [] unityGameObjectsToConvert,
+                string directoryFullPath = null,
+                KeepOriginal keepOriginal = KeepOriginal.Default)
             {
                 if (directoryFullPath == null) {
                     directoryFullPath = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath();
@@ -119,7 +139,7 @@ namespace FbxExporters
                 GameObject toConvert,
                 string directoryFullPath = null,
                 string fbxFullPath = null,
-                bool keepOriginal = true)
+                KeepOriginal keepOriginal = KeepOriginal.Default)
             {
                 if (string.IsNullOrEmpty(fbxFullPath)) {
                     // Generate a unique filename.
@@ -197,7 +217,20 @@ namespace FbxExporters
                 unityGO = PrefabUtility.ConnectGameObjectToPrefab(unityGO, prefab);
 
                 // Remove (now redundant) gameobject
-                if (!keepOriginal) {
+                bool actuallyKeepOriginal;
+                switch(keepOriginal) {
+                case KeepOriginal.Delete:
+                    actuallyKeepOriginal = false;
+                    break;
+                case KeepOriginal.Keep:
+                    actuallyKeepOriginal = true;
+                    break;
+                case KeepOriginal.Default:
+                default:
+                    actuallyKeepOriginal = ExportSettings.keepOriginalAfterConvert;
+                    break;
+                }
+                if (!actuallyKeepOriginal) {
                     Object.DestroyImmediate (toConvert);
                 } else {
                     // rename and put under scene root in case we need to check values
@@ -218,6 +251,7 @@ namespace FbxExporters
             {
                 string fileWithoutExt = Path.GetFileNameWithoutExtension (filename);
                 string ext = Path.GetExtension (filename);
+                // file, space, number, extension.
                 string format = "{0} {1}{2}";
 
                 int index = 1;
@@ -226,10 +260,15 @@ namespace FbxExporters
                 var result = System.Text.RegularExpressions.Regex.Match(fileWithoutExt, @"\d+$");
                 if (result != null) {
                     var number = result.Value;
+
+                    // Parse the number.
                     int tempIndex;
                     if (int.TryParse (number, out tempIndex)) {
                         fileWithoutExt = fileWithoutExt.Remove (fileWithoutExt.LastIndexOf (number));
-                        format = "{0}{1}{2}"; // remove space from format
+                        // Change the format to remove the extra space we'd add
+                        // if there weren't already a number. Also, try to use the
+                        // same width (so Cube001 increments to Cube002, not Cube2).
+                        format = "{0}{1:D" + number.Length + "}{2}"; // file, number with padding, extension
                         index = tempIndex+1;
                     }
                 }

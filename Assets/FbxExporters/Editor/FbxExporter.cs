@@ -542,17 +542,16 @@ namespace FbxExporters
             ///
             /// Use fbxNode.GetMesh() to access the exported mesh.
             /// </summary>
-            /// <param name="weldVertices">If set to <c>true</c>, combine identical vertices together into one Fbx vertex.</param>
-            public void ExportMesh (Mesh mesh, FbxNode fbxNode, bool weldVertices = true, Material[] materials = null)
+            public void ExportMesh (Mesh mesh, FbxNode fbxNode, Material[] materials = null)
             {
                 var meshInfo = new MeshInfo(mesh, materials);
-                ExportMesh(meshInfo, fbxNode, weldVertices);
+                ExportMesh(meshInfo, fbxNode);
             }
 
             /// <summary>
             /// Exports a unity mesh and attaches it to the node as an FbxMesh.
             /// </summary>
-            void ExportMesh (MeshInfo meshInfo, FbxNode fbxNode, bool weldVertices)
+            void ExportMesh (MeshInfo meshInfo, FbxNode fbxNode)
             {
                 if (!meshInfo.IsValid) {
                     return;
@@ -567,31 +566,20 @@ namespace FbxExporters
 
                 // Create control points.
                 Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
-
-                int NumControlPoints = 0;
-                if (weldVertices) {
-                    for (int v = 0; v < meshInfo.VertexCount; v++) {
-                        if (ControlPointToIndex.ContainsKey (meshInfo.Vertices [v])) {
+                {
+                    var vertices = meshInfo.Vertices;
+                    for (int v = 0, n = meshInfo.VertexCount; v < n; v++) {
+                        if (ControlPointToIndex.ContainsKey (vertices [v])) {
                             continue;
                         }
-                        ControlPointToIndex [meshInfo.Vertices [v]] = NumControlPoints;
-
-                        NumControlPoints++;
+                        ControlPointToIndex [vertices [v]] = ControlPointToIndex.Count();
                     }
-                    fbxMesh.InitControlPoints (NumControlPoints);
+                    fbxMesh.InitControlPoints (ControlPointToIndex.Count());
 
-                    foreach (var controlPoint in ControlPointToIndex.Keys) {
-                        fbxMesh.SetControlPointAt (ConvertPositionToRightHanded(controlPoint),
-                            ControlPointToIndex [controlPoint]);
-                    }
-                } else {
-                    NumControlPoints = meshInfo.VertexCount;
-                    fbxMesh.InitControlPoints (NumControlPoints);
-
-                    // copy control point data from Unity to FBX
-                    for (int v = 0; v < NumControlPoints; v++)
-                    {
-                        fbxMesh.SetControlPointAt(ConvertPositionToRightHanded(meshInfo.Vertices[v]), v);
+                    foreach (var kvp in ControlPointToIndex) {
+                        var controlPoint = kvp.Key;
+                        var index = kvp.Value;
+                        fbxMesh.SetControlPointAt (ConvertPositionToRightHanded(controlPoint), index);
                     }
                 }
 
@@ -636,9 +624,7 @@ namespace FbxExporters
                             // properly export UVs, normals, binormals, etc.
                             unmergedPolygons [current] = polyVert;
 
-                            if (weldVertices) {
-                                polyVert = ControlPointToIndex [meshInfo.Vertices [polyVert]];
-                            }
+                            polyVert = ControlPointToIndex [meshInfo.Vertices [polyVert]];
                             fbxMesh.AddPolygon (polyVert);
 
                             current++;
@@ -746,8 +732,7 @@ namespace FbxExporters
 
                 if (!SharedMeshes.TryGetValue (unityPrefabParent.name, out fbxMesh))
                 {
-                    bool weldVertices = ExportSettings.weldVertices;
-                    ExportMesh (unityGo, fbxNode, weldVertices);
+                    ExportMesh (unityGo, fbxNode);
                     if (fbxNode.GetMesh() != null) {
                         SharedMeshes [unityPrefabParent.name] = fbxNode.GetMesh();
                     }
@@ -812,8 +797,7 @@ namespace FbxExporters
 
                 // try exporting mesh as an instance, export regularly if we cannot
                 if (!ExportInstance (unityGo, fbxNode, fbxScene)) {
-                    bool weldVertices = ExportSettings.weldVertices;
-                    ExportMesh (unityGo, fbxNode, weldVertices);
+                    ExportMesh (unityGo, fbxNode);
                 }
 
                 if (Verbose)
@@ -1494,7 +1478,7 @@ namespace FbxExporters
             /// This goes through the callback system to find the right mesh and
             /// allow plugins to substitute their own meshes.
             /// </summary>
-            void ExportMesh (GameObject gameObject, FbxNode fbxNode, bool weldVertices)
+            void ExportMesh (GameObject gameObject, FbxNode fbxNode)
             {
                 // First allow the object-based callbacks to have a hack at it.
                 foreach(var callback in MeshForObjectCallbacks) {
@@ -1547,14 +1531,14 @@ namespace FbxExporters
                 if (meshFilter) {
                     var renderer = gameObject.GetComponent<Renderer>();
                     var materials = renderer ? renderer.sharedMaterials : null;
-                    ExportMesh(new MeshInfo(meshFilter.sharedMesh, materials), fbxNode, weldVertices);
+                    ExportMesh(new MeshInfo(meshFilter.sharedMesh, materials), fbxNode);
                 } else {
                     var smr = defaultComponent as SkinnedMeshRenderer;
                     if (smr) {
                         var mesh = new Mesh();
                         smr.BakeMesh(mesh);
                         var materials = smr.sharedMaterials;
-                        ExportMesh(new MeshInfo(mesh, materials), fbxNode, weldVertices);
+                        ExportMesh(new MeshInfo(mesh, materials), fbxNode);
                         Object.DestroyImmediate(mesh);
                     }
                 }

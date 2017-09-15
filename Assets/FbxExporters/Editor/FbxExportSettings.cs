@@ -28,8 +28,6 @@ namespace FbxExporters.EditorTools {
                 EditorGUILayout.Space ();
             }
 
-            exportSettings.weldVertices = EditorGUILayout.Toggle ("Weld Vertices:", exportSettings.weldVertices);
-
             exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
                 new GUIContent ("Convert to Maya Compatible Naming:",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
@@ -156,7 +154,10 @@ namespace FbxExporters.EditorTools {
             }
             GUILayout.EndHorizontal ();
 
-            if (GUILayout.Button ("Install Unity Integration")) {
+			var installIntegrationContent = new GUIContent(
+                    "Install Unity Integration",
+                    "Install and configure the Unity integration for Maya so that you can import and export directly to this project.");
+            if (GUILayout.Button (installIntegrationContent)) {
                 FbxExporters.Editor.IntegrationsUI.InstallMayaIntegration ();
             }
 
@@ -191,9 +192,15 @@ namespace FbxExporters.EditorTools {
             ;
 
         // Note: default values are set in LoadDefaults().
-        public bool weldVertices;
         public bool mayaCompatibleNames;
         public bool centerObjects;
+
+        /// <summary>
+        /// In Convert-to-model, by default we delete the original object.
+        /// This option lets you override that.
+        /// </summary>
+        [HideInInspector]
+        public bool keepOriginalAfterConvert;
 
         public int selectedMayaApp = 0;
 
@@ -222,9 +229,9 @@ namespace FbxExporters.EditorTools {
 
         protected override void LoadDefaults()
         {
-            weldVertices = true;
             mayaCompatibleNames = true;
             centerObjects = true;
+            keepOriginalAfterConvert = false;
             convertToModelSavePath = kDefaultSavePath;
             turntableScene = null;
             mayaOptionPaths = null;
