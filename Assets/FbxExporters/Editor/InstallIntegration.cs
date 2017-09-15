@@ -16,6 +16,8 @@ namespace FbxExporters.Editor
 
         private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
 
+        private const string MAYA_INSTRUCTION_FILENAME = "_safe_to_delete/_temp.txt";
+
         public class MayaException : System.Exception {
             public MayaException() { }
             public MayaException(string message) : base(message) { }
@@ -177,8 +179,9 @@ namespace FbxExporters.Editor
 #endif
 
         private static string MAYA_COMMANDS { get {
-                return string.Format("configureUnityOneClick {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {5}; scriptJob -idleEvent quit;",
-                    ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(), GetExportSettingsPath(), (IsHeadlessInstall()?1:0));
+                return string.Format("configureUnityOneClick {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6}; scriptJob -idleEvent quit;",
+                    ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(),
+                    GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall()?1:0));
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
@@ -249,6 +252,25 @@ namespace FbxExporters.Editor
         public static string GetTempSavePath()
         {
             return FbxExporters.Review.TurnTable.TempSavePath.Replace("\\", "/");
+        }
+
+        /// <summary>
+        /// Gets the maya instruction path relative to the Assets folder.
+        /// Assets folder is not included in the path.
+        /// </summary>
+        /// <returns>The relative maya instruction path.</returns>
+        public static string GetMayaInstructionPath()
+        {
+            return MAYA_INSTRUCTION_FILENAME;
+        }
+
+        /// <summary>
+        /// Gets the full maya instruction path as an absolute Unity path.
+        /// </summary>
+        /// <returns>The full maya instruction path.</returns>
+        public static string GetFullMayaInstructionPath()
+        {
+            return Application.dataPath + "/" + FbxExporters.Editor.Integrations.GetMayaInstructionPath ();
         }
 
         /// <summary>

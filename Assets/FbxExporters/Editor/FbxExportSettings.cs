@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using UnityEditorInternal;
 using UnityEngine;
@@ -40,7 +40,7 @@ namespace FbxExporters.EditorTools {
 
             exportSettings.centerObjects = EditorGUILayout.Toggle (
                 new GUIContent("Center Objects:",
-                    "Export objects centered around the union of the bounding box of selected objects"),
+                    "Center objects around a shared root and keep their relative placement unchanged."),
                 exportSettings.centerObjects
             );
 
@@ -88,7 +88,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal ();
 
             GUILayout.Label (new GUIContent (
-                "Turn Table Scene:",
+                "Turntable Scene:",
                 "Scene to use for reviewing models. If none, a scene will be created on review."));
             
             exportSettings.turntableScene = EditorGUILayout.ObjectField (

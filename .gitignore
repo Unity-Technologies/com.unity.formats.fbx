@@ -1,6 +1,7 @@
 ## Executable + Temp files ##
 *.exe
 *.exe.*
+!BringToFront.exe
 *.o
 *.pdb
 *.mdb

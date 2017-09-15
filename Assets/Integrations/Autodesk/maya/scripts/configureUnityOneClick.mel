@@ -1,12 +1,14 @@
 global proc configureUnityOneClick(
     string $unityProject, string $unityApp,
-    string $unityTempSavePath, string $unityFbxExportSettings, int $headless)
+    string $unityTempSavePath, string $unityFbxExportSettings,
+    string $mayaInstructionPath, int $headless)
 {
     // configure plugin settings
     optionVar -stringValue "UnityApp" $unityApp;
     optionVar -stringValue "UnityProject" $unityProject;
     optionVar -stringValue "UnityTempSavePath" $unityTempSavePath;
     optionVar -stringValue "UnityFbxExportSettings" $unityFbxExportSettings;
+    optionVar -stringValue "UnityInstructionPath" $mayaInstructionPath;
     optionVar -intValue "UnityOneClick_Headless" $headless;
 
     // configure auto load of plugin
