@@ -4,33 +4,33 @@ RELEASE NOTES
 
 NEW FEATURES
 
-* Fbx Export: Third party software can add FbxMesh to FbxNode directly through delegate instead of passing exporter a mesh
+* Fbx Export: Add support for Third Party software, through a delegate callback, to handling adding the FbxMesh to the FbxNode on export.
 
-* Maya Integration: Added script for installing Maya integration through the command line
+* Maya Unity Integration: Added script for installing Maya integration through the command line
 
-* Maya Integration: Added dropdown to select Maya version to use for installation
+* Maya Unity Integration: Added dropdown to select Maya version to use for installation
 
 Tries to find all Maya versions installed in default install location. Also contains browse option to select Maya installed
 in custom location.
 
-* Maya Integration: Added icons for Import, Preview, and Export
+* Maya Unity Integration: Added icons for Import, Preview, and Export
 
-* Moved Integrations and FbxSdk folders under FbxExporters in Unity package
+* Moved Integrations and FbxSdk folders under a single FbxExporters folder in the Unity package
 
 FIXES
 
-* Maya Integration: always show plugin as new regardless of Maya version
+* Maya Unity Integration: always show plugin as "what's new" regardless of Maya version
 * Convert to Prefab: Handle Convert to Prefab on an FbxPrefab
 * FbxPrefab: Fire OnUpdate event even if there is no obvious change to the Fbx
-* Maya Integration: restore selection after publish
+* Maya Unity Integration: restore selection after publish
 * FbxPrefab: fix so that renaming parent doesn't affect child transform
 * Convert to Prefab: fix so zeros are kept when incrementing (e.g. Cube001.fbx becomes Cube002.fbx instead of Cube2.fbx)
 * Convert to Prefab: Weld vertices by default, remove option from export settings
 * Convert to Prefab: By default delete original GameObject after converting
 * Export Settings: Reword center objects tooltip
-* Maya Integration: Handle projects with spaces in the path
-* Maya Integration: Run turntable review with Unity project already open
-* Maya Integration: Rename "Review" to "Preview", and "Publish" to "Export"
+* Maya Unity Integration: Handle projects with spaces in the path
+* Maya Unity Integration: Run turntable review with Unity project already open
+* Maya Unity Integration: Rename "Review" to "Preview", and "Publish" to "Export"
 * Convert to Prefab: Don't copy SkinnedMeshRenderer component to FbxPrefab (as we currently do not support skinned mesh export)
 * Convert to Prefab: Rename "Convert to Prefab" to "Convert To Linked Prefab Instance"
 * Fbx Export: fix memory leak with SkinnedMeshRenderer creating a temporary mesh and not destroying it.
