@@ -20,7 +20,7 @@ in custom location.
 FIXES
 
 * Maya Unity Integration: always show plugin as "what's new" regardless of Maya version
-* Convert to Prefab: Handle Convert to Prefab on an FbxPrefab
+* Convert to Prefab: fix running "Convert to Prefab" multiple times on same object adds multiple FbxPrefab components
 * FbxPrefab: Fire OnUpdate event even if there is no obvious change to the Fbx
 * Maya Unity Integration: restore selection after publish
 * FbxPrefab: fix so that renaming parent doesn't affect child transform
