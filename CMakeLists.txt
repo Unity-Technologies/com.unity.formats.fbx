@@ -74,6 +74,7 @@ set(FBXSDK_PACKAGE_TARGET import_fbxsdk)
 add_custom_target(
     ${FBXSDK_PACKAGE_TARGET}
     COMMAND "${UNITY_EDITOR_PATH}" -projectPath "${CMAKE_SOURCE_DIR}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
+    COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_SOURCE_DIR}/Assets/FbxSdk" "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk"
 )
 
 ###########################################################################
