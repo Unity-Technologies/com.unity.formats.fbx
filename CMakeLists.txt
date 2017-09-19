@@ -89,8 +89,8 @@ file(REMOVE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME
 
 add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
     COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
-       "${CMAKE_SOURCE_DIR}/Assets/Integrations"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets
+       "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/FbxExporters
     COMMENT "Zipping Maya Integration folder"
 )
 add_custom_target(${MAYA_INTEGRATION_TARGET} DEPENDS ${MAYA_INTEGRATION_ZIP_NAME})
