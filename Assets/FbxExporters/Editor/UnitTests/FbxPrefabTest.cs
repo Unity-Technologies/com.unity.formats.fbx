@@ -434,6 +434,44 @@ namespace FbxExporters.UnitTests
             Assert.That (original.transform.GetChild (0).GetChild (0).name, Is.EqualTo ("building3"));
             Assert.That (original.transform.GetChild (0).GetChild (0).localScale, Is.EqualTo (new Vector3 (.5f, .5f, .5f)));
         }
+
+        [Test]
+        public void TestFbxPrefabNotAtRoot()
+        {
+            // UNI-23143: what happens if you have an FbxPrefab that's not at the root of its prefab?
+            // Use case: table and chair are two separate fbx files, but we
+            // combine them into one prefab.
+
+            // Create a cube fbx/prefab pair.
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var cubeMesh = cube.GetComponent<MeshFilter>().sharedMesh;
+            var cubePath = GetRandomFbxFilePath();
+            var cubeInstance = ConvertToModel.Convert(cube, fbxFullPath: cubePath);
+            var cubeName = cubeInstance.name;
+
+            // Create a prefab that has the cube as a child.
+            // Test the test: make sure the structure is what we expect.
+            var root = new GameObject("root");
+            cubeInstance.transform.parent = root.transform;
+            var rootPrefab = PrefabUtility.CreatePrefab(GetRandomPrefabAssetPath(), root);
+            Assert.That(rootPrefab);
+            Assert.That(rootPrefab.GetComponent<MeshFilter>(), Is.Null);
+            Assert.That(rootPrefab.transform.GetChild(0).name == cubeName);
+            Assert.AreEqual(24, rootPrefab.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.vertexCount);
+
+            // Turn the cube into a quad by exporting over its fbx file.
+            var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            var quadMesh = quad.GetComponent<MeshFilter>().sharedMesh;
+            ModelExporter.ExportObject(cubePath, quad);
+
+            // The actual test:
+            // Make sure the rootPrefab has the structure we expect.
+            // Before fixing the bug, the root of the prefab was destroyed and recreated, so the very first test here failed:
+            Assert.That(rootPrefab);
+            Assert.That(rootPrefab.GetComponent<MeshFilter>(), Is.Null);
+            Assert.That(rootPrefab.transform.GetChild(0).name == cubeName);
+            Assert.AreEqual(4, rootPrefab.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.vertexCount);
+        }
     }
 
     public class FbxPrefabHelpersTest
