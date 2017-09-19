@@ -16,44 +16,41 @@ namespace FbxExporters
 {
     namespace Editor
     {
-        public class ConvertToModel : System.IDisposable
+        public static class ConvertToModel
         {
-            const string MenuItemName1 = "GameObject/Convert To Prefab";
+            const string MenuItemName1 = "GameObject/Convert To Linked Prefab Instance";
 
             /// <summary>
-            /// Clean up this class on garbage collection
+            /// OnContextItem is called either:
+            /// * when the user selects the menu item via the top menu (with a null MenuCommand), or
+            /// * when the user selects the menu item via the context menu (in which case there's a context)
+            ///
+            /// OnContextItem gets called once per selected object (if the
+            /// parent and child are selected, then OnContextItem will only be
+            /// called on the parent)
             /// </summary>
-            public void Dispose () { }
-
-            // Add a menu item called "Export Model..." to a GameObject's context menu.
-            // OnContextItem gets called once per selected object
-            // (if the parent and child are selected, then OnContextItem will only be called on the parent)
             [MenuItem (MenuItemName1, false, 30)]
             static void OnContextItem (MenuCommand command)
             {
+                GameObject [] selection = null;
+
                 if (command == null || command.context == null) {
-                    // We were actually invoked from the top GameObject menu,
-                    // not the context menu, so treat it as such.
-                    GameObject [] unityGameObjectsToConvert = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
-                    if (unityGameObjectsToConvert.Length <= 0) {
-                    ModelExporter.DisplayNoSelectionDialog ();
-                        return;
+                    // We were actually invoked from the top GameObject menu, so use the selection.
+                    selection = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
+                } else {
+                    // We were invoked from the right-click menu, so use the context of the context menu.
+                    var selected = command.context as GameObject;
+                    if (selected) {
+                        selection = new GameObject[] { selected };
                     }
-                    Object[] result = CreateInstantiatedModelPrefab (unityGameObjectsToConvert);
-                    if (result.Length>0)
-                        Selection.objects = result;
+                }
+
+                if (selection == null || selection.Length == 0) {
+                    ModelExporter.DisplayNoSelectionDialog ();
                     return;
                 }
 
-                GameObject selected = command.context as GameObject;
-                if (selected == null) {
-                    Debug.LogError (string.Format("Error: {0} is not a GameObject and cannot be converted", command.context.name));
-                    return;
-                }
-                GameObject[] result1 = CreateInstantiatedModelPrefab (new GameObject[]{selected});
-                if (result1.Length>0)
-                    Selection.objects = result1;
-
+                Selection.objects = CreateInstantiatedModelPrefab (selection);
             }
 
             /// <summary>
@@ -66,113 +63,182 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Create an instantiated model prefab from an game object hierarchy.
+            /// After a convert-to-model, we normally delete the original object.
+            /// That can be overridden.
+            /// </summary>
+            public enum KeepOriginal {
+                Default, // Use the export settings.
+                Keep, // Don't delete, just rename it.
+                Delete, // Delete the original hierarchy.
+            }
+
+            /// <summary>
+            /// Gets the export settings.
+            /// </summary>
+            public static EditorTools.ExportSettings ExportSettings {
+                get { return EditorTools.ExportSettings.instance; }
+            }
+
+            /// <summary>
+            /// Create instantiated model prefabs from a selection of objects.
+            ///
+            /// Every hierarchy in the selection will be exported, under the name of the root.
+            ///
+            /// If an object and one of its descendents are both selected, the descendent is not promoted to be a prefab -- we only export the root.
             /// </summary>
             /// <returns>list of instanced Model Prefabs</returns>
             /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
             /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
             /// <param name="keepOriginal">If set to <c>true</c> keep original gameobject hierarchy.</param>
-            public static GameObject[] CreateInstantiatedModelPrefab (GameObject [] unityGameObjectsToConvert, string path = null, bool keepOriginal = true)
+            public static GameObject[] CreateInstantiatedModelPrefab (
+                GameObject [] unityGameObjectsToConvert,
+                string directoryFullPath = null,
+                KeepOriginal keepOriginal = KeepOriginal.Default)
             {
-                if (path == null) {
-                    path = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath();
+                if (directoryFullPath == null) {
+                    directoryFullPath = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath();
                 } else {
-                    path = Path.GetFullPath(path);
+                    directoryFullPath = Path.GetFullPath(directoryFullPath);
                 }
 
-                List<GameObject> result = new List<GameObject> ();
-
-                var exportSet = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
-                GameObject[] gosToExport = new GameObject[exportSet.Count];
-                exportSet.CopyTo (gosToExport);
-
-                EnforceUniqueNames (gosToExport);
-
-                // find common ancestor root & filePath;
-                string[] filePaths = new string[gosToExport.Length];
-
-                for(int n = 0; n < gosToExport.Length; n++){
-                    var filename = ModelExporter.ConvertToValidFilename (gosToExport [n].name + ".fbx");
-                    var filePath = Path.Combine (path, filename);
-                    if (File.Exists (filePath)) {
-                        filePath = IncrementFileName (path, filename);
+                var toExport = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
+                var wasExported = new List<GameObject>();
+                foreach(var go in toExport) {
+                    try {
+                        wasExported.Add(Convert(go,
+                            directoryFullPath: directoryFullPath,
+                            keepOriginal: keepOriginal));
+                    } catch(System.Exception xcp) {
+                        Debug.LogException(xcp);
                     }
-                    filePaths[n] = filePath;
                 }
+                return wasExported.ToArray();
+            }
 
-                string[] fbxFileNames = new string[filePaths.Length];
-
-                for (int j = 0; j < gosToExport.Length; j++) {
-                    fbxFileNames[j] = FbxExporters.Editor.ModelExporter.ExportObjects (filePaths[j],
-                        new UnityEngine.Object[] {gosToExport[j]}) as string;
-                }
-
-                for(int i = 0; i < fbxFileNames.Length; i++)
-                {
-                    var fbxFileName = fbxFileNames [i];
-                    if (fbxFileName == null) {
-                        Debug.LogWarning (string.Format ("Warning: Export failed for GameObject {0}", gosToExport [i].name));
-                        continue;
-                    }
-
-                    // make filepath relative
-                    var assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFileName);
-                    var projectRelativePath = "Assets/" + assetRelativePath;
-
-                    // refresh the assetdata base so that we can query for the model
-                    AssetDatabase.Refresh ();
-
-                    // Replace w Model asset. LoadMainAssetAtPath wants a path
-                    // relative to the project, not relative to the assets
-                    // folder.
-                    var unityMainAsset = AssetDatabase.LoadMainAssetAtPath(projectRelativePath) as GameObject;
-
-                    if (!unityMainAsset) {
-                        continue;
-                    }
-
-                    // Instantiate the FBX file.
-                    Object unityObj = PrefabUtility.InstantiatePrefab (unityMainAsset, gosToExport[i].scene);
-                    GameObject unityGO = unityObj as GameObject;
-                    if (!unityGO) {
-                        continue;
-                    }
-
-                    // Copy the components over to the instance of the FBX.
-                    SetupImportedGameObject (gosToExport [i], unityGO);
-
-                    // Set up the FbxPrefab component so we can auto-update.
-                    var fbxPrefab = unityGO.AddComponent<FbxPrefab>();
-                    fbxPrefab.SetSourceModel(unityMainAsset);
-
-                    // Disconnect from the FBX file.
-                    PrefabUtility.DisconnectPrefabInstance(unityGO);
-
-                    // Create a prefab from the instantiated and componentized unityGO.
-                    var prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");
-                    var prefab = PrefabUtility.CreatePrefab(prefabFileName, unityGO);
-                    if (!prefab) {
-                        throw new System.Exception(
-                                string.Format("Failed to create prefab asset in [{0}] from fbx [{1}]",
-                                    prefabFileName, fbxFileName));
-                    }
-                    // Connect to the prefab file.
-                    PrefabUtility.ConnectGameObjectToPrefab(unityGO, prefab);
-
-                    // Remove (now redundant) gameobject
-                    if (!keepOriginal) {
-                        Object.DestroyImmediate (unityGameObjectsToConvert [i]);
+            /// <summary>
+            /// Convert one object (and the hierarchy below it) to an auto-updating prefab.
+            ///
+            /// This returns a new object; the converted object may be modified or destroyed.
+            ///
+            /// This refreshes the asset database.
+            ///
+            /// If "keepOriginal" is set, the converted object is modified but remains in the scene.
+            /// </summary>
+            /// <returns>The instance that replaces 'toConvert' in the scene.</returns>
+            /// <param name="toConvert">GameObject hierarchy to replace with a prefab.</param>
+            /// <param name="fbxFullPath">Absolute platform-specific path to
+            /// the fbx file. May be null, in which case we construct a unique
+            /// filename from the object name and the
+            /// directoryFullPath.</param>
+            /// <param name="directoryFullPath">Absolute platform-specific path
+            /// to a directory in which to put the fbx file. Ignored if
+            /// fbxFullPath is specified. May be null, in which case we use the
+            /// export settings.</param>
+            /// <param name="keepOriginal">If set to <c>true</c>, keep the original in the scene.</param>
+            public static GameObject Convert (
+                GameObject toConvert,
+                string directoryFullPath = null,
+                string fbxFullPath = null,
+                KeepOriginal keepOriginal = KeepOriginal.Default)
+            {
+                if (string.IsNullOrEmpty(fbxFullPath)) {
+                    // Generate a unique filename.
+                    if (string.IsNullOrEmpty (directoryFullPath)) {
+                        directoryFullPath = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath ();
                     } else {
-                        // rename and put under scene root in case we need to check values
-                        gosToExport [i].name = "_safe_to_delete_" + gosToExport [i].name;
-                        gosToExport [i].SetActive (false);
+                        directoryFullPath = Path.GetFullPath (directoryFullPath);
                     }
+                    var fbxBasename = ModelExporter.ConvertToValidFilename (toConvert.name + ".fbx");
 
-                    // add the instanced prefab
-                    result.Add (unityGO);
+                    fbxFullPath = Path.Combine (directoryFullPath, fbxBasename);
+                    if (File.Exists (fbxFullPath)) {
+                        fbxFullPath = IncrementFileName (directoryFullPath, fbxFullPath);
+                    }
+                }
+                var assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFullPath);
+                var projectRelativePath = "Assets/" + assetRelativePath;
+                if (string.IsNullOrEmpty(assetRelativePath)) {
+                    throw new System.Exception("Path " + fbxFullPath + " must be in the Assets folder.");
                 }
 
-                return result.ToArray ();
+                // Make sure that the object names in the hierarchy are unique.
+                // The import back in to Unity would do this automatically but
+                // we prefer to control it so that the Maya artist can see the
+                // same names as exist in Unity.
+                EnforceUniqueNames (new GameObject[] {toConvert});
+
+                // Export to FBX. It refreshes the database.
+                {
+                    var fbxActualPath = ModelExporter.ExportObject (fbxFullPath, toConvert);
+                    if (fbxActualPath != fbxFullPath) {
+                        throw new System.Exception ("Failed to convert " + toConvert.name);
+                    }
+                }
+
+                // Replace w Model asset. LoadMainAssetAtPath wants a path
+                // relative to the project, not relative to the assets folder.
+                var unityMainAsset = AssetDatabase.LoadMainAssetAtPath (projectRelativePath) as GameObject;
+                if (!unityMainAsset) {
+                    throw new System.Exception ("Failed to convert " + toConvert.name);;
+                }
+
+                // Instantiate the FBX file.
+                var unityGO = PrefabUtility.InstantiatePrefab (unityMainAsset, toConvert.scene)
+                    as GameObject;
+                if (!unityGO) {
+                    throw new System.Exception ("Failed to convert " + toConvert.name);;
+                }
+
+                // Copy the components over to the instance of the FBX.
+                SetupImportedGameObject (toConvert, unityGO);
+
+                // Set up the FbxPrefab component so it will auto-update.
+                // Make sure to delete whatever FbxPrefab history we had.
+                var fbxPrefab = unityGO.GetComponent<FbxPrefab>();
+                if (fbxPrefab) {
+                    Object.DestroyImmediate(fbxPrefab);
+                }
+                fbxPrefab = unityGO.AddComponent<FbxPrefab>();
+                fbxPrefab.SetSourceModel(unityMainAsset);
+
+                // Disconnect from the FBX file.
+                PrefabUtility.DisconnectPrefabInstance(unityGO);
+
+                // Create a prefab from the instantiated and componentized unityGO.
+                var prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");
+                var prefab = PrefabUtility.CreatePrefab(prefabFileName, unityGO);
+                if (!prefab) {
+                    throw new System.Exception(
+                        string.Format("Failed to create prefab asset in [{0}] from fbx [{1}]",
+                            prefabFileName, fbxFullPath));
+                }
+
+                // Connect to the prefab file.
+                unityGO = PrefabUtility.ConnectGameObjectToPrefab(unityGO, prefab);
+
+                // Remove (now redundant) gameobject
+                bool actuallyKeepOriginal;
+                switch(keepOriginal) {
+                case KeepOriginal.Delete:
+                    actuallyKeepOriginal = false;
+                    break;
+                case KeepOriginal.Keep:
+                    actuallyKeepOriginal = true;
+                    break;
+                case KeepOriginal.Default:
+                default:
+                    actuallyKeepOriginal = ExportSettings.keepOriginalAfterConvert;
+                    break;
+                }
+                if (!actuallyKeepOriginal) {
+                    Object.DestroyImmediate (toConvert);
+                } else {
+                    // rename and put under scene root in case we need to check values
+                    toConvert.name = "_safe_to_delete_" + toConvert.name;
+                    toConvert.SetActive (false);
+                }
+
+                return unityGO;
             }
 
             /// <summary>
@@ -181,10 +247,11 @@ namespace FbxExporters
             /// </summary>
             /// <returns>new file name.</returns>
             /// <param name="filename">Filename.</param>
-            private static string IncrementFileName(string path, string filename)
+            public static string IncrementFileName(string path, string filename)
             {
                 string fileWithoutExt = Path.GetFileNameWithoutExtension (filename);
                 string ext = Path.GetExtension (filename);
+                // file, space, number, extension.
                 string format = "{0} {1}{2}";
 
                 int index = 1;
@@ -193,10 +260,15 @@ namespace FbxExporters
                 var result = System.Text.RegularExpressions.Regex.Match(fileWithoutExt, @"\d+$");
                 if (result != null) {
                     var number = result.Value;
+
+                    // Parse the number.
                     int tempIndex;
                     if (int.TryParse (number, out tempIndex)) {
                         fileWithoutExt = fileWithoutExt.Remove (fileWithoutExt.LastIndexOf (number));
-                        format = "{0}{1}{2}"; // remove space from format
+                        // Change the format to remove the extra space we'd add
+                        // if there weren't already a number. Also, try to use the
+                        // same width (so Cube001 increments to Cube002, not Cube2).
+                        format = "{0}{1:D" + number.Length + "}{2}"; // file, number with padding, extension
                         index = tempIndex+1;
                     }
                 }
@@ -217,7 +289,7 @@ namespace FbxExporters
             /// e.g. Sphere becomes Sphere 1
             /// </summary>
             /// <param name="exportSet">Export set.</param>
-            private static void EnforceUniqueNames(GameObject[] exportSet)
+            public static void EnforceUniqueNames(IEnumerable<GameObject> exportSet)
             {
                 Dictionary<string, int> NameToIndexMap = new Dictionary<string, int> ();
                 string format = "{0} {1}";
@@ -249,7 +321,7 @@ namespace FbxExporters
             /// </summary>
             /// <param name="orig">Original GameObject.</param>
             /// <param name="imported">Imported GameObject.</param>
-            private static void SetupImportedGameObject(GameObject orig, GameObject imported)
+            public static void SetupImportedGameObject(GameObject orig, GameObject imported)
             {
                 Transform importedTransform = imported.transform;
                 Transform origTransform = orig.transform;
@@ -257,16 +329,6 @@ namespace FbxExporters
                 // configure transform and maintain local pose
                 importedTransform.SetParent (origTransform.parent, false);
                 importedTransform.SetSiblingIndex (origTransform.GetSiblingIndex());
-
-                // set the transform to be the same as before
-                bool success = UnityEditorInternal.ComponentUtility.CopyComponent (origTransform);
-                if (success) {
-                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues(importedTransform);
-                }
-                if (!success) {
-                    Debug.LogWarning (string.Format ("Warning: Failed to copy component Transform from {0} to {1}",
-                        imported.name, origTransform.name));
-                }
 
                 // copy the components over, assuming that the hierarchy order is unchanged
                 if (origTransform.hierarchyCount != importedTransform.hierarchyCount) {
@@ -280,7 +342,14 @@ namespace FbxExporters
                 CopyComponentsRecursive (orig, imported, namesExpectedMatch:false);
             }
 
-            private static void FixSiblingOrder(Transform orig, Transform imported){
+            /// <summary>
+            /// Given two hierarchies of nodes whose names match up,
+            /// make the 'imported' hierarchy have its children be in the same
+            /// order as the 'orig' hierarchy.
+            ///
+            /// The 'orig' hierarchy is not modified.
+            /// </summary>
+            public static void FixSiblingOrder(Transform orig, Transform imported){
                 foreach (Transform origChild in orig) {
                     Transform importedChild = imported.Find (origChild.name);
                     if (importedChild == null) {
@@ -307,61 +376,77 @@ namespace FbxExporters
                 }
             }
 
-            private static void CopyComponents(GameObject from, GameObject to){
+            /// <summary>
+            /// Copy components on the 'from' object which is the object in the
+            /// scene we exported, over to the 'to' object which is the object
+            /// in the scene that we imported from the FBX.
+            ///
+            /// Exception: don't copy the references to assets in the scene that
+            /// were also exported, in particular the meshes and materials.
+            ///
+            /// The 'from' hierarchy is not modified.
+            /// </summary>
+            public static void CopyComponents(GameObject from, GameObject to){
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
-                var components = from.GetComponents<Component> ();
-                for(int i = 0; i < components.Length; i++){
-                    if(components[i] == null){
+                foreach(var component in from.GetComponents<Component> ()) {
+                    // UNI-24379: we don't support SkinnedMeshRenderer right
+                    // now: we just bake the mesh into its current pose. So
+                    // don't copy the SMR over. There will already be a
+                    // MeshFilter and MeshRenderer due to the static mesh.
+                    // Remove this code when we support skinning.
+                    if (component is SkinnedMeshRenderer) {
                         continue;
                     }
 
-                    bool success = UnityEditorInternal.ComponentUtility.CopyComponent (components[i]);
-                    if (success) {
-                        bool foundComponentOfType = false;
-                        for (int j = 0; j < originalComponents.Count; j++) {
-                            var toComponent = originalComponents [j];
-                            // If component already exists, paste values.
-                            if (toComponent.GetType () == components [i].GetType ()) {
-                                // we have found the component we are looking for, remove it so
-                                // we don't try to copy to it again
-                                originalComponents.RemoveAt (j);
-                                foundComponentOfType = true;
+                    var json = EditorJsonUtility.ToJson(component);
 
-                                // Don't want to copy MeshFilter because then we will replace the
-                                // exported mesh with the old mesh.
-                                if (toComponent is MeshFilter) {
-                                    break;
-                                }
+                    System.Type expectedType = component.GetType();
+                    Component toComponent = null;
 
-                                // Don't want to copy materials over in case the materials are
-                                // embedded in another model.
-                                if (toComponent is SkinnedMeshRenderer) {
-                                    var skinnedMesh = toComponent as SkinnedMeshRenderer;
-                                    var sharedMesh = skinnedMesh.sharedMesh;
-                                    var sharedMats = skinnedMesh.sharedMaterials;
-                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
-                                    skinnedMesh.sharedMesh = sharedMesh;
-                                    skinnedMesh.sharedMaterials = sharedMats;
-                                } else if (toComponent is Renderer) {
-                                    var renderer = toComponent as Renderer;
-                                    var sharedMats = renderer.sharedMaterials;
-                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
-                                    renderer.sharedMaterials = sharedMats;
-                                } else {
-                                    success = UnityEditorInternal.ComponentUtility.PasteComponentValues (toComponent);
-                                }
-                                break;
-                            }
-                        }
-
-                        // component was not part of the original components, so add it
-                        if (!foundComponentOfType) {
-                            success = UnityEditorInternal.ComponentUtility.PasteComponentAsNew (to);
+                    // Find the component to copy to.
+                    for (int i = 0, n = originalComponents.Count; i < n; i++) {
+                        if (originalComponents[i].GetType() == expectedType) {
+                            // We have found the component we are looking for,
+                            // remove it so we don't try to copy to it again
+                            toComponent = originalComponents[i];
+                            originalComponents.RemoveAt (i);
+                            break;
                         }
                     }
-                    if (!success) {
-                        Debug.LogWarning (string.Format ("Warning: Failed to copy component {0} from {1} to {2}",
-                            components[i].GetType().Name, from.name, to.name));
+
+                    if (!toComponent) {
+                        // It doesn't exist => create and copy.
+                        toComponent = to.AddComponent(component.GetType());
+                        EditorJsonUtility.FromJsonOverwrite(json, toComponent);
+                    } else {
+                        // It exists => copy.
+                        // But we want to override that behaviour in a few
+                        // cases, to avoid clobbering references to the new FBX
+                        // TODO: interpret the object or the json more directly
+                        // TODO: be more generic
+                        // TODO: handle references to other objects in the same hierarchy
+
+                        if (toComponent is MeshFilter) {
+                            // Don't copy the mesh. But there's nothing else to
+                            // copy, so just don't copy anything.
+                        } else if (toComponent is SkinnedMeshRenderer) {
+                            // Don't want to clobber materials or the mesh.
+                            var skinnedMesh = toComponent as SkinnedMeshRenderer;
+                            var sharedMesh = skinnedMesh.sharedMesh;
+                            var sharedMats = skinnedMesh.sharedMaterials;
+                            EditorJsonUtility.FromJsonOverwrite(json, toComponent);
+                            skinnedMesh.sharedMesh = sharedMesh;
+                            skinnedMesh.sharedMaterials = sharedMats;
+                        } else if (toComponent is Renderer) {
+                            // Don't want to clobber materials.
+                            var renderer = toComponent as Renderer;
+                            var sharedMats = renderer.sharedMaterials;
+                            EditorJsonUtility.FromJsonOverwrite(json, toComponent);
+                            renderer.sharedMaterials = sharedMats;
+                        } else {
+                            // Normal case: copy everything.
+                            EditorJsonUtility.FromJsonOverwrite(json, toComponent);
+                        }
                     }
                 }
             }

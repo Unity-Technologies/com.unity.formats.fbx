@@ -13,7 +13,7 @@ FBXExportReferencedAssetsContent -v false;
 FBXExportAnimationOnly -v false;
 
 FBXExportCameras -v false; 
-FBXExportLights -v false; 
+FBXExportLights -v true; 
 
 FBXExportEmbeddedTextures -v false;
 
