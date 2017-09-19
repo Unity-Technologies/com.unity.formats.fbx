@@ -36,7 +36,7 @@ namespace FbxExporters.Editor
             }
         }
 
-        public const string MODULE_TEMPLATE_PATH = "FbxExporters/Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
+        public const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
 
 #if UNITY_EDITOR_OSX
         private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
@@ -45,12 +45,6 @@ namespace FbxExporters.Editor
 #else
         private const string MAYA_MODULES_PATH = "maya/modules";
 #endif
-
-        public class MayaException : System.Exception {
-            public MayaException() { }
-            public MayaException(string message) : base(message) { }
-            public MayaException(string message, System.Exception inner) : base(message, inner) { }
-        }
 
         // Use string to define escaped quote
         // Windows needs the backslash
@@ -546,6 +540,9 @@ namespace FbxExporters.Editor
             myProcess.EnableRaisingEvents = true;
             myProcess.Start();
             myProcess.WaitForExit();
+
+            // in case we unzip inside the Assets folder, make sure it updates
+            AssetDatabase.Refresh ();
         }
     }
 }
