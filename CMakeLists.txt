@@ -27,7 +27,22 @@ endif()
 
 if (NOT DEFINED FBXSDK_PACKAGE_PATH)
     # TODO: store the FbxSdk directly in this project
-    set(FBXSDK_PACKAGE_PATH "${CMAKE_SOURCE_DIR}/../FbxSharpBuild/FbxSdk_${PACKAGE_VERSION}.unitypackage")
+    set(FBXSDK_PACKAGE_PATH "${CMAKE_SOURCE_DIR}/../FbxSharpBuild")
+    
+    # find the most recent package at the path
+    file(GLOB FBXSDK_PACKAGES "${FBXSDK_PACKAGE_PATH}/FbxSdk_*.*.*.unitypackage")
+    set(NEWEST_PACKAGE "")
+    foreach(fbxsdk_package ${FBXSDK_PACKAGES})
+       if(fbxsdk_package IS_NEWER_THAN NEWEST_PACKAGE)
+            set(NEWEST_PACKAGE ${fbxsdk_package})
+       endif()
+    endforeach(fbxsdk_package)
+    
+    if("${NEWEST_PACKAGE}" STREQUAL "")
+        message(FATAL_ERROR "Failed to find FbxSdk Unity Package at: ${FBXSDK_PACKAGE_PATH}")
+    else()
+        set(FBXSDK_PACKAGE_PATH ${NEWEST_PACKAGE})
+    endif()
 endif()
 
 # promote warnings to errors
@@ -52,10 +67,12 @@ set(Python_ADDITIONAL_VERSIONS 2.7)
 ###########################################################################
 # Import FbxSharp package
 
+# remove FbxSdk folder
+file(REMOVE_RECURSE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk")
+
 set(FBXSDK_PACKAGE_TARGET import_fbxsdk)
 add_custom_target(
     ${FBXSDK_PACKAGE_TARGET}
-    COMMAND rmdir /s "${CMAKE_SOURCE_DIR}/Assets/FbxSdk"
     COMMAND "${UNITY_EDITOR_PATH}" -projectPath "${CMAKE_SOURCE_DIR}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
 )
 
@@ -82,7 +99,7 @@ add_custom_target(${MAYA_INTEGRATION_TARGET} DEPENDS ${MAYA_INTEGRATION_ZIP_NAME
 # Add target for creating a package
 add_custom_command(
         OUTPUT ${PACKAGE_PATH}
-        COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} -exportPackage Assets/FbxExporters Assets/FbxSdk ${PACKAGE_PATH} -quit
+        COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} -exportPackage Assets/FbxExporters ${PACKAGE_PATH} -quit
         COMMENT "Creating Unity Package ${PACKAGE_PATH}"
         DEPENDS ${MAYA_INTEGRATION_TARGET}
     )

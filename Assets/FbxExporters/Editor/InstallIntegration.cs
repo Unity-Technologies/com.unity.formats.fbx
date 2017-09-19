@@ -526,7 +526,11 @@ namespace FbxExporters.Editor
 
         public static void DecompressZip(string zipPath, string destPath){
             System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
-            myProcess.StartInfo.FileName = string.Format("\"{0}\"", EditorApplication.applicationContentsPath + "/Tools/7z.exe");
+            var ZIPAPP = "7z.exe";
+#if UNITY_EDITOR_OSX
+            ZIPAPP = "7za.exe";
+#endif
+            myProcess.StartInfo.FileName = EditorApplication.applicationContentsPath + "/Tools/" + ZIPAPP;
             myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
             myProcess.StartInfo.CreateNoWindow = true;
             myProcess.StartInfo.UseShellExecute = false;
