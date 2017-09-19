@@ -36,7 +36,7 @@ namespace FbxExporters.Editor
             }
         }
 
-        private const string MODULE_TEMPLATE_PATH = "FbxExporters/Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
+        public const string MODULE_TEMPLATE_PATH = "FbxExporters/Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
 
 #if UNITY_EDITOR_OSX
         private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
@@ -399,6 +399,7 @@ namespace FbxExporters.Editor
             var mayaExe = GetMayaExe ();
             if (string.IsNullOrEmpty (mayaExe)) {
                 return;
+            }
 
             // decompress zip file if it exists, otherwise try using default location
             if (System.IO.File.Exists (GetIntegrationZipFullPath())) {
