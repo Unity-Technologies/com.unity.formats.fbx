@@ -26,6 +26,52 @@ namespace FbxExporters.UnitTests
         }
 
         [Test]
+        public void BatchModeTest() {
+            // test that the commands work in batch mode
+
+            var mayaExe = Editor.IntegrationsUI.GetMayaExe ();
+
+            // install maya integration
+            bool result = Editor.Integrations.InstallMaya (verbose: true);
+            Assert.IsTrue (result);
+
+            int exitCode = Editor.Integrations.ConfigureMaya (mayaExe);
+            Assert.AreEqual (0, exitCode);
+
+            // run + quit maya in batch mode
+            // make sure the plugin loads before quit
+            RunMaya (mayaExe, "loadPlugin -quiet unityOneClickPlugin");
+
+            // run import command in batch mode
+            RunMaya (mayaExe, "loadPlugin -quiet unityOneClickPlugin; unityImport");
+        }
+
+        private void RunMaya(string mayaExe, string command = null, bool batchMode = true)
+        {
+            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+            myProcess.StartInfo.FileName = mayaExe;
+            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            myProcess.StartInfo.CreateNoWindow = true;
+            myProcess.StartInfo.UseShellExecute = false;
+
+            string commands = (string.IsNullOrEmpty (command) ? "" : command + "; ") + "scriptJob -idleEvent quit;";
+            string arguments = (batchMode ? "-batch" : "") + " -command ";
+
+#if UNITY_EDITOR_OSX
+            myProcess.StartInfo.Arguments = string.Format(arguments + "'{0}'", commands);
+#elif UNITY_EDITOR_LINUX
+            throw new NotImplementedException();
+#else // UNITY_EDITOR_WINDOWS
+            myProcess.StartInfo.Arguments = string.Format(arguments + "\"{0}\"", commands);
+#endif
+            myProcess.EnableRaisingEvents = true;
+            myProcess.Start();
+            myProcess.WaitForExit();
+            int exitCode = myProcess.ExitCode;
+            Assert.AreEqual (0, exitCode);
+        }
+
+        [Test]
         public void BasicTest() {
             Assert.IsFalse(Editor.Integrations.IsHeadlessInstall());
 
