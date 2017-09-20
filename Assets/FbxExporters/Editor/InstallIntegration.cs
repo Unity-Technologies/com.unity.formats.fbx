@@ -14,159 +14,25 @@ namespace FbxExporters.Editor
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
 
-        private const string FBX_EXPORT_SETTINGS_PATH = "Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
+        private const string FBX_EXPORT_SETTINGS_PATH = "FbxExporters/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
+
+        private const string MAYA_INSTRUCTION_FILENAME = "_safe_to_delete/_temp.txt";
+
+        private const string MODULE_TEMPLATE_PATH = "FbxExporters/Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
+
+#if UNITY_EDITOR_OSX
+        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
+#elif UNITY_EDITOR_LINUX
+        private const string MAYA_MODULES_PATH = "Maya/modules";
+#else
+        private const string MAYA_MODULES_PATH = "maya/modules";
+#endif
 
         public class MayaException : System.Exception {
             public MayaException() { }
             public MayaException(string message) : base(message) { }
             public MayaException(string message, System.Exception inner) : base(message, inner) { }
         }
-
-        public class MayaVersion {
-
-            /// <summary>
-            /// Find the Maya installation that has your desired version, or
-            /// the newest version if the 'desired' is an empty string.
-            ///
-            /// If MAYA_LOCATION is set, the desired version is ignored.
-            /// </summary>
-            public MayaVersion(string desiredVersion = "") {
-                // If the location is given by the environment, use it.
-                Location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
-                if (!string.IsNullOrEmpty(Location)) {
-                    Location = Location.TrimEnd('/');
-                    Debug.Log("Using maya set by MAYA_LOCATION: " + Location);
-                    return;
-                }
-
-                // List that directory and find the right version:
-                // either the newest version, or the exact version we wanted.
-                string mayaRoot = "";
-                string bestVersion = "";
-                var adskRoot = new System.IO.DirectoryInfo(AdskRoot);
-                foreach(var productDir in adskRoot.GetDirectories()) {
-                    var product = productDir.Name;
-
-                    // Only accept those that start with 'maya' in either case.
-                    if (!product.StartsWith("maya", StringComparison.InvariantCultureIgnoreCase)) {
-                        continue;
-                    }
-                    // Reject MayaLT -- it doesn't have plugins.
-                    if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
-                        continue;
-                    }
-                    // Parse the version number at the end. Check if it matches,
-                    // or if it's newer than the best so far.
-                    string thisNumber = product.Substring("maya".Length);
-                    if (thisNumber == desiredVersion) {
-                        mayaRoot = product;
-                        bestVersion = thisNumber;
-                        break;
-                    } else if (thisNumber.CompareTo(bestVersion) > 0) {
-                        mayaRoot = product;
-                        bestVersion = thisNumber;
-                    }
-                }
-                if (!string.IsNullOrEmpty(desiredVersion) && bestVersion != desiredVersion) {
-                    throw new MayaException(string.Format(
-                                "Unable to find maya {0} in its default installation path. Set MAYA_LOCATION.", desiredVersion));
-                } else if (string.IsNullOrEmpty(bestVersion)) {
-                    throw new MayaException(string.Format(
-                                "Unable to find any version of maya. Set MAYA_LOCATION."));
-                }
-
-                Location = AdskRoot + "/" + mayaRoot;
-                if (string.IsNullOrEmpty(desiredVersion)) {
-                    Debug.Log("Using latest version of maya found in: " + Location);
-                } else {
-                    Debug.Log(string.Format("Using maya {0} found in: {1}", desiredVersion, Location));
-                }
-            }
-
-            /// <summary>
-            /// The path where all the different versions of Maya are installed
-            /// by default. Depends on the platform.
-            /// </summary>
-            public const string AdskRoot =
-#if UNITY_EDITOR_OSX
-                "/Applications/Autodesk"
-#elif UNITY_EDITOR_LINUX
-                "/usr/autodesk"
-#else // WINDOWS
-                "C:/Program Files/Autodesk"
-#endif
-            ;
-
-            /// <summary>
-            /// The value that you might set MAYA_LOCATION to if you wanted to
-            /// use this version of Maya.
-            /// </summary>
-            public string Location { get; private set; }
-
-            /// <summary>
-            /// The path of the Maya executable.
-            /// </summary>
-            public string MayaExe {
-                get {
-#if UNITY_EDITOR_OSX
-                    // MAYA_LOCATION on mac is set by Autodesk to be the
-                    // Contents directory. But let's make it easier on people
-                    // and allow just having it be the app bundle or a
-                    // directory that holds the app bundle.
-                    if (Location.EndsWith(".app/Contents")) {
-                        return Location + "/MacOS/Maya";
-                    } else if (Location.EndsWith(".app")) {
-                        return Location + "/Contents/MacOS/Maya";
-                    } else {
-                        return Location + "/Maya.app/Contents/MacOS/Maya";
-                    }
-#elif UNITY_EDITOR_LINUX
-                    return Location + "/bin/maya";
-#else // WINDOWS
-                    return Location + "/bin/maya.exe";
-#endif
-                }
-            }
-
-            /// <summary>
-            /// The version number.
-            ///
-            /// This may involve running Maya so it can be expensive (a few
-            /// seconds).
-            /// </summary>
-            public string Version {
-                get {
-                    if (string.IsNullOrEmpty(m_version)) {
-                        m_version = AskVersion(MayaExe);
-                    }
-                    return m_version;
-                }
-            }
-            string m_version;
-
-            /// <summary>
-            /// Ask the version number by running maya.
-            /// </summary>
-            static string AskVersion(string exePath) {
-                System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
-                myProcess.StartInfo.FileName = exePath;
-                myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                myProcess.StartInfo.CreateNoWindow = true;
-                myProcess.StartInfo.UseShellExecute = false;
-                myProcess.StartInfo.RedirectStandardOutput = true;
-                myProcess.StartInfo.Arguments = "-v";
-                myProcess.EnableRaisingEvents = true;
-                myProcess.Start();
-                string resultString = myProcess.StandardOutput.ReadToEnd();
-                myProcess.WaitForExit();
-
-                // Output is like: Maya 2018, Cut Number 201706261615
-                // We want the stuff after 'Maya ' and before the comma.
-                // TODO: less brittle! Consider also the mel command "about -version".
-                var commaIndex = resultString.IndexOf(',');
-                return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
-            }
-        };
 
         // Use string to define escaped quote
         // Windows needs the backslash
@@ -177,20 +43,11 @@ namespace FbxExporters.Editor
 #endif
 
         private static string MAYA_COMMANDS { get {
-                return string.Format("configureUnityOneClick {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {5}; scriptJob -idleEvent quit;",
-                    ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(), GetExportSettingsPath(), (IsHeadlessInstall()?1:0));
+                return string.Format("configureUnityOneClick {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6}; scriptJob -idleEvent quit;",
+                    ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(),
+                    GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall()?1:0));
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
-
-        private const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
-
-#if UNITY_EDITOR_OSX
-        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
-#elif UNITY_EDITOR_LINUX
-        private const string MAYA_MODULES_PATH = "Maya/modules";
-#else
-        private const string MAYA_MODULES_PATH = "maya/modules";
-#endif
 
         private static string GetUserFolder()
         {
@@ -206,29 +63,14 @@ namespace FbxExporters.Editor
             return false;
         }
 
-        public static string GetModulePath(string version)
+        public static string GetModulePath()
         {
-            string result = System.IO.Path.Combine(GetUserFolder(), MAYA_MODULES_PATH);
-
-            return result.Replace(VERSION_TAG,version);
+            return System.IO.Path.Combine(GetUserFolder(), MAYA_MODULES_PATH);
         }
 
-        // GetModuleTemplatePath can support multiple versions of Maya in case
-        // of changes in API.  But most versions are compatible with each
-        // other, so just register one and make a mapping.
-        static Dictionary<string, string> ModuleTemplateCompatibility = new Dictionary<string, string>() {
-            { "2017", "2017" },
-            { "2018", "2017" },
-        };
-
-        public static string GetModuleTemplatePath(string version)
+        public static string GetModuleTemplatePath()
         {
-            string result = System.IO.Path.Combine(Application.dataPath, MODULE_TEMPLATE_PATH);
-            if (!ModuleTemplateCompatibility.TryGetValue(version, out version)) {
-                throw new MayaException("FbxExporters does not support Maya version " + version);
-            }
-
-            return result.Replace(VERSION_TAG,version);
+            return System.IO.Path.Combine(Application.dataPath, MODULE_TEMPLATE_PATH);
         }
 
         public static string GetAppPath()
@@ -249,6 +91,25 @@ namespace FbxExporters.Editor
         public static string GetTempSavePath()
         {
             return FbxExporters.Review.TurnTable.TempSavePath.Replace("\\", "/");
+        }
+
+        /// <summary>
+        /// Gets the maya instruction path relative to the Assets folder.
+        /// Assets folder is not included in the path.
+        /// </summary>
+        /// <returns>The relative maya instruction path.</returns>
+        public static string GetMayaInstructionPath()
+        {
+            return MAYA_INSTRUCTION_FILENAME;
+        }
+
+        /// <summary>
+        /// Gets the full maya instruction path as an absolute Unity path.
+        /// </summary>
+        /// <returns>The full maya instruction path.</returns>
+        public static string GetFullMayaInstructionPath()
+        {
+            return Application.dataPath + "/" + FbxExporters.Editor.Integrations.GetMayaInstructionPath ();
         }
 
         /// <summary>
@@ -356,12 +217,11 @@ namespace FbxExporters.Editor
             }
         }
 
-        public static int ConfigureMaya(MayaVersion version)
+        public static int ConfigureMaya(string mayaPath)
         {
              int ExitCode = 0;
 
              try {
-                string mayaPath = version.MayaExe;
                 if (!System.IO.File.Exists(mayaPath))
                 {
                     Debug.LogError (string.Format ("No maya installation found at {0}", mayaPath));
@@ -396,7 +256,7 @@ namespace FbxExporters.Editor
             return ExitCode;
         }
 
-        public static bool InstallMaya(MayaVersion version = null, bool verbose = false)
+        public static bool InstallMaya(bool verbose = false)
         {
             // What's happening here is that we copy the module template to
             // the module path, basically:
@@ -404,19 +264,16 @@ namespace FbxExporters.Editor
             // - search-and-replace its tags
             // - done.
             // But it's complicated because we can't trust any files actually exist.
-            if (version == null) {
-                version = new MayaVersion();
-            }
 
-            string moduleTemplatePath = GetModuleTemplatePath(version.Version);
+            string moduleTemplatePath = GetModuleTemplatePath();
             if (!System.IO.File.Exists(moduleTemplatePath))
             {
-                Debug.LogError(string.Format("FbxExporters package doesn't have support for " + version.Version));
+                Debug.LogError(string.Format("Missing Maya module file at: \"{0}\"", moduleTemplatePath));
                 return false;
             }
 
             // Create the {USER} modules folder and empty it so it's ready to set up.
-            string modulePath = GetModulePath(version.Version);
+            string modulePath = GetModulePath();
             string moduleFilePath = System.IO.Path.Combine(modulePath, MODULE_FILENAME + ".mod");
             bool installed = false;
 
@@ -501,22 +358,33 @@ namespace FbxExporters.Editor
 
     class IntegrationsUI
     {
+        /// <summary>
+        /// The path of the Maya executable.
+        /// </summary>
+        public static string GetMayaExe () {
+            return FbxExporters.EditorTools.ExportSettings.GetSelectedMayaPath ();
+        }
+
         public static void InstallMayaIntegration ()
         {
-            var mayaVersion = new Integrations.MayaVersion();
-            if (!Integrations.InstallMaya(mayaVersion, verbose: true)) {
+            var mayaExe = GetMayaExe ();
+            if (string.IsNullOrEmpty (mayaExe)) {
                 return;
             }
 
-            int exitCode = Integrations.ConfigureMaya (mayaVersion);
+            if (!Integrations.InstallMaya(verbose: true)) {
+                return;
+            }
+
+            int exitCode = Integrations.ConfigureMaya (mayaExe);
 
             string title, message;
             if (exitCode != 0) {
-                title = string.Format("Failed to install Maya {0} Integration.", mayaVersion.Version);
+                title = "Failed to install Maya Integration.";
                 message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
             } else {
-                title = string.Format("Completed installation of Maya {0} Integration.", mayaVersion.Version);
-                message = string.Format("Enjoy the new \"Unity\" menu in Maya {0}.", mayaVersion.Version);
+                title = "Completed installation of Maya Integration.";
+                message = "Enjoy the new \"Unity\" menu in Maya.";
             }
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }

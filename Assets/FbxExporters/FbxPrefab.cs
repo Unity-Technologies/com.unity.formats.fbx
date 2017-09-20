@@ -686,12 +686,21 @@ namespace FbxExporters
                         for(int i = 0, n = System.Math.Max(oldN, newN); i < n; ++i) {
                             if (/* isNew */ i < newN) {
                                 var newValue = newValues[i];
-                                if (/* isOld */ i < oldN && oldValues[i] == newValue) {
+
+                                // Special case on Transform: if we reparented
+                                // this node then always update the transform
+                                // (UNI-25526). That's because when we do the
+                                // reparenting, it changes the 'prefabValue' in
+                                // a complicated way.
+                                var isReparentedTransform = (typename == "UnityEngine.Transform"
+                                        && m_reparentings.ContainsKey(name));
+
+                                if (/* isOld */ i < oldN && oldValues[i] == newValue && !isReparentedTransform) {
                                     // No change from the old => skip.
                                     continue;
                                 }
                                 if (prefabValues == null) { prefabValues = m_prefab.GetComponentValues(name, typename); }
-                                if (i < prefabValues.Count && prefabValues[i] == newValue) {
+                                if (i < prefabValues.Count && prefabValues[i] == newValue && !isReparentedTransform) {
                                     // Already updated => skip.
                                     continue;
                                 }
@@ -907,21 +916,26 @@ namespace FbxExporters
             // First write down what we want to do.
             var updates = new UpdateList(GetFbxHistory(), m_fbxModel.transform, this);
 
-            // If we don't need to do anything, jump out now.
-            if (!updates.NeedsUpdates()) {
-                Log("{0}: no updates needed", transform.name);
-                return;
-            }
+            // Instantiate the prefab, work on the instance, then copy back.
+            // We could optimize this out if we had nothing to do, but then the
+            // OnUpdate handler wouldn't always get called, and that makes for
+            // confusing API.
 
-            // We want to do something, so instantiate the prefab, work on the instance, then copy back.
-            var prefabInstance = UnityEditor.PrefabUtility.InstantiatePrefab(this.gameObject) as GameObject;
-            if (!prefabInstance) {
+            // This FbxPrefab may not be at the root of its prefab. We instantiate the root of the prefab, then
+            // we find the corresponding FbxPrefab.
+            var prefabRoot = UnityEditor.PrefabUtility.FindPrefabRoot(this.gameObject);
+            var prefabInstanceRoot = UnityEditor.PrefabUtility.InstantiatePrefab(prefabRoot) as GameObject;
+            if (!prefabInstanceRoot) {
                 throw new System.Exception(string.Format("Failed to instantiate {0}; is it really a prefab?",
                             this.gameObject));
             }
-            var fbxPrefabInstance = prefabInstance.GetComponent<FbxPrefab>();
+            var fbxPrefabInstance = prefabInstanceRoot.GetComponentsInChildren<FbxPrefab>().FirstOrDefault(
+                fbxPrefab => UnityEditor.PrefabUtility.GetPrefabParent(fbxPrefab) == this);
+            if (!fbxPrefabInstance) {
+                throw new System.Exception(string.Format("Internal error: couldn't find the right FbxPrefab after instantiating."));
+            }
 
-            // Do ALL the things!
+            // Do ALL the things (potentially nothing).
             var updatedObjects = updates.ImplementUpdates(fbxPrefabInstance);
 
             // Tell listeners about it. They're free to make adjustments now.
@@ -935,10 +949,10 @@ namespace FbxExporters
             fbxPrefabInstance.m_fbxHistory = newFbxRepString;
 
             // Save the changes back to the prefab.
-            UnityEditor.PrefabUtility.ReplacePrefab(prefabInstance, this.transform);
+            UnityEditor.PrefabUtility.ReplacePrefab(prefabInstanceRoot, prefabRoot);
 
             // Destroy the prefabInstance.
-            GameObject.DestroyImmediate(prefabInstance);
+            GameObject.DestroyImmediate(prefabInstanceRoot);
         }
 
         /// <summary>

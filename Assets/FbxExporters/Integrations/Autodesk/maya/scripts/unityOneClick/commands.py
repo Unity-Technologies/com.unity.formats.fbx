@@ -38,6 +38,10 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     """
     Base class for UnityOneClick Plugin Commands.
     """
+    kIconPath = ""
+    kFamilyIcon = 'unity.png'
+    kFamilyLabel = "The UnityOneClick plugin allows you to reliably exchange and review your work between Maya and Unity."
+    
     def __init__(self):
         OpenMayaMPx.MPxCommand.__init__(self)
         LoggerMixin.__init__(self)
@@ -58,7 +62,7 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
         return True
 
     def loadDependencies(self):
-        # GamePipeline plugin 'SendToUnitySelection' command used in Publish
+        # GamePipeline plugin 'SendToUnitySelection' command used in export
         pluginsToLoad = ['GamePipeline', 'fbxmaya']
         
         ext = "mll"
@@ -86,6 +90,14 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
             
         maya.mel.eval(contents)
         return True
+    
+    @classmethod
+    def iconPath(cls):
+        return cls.kIconPath
+    
+    @classmethod
+    def familyIconPath(cls):
+        return maya.mel.eval('$tempPath = languageResourcePath("{0}");'.format(cls.kFamilyIcon))
         
     def storeAttribute(self, node, attr, attrValue, attrType="string"):
         if not maya.mel.eval('attributeExists "{0}" "{1}"'.format(attr, node)):
@@ -102,11 +114,12 @@ class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     
 class importCmd(BaseCommand):
     """
-    Import FBX file from Unity Project and autoconfigure for publishing
+    Import FBX file from Unity Project and autoconfigure for exporting
     
     @ingroup UnityCommands
     """
-    kLabel = 'Import FBX file from Unity Project and auto-configure for publishing'
+    kIconPath = "import.png"
+    kLabel = 'Import FBX file from Unity Project and auto-configure for exporting'
     kShortLabel = 'Import'
     kCmdName = "{}Import".format(version.pluginPrefix())
     kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
@@ -134,7 +147,7 @@ class importCmd(BaseCommand):
     @classmethod
     def scriptCmd(cls):
         return
-    
+
     def beforeImport(self, retCode, file, clientData):
         # store path and filename
         self._tempPath = file.resolvedPath()
@@ -193,25 +206,31 @@ class importCmd(BaseCommand):
         self._origItemsInScene = []
         currWorkspace = None
         
-        callbackId = OpenMaya.MSceneMessage.addCheckFileCallback(OpenMaya.MSceneMessage.kBeforeImportCheck, self.beforeImport)
-        callbackId2 = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterImport, self.afterImport)    
+        callbackId = None
+        callbackId2 = None
+        try:
+            callbackId = OpenMaya.MSceneMessage.addCheckFileCallback(OpenMaya.MSceneMessage.kBeforeImportCheck, self.beforeImport)
+            callbackId2 = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterImport, self.afterImport)
+            # Check if the path was specified on the command line
+            syntax = OpenMaya.MSyntax()
+            syntax.addFlag("-p", "-path", OpenMaya.MSyntax.kString)
+            parser = OpenMaya.MArgParser(syntax, args)
         
-        # Check if the path was specified on the command line
-        syntax = OpenMaya.MSyntax()
-        syntax.addFlag("-p", "-path", OpenMaya.MSyntax.kString)
+            filePath = No                # Check if the path was specified on the command line
+        synta    x = OpenMaya.MSyntax()
+            syntax.addFlag("-p", "-path", OpenMaya.MSyntax.kString)
         parser = OpenMaya.MArgParser(syntax, args)
-        
+            
         filePath = None
-        if parser.isFlagSet("-p"):
+        if parser.isFlagSet("-p"):    
             filePath = parser.flagArgumentString("-p", 0)
             
-        # If a valid path was specified, then use it.
-        # Path is valid if the file exists and it is an FBX
-        if filePath and os.path.isfile(filePath) and os.path.splitext(filePath)[1].lower() == ".fbx":
-            maya.cmds.file(filePath, i=True, type="FBX", ignoreVersion=True, ra=True, mergeNamespacesOnClash=False, pr=True)
-        else:
-            # set Unity project as the current workspace
-            currWorkspace = maya.cmds.workspace(o=True, q=True)
+        # If a valid path was specified, then use     it.
+            # Path is valid if the file exists and it is an FBX    
+        if filePath and os.    path.isfile(filePath) and os.path.splitext(filePath)[1].l    ower() == ".fbx":    
+            maya.cmds.file(filePath, i=True, t    ype="FBX", ignoreVersion=True, ra=True, mergeNamespacesOnClash=False, pr=True)
+        e    lse:             # set Unity project as the current workspace
+                currWorkspace = maya.cmds.workspace(o=True, q=True)
             unityProject = maya.cmds.optionVar(q='UnityProject')
             if unityProject:
                 maya.cmds.workspace(unityProject, o=True)
@@ -219,12 +238,14 @@ class importCmd(BaseCommand):
             strCmd = 'Import'
             self.displayDebug('doIt {0}'.format(strCmd))
             maya.cmds.Import()
-
-        OpenMaya.MMessage.removeCallback(callbackId)
-        OpenMaya.MMessage.removeCallback(callbackId2)
-        
-        if currWorkspace:
-            maya.cmds.workspace(currWorkspace, o=True)
+        finally:
+            if currWorkspace:
+                maya.cmds.workspace(currWorkspace, o=True)
+                
+            if callbackId:
+                OpenMaya.MMessage.removeCallback(callbackId)
+            if callbackId2:
+                OpenMaya.MMessage.removeCallback(callbackId2)
                 
     @classmethod
     def invoke(cls):
@@ -235,17 +256,18 @@ class importCmd(BaseCommand):
         strCmd = '{0};'.format(cls.kCmdName)
         maya.mel.eval(strCmd)   # @UndefinedVariable
 
-class reviewCmd(BaseCommand):
+class previewCmd(BaseCommand):
     """
-    Review Model in Unity
+    Preview Model in Unity Window
         
     @ingroup UnityCommands
     """
-    kLabel = 'Review Model in Unity'
-    kShortLabel = 'Review'
-    kCmdName = "{}Review".format(version.pluginPrefix())
+    kIconPath = "preview.png"
+    kLabel = 'Preview Model in Unity window'
+    kShortLabel = 'Preview'
+    kCmdName = "{}Preview".format(version.pluginPrefix())
     kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
-    kRuntimeCommand = "UnityOneClickReview"
+    kRuntimeCommand = "UnityOneClickPreview"
     
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -269,16 +291,22 @@ class reviewCmd(BaseCommand):
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
         unityTempSavePath = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityTempSavePath'))
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
-        
-        if not self.loadUnityFbxExportSettings():
+        if maya.cmds.optionVar(exists='UnityInstructionPath'):
+            instructionFile = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityInstructionPath'))
+        else:
+            self.displayError("Missing Unity instruction file path, please re-install integration.")
             return
-
+        
         # make sure the GamePipeline and fbxmaya plugins are loaded
         if not self.loadDependencies():
             return
             
+        if not self.loadUnityFbxExportSettings():
+            return
+            
         # select the export set for export, if it exists,
         # otherwise take what is currently selected
+        origSelection = maya.cmds.ls(sl=True)
         if self.setExists(self._exportSet):
             maya.cmds.select(self._exportSet, r=True, ne=True)
         
@@ -290,19 +318,25 @@ class reviewCmd(BaseCommand):
         
         maya.cmds.file(savePath, force=True, options="", typ="FBX export", pr=True, es=True)
         
+        # create temp file in _safe_to_delete/
+        with open(instructionFile,"w+") as f:
+            pass
+        
         if maya.cmds.about(macOS=True):
             # Use 'open -a' to bring app to front if it has already been started.
             # Note that the unity command will not get called.
-            melCommand = r'system("open -a \"{0}\" --args -projectPath {1} -executeMethod {2}");'\
+            melCommand = r'system("open -a \"{0}\" --args -projectPath \"{1}\" -executeMethod {2}");'\
                 .format(unityAppPath, unityProjectPath, unityCommand)
 
         elif maya.cmds.about(linux=True):
-            melCommand = r'system("\"{0}\" -projectPath {1} -executeMethod {2}");'\
+            melCommand = r'system("\"{0}\" -projectPath \"{1}\" -executeMethod {2}");'\
                 .format(unityAppPath, unityProjectPath, unityCommand)
 
         elif maya.cmds.about(windows=True):
-            melCommand = r'system("start \"{0}\" \"{1}\" \"-projectPath {2} -executeMethod {3}\"");'\
-                .format(unityProjectPath + "/Assets/Integrations/BringToFront.exe", unityAppPath, unityProjectPath, unityCommand)
+            melCommand = r'system("start \"{0}\" \"{1}\" \"{2}\" \"-projectPath {3} -executeMethod {4}\"");'\
+                .format(unityProjectPath + "/Assets/FbxExporters/Integrations/BringToFront.exe", 
+                        os.path.basename(unityProjectPath), unityAppPath,
+                        unityProjectPath, unityCommand)
 
         else:
             raise NotImplementedError("missing platform implementation for {0}".format(maya.cmds.about(os=True)))
@@ -310,6 +344,10 @@ class reviewCmd(BaseCommand):
         self.displayDebug('doIt({0})'.format(melCommand))
 
         maya.mel.eval(melCommand)
+        
+        if origSelection:
+            maya.cmds.select(cl=True)
+            maya.cmds.select(origSelection, add=True, ne=True)
 
     @classmethod
     def invoke(cls):
@@ -320,17 +358,18 @@ class reviewCmd(BaseCommand):
         strCmd = '{0};'.format(cls.kCmdName)
         maya.mel.eval(strCmd)   # @UndefinedVariable
 
-class publishCmd(BaseCommand):
+class exportCmd(BaseCommand):
     """
-    Publish Model in Unity
+    Export Model to Unity
         
     @ingroup UnityCommands
     """
-    kLabel = 'Publish Model to Unity'
-    kShortLabel = 'Publish'
-    kCmdName = "{}Publish".format(version.pluginPrefix())
+    kIconPath = "export.png"
+    kLabel = 'Export Model to Unity'
+    kShortLabel = 'Export'
+    kCmdName = "{}Export".format(version.pluginPrefix())
     kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
-    kRuntimeCommand = "UnityOneClickPublish"
+    kRuntimeCommand = "UnityOneClickExport"
     
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -359,6 +398,7 @@ class publishCmd(BaseCommand):
         
         # select the export set for export, if it exists,
         # otherwise take what is currently selected
+        origSelection = maya.cmds.ls(sl=True)
         if self.setExists(self._exportSet):
             maya.cmds.select(self._exportSet, r=True, ne=True)
         
@@ -372,6 +412,10 @@ class publishCmd(BaseCommand):
         self.displayDebug('doIt {0}'.format(strCmd))
         maya.mel.eval(strCmd)
         
+        if origSelection:
+            maya.cmds.select(cl=True)
+            maya.cmds.select(origSelection, add=True, ne=True)
+        
     @classmethod
     def invoke(cls):
         """
@@ -383,11 +427,11 @@ class publishCmd(BaseCommand):
 
 class configureCmd(BaseCommand):
     """
-    Configure Maya Scene for Reviewing and Publishing to Unity
+    Configure Maya Scene for previewing and exporting to Unity
     
     @ingroup UnityCommands
     """
-    kLabel = 'Configure Maya to publish and review to a Unity Project'
+    kLabel = 'Configure Maya to preview and export to a Unity Project'
     kShortLabel = 'Configure'
     kCmdName = "{}Configure".format(version.pluginPrefix())
     kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
@@ -433,8 +477,8 @@ def register(pluginFn):
     @param pluginFn (MFnPlugin): plugin object passed to initializePlugin
     """
     pluginFn.registerCommand(importCmd.kCmdName, importCmd.creator, importCmd.syntaxCreator)
-    pluginFn.registerCommand(reviewCmd.kCmdName, reviewCmd.creator, reviewCmd.syntaxCreator)
-    pluginFn.registerCommand(publishCmd.kCmdName, publishCmd.creator, publishCmd.syntaxCreator)
+    pluginFn.registerCommand(previewCmd.kCmdName, previewCmd.creator, previewCmd.syntaxCreator)
+    pluginFn.registerCommand(exportCmd.kCmdName, exportCmd.creator, exportCmd.syntaxCreator)
     pluginFn.registerCommand(configureCmd.kCmdName, configureCmd.creator, configureCmd.syntaxCreator)
     
     return
@@ -445,8 +489,8 @@ def unregister(pluginFn):
     @param pluginFn (MFnPlugin): plugin object passed to uninitializePlugin
     """
     pluginFn.deregisterCommand(importCmd.kCmdName)
-    pluginFn.deregisterCommand(reviewCmd.kCmdName)
-    pluginFn.deregisterCommand(publishCmd.kCmdName)
+    pluginFn.deregisterCommand(previewCmd.kCmdName)
+    pluginFn.deregisterCommand(exportCmd.kCmdName)
     pluginFn.deregisterCommand(configureCmd.kCmdName)
     return
 
@@ -476,15 +520,15 @@ class importCmdTestCase(BaseCmdTest):
     """
     __cmd__ = importCmd
 
-class reviewCmdTestCase(BaseCmdTest):
-    """UnitTest for testing the reviewCmd command
+class previewCmdTestCase(BaseCmdTest):
+    """UnitTest for testing the previewCmd command
     """
-    __cmd__ = reviewCmd
+    __cmd__ = previewCmd
 
-class publishCmdTestCase(BaseCmdTest):
-    """UnitTest for testing the publishCmd command
+class exportCmdTestCase(BaseCmdTest):
+    """UnitTest for testing the exportCmd command
     """
-    __cmd__ = publishCmd
+    __cmd__ = exportCmd
 
 class configureCmdTestCase(BaseCmdTest):
     """UnitTest for testing the configureCmd command
@@ -492,7 +536,7 @@ class configureCmdTestCase(BaseCmdTest):
     __cmd__ = configureCmd
 
 # NOTE: update this for test discovery
-test_cases = (importCmdTestCase, reviewCmdTestCase, publishCmdTestCase, configureCmdTestCase,)
+test_cases = (importCmdTestCase, previewCmdTestCase, exportCmdTestCase, configureCmdTestCase,)
 
 def load_tests(loader, tests, pattern):
     suite = unittest.TestSuite()

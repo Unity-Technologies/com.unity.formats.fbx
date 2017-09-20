@@ -17,7 +17,8 @@ namespace FbxExporters.UnitTests
     public abstract class ExporterTestBase
     {
         /// <summary>
-        /// Sleep an amount of time (in ms) so we can safely assume that the timestamp on an fbx will change.
+        /// Sleep an amount of time (in ms) so we can safely assume that the
+        /// timestamp on an fbx will change.
         /// </summary>
         public void SleepForFileTimestamp() {
             System.Threading.Thread.Sleep(1000);

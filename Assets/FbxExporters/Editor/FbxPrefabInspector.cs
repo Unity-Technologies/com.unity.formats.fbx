@@ -16,13 +16,6 @@ namespace FbxExporters.EditorTools {
             }
             EditorGUI.BeginDisabledGroup(isDisabled);
 
-            fbxPrefab.SetAutoUpdate(EditorGUILayout.Toggle ("Auto-update:", fbxPrefab.WantsAutoUpdate()));
-            if (!isDisabled && !fbxPrefab.WantsAutoUpdate()) {
-                if (GUILayout.Button("Sync prefab to FBX")) {
-                    fbxPrefab.SyncPrefab();
-                }
-            }
-
             var oldFbxAsset = fbxPrefab.GetFbxAsset();
             var newFbxAsset = EditorGUILayout.ObjectField("Source Fbx Asset", oldFbxAsset,
                     typeof(GameObject), allowSceneObjects: false) as GameObject;
