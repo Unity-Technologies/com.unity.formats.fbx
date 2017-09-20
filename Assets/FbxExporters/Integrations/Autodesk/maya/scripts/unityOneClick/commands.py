@@ -213,13 +213,9 @@ class importCmd(BaseCommand):
             callbackId2 = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterImport, self.afterImport)
             
             # Check if the path was specified on the command line
-            syntax = OpenMaya.MSyntax()
-            syntax.addFlag("-p", "-path", OpenMaya.MSyntax.kString)
-            parser = OpenMaya.MArgParser(syntax, args)
-            
             filePath = None
-            if parser.isFlagSet("-p"):    
-                filePath = parser.flagArgumentString("-p", 0)
+            if args.length() > 0:
+                filePath = args.asString(0)
              
             # If a valid path was specified, then use it.
             # Path is valid if the file exists and it is an FBX    
