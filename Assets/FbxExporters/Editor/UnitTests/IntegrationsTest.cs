@@ -29,20 +29,21 @@ namespace FbxExporters.UnitTests
         public void BatchModeTest() {
             // test that the commands work in batch mode
 
+            var mayaExe = Editor.IntegrationsUI.GetMayaExe ();
+
             // install maya integration
-            var mayaVersion = new Editor.Integrations.MayaVersion();
-            bool result = Editor.Integrations.InstallMaya (mayaVersion, verbose: true);
+            bool result = Editor.Integrations.InstallMaya (verbose: true);
             Assert.IsTrue (result);
 
-            int exitCode = Editor.Integrations.ConfigureMaya (mayaVersion);
+            int exitCode = Editor.Integrations.ConfigureMaya (mayaExe);
             Assert.AreEqual (0, exitCode);
 
             // run + quit maya in batch mode
             // make sure the plugin loads before quit
-            RunMaya (mayaVersion.MayaExe, "loadPlugin -quiet unityOneClickPlugin");
+            RunMaya (mayaExe, "loadPlugin -quiet unityOneClickPlugin");
 
             // run import command in batch mode
-            RunMaya (mayaVersion.MayaExe, "loadPlugin -quiet unityOneClickPlugin; unityImport");
+            RunMaya (mayaExe, "loadPlugin -quiet unityOneClickPlugin; unityImport");
         }
 
         private void RunMaya(string mayaExe, string command = null, bool batchMode = true)
