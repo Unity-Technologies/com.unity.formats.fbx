@@ -29,7 +29,7 @@ Maya Unity Integration
 """
 
 # list of public modules for this package
-__all__ = ["commands", "ui"]
+__all__ = ["commands", "ui", "config"]
 
 try:             
     import maya.standalone             
