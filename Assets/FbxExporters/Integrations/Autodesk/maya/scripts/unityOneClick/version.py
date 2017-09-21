@@ -34,12 +34,19 @@ def versionName():
     """
     return '0.0.14a'
 
+def moduleName():
+    """
+    Return name inside the .mod name
+    @ingroup UnityOneClickPluginVersion
+    """
+    return 'unityoneclick'
+
 def pluginName():
     """
     Return name of unityOneClick plugin
     @ingroup UnityOneClickPluginVersion
     """
-    return '{}.unityOneClick'.format(pluginPrefix())
+    return 'UnityOneClick'
 
 def vendorName():
     """
