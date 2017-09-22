@@ -389,4 +389,99 @@ namespace FbxExporters.Editor
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
     }
+
+    class MaxIntegration
+    {
+        // get version of Max
+        // find 3dsmax.ini file (in the AppData)
+        // get startup path from .ini file
+        // copy .ms file to startup path
+
+        //private const string MaxIni = "3dsmax.ini";
+        private const string PluginName = "unityOneClickPlugin.ms";
+        private const string PluginPath = "Integrations/Autodesk/max/scripts/" + PluginName;
+        //private const string InstallMaxScript = "Integrations/Autodesk/max/scripts/unityPluginInstall.ms";
+
+        private const string InstallMaxScriptTemplate =
+            @"startupScriptPath = pathConfig.GetDir(#userStartupScripts);" +
+            @"copyFile \""{UnityPluginScript_Source}\"" (startupScriptPath + \""/{UnityPluginScript_Name}\"")";
+
+        private const string PluginSourceTag = "{UnityPluginScript_Source}";
+        private const string PluginNameTag = "{UnityPluginScript_Name}";
+
+        // TODO: get this from the export settings
+        private static string GetMaxExe(){
+            return "C:/Program Files/Autodesk/3ds Max 2017/3dsmax.exe";
+        }
+
+        private static string GetInstallScript(){
+            Dictionary<string,string> Tokens = new Dictionary<string,string>()
+            {
+                {PluginSourceTag, Application.dataPath + "/" + PluginPath },
+                {PluginNameTag,  PluginName }
+            };
+
+            var installScript = InstallMaxScriptTemplate;
+            foreach (var t in Tokens) {
+                installScript = installScript.Replace (t.Key, t.Value);
+            }
+            return installScript;
+        }
+
+        public static int InstallMaxPlugin(){
+            var maxExe = GetMaxExe ();
+            var installScript = GetInstallScript ();
+
+            int ExitCode = 0;
+
+            try {
+                if (!System.IO.File.Exists(maxExe))
+                {
+                    Debug.LogError (string.Format ("No 3DsMax installation found at {0}", maxExe));
+                    return -1;
+                }
+
+                System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+                myProcess.StartInfo.FileName = maxExe;
+                myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                myProcess.StartInfo.CreateNoWindow = true;
+                myProcess.StartInfo.UseShellExecute = false;
+
+#if UNITY_EDITOR_OSX
+                throw new NotImplementedException();
+#elif UNITY_EDITOR_LINUX
+                throw new NotImplementedException();
+#else // UNITY_EDITOR_WINDOWS
+                myProcess.StartInfo.Arguments = string.Format("-q -silent -mxs \"{0}\"", installScript);
+#endif
+                myProcess.EnableRaisingEvents = true;
+
+                Debug.Log("args: " + myProcess.StartInfo.Arguments);
+
+                myProcess.Start();
+                myProcess.WaitForExit();
+                ExitCode = myProcess.ExitCode;
+                Debug.Log(string.Format("Ran max: [{0}]\nWith args [{1}]\nResult {2}",
+                    maxExe, myProcess.StartInfo.Arguments, ExitCode));
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogError(string.Format ("Exception failed to start Max ({0})", e.Message));
+                ExitCode = -1;
+            }
+            return ExitCode;
+        }
+
+        /*private string AppDataPath{
+            get{
+                return Environment.GetFolderPath (Environment.SpecialFolder.LocalApplicationData);
+            }
+        }
+
+        //C:/Users/Viktoria/AppData/Local/Autodesk/3dsMax/2017 - 64bit/ENU
+        private string GetMaxIniPath(){
+            var appData = AppDataPath;
+            return null;
+        }*/
+    }
 }
