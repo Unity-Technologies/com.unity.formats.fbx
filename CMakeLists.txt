@@ -17,13 +17,15 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 message(STATUS "Building for ${CMAKE_BUILD_TYPE}")
 
-if (NOT DEFINED PACKAGE_VERSION)
-    set(PACKAGE_VERSION "0.0.10a")
+if (NOT DEFINED PACKAGE_VERSION OR "${PACKAGE_VERSION}" STREQUAL "")
+    set(PACKAGE_VERSION "0.0.15a")
 endif()
+message(STATUS "Using Package Version: ${PACKAGE_VERSION}")
 
-if (NOT DEFINED PACKAGE_PATH)
+if (NOT DEFINED PACKAGE_PATH OR "${PACKAGE_PATH}" STREQUAL "")
     set(PACKAGE_PATH "${CMAKE_BINARY_DIR}/FbxExporters_${PACKAGE_VERSION}.unitypackage")
 endif()
+message(STATUS "Creating Exporter Package at: ${PACKAGE_PATH}")
 
 if (NOT DEFINED FBXSDK_PACKAGE_PATH)
     # TODO: store the FbxSdk directly in this project
@@ -44,6 +46,7 @@ if (NOT DEFINED FBXSDK_PACKAGE_PATH)
         set(FBXSDK_PACKAGE_PATH ${NEWEST_PACKAGE})
     endif()
 endif()
+message(STATUS "Using FbxSdk Package: ${FBXSDK_PACKAGE_PATH}")
 
 # promote warnings to errors
 if(MSVC)
@@ -90,8 +93,8 @@ file(REMOVE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME
 
 add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
     COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
-       "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/FbxExporters
+       "${CMAKE_SOURCE_DIR}/Assets/Integrations"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets
     COMMENT "Zipping Maya Integration folder"
 )
 add_custom_target(${MAYA_INTEGRATION_TARGET} DEPENDS ${MAYA_INTEGRATION_ZIP_NAME})
