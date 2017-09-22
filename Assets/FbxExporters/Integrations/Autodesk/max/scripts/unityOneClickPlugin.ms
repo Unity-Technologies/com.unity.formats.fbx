@@ -41,13 +41,7 @@ if unityMenu == undefined do
 		newUnityMenu.addItem previewAction -1
 		newUnityMenu.addItem exportAction -1
         menuMan.updateMenuBar() --update the menu bar
-
-        print "heeyyyy"
     )
 )
---#preSystemShutdown
 -- Make sure that Menu gets removed at shutdown, force menu to reload each time Max is opened
 callbacks.addScript #preSavingMenus ("menu = menuMan.findMenu \"Unity\" if menu != undefined then menuMan.unregisterMenu menu")
-
---python.ExecuteFile "C:/Program Files/Autodesk/3ds Max 2017/scripts/Python/demoMenu.py"
---pathConfig.GetDir(#userStartupScripts) --where the startup scripts go
