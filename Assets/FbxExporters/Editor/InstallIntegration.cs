@@ -449,9 +449,6 @@ namespace FbxExporters.Editor
                 myProcess.StartInfo.Arguments = string.Format("-q -silent -mxs \"{0}\"", installScript);
 #endif
                 myProcess.EnableRaisingEvents = true;
-
-                Debug.Log("args: " + myProcess.StartInfo.Arguments);
-
                 myProcess.Start();
                 myProcess.WaitForExit();
                 ExitCode = myProcess.ExitCode;
@@ -464,6 +461,24 @@ namespace FbxExporters.Editor
                 ExitCode = -1;
             }
             return ExitCode;
+        }
+
+    }
+
+    class MaxIntegrationUI{
+        [MenuItem("FbxExporters/Install Max Integration", false, 0)]
+        static void OnMenuItem (MenuCommand command)
+        {
+            int exitCode = MaxIntegration.InstallMaxPlugin ();
+            string title, message;
+            if (exitCode != 0) {
+                title = "Failed to install 3DsMax Integration.";
+                message = string.Format("Failed to configure 3DsMax, please check logs (exitcode={0}).", exitCode);
+            } else {
+                title = "Completed installation of 3DsMax Integration.";
+                message = "Enjoy the new \"Unity\" menu in 3DsMax.";
+            }
+            UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
     }
 }

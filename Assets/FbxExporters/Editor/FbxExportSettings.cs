@@ -161,10 +161,6 @@ namespace FbxExporters.EditorTools {
                 FbxExporters.Editor.IntegrationsUI.InstallMayaIntegration ();
             }
 
-            if (GUILayout.Button ("Install Max Integration")) {
-                FbxExporters.Editor.MaxIntegration.InstallMaxPlugin ();
-            }
-
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
 
