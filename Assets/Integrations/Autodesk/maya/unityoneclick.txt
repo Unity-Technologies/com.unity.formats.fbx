@@ -13,4 +13,4 @@
 #
 ########################################################################
 
-+ unityoneclick {Version} {UnityProject}/Assets/FbxExporters/Integrations/Autodesk/maya
++ unityoneclick {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya

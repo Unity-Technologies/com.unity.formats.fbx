@@ -4,7 +4,7 @@ Copyright (c) 2017 Unity Technologies. All rights reserved.
 
 See LICENSE.txt file for full license information.
 
-**Version**: build20170921001 build20170921001 0.0.14a
+**Version**: 0.0.14a
 
 Requirements
 ------------

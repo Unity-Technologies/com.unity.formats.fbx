@@ -13,8 +13,9 @@ namespace FbxExporters.Editor
         private const string VERSION_FIELD = "**Version**";
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
+        private const string INTEGRATION_TAG = "{UnityIntegrationsPath}";
 
-        private const string FBX_EXPORT_SETTINGS_PATH = "FbxExporters/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
+        private const string FBX_EXPORT_SETTINGS_PATH = "/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
 
         private const string MAYA_INSTRUCTION_FILENAME = "_safe_to_delete/_temp.txt";
 
@@ -131,7 +132,7 @@ namespace FbxExporters.Editor
         /// <returns>The export settings path.</returns>
         public static string GetExportSettingsPath()
         {
-            return FBX_EXPORT_SETTINGS_PATH;
+            return INTEGRATION_FOLDER_PATH + FBX_EXPORT_SETTINGS_PATH;
         }
 
         public static string GetPackageVersion()
@@ -338,7 +339,8 @@ namespace FbxExporters.Editor
                 Dictionary<string,string> Tokens = new Dictionary<string,string>()
                 {
                     {VERSION_TAG, GetPackageVersion() },
-                    {PROJECT_TAG, GetProjectPath() }
+                    {PROJECT_TAG, GetProjectPath() },
+                    {INTEGRATION_TAG, INTEGRATION_FOLDER_PATH },
                  };
 
                 // parse template, replace "{UnityProject}" with project path

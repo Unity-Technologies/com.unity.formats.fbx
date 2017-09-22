@@ -77,8 +77,13 @@ set(FBXSDK_PACKAGE_TARGET import_fbxsdk)
 add_custom_target(
     ${FBXSDK_PACKAGE_TARGET}
     COMMAND "${UNITY_EDITOR_PATH}" -projectPath "${CMAKE_SOURCE_DIR}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
-    COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_SOURCE_DIR}/Assets/FbxSdk" "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk"
 )
+
+IF(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/Assets/FbxSdk")
+    file(RENAME "${CMAKE_SOURCE_DIR}/Assets/FbxSdk" "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk")
+ELSE()
+    message("Error failed to install FbxSdk")
+ENDIF()
 
 ###########################################################################
 # TODO: Add target to replace the version number in README.txt
@@ -92,7 +97,9 @@ set(MAYA_INTEGRATION_ZIP_NAME "unityoneclick_for_maya.zip")
 file(REMOVE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME}")
 # remove .pyc files that we don't want to ship
 file(GLOB PYC_FILES "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scripts/unityOneClick/*.pyc")
-file(REMOVE ${PYC_FILES})
+IF( PYC_FILES )
+    file(REMOVE ${PYC_FILES})
+ENDIF()
 
 add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
     COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
