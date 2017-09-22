@@ -46,7 +46,12 @@ if (NOT DEFINED FBXSDK_PACKAGE_PATH)
         set(FBXSDK_PACKAGE_PATH ${NEWEST_PACKAGE})
     endif()
 endif()
-message(STATUS "Using FbxSdk Package: ${FBXSDK_PACKAGE_PATH}")
+
+IF(EXISTS ${FBXSDK_PACKAGE_PATH})
+    message(STATUS "Using FbxSdk Package: ${FBXSDK_PACKAGE_PATH}")
+ELSE()
+    message(FATAL_ERROR "Cannot find FbxSdk Package: ${FBXSDK_PACKAGE_PATH}")
+ENDIF()
 
 # promote warnings to errors
 if(MSVC)
@@ -70,20 +75,14 @@ set(Python_ADDITIONAL_VERSIONS 2.7)
 ###########################################################################
 # Import FbxSharp package
 
-# remove FbxSdk folder
-file(REMOVE_RECURSE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk")
-
 set(FBXSDK_PACKAGE_TARGET import_fbxsdk)
 add_custom_target(
     ${FBXSDK_PACKAGE_TARGET}
+    # remove FbxSdk folder
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk"
     COMMAND "${UNITY_EDITOR_PATH}" -projectPath "${CMAKE_SOURCE_DIR}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
+    COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_SOURCE_DIR}/Assets/FbxSdk" "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk"
 )
-
-IF(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/Assets/FbxSdk")
-    file(RENAME "${CMAKE_SOURCE_DIR}/Assets/FbxSdk" "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk")
-ELSE()
-    message("Error failed to install FbxSdk")
-ENDIF()
 
 ###########################################################################
 # TODO: Add target to replace the version number in README.txt

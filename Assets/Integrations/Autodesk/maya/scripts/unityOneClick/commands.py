@@ -269,7 +269,11 @@ class previewCmd(BaseCommand):
     
     def doIt(self, args):
         def integrationBinPath():
+            # e.g. /Users/inwoods/Development/MyGame/Assets/Integrations/Autodesk/maya/plug-ins/unityOneClickPlugin.py
+            # returns /Users/inwoods/Development/MyGame/Assets/Integrations
             head, tail = os.path.split(maya.cmds.pluginInfo("unityOneClickPlugin", q=True, path=True))
+            head, tail = os.path.split(head)
+            head, tail = os.path.split(head)
             head, tail = os.path.split(head)
             return head
 
