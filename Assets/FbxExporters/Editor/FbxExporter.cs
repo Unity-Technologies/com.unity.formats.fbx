@@ -124,7 +124,7 @@ namespace FbxExporters
                 }
 
                 try{
-                    var versionHeader = "**Version**:";
+                    var versionHeader = "VERSION:";
                     var lines = File.ReadAllLines (absPath);
                     foreach (var line in lines) {
                         if (line.StartsWith(versionHeader)) {

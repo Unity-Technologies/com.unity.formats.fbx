@@ -85,7 +85,23 @@ add_custom_target(
 )
 
 ###########################################################################
-# TODO: Add target to replace the version number in README.txt
+# Add target to replace the unity package version number in files
+set(README_TARGET readme_replace)
+add_custom_target(
+    ${README_TARGET}
+    COMMAND ${PYTHON_EXECUTABLE}
+            "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
+            "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/README.txt"
+            "^\\s*VERSION.*:.*"
+            "VERSION: ${PACKAGE_VERSION}"
+    COMMAND ${PYTHON_EXECUTABLE}
+            "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
+            "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scripts/unityOneClick/version.py"
+            "^\\s*VERSION.*=.*"
+            "VERSION = ${PACKAGE_VERSION}"
+    DEPENDS "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
+    COMMENT "Replacing version number in files"
+)
 
 ###########################################################################
 # Zip integrations folder
@@ -116,7 +132,7 @@ add_custom_command(
         COMMENT "Creating Unity Package ${PACKAGE_PATH}"
         DEPENDS ${MAYA_INTEGRATION_TARGET}
     )
-add_custom_target(unitypackage ALL DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${MAYA_INTEGRATION_TARGET})
+add_custom_target(unitypackage ALL DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${MAYA_INTEGRATION_TARGET} ${README_TARGET})
 
 enable_testing()
 add_test(NAME run-all COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} runEditorTests -quit)
