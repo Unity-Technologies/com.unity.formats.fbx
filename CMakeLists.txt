@@ -90,6 +90,9 @@ set(MAYA_INTEGRATION_ZIP_NAME "unityoneclick_for_maya.zip")
 
 # remove existing zip file
 file(REMOVE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME}")
+# remove .pyc files that we don't want to ship
+file(GLOB PYC_FILES "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scripts/unityOneClick/*.pyc")
+file(REMOVE ${PYC_FILES})
 
 add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
     COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
