@@ -10,7 +10,7 @@ namespace FbxExporters.Editor
         private const string MODULE_FILENAME = "unityoneclick";
         private const string PACKAGE_NAME = "FbxExporters";
         private const string VERSION_FILENAME = "README.txt";
-        private const string VERSION_FIELD = "**Version**";
+        private const string VERSION_FIELD = "VERSION";
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
         private const string INTEGRATION_TAG = "{UnityIntegrationsPath}";
