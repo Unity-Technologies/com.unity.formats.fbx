@@ -392,19 +392,13 @@ namespace FbxExporters.Editor
 
     class MaxIntegration
     {
-        // get version of Max
-        // find 3dsmax.ini file (in the AppData)
-        // get startup path from .ini file
-        // copy .ms file to startup path
-
-        //private const string MaxIni = "3dsmax.ini";
         private const string PluginName = "unityOneClickPlugin.ms";
-        private const string PluginPath = "Integrations/Autodesk/max/scripts/" + PluginName;
-        //private const string InstallMaxScript = "Integrations/Autodesk/max/scripts/unityPluginInstall.ms";
+        private const string PluginPath = "FbxExporters/Integrations/Autodesk/max/scripts/" + PluginName;
 
         private const string InstallMaxScriptTemplate =
-            @"startupScriptPath = pathConfig.GetDir(#userStartupScripts);" +
-            @"copyFile \""{UnityPluginScript_Source}\"" (startupScriptPath + \""/{UnityPluginScript_Name}\"")";
+            @"temp = pathConfig.GetDir(#userStartupScripts) + \""/{UnityPluginScript_Name}\"";" +
+            @"deleteFile temp;" + 
+            @"copyFile \""{UnityPluginScript_Source}\"" temp";
 
         private const string PluginSourceTag = "{UnityPluginScript_Source}";
         private const string PluginNameTag = "{UnityPluginScript_Name}";
@@ -417,7 +411,7 @@ namespace FbxExporters.Editor
         private static string GetInstallScript(){
             Dictionary<string,string> Tokens = new Dictionary<string,string>()
             {
-                {PluginSourceTag, Application.dataPath + "/" + PluginPath },
+                {PluginSourceTag, (Application.dataPath + "/" + PluginPath) },
                 {PluginNameTag,  PluginName }
             };
 
@@ -471,17 +465,5 @@ namespace FbxExporters.Editor
             }
             return ExitCode;
         }
-
-        /*private string AppDataPath{
-            get{
-                return Environment.GetFolderPath (Environment.SpecialFolder.LocalApplicationData);
-            }
-        }
-
-        //C:/Users/Viktoria/AppData/Local/Autodesk/3dsMax/2017 - 64bit/ENU
-        private string GetMaxIniPath(){
-            var appData = AppDataPath;
-            return null;
-        }*/
     }
 }
