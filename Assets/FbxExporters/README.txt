@@ -5,7 +5,7 @@ Copyright (c) 2017 Unity Technologies. All rights reserved.
 
 See LICENSE.txt file for full license information.
 
-VERSION: build20170921001
+VERSION: sprint26
 
 Requirements
 ------------

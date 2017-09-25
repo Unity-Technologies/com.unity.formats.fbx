@@ -1,5 +1,15 @@
 RELEASE NOTES
 
+**Version**: sprint26
+
+NEW FEATURES
+
+* Fbx Export: add support for installing a zipped version of the Maya Unity Integration
+
+FIXES
+
+* Fbx Prefab: Properly handle updating Linked Prefab Instances that get nested inside other Prefabs.
+
 **Version**: 0.0.14a
 
 NEW FEATURES
