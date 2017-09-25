@@ -161,6 +161,10 @@ namespace FbxExporters.EditorTools {
                 FbxExporters.Editor.IntegrationsUI.InstallMayaIntegration ();
             }
 
+            if (GUILayout.Button ("Install 3DS Max Integration")) {
+                FbxExporters.Editor.MaxIntegrationUI.InstallIntegration ();
+            }
+
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
 

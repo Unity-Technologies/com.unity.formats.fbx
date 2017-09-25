@@ -467,8 +467,7 @@ namespace FbxExporters.Editor
     }
 
     class MaxIntegrationUI{
-        [MenuItem("FbxExporters/Install Max Integration", false, 0)]
-        static void OnMenuItem (MenuCommand command)
+        public static void InstallIntegration()
         {
             int exitCode = MaxIntegration.InstallMaxPlugin ();
             string title, message;
