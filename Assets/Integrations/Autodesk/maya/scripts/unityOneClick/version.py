@@ -19,6 +19,7 @@
 @defgroup UnityOneClickPluginVersion Plugin Version
 @ingroup UnityOneClickPlugin
 """
+VERSION = 'build20170921001'
 
 def pluginPrefix():
     """
@@ -32,14 +33,14 @@ def versionName():
     Return version string for the unityOneClick plugin
     @ingroup UnityOneClickPluginVersion
     """
-    return '0.0.14a'
+    return VERSION
 
 def pluginName():
     """
     Return name of unityOneClick plugin
     @ingroup UnityOneClickPluginVersion
     """
-    return '{}.unityOneClick'.format(pluginPrefix())
+    return 'UnityOneClick'
 
 def vendorName():
     """

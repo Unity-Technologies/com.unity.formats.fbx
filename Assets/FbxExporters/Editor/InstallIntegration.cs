@@ -10,15 +10,34 @@ namespace FbxExporters.Editor
         private const string MODULE_FILENAME = "unityoneclick";
         private const string PACKAGE_NAME = "FbxExporters";
         private const string VERSION_FILENAME = "README.txt";
-        private const string VERSION_FIELD = "**Version**";
+        private const string VERSION_FIELD = "VERSION";
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
+        private const string INTEGRATION_TAG = "{UnityIntegrationsPath}";
 
-        private const string FBX_EXPORT_SETTINGS_PATH = "FbxExporters/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
+        private const string FBX_EXPORT_SETTINGS_PATH = "/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
 
         private const string MAYA_INSTRUCTION_FILENAME = "_safe_to_delete/_temp.txt";
 
-        private const string MODULE_TEMPLATE_PATH = "FbxExporters/Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
+        private static string m_integrationFolderPath = null;
+        public static string INTEGRATION_FOLDER_PATH
+        {
+            get{
+                if (string.IsNullOrEmpty (m_integrationFolderPath)) {
+                    m_integrationFolderPath = Application.dataPath;
+                }
+                return m_integrationFolderPath;
+            }
+            set{
+                if (!string.IsNullOrEmpty (value) && System.IO.Directory.Exists (value)) {
+                    m_integrationFolderPath = value;
+                } else {
+                    Debug.LogError (string.Format("Failed to set integration folder path, invalid directory \"{0}\"", value));
+                }
+            }
+        }
+
+        public const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
 
 #if UNITY_EDITOR_OSX
         private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
@@ -27,12 +46,6 @@ namespace FbxExporters.Editor
 #else
         private const string MAYA_MODULES_PATH = "maya/modules";
 #endif
-
-        public class MayaException : System.Exception {
-            public MayaException() { }
-            public MayaException(string message) : base(message) { }
-            public MayaException(string message, System.Exception inner) : base(message, inner) { }
-        }
 
         // Use string to define escaped quote
         // Windows needs the backslash
@@ -70,7 +83,7 @@ namespace FbxExporters.Editor
 
         public static string GetModuleTemplatePath()
         {
-            return System.IO.Path.Combine(Application.dataPath, MODULE_TEMPLATE_PATH);
+            return System.IO.Path.Combine(INTEGRATION_FOLDER_PATH, MODULE_TEMPLATE_PATH);
         }
 
         public static string GetAppPath()
@@ -119,7 +132,7 @@ namespace FbxExporters.Editor
         /// <returns>The export settings path.</returns>
         public static string GetExportSettingsPath()
         {
-            return FBX_EXPORT_SETTINGS_PATH;
+            return INTEGRATION_FOLDER_PATH + FBX_EXPORT_SETTINGS_PATH;
         }
 
         public static string GetPackageVersion()
@@ -326,7 +339,8 @@ namespace FbxExporters.Editor
                 Dictionary<string,string> Tokens = new Dictionary<string,string>()
                 {
                     {VERSION_TAG, GetPackageVersion() },
-                    {PROJECT_TAG, GetProjectPath() }
+                    {PROJECT_TAG, GetProjectPath() },
+                    {INTEGRATION_TAG, INTEGRATION_FOLDER_PATH },
                  };
 
                 // parse template, replace "{UnityProject}" with project path
@@ -365,11 +379,33 @@ namespace FbxExporters.Editor
             return FbxExporters.EditorTools.ExportSettings.GetSelectedMayaPath ();
         }
 
+        const string IntegrationZipPath = "FbxExporters/unityoneclick_for_maya.zip";
+
+        private static string DefaultIntegrationSavePath
+        {
+            get{
+                return Application.dataPath;
+            }
+        }
+
+        private static string LastIntegrationSavePath = DefaultIntegrationSavePath;
+
         public static void InstallMayaIntegration ()
         {
             var mayaExe = GetMayaExe ();
             if (string.IsNullOrEmpty (mayaExe)) {
                 return;
+            }
+
+            // decompress zip file if it exists, otherwise try using default location
+            if (System.IO.File.Exists (GetIntegrationZipFullPath())) {
+                var result = DecompressIntegrationZipFile ();
+                if (!result) {
+                    // could not find integration
+                    return;
+                }
+            } else {
+                Integrations.INTEGRATION_FOLDER_PATH = DefaultIntegrationSavePath;
             }
 
             if (!Integrations.InstallMaya(verbose: true)) {
@@ -387,6 +423,132 @@ namespace FbxExporters.Editor
                 message = "Enjoy the new \"Unity\" menu in Maya.";
             }
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
+        }
+
+        private static bool DecompressIntegrationZipFile()
+        {
+            // prompt user to enter location to unzip file
+            var unzipFolder = EditorUtility.OpenFolderPanel("Select Location to Save Maya Integration",LastIntegrationSavePath,"");
+            if (string.IsNullOrEmpty (unzipFolder)) {
+                // user has cancelled, do nothing
+                return false;
+            }
+
+            // check that this is a valid location to unzip the file
+            if (!DirectoryHasWritePermission (unzipFolder)) {
+                // display dialog to try again or cancel
+                var result = UnityEditor.EditorUtility.DisplayDialog ("No Write Permission",
+                    string.Format("Directory \"{0}\" does not have write access", unzipFolder),
+                    "Select another Directory", 
+                    "Cancel"
+                );
+
+                if (result) {
+                    InstallMayaIntegration ();
+                } else {
+                    return false;
+                }
+            }
+
+            LastIntegrationSavePath = unzipFolder;
+
+            // if file already unzipped in this location, then prompt user
+            // if they would like to continue unzipping or use what is there
+            if (FolderAlreadyUnzippedAtPath (unzipFolder)) {
+                var result = UnityEditor.EditorUtility.DisplayDialogComplex ("Integrations Exist at Path",
+                    string.Format ("Directory \"{0}\" already contains the decompressed integration", unzipFolder),
+                    "Overwrite", 
+                    "Use Existing",
+                    "Cancel"
+                );
+
+                if (result == 0) {
+                    DecompressZip (GetIntegrationZipFullPath(), unzipFolder);
+                } else if (result == 2) {
+                    return false;
+                }
+            } else {
+                // unzip Integration folder
+                DecompressZip (GetIntegrationZipFullPath(), unzipFolder);
+            }
+
+            Integrations.INTEGRATION_FOLDER_PATH = unzipFolder;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the integration zip full path as an absolute Unity-style path.
+        /// </summary>
+        /// <returns>The integration zip full path.</returns>
+        private static string GetIntegrationZipFullPath()
+        {
+            return Application.dataPath + "/" + IntegrationZipPath;
+        }
+
+        /// <summary>
+        /// Determines if folder is already unzipped at the specified path
+        /// by checking if unityoneclick.txt exists at expected location.
+        /// </summary>
+        /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
+        /// <param name="path">Path.</param>
+        public static bool FolderAlreadyUnzippedAtPath(string path)
+        {
+            return System.IO.File.Exists (System.IO.Path.Combine (path, Integrations.MODULE_TEMPLATE_PATH));
+        }
+
+        /// <summary>
+        /// Make sure we can write to this directory.
+        /// Try creating a file in path directory, if it raises an error, then we can't
+        /// write here.
+        /// TODO: find a more reliable way to check this
+        /// </summary>
+        /// <returns><c>true</c>, if possible to write to path, <c>false</c> otherwise.</returns>
+        /// <param name="path">Path.</param>
+        public static bool DirectoryHasWritePermission(string path)
+        {
+            try
+            {
+                using (System.IO.FileStream fs = System.IO.File.Create(
+                    System.IO.Path.Combine(
+                        path, 
+                        System.IO.Path.GetRandomFileName()
+                    ), 
+                    1,
+                    System.IO.FileOptions.DeleteOnClose)
+                )
+                { }
+                return true;
+            }
+            catch(Exception)
+            {
+                return false;
+            }
+        }
+
+        public static void DecompressZip(string zipPath, string destPath){
+            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+            var ZIPAPP = "7z.exe";
+#if UNITY_EDITOR_OSX
+            ZIPAPP = "7za";
+#endif
+            myProcess.StartInfo.FileName = EditorApplication.applicationContentsPath + "/Tools/" + ZIPAPP;
+            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            myProcess.StartInfo.CreateNoWindow = true;
+            myProcess.StartInfo.UseShellExecute = false;
+
+            // Command line flags used:
+            // x : extract the zip contents so that they maintain the file hierarchy
+            // -o : specify where to extract contents
+            // -r : recurse subdirectories
+            // -y : auto yes to all questions (without this Unity freezes as the process waits for a response)
+            myProcess.StartInfo.Arguments = string.Format("x \"{0}\" -o\"{1}\" -r -y", zipPath, destPath);
+            myProcess.EnableRaisingEvents = true;
+            myProcess.Start();
+            myProcess.WaitForExit();
+
+            // in case we unzip inside the Assets folder, make sure it updates
+            AssetDatabase.Refresh ();
         }
     }
 }
