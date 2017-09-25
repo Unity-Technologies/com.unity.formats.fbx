@@ -12,5 +12,39 @@
 #         Unity Technologies Aps.
 #
 ########################################################################
+"""
+@package version
+@brief version file for UnityOneClick
+@author  Simon Inwood <simon.cf.inwood@gmail.com>
+@defgroup UnityOneClickPluginVersion Plugin Version
+@ingroup UnityOneClickPlugin
+"""
+VERSION = 'sprint26'
 
-+ unityoneclick {Version} {UnityProject}/Assets/FbxExporters/Integrations/Autodesk/maya
+def pluginPrefix():
+    """
+    Return prefix to use for commands and Maya Object names
+    @ingroup UnityOneClickPluginVersion
+    """
+    return 'unity'
+
+def versionName():
+    """
+    Return version string for the unityOneClick plugin
+    @ingroup UnityOneClickPluginVersion
+    """
+    return VERSION
+
+def pluginName():
+    """
+    Return name of unityOneClick plugin
+    @ingroup UnityOneClickPluginVersion
+    """
+    return 'UnityOneClick'
+
+def vendorName():
+    """
+    Return vendor name of unityOneClick plugin
+    @ingroup UnityOneClickPluginVersion
+    """
+    return 'Unity Technology Aps.'

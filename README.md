@@ -25,19 +25,13 @@ cd FbxExporters
 Update the source and package:
 ```
 git pull
-PROJECT_PATH=`pwd`
 FBXSDK_PACKAGE_PATH=`ls -t ../FbxSharpBuild/FbxSdk_*.unitypackage | head -1`
 PACKAGE_VERSION=`echo "${FBXSDK_PACKAGE_PATH}" | sed -e 's/.*\([0-9]\{1,\}\.[0-9]*\.[0-9]*[a-z]*\).*/\1/'`
 
-if test `uname -s` = 'Darwin' ; then
-  UNITY_EDITOR_PATH=/Applications/Unity/Unity.app/Contents/MacOS/Unity
-else
-  UNITY_EDITOR_PATH=/opt/Unity/Editor/Unity/Unity
-fi
-rm -rf "${PROJECT_PATH}/Assets/FbxExporters/FbxSdk"
-"${UNITY_EDITOR_PATH}" -projectPath "${PROJECT_PATH}" -importPackage "${FBXSDK_PACKAGE_PATH}" -quit
-mv "%PROJECT_PATH%/Assets/FbxSdk" "%PROJECT_PATH%/Assets/FbxExporters"
-"${UNITY_EDITOR_PATH}" -batchmode -projectPath "${PROJECT_PATH}" -exportPackage Assets/FbxExporters "${PROJECT_PATH}/FbxExporters_${PACKAGE_VERSION}.unitypackage" -quit
+mkdir FbxExporterBuild
+cd FbxExporterBuild
+cmake ../FbxExporters -DPACKAGE_VERSION=${PACKAGE_VERSION} -DFBXSDK_PACKAGE_PATH=${FBXSDK_PACKAGE_PATH}
+make
 ```
 
 **On Windows**
@@ -46,14 +40,11 @@ mv "%PROJECT_PATH%/Assets/FbxSdk" "%PROJECT_PATH%/Assets/FbxExporters"
 # clone the source
 git clone https://github.com/Unity-Technologies/FbxExporters.git
 
-set PROJECT_PATH=%cd%/FbxExporters
-set UNITY3D_PATH="C:/Program Files/Unity/Editor/Unity.exe"
-set PACKAGE_NAME=FbxExporters
 set PACKAGE_VERSION=0.0.5a
 set FBXSDK_PACKAGE_PATH=/path/to/FbxSdk.unitypackage
 
-rmdir /s "%PROJECT_PATH%/Assets/FbxExporters/FbxSdk"
-%UNITY3D_PATH% -projectPath "%PROJECT_PATH%" -importPackage %FBXSDK_PACKAGE_PATH% -quit
-move "%PROJECT_PATH%/Assets/FbxSdk" "%PROJECT_PATH%/Assets/FbxExporters"
-%UNITY3D_PATH% -batchmode -projectPath "%PROJECT_PATH%" -exportPackage Assets/FbxExporters %PROJECT_PATH%/%PACKAGE_NAME%_%PACKAGE_VERSION%.unitypackage -quit
+mkdir FbxExporterBuild
+cd FbxExporterBuild
+cmake ../FbxExporters -G"Visual Studio 14 2015 Win64" -DPACKAGE_VERSION=%PACKAGE_VERSION% -DFBXSDK_PACKAGE_PATH=%FBXSDK_PACKAGE_PATH%
+cmake --build . --target ALL_BUILD --config Release
 ```
