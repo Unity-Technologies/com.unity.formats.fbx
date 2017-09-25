@@ -8,9 +8,7 @@ NEW FEATURES
 
 FIXES
 
-* Fbx Prefab: handle FbxPrefab that is not the root of its prefab. 
-
-Make a prefab instance. Parent it under a cube. Drag that to the project view (which creates a prefab). That used to not work, and upon update you'd lose your cube.
+* Fbx Prefab: Properly handle updating Linked Prefab Instances that get nested inside other Prefabs.
 
 **Version**: 0.0.14a
 
