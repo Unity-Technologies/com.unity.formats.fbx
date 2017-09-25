@@ -115,8 +115,13 @@ file(GLOB PYC_FILES "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scrip
 IF( PYC_FILES )
     file(REMOVE ${PYC_FILES})
 ENDIF()
+# remove .meta files from Integrations
+file(GLOB_RECURSE META_FILES "${CMAKE_SOURCE_DIR}/Assets/Integrations/*.meta")
 
 add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
+    IF(META_FILES)
+        COMMAND ${CMAKE_COMMAND} -E remove ${META_FILES}
+    ENDIF
     COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
        "${CMAKE_SOURCE_DIR}/Assets/Integrations"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets
