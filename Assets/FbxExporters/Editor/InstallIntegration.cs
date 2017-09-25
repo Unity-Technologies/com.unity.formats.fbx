@@ -398,14 +398,15 @@ namespace FbxExporters.Editor
         private const string InstallMaxScriptTemplate =
             @"temp = pathConfig.GetDir(#userStartupScripts) + \""/{UnityPluginScript_Name}\"";" +
             @"deleteFile temp;" + 
-            @"copyFile \""{UnityPluginScript_Source}\"" temp";
+            @"copyFile \""{UnityPluginScript_Source}\"" temp;" +
+            @"quitMax()";
 
         private const string PluginSourceTag = "{UnityPluginScript_Source}";
         private const string PluginNameTag = "{UnityPluginScript_Name}";
 
         // TODO: get this from the export settings
         private static string GetMaxExe(){
-            return "C:/Program Files/Autodesk/3ds Max 2017/3dsmax.exe";
+            return "C:/Program Files/Autodesk/3ds Max 2018/3dsmax.exe";
         }
 
         private static string GetInstallScript(){
