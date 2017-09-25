@@ -98,7 +98,7 @@ add_custom_target(
             "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
             "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scripts/unityOneClick/version.py"
             ".*VERSION.*=.*"
-            "VERSION = ${PACKAGE_VERSION}"
+            "VERSION = '${PACKAGE_VERSION}'"
     DEPENDS "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
     COMMENT "Replacing version number in files"
 )
