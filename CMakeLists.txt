@@ -143,6 +143,13 @@ endif()
 
 ###########################################################################
 # Add target for creating a package
+
+# remove .pyc files that we don't want to ship
+file(GLOB PYC_FILES "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/unityOneClick/*.pyc")
+IF( PYC_FILES )
+    file(REMOVE ${PYC_FILES})
+ENDIF()
+
 add_custom_command(
         OUTPUT ${PACKAGE_PATH}
         COMMAND "${CMAKE_COMMAND}" --build . --target install --config Release
