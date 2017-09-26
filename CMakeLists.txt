@@ -136,6 +136,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk/Plugins/UnityFbxSdk.dll"
             DEPENDS
                 "${CLASS_LIBRARY_DEST}"
+                ${FBXSDK_PACKAGE_TARGET}
     )
     add_custom_target(UnityFbxExporterEditorDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME})
     
