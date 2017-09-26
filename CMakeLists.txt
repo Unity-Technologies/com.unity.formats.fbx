@@ -136,6 +136,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk/Plugins/UnityFbxSdk.dll"
             DEPENDS
                 "${CLASS_LIBRARY_DEST}"
+                ${FBXSDK_PACKAGE_TARGET}
     )
     add_custom_target(UnityFbxExporterEditorDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME})
     
@@ -143,6 +144,13 @@ endif()
 
 ###########################################################################
 # Add target for creating a package
+
+# remove .pyc files that we don't want to ship
+file(GLOB PYC_FILES "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/unityOneClick/*.pyc")
+IF( PYC_FILES )
+    file(REMOVE ${PYC_FILES})
+ENDIF()
+
 add_custom_command(
         OUTPUT ${PACKAGE_PATH}
         COMMAND "${CMAKE_COMMAND}" --build . --target install --config Release
