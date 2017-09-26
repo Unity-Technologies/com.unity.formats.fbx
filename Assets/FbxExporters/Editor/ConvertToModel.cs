@@ -199,7 +199,8 @@ namespace FbxExporters
                     Object.DestroyImmediate(fbxPrefab);
                 }
                 fbxPrefab = unityGO.AddComponent<FbxPrefab>();
-                fbxPrefab.SetSourceModel(unityMainAsset);
+                var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
+                fbxPrefabUtility.SetSourceModel(unityMainAsset);
 
                 // Disconnect from the FBX file.
                 PrefabUtility.DisconnectPrefabInstance(unityGO);

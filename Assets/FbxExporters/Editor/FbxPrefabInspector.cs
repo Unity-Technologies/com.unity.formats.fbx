@@ -16,13 +16,14 @@ namespace FbxExporters.EditorTools {
             }
             EditorGUI.BeginDisabledGroup(isDisabled);
 
-            var oldFbxAsset = fbxPrefab.GetFbxAsset();
+            var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
+            var oldFbxAsset = fbxPrefabUtility.GetFbxAsset();
             var newFbxAsset = EditorGUILayout.ObjectField("Source Fbx Asset", oldFbxAsset,
                     typeof(GameObject), allowSceneObjects: false) as GameObject;
             if (newFbxAsset && !AssetDatabase.GetAssetPath(newFbxAsset).EndsWith(".fbx")) {
                 Debug.LogError("FbxPrefab must point to an Fbx asset (or none).");
             } else if (newFbxAsset != oldFbxAsset) {
-                fbxPrefab.SetSourceModel(newFbxAsset);
+                fbxPrefabUtility.SetSourceModel(newFbxAsset);
             }
 
             EditorGUI.EndDisabledGroup();
