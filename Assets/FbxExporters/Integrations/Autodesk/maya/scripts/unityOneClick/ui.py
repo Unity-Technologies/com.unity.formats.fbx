@@ -95,13 +95,7 @@ def installMenu():
                        command=commands.importCmd.kScriptCommand,
                        image=commands.importCmd.iconPath(),
                        version=whatsNewVersion())
-    maya.cmds.menuItem(parent=kMenuName, 
-                       label=commands.previewCmd.kShortLabel, 
-                       annotation=commands.previewCmd.kLabel, 
-                       command=commands.previewCmd.kScriptCommand, 
-                       image=commands.previewCmd.iconPath(),
-                       version=whatsNewVersion())
-    maya.cmds.menuItem(parent=kMenuName, 
+    maya.cmds.menuItem(parent=kMenuName,
                        label=commands.exportCmd.kShortLabel, 
                        annotation=commands.exportCmd.kLabel, 
                        command=commands.exportCmd.kScriptCommand, 
