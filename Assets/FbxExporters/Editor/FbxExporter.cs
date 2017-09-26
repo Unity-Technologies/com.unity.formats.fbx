@@ -953,7 +953,6 @@ namespace FbxExporters
             public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet)
             {
                 exportCancelled = false;
-                Verbose = true;
 
                 // Export first to a temporary file
                 // in case the export is cancelled.
@@ -1566,7 +1565,7 @@ namespace FbxExporters
             {
             }
 
-            public bool Verbose { private set; get; }
+            public bool Verbose { private set {;} get { return Debug.unityLogger.logEnabled; } }
 
             /// <summary>
             /// manage the selection of a filename
