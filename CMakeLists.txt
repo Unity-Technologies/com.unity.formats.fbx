@@ -103,7 +103,7 @@ add_custom_target(
             "VERSION: ${PACKAGE_VERSION}"
     COMMAND ${PYTHON_EXECUTABLE}
             "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
-            "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scripts/unityOneClick/version.py"
+            "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/unityOneClick/version.py"
             ".*VERSION.*=.*"
             "VERSION = '${PACKAGE_VERSION}'"
     DEPENDS "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
@@ -170,11 +170,12 @@ endif()
 # Add target for creating a package
 add_custom_command(
         OUTPUT ${PACKAGE_PATH}
-        COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} -exportPackage Assets/FbxExporters ${PACKAGE_PATH} -quit
+        COMMAND "${CMAKE_COMMAND}" --build . --target install --config Release
+        COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_BINARY_DIR}/FbxExporterProject -exportPackage Assets/FbxExporters ${PACKAGE_PATH} -quit
         COMMENT "Creating Unity Package ${PACKAGE_PATH}"
-        DEPENDS ${MAYA_INTEGRATION_TARGET}
+        DEPENDS UnityFbxExporterEditorDLL
     )
-add_custom_target(unitypackage DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${MAYA_INTEGRATION_TARGET} ${README_TARGET})
+add_custom_target(unitypackage DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${README_TARGET})
 
 enable_testing()
 add_test(NAME run-all COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} runEditorTests -quit)

@@ -35,4 +35,4 @@ with open(filename, 'r+') as filein:
   data=re.sub(searchstr, replacestr, data, 1, re.IGNORECASE)
   filein.seek(0)
   filein.write(data)
-filein.truncate()
+  filein.truncate()
