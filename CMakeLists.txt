@@ -109,24 +109,17 @@ add_custom_target(
 # Compile editor scripts into a multi-platform DLL
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     set(CLASS_LIBRARY_DEST "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
-    set(CLASS_LIBRARY_NAME "UnityFbxExporter.dll")
+    set(RUNTIME_CLASS_LIBRARY_NAME "UnityFbxExporter.dll")
 
     add_custom_command(OUTPUT ${CLASS_LIBRARY_DEST}
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CLASS_LIBRARY_DEST}
     )
     
-    fbxexporters_compile_csharp(OUTPUT ${CLASS_LIBRARY_DEST}/${CLASS_LIBRARY_NAME}
+    fbxexporters_compile_csharp(OUTPUT ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME}
             EXTRA_ARGS
                 "/target:library"
             SOURCES
-                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxPrefab.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ConvertToModel.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExporter.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExportSettings.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabAutoUpdater.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabInspector.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/InstallIntegration.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ReviewLastSavedModel.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxTurnTableBase.cs"
             REFERENCES
                 "${CSHARP_MSCORLIB_LIBRARY}"
                 "${CSHARP_SYSTEM_CORE_LIBRARY}"
@@ -134,44 +127,24 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CSHARP_UNITYEDITOR_LIBRARY}"
                 "${CSHARP_UNITYENGINE_LIBRARY}"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk/Plugins/UnityFbxSdk.dll"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxTurnTableBase.cs"
             DEPENDS
                 "${CLASS_LIBRARY_DEST}"
     )
-    add_custom_target(UnityFbxExporterDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${CLASS_LIBRARY_NAME})
+    add_custom_target(UnityFbxExporterRuntimeDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME})
     
-    
-    #set(CLASS_LIBRARY_NAME_3 "UnityFbxExporterSettings.dll")
-    #fbxexporters_compile_csharp(OUTPUT ${CLASS_LIBRARY_DEST}/${CLASS_LIBRARY_NAME_3}
-    #        EXTRA_ARGS
-    #            "/target:library"
-    #        SOURCES
-    #            "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExportSettings.cs"
-    #        REFERENCES
-    #            "${CSHARP_MSCORLIB_LIBRARY}"
-    #            "${CSHARP_SYSTEM_CORE_LIBRARY}"
-    #            "${CSHARP_SYSTEM_LIBRARY}"
-    #            "${CSHARP_UNITYEDITOR_LIBRARY}"
-    #            "${CSHARP_UNITYENGINE_LIBRARY}"
-    #            "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk/Plugins/UnityFbxSdk.dll"
-    #        DEPENDS
-    #            "${CLASS_LIBRARY_DEST}"
-    #)
-    #add_custom_target(UnityFbxSettingsDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${CLASS_LIBRARY_NAME_3})
-    
-    set(CLASS_LIBRARY_NAME_2 "UnityFbxExporterEditor.dll")
-    fbxexporters_compile_csharp(OUTPUT ${CLASS_LIBRARY_DEST}/${CLASS_LIBRARY_NAME_2}
+    set(EDITOR_CLASS_LIBRARY_NAME "UnityFbxExporterEditor.dll")
+    fbxexporters_compile_csharp(OUTPUT ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME}
             EXTRA_ARGS
                 "/target:library"
             SOURCES
                 #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/*.cs"
-                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ConvertToModel.cs"
+                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ConvertToModel.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExporter.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExportSettings.cs"
-                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabAutoUpdater.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExportSettings.cs"
+                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabAutoUpdater.cs"
                 #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabInspector.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/InstallIntegration.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ReviewLastSavedModel.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/InstallIntegration.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ReviewLastSavedModel.cs"
             REFERENCES
                 "${CSHARP_MSCORLIB_LIBRARY}"
                 "${CSHARP_SYSTEM_CORE_LIBRARY}"
@@ -179,12 +152,12 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CSHARP_UNITYEDITOR_LIBRARY}"
                 "${CSHARP_UNITYENGINE_LIBRARY}"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk/Plugins/UnityFbxSdk.dll"
-                "${CLASS_LIBRARY_DEST}/${CLASS_LIBRARY_NAME}"
+                "${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME}"
             DEPENDS
                 "${CLASS_LIBRARY_DEST}"
-                UnityFbxExporterDLL
+                UnityFbxExporterRuntimeDLL
     )
-    add_custom_target(UnityFbxExporterEditorDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${CLASS_LIBRARY_NAME_2})
+    add_custom_target(UnityFbxExporterEditorDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME})
     
 endif()
 

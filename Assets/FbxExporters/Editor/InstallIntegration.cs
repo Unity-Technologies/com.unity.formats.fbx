@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace FbxExporters.Editor
 {
-    class Integrations
+    public class Integrations
     {
         private const string MODULE_FILENAME = "unityoneclick";
         private const string PACKAGE_NAME = "FbxExporters";
