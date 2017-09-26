@@ -122,6 +122,13 @@ namespace FbxExporters.EditorTools {
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (mayaPath)) {
+                    var md = Directory.GetParent (mayaPath);
+                    if (md.Parent.Name.ToLower ().StartsWith ("mayalt")) {
+                        Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", md.FullName));
+                        exportSettings.selectedMayaApp = oldValue;
+                        return;
+                    }
+
                     if (!Path.GetFileNameWithoutExtension (mayaPath).ToLower ().Equals ("maya")) {
                         // clicked on the wrong application, try to see if we can still find
                         // maya in this directory.
