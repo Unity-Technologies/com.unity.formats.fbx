@@ -114,10 +114,17 @@ namespace FbxExporters.EditorTools {
             int oldValue = exportSettings.selectedMayaApp;
             exportSettings.selectedMayaApp = EditorGUILayout.Popup(exportSettings.selectedMayaApp, options);
             if (exportSettings.selectedMayaApp == options.Length - 1) {
-                var ext = "exe";
-#if UNITY_EDITOR_OSX
-                ext = "app";
-#endif
+                var ext = "";
+                switch(Application.platform){
+                case RuntimePlatform.WindowsEditor:
+                    ext = "exe";
+                    break;
+                case RuntimePlatform.OSXEditor:
+                    ext = "app";
+                    break;
+                default:
+                    throw new NotImplementedException ();
+                }
                 string mayaPath = EditorUtility.OpenFilePanel ("Select Maya Application", ExportSettings.kDefaultAdskRoot, ext);
 
                 // check that the path is valid and references the maya executable
@@ -126,11 +133,20 @@ namespace FbxExporters.EditorTools {
                         // clicked on the wrong application, try to see if we can still find
                         // maya in this directory.
                         var mayaDir = new DirectoryInfo(Path.GetDirectoryName(mayaPath));
-#if UNITY_EDITOR_OSX
-                        var files = mayaDir.GetDirectories("*." + ext);
-#else
-                        var files = mayaDir.GetFiles ("*." + ext);
-#endif
+
+                        FileSystemInfo[] files = null;
+
+                        switch(Application.platform){
+                        case RuntimePlatform.WindowsEditor:
+                            files = mayaDir.GetFiles ("*." + ext);
+                            break;
+                        case RuntimePlatform.OSXEditor:
+                            files = mayaDir.GetDirectories ("*." + ext);
+                            break;
+                        default:
+                            throw new NotImplementedException ();
+                        }
+
                         bool foundMaya = false;
                         foreach (var file in files) {
                             var filename = Path.GetFileNameWithoutExtension (file.Name).ToLower ();
@@ -181,15 +197,18 @@ namespace FbxExporters.EditorTools {
         /// The path where all the different versions of Maya are installed
         /// by default. Depends on the platform.
         /// </summary>
-        public const string kDefaultAdskRoot =
-#if UNITY_EDITOR_OSX
-            "/Applications/Autodesk"
-#elif UNITY_EDITOR_LINUX
-            "/usr/autodesk"
-#else // WINDOWS
-            "C:/Program Files/Autodesk"
-#endif
-            ;
+        public static string kDefaultAdskRoot {
+            get{
+                switch (Application.platform) {
+                case RuntimePlatform.WindowsEditor:
+                    return "C:/Program Files/Autodesk";
+                case RuntimePlatform.OSXEditor:
+                    return "/Applications/Autodesk";
+                default:
+                    throw new NotImplementedException ();
+                }
+            }
+        }
 
         // Note: default values are set in LoadDefaults().
         public bool mayaCompatibleNames;
@@ -317,23 +336,24 @@ namespace FbxExporters.EditorTools {
         /// <param name="location">Location of Maya install.</param>
         private static string GetMayaExePath(string location)
         {
-#if UNITY_EDITOR_OSX
-            // MAYA_LOCATION on mac is set by Autodesk to be the
-            // Contents directory. But let's make it easier on people
-            // and allow just having it be the app bundle or a
-            // directory that holds the app bundle.
-            if (location.EndsWith(".app/Contents")) {
-            return location + "/MacOS/Maya";
-            } else if (location.EndsWith(".app")) {
-            return location + "/Contents/MacOS/Maya";
-            } else {
-            return location + "/Maya.app/Contents/MacOS/Maya";
+            switch (Application.platform) {
+            case RuntimePlatform.WindowsEditor:
+                return location + "/bin/maya.exe";
+            case RuntimePlatform.OSXEditor:
+                // MAYA_LOCATION on mac is set by Autodesk to be the
+                // Contents directory. But let's make it easier on people
+                // and allow just having it be the app bundle or a
+                // directory that holds the app bundle.
+                if (location.EndsWith(".app/Contents")) {
+                    return location + "/MacOS/Maya";
+                } else if (location.EndsWith(".app")) {
+                    return location + "/Contents/MacOS/Maya";
+                } else {
+                    return location + "/Maya.app/Contents/MacOS/Maya";
+                }
+            default:
+                throw new NotImplementedException ();
             }
-#elif UNITY_EDITOR_LINUX
-            return location + "/bin/maya";
-#else // WINDOWS
-            return location + "/bin/maya.exe";
-#endif
         }
 
         public static GUIContent[] GetMayaOptions(){
@@ -373,9 +393,9 @@ namespace FbxExporters.EditorTools {
 
         public static void AddMayaOption(string newOption){
             // on OSX we get a path ending in .app, which is not quite the exe
-#if UNITY_EDITOR_OSX
-            newOption = GetMayaExePath(newOption);
-#endif
+            if (Application.platform == RuntimePlatform.OSXEditor) {
+                newOption = GetMayaExePath (newOption);
+            }
 
             var mayaOptionPaths = instance.mayaOptionPaths;
             if (mayaOptionPaths.Contains(newOption)) {
