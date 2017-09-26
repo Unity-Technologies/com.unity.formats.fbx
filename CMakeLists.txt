@@ -120,6 +120,23 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CLASS_LIBRARY_DEST}
     )
     
+    set(RUNTIME_CLASS_LIBRARY_NAME "UnityFbxExporter.dll")
+    fbxexporters_compile_csharp(OUTPUT ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME}
+            EXTRA_ARGS
+                "/target:library"
+            SOURCES
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxPrefab.cs"
+            REFERENCES
+                "${CSHARP_MSCORLIB_LIBRARY}"
+                "${CSHARP_SYSTEM_CORE_LIBRARY}"
+                "${CSHARP_SYSTEM_LIBRARY}"
+                "${CSHARP_UNITYEDITOR_LIBRARY}"
+                "${CSHARP_UNITYENGINE_LIBRARY}"
+            DEPENDS
+                "${CLASS_LIBRARY_DEST}"
+    )
+    add_custom_target(UnityFbxExporterRuntimeDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME})
+    
     set(EDITOR_CLASS_LIBRARY_NAME "UnityFbxExporterEditor.dll")
     fbxexporters_compile_csharp(OUTPUT ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME}
             EXTRA_ARGS
@@ -128,6 +145,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExporter.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExportSettings.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/InstallIntegration.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabAutoUpdater.cs"
             REFERENCES
                 "${CSHARP_MSCORLIB_LIBRARY}"
                 "${CSHARP_SYSTEM_CORE_LIBRARY}"
@@ -135,9 +153,11 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CSHARP_UNITYEDITOR_LIBRARY}"
                 "${CSHARP_UNITYENGINE_LIBRARY}"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxSdk/Plugins/UnityFbxSdk.dll"
+                ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME}
             DEPENDS
                 "${CLASS_LIBRARY_DEST}"
                 ${FBXSDK_PACKAGE_TARGET}
+                UnityFbxExporterRuntimeDLL
     )
     add_custom_target(UnityFbxExporterEditorDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME})
     
@@ -175,12 +195,15 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             DESTINATION .
             PATTERN "Editor/UnitTests" EXCLUDE
             PATTERN "FbxTurnTableBase.cs" EXCLUDE
+            PATTERN "FbxPrefab.cs" EXCLUDE
             PATTERN "Editor/FbxExporter.cs" EXCLUDE
             PATTERN "Editor/FbxExportSettings.cs" EXCLUDE
             PATTERN "Editor/InstallIntegration.cs" EXCLUDE
             PATTERN "Editor/ReviewLastSavedModel.cs" EXCLUDE
-            PATTERN "Editor/EditorRotate.cs" EXCLUDE)
+            PATTERN "Editor/EditorRotate.cs" EXCLUDE
+            PATTERN "Editor/FbxPrefabAutoUpdater.cs" EXCLUDE)
     install(FILES ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME} DESTINATION FbxExporters/Editor)
+    install(FILES ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME} DESTINATION FbxExporters)
 else()
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/FbxExporters
             DESTINATION .)
