@@ -142,12 +142,8 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
             EXTRA_ARGS
                 "/target:library"
             SOURCES
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/*.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ConvertToModel.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExporter.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExportSettings.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabAutoUpdater.cs"
-                #"${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabInspector.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/InstallIntegration.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ReviewLastSavedModel.cs"
             REFERENCES
