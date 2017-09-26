@@ -953,7 +953,6 @@ namespace FbxExporters
             public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet)
             {
                 exportCancelled = false;
-                Verbose = true;
 
                 // Export first to a temporary file
                 // in case the export is cancelled.
