@@ -40,11 +40,36 @@ make
 # clone the source
 git clone https://github.com/Unity-Technologies/FbxExporters.git
 
-set PACKAGE_VERSION=0.0.5a
+set PACKAGE_VERSION=0.0.14a
 set FBXSDK_PACKAGE_PATH=/path/to/FbxSdk.unitypackage
 
-mkdir FbxExporterBuild
-cd FbxExporterBuild
+mkdir FbxExportersBuild
+cd FbxExportersBuild
 cmake ../FbxExporters -G"Visual Studio 14 2015 Win64" -DPACKAGE_VERSION=%PACKAGE_VERSION% -DFBXSDK_PACKAGE_PATH=%FBXSDK_PACKAGE_PATH%
 cmake --build . --target ALL_BUILD --config Release
 ```
+**On macOS**
+
+```
+# clone the source
+git clone https://github.com/Unity-Technologies/FbxExporters.git
+
+export PACKAGE_VERSION=0.0.14a
+export FBXSDK_PACKAGE_PATH=/path/to/FbxSdk.unitypackage
+
+if [ ! -f "${UNITY_EDITOR_PATH}" ]; then
+    UNITY_EDITOR_PATH="/Applications/Unity/Unity.app/Contents/MacOS/Unity"
+fi
+
+if [ -d FbxExportersBuild ]; then
+    rm -rf FbxExportersBuild
+fi
+
+mkdir FbxExportersBuild
+cd FbxExportersBuild
+cmake ../FbxExporters -DPACKAGE_VERSION=${PACKAGE_VERSION} \
+  -DFBXSDK_PACKAGE_PATH=${FBXSDK_PACKAGE_PATH} \
+  -DUNITY_EDITOR_PATH="${UNITY_EDITOR_PATH}"
+make
+```
+
