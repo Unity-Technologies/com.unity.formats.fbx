@@ -20,6 +20,8 @@ namespace FbxExporters.Editor
 
         private const string MODULE_TEMPLATE_PATH = "FbxExporters/Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
 
+        public const string TEMP_SAVE_PATH = "_safe_to_delete";
+
 #if UNITY_EDITOR_OSX
         private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
 #elif UNITY_EDITOR_LINUX
@@ -90,7 +92,7 @@ namespace FbxExporters.Editor
 
         public static string GetTempSavePath()
         {
-            return FbxExporters.Review.TurnTable.TempSavePath.Replace("\\", "/");
+            return TEMP_SAVE_PATH.Replace("\\", "/");
         }
 
         /// <summary>
