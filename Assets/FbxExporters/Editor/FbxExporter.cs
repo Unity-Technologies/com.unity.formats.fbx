@@ -1566,7 +1566,7 @@ namespace FbxExporters
             {
             }
 
-            public bool Verbose { private set ; get { return Debug.unityLogger.logEnabled; } }
+            public bool Verbose { private set; get { return Debug.unityLogger.logEnabled; } }
 
             /// <summary>
             /// manage the selection of a filename
