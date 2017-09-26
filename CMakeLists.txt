@@ -7,6 +7,11 @@
 
 cmake_minimum_required (VERSION 3.8)
 
+SET(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/FbxExporterProject/Assets" CACHE PATH "Install path prefix")
+MESSAGE(STATUS "CMAKE_INSTALL_PREFIX is: " ${CMAKE_INSTALL_PREFIX})
+
+project (UnityFbxExporterEditorDLL)
+
 # Default is a release build.
 if (NOT CMAKE_BUILD_TYPE)
   # CMAKE_BUILD_TYPE is special, so we have to CACHE FORCE to actually set it,
@@ -173,3 +178,23 @@ add_custom_target(unitypackage DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} 
 
 enable_testing()
 add_test(NAME run-all COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} runEditorTests -quit)
+
+
+############################################################################
+# Install project into build folder
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/FbxExporters
+            DESTINATION .
+            PATTERN "Editor/UnitTests" EXCLUDE
+            PATTERN "FbxTurnTableBase.cs" EXCLUDE
+            PATTERN "Editor/FbxExporter.cs" EXCLUDE
+            PATTERN "Editor/FbxExportSettings.cs" EXCLUDE
+            PATTERN "Editor/InstallIntegration.cs" EXCLUDE
+            PATTERN "Editor/ReviewLastSavedModel.cs" EXCLUDE)
+    install(FILES ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME} DESTINATION FbxExporters)
+    install(FILES ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME} DESTINATION FbxExporters/Editor)
+else()
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/FbxExporters
+            DESTINATION .)
+endif()
