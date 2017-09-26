@@ -238,108 +238,6 @@ class importCmd(BaseCommand):
         strCmd = '{0};'.format(cls.kCmdName)
         maya.mel.eval(strCmd)   # @UndefinedVariable
 
-class previewCmd(BaseCommand):
-    """
-    Preview Model in Unity Window
-        
-    @ingroup UnityCommands
-    """
-    kIconPath = "preview.png"
-    kLabel = 'Preview Model in Unity window'
-    kShortLabel = 'Preview'
-    kCmdName = "{}Preview".format(version.pluginPrefix())
-    kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
-    kRuntimeCommand = "UnityOneClickPreview"
-    
-    def __init__(self):
-        super(self.__class__, self).__init__()
-    
-    @classmethod
-    def creator(cls):
-        return OpenMayaMPx.asMPxPtr(cls())
-    
-    @classmethod
-    def syntaxCreator(cls):
-        syntax = OpenMaya.MSyntax()
-        return syntax
-    
-    @classmethod
-    def scriptCmd(cls):
-        return
-    
-    def doIt(self, args):
-
-        unityAppPath = maya.cmds.optionVar(q='UnityApp')
-        unityProjectPath = maya.cmds.optionVar(q='UnityProject')
-        unityTempSavePath = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityTempSavePath'))
-        unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
-        if maya.cmds.optionVar(exists='UnityInstructionPath'):
-            instructionFile = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityInstructionPath'))
-        else:
-            self.displayError("Missing Unity instruction file path, please re-install integration.")
-            return
-        
-        # make sure the GamePipeline and fbxmaya plugins are loaded
-        if not self.loadDependencies():
-            return
-            
-        if not self.loadUnityFbxExportSettings():
-            return
-            
-        # select the export set for export, if it exists,
-        # otherwise take what is currently selected
-        origSelection = maya.cmds.ls(sl=True)
-        if self.setExists(self._exportSet):
-            maya.cmds.select(self._exportSet, r=True, ne=True)
-        
-        # save fbx to Assets/_safe_to_delete/
-        savePath = unityTempSavePath
-        maya.cmds.sysFile(savePath, makeDir=True)
-        savePath = os.path.join(savePath, "TurnTableModel.fbx")
-        savePath = os.path.abspath(savePath)
-        
-        maya.cmds.file(savePath, force=True, options="", typ="FBX export", pr=True, es=True)
-        
-        # create temp file in _safe_to_delete/
-        with open(instructionFile,"w+") as f:
-            pass
-        
-        if maya.cmds.about(macOS=True):
-            # Use 'open -a' to bring app to front if it has already been started.
-            # Note that the unity command will not get called.
-            melCommand = r'system("open -a \"{0}\" --args -projectPath \"{1}\" -executeMethod {2}");'\
-                .format(unityAppPath, unityProjectPath, unityCommand)
-
-        elif maya.cmds.about(linux=True):
-            melCommand = r'system("\"{0}\" -projectPath \"{1}\" -executeMethod {2}");'\
-                .format(unityAppPath, unityProjectPath, unityCommand)
-
-        elif maya.cmds.about(windows=True):
-            melCommand = r'system("start \"{0}\" \"{1}\" \"{2}\" \"-projectPath {3} -executeMethod {4}\"");'\
-                .format(unityProjectPath + "/Assets/FbxExporters/Integrations/BringToFront.exe", 
-                        os.path.basename(unityProjectPath), unityAppPath,
-                        unityProjectPath, unityCommand)
-
-        else:
-            raise NotImplementedError("missing platform implementation for {0}".format(maya.cmds.about(os=True)))
-
-        self.displayDebug('doIt({0})'.format(melCommand))
-
-        maya.mel.eval(melCommand)
-        
-        if origSelection:
-            maya.cmds.select(cl=True)
-            maya.cmds.select(origSelection, add=True, ne=True)
-
-    @classmethod
-    def invoke(cls):
-        """
-            Invoke command using mel so that it is executed and logged to script editor log
-            @return: void
-            """
-        strCmd = '{0};'.format(cls.kCmdName)
-        maya.mel.eval(strCmd)   # @UndefinedVariable
-
 class exportCmd(BaseCommand):
     """
     Export Model to Unity
@@ -407,62 +305,14 @@ class exportCmd(BaseCommand):
         strCmd = '{0};'.format(cls.kCmdName)
         maya.mel.eval(strCmd)   # @UndefinedVariable
 
-class configureCmd(BaseCommand):
-    """
-    Configure Maya Scene for previewing and exporting to Unity
-    
-    @ingroup UnityCommands
-    """
-    kLabel = 'Configure Maya to preview and export to a Unity Project'
-    kShortLabel = 'Configure'
-    kCmdName = "{}Configure".format(version.pluginPrefix())
-    kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
-    kRuntimeCommand = "UnityOneClickConfigure"
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-    @classmethod
-    def creator(cls):
-        return OpenMayaMPx.asMPxPtr(cls())
-
-    @classmethod
-    def syntaxCreator(cls):
-        syntax = OpenMaya.MSyntax()
-        return syntax
-
-    @classmethod
-    def scriptCmd(cls):
-        return
-    
-    def doIt(self, args):
-        # make sure the GamePipeline plugin is loaded
-        if not self.loadDependencies():
-            return
-        
-        strCmd = 'SendToUnitySetProject'
-        self.displayDebug('doIt {0}'.format(strCmd))
-        maya.mel.eval(strCmd)
-        
-    @classmethod
-    def invoke(cls):
-        """
-        Invoke command using mel so that it is executed and logged to script editor log
-        @return: void
-        """
-        strCmd = '{0};'.format(cls.kCmdName)
-        maya.mel.eval(strCmd)   # @UndefinedVariable
-
 def register(pluginFn):
     """
     Register commands for plugin
     @param pluginFn (MFnPlugin): plugin object passed to initializePlugin
     """
     pluginFn.registerCommand(importCmd.kCmdName, importCmd.creator, importCmd.syntaxCreator)
-    pluginFn.registerCommand(previewCmd.kCmdName, previewCmd.creator, previewCmd.syntaxCreator)
     pluginFn.registerCommand(exportCmd.kCmdName, exportCmd.creator, exportCmd.syntaxCreator)
-    pluginFn.registerCommand(configureCmd.kCmdName, configureCmd.creator, configureCmd.syntaxCreator)
-    
+
     return
 
 def unregister(pluginFn):
@@ -471,9 +321,7 @@ def unregister(pluginFn):
     @param pluginFn (MFnPlugin): plugin object passed to uninitializePlugin
     """
     pluginFn.deregisterCommand(importCmd.kCmdName)
-    pluginFn.deregisterCommand(previewCmd.kCmdName)
     pluginFn.deregisterCommand(exportCmd.kCmdName)
-    pluginFn.deregisterCommand(configureCmd.kCmdName)
     return
 
 #===============================================================================
@@ -502,23 +350,13 @@ class importCmdTestCase(BaseCmdTest):
     """
     __cmd__ = importCmd
 
-class previewCmdTestCase(BaseCmdTest):
-    """UnitTest for testing the previewCmd command
-    """
-    __cmd__ = previewCmd
-
 class exportCmdTestCase(BaseCmdTest):
     """UnitTest for testing the exportCmd command
     """
     __cmd__ = exportCmd
 
-class configureCmdTestCase(BaseCmdTest):
-    """UnitTest for testing the configureCmd command
-    """
-    __cmd__ = configureCmd
-
 # NOTE: update this for test discovery
-test_cases = (importCmdTestCase, previewCmdTestCase, exportCmdTestCase, configureCmdTestCase,)
+test_cases = (importCmdTestCase, exportCmdTestCase,)
 
 def load_tests(loader, tests, pattern):
     suite = unittest.TestSuite()
