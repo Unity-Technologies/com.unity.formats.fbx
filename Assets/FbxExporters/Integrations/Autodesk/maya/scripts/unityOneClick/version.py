@@ -19,7 +19,7 @@
 @defgroup UnityOneClickPluginVersion Plugin Version
 @ingroup UnityOneClickPlugin
 """
-VERSION = 1.0.0a1-sprint27
+VERSION = '1.0.0a1-sprint27'
 
 def pluginPrefix():
     """
