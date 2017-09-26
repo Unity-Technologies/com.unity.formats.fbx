@@ -1,0 +1,176 @@
+# ***********************************************************************
+# Copyright (c) 2017 Unity Technologies. All rights reserved.
+#
+# Licensed under the ##LICENSENAME##.
+# See LICENSE.md file in the project root for full license information.
+# ***********************************************************************
+
+cmake_minimum_required (VERSION 3.8)
+
+SET(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/FbxExporterProject/Assets" CACHE PATH "Install path prefix")
+MESSAGE(STATUS "CMAKE_INSTALL_PREFIX is: " ${CMAKE_INSTALL_PREFIX})
+
+project (UnityFbxExporterEditorDLL)
+
+# Default is a release build.
+if (NOT CMAKE_BUILD_TYPE)
+  # CMAKE_BUILD_TYPE is special, so we have to CACHE FORCE to actually set it,
+  # or else our 'set' has very wonky scope.
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+elseif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  list(APPEND CMAKE_CXX_FLAGS "-DMEMORY_DEBUG")
+endif()
+message(STATUS "Building for ${CMAKE_BUILD_TYPE}")
+
+if (NOT DEFINED PACKAGE_VERSION OR "${PACKAGE_VERSION}" STREQUAL "")
+    set(PACKAGE_VERSION "0.0.15a")
+endif()
+message(STATUS "Using Package Version: ${PACKAGE_VERSION}")
+
+if (NOT DEFINED PACKAGE_PATH OR "${PACKAGE_PATH}" STREQUAL "")
+    set(PACKAGE_PATH "${CMAKE_BINARY_DIR}/FbxExporters_${PACKAGE_VERSION}.unitypackage")
+endif()
+message(STATUS "Creating Exporter Package at: ${PACKAGE_PATH}")
+
+if (NOT DEFINED FBXSDK_PACKAGE_PATH)
+    # TODO: store the FbxSdk directly in this project
+    set(FBXSDK_PACKAGE_PATH "${CMAKE_SOURCE_DIR}/../FbxSharpBuild")
+    
+    # find the most recent package at the path
+    file(GLOB FBXSDK_PACKAGES "${FBXSDK_PACKAGE_PATH}/FbxSdk_*.*.*.unitypackage")
+    set(NEWEST_PACKAGE "")
+    foreach(fbxsdk_package ${FBXSDK_PACKAGES})
+       if(fbxsdk_package IS_NEWER_THAN NEWEST_PACKAGE)
+            set(NEWEST_PACKAGE ${fbxsdk_package})
+       endif()
+    endforeach(fbxsdk_package)
+    
+    if("${NEWEST_PACKAGE}" STREQUAL "")
+        message(FATAL_ERROR "Failed to find FbxSdk Unity Package at: ${FBXSDK_PACKAGE_PATH}")
+    else()
+        set(FBXSDK_PACKAGE_PATH ${NEWEST_PACKAGE})
+    endif()
+endif()
+
+IF(EXISTS ${FBXSDK_PACKAGE_PATH})
+    message(STATUS "Using FbxSdk Package: ${FBXSDK_PACKAGE_PATH}")
+ELSE()
+    message(FATAL_ERROR "Cannot find FbxSdk Package: ${FBXSDK_PACKAGE_PATH}")
+ENDIF()
+
+# promote warnings to errors
+if(MSVC)
+set(PROJECT_COMPILE_FLAGS "/WX")
+else()
+# requires gcc 6 or higher
+set(PROJECT_COMPILE_FLAGS "-Werror -Wno-error=null-dereference")
+endif()
+
+add_definitions(${PROJECT_COMPILE_FLAGS})
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/deps/cmake)
+
+###########################################################################
+# Find packages that we need.
+
+find_package(Unity REQUIRED)
+find_package(CSharpAssemblies REQUIRED)
+include(deps/cmake/BuildCSharp.cmake)
+
+set(Python_ADDITIONAL_VERSIONS 2.7)
+
+###########################################################################
+# Import FbxSharp package
+
+set(FBXSDK_PACKAGE_TARGET import_fbxsdk)
+add_custom_target(
+    ${FBXSDK_PACKAGE_TARGET}
+    # remove FbxSdk folder
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk"
+    COMMAND "${UNITY_EDITOR_PATH}" -projectPath "${CMAKE_SOURCE_DIR}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
+    COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_SOURCE_DIR}/Assets/FbxSdk" "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk"
+)
+
+###########################################################################
+# Add target to replace the unity package version number in files
+set(README_TARGET readme_replace)
+add_custom_target(
+    ${README_TARGET}
+    COMMAND ${PYTHON_EXECUTABLE}
+            "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
+            "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/README.txt"
+            ".*VERSION.*:.*"
+            "VERSION: ${PACKAGE_VERSION}"
+    COMMAND ${PYTHON_EXECUTABLE}
+            "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
+            "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/unityOneClick/version.py"
+            ".*VERSION.*=.*"
+            "VERSION = '${PACKAGE_VERSION}'"
+    DEPENDS "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
+    COMMENT "Replacing version number in files"
+)
+
+###########################################################################
+# Compile editor scripts into a multi-platform DLL
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    set(CLASS_LIBRARY_DEST "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+
+    add_custom_command(OUTPUT ${CLASS_LIBRARY_DEST}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CLASS_LIBRARY_DEST}
+    )
+    
+    set(EDITOR_CLASS_LIBRARY_NAME "UnityFbxExporterEditor.dll")
+    fbxexporters_compile_csharp(OUTPUT ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME}
+            EXTRA_ARGS
+                "/target:library"
+            SOURCES
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExporter.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExportSettings.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/InstallIntegration.cs"
+            REFERENCES
+                "${CSHARP_MSCORLIB_LIBRARY}"
+                "${CSHARP_SYSTEM_CORE_LIBRARY}"
+                "${CSHARP_SYSTEM_LIBRARY}"
+                "${CSHARP_UNITYEDITOR_LIBRARY}"
+                "${CSHARP_UNITYENGINE_LIBRARY}"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk/Plugins/UnityFbxSdk.dll"
+            DEPENDS
+                "${CLASS_LIBRARY_DEST}"
+    )
+    add_custom_target(UnityFbxExporterEditorDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME})
+    
+endif()
+
+###########################################################################
+# Add target for creating a package
+add_custom_command(
+        OUTPUT ${PACKAGE_PATH}
+        COMMAND "${CMAKE_COMMAND}" --build . --target install --config Release
+        COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_BINARY_DIR}/FbxExporterProject -exportPackage Assets/FbxExporters ${PACKAGE_PATH} -quit
+        COMMENT "Creating Unity Package ${PACKAGE_PATH}"
+        DEPENDS UnityFbxExporterEditorDLL
+    )
+add_custom_target(unitypackage DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${README_TARGET})
+
+enable_testing()
+add_test(NAME run-all COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} runEditorTests -quit)
+
+
+############################################################################
+# Install project into build folder
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/FbxExporters
+            DESTINATION .
+            PATTERN "Editor/UnitTests" EXCLUDE
+            PATTERN "FbxTurnTableBase.cs" EXCLUDE
+            PATTERN "Editor/FbxExporter.cs" EXCLUDE
+            PATTERN "Editor/FbxExportSettings.cs" EXCLUDE
+            PATTERN "Editor/InstallIntegration.cs" EXCLUDE
+            PATTERN "Editor/ReviewLastSavedModel.cs" EXCLUDE
+            PATTERN "Editor/EditorRotate.cs" EXCLUDE)
+    install(FILES ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME} DESTINATION FbxExporters/Editor)
+else()
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/FbxExporters
+            DESTINATION .)
+endif()
