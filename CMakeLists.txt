@@ -86,9 +86,10 @@ set(FBXSDK_PACKAGE_TARGET import_fbxsdk)
 add_custom_target(
     ${FBXSDK_PACKAGE_TARGET}
     # remove FbxSdk folder
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_SOURCE_DIR}/Assets/FbxSdk"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxSdk"
     COMMAND "${UNITY_EDITOR_PATH}" -projectPath "${CMAKE_SOURCE_DIR}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
-    COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_SOURCE_DIR}/Assets/FbxSdk" "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk"
+    COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_SOURCE_DIR}/Assets/FbxSdk" "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxSdk"
 )
 
 ###########################################################################
@@ -133,7 +134,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CSHARP_SYSTEM_LIBRARY}"
                 "${CSHARP_UNITYEDITOR_LIBRARY}"
                 "${CSHARP_UNITYENGINE_LIBRARY}"
-                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk/Plugins/UnityFbxSdk.dll"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxSdk/Plugins/UnityFbxSdk.dll"
             DEPENDS
                 "${CLASS_LIBRARY_DEST}"
                 ${FBXSDK_PACKAGE_TARGET}
@@ -153,7 +154,9 @@ ENDIF()
 
 add_custom_command(
         OUTPUT ${PACKAGE_PATH}
+        COMMAND "${CMAKE_COMMAND}" -E remove_directory ${CMAKE_BINARY_DIR}/FbxExporterProject
         COMMAND "${CMAKE_COMMAND}" --build . --target install --config Release
+        COMMAND "${CMAKE_COMMAND}" -E remove ${PACKAGE_PATH}
         COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_BINARY_DIR}/FbxExporterProject -exportPackage Assets/FbxExporters ${PACKAGE_PATH} -quit
         COMMENT "Creating Unity Package ${PACKAGE_PATH}"
         DEPENDS UnityFbxExporterEditorDLL
