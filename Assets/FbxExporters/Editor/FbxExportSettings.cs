@@ -86,17 +86,6 @@ namespace FbxExporters.EditorTools {
                 }
             }
             GUILayout.EndHorizontal ();
-            GUILayout.BeginHorizontal ();
-
-            GUILayout.Label (new GUIContent (
-                "Turntable Scene:",
-                "Scene to use for reviewing models. If none, a scene will be created on review."));
-            
-            exportSettings.turntableScene = EditorGUILayout.ObjectField (
-                exportSettings.turntableScene, typeof(SceneAsset), false
-            );
-
-            GUILayout.EndHorizontal ();
 
             EditorGUILayout.Space ();
 
@@ -230,9 +219,6 @@ namespace FbxExporters.EditorTools {
 
         public int selectedMayaApp = 0;
 
-        [SerializeField]
-        public UnityEngine.Object turntableScene;
-
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
         ///
@@ -259,7 +245,6 @@ namespace FbxExporters.EditorTools {
             centerObjects = true;
             keepOriginalAfterConvert = false;
             convertToModelSavePath = kDefaultSavePath;
-            turntableScene = null;
             mayaOptionPaths = null;
             mayaOptionNames = null;
         }
@@ -442,20 +427,6 @@ namespace FbxExporters.EditorTools {
         public static string GetSelectedMayaPath()
         {
             return instance.mayaOptionPaths [instance.selectedMayaApp];
-        }
-
-        public static string GetTurnTableSceneName(){
-            if (instance.turntableScene) {
-                return instance.turntableScene.name;
-            }
-            return null;
-        }
-
-        public static string GetTurnTableScenePath(){
-            if (instance.turntableScene) {
-                return AssetDatabase.GetAssetPath (instance.turntableScene);
-            }
-            return null;
         }
 
         /// <summary>
