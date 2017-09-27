@@ -23,8 +23,11 @@ namespace FbxExporters
     /// </summary>
     public /*static*/ class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
     {
+        #if UNITY_EDITOR
+        public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
+        #else
         public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
-
+        #endif
         public static string FindFbxPrefabAssetPath()
         {
             // Find guids that are scripts that look like FbxPrefab.
@@ -1031,12 +1034,20 @@ namespace FbxExporters
                 // We could optimize this out if we had nothing to do, but then the
                 // OnUpdate handler wouldn't always get called, and that makes for
                 // confusing API.
-                var prefabInstance = UnityEditor.PrefabUtility.InstantiatePrefab(m_fbxPrefab.gameObject) as GameObject;
-                if (!prefabInstance) {
+
+                // This FbxPrefab may not be at the root of its prefab. We instantiate the root of the prefab, then
+                // we find the corresponding FbxPrefab.
+                var prefabRoot = UnityEditor.PrefabUtility.FindPrefabRoot(m_fbxPrefab.gameObject);
+                var prefabInstanceRoot = UnityEditor.PrefabUtility.InstantiatePrefab(prefabRoot) as GameObject;
+                if (!prefabInstanceRoot) {
                     throw new System.Exception(string.Format("Failed to instantiate {0}; is it really a prefab?",
                         m_fbxPrefab.gameObject));
                 }
-                var fbxPrefabInstance = prefabInstance.GetComponent<FbxPrefab>();
+                var fbxPrefabInstance = prefabInstanceRoot.GetComponentsInChildren<FbxPrefab>().FirstOrDefault(
+                    fbxPrefab => UnityEditor.PrefabUtility.GetPrefabParent(fbxPrefab) == m_fbxPrefab);
+                if (!fbxPrefabInstance) {
+                    throw new System.Exception(string.Format("Internal error: couldn't find the right FbxPrefab after instantiating."));
+                }
 
                 // Do ALL the things (potentially nothing).
                 var updatedObjects = updates.ImplementUpdates(fbxPrefabInstance);
@@ -1050,10 +1061,10 @@ namespace FbxExporters
                 fbxPrefabInstance.FbxHistory = newFbxRepString;
 
                 // Save the changes back to the prefab.
-                UnityEditor.PrefabUtility.ReplacePrefab(prefabInstance, m_fbxPrefab.transform);
+                UnityEditor.PrefabUtility.ReplacePrefab(prefabInstanceRoot, prefabRoot);
 
                 // Destroy the prefabInstance.
-                GameObject.DestroyImmediate(prefabInstance);
+                GameObject.DestroyImmediate(prefabInstanceRoot);
             }
 
             /// <summary>
