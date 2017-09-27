@@ -120,7 +120,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CLASS_LIBRARY_DEST}
     )
     
-    set(RUNTIME_CLASS_LIBRARY_NAME "UnityFbxExporter.dll")
+    set(RUNTIME_CLASS_LIBRARY_NAME "UnityFbxPrefab.dll")
     fbxexporters_compile_csharp(OUTPUT ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME}
             EXTRA_ARGS
                 "/target:library"
@@ -146,6 +146,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExportSettings.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/InstallIntegration.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabAutoUpdater.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabInspector.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ConvertToModel.cs"
             REFERENCES
                 "${CSHARP_MSCORLIB_LIBRARY}"
@@ -203,7 +204,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             PATTERN "Editor/ReviewLastSavedModel.cs" EXCLUDE
             PATTERN "Editor/EditorRotate.cs" EXCLUDE
             PATTERN "Editor/FbxPrefabAutoUpdater.cs" EXCLUDE
-            PATTERN "Editor/ConvertToModel.cs" EXCLUDE)
+            PATTERN "Editor/ConvertToModel.cs" EXCLUDE
+            PATTERN "Editor/FbxPrefabInspector.cs" EXCLUDE)
     install(FILES ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME} DESTINATION FbxExporters/Editor)
     install(FILES ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME} DESTINATION FbxExporters)
 else()

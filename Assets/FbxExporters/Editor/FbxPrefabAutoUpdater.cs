@@ -30,7 +30,7 @@ namespace FbxExporters
             var allGuids = AssetDatabase.FindAssets("FbxPrefab t:MonoScript");
             foreach(var guid in allGuids) {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.EndsWith("/FbxPrefab.cs")) {
+                if (path.EndsWith ("/UnityFbxPrefab.dll")) {
                     return path;
                 }
             }
@@ -1040,9 +1040,7 @@ namespace FbxExporters
                 var updatedObjects = updates.ImplementUpdates(fbxPrefabInstance);
 
                 // Tell listeners about it. They're free to make adjustments now.
-                if (OnUpdate != null) {
-                    OnUpdate(fbxPrefabInstance, updatedObjects);
-                }
+                FbxPrefab.CallOnUpdate (fbxPrefabInstance, updatedObjects);
 
                 // Update the representation of the history to match the new fbx.
                 var newFbxRep = new FbxRepresentation(m_fbxPrefab.FbxModel.transform);
@@ -1143,33 +1141,6 @@ namespace FbxExporters
                     CompareAndUpdate();
                 }
             }
-
-            //////////////////////////////////////////////////////////////////////////
-            // Event handling for updates.
-
-            /// <summary>
-            /// Handler for an OnUpdate event.
-            ///
-            /// The update is performed on a temporary instance, which, shortly after
-            /// this handler is invoked, will be applied to the prefab.
-            ///
-            /// The event handler can make changes to any objects in the hierarchy rooted
-            /// by the updatedInstance. Those changes will be applied to the prefab.
-            ///
-            /// The updatedObjects include all objects in the temporary instance
-            /// that were:
-            /// - created, or
-            /// - changed parent, or
-            /// - had a component that was created, destroyed, or updated.
-            /// There is no notification for entire objects that were destroyed.
-            /// </summary>
-            public delegate void HandleUpdate(FbxPrefab updatedInstance, IEnumerable<GameObject> updatedObjects);
-
-            /// <summary>
-            /// OnUpdate is raised once when an FbxPrefab gets updated, after all the changes
-            /// have been done.
-            /// </summary>
-            public static event HandleUpdate OnUpdate;
         }
     }
 }

@@ -65,5 +65,38 @@ namespace FbxExporters
                 m_autoUpdate = value;
             }
         }
+
+        //////////////////////////////////////////////////////////////////////////
+        // Event handling for updates.
+
+        /// <summary>
+        /// Handler for an OnUpdate event.
+        ///
+        /// The update is performed on a temporary instance, which, shortly after
+        /// this handler is invoked, will be applied to the prefab.
+        ///
+        /// The event handler can make changes to any objects in the hierarchy rooted
+        /// by the updatedInstance. Those changes will be applied to the prefab.
+        ///
+        /// The updatedObjects include all objects in the temporary instance
+        /// that were:
+        /// - created, or
+        /// - changed parent, or
+        /// - had a component that was created, destroyed, or updated.
+        /// There is no notification for entire objects that were destroyed.
+        /// </summary>
+        public delegate void HandleUpdate(FbxPrefab updatedInstance, IEnumerable<GameObject> updatedObjects);
+
+        /// <summary>
+        /// OnUpdate is raised once when an FbxPrefab gets updated, after all the changes
+        /// have been done.
+        /// </summary>
+        public static event HandleUpdate OnUpdate;
+
+        public static void CallOnUpdate(FbxPrefab instance, IEnumerable<GameObject> updatedObjects){
+            if (OnUpdate != null) {
+                OnUpdate (instance, updatedObjects);
+            }
+        }
     }
 }

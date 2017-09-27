@@ -30,15 +30,15 @@ namespace FbxExporters.UnitTests
                 m_prefabToAttachTo = prefabToAttachTo;
                 Updated = new List<string>();
                 NumUpdates = 0;
-                FbxPrefabAutoUpdater.FbxPrefabUtility.OnUpdate += OnUpdate;
+                FbxPrefab.OnUpdate += OnUpdate;
             }
 
             ~UpdateListener() {
-                FbxPrefabAutoUpdater.FbxPrefabUtility.OnUpdate -= OnUpdate;
+                FbxPrefab.OnUpdate -= OnUpdate;
             }
 
             public void Dispose() {
-                FbxPrefabAutoUpdater.FbxPrefabUtility.OnUpdate -= OnUpdate;
+                FbxPrefab.OnUpdate -= OnUpdate;
             }
 
             void OnUpdate(FbxPrefab prefabInstance, IEnumerable<GameObject> updated)
