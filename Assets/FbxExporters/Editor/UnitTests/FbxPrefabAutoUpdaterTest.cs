@@ -47,7 +47,7 @@ namespace FbxExporters.UnitTests
         {
             var fbxPrefabPath = FbxPrefabAutoUpdater.FindFbxPrefabAssetPath();
             Assert.IsFalse(string.IsNullOrEmpty(fbxPrefabPath));
-            Assert.IsTrue(fbxPrefabPath.EndsWith("FbxPrefab.cs"));
+            Assert.IsTrue(fbxPrefabPath.EndsWith(FbxPrefabAutoUpdater.FBX_PREFAB_FILE));
 
             Assert.IsTrue(FbxPrefabAutoUpdater.IsFbxAsset("Assets/path/to/foo.fbx"));
             Assert.IsFalse(FbxPrefabAutoUpdater.IsFbxAsset("Assets/path/to/foo.png"));

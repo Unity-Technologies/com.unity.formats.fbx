@@ -23,6 +23,8 @@ namespace FbxExporters
     /// </summary>
     public /*static*/ class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
     {
+        public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
+
         public static string FindFbxPrefabAssetPath()
         {
             // Find guids that are scripts that look like FbxPrefab.
@@ -30,7 +32,7 @@ namespace FbxExporters
             var allGuids = AssetDatabase.FindAssets("FbxPrefab t:MonoScript");
             foreach(var guid in allGuids) {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.EndsWith ("/UnityFbxPrefab.dll")) {
+                if (path.EndsWith (FBX_PREFAB_FILE)) {
                     return path;
                 }
             }
