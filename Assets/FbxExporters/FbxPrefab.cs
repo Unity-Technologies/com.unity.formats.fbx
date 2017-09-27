@@ -92,6 +92,12 @@ namespace FbxExporters
         /// </summary>
         public static event HandleUpdate OnUpdate;
 
+        /// <summary>
+        /// Notify listeners that they're free to make adjustments. 
+        /// This will be called after the FbxPrefab auto updater has completed it's work.
+        /// </summary>
+        /// <param name="instance">Updated FbxPrefab instance.</param>
+        /// <param name="updatedObjects">Updated objects.</param>
         public static void CallOnUpdate(FbxPrefab instance, IEnumerable<GameObject> updatedObjects){
             if (OnUpdate != null) {
                 OnUpdate (instance, updatedObjects);
