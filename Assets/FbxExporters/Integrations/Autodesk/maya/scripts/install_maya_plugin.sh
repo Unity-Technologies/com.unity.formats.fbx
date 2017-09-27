@@ -26,12 +26,6 @@ if [ ! -d "${PROJECT_PATH}" ]; then
 fi
 echo "Using PROJECT_PATH=${PROJECT_PATH}"
 
-# Configure where unitypackage is located
-if [ ! -f "${PACKAGE_PATH}" ]; then
-    PACKAGE_PATH=`ls -t ${PROJECT_PATH}/FbxExporters_*.unitypackage | head -1`
-fi
-echo "Using PACKAGE_PATH=${PACKAGE_PATH}"
-
 # Configure where Maya is installed
 if [ ! -d "${MAYA_LOCATION}" ]; then
     MAYA_LOCATION=/Applications/Autodesk/maya2017/Maya.app/Contents
@@ -42,15 +36,6 @@ if [ ! -f "${UNITY_EDITOR_PATH}" ]; then
     echo "Unity is not installed in default location"
     exit -1
 fi    
-
-# remove existing installation
-if [ -d "${PROJECT_PATH}/Assets/FbxExporters" ]; then
-    echo "Uninstalling previous version"
-    rm -rf "${PROJECT_PATH}/Assets/FbxExporters"   
-fi
-
-# Install FbxExporters package
-"${UNITY_EDITOR_PATH}" -projectPath "${PROJECT_PATH}" -importPackage ${PACKAGE_PATH} -quit
 
 # Install Maya Integration
 "${UNITY_EDITOR_PATH}" -batchMode -projectPath "${PROJECT_PATH}" -executeMethod FbxExporters.Integrations.InstallMaya -quit
