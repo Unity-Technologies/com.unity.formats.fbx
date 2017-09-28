@@ -1007,7 +1007,7 @@ namespace FbxExporters
                         fbxSceneInfo.mRevision = "1.0";
                         fbxSceneInfo.mKeywords = Keywords;
                         fbxSceneInfo.mComment = Comments;
-                        fbxSceneInfo.Original_ApplicationName.Set(string.Format("Unity {0} Plugin", PACKAGE_UI_NAME));
+                        fbxSceneInfo.Original_ApplicationName.Set(string.Format("Unity {0}", PACKAGE_UI_NAME));
                         // set last saved to be the same as original, as this is a new file.
                         fbxSceneInfo.LastSaved_ApplicationName.Set(fbxSceneInfo.Original_ApplicationName.Get());
 
