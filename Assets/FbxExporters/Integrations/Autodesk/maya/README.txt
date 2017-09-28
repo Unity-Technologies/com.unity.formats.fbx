@@ -30,12 +30,12 @@ Manual Installation
 Instructions for installing if you don't use the unity package installer
 and your installing in a non-default location.
 
-1. copy unityoneclick.mod to user folder
+1. copy UnityFbxForMaya.mod to user folder
 
     MacOS & Ubuntu: ~/MayaProjects/modules
     Windows:        C:\Program Files\Autodesk\Maya2017\modules
 
-2. configure path within unityoneclick.mod to point to integration installation folder
+2. configure path within UnityFbxForMaya.mod to point to integration installation folder
 
     {UnityProject}/Assets/Integrations/Autodesk/maya2017
 
@@ -53,4 +53,4 @@ export PYTHONPATH=${MAYA_INTEGRATION_PATH}/scripts
 ${MAYAPY_PATH} ${MAYA_INTEGRATION_PATH}/scripts/run_all_tests.py
 
 # run one test
-${MAYAPY_PATH} ${MAYA_INTEGRATION_PATH}/scripts/unityOneClick/commands.py
+${MAYAPY_PATH} ${MAYA_INTEGRATION_PATH}/scripts/UnityFbxForMaya/commands.py

@@ -20,12 +20,12 @@ import sys
 import maya.OpenMayaMPx as OpenMayaMPx
 import maya.cmds
 
-from unityOneClick import (version, commands, ui, debug)
+from UnityFbxForMaya import (version, commands, ui, debug)
 
 kPluginInfo = { 'name': version.pluginName(), 'version': version.versionName(), 'vendor': version.vendorName() }
 kVerbose = True
-kHeadlessInstall = (maya.cmds.optionVar( exists='UnityOneClick_Headless')
-                    and maya.cmds.optionVar(q='UnityOneClick_Headless') == 1)
+kHeadlessInstall = (maya.cmds.optionVar( exists='UnityFbxForMaya_Headless')
+                    and maya.cmds.optionVar(q='UnityFbxForMaya_Headless') == 1)
 
 # initialize the script plug-in
 def initializePlugin(mobject):

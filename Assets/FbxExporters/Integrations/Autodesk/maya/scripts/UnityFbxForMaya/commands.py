@@ -15,18 +15,18 @@
 """
 @package commands
 @defgroup UnityCommands Commands
-@ingroup UnityOneClickPlugin
+@ingroup UnityFbxForMayaPlugin
 @author  Simon Inwood <simon.cf.inwood@gmail.com>
 """
 
-from unityOneClick.logger import LoggerMixin
+from UnityFbxForMaya.logger import LoggerMixin
 
 import maya.OpenMaya as OpenMaya        # @UnresolvedImport
 import maya.OpenMayaMPx as OpenMayaMPx  # @UnresolvedImport
 import maya.mel
 import maya.cmds
 
-import unityOneClick.version as version
+import UnityFbxForMaya.version as version
 
 import ctypes
 ctypes.pythonapi.PyCObject_AsVoidPtr.restype = ctypes.c_void_p
@@ -36,11 +36,11 @@ import os
 
 class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     """
-    Base class for UnityOneClick Plugin Commands.
+    Base class for UnityFbxForMaya Plugin Commands.
     """
     kIconPath = ""
     kFamilyIcon = 'unity.png'
-    kFamilyLabel = "The UnityOneClick plugin allows you to reliably exchange and review your work between Maya and Unity."
+    kFamilyLabel = "The UnityFbxForMaya plugin allows you to reliably exchange and review your work between Maya and Unity."
     
     def __init__(self):
         OpenMayaMPx.MPxCommand.__init__(self)
@@ -123,7 +123,7 @@ class importCmd(BaseCommand):
     kShortLabel = 'Import'
     kCmdName = "{}Import".format(version.pluginPrefix())
     kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
-    kRuntimeCommand = "UnityOneClickImport"
+    kRuntimeCommand = "UnityFbxForMayaImport"
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -249,7 +249,7 @@ class exportCmd(BaseCommand):
     kShortLabel = 'Export'
     kCmdName = "{}Export".format(version.pluginPrefix())
     kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
-    kRuntimeCommand = "UnityOneClickExport"
+    kRuntimeCommand = "UnityFbxForMayaExport"
     
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -328,7 +328,7 @@ def unregister(pluginFn):
 # UNIT TESTS
 #===============================================================================
 import unittest
-from unityOneClick.basetestcase import BaseTestCase
+from UnityFbxForMaya.basetestcase import BaseTestCase
 
 class BaseCmdTest(BaseTestCase):
     """Base class for command UnitTests
@@ -338,7 +338,7 @@ class BaseCmdTest(BaseTestCase):
     
     def setUp(self):
         super(BaseCmdTest,self).setUp()
-        maya.cmds.loadPlugin( 'unityOneClickPlugin.py', quiet=True )  # @UndefinedVariable
+        maya.cmds.loadPlugin( 'UnityFbxForMayaPlugin.py', quiet=True )  # @UndefinedVariable
         
     # test routine 
     def test_invoke(self):
