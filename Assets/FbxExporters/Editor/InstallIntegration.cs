@@ -7,7 +7,7 @@ namespace FbxExporters.Editor
 {
     public class Integrations
     {
-        private const string MODULE_FILENAME = "unityoneclick";
+        private const string MODULE_FILENAME = "UnityFbxForMaya";
         private const string PACKAGE_NAME = "FbxExporters";
         private const string VERSION_FILENAME = "README.txt";
         private const string VERSION_FIELD = "VERSION";
@@ -58,7 +58,7 @@ namespace FbxExporters.Editor
         }
 
         private static string MAYA_COMMANDS { get {
-                return string.Format("configureUnityOneClick {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6}; scriptJob -idleEvent quit;",
+                return string.Format("configureUnityFbxForMaya {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6}; scriptJob -idleEvent quit;",
                     ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(),
                     GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall()?1:0));
         }}
@@ -323,7 +323,7 @@ namespace FbxExporters.Editor
             }
             else
             {
-                // detect if unityoneclick.mod is installed
+                // detect if UnityFbxForMaya.mod is installed
                 installed = System.IO.File.Exists(moduleFilePath);
 
                 if (installed)

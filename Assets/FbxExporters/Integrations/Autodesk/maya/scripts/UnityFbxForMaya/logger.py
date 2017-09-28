@@ -21,8 +21,8 @@
 @ingroup UnityUtils
 """
 
-from unityOneClick.debug import debug_info
-from unityOneClick.version import pluginName
+from UnityFbxForMaya.debug import debug_info
+from UnityFbxForMaya.version import pluginName
 
 import maya.OpenMaya as OpenMaya  # @UnresolvedImport
 
