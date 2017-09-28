@@ -17,7 +17,7 @@ Please note that MayaLT is not supported at this time.
 Installing Unity Integration for Maya
 -------------------------------------
 
-The easiest way to install the Unity integration For Maya is from the Fbx Export Settings panel in Unity.
+The easiest way to install the Unity integration For Maya is from the Fbx Export Settings in Unity.
 
         MenuBar -> Edit -> Project Settings -> Fbx Export -> Install Unity Integration
 
