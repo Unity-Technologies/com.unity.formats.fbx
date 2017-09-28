@@ -23,12 +23,12 @@ endif()
 message(STATUS "Building for ${CMAKE_BUILD_TYPE}")
 
 if (NOT DEFINED PACKAGE_VERSION OR "${PACKAGE_VERSION}" STREQUAL "")
-    set(PACKAGE_VERSION "1.0")
+    set(PACKAGE_VERSION "1.0.0f1")
 endif()
 message(STATUS "Using Package Version: ${PACKAGE_VERSION}")
 
 if (NOT DEFINED PACKAGE_PATH OR "${PACKAGE_PATH}" STREQUAL "")
-    set(PACKAGE_PATH "${CMAKE_BINARY_DIR}/FbxExporters_${PACKAGE_VERSION}.unitypackage")
+    set(PACKAGE_PATH "${CMAKE_BINARY_DIR}/FbxExporter_${PACKAGE_VERSION}.unitypackage")
 endif()
 message(STATUS "Creating Exporter Package at: ${PACKAGE_PATH}")
 
@@ -205,7 +205,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             PATTERN "Editor/EditorRotate.cs" EXCLUDE
             PATTERN "Editor/FbxPrefabAutoUpdater.cs" EXCLUDE
             PATTERN "Editor/ConvertToModel.cs" EXCLUDE
-            PATTERN "Editor/FbxPrefabInspector.cs" EXCLUDE)
+            PATTERN "Editor/FbxPrefabInspector.cs" EXCLUDE
+            PATTERN "Integrations/BringToFront.exe" EXCLUDE)
     install(FILES ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME} DESTINATION FbxExporters/Editor)
     install(FILES ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME} DESTINATION FbxExporters)
 else()
