@@ -400,6 +400,10 @@ namespace FbxExporters
                     }
 
                     var json = EditorJsonUtility.ToJson(component);
+                    if (string.IsNullOrEmpty (json)) {
+                        // this happens for missing scripts
+                        continue;
+                    }
 
                     System.Type expectedType = component.GetType();
                     Component toComponent = null;
@@ -418,7 +422,9 @@ namespace FbxExporters
                     if (!toComponent) {
                         // It doesn't exist => create and copy.
                         toComponent = to.AddComponent(component.GetType());
-                        EditorJsonUtility.FromJsonOverwrite(json, toComponent);
+                        if (toComponent) {
+                            EditorJsonUtility.FromJsonOverwrite (json, toComponent);
+                        }
                     } else {
                         // It exists => copy.
                         // But we want to override that behaviour in a few
