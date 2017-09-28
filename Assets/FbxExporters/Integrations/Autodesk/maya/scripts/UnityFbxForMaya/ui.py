@@ -31,7 +31,7 @@ from UnityFbxForMaya import (commands)
 
 kMenuName = 'UnityFbxForMaya'
 kMenuDivider = 'UnityFbxForMayaDivider'
-kMenuLabel = 'UNITY'
+kMenuLabel = 'Unity'
 kMenuInsertAfter = 'exportActiveFileOptions'
 
 def register(pluginFn):
