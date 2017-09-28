@@ -37,7 +37,7 @@ if (NOT DEFINED FBXSDK_PACKAGE_PATH)
     set(FBXSDK_PACKAGE_PATH "${CMAKE_SOURCE_DIR}/../FbxSharpBuild")
     
     # find the most recent package at the path
-    file(GLOB FBXSDK_PACKAGES "${FBXSDK_PACKAGE_PATH}/FbxSdk_*.*.unitypackage")
+    file(GLOB FBXSDK_PACKAGES "${FBXSDK_PACKAGE_PATH}/FbxSdk_*.*.*.unitypackage")
     set(NEWEST_PACKAGE "")
     foreach(fbxsdk_package ${FBXSDK_PACKAGES})
        if(fbxsdk_package IS_NEWER_THAN NEWEST_PACKAGE)

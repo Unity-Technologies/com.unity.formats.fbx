@@ -39,7 +39,7 @@ namespace FbxExporters
                     return path;
                 }
             }
-            Debug.LogError("FbxPrefab.cs not found; are you trying to uninstall FbxExporters?");
+            Debug.LogError(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
             return "";
         }
 
