@@ -104,7 +104,7 @@ add_custom_target(
             "VERSION: ${PACKAGE_VERSION}"
     COMMAND ${PYTHON_EXECUTABLE}
             "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
-            "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/unityOneClick/version.py"
+            "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/UnityFbxForMaya/version.py"
             ".*VERSION.*=.*"
             "VERSION = '${PACKAGE_VERSION}'"
     DEPENDS "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
@@ -169,7 +169,7 @@ endif()
 # Add target for creating a package
 
 # remove .pyc files that we don't want to ship
-file(GLOB PYC_FILES "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/unityOneClick/*.pyc")
+file(GLOB PYC_FILES "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/UnityFbxForMaya/*.pyc")
 IF( PYC_FILES )
     file(REMOVE ${PYC_FILES})
 ENDIF()
