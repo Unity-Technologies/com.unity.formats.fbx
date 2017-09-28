@@ -94,6 +94,14 @@ add_custom_target(
 
 ###########################################################################
 # Add target to replace the unity package version number in files
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+  set(VERSION_AS_STRING "\\'${PACKAGE_VERSION}\\'")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  set(VERSION_AS_STRING "'${PACKAGE_VERSION}'")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set(VERSION_AS_STRING "\\'${PACKAGE_VERSION}\\'")
+endif()
+
 set(README_TARGET readme_replace)
 add_custom_target(
     ${README_TARGET}
@@ -106,7 +114,7 @@ add_custom_target(
             "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
             "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/UnityFbxForMaya/version.py"
             ".*VERSION.*=.*"
-            "VERSION = \\'${PACKAGE_VERSION}\\'"
+            "VERSION = ${VERSION_AS_STRING}"
     DEPENDS "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
     COMMENT "Replacing version number in files with ${PACKAGE_VERSION}"
 )
