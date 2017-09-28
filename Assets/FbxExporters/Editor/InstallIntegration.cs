@@ -406,7 +406,7 @@ namespace FbxExporters.Editor
                 message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
             } else {
                 title = "Completed installation of Maya Integration.";
-                message = "Enjoy the new \"Unity\" menu in Maya.";
+                message = "Enjoy the new Unity menu in Maya.";
             }
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
