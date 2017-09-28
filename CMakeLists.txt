@@ -106,9 +106,9 @@ add_custom_target(
             "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
             "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/UnityFbxForMaya/version.py"
             ".*VERSION.*=.*"
-            "VERSION = '${PACKAGE_VERSION}'"
+            "VERSION = \\'${PACKAGE_VERSION}\\'"
     DEPENDS "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
-    COMMENT "Replacing version number in files"
+    COMMENT "Replacing version number in files with ${PACKAGE_VERSION}"
 )
 
 ###########################################################################
