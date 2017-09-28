@@ -400,6 +400,10 @@ namespace FbxExporters
                     }
 
                     var json = EditorJsonUtility.ToJson(component);
+                    if (string.IsNullOrEmpty (json)) {
+                        // this happens for missing scripts
+                        continue;
+                    }
 
                     System.Type expectedType = component.GetType();
                     Component toComponent = null;
