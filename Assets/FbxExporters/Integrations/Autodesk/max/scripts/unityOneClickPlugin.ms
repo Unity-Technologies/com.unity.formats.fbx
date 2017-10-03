@@ -3,6 +3,9 @@ macroScript Import category:"Unity"
 (
     origObjects = #()
 
+    persistent global unityFbxFilePathAttr
+    persistent global unityFbxFileNameAttr
+    
     global afterImport
     fn afterImport = (
         unityFbxExportSet = #()
@@ -24,12 +27,18 @@ macroScript Import category:"Unity"
     fbxFileName = getOpenFileName caption:"Import FBX from Unity" filename:"C:/Users/Viktoria/Desktop/" types:"FBX (*.fbx)|*.fbx|"
     if fbxFileName != undefined then
     (
+        -- reset persistent values, in case import fails
+        unityFbxFilePathAttr = ""
+        unityFbxFileNameAttr = ""
+    
         -- Get all objects in scene before importAction
         origObjects = objects as array
-        print (origObjects as string)
         callbacks.addScript #postImport ("afterImport()") id:#unityPlugin
 
         importFile fbxFileName using:FBXIMP
+        
+        unityFbxFilePathAttr = getFilenamePath fbxFileName
+        unityFbxFileNameAttr = filenameFromPath fbxFileName
         
         callbacks.removeScripts #postImport id:#unityPlugin
     )
@@ -40,7 +49,30 @@ print "I do nothing, but I should Preview!"
 )
 macroScript Export category:"Unity"
 (
-print "I do nothing, but I should Export!"
+    -- Make sure the FbxExporter plugin is loaded
+    pluginManager.loadClass FbxExporter
+    
+    origSelection = getCurrentSelection()
+    exportSet = selectionSets["UnityFbxExportSet"]
+    if not isdeleted exportSet and exportSet != undefined then(
+        select exportSet
+    )
+    
+    exportFileName = undefined
+    if unityFbxFilePathAttr != undefined and unityFbxFileNameAttr != undefined then(
+        exportFileName = unityFbxFilePathAttr + unityFbxFileNameAttr
+    )
+    else(
+        exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:"C:/Users/Viktoria/Desktop/" types:"FBX (*.fbx)|*.fbx|"
+    )
+    
+    if exportFileName != undefined then (
+        exportFile exportFileName selectedOnly:true using:FBXEXP
+    )
+    
+    if origSelection != undefined then (
+        select origSelection
+    )
 )
 
 -- Setup UI
