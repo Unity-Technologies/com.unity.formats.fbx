@@ -1,7 +1,13 @@
 -- MacroScripts that will perform actions
 macroScript Import category:"Unity"
 (
-print "I do nothing, but I should Import!"
+-- Make sure the FbxImporter plugin is loaded
+pluginManager.loadClass FbxImporter
+fbxFileName = getOpenFileName caption:"Import FBX from Unity" filename:"C:/" types:"FBX (*.fbx)|*.fbx|"
+if fbxFileName != undefined then
+(
+    importFile fbxFileName using:FBXIMP
+)
 )
 macroScript Preview category:"Unity"
 (
