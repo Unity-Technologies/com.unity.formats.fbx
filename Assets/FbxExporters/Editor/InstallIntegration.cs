@@ -392,7 +392,7 @@ namespace FbxExporters.Editor
 
     class MaxIntegration
     {
-        private const string PluginName = "unityOneClickPlugin.ms";
+        private const string PluginName = "UnityFbxForMaxPlugin.ms";
         private const string PluginPath = "FbxExporters/Integrations/Autodesk/max/scripts/" + PluginName;
 
         private const string ConfigureMaxScript = "FbxExporters/Integrations/Autodesk/max/scripts/configureUnityFbxForMax.ms";
@@ -411,7 +411,7 @@ namespace FbxExporters.Editor
             {
                 {PluginSourceTag, (Application.dataPath + "/" + PluginPath) },
                 {PluginNameTag,  PluginName },
-                {ProjectTag, Integrations.GetProjectPath()}
+                {ProjectTag, Application.dataPath + "/"}
             };
 
             var installScript = "";
