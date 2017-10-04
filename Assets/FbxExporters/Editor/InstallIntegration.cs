@@ -392,26 +392,41 @@ namespace FbxExporters.Editor
 
     class MaxIntegration
     {
-        private const string PluginName = "UnityFbxForMaxPlugin.ms";
-        private const string PluginPath = "FbxExporters/Integrations/Autodesk/max/scripts/" + PluginName;
+        private const string MaxScriptsPath = "FbxExporters/Integrations/Autodesk/max/scripts/";
 
-        private const string ConfigureMaxScript = "FbxExporters/Integrations/Autodesk/max/scripts/configureUnityFbxForMax.ms";
+        private const string PluginName = "UnityFbxForMaxPlugin.ms";
+        private const string PluginPath = MaxScriptsPath + PluginName;
+
+        private const string ConfigureMaxScript = MaxScriptsPath + "configureUnityFbxForMax.ms";
+
+        private const string ExportSettingsFile = MaxScriptsPath + "unityFbxExportSettings.ms";
 
         private const string PluginSourceTag = "UnityPluginScript_Source";
         private const string PluginNameTag = "UnityPluginScript_Name";
         private const string ProjectTag = "UnityProject";
+        private const string ExportSettingsTag = "UnityFbxExportSettings";
 
         // TODO: get this from the export settings
         private static string GetMaxExe(){
             return "C:/Program Files/Autodesk/3ds Max 2018/3dsmax.exe";
         }
 
+        /// <summary>
+        /// Gets the absolute Unity path for relative path in Assets folder.
+        /// </summary>
+        /// <returns>The absolute path.</returns>
+        /// <param name="relPath">Relative path.</param>
+        public static string GetAbsPath(string relPath){
+            return Application.dataPath + "/" + relPath;
+        }
+
         private static string GetInstallScript(){
             Dictionary<string,string> Tokens = new Dictionary<string,string>()
             {
-                {PluginSourceTag, (Application.dataPath + "/" + PluginPath) },
+                {PluginSourceTag, GetAbsPath(PluginPath) },
                 {PluginNameTag,  PluginName },
-                {ProjectTag, Application.dataPath + "/"}
+                {ProjectTag,GetAbsPath("")},
+                {ExportSettingsTag, GetAbsPath(ExportSettingsFile) }
             };
 
             var installScript = "";
@@ -419,7 +434,7 @@ namespace FbxExporters.Editor
             foreach (var t in Tokens) {
                 installScript += string.Format (@"global {0} = @\""{1}\"";", t.Key, t.Value);
             }
-            installScript += string.Format(@"filein \""{0}/{1}\""", Application.dataPath, ConfigureMaxScript);
+            installScript += string.Format(@"filein \""{0}\""", GetAbsPath(ConfigureMaxScript));
             return installScript;
         }
 

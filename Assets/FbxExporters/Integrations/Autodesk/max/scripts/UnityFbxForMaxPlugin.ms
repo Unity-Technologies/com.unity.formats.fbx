@@ -51,8 +51,17 @@ print "I do nothing, but I should Preview!"
 )
 macroScript Export category:"Unity"
 (
+    fn loadUnityFbxExportSettings = (
+        fbxExportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxExportSettings"
+        if fbxExportSettings != undefined and doesFileExist fbxExportSettings then(
+            filein fbxExportSettings
+        )
+    )
+
     -- Make sure the FbxExporter plugin is loaded
     pluginManager.loadClass FbxExporter
+    
+    loadUnityFbxExportSettings()
     
     origSelection = getCurrentSelection()
     exportSet = selectionSets["UnityFbxExportSet"]
@@ -65,11 +74,12 @@ macroScript Export category:"Unity"
         exportFileName = unityFbxFilePathAttr + unityFbxFileNameAttr
     )
     else(
-        exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:"C:/Users/Viktoria/Desktop/" types:"FBX (*.fbx)|*.fbx|"
+        unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
+        exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:unityProjectPath types:"FBX (*.fbx)|*.fbx|"
     )
     
     if exportFileName != undefined then (
-        exportFile exportFileName selectedOnly:true using:FBXEXP
+        exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
     )
     
     if origSelection != undefined then (
