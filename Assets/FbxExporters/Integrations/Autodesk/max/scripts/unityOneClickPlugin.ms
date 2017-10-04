@@ -24,7 +24,9 @@ macroScript Import category:"Unity"
 
     -- Make sure the FbxImporter plugin is loaded
     pluginManager.loadClass FbxImporter
-    fbxFileName = getOpenFileName caption:"Import FBX from Unity" filename:"C:/Users/Viktoria/Desktop/" types:"FBX (*.fbx)|*.fbx|"
+    
+    unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
+    fbxFileName = getOpenFileName caption:"Import FBX from Unity" filename:unityProjectPath types:"FBX (*.fbx)|*.fbx|"
     if fbxFileName != undefined then
     (
         -- reset persistent values, in case import fails

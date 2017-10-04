@@ -395,14 +395,11 @@ namespace FbxExporters.Editor
         private const string PluginName = "unityOneClickPlugin.ms";
         private const string PluginPath = "FbxExporters/Integrations/Autodesk/max/scripts/" + PluginName;
 
-        private const string InstallMaxScriptTemplate =
-            @"temp = pathConfig.GetDir(#userStartupScripts) + \""/{UnityPluginScript_Name}\"";" +
-            @"deleteFile temp;" + 
-            @"copyFile \""{UnityPluginScript_Source}\"" temp;" +
-            @"quitMax()";
+        private const string ConfigureMaxScript = "FbxExporters/Integrations/Autodesk/max/scripts/configureUnityFbxForMax.ms";
 
-        private const string PluginSourceTag = "{UnityPluginScript_Source}";
-        private const string PluginNameTag = "{UnityPluginScript_Name}";
+        private const string PluginSourceTag = "UnityPluginScript_Source";
+        private const string PluginNameTag = "UnityPluginScript_Name";
+        private const string ProjectTag = "UnityProject";
 
         // TODO: get this from the export settings
         private static string GetMaxExe(){
@@ -413,13 +410,16 @@ namespace FbxExporters.Editor
             Dictionary<string,string> Tokens = new Dictionary<string,string>()
             {
                 {PluginSourceTag, (Application.dataPath + "/" + PluginPath) },
-                {PluginNameTag,  PluginName }
+                {PluginNameTag,  PluginName },
+                {ProjectTag, Integrations.GetProjectPath()}
             };
 
-            var installScript = InstallMaxScriptTemplate;
+            var installScript = "";
+            // setup the variables to be used in the configure max script
             foreach (var t in Tokens) {
-                installScript = installScript.Replace (t.Key, t.Value);
+                installScript += string.Format (@"global {0} = @\""{1}\"";", t.Key, t.Value);
             }
+            installScript += string.Format(@"filein \""{0}/{1}\""", Application.dataPath, ConfigureMaxScript);
             return installScript;
         }
 
@@ -476,7 +476,7 @@ namespace FbxExporters.Editor
                 message = string.Format("Failed to configure 3DsMax, please check logs (exitcode={0}).", exitCode);
             } else {
                 title = "Completed installation of 3DsMax Integration.";
-                message = "Enjoy the new \"Unity\" menu in 3DsMax.";
+                message = "Enjoy the new Unity menu in 3DsMax.";
             }
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
