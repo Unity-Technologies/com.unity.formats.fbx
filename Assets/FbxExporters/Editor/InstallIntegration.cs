@@ -356,40 +356,6 @@ namespace FbxExporters.Editor
         }
     }
 
-    class IntegrationsUI
-    {
-        /// <summary>
-        /// The path of the Maya executable.
-        /// </summary>
-        public static string GetMayaExe () {
-            return FbxExporters.EditorTools.ExportSettings.GetSelectedMayaPath ();
-        }
-
-        public static void InstallMayaIntegration ()
-        {
-            var mayaExe = GetMayaExe ();
-            if (string.IsNullOrEmpty (mayaExe)) {
-                return;
-            }
-
-            if (!Integrations.InstallMaya(verbose: true)) {
-                return;
-            }
-
-            int exitCode = Integrations.ConfigureMaya (mayaExe);
-
-            string title, message;
-            if (exitCode != 0) {
-                title = "Failed to install Maya Integration.";
-                message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
-            } else {
-                title = "Completed installation of Maya Integration.";
-                message = "Enjoy the new \"Unity\" menu in Maya.";
-            }
-            UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
-        }
-    }
-
     class MaxIntegration
     {
         private const string MaxScriptsPath = "FbxExporters/Integrations/Autodesk/max/scripts/";
@@ -478,22 +444,52 @@ namespace FbxExporters.Editor
             }
             return ExitCode;
         }
-
     }
 
-    class MaxIntegrationUI{
-        public static void InstallIntegration()
-        {
-            int exitCode = MaxIntegration.InstallMaxPlugin ();
+    class IntegrationsUI
+    {
+        /// <summary>
+        /// The path of the Maya executable.
+        /// </summary>
+        public static string GetMayaExe () {
+            return FbxExporters.EditorTools.ExportSettings.GetSelectedMayaPath ();
+        }
+
+        /// <summary>
+        /// Opens a dialog showing whether the installation succeeded.
+        /// </summary>
+        /// <param name="dcc">Dcc name.</param>
+        private static void ShowSuccessDialog(string dcc, int exitCode){
             string title, message;
             if (exitCode != 0) {
-                title = "Failed to install 3DsMax Integration.";
-                message = string.Format("Failed to configure 3DsMax, please check logs (exitcode={0}).", exitCode);
+                title = string.Format("Failed to install {0} Integration.", dcc);
+                message = string.Format("Failed to configure {0}, please check logs (exitcode={1}).", dcc, exitCode);
             } else {
-                title = "Completed installation of 3DsMax Integration.";
-                message = "Enjoy the new Unity menu in 3DsMax.";
+                title = string.Format("Completed installation of {0} Integration.", dcc);
+                message = string.Format("Enjoy the new Unity menu in {0}.", dcc);
             }
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
+        }
+
+        public static void InstallMayaIntegration ()
+        {
+            var mayaExe = GetMayaExe ();
+            if (string.IsNullOrEmpty (mayaExe)) {
+                return;
+            }
+
+            if (!Integrations.InstallMaya(verbose: true)) {
+                return;
+            }
+
+            int exitCode = Integrations.ConfigureMaya (mayaExe);
+            ShowSuccessDialog ("Maya", exitCode);
+        }
+
+        public static void InstallMaxIntegration()
+        {
+            int exitCode = MaxIntegration.InstallMaxPlugin ();
+            ShowSuccessDialog ("3DsMax", exitCode);
         }
     }
 }

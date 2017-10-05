@@ -162,7 +162,7 @@ namespace FbxExporters.EditorTools {
             }
 
             if (GUILayout.Button ("Install 3DS Max Integration")) {
-                FbxExporters.Editor.MaxIntegrationUI.InstallIntegration ();
+                FbxExporters.Editor.IntegrationsUI.InstallMaxIntegration ();
             }
 
             GUILayout.FlexibleSpace ();
