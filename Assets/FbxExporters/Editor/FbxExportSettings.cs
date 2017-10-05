@@ -106,26 +106,26 @@ namespace FbxExporters.EditorTools {
                 "Select the version of Maya where you would like to install the Unity integration."));
 
             // dropdown to select Maya version to use
-            var options = ExportSettings.GetMayaOptions();
+            var options = ExportSettings.GetDCCOptions();
             // make sure we never initially have browse selected
-            if (exportSettings.selectedMayaApp == options.Length - 1) {
-                exportSettings.selectedMayaApp = 0;
+            if (exportSettings.selectedDCCApp == options.Length - 1) {
+                exportSettings.selectedDCCApp = 0;
             }
-            int oldValue = exportSettings.selectedMayaApp;
-            exportSettings.selectedMayaApp = EditorGUILayout.Popup(exportSettings.selectedMayaApp, options);
-            if (exportSettings.selectedMayaApp == options.Length - 1) {
+            int oldValue = exportSettings.selectedDCCApp;
+            exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
+            if (exportSettings.selectedDCCApp == options.Length - 1) {
                 var ext = "exe";
 #if UNITY_EDITOR_OSX
                 ext = "app";
 #endif
-                string mayaPath = EditorUtility.OpenFilePanel ("Select Maya Application", ExportSettings.kDefaultAdskRoot, ext);
+                string dccPath = EditorUtility.OpenFilePanel ("Select DCC Application", ExportSettings.kDefaultAdskRoot, ext);
 
                 // check that the path is valid and references the maya executable
-                if (!string.IsNullOrEmpty (mayaPath)) {
-                    if (!Path.GetFileNameWithoutExtension (mayaPath).ToLower ().Equals ("maya")) {
+                if (!string.IsNullOrEmpty (dccPath)) {
+                    if (!Path.GetFileNameWithoutExtension (dccPath).ToLower ().Equals ("maya")) {
                         // clicked on the wrong application, try to see if we can still find
                         // maya in this directory.
-                        var mayaDir = new DirectoryInfo(Path.GetDirectoryName(mayaPath));
+                        var mayaDir = new DirectoryInfo(Path.GetDirectoryName(dccPath));
 #if UNITY_EDITOR_OSX
                         var files = mayaDir.GetDirectories("*." + ext);
 #else
@@ -135,21 +135,21 @@ namespace FbxExporters.EditorTools {
                         foreach (var file in files) {
                             var filename = Path.GetFileNameWithoutExtension (file.Name).ToLower ();
                             if (filename.Equals ("maya")) {
-                                mayaPath = file.FullName.Replace("\\","/");
+                                dccPath = file.FullName.Replace("\\","/");
                                 foundMaya = true;
                                 break;
                             }
                         }
                         if (!foundMaya) {
                             Debug.LogError (string.Format("Could not find Maya at: \"{0}\"", mayaDir.FullName));
-                            exportSettings.selectedMayaApp = oldValue;
+                            exportSettings.selectedDCCApp = oldValue;
                             return;
                         }
                     }
-                    ExportSettings.AddMayaOption (mayaPath);
+                    ExportSettings.AddDCCOption (dccPath);
                     Repaint ();
                 } else {
-                    exportSettings.selectedMayaApp = oldValue;
+                    exportSettings.selectedDCCApp = oldValue;
                 }
             }
             GUILayout.EndHorizontal ();
@@ -206,7 +206,7 @@ namespace FbxExporters.EditorTools {
         [HideInInspector]
         public bool keepOriginalAfterConvert;
 
-        public int selectedMayaApp = 0;
+        public int selectedDCCApp = 0;
 
         [SerializeField]
         public UnityEngine.Object turntableScene;
@@ -226,10 +226,10 @@ namespace FbxExporters.EditorTools {
 
         // List of names in order that they appear in option list
         [SerializeField]
-        private List<string> mayaOptionNames;
+        private List<string> dccOptionNames;
         // List of paths in order that they appear in the option list
         [SerializeField]
-        private List<string> mayaOptionPaths;
+        private List<string> dccOptionPaths;
 
         protected override void LoadDefaults()
         {
@@ -238,8 +238,8 @@ namespace FbxExporters.EditorTools {
             keepOriginalAfterConvert = false;
             convertToModelSavePath = kDefaultSavePath;
             turntableScene = null;
-            mayaOptionPaths = null;
-            mayaOptionNames = null;
+            dccOptionPaths = null;
+            dccOptionNames = null;
         }
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace FbxExporters.EditorTools {
         /// <returns>The unique name.</returns>
         /// <param name="name">Name.</param>
         private static string GetUniqueName(string name){
-            if (!instance.mayaOptionNames.Contains(name)) {
+            if (!instance.dccOptionNames.Contains(name)) {
                 return name;
             }
             var format = "{1} ({0})";
@@ -269,9 +269,33 @@ namespace FbxExporters.EditorTools {
             do {
                 uniqueName = string.Format (format, index, name);
                 index++;
-            } while (instance.mayaOptionNames.Contains(name));
+            } while (instance.dccOptionNames.Contains(name));
 
             return uniqueName;
+        }
+
+        /// <summary>
+        /// Find 3DsMax installations at default install path.
+        /// Add results to given dictionary.
+        /// </summary>
+        private static void FindMaxInstalls(){
+            var maxOptionName = instance.dccOptionNames;
+            var maxOptionPath = instance.dccOptionPaths;
+
+            // List that directory and find the right version:
+            // either the newest version, or the exact version we wanted.
+            var adskRoot = new System.IO.DirectoryInfo(kDefaultAdskRoot);
+            foreach(var productDir in adskRoot.GetDirectories()) {
+                var product = productDir.Name;
+
+                // Only accept those that start with 'maya' in either case.
+                if (!product.StartsWith("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
+                    continue;
+                }
+                string version = product.Substring ("3ds max ".Length);
+                maxOptionPath.Add (string.Format("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe"));
+                maxOptionName.Add (GetUniqueName("3Ds Max " + version));
+            }
         }
 
         /// <summary>
@@ -281,10 +305,8 @@ namespace FbxExporters.EditorTools {
         /// If MAYA_LOCATION is set, add this to the list as well.
         /// </summary>
         private static void FindMayaInstalls() {
-            instance.mayaOptionPaths = new List<string> ();
-            instance.mayaOptionNames = new List<string> ();
-            var mayaOptionName = instance.mayaOptionNames;
-            var mayaOptionPath = instance.mayaOptionPaths;
+            var mayaOptionName = instance.dccOptionNames;
+            var mayaOptionPath = instance.dccOptionPaths;
 
             // If the location is given by the environment, use it.
             var location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
@@ -340,34 +362,38 @@ namespace FbxExporters.EditorTools {
 #endif
         }
 
-        public static GUIContent[] GetMayaOptions(){
-            if (instance.mayaOptionNames == null ||
-                instance.mayaOptionNames.Count != instance.mayaOptionPaths.Count ||
-                instance.mayaOptionNames.Count == 0) {
+        public static GUIContent[] GetDCCOptions(){
+            if (instance.dccOptionNames == null ||
+                instance.dccOptionNames.Count != instance.dccOptionPaths.Count ||
+                instance.dccOptionNames.Count == 0) {
+
+                instance.dccOptionPaths = new List<string> ();
+                instance.dccOptionNames = new List<string> ();
                 FindMayaInstalls ();
+                FindMaxInstalls ();
             }
 
             // remove options that no longer exist
             List<int> toDelete = new List<int>();
-            for(int i = 0; i < instance.mayaOptionPaths.Count; i++) {
-                var mayaPath = instance.mayaOptionPaths [i];
+            for(int i = 0; i < instance.dccOptionPaths.Count; i++) {
+                var mayaPath = instance.dccOptionPaths [i];
                 if (!File.Exists (mayaPath)) {
-                    if (i == instance.selectedMayaApp) {
-                        instance.selectedMayaApp = 0;
+                    if (i == instance.selectedDCCApp) {
+                        instance.selectedDCCApp = 0;
                     }
-                    instance.mayaOptionNames.RemoveAt (i);
+                    instance.dccOptionNames.RemoveAt (i);
                     toDelete.Add (i);
                 }
             }
             foreach (var index in toDelete) {
-                instance.mayaOptionPaths.RemoveAt (index);
+                instance.dccOptionPaths.RemoveAt (index);
             }
 
-            GUIContent[] optionArray = new GUIContent[instance.mayaOptionPaths.Count+1];
-            for(int i = 0; i < instance.mayaOptionPaths.Count; i++){
+            GUIContent[] optionArray = new GUIContent[instance.dccOptionPaths.Count+1];
+            for(int i = 0; i < instance.dccOptionPaths.Count; i++){
                 optionArray [i] = new GUIContent(
-                    instance.mayaOptionNames[i],
-                    instance.mayaOptionPaths[i]
+                    instance.dccOptionNames[i],
+                    instance.dccOptionPaths[i]
                 );
             }
             optionArray [optionArray.Length - 1] = new GUIContent("Browse...");
@@ -375,22 +401,22 @@ namespace FbxExporters.EditorTools {
             return optionArray;
         }
 
-        public static void AddMayaOption(string newOption){
+        public static void AddDCCOption(string newOption){
             // on OSX we get a path ending in .app, which is not quite the exe
 #if UNITY_EDITOR_OSX
             newOption = GetMayaExePath(newOption);
 #endif
 
-            var mayaOptionPaths = instance.mayaOptionPaths;
+            var mayaOptionPaths = instance.dccOptionPaths;
             if (mayaOptionPaths.Contains(newOption)) {
-                instance.selectedMayaApp = mayaOptionPaths.IndexOf (newOption);
+                instance.selectedDCCApp = mayaOptionPaths.IndexOf (newOption);
                 return;
             }
             // get the version
             var version = AskMayaVersion(newOption);
-            instance.mayaOptionNames.Add (GetUniqueName("Maya "+version));
+            instance.dccOptionNames.Add (GetUniqueName("Maya "+version));
             mayaOptionPaths.Add (newOption);
-            instance.selectedMayaApp = mayaOptionPaths.Count - 1;
+            instance.selectedDCCApp = mayaOptionPaths.Count - 1;
         }
 
         /// <summary>
@@ -418,7 +444,7 @@ namespace FbxExporters.EditorTools {
 
         public static string GetSelectedMayaPath()
         {
-            return instance.mayaOptionPaths [instance.selectedMayaApp];
+            return instance.dccOptionPaths [instance.selectedDCCApp];
         }
 
         public static string GetTurnTableSceneName(){
