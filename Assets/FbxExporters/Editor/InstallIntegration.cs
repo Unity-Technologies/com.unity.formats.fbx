@@ -372,11 +372,6 @@ namespace FbxExporters.Editor
         private const string ProjectTag = "UnityProject";
         private const string ExportSettingsTag = "UnityFbxExportSettings";
 
-        // TODO: get this from the export settings
-        private static string GetMaxExe(){
-            return "C:/Program Files/Autodesk/3ds Max 2018/3dsmax.exe";
-        }
-
         /// <summary>
         /// Gets the absolute Unity path for relative path in Assets folder.
         /// </summary>
@@ -404,8 +399,7 @@ namespace FbxExporters.Editor
             return installScript;
         }
 
-        public static int InstallMaxPlugin(){
-            var maxExe = GetMaxExe ();
+        public static int InstallMaxPlugin(string maxExe){
             var installScript = GetInstallScript ();
 
             int ExitCode = 0;
@@ -449,9 +443,9 @@ namespace FbxExporters.Editor
     class IntegrationsUI
     {
         /// <summary>
-        /// The path of the Maya executable.
+        /// The path of the DCC executable.
         /// </summary>
-        public static string GetMayaExe () {
+        public static string GetDCCExe () {
             return FbxExporters.EditorTools.ExportSettings.GetSelectedDCCPath ();
         }
 
@@ -471,13 +465,25 @@ namespace FbxExporters.Editor
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
 
-        public static void InstallMayaIntegration ()
+        public static void InstallDCCIntegration()
         {
-            var mayaExe = GetMayaExe ();
-            if (string.IsNullOrEmpty (mayaExe)) {
+            var dccExe = GetDCCExe ();
+            if (string.IsNullOrEmpty (dccExe)) {
                 return;
             }
+            string dccType = System.IO.Path.GetFileNameWithoutExtension (dccExe).ToLower();
+            if (dccType.Equals ("maya")) {
+                InstallMayaIntegration (dccExe);
+                return;
+            }
+            if (dccType.Equals ("3dsmax")) {
+                InstallMaxIntegration (dccExe);
+                return;
+            }
+        }
 
+        public static void InstallMayaIntegration (string mayaExe)
+        {
             if (!Integrations.InstallMaya(verbose: true)) {
                 return;
             }
@@ -486,9 +492,9 @@ namespace FbxExporters.Editor
             ShowSuccessDialog ("Maya", exitCode);
         }
 
-        public static void InstallMaxIntegration()
+        public static void InstallMaxIntegration(string maxExe)
         {
-            int exitCode = MaxIntegration.InstallMaxPlugin ();
+            int exitCode = MaxIntegration.InstallMaxPlugin (maxExe);
             ShowSuccessDialog ("3DsMax", exitCode);
         }
     }

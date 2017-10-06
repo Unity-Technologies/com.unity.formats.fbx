@@ -154,7 +154,7 @@ namespace FbxExporters.EditorTools {
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected DCC so that you can import and export directly to this project.");
             if (GUILayout.Button (installIntegrationContent)) {
-                //FbxExporters.Editor.IntegrationsUI.InstallMayaIntegration ();
+                FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
             }
 
             GUILayout.FlexibleSpace ();
