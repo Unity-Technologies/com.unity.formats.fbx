@@ -146,7 +146,7 @@ namespace FbxExporters.EditorTools {
                             return;
                         }
                     }
-                    ExportSettings.AddDCCOption (dccPath);
+                    ExportSettings.AddDCCOption (dccPath, ExportSettings.DCCType.Maya);
                     Repaint ();
                 } else {
                     exportSettings.selectedDCCApp = oldValue;
@@ -243,7 +243,7 @@ namespace FbxExporters.EditorTools {
         }
 
         /// <summary>
-        /// Increments the name if there is a duplicate in MayaAppOptions dictionary.
+        /// Increments the name if there is a duplicate in dccAppOptions.
         /// </summary>
         /// <returns>The unique name.</returns>
         /// <param name="name">Name.</param>
@@ -294,7 +294,7 @@ namespace FbxExporters.EditorTools {
                 }
                 string version = product.Substring ("3ds max ".Length);
                 maxOptionPath.Add (string.Format("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe"));
-                maxOptionName.Add (GetUniqueName("3Ds Max " + version));
+                maxOptionName.Add (GetUniqueName("3ds Max " + version));
             }
         }
 
@@ -376,8 +376,8 @@ namespace FbxExporters.EditorTools {
             // remove options that no longer exist
             List<int> toDelete = new List<int>();
             for(int i = 0; i < instance.dccOptionPaths.Count; i++) {
-                var mayaPath = instance.dccOptionPaths [i];
-                if (!File.Exists (mayaPath)) {
+                var dccPath = instance.dccOptionPaths [i];
+                if (!File.Exists (dccPath)) {
                     if (i == instance.selectedDCCApp) {
                         instance.selectedDCCApp = 0;
                     }
@@ -401,22 +401,36 @@ namespace FbxExporters.EditorTools {
             return optionArray;
         }
 
-        public static void AddDCCOption(string newOption){
-            // on OSX we get a path ending in .app, which is not quite the exe
-#if UNITY_EDITOR_OSX
-            newOption = GetMayaExePath(newOption);
-#endif
+        public enum DCCType { Maya, Max };
 
-            var mayaOptionPaths = instance.dccOptionPaths;
-            if (mayaOptionPaths.Contains(newOption)) {
-                instance.selectedDCCApp = mayaOptionPaths.IndexOf (newOption);
+        public static void AddDCCOption(string newOption, DCCType dcc){
+            if (Application.platform == RuntimePlatform.OSXEditor && dcc == DCCType.Maya) {
+                // on OSX we get a path ending in .app, which is not quite the exe
+                newOption = GetMayaExePath(newOption);
+            }
+
+            var dccOptionPaths = instance.dccOptionPaths;
+            if (dccOptionPaths.Contains(newOption)) {
+                instance.selectedDCCApp = dccOptionPaths.IndexOf (newOption);
                 return;
             }
-            // get the version
-            var version = AskMayaVersion(newOption);
-            instance.dccOptionNames.Add (GetUniqueName("Maya "+version));
-            mayaOptionPaths.Add (newOption);
-            instance.selectedDCCApp = mayaOptionPaths.Count - 1;
+
+            string optionName = "";
+            switch (dcc) {
+            case DCCType.Maya:
+                var version = AskMayaVersion(newOption);
+                optionName = GetUniqueName ("Maya " + version);
+                break;
+            case DCCType.Max:
+                optionName = GetMaxOptionName (newOption);
+                break;
+            default:
+                throw new System.NotImplementedException();
+            }
+
+            instance.dccOptionNames.Add (optionName);
+            dccOptionPaths.Add (newOption);
+            instance.selectedDCCApp = dccOptionPaths.Count - 1;
         }
 
         /// <summary>
@@ -442,7 +456,16 @@ namespace FbxExporters.EditorTools {
             return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
         }
 
-        public static string GetSelectedMayaPath()
+        /// <summary>
+        /// Gets the unique label for a new 3DsMax dropdown option.
+        /// </summary>
+        /// <returns>The 3DsMax dropdown option label.</returns>
+        /// <param name="exePath">Exe path.</param>
+        public static string GetMaxOptionName(string exePath){
+            return GetUniqueName (Path.GetFileName(Path.GetDirectoryName (exePath)));
+        }
+
+        public static string GetSelectedDCCPath()
         {
             return instance.dccOptionPaths [instance.selectedDCCApp];
         }

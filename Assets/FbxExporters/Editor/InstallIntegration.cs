@@ -452,7 +452,7 @@ namespace FbxExporters.Editor
         /// The path of the Maya executable.
         /// </summary>
         public static string GetMayaExe () {
-            return FbxExporters.EditorTools.ExportSettings.GetSelectedMayaPath ();
+            return FbxExporters.EditorTools.ExportSettings.GetSelectedDCCPath ();
         }
 
         /// <summary>
