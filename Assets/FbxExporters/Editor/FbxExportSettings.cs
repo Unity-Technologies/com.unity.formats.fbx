@@ -114,39 +114,35 @@ namespace FbxExporters.EditorTools {
             int oldValue = exportSettings.selectedDCCApp;
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
             if (exportSettings.selectedDCCApp == options.Length - 1) {
-                var ext = "exe";
-#if UNITY_EDITOR_OSX
-                ext = "app";
-#endif
+                var ext = "";
+                switch (Application.platform) {
+                case RuntimePlatform.WindowsEditor:
+                    ext = "exe";
+                    break;
+                case RuntimePlatform.OSXEditor:
+                    ext = "app";
+                    break;
+                default:
+                    throw new System.NotImplementedException ();
+                }
+
                 string dccPath = EditorUtility.OpenFilePanel ("Select DCC Application", ExportSettings.kDefaultAdskRoot, ext);
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (dccPath)) {
-                    if (!Path.GetFileNameWithoutExtension (dccPath).ToLower ().Equals ("maya")) {
-                        // clicked on the wrong application, try to see if we can still find
-                        // maya in this directory.
-                        var mayaDir = new DirectoryInfo(Path.GetDirectoryName(dccPath));
-#if UNITY_EDITOR_OSX
-                        var files = mayaDir.GetDirectories("*." + ext);
-#else
-                        var files = mayaDir.GetFiles ("*." + ext);
-#endif
-                        bool foundMaya = false;
-                        foreach (var file in files) {
-                            var filename = Path.GetFileNameWithoutExtension (file.Name).ToLower ();
-                            if (filename.Equals ("maya")) {
-                                dccPath = file.FullName.Replace("\\","/");
-                                foundMaya = true;
-                                break;
-                            }
-                        }
-                        if (!foundMaya) {
-                            Debug.LogError (string.Format("Could not find Maya at: \"{0}\"", mayaDir.FullName));
-                            exportSettings.selectedDCCApp = oldValue;
-                            return;
-                        }
+                    bool foundMax = false;
+                    var foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Maya);
+                    if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor) {
+                        foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
+                        foundMax = true;
                     }
-                    ExportSettings.AddDCCOption (dccPath, ExportSettings.DCCType.Maya);
+                    if (foundDCCPath == null) {
+                        Debug.LogError (string.Format ("Could not find supported DCC application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
+                        exportSettings.selectedDCCApp = oldValue;
+                    } else {
+                        dccPath = foundDCCPath;
+                        ExportSettings.AddDCCOption (dccPath, foundMax? ExportSettings.DCCType.Max : ExportSettings.DCCType.Maya);
+                    }
                     Repaint ();
                 } else {
                     exportSettings.selectedDCCApp = oldValue;
@@ -156,13 +152,9 @@ namespace FbxExporters.EditorTools {
 
 			var installIntegrationContent = new GUIContent(
                     "Install Unity Integration",
-                    "Install and configure the Unity integration for Maya so that you can import and export directly to this project.");
+                    "Install and configure the Unity integration for the selected DCC so that you can import and export directly to this project.");
             if (GUILayout.Button (installIntegrationContent)) {
-                FbxExporters.Editor.IntegrationsUI.InstallMayaIntegration ();
-            }
-
-            if (GUILayout.Button ("Install 3DS Max Integration")) {
-                FbxExporters.Editor.IntegrationsUI.InstallMaxIntegration ();
+                //FbxExporters.Editor.IntegrationsUI.InstallMayaIntegration ();
             }
 
             GUILayout.FlexibleSpace ();
@@ -172,6 +164,49 @@ namespace FbxExporters.EditorTools {
                 EditorUtility.SetDirty (exportSettings);
                 exportSettings.Save ();
             }
+        }
+
+        private static string TryFindDCC(string dccPath, string ext, ExportSettings.DCCType dccType){
+            string dccName = "";
+            switch (dccType) {
+            case ExportSettings.DCCType.Maya:
+                dccName = "maya";
+                break;
+            case ExportSettings.DCCType.Max:
+                dccName = "3dsmax";
+                break;
+            default:
+                throw new System.NotImplementedException ();
+            }
+
+            if (Path.GetFileNameWithoutExtension (dccPath).ToLower ().Equals (dccName)) {
+                return dccPath;
+            }
+
+            // clicked on the wrong application, try to see if we can still find
+            // a dcc in this directory.
+            var dccDir = new DirectoryInfo(Path.GetDirectoryName(dccPath));
+            FileSystemInfo[] files = {};
+            switch(Application.platform){
+            case RuntimePlatform.OSXEditor:
+                files = dccDir.GetDirectories ("*." + ext);
+                break;
+            case RuntimePlatform.WindowsEditor:
+                files = dccDir.GetFiles ("*." + ext);
+                break;
+            default:
+                throw new System.NotImplementedException();
+            }
+
+            string newDccPath = null;
+            foreach (var file in files) {
+                var filename = Path.GetFileNameWithoutExtension (file.Name).ToLower ();
+                if (filename.Equals (dccName)) {
+                    newDccPath = file.FullName.Replace("\\","/");
+                    break;
+                }
+            }
+            return newDccPath;
         }
 
     }
