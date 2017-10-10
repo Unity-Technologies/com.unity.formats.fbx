@@ -106,15 +106,21 @@ add_custom_target(
 ###########################################################################
 # Zip integrations folder
 set(MAYA_INTEGRATION_TARGET zip_maya_integration)
-set(MAYA_INTEGRATION_ZIP_NAME "unityoneclick_for_maya.zip")
+set(MAYA_INTEGRATION_ZIP_NAME "UnityFbxForMaya.zip")
 
-# remove existing zip file
+set(MAX_INTEGRATION_TARGET zip_max_integration)
+set(MAX_INTEGRATION_ZIP_NAME "UnityFbxForMax.zip")
+
+# remove existing zip files
 file(REMOVE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME}")
+file(REMOVE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAX_INTEGRATION_ZIP_NAME}")
+
 # remove .pyc files that we don't want to ship
 file(GLOB PYC_FILES "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scripts/unityOneClick/*.pyc")
 IF( PYC_FILES )
     file(REMOVE ${PYC_FILES})
 ENDIF()
+
 # remove .meta files from Integrations
 file(GLOB_RECURSE META_FILES "${CMAKE_SOURCE_DIR}/Assets/Integrations/*.meta")
 
@@ -123,11 +129,25 @@ add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
         COMMAND ${CMAKE_COMMAND} -E remove ${META_FILES}
     ENDIF
     COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
-       "${CMAKE_SOURCE_DIR}/Assets/Integrations"
+       "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya" 
+       "${CMAKE_SOURCE_DIR}/Assets/Integrations/BringToFront.exe"
+       "${CMAKE_SOURCE_DIR}/Assets/Integrations/.gitignore"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets
     COMMENT "Zipping Maya Integration folder"
 )
 add_custom_target(${MAYA_INTEGRATION_TARGET} DEPENDS ${MAYA_INTEGRATION_ZIP_NAME})
+
+
+add_custom_command(OUTPUT ${MAX_INTEGRATION_ZIP_NAME}
+    IF(META_FILES)
+        COMMAND ${CMAKE_COMMAND} -E remove ${META_FILES}
+    ENDIF
+    COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAX_INTEGRATION_ZIP_NAME} --format=zip
+       "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/max"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets
+    COMMENT "Zipping 3DsMax Integration folder"
+)
+add_custom_target(${MAX_INTEGRATION_TARGET} DEPENDS ${MAX_INTEGRATION_ZIP_NAME})
 
 ###########################################################################
 # Add target for creating a package
@@ -135,9 +155,9 @@ add_custom_command(
         OUTPUT ${PACKAGE_PATH}
         COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} -exportPackage Assets/FbxExporters ${PACKAGE_PATH} -quit
         COMMENT "Creating Unity Package ${PACKAGE_PATH}"
-        DEPENDS ${MAYA_INTEGRATION_TARGET}
+        DEPENDS ${MAYA_INTEGRATION_TARGET} ${MAX_INTEGRATION_TARGET}
     )
-add_custom_target(unitypackage ALL DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${MAYA_INTEGRATION_TARGET} ${README_TARGET})
+add_custom_target(unitypackage ALL DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${MAYA_INTEGRATION_TARGET} ${MAX_INTEGRATION_TARGET} ${README_TARGET})
 
 enable_testing()
 add_test(NAME run-all COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} runEditorTests -quit)

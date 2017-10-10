@@ -10,7 +10,7 @@
 [Bb]in/
 [Dd]ebug/
 
-[Aa]ssets/FbxExporters/unityoneclick_for_maya.zip
+[Aa]ssets/FbxExporters/*.zip
 
 # vim temp files
 *.swp

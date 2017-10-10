@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using System.Collections.Generic;
+using FbxExporters.EditorTools;
 
 namespace FbxExporters.Editor
 {
@@ -375,7 +376,7 @@ namespace FbxExporters.Editor
         private const string MaxScriptsPath = "Integrations/Autodesk/max/scripts/";
 
         private const string PluginName = "UnityFbxForMaxPlugin.ms";
-        private const string PluginPath = MaxScriptsPath + PluginName;
+        public const string PluginPath = MaxScriptsPath + PluginName;
 
         private const string ConfigureMaxScript = MaxScriptsPath + "configureUnityFbxForMax.ms";
 
@@ -385,6 +386,24 @@ namespace FbxExporters.Editor
         private const string PluginNameTag = "UnityPluginScript_Name";
         private const string ProjectTag = "UnityProject";
         private const string ExportSettingsTag = "UnityFbxExportSettings";
+
+        private static string m_integrationFolderPath = null;
+        public static string INTEGRATION_FOLDER_PATH
+        {
+            get{
+                if (string.IsNullOrEmpty (m_integrationFolderPath)) {
+                    m_integrationFolderPath = Application.dataPath;
+                }
+                return m_integrationFolderPath;
+            }
+            set{
+                if (!string.IsNullOrEmpty (value) && System.IO.Directory.Exists (value)) {
+                    m_integrationFolderPath = value;
+                } else {
+                    Debug.LogError (string.Format("Failed to set integration folder path, invalid directory \"{0}\"", value));
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the absolute Unity path for relative path in Integrations folder.
@@ -479,7 +498,8 @@ namespace FbxExporters.Editor
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
 
-        const string IntegrationZipPath = "FbxExporters/unityoneclick_for_maya.zip";
+        const string MayaIntegrationZipPath = "FbxExporters/UnityFbxForMaya.zip";
+        const string MaxIntegrationZipPath = "FbxExporters/UnityFbxForMax.zip";
 
         private static string DefaultIntegrationSavePath
         {
@@ -497,23 +517,14 @@ namespace FbxExporters.Editor
                 return;
             }
 
-            // decompress zip file if it exists, otherwise try using default location
-            if (System.IO.File.Exists (GetIntegrationZipFullPath())) {
-                var result = DecompressIntegrationZipFile ();
-                if (!result) {
-                    // could not find integration
-                    return;
-                }
-            } else {
-                Integrations.INTEGRATION_FOLDER_PATH = DefaultIntegrationSavePath;
-            }
-
             string dccType = System.IO.Path.GetFileNameWithoutExtension (dccExe).ToLower();
             if (dccType.Equals ("maya")) {
+                GetIntegrationFolder (ExportSettings.DCCType.Maya);
                 InstallMayaIntegration (dccExe);
                 return;
             }
             if (dccType.Equals ("3dsmax")) {
+                GetIntegrationFolder (ExportSettings.DCCType.Max);
                 InstallMaxIntegration (dccExe);
                 return;
             }
@@ -534,10 +545,49 @@ namespace FbxExporters.Editor
             ShowSuccessDialog ("3DsMax", exitCode);
         }
 
-        private static bool DecompressIntegrationZipFile()
+        private static void GetIntegrationFolder(ExportSettings.DCCType dcc){
+            // decompress zip file if it exists, otherwise try using default location
+            var zipPath = GetIntegrationZipFullPath(dcc);
+            if (System.IO.File.Exists (zipPath)) {
+                var result = DecompressIntegrationZipFile (zipPath, dcc);
+                if (!result) {
+                    // could not find integration
+                    return;
+                }
+            } else {
+                SetIntegrationFolderPath (DefaultIntegrationSavePath, dcc);
+            }
+        }
+
+        private static void SetIntegrationFolderPath(string path, ExportSettings.DCCType dcc){
+            switch (dcc) {
+            case ExportSettings.DCCType.Max:
+                MaxIntegration.INTEGRATION_FOLDER_PATH = path;
+                break;
+            case ExportSettings.DCCType.Maya:
+                Integrations.INTEGRATION_FOLDER_PATH = path;
+                break;
+            default:
+                throw new System.NotImplementedException ();
+            }
+        }
+
+        private static bool DecompressIntegrationZipFile(string zipPath, ExportSettings.DCCType dcc)
         {
+            var dccName = "DCC";
+            switch (dcc) {
+            case ExportSettings.DCCType.Max:
+                dccName = "3Ds Max";
+                break;
+            case ExportSettings.DCCType.Maya:
+                dccName = "Maya";
+                break;
+            default:
+                throw new System.NotImplementedException ();
+            }
+
             // prompt user to enter location to unzip file
-            var unzipFolder = EditorUtility.OpenFolderPanel("Select Location to Save DCC Integration",LastIntegrationSavePath,"");
+            var unzipFolder = EditorUtility.OpenFolderPanel(string.Format("Select Location to Save {0} Integration", dccName),LastIntegrationSavePath,"");
             if (string.IsNullOrEmpty (unzipFolder)) {
                 // user has cancelled, do nothing
                 return false;
@@ -563,7 +613,7 @@ namespace FbxExporters.Editor
 
             // if file already unzipped in this location, then prompt user
             // if they would like to continue unzipping or use what is there
-            if (FolderAlreadyUnzippedAtPath (unzipFolder)) {
+            if (FolderAlreadyUnzippedAtPath (unzipFolder, dcc)) {
                 var result = UnityEditor.EditorUtility.DisplayDialogComplex ("Integrations Exist at Path",
                     string.Format ("Directory \"{0}\" already contains the decompressed integration", unzipFolder),
                     "Overwrite", 
@@ -572,16 +622,16 @@ namespace FbxExporters.Editor
                 );
 
                 if (result == 0) {
-                    DecompressZip (GetIntegrationZipFullPath(), unzipFolder);
+                    DecompressZip (zipPath, unzipFolder);
                 } else if (result == 2) {
                     return false;
                 }
             } else {
                 // unzip Integration folder
-                DecompressZip (GetIntegrationZipFullPath(), unzipFolder);
+                DecompressZip (zipPath, unzipFolder);
             }
 
-            Integrations.INTEGRATION_FOLDER_PATH = unzipFolder;
+            SetIntegrationFolderPath(unzipFolder, dcc);
 
             return true;
         }
@@ -590,9 +640,20 @@ namespace FbxExporters.Editor
         /// Gets the integration zip full path as an absolute Unity-style path.
         /// </summary>
         /// <returns>The integration zip full path.</returns>
-        private static string GetIntegrationZipFullPath()
+        private static string GetIntegrationZipFullPath(ExportSettings.DCCType dcc)
         {
-            return Application.dataPath + "/" + IntegrationZipPath;
+            var relPath = "";
+            switch (dcc) {
+            case ExportSettings.DCCType.Max:
+                relPath = MaxIntegrationZipPath;
+                break;
+            case ExportSettings.DCCType.Maya:
+                relPath = MayaIntegrationZipPath;
+                break;
+            default:
+                throw new System.NotImplementedException ();
+            }
+            return Application.dataPath + "/" + relPath;
         }
 
         /// <summary>
@@ -601,9 +662,16 @@ namespace FbxExporters.Editor
         /// </summary>
         /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
         /// <param name="path">Path.</param>
-        public static bool FolderAlreadyUnzippedAtPath(string path)
+        public static bool FolderAlreadyUnzippedAtPath(string path, ExportSettings.DCCType dcc)
         {
-            return System.IO.File.Exists (System.IO.Path.Combine (path, Integrations.MODULE_TEMPLATE_PATH));
+            switch (dcc) {
+            case ExportSettings.DCCType.Max:
+                return System.IO.File.Exists (System.IO.Path.Combine (path, MaxIntegration.PluginPath));
+            case ExportSettings.DCCType.Maya:
+                return System.IO.File.Exists (System.IO.Path.Combine (path, Integrations.MODULE_TEMPLATE_PATH));
+            default:
+                throw new System.NotImplementedException ();
+            }
         }
 
         /// <summary>
