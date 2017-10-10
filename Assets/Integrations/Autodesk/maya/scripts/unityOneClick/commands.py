@@ -268,11 +268,20 @@ class previewCmd(BaseCommand):
         return
     
     def doIt(self, args):
+        def integrationBinPath():
+            # e.g. /Users/inwoods/Development/MyGame/Assets/Integrations/Autodesk/maya/plug-ins/unityOneClickPlugin.py
+            # returns /Users/inwoods/Development/MyGame/Assets/Integrations
+            head, tail = os.path.split(maya.cmds.pluginInfo("unityOneClickPlugin", q=True, path=True))
+            head, tail = os.path.split(head)
+            head, tail = os.path.split(head)
+            head, tail = os.path.split(head)
+            return head
 
         unityAppPath = maya.cmds.optionVar(q='UnityApp')
         unityProjectPath = maya.cmds.optionVar(q='UnityProject')
         unityTempSavePath = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityTempSavePath'))
         unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
+
         if maya.cmds.optionVar(exists='UnityInstructionPath'):
             instructionFile = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityInstructionPath'))
         else:
@@ -316,7 +325,7 @@ class previewCmd(BaseCommand):
 
         elif maya.cmds.about(windows=True):
             melCommand = r'system("start \"{0}\" \"{1}\" \"{2}\" \"-projectPath {3} -executeMethod {4}\"");'\
-                .format(unityProjectPath + "/Assets/FbxExporters/Integrations/BringToFront.exe", 
+                .format(integrationBinPath() + "/BringToFront.exe",
                         os.path.basename(unityProjectPath), unityAppPath,
                         unityProjectPath, unityCommand)
 
