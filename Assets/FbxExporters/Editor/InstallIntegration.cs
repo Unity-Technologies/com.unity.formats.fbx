@@ -477,6 +477,11 @@ namespace FbxExporters.Editor
         }
 
         public static int InstallMaxPlugin(string maxExe){
+            if (Application.platform != RuntimePlatform.WindowsEditor) {
+                Debug.LogError ("The 3DsMax Unity plugin is Windows only, please try installing a Maya plugin instead");
+                return -1;
+            }
+
             var installScript = GetInstallScript ();
 
             int ExitCode = 0;
@@ -494,13 +499,8 @@ namespace FbxExporters.Editor
                 myProcess.StartInfo.CreateNoWindow = true;
                 myProcess.StartInfo.UseShellExecute = false;
 
-#if UNITY_EDITOR_OSX
-                throw new NotImplementedException();
-#elif UNITY_EDITOR_LINUX
-                throw new NotImplementedException();
-#else // UNITY_EDITOR_WINDOWS
                 myProcess.StartInfo.Arguments = string.Format("-q -silent -mxs \"{0}\"", installScript);
-#endif
+
                 myProcess.EnableRaisingEvents = true;
                 myProcess.Start();
                 myProcess.WaitForExit();
