@@ -310,45 +310,21 @@ namespace FbxExporters.EditorTools {
         }
 
         /// <summary>
-        /// Find 3DsMax installations at default install path.
-        /// Add results to given dictionary.
-        /// </summary>
-        private static void FindMaxInstalls(){
-            var maxOptionName = instance.dccOptionNames;
-            var maxOptionPath = instance.dccOptionPaths;
-
-            // List that directory and find the right version:
-            // either the newest version, or the exact version we wanted.
-            var adskRoot = new System.IO.DirectoryInfo(kDefaultAdskRoot);
-            foreach(var productDir in adskRoot.GetDirectories()) {
-                var product = productDir.Name;
-
-                // Only accept those that start with 'maya' in either case.
-                if (!product.StartsWith("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
-                    continue;
-                }
-                string version = product.Substring ("3ds max ".Length);
-                maxOptionPath.Add (string.Format("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe"));
-                maxOptionName.Add (GetUniqueName("3ds Max " + version));
-            }
-        }
-
-        /// <summary>
-        /// Find Maya installations at default install path.
+        /// Find Maya and 3DsMax installations at default install path.
         /// Add results to given dictionary.
         /// 
         /// If MAYA_LOCATION is set, add this to the list as well.
         /// </summary>
-        private static void FindMayaInstalls() {
-            var mayaOptionName = instance.dccOptionNames;
-            var mayaOptionPath = instance.dccOptionPaths;
+        private static void FindDCCInstalls() {
+            var dccOptionName = instance.dccOptionNames;
+            var dccOptionPath = instance.dccOptionPaths;
 
             // If the location is given by the environment, use it.
             var location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
             if (!string.IsNullOrEmpty(location)) {
                 location = location.TrimEnd('/');
-                mayaOptionPath.Add (GetMayaExePath (location.Replace ("\\", "/")));
-                mayaOptionName.Add ("MAYA_LOCATION");
+                dccOptionPath.Add (GetMayaExePath (location.Replace ("\\", "/")));
+                dccOptionName.Add ("MAYA_LOCATION");
             }
 
             // List that directory and find the right version:
@@ -358,16 +334,21 @@ namespace FbxExporters.EditorTools {
                 var product = productDir.Name;
 
                 // Only accept those that start with 'maya' in either case.
-                if (!product.StartsWith("maya", StringComparison.InvariantCultureIgnoreCase)) {
-                    continue;
+                if (product.StartsWith ("maya", StringComparison.InvariantCultureIgnoreCase)) {
+                    // Reject MayaLT -- it doesn't have plugins.
+                    if (product.StartsWith ("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
+                        continue;
+                    }
+                    string version = product.Substring ("maya".Length);
+                    dccOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
+                    dccOptionName.Add (GetUniqueName ("Maya " + version));
                 }
-                // Reject MayaLT -- it doesn't have plugins.
-                if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
-                    continue;
+
+                if (product.StartsWith ("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
+                    string version = product.Substring ("3ds max ".Length);
+                    dccOptionPath.Add (string.Format ("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe"));
+                    dccOptionName.Add (GetUniqueName ("3ds Max " + version));
                 }
-                string version = product.Substring ("maya".Length);
-                mayaOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
-                mayaOptionName.Add (GetUniqueName("Maya " + version));
             }
         }
 
@@ -404,8 +385,7 @@ namespace FbxExporters.EditorTools {
 
                 instance.dccOptionPaths = new List<string> ();
                 instance.dccOptionNames = new List<string> ();
-                FindMayaInstalls ();
-                FindMaxInstalls ();
+                FindDCCInstalls ();
             }
 
             // remove options that no longer exist
