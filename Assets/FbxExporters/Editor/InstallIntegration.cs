@@ -551,4 +551,111 @@ namespace FbxExporters.Editor
             AssetDatabase.Refresh ();
         }
     }
+
+    class MaxIntegration
+    {
+        private const string MaxScriptsPath = "FbxExporters/Integrations/Autodesk/max/scripts/";
+
+        private const string PluginName = "UnityFbxForMaxPlugin.ms";
+        private const string PluginPath = MaxScriptsPath + PluginName;
+
+        private const string ConfigureMaxScript = MaxScriptsPath + "configureUnityFbxForMax.ms";
+
+        private const string ExportSettingsFile = MaxScriptsPath + "unityFbxExportSettings.ms";
+
+        private const string PluginSourceTag = "UnityPluginScript_Source";
+        private const string PluginNameTag = "UnityPluginScript_Name";
+        private const string ProjectTag = "UnityProject";
+        private const string ExportSettingsTag = "UnityFbxExportSettings";
+
+        // TODO: get this from the export settings
+        private static string GetMaxExe(){
+            return "C:/Program Files/Autodesk/3ds Max 2018/3dsmax.exe";
+        }
+
+        /// <summary>
+        /// Gets the absolute Unity path for relative path in Assets folder.
+        /// </summary>
+        /// <returns>The absolute path.</returns>
+        /// <param name="relPath">Relative path.</param>
+        public static string GetAbsPath(string relPath){
+            return Application.dataPath + "/" + relPath;
+        }
+
+        private static string GetInstallScript(){
+            Dictionary<string,string> Tokens = new Dictionary<string,string>()
+            {
+                {PluginSourceTag, GetAbsPath(PluginPath) },
+                {PluginNameTag,  PluginName },
+                {ProjectTag,GetAbsPath("")},
+                {ExportSettingsTag, GetAbsPath(ExportSettingsFile) }
+            };
+
+            var installScript = "";
+            // setup the variables to be used in the configure max script
+            foreach (var t in Tokens) {
+                installScript += string.Format (@"global {0} = @\""{1}\"";", t.Key, t.Value);
+            }
+            installScript += string.Format(@"filein \""{0}\""", GetAbsPath(ConfigureMaxScript));
+            return installScript;
+        }
+
+        public static int InstallMaxPlugin(){
+            if (Application.platform != RuntimePlatform.WindowsEditor) {
+                Debug.LogError ("The 3DsMax Unity plugin is Windows only, please try installing a Maya plugin instead");
+                return -1;
+            }
+
+            var maxExe = GetMaxExe ();
+            var installScript = GetInstallScript ();
+
+            int ExitCode = 0;
+
+            try {
+                if (!System.IO.File.Exists(maxExe))
+                {
+                    Debug.LogError (string.Format ("No 3DsMax installation found at {0}", maxExe));
+                    return -1;
+                }
+
+                System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+                myProcess.StartInfo.FileName = maxExe;
+                myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                myProcess.StartInfo.CreateNoWindow = true;
+                myProcess.StartInfo.UseShellExecute = false;
+
+                myProcess.StartInfo.Arguments = string.Format("-q -silent -mxs \"{0}\"", installScript);
+
+                myProcess.EnableRaisingEvents = true;
+                myProcess.Start();
+                myProcess.WaitForExit();
+                ExitCode = myProcess.ExitCode;
+                Debug.Log(string.Format("Ran max: [{0}]\nWith args [{1}]\nResult {2}",
+                    maxExe, myProcess.StartInfo.Arguments, ExitCode));
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogError(string.Format ("Exception failed to start Max ({0})", e.Message));
+                ExitCode = -1;
+            }
+            return ExitCode;
+        }
+
+    }
+
+    class MaxIntegrationUI{
+        public static void InstallIntegration()
+        {
+            int exitCode = MaxIntegration.InstallMaxPlugin ();
+            string title, message;
+            if (exitCode != 0) {
+                title = "Failed to install 3DsMax Integration.";
+                message = string.Format("Failed to configure 3DsMax, please check logs (exitcode={0}).", exitCode);
+            } else {
+                title = "Completed installation of 3DsMax Integration.";
+                message = "Enjoy the new Unity menu in 3DsMax.";
+            }
+            UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
+        }
+    }
 }
