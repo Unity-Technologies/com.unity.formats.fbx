@@ -112,7 +112,7 @@ add_custom_target(
             "VERSION: ${PACKAGE_VERSION}"
     COMMAND ${PYTHON_EXECUTABLE}
             "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
-            "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/UnityFbxForMaya/version.py"
+            "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scripts/UnityFbxForMaya/version.py"
             ".*VERSION.*=.*"
             "VERSION = ${VERSION_AS_STRING}"
     DEPENDS "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
@@ -142,6 +142,7 @@ add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
        "${CMAKE_SOURCE_DIR}/Assets/Integrations"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets
     COMMENT "Zipping Maya Integration folder"
+    DEPENDS ${README_TARGET}
 )
 add_custom_target(${MAYA_INTEGRATION_TARGET} DEPENDS ${MAYA_INTEGRATION_ZIP_NAME})
 
@@ -217,7 +218,7 @@ add_custom_command(
         COMMENT "Creating Unity Package ${PACKAGE_PATH}"
         DEPENDS UnityFbxExporterEditorDLL
     )
-add_custom_target(unitypackage DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${MAYA_INTEGRATION_TARGET} ${README_TARGET})
+add_custom_target(unitypackage DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${README_TARGET} ${MAYA_INTEGRATION_TARGET})
 
 enable_testing()
 add_test(NAME run-all COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} runEditorTests -quit)
@@ -239,8 +240,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             PATTERN "Editor/EditorRotate.cs" EXCLUDE
             PATTERN "Editor/FbxPrefabAutoUpdater.cs" EXCLUDE
             PATTERN "Editor/ConvertToModel.cs" EXCLUDE
-            PATTERN "Editor/FbxPrefabInspector.cs" EXCLUDE
-            PATTERN "Integrations/BringToFront.exe" EXCLUDE)
+            PATTERN "Editor/FbxPrefabInspector.cs" EXCLUDE)
     install(FILES ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME} DESTINATION FbxExporters/Editor)
     install(FILES ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME} DESTINATION FbxExporters)
 else()
