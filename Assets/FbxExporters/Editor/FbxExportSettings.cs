@@ -327,6 +327,10 @@ namespace FbxExporters.EditorTools {
                 dccOptionName.Add ("MAYA_LOCATION");
             }
 
+            if (!Directory.Exists (kDefaultAdskRoot)) {
+                // no autodesk products installed
+                return;
+            }
             // List that directory and find the right version:
             // either the newest version, or the exact version we wanted.
             var adskRoot = new System.IO.DirectoryInfo(kDefaultAdskRoot);
