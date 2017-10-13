@@ -102,8 +102,8 @@ namespace FbxExporters.EditorTools {
 
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
-                "Maya Application:",
-                "Select the version of Maya where you would like to install the Unity integration."));
+                "DCC Application:",
+                "Select the DCC where you would like to install the Unity integration."));
 
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
@@ -130,18 +130,18 @@ namespace FbxExporters.EditorTools {
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (dccPath)) {
-                    bool foundMax = false;
+                    ExportSettings.DCCType foundDCC = ExportSettings.DCCType.Maya;
                     var foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Maya);
                     if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor) {
                         foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
-                        foundMax = true;
+                        foundDCC = ExportSettings.DCCType.Max;
                     }
                     if (foundDCCPath == null) {
                         Debug.LogError (string.Format ("Could not find supported DCC application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
                         exportSettings.selectedDCCApp = oldValue;
                     } else {
                         dccPath = foundDCCPath;
-                        ExportSettings.AddDCCOption (dccPath, foundMax? ExportSettings.DCCType.Max : ExportSettings.DCCType.Maya);
+                        ExportSettings.AddDCCOption (dccPath, foundDCC);
                     }
                     Repaint ();
                 } else {
