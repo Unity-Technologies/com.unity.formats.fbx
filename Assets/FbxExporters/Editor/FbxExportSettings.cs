@@ -408,6 +408,13 @@ namespace FbxExporters.EditorTools {
                 instance.dccOptionPaths.RemoveAt (index);
             }
 
+            if (instance.dccOptionPaths.Count <= 0) {
+                return new GUIContent[]{
+                    new GUIContent("<no DCC found>"),
+                    new GUIContent("Browse...")
+                };
+            }
+
             GUIContent[] optionArray = new GUIContent[instance.dccOptionPaths.Count+1];
             for(int i = 0; i < instance.dccOptionPaths.Count; i++){
                 optionArray [i] = new GUIContent(
