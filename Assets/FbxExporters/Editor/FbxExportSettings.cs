@@ -86,7 +86,6 @@ namespace FbxExporters.EditorTools {
                 }
             }
             GUILayout.EndHorizontal ();
-            GUILayout.BeginHorizontal ();
 
             EditorGUILayout.Space ();
 
