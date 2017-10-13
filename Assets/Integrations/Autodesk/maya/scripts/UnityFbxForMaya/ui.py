@@ -23,15 +23,15 @@
 
 import maya.cmds              
 
-from unityOneClick import (commands)
+from UnityFbxForMaya import (commands)
 
 # ======================================================================'
 # User Interface
 # ======================================================================'
 
-kMenuName = 'UnityOneClick'
-kMenuDivider = 'UnityOneClickDivider'
-kMenuLabel = 'UNITY'
+kMenuName = 'UnityFbxForMaya'
+kMenuDivider = 'UnityFbxForMayaDivider'
+kMenuLabel = 'Unity'
 kMenuInsertAfter = 'exportActiveFileOptions'
 
 def register(pluginFn):
@@ -110,7 +110,7 @@ def installMenu():
 
 def uninstallMenu():
     """
-    uninstall the unityOneClick menu from main window
+    uninstall the UnityFbxForMaya menu from main window
     @ingroup UnityUI
     """
     if maya.cmds.menu(kMenuName, exists=True):     # @UndefinedVariable

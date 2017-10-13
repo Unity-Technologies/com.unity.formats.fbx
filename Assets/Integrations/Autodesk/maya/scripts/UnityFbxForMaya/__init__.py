@@ -14,9 +14,9 @@
 ########################################################################
 """
 Maya Unity Integration
-@package unityOneClick
+@package UnityFbxForMaya
 @author  Simon Inwood <simon.cf.inwood@gmail.com>
-@defgroup unityOneClickPlugin Unity Plugin
+@defgroup UnityFbxForMayaPlugin Unity Plugin
 
 @brief
 

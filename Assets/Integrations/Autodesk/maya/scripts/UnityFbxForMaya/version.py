@@ -14,37 +14,37 @@
 ########################################################################
 """
 @package version
-@brief version file for UnityOneClick
+@brief version file for UnityFbxForMaya
 @author  Simon Inwood <simon.cf.inwood@gmail.com>
-@defgroup UnityOneClickPluginVersion Plugin Version
-@ingroup UnityOneClickPlugin
+@defgroup UnityFbxForMayaPluginVersion Plugin Version
+@ingroup UnityFbxForMayaPlugin
 """
 VERSION = 'sprint26'
 
 def pluginPrefix():
     """
     Return prefix to use for commands and Maya Object names
-    @ingroup UnityOneClickPluginVersion
+    @ingroup UnityFbxForMayaPluginVersion
     """
     return 'unity'
 
 def versionName():
     """
-    Return version string for the unityOneClick plugin
-    @ingroup UnityOneClickPluginVersion
+    Return version string for the UnityFbxForMaya plugin
+    @ingroup UnityFbxForMayaPluginVersion
     """
     return VERSION
 
 def pluginName():
     """
-    Return name of unityOneClick plugin
-    @ingroup UnityOneClickPluginVersion
+    Return name of UnityFbxForMaya plugin
+    @ingroup UnityFbxForMayaPluginVersion
     """
-    return 'UnityOneClick'
+    return 'UnityFbxForMaya'
 
 def vendorName():
     """
-    Return vendor name of unityOneClick plugin
-    @ingroup UnityOneClickPluginVersion
+    Return vendor name of UnityFbxForMaya plugin
+    @ingroup UnityFbxForMayaPluginVersion
     """
     return 'Unity Technology Aps.'
