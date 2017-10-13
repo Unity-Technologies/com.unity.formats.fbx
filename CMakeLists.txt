@@ -7,6 +7,11 @@
 
 cmake_minimum_required (VERSION 3.8)
 
+SET(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/FbxExporterProject/Assets" CACHE PATH "Install path prefix")
+MESSAGE(STATUS "CMAKE_INSTALL_PREFIX is: " ${CMAKE_INSTALL_PREFIX})
+
+project (UnityFbxExporterEditorDLL)
+
 # Default is a release build.
 if (NOT CMAKE_BUILD_TYPE)
   # CMAKE_BUILD_TYPE is special, so we have to CACHE FORCE to actually set it,
@@ -18,12 +23,12 @@ endif()
 message(STATUS "Building for ${CMAKE_BUILD_TYPE}")
 
 if (NOT DEFINED PACKAGE_VERSION OR "${PACKAGE_VERSION}" STREQUAL "")
-    set(PACKAGE_VERSION "0.0.15a")
+    set(PACKAGE_VERSION "1.0.0b1")
 endif()
 message(STATUS "Using Package Version: ${PACKAGE_VERSION}")
 
 if (NOT DEFINED PACKAGE_PATH OR "${PACKAGE_PATH}" STREQUAL "")
-    set(PACKAGE_PATH "${CMAKE_BINARY_DIR}/FbxExporters_${PACKAGE_VERSION}.unitypackage")
+    set(PACKAGE_PATH "${CMAKE_BINARY_DIR}/FbxExporter_${PACKAGE_VERSION}.unitypackage")
 endif()
 message(STATUS "Creating Exporter Package at: ${PACKAGE_PATH}")
 
@@ -69,6 +74,8 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/deps/cmake)
 # Find packages that we need.
 
 find_package(Unity REQUIRED)
+find_package(CSharpAssemblies REQUIRED)
+include(deps/cmake/BuildCSharp.cmake)
 
 set(Python_ADDITIONAL_VERSIONS 2.7)
 
@@ -79,13 +86,22 @@ set(FBXSDK_PACKAGE_TARGET import_fbxsdk)
 add_custom_target(
     ${FBXSDK_PACKAGE_TARGET}
     # remove FbxSdk folder
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_SOURCE_DIR}/Assets/FbxSdk"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxSdk"
     COMMAND "${UNITY_EDITOR_PATH}" -projectPath "${CMAKE_SOURCE_DIR}" -importPackage ${FBXSDK_PACKAGE_PATH} -quit
-    COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_SOURCE_DIR}/Assets/FbxSdk" "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxSdk"
+    COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_SOURCE_DIR}/Assets/FbxSdk" "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxSdk"
 )
 
 ###########################################################################
 # Add target to replace the unity package version number in files
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+  set(VERSION_AS_STRING "\\'${PACKAGE_VERSION}\\'")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  set(VERSION_AS_STRING "'${PACKAGE_VERSION}'")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set(VERSION_AS_STRING "\\'${PACKAGE_VERSION}\\'")
+endif()
+
 set(README_TARGET readme_replace)
 add_custom_target(
     ${README_TARGET}
@@ -96,11 +112,11 @@ add_custom_target(
             "VERSION: ${PACKAGE_VERSION}"
     COMMAND ${PYTHON_EXECUTABLE}
             "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
-            "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scripts/unityOneClick/version.py"
+            "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/UnityFbxForMaya/version.py"
             ".*VERSION.*=.*"
-            "VERSION = '${PACKAGE_VERSION}'"
+            "VERSION = ${VERSION_AS_STRING}"
     DEPENDS "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
-    COMMENT "Replacing version number in files"
+    COMMENT "Replacing version number in files with ${PACKAGE_VERSION}"
 )
 
 ###########################################################################
@@ -130,14 +146,104 @@ add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
 add_custom_target(${MAYA_INTEGRATION_TARGET} DEPENDS ${MAYA_INTEGRATION_ZIP_NAME})
 
 ###########################################################################
+# Compile editor scripts into a multi-platform DLL
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    set(CLASS_LIBRARY_DEST "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+
+    add_custom_command(OUTPUT ${CLASS_LIBRARY_DEST}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CLASS_LIBRARY_DEST}
+    )
+    
+    set(RUNTIME_CLASS_LIBRARY_NAME "UnityFbxPrefab.dll")
+    fbxexporters_compile_csharp(OUTPUT ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME}
+            EXTRA_ARGS
+                "/target:library"
+            SOURCES
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/FbxPrefab.cs"
+            REFERENCES
+                "${CSHARP_MSCORLIB_LIBRARY}"
+                "${CSHARP_SYSTEM_CORE_LIBRARY}"
+                "${CSHARP_SYSTEM_LIBRARY}"
+                "${CSHARP_UNITYEDITOR_LIBRARY}"
+                "${CSHARP_UNITYENGINE_LIBRARY}"
+            DEPENDS
+                "${CLASS_LIBRARY_DEST}"
+    )
+    add_custom_target(UnityFbxExporterRuntimeDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME})
+    
+    set(EDITOR_CLASS_LIBRARY_NAME "UnityFbxExporterEditor.dll")
+    fbxexporters_compile_csharp(OUTPUT ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME}
+            EXTRA_ARGS
+                "/target:library"
+            SOURCES
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExporter.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExportSettings.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/InstallIntegration.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabAutoUpdater.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabInspector.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ConvertToModel.cs"
+            REFERENCES
+                "${CSHARP_MSCORLIB_LIBRARY}"
+                "${CSHARP_SYSTEM_CORE_LIBRARY}"
+                "${CSHARP_SYSTEM_LIBRARY}"
+                "${CSHARP_UNITYEDITOR_LIBRARY}"
+                "${CSHARP_UNITYENGINE_LIBRARY}"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxSdk/Plugins/UnityFbxSdk.dll"
+                ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME}
+            DEPENDS
+                "${CLASS_LIBRARY_DEST}"
+                ${FBXSDK_PACKAGE_TARGET}
+                UnityFbxExporterRuntimeDLL
+    )
+    add_custom_target(UnityFbxExporterEditorDLL ALL DEPENDS ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME})
+    
+endif()
+
+###########################################################################
 # Add target for creating a package
+
+# remove .pyc files that we don't want to ship
+file(GLOB PYC_FILES "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Integrations/Autodesk/maya/scripts/UnityFbxForMaya/*.pyc")
+IF( PYC_FILES )
+    file(REMOVE ${PYC_FILES})
+ENDIF()
+
 add_custom_command(
         OUTPUT ${PACKAGE_PATH}
-        COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} -exportPackage Assets/FbxExporters ${PACKAGE_PATH} -quit
+        COMMAND "${CMAKE_COMMAND}" -E remove_directory ${CMAKE_BINARY_DIR}/FbxExporterProject
+        COMMAND "${CMAKE_COMMAND}" --build . --target install --config Release
+        COMMAND "${CMAKE_COMMAND}" -E remove ${PACKAGE_PATH}
+        COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_BINARY_DIR}/FbxExporterProject -exportPackage Assets/FbxExporters ${PACKAGE_PATH} -quit
         COMMENT "Creating Unity Package ${PACKAGE_PATH}"
-        DEPENDS ${MAYA_INTEGRATION_TARGET}
+        DEPENDS UnityFbxExporterEditorDLL
     )
-add_custom_target(unitypackage ALL DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${MAYA_INTEGRATION_TARGET} ${README_TARGET})
+add_custom_target(unitypackage DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${MAYA_INTEGRATION_TARGET} ${README_TARGET})
 
 enable_testing()
 add_test(NAME run-all COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_SOURCE_DIR} runEditorTests -quit)
+
+
+############################################################################
+# Install project into build folder
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/FbxExporters
+            DESTINATION .
+            PATTERN "Editor/UnitTests" EXCLUDE
+            PATTERN "FbxTurnTableBase.cs" EXCLUDE
+            PATTERN "FbxPrefab.cs" EXCLUDE
+            PATTERN "Editor/FbxExporter.cs" EXCLUDE
+            PATTERN "Editor/FbxExportSettings.cs" EXCLUDE
+            PATTERN "Editor/InstallIntegration.cs" EXCLUDE
+            PATTERN "Editor/ReviewLastSavedModel.cs" EXCLUDE
+            PATTERN "Editor/EditorRotate.cs" EXCLUDE
+            PATTERN "Editor/FbxPrefabAutoUpdater.cs" EXCLUDE
+            PATTERN "Editor/ConvertToModel.cs" EXCLUDE
+            PATTERN "Editor/FbxPrefabInspector.cs" EXCLUDE
+            PATTERN "Integrations/BringToFront.exe" EXCLUDE)
+    install(FILES ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME} DESTINATION FbxExporters/Editor)
+    install(FILES ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME} DESTINATION FbxExporters)
+else()
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/FbxExporters
+            DESTINATION .)
+endif()

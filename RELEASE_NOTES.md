@@ -1,5 +1,21 @@
 RELEASE NOTES
 
+**Version**: 1.0.0b1
+
+NEW FEATURES
+
+* Ship all C# scripts as DLLs
+
+* Maya Unity Integration: Remove Preview option from menu
+
+* Enforce Exporter only works with Unity 2017.1+
+
+FIXES
+* Export Settings: prevent user from selecting Maya LT with "Browse" option in dropdown
+* Fbx Export: fix game won't compile with package installed (move FbxSdk to editor folder)
+* Convert to Prefab: fix particle system component causing convert to fail 
+* Fbx Prefab: Properly handle updating Linked Prefab Instances that get nested inside other Prefabs.
+
 **Version**: sprint26
 
 NEW FEATURES
