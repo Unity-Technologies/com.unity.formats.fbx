@@ -407,8 +407,7 @@ namespace FbxExporters.UnitTests
             building3.transform.localScale = new Vector3(.5f, .5f, .5f);
 
             var original = ConvertToModel.Convert (root,
-                fbxFullPath: GetRandomFbxFilePath (),
-                keepOriginal: ConvertToModel.KeepOriginal.Keep);
+                fbxFullPath: GetRandomFbxFilePath ());
 
             // Make sure it's OK.
             Assert.That (original.transform.GetChild (0).name, Is.EqualTo ("building2"));

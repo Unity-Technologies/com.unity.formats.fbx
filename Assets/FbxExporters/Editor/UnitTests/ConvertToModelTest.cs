@@ -58,37 +58,6 @@ namespace FbxExporters.UnitTests
                 Assert.AreEqual("a 2", a2.name);
             }
 
-            // Test FixSiblingOrder
-            {
-                var a = new GameObject("a").transform;
-                var b = new GameObject("a").transform;
-
-                var a1 = new GameObject("a1").transform;
-                var a2 = new GameObject("a2").transform;
-                var a3 = new GameObject("a3").transform;
-
-                var b1 = new GameObject("a1").transform;
-                var b2 = new GameObject("a2").transform;
-                var b3 = new GameObject("a3").transform;
-
-                a1.parent = a;
-                a2.parent = a;
-                a3.parent = a;
-
-                b3.parent = b;
-                b1.parent = b;
-                b2.parent = b;
-
-                // Assert same set, different order.
-                Assert.That(ChildNames(b), Is.EquivalentTo(ChildNames(a)));
-                Assert.That(ChildNames(b), Is.Not.EqualTo(ChildNames(a)));
-
-                // Fix the sibling order. Now we have same set, same order!
-                ConvertToModel.FixSiblingOrder(a, b);
-                Assert.That(ChildNames(b), Is.EquivalentTo(ChildNames(a)));
-                Assert.That(ChildNames(b), Is.EqualTo(ChildNames(a)));
-            }
-
             // Test CopyComponents
             {
                 var a = new GameObject("a");
@@ -121,7 +90,7 @@ namespace FbxExporters.UnitTests
                 Assert.AreEqual ("BB", b.transform.GetChild (1).name);
                 Assert.AreEqual (Vector3.zero, b1.transform.localPosition);
 
-                ConvertToModel.SetupImportedGameObject (a, b);
+                ConvertToModel.UpdateFromFBX (a, b);
 
                 Assert.IsTrue (b.GetComponent<BoxCollider> ());
                 Assert.AreEqual ("AA", b.transform.GetChild (1).name);
@@ -140,7 +109,7 @@ namespace FbxExporters.UnitTests
 
             // Convert it to a prefab -- but keep the cube.
             var cubePrefabInstance = ConvertToModel.Convert(cube,
-                directoryFullPath: path, keepOriginal: ConvertToModel.KeepOriginal.Keep);
+                directoryFullPath: path);
 
             // Make sure it's what we expect.
             Assert.That(cube); // we kept the original
@@ -175,13 +144,12 @@ namespace FbxExporters.UnitTests
             // Convert it again, make sure there's only one FbxPrefab (see UNI-25528).
             // Also make sure we deleted.
             var cubePrefabInstance2 = ConvertToModel.Convert(cubePrefabInstance,
-                directoryFullPath: path, keepOriginal: ConvertToModel.KeepOriginal.Delete);
+                directoryFullPath: path);
             Assert.IsFalse(cubePrefabInstance);
             Assert.That(cubePrefabInstance2.GetComponents<FbxPrefab>().Length, Is.EqualTo(1));
 
             // Create another cube, make sure the export settings drive whether we keep the cube or not.
-            ConvertToModel.Convert(cube, directoryFullPath: path,
-                    keepOriginal: ConvertToModel.KeepOriginal.Default);
+            ConvertToModel.Convert(cube, directoryFullPath: path);
             if (ConvertToModel.ExportSettings.keepOriginalAfterConvert) {
                 Assert.IsTrue(cube);
             } else {
