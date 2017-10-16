@@ -192,6 +192,11 @@ namespace FbxExporters
                 // Copy the components over to the instance of the FBX.
                 SetupImportedGameObject (toConvert, unityGO);
 
+                // temporary quick fix
+                var temp = toConvert;
+                toConvert = unityGO;
+                unityGO = temp;
+
                 // Set up the FbxPrefab component so it will auto-update.
                 // Make sure to delete whatever FbxPrefab history we had.
                 var fbxPrefab = unityGO.GetComponent<FbxPrefab>();
@@ -376,29 +381,28 @@ namespace FbxExporters
                 }
             }
 
+
             /// <summary>
-            /// Copy components on the 'from' object which is the object in the
-            /// scene we exported, over to the 'to' object which is the object
-            /// in the scene that we imported from the FBX.
+            /// Copy components on the 'from' object which is the object
+            /// in the scene that we imported from the FBX,
+            /// over to the 'to' object which is the object in the
+            /// scene we exported.
             ///
-            /// Exception: don't copy the references to assets in the scene that
-            /// were also exported, in particular the meshes and materials.
+            /// Only copy over meshes and materials, since that is all the FBX contains
+            /// that is not already in the scene.
             ///
             /// The 'from' hierarchy is not modified.
             /// </summary>
-            public static void CopyComponents(GameObject from, GameObject to){
+            public static void CopyComponents(GameObject to, GameObject from){
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
-                foreach(var component in from.GetComponents<Component> ()) {
-                    // UNI-24379: we don't support SkinnedMeshRenderer right
-                    // now: we just bake the mesh into its current pose. So
-                    // don't copy the SMR over. There will already be a
-                    // MeshFilter and MeshRenderer due to the static mesh.
-                    // Remove this code when we support skinning.
-                    if (component is SkinnedMeshRenderer) {
-                        continue;
-                    }
+                // copy over meshes, materials, and nothing else
+                foreach (var component in from.GetComponents<Component>()) {
 
                     var json = EditorJsonUtility.ToJson(component);
+                    if (string.IsNullOrEmpty (json)) {
+                        // this happens for missing scripts
+                        continue;
+                    }
 
                     System.Type expectedType = component.GetType();
                     Component toComponent = null;
@@ -415,38 +419,20 @@ namespace FbxExporters
                     }
 
                     if (!toComponent) {
-                        // It doesn't exist => create and copy.
-                        toComponent = to.AddComponent(component.GetType());
-                        EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                    } else {
-                        // It exists => copy.
-                        // But we want to override that behaviour in a few
-                        // cases, to avoid clobbering references to the new FBX
-                        // TODO: interpret the object or the json more directly
-                        // TODO: be more generic
-                        // TODO: handle references to other objects in the same hierarchy
+                        continue;
+                    }
 
-                        if (toComponent is MeshFilter) {
-                            // Don't copy the mesh. But there's nothing else to
-                            // copy, so just don't copy anything.
-                        } else if (toComponent is SkinnedMeshRenderer) {
-                            // Don't want to clobber materials or the mesh.
-                            var skinnedMesh = toComponent as SkinnedMeshRenderer;
-                            var sharedMesh = skinnedMesh.sharedMesh;
-                            var sharedMats = skinnedMesh.sharedMaterials;
-                            EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                            skinnedMesh.sharedMesh = sharedMesh;
-                            skinnedMesh.sharedMaterials = sharedMats;
-                        } else if (toComponent is Renderer) {
-                            // Don't want to clobber materials.
-                            var renderer = toComponent as Renderer;
-                            var sharedMats = renderer.sharedMaterials;
-                            EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                            renderer.sharedMaterials = sharedMats;
-                        } else {
-                            // Normal case: copy everything.
-                            EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                        }
+                    if (toComponent is SkinnedMeshRenderer) {
+                        var skinnedMesh = toComponent as SkinnedMeshRenderer;
+                        var fromSkinnedMesh = component as SkinnedMeshRenderer;
+                        skinnedMesh.sharedMesh = fromSkinnedMesh.sharedMesh;
+                        skinnedMesh.sharedMaterials = fromSkinnedMesh.sharedMaterials;
+                    } else if (toComponent is MeshFilter) {
+                        EditorJsonUtility.FromJsonOverwrite (json, toComponent);
+                    } else if (toComponent is Renderer) {
+                        var toRen = toComponent as Renderer;
+                        var fromRen = component as Renderer;
+                        toRen.sharedMaterials = fromRen.sharedMaterials;
                     }
                 }
             }
