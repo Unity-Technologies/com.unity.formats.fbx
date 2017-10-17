@@ -463,7 +463,7 @@ namespace FbxExporters.Editor
             {
                 {PluginSourceTag, GetAbsPath(PluginPath) },
                 {PluginNameTag,  PluginName },
-                {ProjectTag,GetAbsPath("")},
+                {ProjectTag, Application.dataPath },
                 {ExportSettingsTag, GetAbsPath(ExportSettingsFile) }
             };
 
