@@ -240,8 +240,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             PATTERN "Editor/EditorRotate.cs" EXCLUDE
             PATTERN "Editor/FbxPrefabAutoUpdater.cs" EXCLUDE
             PATTERN "Editor/ConvertToModel.cs" EXCLUDE
-            PATTERN "Editor/FbxPrefabInspector.cs" EXCLUDE
-            PATTERN "Integrations/BringToFront.exe" EXCLUDE)
+            PATTERN "Editor/FbxPrefabInspector.cs" EXCLUDE)
     install(FILES ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME} DESTINATION FbxExporters/Editor)
     install(FILES ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME} DESTINATION FbxExporters)
 else()
