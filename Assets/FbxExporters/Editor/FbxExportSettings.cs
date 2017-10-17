@@ -393,19 +393,23 @@ namespace FbxExporters.EditorTools {
             }
 
             // remove options that no longer exist
-            List<int> toDelete = new List<int>();
+            List<string> pathsToDelete = new List<string>();
+            List<string> namesToDelete = new List<string>();
             for(int i = 0; i < instance.dccOptionPaths.Count; i++) {
                 var dccPath = instance.dccOptionPaths [i];
                 if (!File.Exists (dccPath)) {
                     if (i == instance.selectedDCCApp) {
                         instance.selectedDCCApp = 0;
                     }
-                    instance.dccOptionNames.RemoveAt (i);
-                    toDelete.Add (i);
+                    namesToDelete.Add (instance.dccOptionNames [i]);
+                    pathsToDelete.Add (dccPath);
                 }
             }
-            foreach (var index in toDelete) {
-                instance.dccOptionPaths.RemoveAt (index);
+            foreach (var str in pathsToDelete) {
+                instance.dccOptionPaths.Remove (str);
+            }
+            foreach (var str in namesToDelete) {
+                instance.dccOptionNames.Remove (str);
             }
 
             if (instance.dccOptionPaths.Count <= 0) {
