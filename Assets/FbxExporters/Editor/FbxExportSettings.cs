@@ -133,8 +133,12 @@ namespace FbxExporters.EditorTools {
                     ExportSettings.DCCType foundDCC = ExportSettings.DCCType.Maya;
                     var foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Maya);
                     if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor) {
-                        foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
-                        foundDCC = ExportSettings.DCCType.Max;
+                        if (!ExportSettings.IsMax2018OrLater (dccPath)) {
+                            Debug.LogError ("3DsMax 2017 or earlier is not supported");
+                        } else {
+                            foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
+                            foundDCC = ExportSettings.DCCType.Max;
+                        }
                     }
                     if (foundDCCPath == null) {
                         Debug.LogError (string.Format ("Could not find supported DCC application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
@@ -349,8 +353,12 @@ namespace FbxExporters.EditorTools {
                 }
 
                 if (product.StartsWith ("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
+                    var exePath = string.Format ("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe");
+                    if (!IsMax2018OrLater (exePath)) {
+                        continue;
+                    }
                     string version = product.Substring ("3ds max ".Length);
-                    dccOptionPath.Add (string.Format ("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe"));
+                    dccOptionPath.Add (exePath);
                     dccOptionName.Add (GetUniqueName ("3ds Max " + version));
                 }
             }
@@ -493,6 +501,13 @@ namespace FbxExporters.EditorTools {
         /// <param name="exePath">Exe path.</param>
         public static string GetMaxOptionName(string exePath){
             return GetUniqueName (Path.GetFileName(Path.GetDirectoryName (exePath)));
+        }
+
+        public static bool IsMax2018OrLater(string exePath){
+            var name = Path.GetFileName (Path.GetDirectoryName (exePath)).ToLower();
+            name = name.Replace ("3ds max", "").Trim();
+            int version;
+            return int.TryParse (name, out version) && version >= 2018;
         }
 
         public static string GetSelectedDCCPath()
