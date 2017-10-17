@@ -1,5 +1,5 @@
 -- MacroScripts that will perform actions
-macroScript Import category:"Unity"
+macroScript UnityImport category:"File-Import"
 (
     origObjects = #()
 
@@ -45,11 +45,7 @@ macroScript Import category:"Unity"
         callbacks.removeScripts #postImport id:#unityPlugin
     )
 )
-macroScript Preview category:"Unity"
-(
-print "I do nothing, but I should Preview!"
-)
-macroScript Export category:"Unity"
+macroScript UnityExport category:"File-Export"
 (
     fn loadUnityFbxExportSettings = (
         fbxExportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxExportSettings"
@@ -88,35 +84,36 @@ macroScript Export category:"Unity"
 )
 
 -- Setup UI
-unityMenuName = "Unity"
-unityMenu = menuMan.findMenu unityMenuName
-if unityMenu == undefined do
+importMenuName = "File-Import"
+exportMenuName = "File-Export"
+importMenu = menuMan.findMenu importMenuName
+exportMenu = menuMan.findMenu exportMenuName
+if importMenu != undefined and exportMenu != undefined do
 (
     id = genClassID returnValue:true
     if menuMan.registerMenuContext id[1] then
     (
-        mainMenu = menuMan.getMainMenuBar() --get the main menu bar
-        newUnityMenu = menuMan.createMenu unityMenuName
-        newUnitySubMenu = menuMan.createSubMenuItem unityMenuName newUnityMenu --create a SubMenuItem
-        mainMenu.addItem newUnitySubMenu -1 --add the SubMenu to the end of the Main Menu
+        global unityImportAction = menuMan.createActionItem "UnityImport" importMenuName --create an ActionItem from the MacroScript
+		unityImportAction.setTitle "Import from Unity"
+        unityImportAction.setUseCustomTitle true
         
-        importAction = menuMan.createActionItem "Import" unityMenuName --create an ActionItem from the MacroScript
-		importAction.setTitle "Import"
-        importAction.setUseCustomTitle true
+		global unityExportAction = menuMan.createActionItem "UnityExport" exportMenuName
+		unityExportAction.setTitle "Export to Unity"
+        unityExportAction.setUseCustomTitle true
         
-		previewAction = menuMan.createActionItem "Preview" unityMenuName
-		previewAction.setTitle "Preview"
-        previewAction.setUseCustomTitle true
-        
-		exportAction = menuMan.createActionItem "Export" unityMenuName
-		exportAction.setTitle "Export"
-        exportAction.setUseCustomTitle true
-        
-        newUnityMenu.addItem importAction -1 --add the ActionItem to the menu
-		newUnityMenu.addItem previewAction -1
-		newUnityMenu.addItem exportAction -1
+        importMenu.addItem unityImportAction -1 --add the ActionItem to the menu
+		exportMenu.addItem unityExportAction -1
         menuMan.updateMenuBar() --update the menu bar
     )
 )
 -- Make sure that Menu gets removed at shutdown, force menu to reload each time Max is opened
-callbacks.addScript #preSavingMenus ("menu = menuMan.findMenu \"Unity\" if menu != undefined then menuMan.unregisterMenu menu")
+callbacks.addScript #preSavingMenus (
+    "importMenu = menuMan.findMenu \"File-Import\"; \
+     exportMenu = menuMan.findMenu \"File-Export\"; \
+     if importMenu != undefined and unityImportAction != undefined then( \
+        importMenu.removeItem unityImportAction; \
+     ) \
+     if exportMenu != undefined and unityExportAction != undefined then( \
+        exportMenu.removeItem unityExportAction; \
+     )"
+)
