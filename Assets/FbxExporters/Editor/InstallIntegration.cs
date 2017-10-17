@@ -42,6 +42,15 @@ namespace FbxExporters.Editor
         }
 
         /// <summary>
+        /// Gets the project path.
+        /// </summary>
+        /// <returns>The project path.</returns>
+        public static string GetProjectPath()
+        {
+            return System.IO.Directory.GetParent(Application.dataPath).FullName.Replace("\\","/");
+        }
+
+        /// <summary>
         /// Installs the integration using the provided executable.
         /// </summary>
         /// <returns>The integration.</returns>
@@ -127,11 +136,6 @@ namespace FbxExporters.Editor
         public static string GetAppPath()
         {
             return EditorApplication.applicationPath.Replace("\\","/");
-        }
-
-        public static string GetProjectPath()
-        {
-            return System.IO.Directory.GetParent(Application.dataPath).FullName.Replace("\\","/");
         }
 
         public static string GetPackagePath()
@@ -463,7 +467,7 @@ namespace FbxExporters.Editor
             {
                 {PluginSourceTag, GetAbsPath(PluginPath) },
                 {PluginNameTag,  PluginName },
-                {ProjectTag, Application.dataPath },
+                {ProjectTag, GetProjectPath() },
                 {ExportSettingsTag, GetAbsPath(ExportSettingsFile) }
             };
 

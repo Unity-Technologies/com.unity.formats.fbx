@@ -26,7 +26,7 @@ macroScript UnityImport category:"File-Import"
     pluginManager.loadClass FbxImporter
     
     unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
-    fbxFileName = getOpenFileName caption:"Import FBX from Unity" filename:unityProjectPath types:"FBX (*.fbx)|*.fbx|"
+    fbxFileName = getOpenFileName caption:"Import FBX from Unity" filename:(unityProjectPath + "/Assets/")  types:"FBX (*.fbx)|*.fbx|"
     if fbxFileName != undefined then
     (
         -- reset persistent values, in case import fails
@@ -72,6 +72,7 @@ macroScript UnityExport category:"File-Export"
     else(
         unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
         exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:unityProjectPath types:"FBX (*.fbx)|*.fbx|"
+        exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:(unityProjectPath + "/Assets/") types:"FBX (*.fbx)|*.fbx|"
     )
     
     if exportFileName != undefined then (
