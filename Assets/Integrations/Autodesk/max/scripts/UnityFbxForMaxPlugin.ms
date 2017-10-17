@@ -71,7 +71,6 @@ macroScript UnityExport category:"File-Export"
     )
     else(
         unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
-        exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:unityProjectPath types:"FBX (*.fbx)|*.fbx|"
         exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:(unityProjectPath + "/Assets/") types:"FBX (*.fbx)|*.fbx|"
     )
     

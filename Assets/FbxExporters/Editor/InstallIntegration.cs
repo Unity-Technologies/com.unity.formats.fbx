@@ -503,7 +503,7 @@ namespace FbxExporters.Editor
                 myProcess.StartInfo.CreateNoWindow = true;
                 myProcess.StartInfo.UseShellExecute = false;
 
-                myProcess.StartInfo.Arguments = string.Format("-q -silent -mxs \"{0}\"", installScript);
+                myProcess.StartInfo.Arguments = string.Format("-s -q -silent -mxs \"{0}\"", installScript);
 
                 myProcess.EnableRaisingEvents = true;
                 myProcess.Start();
