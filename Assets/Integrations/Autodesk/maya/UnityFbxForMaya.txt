@@ -13,4 +13,4 @@
 #
 ########################################################################
 
-+ UnityFbxForMaya {Version} {UnityProject}/Assets/FbxExporters/Integrations/Autodesk/maya
++ UnityFbxForMaya {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya
