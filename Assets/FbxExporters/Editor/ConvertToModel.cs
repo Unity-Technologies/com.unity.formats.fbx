@@ -364,6 +364,23 @@ namespace FbxExporters
                     }
 
                     if (!toComponent) {
+                        // copy over mesh filter and mesh renderer to replace
+                        // skinned mesh renderer
+                        if (component is MeshFilter) {
+                            var skinnedMesh = to.GetComponent<SkinnedMeshRenderer> ();
+                            if (skinnedMesh) {
+                                toComponent = to.AddComponent(component.GetType());
+                                EditorJsonUtility.FromJsonOverwrite (json, toComponent);
+
+                                var toRenderer = to.AddComponent <MeshRenderer>();
+                                var fromRenderer = from.GetComponent<MeshRenderer> ();
+                                if (toRenderer && fromRenderer) {
+                                    EditorJsonUtility.FromJsonOverwrite (EditorJsonUtility.ToJson(fromRenderer), toRenderer);
+                                }
+
+                                Object.DestroyImmediate (skinnedMesh);
+                            }
+                        }
                         continue;
                     }
 
