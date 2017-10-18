@@ -146,7 +146,6 @@ add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
     ENDIF
     COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
        "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya" 
-       "${CMAKE_SOURCE_DIR}/Assets/Integrations/BringToFront.exe"
        "${CMAKE_SOURCE_DIR}/Assets/Integrations/.gitignore"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets
     COMMENT "Zipping Maya Integration folder"
