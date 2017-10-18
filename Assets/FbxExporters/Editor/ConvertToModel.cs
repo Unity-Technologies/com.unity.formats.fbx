@@ -343,9 +343,6 @@ namespace FbxExporters
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
                 // copy over meshes, materials, and nothing else
                 foreach (var component in from.GetComponents<Component>()) {
-                        continue;
-                    }
-
                     var json = EditorJsonUtility.ToJson(component);
                     if (string.IsNullOrEmpty (json)) {
                         // this happens for missing scripts
@@ -380,8 +377,6 @@ namespace FbxExporters
                                 if (toRenderer && fromRenderer) {
                                     EditorJsonUtility.FromJsonOverwrite (EditorJsonUtility.ToJson(fromRenderer), toRenderer);
                                 }
-                        }
-
                                 Object.DestroyImmediate (skinnedMesh);
                             }
                         }
