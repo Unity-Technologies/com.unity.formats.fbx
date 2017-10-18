@@ -119,8 +119,14 @@ namespace FbxExporters.EditorTools {
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (dccPath)) {
+                    // get the directory of the executable
                     var md = Directory.GetParent (dccPath);
-                    if (md.Parent.Name.ToLower ().StartsWith ("mayalt")) {
+                    // UNI-29074 TODO: add Maya LT support
+                    // Check that the executable is not in a MayaLT directory (thus being MayaLT instead of Maya executable).
+                    // On Mac path resembles: /Applications/Autodesk/mayaLT2018/Maya.app
+                    // On Windows path resembles: C:\Program Files\Autodesk\MayaLT2018\bin\maya.exe
+                    // Therefore check both executable folder (for Mac) and its parent (for Windows)
+                    if (md.Name.ToLower().StartsWith("mayalt") || md.Parent.Name.ToLower ().StartsWith ("mayalt")) {
                         Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", md.FullName));
                         exportSettings.selectedDCCApp = oldValue;
                         return;
@@ -237,13 +243,6 @@ namespace FbxExporters.EditorTools {
         public bool mayaCompatibleNames;
         public bool centerObjects;
 
-        /// <summary>
-        /// In Convert-to-model, by default we delete the original object.
-        /// This option lets you override that.
-        /// </summary>
-        [HideInInspector]
-        public bool keepOriginalAfterConvert;
-
         public int selectedDCCApp = 0;
 
         /// <summary>
@@ -270,7 +269,6 @@ namespace FbxExporters.EditorTools {
         {
             mayaCompatibleNames = true;
             centerObjects = true;
-            keepOriginalAfterConvert = false;
             convertToModelSavePath = kDefaultSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
@@ -338,6 +336,7 @@ namespace FbxExporters.EditorTools {
 
                 // Only accept those that start with 'maya' in either case.
                 if (product.StartsWith ("maya", StringComparison.InvariantCultureIgnoreCase)) {
+                    // UNI-29074 TODO: add Maya LT support
                     // Reject MayaLT -- it doesn't have plugins.
                     if (product.StartsWith ("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
                         continue;
@@ -453,6 +452,13 @@ namespace FbxExporters.EditorTools {
             switch (dcc) {
             case DCCType.Maya:
                 var version = AskMayaVersion(newOption);
+
+                // UNI-29074 TODO: add Maya LT support
+                // make sure this is not Maya LT
+                if (version.ToLower ().StartsWith ("lt")) {
+                    Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", newOption));
+                    return;
+                }
                 optionName = GetUniqueName ("Maya " + version);
                 break;
             case DCCType.Max:

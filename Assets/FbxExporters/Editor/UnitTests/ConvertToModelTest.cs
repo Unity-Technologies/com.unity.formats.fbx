@@ -58,74 +58,56 @@ namespace FbxExporters.UnitTests
                 Assert.AreEqual("a 2", a2.name);
             }
 
-            // Test FixSiblingOrder
-            {
-                var a = new GameObject("a").transform;
-                var b = new GameObject("a").transform;
-
-                var a1 = new GameObject("a1").transform;
-                var a2 = new GameObject("a2").transform;
-                var a3 = new GameObject("a3").transform;
-
-                var b1 = new GameObject("a1").transform;
-                var b2 = new GameObject("a2").transform;
-                var b3 = new GameObject("a3").transform;
-
-                a1.parent = a;
-                a2.parent = a;
-                a3.parent = a;
-
-                b3.parent = b;
-                b1.parent = b;
-                b2.parent = b;
-
-                // Assert same set, different order.
-                Assert.That(ChildNames(b), Is.EquivalentTo(ChildNames(a)));
-                Assert.That(ChildNames(b), Is.Not.EqualTo(ChildNames(a)));
-
-                // Fix the sibling order. Now we have same set, same order!
-                ConvertToModel.FixSiblingOrder(a, b);
-                Assert.That(ChildNames(b), Is.EquivalentTo(ChildNames(a)));
-                Assert.That(ChildNames(b), Is.EqualTo(ChildNames(a)));
-            }
-
             // Test CopyComponents
             {
-                var a = new GameObject("a");
-                var b = new GameObject("b");
+                var a = GameObject.CreatePrimitive (PrimitiveType.Cube);
+                a.name = "a";
+                var b = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+                b.name = "b";
                 a.AddComponent<BoxCollider>();
                 a.transform.localPosition += new Vector3(1,2,3);
                 Assert.IsFalse(b.GetComponent<BoxCollider>());
                 Assert.AreEqual(Vector3.zero, b.transform.localPosition);
-                ConvertToModel.CopyComponents(a, b);
-                Assert.IsTrue(b.GetComponent<BoxCollider>());
-                Assert.AreEqual(new Vector3(1,2,3), b.transform.localPosition);
+                Assert.AreNotEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
+                ConvertToModel.CopyComponents(b, a);
+                Assert.IsFalse(b.GetComponent<BoxCollider>());
+                Assert.AreEqual(Vector3.zero, b.transform.localPosition);
+                Assert.AreEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
             }
 
-            // Test SetupImportedGameObject. Very similar but recursive.
+            // Test UpdateFromSourceRecursive. Very similar but recursive.
             {
-                var a = new GameObject ("a");
-                var a1 = new GameObject ("AA");
-                var a2 = new GameObject ("BB");
+                var a = GameObject.CreatePrimitive (PrimitiveType.Cube);
+                a.name = "a";
+                var a1 = GameObject.CreatePrimitive (PrimitiveType.Cube);
+                a1.name = "AA";
+                var a2 = GameObject.CreatePrimitive (PrimitiveType.Cube);
+                a2.name = "BB";
                 a2.transform.parent = a.transform;
                 a1.transform.parent = a.transform; // out of alpha order!
-                var b = new GameObject ("b");
-                var b1 = new GameObject ("AA");
-                var b2 = new GameObject ("BB");
+                var b = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+                b.name = "b";
+                var b1 = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+                b1.name = "AA";
+                var b2 = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+                b2.name = "BB";
                 b1.transform.parent = b.transform;
                 b2.transform.parent = b.transform; // in alpha order
                 a.AddComponent<BoxCollider> ();
                 a1.transform.localPosition = new Vector3 (1, 2, 3);
 
+                Assert.AreNotEqual(b.GetComponent<MeshFilter>().sharedMesh, a.GetComponent<MeshFilter>().sharedMesh);
                 Assert.IsFalse (b.GetComponent<BoxCollider> ());
                 Assert.AreEqual ("BB", b.transform.GetChild (1).name);
                 Assert.AreEqual (Vector3.zero, b1.transform.localPosition);
 
-                ConvertToModel.SetupImportedGameObject (a, b);
+                ConvertToModel.UpdateFromSourceRecursive (b, a);
 
-                Assert.IsTrue (b.GetComponent<BoxCollider> ());
-                Assert.AreEqual ("AA", b.transform.GetChild (1).name);
-                Assert.AreEqual (new Vector3 (1, 2, 3), b1.transform.localPosition);
+                // only the mesh + materials should change
+                Assert.AreEqual(b.GetComponent<MeshFilter>().sharedMesh, a.GetComponent<MeshFilter>().sharedMesh);
+                Assert.IsFalse (b.GetComponent<BoxCollider> ());
+                Assert.AreEqual ("BB", b.transform.GetChild (1).name);
+                Assert.AreEqual (Vector3.zero, b1.transform.localPosition);
             }
         }
 
@@ -140,25 +122,23 @@ namespace FbxExporters.UnitTests
 
             // Convert it to a prefab -- but keep the cube.
             var cubePrefabInstance = ConvertToModel.Convert(cube,
-                directoryFullPath: path, keepOriginal: ConvertToModel.KeepOriginal.Keep);
+                directoryFullPath: path);
 
             // Make sure it's what we expect.
             Assert.That(cube); // we kept the original
             Assert.That(cubePrefabInstance); // we got the new
+            Assert.AreSame(cube, cubePrefabInstance); // the original and new are the same
             Assert.AreEqual("Cube", cubePrefabInstance.name); // it has the right name
             Assert.That(!EditorUtility.IsPersistent(cubePrefabInstance));
             var cubePrefabAsset = PrefabUtility.GetPrefabParent(cubePrefabInstance);
             Assert.That(cubePrefabAsset);
+            Assert.That (EditorUtility.IsPersistent (cubePrefabAsset));
 
-            // it's a different mesh instance, but the same mesh
-            Assert.AreNotEqual(
-                cube.GetComponent<MeshFilter>().sharedMesh,
-                cubePrefabInstance.GetComponent<MeshFilter>().sharedMesh);
             Assert.That(cubePrefabInstance.GetComponent<FbxPrefab>());
 
             // Should be all the same triangles. But it isn't. TODO.
             // At least the indices should match in multiplicity.
-            var cubeMesh = cube.GetComponent<MeshFilter>().sharedMesh;
+            var cubeMesh = GameObject.CreatePrimitive(PrimitiveType.Cube).GetComponent<MeshFilter>().sharedMesh;
             var cubePrefabMesh = cubePrefabInstance.GetComponent<MeshFilter>().sharedMesh;
             //Assert.That(
             //  cubeMesh.triangles,
@@ -175,18 +155,8 @@ namespace FbxExporters.UnitTests
             // Convert it again, make sure there's only one FbxPrefab (see UNI-25528).
             // Also make sure we deleted.
             var cubePrefabInstance2 = ConvertToModel.Convert(cubePrefabInstance,
-                directoryFullPath: path, keepOriginal: ConvertToModel.KeepOriginal.Delete);
-            Assert.IsFalse(cubePrefabInstance);
+                directoryFullPath: path);
             Assert.That(cubePrefabInstance2.GetComponents<FbxPrefab>().Length, Is.EqualTo(1));
-
-            // Create another cube, make sure the export settings drive whether we keep the cube or not.
-            ConvertToModel.Convert(cube, directoryFullPath: path,
-                    keepOriginal: ConvertToModel.KeepOriginal.Default);
-            if (ConvertToModel.ExportSettings.keepOriginalAfterConvert) {
-                Assert.IsTrue(cube);
-            } else {
-                Assert.IsFalse(cube);
-            }
         }
 
         [Test]
@@ -205,9 +175,8 @@ namespace FbxExporters.UnitTests
             Object.DestroyImmediate(meshRender);
             Object.DestroyImmediate(meshFilter);
 
-            // Convert it. Make sure it gets deleted, to avoid a useless error about internal consistency.
+            // Convert it.
             var cubeInstance = ConvertToModel.Convert(cube, fbxFullPath: GetRandomFbxFilePath());
-            if (cube) { Object.DestroyImmediate(cube); }
 
             // Make sure it doesn't have a skinned mesh renderer on it.
             // In the future we'll want to assert the opposite!
