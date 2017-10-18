@@ -210,13 +210,6 @@ namespace FbxExporters.EditorTools {
         public bool mayaCompatibleNames;
         public bool centerObjects;
 
-        /// <summary>
-        /// In Convert-to-model, by default we delete the original object.
-        /// This option lets you override that.
-        /// </summary>
-        [HideInInspector]
-        public bool keepOriginalAfterConvert;
-
         public int selectedMayaApp = 0;
 
         /// <summary>
@@ -243,7 +236,6 @@ namespace FbxExporters.EditorTools {
         {
             mayaCompatibleNames = true;
             centerObjects = true;
-            keepOriginalAfterConvert = false;
             convertToModelSavePath = kDefaultSavePath;
             mayaOptionPaths = null;
             mayaOptionNames = null;
