@@ -92,7 +92,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "DCC Application:",
-                "Select the DCC where you would like to install the Unity integration."));
+                "Select the Digital Content Creation (DCC) Application for which you would like to install the Unity integration."));
 
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
@@ -115,7 +115,7 @@ namespace FbxExporters.EditorTools {
                     throw new System.NotImplementedException ();
                 }
 
-                string dccPath = EditorUtility.OpenFilePanel ("Select DCC Application", ExportSettings.kDefaultAdskRoot, ext);
+                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.kDefaultAdskRoot, ext);
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (dccPath)) {
@@ -158,7 +158,7 @@ namespace FbxExporters.EditorTools {
 
 			var installIntegrationContent = new GUIContent(
                     "Install Unity Integration",
-                    "Install and configure the Unity integration for the selected DCC so that you can import and export directly to this project.");
+                    "Install and configure the Unity integration for the selected Digital Content Creation (DCC) application so that you can import and export directly with this project.");
             if (GUILayout.Button (installIntegrationContent)) {
                 FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
             }
@@ -417,7 +417,7 @@ namespace FbxExporters.EditorTools {
 
             if (instance.dccOptionPaths.Count <= 0) {
                 return new GUIContent[]{
-                    new GUIContent("<no DCC found>"),
+                    new GUIContent("<No DCC found>"),
                     new GUIContent("Browse...")
                 };
             }
@@ -514,7 +514,7 @@ namespace FbxExporters.EditorTools {
 
         public static string GetSelectedDCCPath()
         {
-            return instance.dccOptionPaths [instance.selectedDCCApp];
+            return (instance.dccOptionPaths.Count>0) ? instance.dccOptionPaths [instance.selectedDCCApp] : "";
         }
 
         /// <summary>
