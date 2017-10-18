@@ -40,7 +40,7 @@ make
 # clone the source
 git clone https://github.com/Unity-Technologies/FbxExporters.git
 
-set PACKAGE_VERSION=0.0.14a
+set PACKAGE_VERSION=master
 set FBXSDK_PACKAGE_PATH=/path/to/FbxSdk.unitypackage
 
 mkdir FbxExportersBuild
@@ -54,8 +54,8 @@ cmake --build . --target ALL_BUILD --config Release
 # clone the source
 git clone https://github.com/Unity-Technologies/FbxExporters.git
 
-export PACKAGE_VERSION=0.0.14a
-export FBXSDK_PACKAGE_PATH=/path/to/FbxSdk.unitypackage
+PACKAGE_VERSION=master
+FBXSDK_PACKAGE_PATH=/path/to/FbxSdk.unitypackage
 
 if [ ! -f "${UNITY_EDITOR_PATH}" ]; then
     UNITY_EDITOR_PATH="/Applications/Unity/Unity.app/Contents/MacOS/Unity"
