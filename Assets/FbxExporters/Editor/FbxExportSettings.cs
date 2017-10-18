@@ -118,7 +118,12 @@ namespace FbxExporters.EditorTools {
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (mayaPath)) {
+                    // get the directory of the executable
                     var md = Directory.GetParent (mayaPath);
+                    // Check that the executable is not in a MayaLT directory (thus being MayaLT instead of Maya executable).
+                    // On Mac path resembles: /Applications/Autodesk/mayaLT2018/Maya.app
+                    // On Windows path resembles: C:\Program Files\Autodesk\MayaLT2018\bin\maya.exe
+                    // Therefore check both executable folder (for Mac) and its parent (for Windows)
                     if (md.Name.ToLower().StartsWith("mayalt") || md.Parent.Name.ToLower ().StartsWith ("mayalt")) {
                         Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", md.FullName));
                         exportSettings.selectedMayaApp = oldValue;
