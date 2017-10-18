@@ -90,7 +90,7 @@ namespace FbxExporters.UnitTests
                 Assert.AreEqual ("BB", b.transform.GetChild (1).name);
                 Assert.AreEqual (Vector3.zero, b1.transform.localPosition);
 
-                ConvertToModel.UpdateFromFBX (a, b);
+                ConvertToModel.UpdateFromSourceRecursive (a, b);
 
                 Assert.IsTrue (b.GetComponent<BoxCollider> ());
                 Assert.AreEqual ("AA", b.transform.GetChild (1).name);
