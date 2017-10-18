@@ -445,7 +445,7 @@ namespace FbxExporters.Editor
 
         /// <summary>
         /// Determines if folder is already unzipped at the specified path
-        /// by checking if unityoneclick.txt exists at expected location.
+        /// by checking if UnityFbxForMaya.txt exists at expected location.
         /// </summary>
         /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
         /// <param name="path">Path.</param>
