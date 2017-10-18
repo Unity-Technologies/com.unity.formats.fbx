@@ -166,7 +166,7 @@ namespace FbxExporters
                 }
 
                 // Copy the mesh/materials from the FBX
-                UpdateFromFBX (toConvert, unityMainAsset);
+                UpdateFromSourceRecursive (toConvert, unityMainAsset);
 
                 // Set up the FbxPrefab component so it will auto-update.
                 // Make sure to delete whatever FbxPrefab history we had.
@@ -265,15 +265,15 @@ namespace FbxExporters
             /// Updates the meshes and materials of the exported GameObjects
             /// to link to those imported from the FBX.
             /// </summary>
-            /// <param name="orig">Original.</param>
-            /// <param name="fbx">Fbx.</param>
-            public static void UpdateFromFBX(GameObject orig, GameObject fbx)
+            /// <param name="dest">GameObject to update.</param>
+            /// <param name="source">Source to update from.</param>
+            public static void UpdateFromSourceRecursive(GameObject dest, GameObject source)
             {
                 // recurse over orig, for each transform finding the corresponding transform in the FBX
                 // and copying the meshes and materials over from the FBX
-                var goDict = GetNameToFbxGameObject(orig, fbx);
+                var goDict = MapNameToSourceRecursive(dest, source);
                 var q = new Queue<Transform> ();
-                q.Enqueue (orig.transform);
+                q.Enqueue (dest.transform);
                 while (q.Count > 0) {
                     var t = q.Dequeue ();
 
@@ -289,16 +289,16 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Gets a dictionary linking exported GameObject name to fbx game object.
+            /// Gets a dictionary linking dest GameObject name to source game object.
             /// </summary>
-            /// <returns>Dictionary containing the name to fbx game object.</returns>
-            /// <param name="orig">Original.</param>
-            /// <param name="fbx">Fbx.</param>
-            private static Dictionary<string,GameObject> GetNameToFbxGameObject(GameObject orig, GameObject fbx){
+            /// <returns>Dictionary containing the name to source game object.</returns>
+            /// <param name="dest">Destination GameObject.</param>
+            /// <param name="source">Source GameObject.</param>
+            private static Dictionary<string,GameObject> MapNameToSourceRecursive(GameObject dest, GameObject source){
                 var nameToGO = new Dictionary<string,GameObject> ();
 
                 var q = new Queue<Transform> ();
-                q.Enqueue (orig.transform);
+                q.Enqueue (dest.transform);
                 while (q.Count > 0) {
                     var t = q.Dequeue ();
                     nameToGO [t.name] = null;
@@ -307,10 +307,10 @@ namespace FbxExporters
                     }
                 }
 
-                nameToGO [orig.name] = fbx;
+                nameToGO [dest.name] = source;
 
                 var fbxQ = new Queue<Transform> ();
-                foreach (Transform child in fbx.transform) {
+                foreach (Transform child in source.transform) {
                     fbxQ.Enqueue (child);
                 }
 
