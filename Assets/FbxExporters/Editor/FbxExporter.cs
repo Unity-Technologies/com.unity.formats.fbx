@@ -52,6 +52,8 @@ namespace FbxExporters
 
             const int UnitScaleFactor = 100;
 
+            public const string PACKAGE_UI_NAME = "FBX Exporter";
+
             /// <summary>
             /// Create instance of exporter.
             /// </summary>
@@ -953,7 +955,6 @@ namespace FbxExporters
             public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet)
             {
                 exportCancelled = false;
-                Verbose = true;
 
                 // Export first to a temporary file
                 // in case the export is cancelled.
@@ -1006,7 +1007,7 @@ namespace FbxExporters
                         fbxSceneInfo.mRevision = "1.0";
                         fbxSceneInfo.mKeywords = Keywords;
                         fbxSceneInfo.mComment = Comments;
-                        fbxSceneInfo.Original_ApplicationName.Set("Unity FbxExporter Plugin");
+                        fbxSceneInfo.Original_ApplicationName.Set(string.Format("Unity {0}", PACKAGE_UI_NAME));
                         // set last saved to be the same as original, as this is a new file.
                         fbxSceneInfo.LastSaved_ApplicationName.Set(fbxSceneInfo.Original_ApplicationName.Get());
 
@@ -1181,7 +1182,7 @@ namespace FbxExporters
             public static void DisplayNoSelectionDialog()
             {
                 UnityEditor.EditorUtility.DisplayDialog (
-                    "Fbx Exporter Warning", 
+                    string.Format("{0} Warning", PACKAGE_UI_NAME), 
                     "No GameObjects selected for export.", 
                     "Ok");
             }
@@ -1566,7 +1567,7 @@ namespace FbxExporters
             {
             }
 
-            public bool Verbose { private set; get; }
+            public bool Verbose { private set {;} get { return Debug.unityLogger.logEnabled; } }
 
             /// <summary>
             /// manage the selection of a filename

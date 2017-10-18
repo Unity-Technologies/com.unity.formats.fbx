@@ -26,34 +26,23 @@ if [ ! -d "${PROJECT_PATH}" ]; then
 fi
 echo "Using PROJECT_PATH=${PROJECT_PATH}"
 
-# Configure where Maya is installed
-if [ ! -d "${MAYA_LOCATION}" ]; then
-    MAYA_LOCATION=/Applications/Autodesk/maya2017/Maya.app/Contents
+# Configure where unitypackage is located
+if [ ! -f "${PACKAGE_PATH}" ]; then
+    PACKAGE_PATH=`ls -t ${PROJECT_PATH}/FbxExporters_*.unitypackage | head -1`
 fi
-echo "Using MAYA_LOCATION=${MAYA_LOCATION}"
+echo "Using PACKAGE_PATH=${PACKAGE_PATH}"
 
 if [ ! -f "${UNITY_EDITOR_PATH}" ]; then
     echo "Unity is not installed in default location"
     exit -1
 fi    
 
-# Install Maya Integration
-"${UNITY_EDITOR_PATH}" -batchMode -projectPath "${PROJECT_PATH}" -executeMethod FbxExporters.Integrations.InstallMaya -quit
-
-# Configuring Maya2017 to auto-load integration
-MAYA_PATH=${MAYA_LOCATION}/bin/maya
-
-if [ ! -f "${MAYA_PATH}" ]; then
-    echo "Maya not installed at ${MAYA_PATH}"
-else
-    # Configure Maya Integration
-    TEMP_SAVE_PATH="_safe_to_delete"
-    EXPORT_SETTINGS_PATH="FbxExporters/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel"
-    MAYA_INSTRUCTION_PATH="_safe_to_delete/_temp.txt"
-    HEADLESS=1
-
-    # NOTE: we need start Maya in UI mode so that we can correctly configure the auto-load of the plugin.
-    "${MAYA_PATH}" -command "configureUnityFbxForMaya \"${PROJECT_PATH}\" \"${UNITY_EDITOR_PATH}\" \"${TEMP_SAVE_PATH}\" \"${EXPORT_SETTINGS_PATH}\" \"${MAYA_INSTRUCTION_PATH}\" ${HEADLESS}; scriptJob -idleEvent quit;"
+if [ -d "${PROJECT_PATH}/Assets/FbxExporters" ]; then
+    echo "Uninstalling previous package"
+    rm -rf "${PROJECT_PATH}/Assets/FbxExporters"
 fi
+
+# Install FbxExporters package
+"${UNITY_EDITOR_PATH}" -projectPath "${PROJECT_PATH}" -importPackage ${PACKAGE_PATH} -quit
 
 exit 0

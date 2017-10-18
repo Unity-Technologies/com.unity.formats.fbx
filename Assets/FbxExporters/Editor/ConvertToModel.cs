@@ -199,22 +199,20 @@ namespace FbxExporters
                     Object.DestroyImmediate(fbxPrefab);
                 }
                 fbxPrefab = unityGO.AddComponent<FbxPrefab>();
-                fbxPrefab.SetSourceModel(unityMainAsset);
+                var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
+                fbxPrefabUtility.SetSourceModel(unityMainAsset);
 
                 // Disconnect from the FBX file.
                 PrefabUtility.DisconnectPrefabInstance(unityGO);
 
                 // Create a prefab from the instantiated and componentized unityGO.
                 var prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");
-                var prefab = PrefabUtility.CreatePrefab(prefabFileName, unityGO);
+                var prefab = PrefabUtility.CreatePrefab(prefabFileName, unityGO, ReplacePrefabOptions.ConnectToPrefab);
                 if (!prefab) {
                     throw new System.Exception(
                         string.Format("Failed to create prefab asset in [{0}] from fbx [{1}]",
                             prefabFileName, fbxFullPath));
                 }
-
-                // Connect to the prefab file.
-                unityGO = PrefabUtility.ConnectGameObjectToPrefab(unityGO, prefab);
 
                 // Remove (now redundant) gameobject
                 bool actuallyKeepOriginal;
@@ -399,6 +397,10 @@ namespace FbxExporters
                     }
 
                     var json = EditorJsonUtility.ToJson(component);
+                    if (string.IsNullOrEmpty (json)) {
+                        // this happens for missing scripts
+                        continue;
+                    }
 
                     System.Type expectedType = component.GetType();
                     Component toComponent = null;
@@ -417,7 +419,9 @@ namespace FbxExporters
                     if (!toComponent) {
                         // It doesn't exist => create and copy.
                         toComponent = to.AddComponent(component.GetType());
-                        EditorJsonUtility.FromJsonOverwrite(json, toComponent);
+                        if (toComponent) {
+                            EditorJsonUtility.FromJsonOverwrite (json, toComponent);
+                        }
                     } else {
                         // It exists => copy.
                         // But we want to override that behaviour in a few

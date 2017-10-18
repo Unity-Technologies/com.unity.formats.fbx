@@ -15,18 +15,18 @@
 """
 @package commands
 @defgroup UnityCommands Commands
-@ingroup UnityOneClickPlugin
+@ingroup UnityFbxForMayaPlugin
 @author  Simon Inwood <simon.cf.inwood@gmail.com>
 """
 
-from unityOneClick.logger import LoggerMixin
+from UnityFbxForMaya.logger import LoggerMixin
 
 import maya.OpenMaya as OpenMaya        # @UnresolvedImport
 import maya.OpenMayaMPx as OpenMayaMPx  # @UnresolvedImport
 import maya.mel
 import maya.cmds
 
-import unityOneClick.version as version
+import UnityFbxForMaya.version as version
 
 import ctypes
 ctypes.pythonapi.PyCObject_AsVoidPtr.restype = ctypes.c_void_p
@@ -36,11 +36,11 @@ import os
 
 class BaseCommand(OpenMayaMPx.MPxCommand, LoggerMixin):
     """
-    Base class for UnityOneClick Plugin Commands.
+    Base class for UnityFbxForMaya Plugin Commands.
     """
     kIconPath = ""
     kFamilyIcon = 'unity.png'
-    kFamilyLabel = "The UnityOneClick plugin allows you to reliably exchange and review your work between Maya and Unity."
+    kFamilyLabel = "The UnityFbxForMaya plugin allows you to reliably exchange and review your work between Maya and Unity."
     
     def __init__(self):
         OpenMayaMPx.MPxCommand.__init__(self)
@@ -123,7 +123,7 @@ class importCmd(BaseCommand):
     kShortLabel = 'Import'
     kCmdName = "{}Import".format(version.pluginPrefix())
     kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
-    kRuntimeCommand = "UnityOneClickImport"
+    kRuntimeCommand = "UnityFbxForMayaImport"
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -160,6 +160,8 @@ class importCmd(BaseCommand):
         if not self.setExists(self._exportSet):
             # couldn't find export set so create it
             maya.cmds.sets(name=self._exportSet)
+            # unlock set so we can add attributes to it
+            maya.cmds.lockNode(self._exportSet, lock=False)
         
         # reset attribute values, in case import fails
         self.storeAttribute(self._exportSet, self._unityFbxFilePathAttr, "")
@@ -197,6 +199,9 @@ class importCmd(BaseCommand):
             # add newly imported items to set
             if len(newItems) > 0:
                 maya.cmds.sets(newItems, include=self._exportSet)
+                
+            # lock set so it doesn't get deleted when empty
+            maya.cmds.lockNode(self._exportSet, lock=True)    
 
     def doIt(self, args):
         self.loadDependencies()
@@ -238,117 +243,6 @@ class importCmd(BaseCommand):
         strCmd = '{0};'.format(cls.kCmdName)
         maya.mel.eval(strCmd)   # @UndefinedVariable
 
-class previewCmd(BaseCommand):
-    """
-    Preview Model in Unity Window
-        
-    @ingroup UnityCommands
-    """
-    kIconPath = "preview.png"
-    kLabel = 'Preview Model in Unity window'
-    kShortLabel = 'Preview'
-    kCmdName = "{}Preview".format(version.pluginPrefix())
-    kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
-    kRuntimeCommand = "UnityOneClickPreview"
-    
-    def __init__(self):
-        super(self.__class__, self).__init__()
-    
-    @classmethod
-    def creator(cls):
-        return OpenMayaMPx.asMPxPtr(cls())
-    
-    @classmethod
-    def syntaxCreator(cls):
-        syntax = OpenMaya.MSyntax()
-        return syntax
-    
-    @classmethod
-    def scriptCmd(cls):
-        return
-    
-    def doIt(self, args):
-        def integrationBinPath():
-            # e.g. /Users/inwoods/Development/MyGame/Assets/Integrations/Autodesk/maya/plug-ins/unityOneClickPlugin.py
-            # returns /Users/inwoods/Development/MyGame/Assets/Integrations
-            head, tail = os.path.split(maya.cmds.pluginInfo("unityOneClickPlugin", q=True, path=True))
-            head, tail = os.path.split(head)
-            head, tail = os.path.split(head)
-            head, tail = os.path.split(head)
-            return head
-
-        unityAppPath = maya.cmds.optionVar(q='UnityApp')
-        unityProjectPath = maya.cmds.optionVar(q='UnityProject')
-        unityTempSavePath = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityTempSavePath'))
-        unityCommand = "FbxExporters.Review.TurnTable.LastSavedModel"
-
-        if maya.cmds.optionVar(exists='UnityInstructionPath'):
-            instructionFile = os.path.join(unityProjectPath, "Assets", maya.cmds.optionVar(q='UnityInstructionPath'))
-        else:
-            self.displayError("Missing Unity instruction file path, please re-install integration.")
-            return
-        
-        # make sure the GamePipeline and fbxmaya plugins are loaded
-        if not self.loadDependencies():
-            return
-            
-        if not self.loadUnityFbxExportSettings():
-            return
-            
-        # select the export set for export, if it exists,
-        # otherwise take what is currently selected
-        origSelection = maya.cmds.ls(sl=True)
-        if self.setExists(self._exportSet):
-            maya.cmds.select(self._exportSet, r=True, ne=True)
-        
-        # save fbx to Assets/_safe_to_delete/
-        savePath = unityTempSavePath
-        maya.cmds.sysFile(savePath, makeDir=True)
-        savePath = os.path.join(savePath, "TurnTableModel.fbx")
-        savePath = os.path.abspath(savePath)
-        
-        maya.cmds.file(savePath, force=True, options="", typ="FBX export", pr=True, es=True)
-        
-        # create temp file in _safe_to_delete/
-        with open(instructionFile,"w+") as f:
-            pass
-        
-        if maya.cmds.about(macOS=True):
-            # Use 'open -a' to bring app to front if it has already been started.
-            # Note that the unity command will not get called.
-            melCommand = r'system("open -a \"{0}\" --args -projectPath \"{1}\" -executeMethod {2}");'\
-                .format(unityAppPath, unityProjectPath, unityCommand)
-
-        elif maya.cmds.about(linux=True):
-            melCommand = r'system("\"{0}\" -projectPath \"{1}\" -executeMethod {2}");'\
-                .format(unityAppPath, unityProjectPath, unityCommand)
-
-        elif maya.cmds.about(windows=True):
-            melCommand = r'system("start \"{0}\" \"{1}\" \"{2}\" \"-projectPath {3} -executeMethod {4}\"");'\
-                .format(integrationBinPath() + "/BringToFront.exe",
-                        os.path.basename(unityProjectPath), unityAppPath,
-                        unityProjectPath, unityCommand)
-
-        else:
-            raise NotImplementedError("missing platform implementation for {0}".format(maya.cmds.about(os=True)))
-
-        self.displayDebug('doIt({0})'.format(melCommand))
-
-        maya.mel.eval(melCommand)
-        
-        if origSelection:
-            maya.cmds.select(cl=True)
-            maya.cmds.select(origSelection, add=True, ne=True)
-
-    @classmethod
-    def invoke(cls):
-        """
-            Invoke command using mel so that it is executed and logged to script editor log
-            @return: void
-            """
-        strCmd = '{0};'.format(cls.kCmdName)
-        maya.mel.eval(strCmd)   # @UndefinedVariable
-
 class exportCmd(BaseCommand):
     """
     Export Model to Unity
@@ -360,7 +254,7 @@ class exportCmd(BaseCommand):
     kShortLabel = 'Export'
     kCmdName = "{}Export".format(version.pluginPrefix())
     kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
-    kRuntimeCommand = "UnityOneClickExport"
+    kRuntimeCommand = "UnityFbxForMayaExport"
     
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -416,61 +310,13 @@ class exportCmd(BaseCommand):
         strCmd = '{0};'.format(cls.kCmdName)
         maya.mel.eval(strCmd)   # @UndefinedVariable
 
-class configureCmd(BaseCommand):
-    """
-    Configure Maya Scene for previewing and exporting to Unity
-    
-    @ingroup UnityCommands
-    """
-    kLabel = 'Configure Maya to preview and export to a Unity Project'
-    kShortLabel = 'Configure'
-    kCmdName = "{}Configure".format(version.pluginPrefix())
-    kScriptCommand = 'import maya.cmds;maya.cmds.{0}()'.format(kCmdName)
-    kRuntimeCommand = "UnityOneClickConfigure"
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-    @classmethod
-    def creator(cls):
-        return OpenMayaMPx.asMPxPtr(cls())
-
-    @classmethod
-    def syntaxCreator(cls):
-        syntax = OpenMaya.MSyntax()
-        return syntax
-
-    @classmethod
-    def scriptCmd(cls):
-        return
-    
-    def doIt(self, args):
-        # make sure the GamePipeline plugin is loaded
-        if not self.loadDependencies():
-            return
-        
-        strCmd = 'SendToUnitySetProject'
-        self.displayDebug('doIt {0}'.format(strCmd))
-        maya.mel.eval(strCmd)
-        
-    @classmethod
-    def invoke(cls):
-        """
-        Invoke command using mel so that it is executed and logged to script editor log
-        @return: void
-        """
-        strCmd = '{0};'.format(cls.kCmdName)
-        maya.mel.eval(strCmd)   # @UndefinedVariable
-
 def register(pluginFn):
     """
     Register commands for plugin
     @param pluginFn (MFnPlugin): plugin object passed to initializePlugin
     """
     pluginFn.registerCommand(importCmd.kCmdName, importCmd.creator, importCmd.syntaxCreator)
-    pluginFn.registerCommand(previewCmd.kCmdName, previewCmd.creator, previewCmd.syntaxCreator)
     pluginFn.registerCommand(exportCmd.kCmdName, exportCmd.creator, exportCmd.syntaxCreator)
-    pluginFn.registerCommand(configureCmd.kCmdName, configureCmd.creator, configureCmd.syntaxCreator)
     
     return
 
@@ -480,16 +326,14 @@ def unregister(pluginFn):
     @param pluginFn (MFnPlugin): plugin object passed to uninitializePlugin
     """
     pluginFn.deregisterCommand(importCmd.kCmdName)
-    pluginFn.deregisterCommand(previewCmd.kCmdName)
     pluginFn.deregisterCommand(exportCmd.kCmdName)
-    pluginFn.deregisterCommand(configureCmd.kCmdName)
     return
 
 #===============================================================================
 # UNIT TESTS
 #===============================================================================
 import unittest
-from unityOneClick.basetestcase import BaseTestCase
+from UnityFbxForMaya.basetestcase import BaseTestCase
 
 class BaseCmdTest(BaseTestCase):
     """Base class for command UnitTests
@@ -499,7 +343,7 @@ class BaseCmdTest(BaseTestCase):
     
     def setUp(self):
         super(BaseCmdTest,self).setUp()
-        maya.cmds.loadPlugin( 'unityOneClickPlugin.py', quiet=True )  # @UndefinedVariable
+        maya.cmds.loadPlugin( 'UnityFbxForMayaPlugin.py', quiet=True )  # @UndefinedVariable
         
     # test routine 
     def test_invoke(self):
@@ -511,23 +355,13 @@ class importCmdTestCase(BaseCmdTest):
     """
     __cmd__ = importCmd
 
-class previewCmdTestCase(BaseCmdTest):
-    """UnitTest for testing the previewCmd command
-    """
-    __cmd__ = previewCmd
-
 class exportCmdTestCase(BaseCmdTest):
     """UnitTest for testing the exportCmd command
     """
     __cmd__ = exportCmd
 
-class configureCmdTestCase(BaseCmdTest):
-    """UnitTest for testing the configureCmd command
-    """
-    __cmd__ = configureCmd
-
 # NOTE: update this for test discovery
-test_cases = (importCmdTestCase, previewCmdTestCase, exportCmdTestCase, configureCmdTestCase,)
+test_cases = (importCmdTestCase, exportCmdTestCase,)
 
 def load_tests(loader, tests, pattern):
     suite = unittest.TestSuite()

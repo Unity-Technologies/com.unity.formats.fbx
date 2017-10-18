@@ -13,28 +13,38 @@
 #
 ########################################################################
 """
-Maya Unity Integration
-@package unityOneClick
+@package version
+@brief version file for UnityFbxForMaya
 @author  Simon Inwood <simon.cf.inwood@gmail.com>
-@defgroup unityOneClickPlugin Unity Plugin
-
-@brief
-
-@details
-
-@defgroup UnityUtils Utilities
-@defgroup UnityCommands Commands
-@defgroup UnityUI User Interface
-@defgroup UnityUnitTests Unit Tests
+@defgroup UnityFbxForMayaPluginVersion Plugin Version
+@ingroup UnityFbxForMayaPlugin
 """
+VERSION = 'sprint26'
 
-# list of public modules for this package
-__all__ = ["commands", "ui"]
+def pluginPrefix():
+    """
+    Return prefix to use for commands and Maya Object names
+    @ingroup UnityFbxForMayaPluginVersion
+    """
+    return 'unity'
 
-try:             
-    import maya.standalone             
-    maya.standalone.initialize()         
-    print "Unity standalone"
-except: 
-    pass
+def versionName():
+    """
+    Return version string for the UnityFbxForMaya plugin
+    @ingroup UnityFbxForMayaPluginVersion
+    """
+    return VERSION
 
+def pluginName():
+    """
+    Return name of UnityFbxForMaya plugin
+    @ingroup UnityFbxForMayaPluginVersion
+    """
+    return 'UnityFbxForMaya'
+
+def vendorName():
+    """
+    Return vendor name of UnityFbxForMaya plugin
+    @ingroup UnityFbxForMayaPluginVersion
+    """
+    return 'Unity Technology Aps.'

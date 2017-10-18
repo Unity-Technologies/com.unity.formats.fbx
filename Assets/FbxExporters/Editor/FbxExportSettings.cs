@@ -86,17 +86,6 @@ namespace FbxExporters.EditorTools {
                 }
             }
             GUILayout.EndHorizontal ();
-            GUILayout.BeginHorizontal ();
-
-            GUILayout.Label (new GUIContent (
-                "Turntable Scene:",
-                "Scene to use for reviewing models. If none, a scene will be created on review."));
-            
-            exportSettings.turntableScene = EditorGUILayout.ObjectField (
-                exportSettings.turntableScene, typeof(SceneAsset), false
-            );
-
-            GUILayout.EndHorizontal ();
 
             EditorGUILayout.Space ();
 
@@ -130,6 +119,13 @@ namespace FbxExporters.EditorTools {
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (dccPath)) {
+                    var md = Directory.GetParent (dccPath);
+                    if (md.Parent.Name.ToLower ().StartsWith ("mayalt")) {
+                        Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", md.FullName));
+                        exportSettings.selectedDCCApp = oldValue;
+                        return;
+                    }
+
                     ExportSettings.DCCType foundDCC = ExportSettings.DCCType.Maya;
                     var foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Maya);
                     if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor) {
@@ -138,6 +134,8 @@ namespace FbxExporters.EditorTools {
                         } else {
                             foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
                             foundDCC = ExportSettings.DCCType.Max;
+                    }
+
                         }
                     }
                     if (foundDCCPath == null) {
@@ -224,15 +222,18 @@ namespace FbxExporters.EditorTools {
         /// The path where all the different versions of Maya are installed
         /// by default. Depends on the platform.
         /// </summary>
-        public const string kDefaultAdskRoot =
-#if UNITY_EDITOR_OSX
-            "/Applications/Autodesk"
-#elif UNITY_EDITOR_LINUX
-            "/usr/autodesk"
-#else // WINDOWS
-            "C:/Program Files/Autodesk"
-#endif
-            ;
+        public static string kDefaultAdskRoot {
+            get{
+                switch (Application.platform) {
+                case RuntimePlatform.WindowsEditor:
+                    return "C:/Program Files/Autodesk";
+                case RuntimePlatform.OSXEditor:
+                    return "/Applications/Autodesk";
+                default:
+                    throw new NotImplementedException ();
+                }
+            }
+        }
 
         // Note: default values are set in LoadDefaults().
         public bool mayaCompatibleNames;
@@ -246,9 +247,6 @@ namespace FbxExporters.EditorTools {
         public bool keepOriginalAfterConvert;
 
         public int selectedDCCApp = 0;
-
-        [SerializeField]
-        public UnityEngine.Object turntableScene;
 
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
@@ -276,7 +274,6 @@ namespace FbxExporters.EditorTools {
             centerObjects = true;
             keepOriginalAfterConvert = false;
             convertToModelSavePath = kDefaultSavePath;
-            turntableScene = null;
             dccOptionPaths = null;
             dccOptionNames = null;
         }
@@ -371,23 +368,24 @@ namespace FbxExporters.EditorTools {
         /// <param name="location">Location of Maya install.</param>
         private static string GetMayaExePath(string location)
         {
-#if UNITY_EDITOR_OSX
-            // MAYA_LOCATION on mac is set by Autodesk to be the
-            // Contents directory. But let's make it easier on people
-            // and allow just having it be the app bundle or a
-            // directory that holds the app bundle.
-            if (location.EndsWith(".app/Contents")) {
-            return location + "/MacOS/Maya";
-            } else if (location.EndsWith(".app")) {
-            return location + "/Contents/MacOS/Maya";
-            } else {
-            return location + "/Maya.app/Contents/MacOS/Maya";
+            switch (Application.platform) {
+            case RuntimePlatform.WindowsEditor:
+                return location + "/bin/maya.exe";
+            case RuntimePlatform.OSXEditor:
+                // MAYA_LOCATION on mac is set by Autodesk to be the
+                // Contents directory. But let's make it easier on people
+                // and allow just having it be the app bundle or a
+                // directory that holds the app bundle.
+                if (location.EndsWith(".app/Contents")) {
+                    return location + "/MacOS/Maya";
+                } else if (location.EndsWith(".app")) {
+                    return location + "/Contents/MacOS/Maya";
+                } else {
+                    return location + "/Maya.app/Contents/MacOS/Maya";
+                }
+            default:
+                throw new NotImplementedException ();
             }
-#elif UNITY_EDITOR_LINUX
-            return location + "/bin/maya";
-#else // WINDOWS
-            return location + "/bin/maya.exe";
-#endif
         }
 
         public static GUIContent[] GetDCCOptions(){
@@ -513,20 +511,6 @@ namespace FbxExporters.EditorTools {
         public static string GetSelectedDCCPath()
         {
             return instance.dccOptionPaths [instance.selectedDCCApp];
-        }
-
-        public static string GetTurnTableSceneName(){
-            if (instance.turntableScene) {
-                return instance.turntableScene.name;
-            }
-            return null;
-        }
-
-        public static string GetTurnTableScenePath(){
-            if (instance.turntableScene) {
-                return AssetDatabase.GetAssetPath (instance.turntableScene);
-            }
-            return null;
         }
 
         /// <summary>

@@ -13,4 +13,4 @@
 #
 ########################################################################
 
-+ unityoneclick {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya
++ UnityFbxForMaya {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya
