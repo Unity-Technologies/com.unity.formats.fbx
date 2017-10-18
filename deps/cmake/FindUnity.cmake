@@ -15,7 +15,7 @@ if (NOT DEFINED UNITY)
       set(UNITY "/Applications/Unity")
     elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
       set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll")
-      set(UNITY "c:/Program Files/Unity")
+      set(UNITY "c:/Program Files/Unity2017.1.1f1")
     elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
       set(UNITY "/opt/Unity")
     endif()
@@ -36,7 +36,41 @@ endif()
 
 find_program(UNITY_EDITOR_PATH Unity PATHS ${UNITY_EXECUTABLE_PATHS})
 
+if (DEFINED UNITY_EDITOR_DLL_PATH)
+    message("Using ${UNITY_EDITOR_DLL_PATH}")
+else()
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+        # The editor is   Unity.app/Contents/MacOS/Unity
+        # The dlls are in Unity.app/Contents/Managed/*.dll
+        # Monodevelop is  Monodevelop.app/Contents/
+        get_filename_component(UNITY_EDITOR_DLL_PATH "${UNITY_EDITOR_PATH}" PATH)
+        get_filename_component(UNITY_EDITOR_DLL_PATH "${UNITY_EDITOR_DLL_PATH}" DIRECTORY)
+        set(UNITY_EDITOR_DLL_PATH "${UNITY_EDITOR_DLL_PATH}/Managed")
+
+        list(APPEND MONO_ROOT_PATH "${UNITY_EDITOR_DLL_PATH}/../../../Monodevelop.app/Contents/Frameworks/Mono.framework/Versions/Current")
+
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        # The editor is   .../Unity.exe
+        # The dlls are in .../Data/Managed/*.dll
+        get_filename_component(UNITY_EDITOR_DLL_PATH "${UNITY_EDITOR_PATH}" PATH)
+        set(UNITY_EDITOR_DLL_PATH "${UNITY_EDITOR_DLL_PATH}/Data/Managed")
+
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        # The editor is   .../Unity
+        # The dlls are in .../Data/Managed/*.dll
+        get_filename_component(UNITY_EDITOR_DLL_PATH "${UNITY_EDITOR_PATH}" PATH)
+        set(UNITY_EDITOR_DLL_PATH "${UNITY_EDITOR_DLL_PATH}/Data/Managed")
+    endif()
+endif()
+
+# Look for a dll on all platforms.
+message("Looking for UnityEditor.dll in ${UNITY_EDITOR_DLL_PATH}")
+set(_platformLibrarySuffix ${CMAKE_FIND_LIBRARY_SUFFIXES})
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll")
+find_library(CSHARP_UNITYEDITOR_LIBRARY UnityEditor.dll PATH ${UNITY_EDITOR_DLL_PATH})
+find_library(CSHARP_UNITYENGINE_LIBRARY UnityEngine.dll PATH ${UNITY_EDITOR_DLL_PATH})
+set(CMAKE_FIND_LIBRARY_SUFFIXES ${_platformLibrarySuffix})
 
 # Check whether we found everything we needed.
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Unity DEFAULT_MSG UNITY_EDITOR_PATH)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Unity DEFAULT_MSG UNITY_EDITOR_PATH CSHARP_UNITYEDITOR_LIBRARY)
