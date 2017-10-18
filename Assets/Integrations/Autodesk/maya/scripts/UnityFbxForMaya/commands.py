@@ -160,6 +160,8 @@ class importCmd(BaseCommand):
         if not self.setExists(self._exportSet):
             # couldn't find export set so create it
             maya.cmds.sets(name=self._exportSet)
+            # unlock set so we can add attributes to it
+            maya.cmds.lockNode(self._exportSet, lock=False)
         
         # reset attribute values, in case import fails
         self.storeAttribute(self._exportSet, self._unityFbxFilePathAttr, "")
@@ -197,6 +199,9 @@ class importCmd(BaseCommand):
             # add newly imported items to set
             if len(newItems) > 0:
                 maya.cmds.sets(newItems, include=self._exportSet)
+                
+            # lock set so it doesn't get deleted when empty
+            maya.cmds.lockNode(self._exportSet, lock=True)    
 
     def doIt(self, args):
         self.loadDependencies()
