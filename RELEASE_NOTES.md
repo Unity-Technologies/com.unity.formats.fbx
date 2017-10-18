@@ -7,6 +7,10 @@ NEW FEATURES
 * Added 3DsMax Integration
 
 Install the same way as the Maya integration from the export settings.
+3DsMax 2017 or earlier not supported.
+Plugin menu items can be found in the File menu:
+File->Import->Import from Unity
+File->Export->Export to Unity
 
 FIXES
 
