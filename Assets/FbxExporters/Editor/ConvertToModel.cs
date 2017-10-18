@@ -207,15 +207,12 @@ namespace FbxExporters
 
                 // Create a prefab from the instantiated and componentized unityGO.
                 var prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");
-                var prefab = PrefabUtility.CreatePrefab(prefabFileName, unityGO);
+                var prefab = PrefabUtility.CreatePrefab(prefabFileName, unityGO, ReplacePrefabOptions.ConnectToPrefab);
                 if (!prefab) {
                     throw new System.Exception(
                         string.Format("Failed to create prefab asset in [{0}] from fbx [{1}]",
                             prefabFileName, fbxFullPath));
                 }
-
-                // Connect to the prefab file.
-                unityGO = PrefabUtility.ConnectGameObjectToPrefab(unityGO, prefab);
 
                 // Remove (now redundant) gameobject
                 bool actuallyKeepOriginal;
