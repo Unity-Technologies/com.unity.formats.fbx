@@ -27,25 +27,25 @@ namespace FbxExporters.UnitTests
 
         [Test]
         public void BasicTest() {
-            Assert.IsFalse(Editor.Integrations.IsHeadlessInstall());
+            Assert.IsFalse(Editor.MayaIntegration.IsHeadlessInstall());
 
-            LogNonEmptyString("module path", Editor.Integrations.GetModulePath());
-            LogNonEmptyString("module template path", Editor.Integrations.GetModuleTemplatePath());
+            LogNonEmptyString("module path", Editor.MayaIntegration.GetModulePath());
+            LogNonEmptyString("module template path", Editor.MayaIntegration.GetModuleTemplatePath());
 
-            LogNonEmptyString("app path", Editor.Integrations.GetAppPath());
-            LogNonEmptyString("project path", Editor.Integrations.GetProjectPath());
-            LogNonEmptyString("package path", Editor.Integrations.GetPackagePath());
-            LogNonEmptyString("package version", Editor.Integrations.GetPackageVersion());
-            LogNonEmptyString("temp path", Editor.Integrations.GetTempSavePath());
-            LogNonEmptyString("export settings path", Editor.Integrations.GetExportSettingsPath ());
-            LogNonEmptyString ("instruction path", Editor.Integrations.GetMayaInstructionPath ());
-            LogNonEmptyString ("full instruction path", Editor.Integrations.GetFullMayaInstructionPath ());
+            LogNonEmptyString("app path", Editor.MayaIntegration.GetAppPath());
+            LogNonEmptyString("project path", Editor.MayaIntegration.GetProjectPath());
+            LogNonEmptyString("package path", Editor.MayaIntegration.GetPackagePath());
+            LogNonEmptyString("package version", Editor.MayaIntegration.GetPackageVersion());
+            LogNonEmptyString("temp path", Editor.MayaIntegration.GetTempSavePath());
+            LogNonEmptyString("export settings path", Editor.MayaIntegration.GetExportSettingsPath ());
+            LogNonEmptyString ("instruction path", Editor.MayaIntegration.GetMayaInstructionPath ());
+            LogNonEmptyString ("full instruction path", Editor.MayaIntegration.GetFullMayaInstructionPath ());
 
             // test that the paths don't contain backslashes
-            Assert.IsFalse(Editor.Integrations.GetAppPath().Contains("\\"));
-            Assert.IsFalse(Editor.Integrations.GetProjectPath().Contains("\\"));
-            Assert.IsFalse(Editor.Integrations.GetTempSavePath().Contains("\\"));
-            Assert.IsFalse(Editor.Integrations.GetExportSettingsPath ().Contains("\\"));
+            Assert.IsFalse(Editor.MayaIntegration.GetAppPath().Contains("\\"));
+            Assert.IsFalse(Editor.MayaIntegration.GetProjectPath().Contains("\\"));
+            Assert.IsFalse(Editor.MayaIntegration.GetTempSavePath().Contains("\\"));
+            Assert.IsFalse(Editor.MayaIntegration.GetExportSettingsPath ().Contains("\\"));
         }
     }
 }
