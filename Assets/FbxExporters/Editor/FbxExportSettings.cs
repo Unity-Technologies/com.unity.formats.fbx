@@ -134,8 +134,6 @@ namespace FbxExporters.EditorTools {
                         } else {
                             foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
                             foundDCC = ExportSettings.DCCType.Max;
-                    }
-
                         }
                     }
                     if (foundDCCPath == null) {

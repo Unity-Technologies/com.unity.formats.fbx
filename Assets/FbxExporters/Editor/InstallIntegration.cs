@@ -70,7 +70,7 @@ namespace FbxExporters.Editor
     {
         public override string DccDisplayName { get { return "Maya"; } }
 
-        private const string MODULE_FILENAME = "unityoneclick";
+        private const string MODULE_FILENAME = "UnityFbxForMaya";
         private const string PACKAGE_NAME = "FbxExporters";
         private const string VERSION_FILENAME = "README.txt";
         private const string VERSION_FIELD = "VERSION";
