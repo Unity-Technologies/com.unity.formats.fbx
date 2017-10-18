@@ -609,23 +609,22 @@ namespace FbxExporters.Editor
                 throw new System.NotImplementedException ();
             }
 
-            GetIntegrationFolder (dccIntegration);
+            if (!GetIntegrationFolder (dccIntegration)) {
+                // failed to get integration folder
+                return;
+            }
             int exitCode = dccIntegration.InstallIntegration (dccExe);
             ShowSuccessDialog (dccIntegration.DccDisplayName, exitCode);
         }
 
-        private static void GetIntegrationFolder(DCCIntegration dcc){
+        private static bool GetIntegrationFolder(DCCIntegration dcc){
             // decompress zip file if it exists, otherwise try using default location
             var zipPath = dcc.GetIntegrationZipFullPath();
             if (System.IO.File.Exists (zipPath)) {
-                var result = DecompressIntegrationZipFile (zipPath, dcc);
-                if (!result) {
-                    // could not find integration
-                    return;
-                }
-            } else {
-                dcc.SetIntegrationFolderPath (DefaultIntegrationSavePath);
+                return DecompressIntegrationZipFile (zipPath, dcc);
             }
+            dcc.SetIntegrationFolderPath (DefaultIntegrationSavePath);
+            return true;
         }
 
         private static bool DecompressIntegrationZipFile(string zipPath, DCCIntegration dcc)
