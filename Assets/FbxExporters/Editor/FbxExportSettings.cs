@@ -120,6 +120,7 @@ namespace FbxExporters.EditorTools {
                 if (!string.IsNullOrEmpty (mayaPath)) {
                     // get the directory of the executable
                     var md = Directory.GetParent (mayaPath);
+                    // UNI-29074 TODO: add Maya LT support
                     // Check that the executable is not in a MayaLT directory (thus being MayaLT instead of Maya executable).
                     // On Mac path resembles: /Applications/Autodesk/mayaLT2018/Maya.app
                     // On Windows path resembles: C:\Program Files\Autodesk\MayaLT2018\bin\maya.exe
@@ -316,6 +317,7 @@ namespace FbxExporters.EditorTools {
                 if (!product.StartsWith("maya", StringComparison.InvariantCultureIgnoreCase)) {
                     continue;
                 }
+                // UNI-29074 TODO: add Maya LT support
                 // Reject MayaLT -- it doesn't have plugins.
                 if (product.StartsWith("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
                     continue;
@@ -402,6 +404,7 @@ namespace FbxExporters.EditorTools {
             // get the version
             var version = AskMayaVersion(newOption);
 
+            // UNI-29074 TODO: add Maya LT support
             // make sure this is not Maya LT
             if (version.ToLower ().StartsWith ("lt")) {
                 Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", newOption));
