@@ -24,12 +24,12 @@ import unittest
 import maya.cmds
 import maya.mel
 
-from unityOneClick.logger import LoggerMixin
+from UnityFbxForMaya.logger import LoggerMixin
 
 try:
     import maya.standalone             
     maya.standalone.initialize()         
-    print "unityOneClick standalone"
+    print "UnityFbxForMaya standalone"
 except:
     pass
 

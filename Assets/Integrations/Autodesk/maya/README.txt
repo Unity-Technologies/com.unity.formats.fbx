@@ -17,12 +17,13 @@ Automatic Installation
 ===================
 
 The easiest installation method is to launch Unity and use the
-        FbxExporters -> Install Maya Integration
-option.
+        MenuBar -> Edit -> Project Settings -> Fbx Export -> Install Unity Integration
+button.
 
-It will choose the most recent version of Maya installed in the default
-installation location. To choose a particular version of Maya or to handle
-non-default installation locations, set the MAYA_LOCATION environment variable.
+It will use the version of Maya specified in the "Maya Application" dropdown located above the
+button. The dropdown will show all Maya versions located in the default installation location.
+To handle non-default installation locations, either select the browse option in the dropdown
+and browse to the desired Maya executable location, or set the MAYA_LOCATION environment variable.
 
 Manual Installation
 ===================
@@ -30,14 +31,14 @@ Manual Installation
 Instructions for installing if you don't use the unity package installer
 and your installing in a non-default location.
 
-1. copy unityoneclick.mod to user folder
+1. copy UnityFbxForMaya.mod to user folder
 
     MacOS & Ubuntu: ~/MayaProjects/modules
-    Windows:        C:\Program Files\Autodesk\Maya2017\modules
+    Windows:        C:\Users\{USER}\Documents\maya\modules
 
-2. configure path within unityoneclick.mod to point to integration installation folder
+2. configure path within UnityFbxForMaya.mod to point to integration installation folder
 
-    {UnityProject}/Assets/Integrations/Autodesk/maya2017
+    {UnityProject}/Assets/FbxExporters/Integrations/Autodesk/maya
 
 
 Running Unit Tests
@@ -46,11 +47,11 @@ Running Unit Tests
 MacOS
 
 export MAYAPY_PATH=/Applications/Autodesk/maya2017/Maya.app/Contents/bin/mayapy
-export MAYA_INTEGRATION_PATH=${UNITY_PROJECT_PATH}/Assets/Integrations/Autodesk/maya2017
+export MAYA_INTEGRATION_PATH=${UNITY_PROJECT_PATH}/Assets/FbxExporters/Integrations/Autodesk/maya
 export PYTHONPATH=${MAYA_INTEGRATION_PATH}/scripts
 
 # run all tests
 ${MAYAPY_PATH} ${MAYA_INTEGRATION_PATH}/scripts/run_all_tests.py
 
 # run one test
-${MAYAPY_PATH} ${MAYA_INTEGRATION_PATH}/scripts/unityOneClick/commands.py
+${MAYAPY_PATH} ${MAYA_INTEGRATION_PATH}/scripts/UnityFbxForMaya/commands.py

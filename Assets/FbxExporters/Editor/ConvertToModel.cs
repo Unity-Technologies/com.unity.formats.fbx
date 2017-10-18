@@ -175,7 +175,8 @@ namespace FbxExporters
                     Object.DestroyImmediate(fbxPrefab);
                 }
                 fbxPrefab = toConvert.AddComponent<FbxPrefab>();
-                fbxPrefab.SetSourceModel(unityMainAsset);
+                var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
+                fbxPrefabUtility.SetSourceModel(unityMainAsset);
 
                 // Create a prefab from the instantiated and componentized unityGO.
                 var prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");
@@ -342,6 +343,8 @@ namespace FbxExporters
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
                 // copy over meshes, materials, and nothing else
                 foreach (var component in from.GetComponents<Component>()) {
+                        continue;
+                    }
 
                     var json = EditorJsonUtility.ToJson(component);
                     if (string.IsNullOrEmpty (json)) {
@@ -377,6 +380,7 @@ namespace FbxExporters
                                 if (toRenderer && fromRenderer) {
                                     EditorJsonUtility.FromJsonOverwrite (EditorJsonUtility.ToJson(fromRenderer), toRenderer);
                                 }
+                        }
 
                                 Object.DestroyImmediate (skinnedMesh);
                             }

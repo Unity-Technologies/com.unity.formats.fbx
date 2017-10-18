@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace FbxExporters.Editor
 {
-    class Integrations
+    public class Integrations
     {
-        private const string MODULE_FILENAME = "unityoneclick";
+        private const string MODULE_FILENAME = "UnityFbxForMaya";
         private const string PACKAGE_NAME = "FbxExporters";
         private const string VERSION_FILENAME = "README.txt";
         private const string VERSION_FIELD = "VERSION";
@@ -39,24 +39,39 @@ namespace FbxExporters.Editor
 
         public const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
 
-#if UNITY_EDITOR_OSX
-        private const string MAYA_MODULES_PATH = "Library/Preferences/Autodesk/Maya/modules";
-#elif UNITY_EDITOR_LINUX
-        private const string MAYA_MODULES_PATH = "Maya/modules";
-#else
-        private const string MAYA_MODULES_PATH = "maya/modules";
-#endif
+        public const string TEMP_SAVE_PATH = "_safe_to_delete";
+
+
+        private static string MAYA_MODULES_PATH {
+            get {
+                switch (Application.platform) {
+                case RuntimePlatform.WindowsEditor:
+                    return "maya/modules";
+                case RuntimePlatform.OSXEditor:
+                    return "Library/Preferences/Autodesk/Maya/modules";
+                default:
+                    throw new NotImplementedException ();
+                }
+            }
+        }
 
         // Use string to define escaped quote
         // Windows needs the backslash
-#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
-        private const string ESCAPED_QUOTE = "\"";
-#else
-        private const string ESCAPED_QUOTE = "\\\"";
-#endif
+        private static string ESCAPED_QUOTE {
+            get {
+                switch (Application.platform) {
+                case RuntimePlatform.WindowsEditor:
+                    return "\\\"";
+                case RuntimePlatform.OSXEditor:
+                    return "\"";
+                default:
+                    throw new NotImplementedException ();
+                }
+            }
+        }
 
         private static string MAYA_COMMANDS { get {
-                return string.Format("configureUnityOneClick {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6}; scriptJob -idleEvent quit;",
+                return string.Format("configureUnityFbxForMaya {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6}; scriptJob -idleEvent quit;",
                     ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(),
                     GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall()?1:0));
         }}
@@ -64,11 +79,14 @@ namespace FbxExporters.Editor
 
         private static string GetUserFolder()
         {
-#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
-            return System.Environment.GetEnvironmentVariable("HOME");
-#else
-            return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
-#endif
+            switch (Application.platform) {
+            case RuntimePlatform.WindowsEditor:
+                return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+            case RuntimePlatform.OSXEditor:
+                return System.Environment.GetEnvironmentVariable("HOME");
+            default:
+                throw new NotImplementedException ();
+            }
         }
 
         public static bool IsHeadlessInstall ()
@@ -103,7 +121,7 @@ namespace FbxExporters.Editor
 
         public static string GetTempSavePath()
         {
-            return FbxExporters.Review.TurnTable.TempSavePath.Replace("\\", "/");
+            return TEMP_SAVE_PATH.Replace("\\", "/");
         }
 
         /// <summary>
@@ -247,13 +265,17 @@ namespace FbxExporters.Editor
                 myProcess.StartInfo.CreateNoWindow = true;
                 myProcess.StartInfo.UseShellExecute = false;
 
-#if UNITY_EDITOR_OSX
-                myProcess.StartInfo.Arguments = string.Format(@"-command '{0}'", MAYA_COMMANDS);
-#elif UNITY_EDITOR_LINUX
-                throw new NotImplementedException();
-#else // UNITY_EDITOR_WINDOWS
-                myProcess.StartInfo.Arguments = string.Format("-command \"{0}\"", MAYA_COMMANDS);
-#endif
+                switch (Application.platform) {
+                case RuntimePlatform.WindowsEditor:
+                    myProcess.StartInfo.Arguments = string.Format("-command \"{0}\"", MAYA_COMMANDS);
+                    break;
+                case RuntimePlatform.OSXEditor:
+                    myProcess.StartInfo.Arguments = string.Format(@"-command '{0}'", MAYA_COMMANDS);
+                    break;
+                default:
+                    throw new NotImplementedException ();
+                }
+
                 myProcess.EnableRaisingEvents = true;
                 myProcess.Start();
                 myProcess.WaitForExit();
@@ -314,7 +336,7 @@ namespace FbxExporters.Editor
             }
             else
             {
-                // detect if unityoneclick.mod is installed
+                // detect if UnityFbxForMaya.mod is installed
                 installed = System.IO.File.Exists(moduleFilePath);
 
                 if (installed)
@@ -420,7 +442,7 @@ namespace FbxExporters.Editor
                 message = string.Format("Failed to configure Maya, please check logs (exitcode={0}).", exitCode);
             } else {
                 title = "Completed installation of Maya Integration.";
-                message = "Enjoy the new \"Unity\" menu in Maya.";
+                message = "Enjoy the new Unity menu in Maya.";
             }
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
@@ -529,9 +551,9 @@ namespace FbxExporters.Editor
         public static void DecompressZip(string zipPath, string destPath){
             System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
             var ZIPAPP = "7z.exe";
-#if UNITY_EDITOR_OSX
-            ZIPAPP = "7za";
-#endif
+            if (Application.platform == RuntimePlatform.OSXEditor) {
+                ZIPAPP = "7za";
+            }
             myProcess.StartInfo.FileName = EditorApplication.applicationContentsPath + "/Tools/" + ZIPAPP;
             myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
             myProcess.StartInfo.CreateNoWindow = true;
