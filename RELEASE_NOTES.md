@@ -1,5 +1,23 @@
 RELEASE NOTES
 
+**Version**: sprint30
+
+NEW FEATURES
+
+* Added 3DsMax Integration
+
+Install the same way as the Maya integration from the export settings.
+3DsMax 2017 or earlier not supported.
+Plugin menu items can be found in the File menu:
+File->Import->Import from Unity
+File->Export->Export to Unity
+
+FIXES
+
+* Maya Unity Integration: lock export set so it doesn't accidentally get deleted
+* Convert to Prefab: Fix so convert to prefab doesn't lose Object references in scripts
+* Export Settings: Fix so MayaLT cannot be selected using "Browse" on Mac
+
 **Version**: 1.0.0b1
 
 NEW FEATURES
