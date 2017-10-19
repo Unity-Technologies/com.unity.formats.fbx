@@ -989,7 +989,10 @@ namespace FbxExporters
                                 prefabComponent = prefabXfo.gameObject.AddComponent(fbxComponent.t);
                                 Log("created component {0}:{1}", nodeName, fbxComponent.t);
                             }
-
+                            // check that the component exists before copying to it
+                            if (!prefabComponent) {
+                                continue;
+                            }
                             // Now set the values.
                             UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponent.jsonValue, prefabComponent);
                         }
