@@ -989,7 +989,12 @@ namespace FbxExporters
                                 prefabComponent = prefabXfo.gameObject.AddComponent(fbxComponent.t);
                                 Log("created component {0}:{1}", nodeName, fbxComponent.t);
                             }
-                            // check that the component exists before copying to it
+                            // Check that the component exists before copying to it.
+                            // This happens for Rect Transform components as the fbx
+                            // contains a Transform which it tries to add/update on the
+                            // prefab, but fails because you cannot have both a Transform
+                            // and a Rect Transform
+                            // UNI-29179 TODO: better handling of Rect Transforms
                             if (!prefabComponent) {
                                 continue;
                             }

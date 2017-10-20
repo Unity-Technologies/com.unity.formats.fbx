@@ -17,7 +17,6 @@ FIXES
 * Maya Unity Integration: lock export set so it doesn't accidentally get deleted
 * Convert to Prefab: Fix so convert to prefab doesn't lose Object references in scripts
 * Export Settings: Fix so MayaLT cannot be selected using "Browse" on Mac
-* Fbx Prefab: Fix update fails if trying to update component that doesn't exist
 
 **Version**: 1.0.0b1
 
