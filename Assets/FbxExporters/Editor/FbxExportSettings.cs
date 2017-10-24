@@ -135,12 +135,8 @@ namespace FbxExporters.EditorTools {
                     ExportSettings.DCCType foundDCC = ExportSettings.DCCType.Maya;
                     var foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Maya);
                     if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor) {
-                        if (!ExportSettings.IsMax2018OrLater (dccPath)) {
-                            Debug.LogError ("3DsMax 2017 or earlier is not supported");
-                        } else {
-                            foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
-                            foundDCC = ExportSettings.DCCType.Max;
-                        }
+                        foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
+                        foundDCC = ExportSettings.DCCType.Max;
                     }
                     if (foundDCCPath == null) {
                         Debug.LogError (string.Format ("Could not find supported DCC application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
@@ -348,9 +344,6 @@ namespace FbxExporters.EditorTools {
 
                 if (product.StartsWith ("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
                     var exePath = string.Format ("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe");
-                    if (!IsMax2018OrLater (exePath)) {
-                        continue;
-                    }
                     string version = product.Substring ("3ds max ".Length);
                     dccOptionPath.Add (exePath);
                     dccOptionName.Add (GetUniqueName ("3ds Max " + version));
