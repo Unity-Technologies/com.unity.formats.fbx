@@ -9,7 +9,7 @@ FbxExporterSetParam "SmoothMeshExport" false
 FbxExporterSetParam "Preserveinstances" true
 
 -- Animation
-FbxExporterSetParam "Animation" false
+FbxExporterSetParam "Animation" true
 
 FbxExporterSetParam "Cameras" true
 FbxExporterSetParam "Lights" true
