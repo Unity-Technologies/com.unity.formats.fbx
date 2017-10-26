@@ -91,8 +91,8 @@ namespace FbxExporters.EditorTools {
 
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
-                "DCC Application:",
-                "Select the Digital Content Creation (DCC) Application for which you would like to install the Unity integration."));
+                "3D Application:",
+                "Select the 3D Application for which you would like to install the Unity integration."));
 
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
@@ -143,7 +143,7 @@ namespace FbxExporters.EditorTools {
                         }
                     }
                     if (foundDCCPath == null) {
-                        Debug.LogError (string.Format ("Could not find supported DCC application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
+                        Debug.LogError (string.Format ("Could not find supported 3D application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
                         exportSettings.selectedDCCApp = oldValue;
                     } else {
                         dccPath = foundDCCPath;
@@ -158,7 +158,7 @@ namespace FbxExporters.EditorTools {
 
 			var installIntegrationContent = new GUIContent(
                     "Install Unity Integration",
-                    "Install and configure the Unity integration for the selected Digital Content Creation (DCC) application so that you can import and export directly with this project.");
+                    "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
             if (GUILayout.Button (installIntegrationContent)) {
                 FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
             }
@@ -417,7 +417,7 @@ namespace FbxExporters.EditorTools {
 
             if (instance.dccOptionPaths.Count <= 0) {
                 return new GUIContent[]{
-                    new GUIContent("<No DCC found>"),
+                    new GUIContent("<No 3D Application found>"),
                     new GUIContent("Browse...")
                 };
             }
