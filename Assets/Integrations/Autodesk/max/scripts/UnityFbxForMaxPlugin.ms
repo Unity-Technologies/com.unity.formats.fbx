@@ -99,7 +99,7 @@ fn createUnityExportAction title parentMenu = (
 	createUnityActionItem "UnityExport" "Unity" title parentMenu;
 );
 
--- Setup UI using menu manager if using 3ds Max 2018+
+-- Setup UI in existing Import/Export menus if using 3ds Max 2018+
 if (maxVersion())[1] >= 20000 then(
 	global importMenuName = "File-Import"
 	global exportMenuName = "File-Export"
@@ -108,13 +108,13 @@ if (maxVersion())[1] >= 20000 then(
 	global getImportMenu
 	fn getImportMenu = (
 		menuMan.findMenu importMenuName
-	)
+	);
 
 	-- get the export menu
 	global getExportMenu
 	fn getExportMenu = (
 		menuMan.findMenu exportMenuName
-	)
+	);
 	
 	-- Setup UI
 	fn setupUnityPluginUI = (
