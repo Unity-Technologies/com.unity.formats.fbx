@@ -1,5 +1,5 @@
 -- MacroScripts that will perform actions
-macroScript UnityImport category:"File-Import"
+macroScript UnityImport category:"Unity"
 (
     origObjects = #()
 
@@ -45,7 +45,7 @@ macroScript UnityImport category:"File-Import"
         callbacks.removeScripts #postImport id:#unityPlugin
     )
 )
-macroScript UnityExport category:"File-Export"
+macroScript UnityExport category:"Unity"
 (
     fn loadUnityFbxExportSettings = (
         fbxExportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxExportSettings"
@@ -83,68 +83,135 @@ macroScript UnityExport category:"File-Export"
     )
 )
 
--- Setup UI
-importMenuName = "File-Import"
-exportMenuName = "File-Export"
-fn setupUnityPluginUI = (
-    importMenu = menuMan.findMenu importMenuName
-    exportMenu = menuMan.findMenu exportMenuName
-    if importMenu != undefined and exportMenu != undefined do
-    (
-        unityImportTitle = "Import from Unity"
-        unityExportTitle = "Export to Unity"
-        
-        -- check if menu items already exists
-        foundUnityImport = false
-        for i=1 to importMenu.numItems() do(
-            mi = importMenu.getItem i
-            if mi.getTitle() == unityImportTitle then(
-                foundUnityImport = true
-                global unityImportAction = mi
-                break
-            )
-        )
-        foundUnityExport = false
-        for i=1 to exportMenu.numItems() do(
-            mi = exportMenu.getItem i
-            if mi.getTitle() == unityExportTitle then(
-                foundUnityExport = true
-                global unityExportAction = mi
-                break
-            )
-        )
-        
-        if foundUnityImport == false or foundUnityExport == false then(
+fn createUnityActionItem macroName category title parentMenu = (
+	local unityAction = menuMan.createActionItem macroName category; --create an ActionItem from the MacroScript
+	unityAction.setTitle title;
+	unityAction.setUseCustomTitle true;
+	parentMenu.addItem unityAction -1;
+	unityAction
+);
+
+fn createUnityImportAction title parentMenu = (
+	createUnityActionItem "UnityImport" "Unity" title parentMenu;
+);
+
+fn createUnityExportAction title parentMenu = (
+	createUnityActionItem "UnityExport" "Unity" title parentMenu;
+);
+
+-- Setup UI in existing Import/Export menus if using 3ds Max 2018+
+if (maxVersion())[1] >= 20000 then(
+	global importMenuName = "File-Import"
+	global exportMenuName = "File-Export"
+	
+	-- get the import menu
+	global getImportMenu
+	fn getImportMenu = (
+		menuMan.findMenu importMenuName
+	);
+
+	-- get the export menu
+	global getExportMenu
+	fn getExportMenu = (
+		menuMan.findMenu exportMenuName
+	);
+	
+	-- Setup UI
+	fn setupUnityPluginUI = (
+		local importMenu = getImportMenu()
+		local exportMenu = getExportMenu()
+		if importMenu != undefined and exportMenu != undefined do
+		(
+			local unityImportTitle = "Import from Unity"
+			local unityExportTitle = "Export to Unity"
+			
+			-- check if menu items already exist, delete if they do
+			local foundUnityImport = false
+			for i=1 to importMenu.numItems() while not foundUnityImport do(
+				local mi = importMenu.getItem i
+				if mi.getTitle() == unityImportTitle then(
+					importMenu.removeItem mi
+					foundUnityImport = true
+				)
+			)
+			local foundUnityExport = false
+			for i=1 to exportMenu.numItems() while not foundUnityExport do(
+				local mi = exportMenu.getItem i
+				if mi.getTitle() == unityExportTitle then(
+					exportMenu.removeItem mi
+					foundUnityExport = true
+				)
+			)
+			
             id = genClassID returnValue:true
             if menuMan.registerMenuContext id[1] then
             (
-                if foundUnityImport == false do (
-                    global unityImportAction = menuMan.createActionItem "UnityImport" importMenuName; --create an ActionItem from the MacroScript
-                    unityImportAction.setTitle unityImportTitle;
-                    unityImportAction.setUseCustomTitle true;
-                    importMenu.addItem unityImportAction -1; --add the ActionItem to the menu
-                )
-                if foundUnityExport == false do (
-                    global unityExportAction = menuMan.createActionItem "UnityExport" exportMenuName;
-                    unityExportAction.setTitle unityExportTitle;
-                    unityExportAction.setUseCustomTitle true;
-                    exportMenu.addItem unityExportAction -1;
-                )
+                global unityImportAction = createUnityImportAction unityImportTitle importMenu
+                global unityExportAction = createUnityExportAction unityExportTitle exportMenu
+                
                 menuMan.updateMenuBar() --update the menu bar
             )
-        )
-    )
-);
-setupUnityPluginUI()
+		)
+	);
+	setupUnityPluginUI()
 
--- Make sure that Menu gets removed at shutdown, force menu to reload each time Max is opened
-callbacks.addScript #preSavingMenus (
-    "importMenu = menuMan.findMenu \""+importMenuName+"\"; \
-     exportMenu = menuMan.findMenu \""+exportMenuName+"\"; \
-     if importMenu != undefined and unityImportAction != undefined then( \
-        importMenu.removeItem unityImportAction; \
-     ) \
-     if exportMenu != undefined and unityExportAction != undefined then( \
-        exportMenu.removeItem unityExportAction; \
-     )"
+	-- Make sure that Menu gets removed at shutdown, force menu to reload each time Max is opened
+	callbacks.addScript #preSavingMenus (
+		"importMenu = getImportMenu(); \
+		 exportMenu = getExportMenu(); \
+		 if importMenu != undefined and unityImportAction != undefined then( \
+			importMenu.removeItem unityImportAction; \
+		 ) \
+		 if exportMenu != undefined and unityExportAction != undefined then( \
+			exportMenu.removeItem unityExportAction; \
+		 )"
+	)
+)
+else if (maxVersion())[1] == 19000 then (
+	-- for 3ds Max 2017
+	
+	global unityMenuName = "Unity"
+	
+	global getUnityMenu
+	fn getUnityMenu = (
+		menuMan.findMenu unityMenuName
+	);
+	
+	-- Setup UI
+	fn setupUnityPluginUI = (
+		local unityMenu = getUnityMenu()
+		local unityImportTitle = "Import"
+		local unityExportTitle = "Export"
+		if unityMenu != undefined do
+		(
+			-- remove the menu if it still exists
+			menuMan.unRegisterMenu unityMenu
+		)
+		
+		id = genClassID returnValue:true
+		if menuMan.registerMenuContext id[1] then
+		(
+			local mainMenuBar = menuMan.getMainMenuBar()
+			local unityMenu = menuMan.createMenu unityMenuName
+			local unityMenuItem = menuMan.createSubMenuItem unityMenuName unityMenu
+			mainMenuBar.addItem unityMenuItem -1
+			
+			createUnityImportAction unityImportTitle unityMenu
+			createUnityExportAction unityExportTitle unityMenu
+			
+			menuMan.updateMenuBar() --update the menu bar
+		)
+	);
+	setupUnityPluginUI()
+
+	-- Make sure that Menu gets removed at shutdown, force menu to reload each time Max is opened
+	callbacks.addScript #preSavingMenus (
+		"unityMenu = getUnityMenu(); \
+		 if unityMenu != undefined do ( \
+			menuMan.unRegisterMenu unityMenu; \
+		 )"
+	)
+)
+else(
+    print "Error: Unity Integration only supports 3ds Max 2017 or later"
 )

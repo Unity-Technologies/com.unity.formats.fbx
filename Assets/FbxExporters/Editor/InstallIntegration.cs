@@ -531,6 +531,13 @@ namespace FbxExporters.Editor
                 myProcess.Start();
                 myProcess.WaitForExit();
                 ExitCode = myProcess.ExitCode;
+
+                // TODO (UNI-29910): figure out what exactly causes this exit code + how to resolve
+                if(ExitCode == -1073740791){
+                    Debug.Log(string.Format("Detected 3ds max exitcode {0} -- safe to ignore", ExitCode));
+                    ExitCode = 0;
+                }
+
                 Debug.Log(string.Format("Ran max: [{0}]\nWith args [{1}]\nResult {2}",
                     maxExe, myProcess.StartInfo.Arguments, ExitCode));
             }
