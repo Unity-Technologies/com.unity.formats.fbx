@@ -1,5 +1,19 @@
 RELEASE NOTES
 
+**Version**: sprint31
+
+NEW FEATURES
+
+* Added 3ds Max 2017 support
+
+Import/Export menu items added into a Unity menu item on the main menu bar.
+
+FIXES
+*FbxPrefab: Avoid trying to update Rect Transforms with the fbx's Transform component
+*Export Settings: Rename "DCC Application" to "3D Application"
+*Unity 3ds Max integration: Fix model rotated by 90 degrees along x when importing into Unity
+
+
 **Version**: sprint30
 
 NEW FEATURES
