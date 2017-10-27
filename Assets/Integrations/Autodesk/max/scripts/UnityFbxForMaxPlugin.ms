@@ -213,5 +213,5 @@ else if (maxVersion())[1] == 19000 then (
 	)
 )
 else(
-    print "Warning: Unity Integration not supported for 3ds Max versions earlier than 3ds Max 2017"
+    print "Error: Unity Integration only supports 3ds Max 2017 or later"
 )
