@@ -1,5 +1,5 @@
 -- MacroScripts that will perform actions
-macroScript UnityImport category:"Unity" iconName:"UnityIcons/import"
+macroScript UnityImport category:"Unity"
 (
     origObjects = #()
 
@@ -41,11 +41,29 @@ macroScript UnityImport category:"Unity" iconName:"UnityIcons/import"
         
         unityFbxFilePathAttr = getFilenamePath fbxFileName
         unityFbxFileNameAttr = filenameFromPath fbxFileName
-        
+		
+		-- Change Unity project if fbx is from a different Unity project.
+		-- Get the project based on the folder structure (i.e. folder above Assets)
+		local head = unityFbxFilePathAttr
+		head = trimRight t "\\/"
+		-- Check that we are not at the root directory.
+		while head != "" and not (pathConfig.isRootPath head) do(
+			if (pathConfig.stripPathToLeaf head) == "Assets" do (
+				-- this is a valid Unity project, so set it
+				unityProject = pathConfig.removePathLeaf head
+				maxIniFile = (GetMAXIniFile())
+				setINISetting maxIniFile "Unity" "UnityProject" unityProject
+					
+			    -- in order to break out of loop without calling break (because "break" is slow)
+			    head = ""
+			)
+			head = pathConfig.removePathLeaf head
+		)
+		
         callbacks.removeScripts #postImport id:#unityPlugin
     )
 )
-macroScript UnityExport category:"Unity" iconName:"UnityIcons/export"
+macroScript UnityExport category:"Unity"
 (
     fn loadUnityFbxExportSettings = (
         fbxExportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxExportSettings"
