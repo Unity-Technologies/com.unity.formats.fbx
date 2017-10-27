@@ -45,7 +45,7 @@ macroScript UnityImport category:"Unity"
 		-- Change Unity project if fbx is from a different Unity project.
 		-- Get the project based on the folder structure (i.e. folder above Assets)
 		local head = unityFbxFilePathAttr
-		head = trimRight t "\\/"
+		head = trimRight head "\\/"
 		-- Check that we are not at the root directory.
 		while head != "" and not (pathConfig.isRootPath head) do(
 			if (pathConfig.stripPathToLeaf head) == "Assets" do (
