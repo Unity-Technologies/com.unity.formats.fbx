@@ -534,6 +534,7 @@ namespace FbxExporters.Editor
 
                 // TODO (UNI-29910): figure out what exactly causes this exit code + how to resolve
                 if(ExitCode == -1073740791){
+                    Debug.LogWarning(string.Format("3ds Max exited with code: {0}, ignoring as this does not affect plugin installation", ExitCode));
                     ExitCode = 0;
                 }
 

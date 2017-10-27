@@ -135,8 +135,12 @@ namespace FbxExporters.EditorTools {
                     ExportSettings.DCCType foundDCC = ExportSettings.DCCType.Maya;
                     var foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Maya);
                     if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor) {
-                        foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
-                        foundDCC = ExportSettings.DCCType.Max;
+                        if (!ExportSettings.IsEarlierThanMax2017 (dccPath)) {
+                            Debug.LogWarning ("Earlier than 3ds Max 2017 is not supported");
+                        } else {
+                            foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
+                            foundDCC = ExportSettings.DCCType.Max;
+                        }
                     }
                     if (foundDCCPath == null) {
                         Debug.LogError (string.Format ("Could not find supported DCC application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
@@ -344,6 +348,10 @@ namespace FbxExporters.EditorTools {
 
                 if (product.StartsWith ("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
                     var exePath = string.Format ("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe");
+                    if (!IsEarlierThanMax2017 (exePath)) {
+                        Debug.LogWarning ("Earlier than 3ds Max 2017 is not supported");
+                        continue;
+                    }
                     string version = product.Substring ("3ds max ".Length);
                     dccOptionPath.Add (exePath);
                     dccOptionName.Add (GetUniqueName ("3ds Max " + version));
@@ -498,11 +506,11 @@ namespace FbxExporters.EditorTools {
             return GetUniqueName (Path.GetFileName(Path.GetDirectoryName (exePath)));
         }
 
-        public static bool IsMax2018OrLater(string exePath){
+        public static bool IsEarlierThanMax2017(string exePath){
             var name = Path.GetFileName (Path.GetDirectoryName (exePath)).ToLower();
             name = name.Replace ("3ds max", "").Trim();
             int version;
-            return int.TryParse (name, out version) && version >= 2018;
+            return int.TryParse (name, out version) && version < 2017;
         }
 
         public static string GetSelectedDCCPath()

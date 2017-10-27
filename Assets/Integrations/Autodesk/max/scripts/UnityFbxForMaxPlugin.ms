@@ -1,5 +1,5 @@
 -- MacroScripts that will perform actions
-macroScript UnityImport category:"Unity" iconName:"UnityIcons/import"
+macroScript UnityImport category:"Unity"
 (
     origObjects = #()
 
@@ -45,7 +45,7 @@ macroScript UnityImport category:"Unity" iconName:"UnityIcons/import"
         callbacks.removeScripts #postImport id:#unityPlugin
     )
 )
-macroScript UnityExport category:"Unity" iconName:"UnityIcons/export"
+macroScript UnityExport category:"Unity"
 (
     fn loadUnityFbxExportSettings = (
         fbxExportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxExportSettings"
@@ -143,16 +143,14 @@ if (maxVersion())[1] >= 20000 then(
 				)
 			)
 			
-			if foundUnityImport == false or foundUnityExport == false then(
-				id = genClassID returnValue:true
-				if menuMan.registerMenuContext id[1] then
-				(
-					global unityImportAction = createUnityImportAction unityImportTitle importMenu
-					global unityExportAction = createUnityExportAction unityExportTitle exportMenu
-					
-					menuMan.updateMenuBar() --update the menu bar
-				)
-			)
+            id = genClassID returnValue:true
+            if menuMan.registerMenuContext id[1] then
+            (
+                global unityImportAction = createUnityImportAction unityImportTitle importMenu
+                global unityExportAction = createUnityExportAction unityExportTitle exportMenu
+                
+                menuMan.updateMenuBar() --update the menu bar
+            )
 		)
 	);
 	setupUnityPluginUI()
@@ -169,7 +167,7 @@ if (maxVersion())[1] >= 20000 then(
 		 )"
 	)
 )
-else(
+else if (maxVersion())[1] == 19000 then (
 	-- for 3ds Max 2017
 	
 	global unityMenuName = "Unity"
@@ -213,4 +211,7 @@ else(
 			menuMan.unRegisterMenu unityMenu; \
 		 )"
 	)
+)
+else(
+    print "Warning: Unity Integration not supported for 3ds Max versions earlier than 3ds Max 2017"
 )
