@@ -100,6 +100,9 @@ namespace FbxExporters.EditorTools {
             if (exportSettings.selectedDCCApp == options.Length - 1) {
                 exportSettings.selectedDCCApp = 0;
             }
+
+            exportSettings.selectedDCCApp = exportSettings.FindMostRecentProgram();
+
             int oldValue = exportSettings.selectedDCCApp;
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
             if (exportSettings.selectedDCCApp == options.Length - 1) {
@@ -308,6 +311,69 @@ namespace FbxExporters.EditorTools {
             } while (instance.dccOptionNames.Contains(name));
 
             return uniqueName;
+        }
+
+        // <summary>
+        //
+        // Find the latest program available and make that the default choice.
+        // Will always take any Maya version over any 3ds Max version.
+        //
+        // Returns the position of the most recent program in the list of dccOptionPaths
+        //
+        // </summary>
+        public int FindMostRecentProgram()
+        {
+            int newestMayaVersion = -1;
+            int newestMaxVersion = -1;
+
+            for (int i = 0; i < instance.dccOptionPaths.Count; i++)
+            {
+                if (instance.dccOptionPaths[i].ToLower().Contains("maya"))
+                {
+                    if (newestMayaVersion == -1)
+                        newestMayaVersion = 0;
+
+                    //Check if the path we are considering is newer than the previously saved one
+                    if (int.Parse(AskMayaVersion(instance.dccOptionPaths[i])) > int.Parse(AskMayaVersion(instance.dccOptionPaths[newestMayaVersion])))
+                    {
+                        newestMayaVersion = i;
+                    }
+                }
+                else if (instance.dccOptionPaths[i].ToLower().Contains("max"))
+                {
+                    if (newestMaxVersion == -1)
+                        newestMaxVersion = 0;
+
+                    //Isolate the number out of the path we are currently checking
+                    var nameCurrent = Path.GetFileName(Path.GetDirectoryName(instance.dccOptionPaths[i])).ToLower();
+                    nameCurrent = nameCurrent.Replace("3ds max", "").Trim();
+
+                    //Isolate the number out of the path that is the current best answer
+                    var nameNewest = Path.GetFileName(Path.GetDirectoryName(instance.dccOptionPaths[newestMaxVersion])).ToLower();
+                    nameNewest = nameNewest.Replace("3ds max", "").Trim();
+
+                    //Check if the path we are considering is newer than the previously saved one
+                    if (int.Parse(nameCurrent) > int.Parse(nameNewest))
+                    {
+                        newestMaxVersion = i;
+                    }
+
+
+                }
+
+            }
+
+            //We prefer to use the latest Maya version, if one exists
+            if (newestMayaVersion != -1)
+            {
+                return newestMayaVersion;
+            }
+            else if (newestMaxVersion != -1)
+            {
+                return newestMaxVersion;
+            }
+
+            return 0;
         }
 
         /// <summary>
