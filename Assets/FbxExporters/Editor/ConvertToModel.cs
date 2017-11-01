@@ -294,7 +294,7 @@ namespace FbxExporters
             /// <returns>Dictionary containing the name to source game object.</returns>
             /// <param name="dest">Destination GameObject.</param>
             /// <param name="source">Source GameObject.</param>
-            private static Dictionary<string,GameObject> MapNameToSourceRecursive(GameObject dest, GameObject source){
+            public static Dictionary<string,GameObject> MapNameToSourceRecursive(GameObject dest, GameObject source){
                 var nameToGO = new Dictionary<string,GameObject> ();
 
                 var q = new Queue<Transform> ();

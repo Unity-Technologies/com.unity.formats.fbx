@@ -182,5 +182,39 @@ namespace FbxExporters.UnitTests
             // In the future we'll want to assert the opposite!
             Assert.That(cubeInstance.GetComponentsInChildren<SkinnedMeshRenderer>(), Is.Empty);
         }
+
+        [Test]
+        public void MapNameToSourceTest()
+        {
+            //Create a cube with 3 children game objects
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+
+            capsule.transform.parent = cube.transform;
+            sphere.transform.parent = cube.transform;
+            quad.transform.parent = cube.transform;
+
+
+            //Create a similar Heirarchy that we can use as our phony "exported" hierarchy.
+            var cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var capsule2 = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            var sphere2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            var quad2 = GameObject.CreatePrimitive(PrimitiveType.Quad);
+
+            capsule2.transform.parent = cube2.transform;
+            sphere2.transform.parent = cube2.transform;
+            quad2.transform.parent = cube2.transform;
+
+            var dictionary = ConvertToModel.MapNameToSourceRecursive(cube, cube2);
+
+            //We expect these to pass because we've given it an identical game object, as it would have after a normal export.
+            Assert.AreEqual(capsule.name, dictionary[capsule.name].name);
+            Assert.AreEqual(sphere.name, dictionary[sphere.name].name);
+            Assert.AreEqual(quad.name, dictionary[quad.name].name);
+
+            Assert.AreNotSame(cube.GetInstanceID(), cube2.GetInstanceID());
+        }
     }
 }
