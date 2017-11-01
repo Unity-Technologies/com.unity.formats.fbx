@@ -98,10 +98,8 @@ namespace FbxExporters.EditorTools {
             var options = ExportSettings.GetDCCOptions();
             // make sure we never initially have browse selected
             if (exportSettings.selectedDCCApp == options.Length - 1) {
-                exportSettings.selectedDCCApp = 0;
+                exportSettings.selectedDCCApp = exportSettings.FindMostRecentProgram();
             }
-
-            exportSettings.selectedDCCApp = exportSettings.FindMostRecentProgram();
 
             int oldValue = exportSettings.selectedDCCApp;
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
@@ -452,6 +450,7 @@ namespace FbxExporters.EditorTools {
                     dccOptionName.Add (GetUniqueName ("3ds Max " + version));
                 }
             }
+            instance.selectedDCCApp = instance.FindMostRecentProgram();
         }
 
         /// <summary>
