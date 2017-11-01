@@ -313,17 +313,18 @@ namespace FbxExporters.EditorTools {
             return uniqueName;
         }
 
-        // <summary>
-        //
-        // Find the latest program available and make that the default choice.
-        // Will always take any Maya version over any 3ds Max version.
-        //
-        // Returns the position of the most recent program in the list of dccOptionPaths
-        //
-        // </summary>
+        /// <summary>
+        ///
+        /// Find the latest program available and make that the default choice.
+        /// Will always take any Maya version over any 3ds Max version.
+        ///
+        /// Returns the position of the most recent program in the list of dccOptionPaths
+        ///
+        /// </summary>
         public int FindMostRecentProgram()
         {
             int newestMayaVersion = -1;
+            int savedMayaVersionNumber = 0;
             int newestMaxVersion = -1;
 
             for (int i = 0; i < instance.dccOptionPaths.Count; i++)
@@ -331,33 +332,36 @@ namespace FbxExporters.EditorTools {
                 if (instance.dccOptionPaths[i].ToLower().Contains("maya"))
                 {
                     if (newestMayaVersion == -1)
+                    {
                         newestMayaVersion = 0;
+                        savedMayaVersionNumber = int.Parse(AskMayaVersion(instance.dccOptionPaths[i]));
+                        continue;
+                    }
 
                     //Check if the path we are considering is newer than the previously saved one
-                    if (int.Parse(AskMayaVersion(instance.dccOptionPaths[i])) > int.Parse(AskMayaVersion(instance.dccOptionPaths[newestMayaVersion])))
+                    int versionToCheck;
+                    if (int.TryParse(AskMayaVersion(instance.dccOptionPaths[i]), out versionToCheck))
                     {
-                        newestMayaVersion = i;
+                        if (versionToCheck > savedMayaVersionNumber)
+                        {
+                            newestMayaVersion = i;
+                            savedMayaVersionNumber = versionToCheck;
+                        }
                     }
                 }
-                else if (instance.dccOptionPaths[i].ToLower().Contains("max"))
+                else if (instance.dccOptionPaths[i].ToLower().Contains("max") && newestMayaVersion == -1)
                 {
                     if (newestMaxVersion == -1)
+                    {
                         newestMaxVersion = 0;
-
-                    //Isolate the number out of the path we are currently checking
-                    var nameCurrent = Path.GetFileName(Path.GetDirectoryName(instance.dccOptionPaths[i])).ToLower();
-                    nameCurrent = nameCurrent.Replace("3ds max", "").Trim();
-
-                    //Isolate the number out of the path that is the current best answer
-                    var nameNewest = Path.GetFileName(Path.GetDirectoryName(instance.dccOptionPaths[newestMaxVersion])).ToLower();
-                    nameNewest = nameNewest.Replace("3ds max", "").Trim();
+                        continue;
+                    }
 
                     //Check if the path we are considering is newer than the previously saved one
-                    if (int.Parse(nameCurrent) > int.Parse(nameNewest))
+                    if (FindMaxVersion(dccOptionPaths[i]) > FindMaxVersion(dccOptionPaths[newestMaxVersion]))
                     {
                         newestMaxVersion = i;
                     }
-
 
                 }
 
@@ -374,6 +378,28 @@ namespace FbxExporters.EditorTools {
             }
 
             return 0;
+        }
+
+        /// <summary>
+        /// Finds the 3ds Max version based off of the title of the application
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns> the year/version  OR -1 if the year could not be parsed </returns>
+        private static int FindMaxVersion(string path)
+        {
+            var fileName = Path.GetFileName(Path.GetDirectoryName(path)).ToLower();
+            fileName = fileName.Replace("3ds max", "").Trim();
+
+            int version;
+
+            if (int.TryParse(fileName, out version))
+            {
+                return version;
+            }
+            else
+            {
+                return -1;
+            }
         }
 
         /// <summary>
@@ -576,10 +602,8 @@ namespace FbxExporters.EditorTools {
         }
 
         public static bool IsEarlierThanMax2017(string exePath){
-            var name = Path.GetFileName (Path.GetDirectoryName (exePath)).ToLower();
-            name = name.Replace ("3ds max", "").Trim();
-            int version;
-            return int.TryParse (name, out version) && version < 2017;
+            int version = FindMaxVersion(exePath);
+            return version != -1 && version < 2017;
         }
 
         public static string GetSelectedDCCPath()
