@@ -37,7 +37,13 @@ macroScript UnityImport category:"Unity"
         origObjects = objects as array
         callbacks.addScript #postImport ("afterImport()") id:#unityPlugin
 
+        -- set the system units to centimeters
+        local origUnits = units.SystemType
+        units.SystemType = #Centimeters
+        
         importFile fbxFileName using:FBXIMP
+        
+        units.SystemType = origUnits
         
         unityFbxFilePathAttr = getFilenamePath fbxFileName
         unityFbxFileNameAttr = filenameFromPath fbxFileName
@@ -83,6 +89,9 @@ macroScript UnityExport category:"Unity"
         select exportSet
     )
     
+    local origUnits = units.SystemType
+    units.SystemType = #Centimeters
+    
     exportFileName = undefined
     if unityFbxFilePathAttr != undefined and unityFbxFileNameAttr != undefined then(
         exportFileName = unityFbxFilePathAttr + unityFbxFileNameAttr
@@ -95,6 +104,8 @@ macroScript UnityExport category:"Unity"
     if exportFileName != undefined then (
         exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
     )
+    
+    units.SystemType = origUnits
     
     if origSelection != undefined then (
         select origSelection

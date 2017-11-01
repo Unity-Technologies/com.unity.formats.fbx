@@ -17,7 +17,7 @@ FbxExporterSetParam "Lights" true
 FbxExporterSetParam "EmbedTextures" false
 
 -- Units
---FbxExporterSetParam "ScaleFactor" 1
+FbxExporterSetParam "ScaleFactor" 1
 FbxExporterSetParam "ConvertUnit" "cm"
 
 -- Axis Conversion
