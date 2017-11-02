@@ -214,7 +214,8 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual(sphere.name, dictionary[sphere.name].name);
             Assert.AreEqual(quad.name, dictionary[quad.name].name);
 
-            Assert.AreNotSame(cube.GetInstanceID(), cube2.GetInstanceID());
+            //the dictionary size should be equal to the amount of children + the parent
+            Assert.True(dictionary.Count == cube.transform.childCount + 1);
         }
     }
 }
