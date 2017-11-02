@@ -36,14 +36,8 @@ macroScript UnityImport category:"Unity"
         -- Get all objects in scene before importAction
         origObjects = objects as array
         callbacks.addScript #postImport ("afterImport()") id:#unityPlugin
-
-        -- set the system units to centimeters
-        local origUnits = units.SystemType
-        units.SystemType = #Centimeters
         
         importFile fbxFileName using:FBXIMP
-        
-        units.SystemType = origUnits
         
         unityFbxFilePathAttr = getFilenamePath fbxFileName
         unityFbxFileNameAttr = filenameFromPath fbxFileName
@@ -71,12 +65,25 @@ macroScript UnityImport category:"Unity"
 )
 macroScript UnityExport category:"Unity"
 (
+    fn unitToScaleFactor unit = (
+        case unit of (
+            #Inches: 2.54
+            #Feet: 30.48
+            #Miles: 160934
+            #Millimeters: 0.1
+            #Kilometers: 100000
+            #Meters: 100
+            default: 1
+        )
+    );
+
     fn loadUnityFbxExportSettings = (
         fbxExportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxExportSettings"
         if fbxExportSettings != undefined and doesFileExist fbxExportSettings then(
             filein fbxExportSettings
         )
-    )
+        FbxExporterSetParam "ScaleFactor" (unitToScaleFactor units.SystemType)
+    );
 
     -- Make sure the FbxExporter plugin is loaded
     pluginManager.loadClass FbxExporter
