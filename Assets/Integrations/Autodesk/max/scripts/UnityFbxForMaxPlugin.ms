@@ -5,6 +5,7 @@ macroScript UnityImport category:"Unity"
 
     persistent global unityFbxFilePathAttr
     persistent global unityFbxFileNameAttr
+    persistent global unityAskSetUnits
     
     global afterImport
     fn afterImport = (
@@ -29,6 +30,20 @@ macroScript UnityImport category:"Unity"
     fbxFileName = getOpenFileName caption:"Import FBX from Unity" filename:(unityProjectPath + "/Assets/")  types:"FBX (*.fbx)|*.fbx|"
     if fbxFileName != undefined then
     (
+        -- ask to set units to cm if not already
+        if (unityAskSetUnits == undefined or !unityAskSetUnits) and units.SystemType != #Centimeters then (
+            result = false
+            (
+                result = queryBox "Using system units other than centimeters is not recommended and may result in unexpected scaling on export.\nWould you like to set system units to centimeters?" title:"Warning"
+            )
+            if result then (
+                units.SystemType = #Centimeters
+            )
+            else (
+                unityAskSetUnits = true
+            )
+        )
+    
         -- reset persistent values, in case import fails
         unityFbxFilePathAttr = ""
         unityFbxFileNameAttr = ""
