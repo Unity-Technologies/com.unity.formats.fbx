@@ -324,6 +324,7 @@ namespace FbxExporters.EditorTools {
             int newestMayaVersion = -1;
             int savedMayaVersionNumber = 0;
             int newestMaxVersion = -1;
+            int savedMaxVersionNumber = 0;
 
             for (int i = 0; i < instance.dccOptionPaths.Count; i++)
             {
@@ -332,33 +333,33 @@ namespace FbxExporters.EditorTools {
                     if (newestMayaVersion == -1)
                     {
                         newestMayaVersion = 0;
-                        savedMayaVersionNumber = int.Parse(AskMayaVersion(instance.dccOptionPaths[i]));
+                        savedMayaVersionNumber = FindMayaVersion(dccOptionPaths[i]);
                         continue;
                     }
 
                     //Check if the path we are considering is newer than the previously saved one
-                    int versionToCheck;
-                    if (int.TryParse(AskMayaVersion(instance.dccOptionPaths[i]), out versionToCheck))
-                    {
+                    int versionToCheck = FindMayaVersion(dccOptionPaths[i]);
                         if (versionToCheck > savedMayaVersionNumber)
                         {
                             newestMayaVersion = i;
                             savedMayaVersionNumber = versionToCheck;
-                        }
-                    }
+                        }                   
                 }
-                else if (instance.dccOptionPaths[i].ToLower().Contains("max") && newestMayaVersion == -1)
+                else if (newestMayaVersion == -1 && instance.dccOptionPaths[i].ToLower().Contains("max"))
                 {
                     if (newestMaxVersion == -1)
                     {
                         newestMaxVersion = 0;
+                        savedMaxVersionNumber = FindMaxVersion(dccOptionPaths[newestMaxVersion]);
                         continue;
                     }
 
                     //Check if the path we are considering is newer than the previously saved one
-                    if (FindMaxVersion(dccOptionPaths[i]) > FindMaxVersion(dccOptionPaths[newestMaxVersion]))
+                    int versionToCheck = FindMaxVersion(dccOptionPaths[i]);
+                    if (versionToCheck > savedMaxVersionNumber)
                     {
                         newestMaxVersion = i;
+                        savedMaxVersionNumber = versionToCheck;
                     }
 
                 }
@@ -387,6 +388,28 @@ namespace FbxExporters.EditorTools {
         {
             var fileName = Path.GetFileName(Path.GetDirectoryName(path)).ToLower();
             fileName = fileName.Replace("3ds max", "").Trim();
+
+            int version;
+
+            if (int.TryParse(fileName, out version))
+            {
+                return version;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// Finds the Maya version based off of the title of the application
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns> the year/version  OR -1 if the year could not be parsed </returns>
+        private static int FindMayaVersion(string path)
+        {
+            var fileName = Path.GetFileName(Path.GetDirectoryName(path)).ToLower();
+            fileName = fileName.Replace("maya", "").Trim();
 
             int version;
 
@@ -497,7 +520,7 @@ namespace FbxExporters.EditorTools {
                 var dccPath = instance.dccOptionPaths [i];
                 if (!File.Exists (dccPath)) {
                     if (i == instance.selectedDCCApp) {
-                        instance.selectedDCCApp = 0;
+                        instance.selectedDCCApp = instance.FindMostRecentProgram();
                     }
                     namesToDelete.Add (instance.dccOptionNames [i]);
                     pathsToDelete.Add (dccPath);
