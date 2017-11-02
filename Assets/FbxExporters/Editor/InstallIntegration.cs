@@ -324,13 +324,30 @@ namespace FbxExporters.Editor
                 ExitCode = myProcess.ExitCode;
                 Debug.Log(string.Format("Ran maya: [{0}]\nWith args [{1}]\nResult {2}",
                             mayaPath, myProcess.StartInfo.Arguments, ExitCode));
-             }
+
+                if (EditorTools.ExportSettings.instance.launchAfterInstallation)
+                {
+                    LaunchMaya(mayaPath);
+                }
+            }
              catch (Exception e)
              {
                 UnityEngine.Debug.LogError(string.Format ("Exception failed to start Maya ({0})", e.Message));
                 ExitCode = -1;
              }
             return ExitCode;
+        }
+
+        public static void LaunchMaya(string mayaPath)
+        {
+            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+            myProcess.StartInfo.FileName = mayaPath;
+            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+            myProcess.StartInfo.CreateNoWindow = false;
+            myProcess.StartInfo.UseShellExecute = false;
+
+            myProcess.EnableRaisingEvents = false;
+            myProcess.Start();
         }
 
         public static bool InstallMaya(bool verbose = false)
@@ -532,8 +549,13 @@ namespace FbxExporters.Editor
                 myProcess.WaitForExit();
                 ExitCode = myProcess.ExitCode;
 
+                if (EditorTools.ExportSettings.instance.launchAfterInstallation)
+                {
+                    LaunchMax(maxExe);
+                }
+
                 // TODO (UNI-29910): figure out what exactly causes this exit code + how to resolve
-                if(ExitCode == -1073740791){
+                if (ExitCode == -1073740791){
                     Debug.Log(string.Format("Detected 3ds max exitcode {0} -- safe to ignore", ExitCode));
                     ExitCode = 0;
                 }
@@ -545,8 +567,20 @@ namespace FbxExporters.Editor
             {
                 UnityEngine.Debug.LogError(string.Format ("Exception failed to start Max ({0})", e.Message));
                 ExitCode = -1;
-            }
+            }            
             return ExitCode;
+        }
+
+        public static void LaunchMax(string maxPath)
+        {
+            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+            myProcess.StartInfo.FileName = maxPath;
+            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+            myProcess.StartInfo.CreateNoWindow = false;
+            myProcess.StartInfo.UseShellExecute = false;
+
+            myProcess.EnableRaisingEvents = false;
+            myProcess.Start();
         }
 
         public override int InstallIntegration(string maxExe){
