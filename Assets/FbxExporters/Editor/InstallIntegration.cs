@@ -63,6 +63,22 @@ namespace FbxExporters.Editor
         /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
         /// <param name="path">Path.</param>
         public abstract bool FolderAlreadyUnzippedAtPath (string path);
+
+        /// <summary>
+        /// Launches application at given path
+        /// </summary>
+        /// <param name="AppPath"></param>
+        public static void LaunchDCCApplication(string AppPath)
+        {
+            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+            myProcess.StartInfo.FileName = AppPath;
+            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+            myProcess.StartInfo.CreateNoWindow = false;
+            myProcess.StartInfo.UseShellExecute = false;
+
+            myProcess.EnableRaisingEvents = false;
+            myProcess.Start();
+        }
     }
 
 
@@ -327,7 +343,7 @@ namespace FbxExporters.Editor
 
                 if (EditorTools.ExportSettings.instance.launchAfterInstallation)
                 {
-                    LaunchMaya(mayaPath);
+                    LaunchDCCApplication(mayaPath);
                 }
             }
              catch (Exception e)
@@ -336,18 +352,6 @@ namespace FbxExporters.Editor
                 ExitCode = -1;
              }
             return ExitCode;
-        }
-
-        public static void LaunchMaya(string mayaPath)
-        {
-            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
-            myProcess.StartInfo.FileName = mayaPath;
-            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
-            myProcess.StartInfo.CreateNoWindow = false;
-            myProcess.StartInfo.UseShellExecute = false;
-
-            myProcess.EnableRaisingEvents = false;
-            myProcess.Start();
         }
 
         public static bool InstallMaya(bool verbose = false)
@@ -551,7 +555,7 @@ namespace FbxExporters.Editor
 
                 if (EditorTools.ExportSettings.instance.launchAfterInstallation)
                 {
-                    LaunchMax(maxExe);
+                    LaunchDCCApplication(maxExe);
                 }
 
                 // TODO (UNI-29910): figure out what exactly causes this exit code + how to resolve
@@ -569,18 +573,6 @@ namespace FbxExporters.Editor
                 ExitCode = -1;
             }            
             return ExitCode;
-        }
-
-        public static void LaunchMax(string maxPath)
-        {
-            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
-            myProcess.StartInfo.FileName = maxPath;
-            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
-            myProcess.StartInfo.CreateNoWindow = false;
-            myProcess.StartInfo.UseShellExecute = false;
-
-            myProcess.EnableRaisingEvents = false;
-            myProcess.Start();
         }
 
         public override int InstallIntegration(string maxExe){
