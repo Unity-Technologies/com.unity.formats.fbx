@@ -33,8 +33,12 @@ macroScript UnityImport category:"Unity"
         -- ask to set units to cm if not already
         if (unityAskSetUnits == undefined or not unityAskSetUnits) and units.SystemType != #Centimeters then (
             result = false
+            message = ("Detected system units set to "+units.SystemType+".\n\n" +
+                      "Using system units other than centimeters is not recommended for the Unity FBX " +
+                      "workflow and may result in unexpected scaling on export.\n\n" + 
+                      "Would you like to change the system units to centimeters?")
             (
-                result = queryBox "Using system units other than centimeters is not recommended and may result in unexpected scaling on export.\nWould you like to set system units to centimeters?" title:"Warning"
+                result = queryBox message title:"Warning, system units not set to centimeters"
             )
             if result then (
                 units.SystemType = #Centimeters
@@ -51,7 +55,7 @@ macroScript UnityImport category:"Unity"
         -- Get all objects in scene before importAction
         origObjects = objects as array
         callbacks.addScript #postImport ("afterImport()") id:#unityPlugin
-        
+
         importFile fbxFileName using:FBXIMP
         
         unityFbxFilePathAttr = getFilenamePath fbxFileName
