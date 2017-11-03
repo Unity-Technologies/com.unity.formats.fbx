@@ -249,7 +249,7 @@ else if (maxVersion())[1] == 19000 then (
 			local mainMenuBar = menuMan.getMainMenuBar()
 			local unityMenu = menuMan.createMenu unityMenuName
 			local unityMenuItem = menuMan.createSubMenuItem unityMenuName unityMenu
-			mainMenuBar.addItem unityMenuItem -1
+			mainMenuBar.addItem unityMenuItem (mainMenuBar.numItems())
 			
 			createUnityImportAction unityImportTitle unityMenu
 			createUnityExportAction unityExportTitle unityMenu
