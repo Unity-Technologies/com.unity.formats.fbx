@@ -333,12 +333,12 @@ namespace FbxExporters.EditorTools {
                     if (newestMayaVersion == -1)
                     {
                         newestMayaVersion = 0;
-                        savedMayaVersionNumber = FindMayaVersion(dccOptionPaths[i]);
+                        savedMayaVersionNumber = FindDCCVersion(dccOptionNames[i]);
                         continue;
                     }
 
                     //Check if the path we are considering is newer than the previously saved one
-                    int versionToCheck = FindMayaVersion(dccOptionPaths[i]);
+                    int versionToCheck = FindDCCVersion(dccOptionNames[i]);
                         if (versionToCheck > savedMayaVersionNumber)
                         {
                             newestMayaVersion = i;
@@ -350,12 +350,12 @@ namespace FbxExporters.EditorTools {
                     if (newestMaxVersion == -1)
                     {
                         newestMaxVersion = 0;
-                        savedMaxVersionNumber = FindMaxVersion(dccOptionPaths[newestMaxVersion]);
+                        savedMaxVersionNumber = FindDCCVersion(dccOptionNames[newestMaxVersion]);
                         continue;
                     }
 
                     //Check if the path we are considering is newer than the previously saved one
-                    int versionToCheck = FindMaxVersion(dccOptionPaths[i]);
+                    int versionToCheck = FindDCCVersion(dccOptionNames[i]);
                     if (versionToCheck > savedMaxVersionNumber)
                     {
                         newestMaxVersion = i;
@@ -384,36 +384,11 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         /// <param name="path"></param>
         /// <returns> the year/version  OR -1 if the year could not be parsed </returns>
-        private static int FindMaxVersion(string path)
+        private static int FindDCCVersion(string AppName)
         {
-            var fileName = Path.GetFileName(Path.GetDirectoryName(path)).ToLower();
-            fileName = fileName.Replace("3ds max", "").Trim();
-
             int version;
 
-            if (int.TryParse(fileName, out version))
-            {
-                return version;
-            }
-            else
-            {
-                return -1;
-            }
-        }
-
-        /// <summary>
-        /// Finds the Maya version based off of the title of the application
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns> the year/version  OR -1 if the year could not be parsed </returns>
-        private static int FindMayaVersion(string path)
-        {
-            var fileName = Path.GetFileName(Path.GetDirectoryName(path)).ToLower();
-            fileName = fileName.Replace("maya", "").Trim();
-
-            int version;
-
-            if (int.TryParse(fileName, out version))
+            if (int.TryParse(AppName, out version))
             {
                 return version;
             }
@@ -623,8 +598,8 @@ namespace FbxExporters.EditorTools {
             return GetUniqueName (Path.GetFileName(Path.GetDirectoryName (exePath)));
         }
 
-        public static bool IsEarlierThanMax2017(string exePath){
-            int version = FindMaxVersion(exePath);
+        public static bool IsEarlierThanMax2017(string AppName){
+            int version = FindDCCVersion(AppName);
             return version != -1 && version < 2017;
         }
 
