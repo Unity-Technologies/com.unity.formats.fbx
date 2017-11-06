@@ -210,9 +210,9 @@ namespace FbxExporters.UnitTests
             var dictionary = ConvertToModel.MapNameToSourceRecursive(cube, cube2);
 
             //We expect these to pass because we've given it an identical game object, as it would have after a normal export.
-            Assert.AreEqual(capsule.name, dictionary[capsule.name].name);
-            Assert.AreEqual(sphere.name, dictionary[sphere.name].name);
-            Assert.AreEqual(quad.name, dictionary[quad.name].name);
+            Assert.AreSame(capsule2, dictionary[capsule.name]);
+            Assert.AreSame(sphere2, dictionary[sphere.name]);
+            Assert.AreEqual(quad2, dictionary[quad.name]);
 
             //the dictionary size should be equal to the amount of children + the parent
             Assert.True(dictionary.Count == cube.transform.childCount + 1);
