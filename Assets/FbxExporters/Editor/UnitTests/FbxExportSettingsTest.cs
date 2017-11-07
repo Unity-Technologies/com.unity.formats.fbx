@@ -178,5 +178,25 @@ namespace FbxExporters.UnitTests
             var platformPath = Path.Combine("a", Path.Combine("b", "c"));
             Assert.AreEqual(Path.Combine(appDataPath, platformPath), ExportSettings.GetAbsoluteSavePath());
         }
+
+        [Test]
+        public void TestFindPreferredProgram()
+        {           
+            //Putting Maya 2017 and Max 2017 will also test our PickPreferredName function
+            ExportSettings.instance.dccOptionNames = new List<string> { "3ds Max 2000", "Maya 2016", "Maya 2017", "3ds max 2017" };
+            ExportSettings.instance.dccOptionPaths = new List<string> { "3ds Max 2000 path", "maya 2016 path", "maya 2017 path", "3ds max 2017 path"};
+
+            int preferred = ExportSettings.instance.FindPreferredProgram();
+            //While Maya 2017 and 3ds Max 2017 are tied for most recent, Maya 2017 should win because we prefer Maya.
+            Assert.AreEqual(preferred, 2);
+
+            ExportSettings.instance.dccOptionNames = new List<string> { "Blender 2.67", "Blender 3.0" };
+            ExportSettings.instance.dccOptionPaths = new List<string> { "Blender 2.67 path", "Blender 3.0 path" };
+
+            preferred = ExportSettings.instance.FindPreferredProgram();
+            //The function should be able to deal with floats well enough to give us a preferred version of soemthing like blender, which does not use the year.
+            Assert.AreEqual(preferred, 1);
+        }
+
     }
 }

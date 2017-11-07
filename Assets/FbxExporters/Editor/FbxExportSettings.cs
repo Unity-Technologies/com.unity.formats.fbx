@@ -98,7 +98,7 @@ namespace FbxExporters.EditorTools {
             var options = ExportSettings.GetDCCOptions();
             // make sure we never initially have browse selected
             if (exportSettings.selectedDCCApp == options.Length - 1) {
-                exportSettings.selectedDCCApp = exportSettings.FindMostRecentProgram();
+                exportSettings.selectedDCCApp = exportSettings.FindPreferredProgram();
             }
 
             int oldValue = exportSettings.selectedDCCApp;
@@ -226,6 +226,7 @@ namespace FbxExporters.EditorTools {
     public class ExportSettings : ScriptableSingleton<ExportSettings>
     {
         public const string kDefaultSavePath = ".";
+        private static List<string> preferenceList = new List<string>() {"maya", "mayalt", "3ds", "blender" };
 
         /// <summary>
         /// The path where all the different versions of Maya are installed
@@ -265,10 +266,10 @@ namespace FbxExporters.EditorTools {
 
         // List of names in order that they appear in option list
         [SerializeField]
-        private List<string> dccOptionNames;
+        public List<string> dccOptionNames;
         // List of paths in order that they appear in the option list
         [SerializeField]
-        private List<string> dccOptionPaths;
+        public List<string> dccOptionPaths;
 
         protected override void LoadDefaults()
         {
@@ -316,84 +317,87 @@ namespace FbxExporters.EditorTools {
         /// Find the latest program available and make that the default choice.
         /// Will always take any Maya version over any 3ds Max version.
         ///
-        /// Returns the position of the most recent program in the list of dccOptionPaths
+        /// Returns the index of the most recent program in the list of dccOptionPaths
         ///
         /// </summary>
-        public int FindMostRecentProgram()
+        public int FindPreferredProgram()
         {
-            int newestMayaVersion = -1;
-            int savedMayaVersionNumber = 0;
-            int newestMaxVersion = -1;
-            int savedMaxVersionNumber = 0;
 
-            for (int i = 0; i < instance.dccOptionPaths.Count; i++)
+            int newestDCCVersionIndex = 0;
+            int newestDCCVersionNumber = 0;
+            
+            for (int i = 0; i < dccOptionPaths.Count; i++)
             {
-                if (instance.dccOptionPaths[i].ToLower().Contains("maya"))
+                int versionToCheck = FindDCCVersion(dccOptionNames[i]);
+                if (versionToCheck > newestDCCVersionNumber)
                 {
-                    if (newestMayaVersion == -1)
-                    {
-                        newestMayaVersion = 0;
-                        savedMayaVersionNumber = FindDCCVersion(dccOptionNames[i]);
-                        continue;
-                    }
-
-                    //Check if the path we are considering is newer than the previously saved one
-                    int versionToCheck = FindDCCVersion(dccOptionNames[i]);
-                        if (versionToCheck > savedMayaVersionNumber)
-                        {
-                            newestMayaVersion = i;
-                            savedMayaVersionNumber = versionToCheck;
-                        }                   
+                    newestDCCVersionIndex = i;
+                    newestDCCVersionNumber = versionToCheck;
                 }
-                else if (newestMayaVersion == -1 && instance.dccOptionPaths[i].ToLower().Contains("max"))
+                else if (versionToCheck == newestDCCVersionNumber)
                 {
-                    if (newestMaxVersion == -1)
+                    string selection = PickPrefferedName(dccOptionNames[newestDCCVersionIndex], dccOptionNames[i]);
+                    if (selection == dccOptionNames[i])
                     {
-                        newestMaxVersion = 0;
-                        savedMaxVersionNumber = FindDCCVersion(dccOptionNames[newestMaxVersion]);
-                        continue;
+                        newestDCCVersionIndex = i;
+                        newestDCCVersionNumber = FindDCCVersion(dccOptionNames[i]);
                     }
-
-                    //Check if the path we are considering is newer than the previously saved one
-                    int versionToCheck = FindDCCVersion(dccOptionNames[i]);
-                    if (versionToCheck > savedMaxVersionNumber)
-                    {
-                        newestMaxVersion = i;
-                        savedMaxVersionNumber = versionToCheck;
-                    }
-
                 }
-
             }
+            Debug.Assert(newestDCCVersionIndex > -1 && newestDCCVersionIndex < dccOptionPaths.Count);
+            return newestDCCVersionIndex;
+        }
+        /// <summary>
+        /// Gives our preffered program name from two options. ACCEPTS ENTRIES FROM DCCOptionNames LIST
+        /// </summary>
+        /// <param name="optionA"></param>
+        /// <param name="optionB"></param>
+        /// <returns></returns>
+        private string PickPrefferedName(string optionA, string optionB)
+        {
+            string[] optionArray = new string[2];
+            optionArray[0] = optionA.ToLower().Split(' ')[0];
+            optionArray[1] = optionB.ToLower().Split(' ')[0];
+            int[] optionScores = new int[2];
 
-            //We prefer to use the latest Maya version, if one exists
-            if (newestMayaVersion != -1)
+            for (int i = 0; i < 2; i++)
             {
-                return newestMayaVersion;
-            }
-            else if (newestMaxVersion != -1)
-            {
-                return newestMaxVersion;
+                for (int j = 0; j < preferenceList.Count; j++)
+                {
+                    if (optionArray[i] == preferenceList[j])
+                    {
+                        optionScores[i] = j;
+                    }
+                }
             }
 
-            return 0;
+            return optionScores[0] < optionScores[1] ? optionA : optionB;
         }
 
         /// <summary>
-        /// Finds the 3ds Max version based off of the title of the application
+        /// Finds the version based off of the title of the application
         /// </summary>
         /// <param name="path"></param>
         /// <returns> the year/version  OR -1 if the year could not be parsed </returns>
         private static int FindDCCVersion(string AppName)
         {
             int version;
+            string[] piecesArray = AppName.Split(' ');
+            //Get the number, which is always the last chunk separated by a space.
+            string number = piecesArray[piecesArray.Length - 1];
 
-            if (int.TryParse(AppName, out version))
+            if (int.TryParse(number, out version))
             {
                 return version;
             }
             else
             {
+                float fVersion;
+                //In case we are looking at a Blender version- the int parse will fail so we'll need to parse it as a float.
+                if (float.TryParse(number, out fVersion))
+                {
+                   return (int)fVersion;
+                }
                 return -1;
             }
         }
@@ -448,7 +452,7 @@ namespace FbxExporters.EditorTools {
                     dccOptionName.Add (GetUniqueName ("3ds Max " + version));
                 }
             }
-            instance.selectedDCCApp = instance.FindMostRecentProgram();
+            instance.selectedDCCApp = instance.FindPreferredProgram();
         }
 
         /// <summary>
@@ -495,7 +499,7 @@ namespace FbxExporters.EditorTools {
                 var dccPath = instance.dccOptionPaths [i];
                 if (!File.Exists (dccPath)) {
                     if (i == instance.selectedDCCApp) {
-                        instance.selectedDCCApp = instance.FindMostRecentProgram();
+                        instance.selectedDCCApp = instance.FindPreferredProgram();
                     }
                     namesToDelete.Add (instance.dccOptionNames [i]);
                     pathsToDelete.Add (dccPath);
