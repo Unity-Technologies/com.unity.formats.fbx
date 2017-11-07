@@ -1,5 +1,11 @@
 RELEASE NOTES
 
+**Version**: 1.1.0b1
+
+NEW FEATURES
+
+* Updated user documentation
+
 **Version**: sprint32
 
 NEW FEATURES
