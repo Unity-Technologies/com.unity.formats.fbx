@@ -209,6 +209,13 @@ namespace FbxExporters.UnitTests
 
             var dictionary = ConvertToModel.MapNameToSourceRecursive(cube, cube2);
 
+            //Create a broken hierarchy, one that is missing a primitive
+            var cube3 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var capsule3 = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            var sphere3 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+
+            var dictionaryBroken = ConvertToModel.MapNameToSourceRecursive(cube, cube3);
+
             //We expect these to pass because we've given it an identical game object, as it would have after a normal export.
             Assert.AreSame(capsule2, dictionary[capsule.name]);
             Assert.AreSame(sphere2, dictionary[sphere.name]);
@@ -216,6 +223,8 @@ namespace FbxExporters.UnitTests
 
             //the dictionary size should be equal to the amount of children + the parent
             Assert.True(dictionary.Count == cube.transform.childCount + 1);
+
+            Assert.AreNotSame(quad, dictionaryBroken[quad.name]);
         }
     }
 }
