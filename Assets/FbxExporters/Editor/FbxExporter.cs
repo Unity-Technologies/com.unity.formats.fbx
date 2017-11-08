@@ -585,8 +585,7 @@ namespace FbxExporters
                     }
                 }
 
-                int[] unmergedPolygons = new int[meshInfo.Triangles.Length];
-                int current = 0;
+                var unmergedPolygons = new List<int> ();
                 var mesh = meshInfo.mesh;
                 for (int s = 0; s < mesh.subMeshCount; s++) {
                     var topology = mesh.GetTopology (s);
@@ -624,12 +623,11 @@ namespace FbxExporters
 
                             // Save the polygon order (without merging vertices) so we
                             // properly export UVs, normals, binormals, etc.
-                            unmergedPolygons [current] = polyVert;
+                            unmergedPolygons.Add(polyVert);
 
                             polyVert = ControlPointToIndex [meshInfo.Vertices [polyVert]];
                             fbxMesh.AddPolygon (polyVert);
 
-                            current++;
                         }
                         fbxMesh.EndPolygon ();
                     }
@@ -643,7 +641,7 @@ namespace FbxExporters
                 AssignLayerElementMaterial (fbxMesh, meshInfo.mesh, meshInfo.Materials.Length);
 
                 // Set up normals, etc.
-                ExportComponentAttributes (meshInfo, fbxMesh, unmergedPolygons);
+                ExportComponentAttributes (meshInfo, fbxMesh, unmergedPolygons.ToArray());
 
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
