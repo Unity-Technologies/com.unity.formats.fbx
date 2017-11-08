@@ -136,16 +136,10 @@ namespace FbxExporters.EditorTools {
                     ExportSettings.DCCType foundDCC = ExportSettings.DCCType.Maya;
                     var foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Maya);
                     if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor) {
-                        if (ExportSettings.IsEarlierThanMax2017 (dccPath)) {
-                            Debug.LogError ("Earlier than 3ds Max 2017 is not supported");
-                            UnityEditor.EditorUtility.DisplayDialog (
-                                "Error adding 3D Application",
-                                "Unity Integration only supports 3ds Max 2017 or later",
-                                "Ok");
-                        } else {
-                            foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
-                            foundDCC = ExportSettings.DCCType.Max;
-                        }
+                        
+                        foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
+                        foundDCC = ExportSettings.DCCType.Max;
+                        
                     }
                     if (foundDCCPath == null) {
                         Debug.LogError (string.Format ("Could not find supported 3D application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
@@ -482,12 +476,16 @@ namespace FbxExporters.EditorTools {
 
                 if (product.StartsWith ("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
                     var exePath = string.Format ("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe");
-                    if (IsEarlierThanMax2017 (exePath)) {
+
+                    string version = product.Substring("3ds max ".Length);
+                    var maxOptionName = GetUniqueDCCOptionName(kMaxOptionName + version);
+
+                    if (IsEarlierThanMax2017 (maxOptionName)) {
                         continue;
                     }
-                    string version = product.Substring ("3ds max ".Length);
+                    
                     dccOptionPath.Add (exePath);
-                    dccOptionName.Add (GetUniqueDCCOptionName(kMaxOptionName + version));
+                    dccOptionName.Add (maxOptionName);
                 }
             }
             instance.selectedDCCApp = instance.GetPreferredDCCApp();
@@ -598,7 +596,16 @@ namespace FbxExporters.EditorTools {
                 break;
             case DCCType.Max:
                 optionName = GetMaxOptionName (newOption);
-                break;
+                if (ExportSettings.IsEarlierThanMax2017(optionName))
+                {
+                    Debug.LogError("Earlier than 3ds Max 2017 is not supported");
+                    UnityEditor.EditorUtility.DisplayDialog(
+                        "Error adding 3D Application",
+                        "Unity Integration only supports 3ds Max 2017 or later",
+                        "Ok");
+                        return;
+                }
+                    break;
             default:
                 throw new System.NotImplementedException();
             }
