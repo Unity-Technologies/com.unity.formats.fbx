@@ -226,9 +226,12 @@ namespace FbxExporters.EditorTools {
     public class ExportSettings : ScriptableSingleton<ExportSettings>
     {
         public const string kDefaultSavePath = ".";
-        private static List<string> s_PreferenceList = new List<string>() {"maya", "mayalt", "3ds", "blender" };
-        public static string s_MaxName = "3ds Max ";
-        public static string s_MayaName = "Maya ";
+        private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName, kBlenderOptionName };
+        //Any additional names require a space after the name
+        public const string kMaxOptionName = "3ds Max ";
+        public const string kMayaOptionName = "Maya ";
+        public const string kMayaLtOptionName = "MayaLT ";
+        public const string kBlenderOptionName = "Blender ";
 
         /// <summary>
         /// The path where all the different versions of Maya are installed
@@ -268,10 +271,10 @@ namespace FbxExporters.EditorTools {
 
         // List of names in order that they appear in option list
         [SerializeField]
-        public List<string> dccOptionNames;
+        private List<string> dccOptionNames = new List<string>();
         // List of paths in order that they appear in the option list
         [SerializeField]
-        public List<string> dccOptionPaths;
+        private List<string> dccOptionPaths;
 
         protected override void LoadDefaults()
         {
@@ -287,7 +290,12 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         /// <returns>The unique name.</returns>
         /// <param name="name">Name.</param>
-        public static string GetUniqueName(string name){
+        public static string GetUniqueDCCOptionName(string name){
+            Debug.Assert(instance != null);
+            if (name == null)
+            {
+                return null;
+            }
             if (!instance.dccOptionNames.Contains(name)) {
                 return name;
             }
@@ -314,6 +322,16 @@ namespace FbxExporters.EditorTools {
             return uniqueName;
         }
 
+        public void SetDCCOptionNames(List<string> newList)
+        {
+            dccOptionNames = newList;
+        }
+
+        public void ClearDCCOptionNames()
+        {
+            dccOptionNames.Clear();
+        }
+
         /// <summary>
         ///
         /// Find the latest program available and make that the default choice.
@@ -335,6 +353,10 @@ namespace FbxExporters.EditorTools {
             for (int i = 0; i < dccOptionNames.Count; i++)
             {
                 int versionToCheck = FindDCCVersion(dccOptionNames[i]);
+                if (versionToCheck == -1)
+                {
+                    continue;
+                }
                 if (versionToCheck > newestDCCVersionNumber)
                 {
                     newestDCCVersionIndex = i;
@@ -362,16 +384,23 @@ namespace FbxExporters.EditorTools {
         /// <returns></returns>
         private int ChoosePreferredDCCApp(int optionA, int optionB)
         {
-            int scoreA = s_PreferenceList.IndexOf(GetAppNameFromFolderName(dccOptionNames[optionA]));
-            int scoreB = s_PreferenceList.IndexOf(GetAppNameFromFolderName(dccOptionNames[optionB]));
+            Debug.Assert(optionA >= 0 && optionB >= 0 && optionA < dccOptionNames.Count && optionB < dccOptionNames.Count);
+            if (dccOptionNames.Count == 0)
+            {
+                return -1;
+            }
+            var appA = dccOptionNames[optionA];
+            var appB = dccOptionNames[optionB];
+            if (appA == null || appB == null || appA.Length <= 0 || appB.Length <= 0)
+            {
+                return -1;
+            }
+
+            //We assume that the option names have a 
+            int scoreA = s_PreferenceList.IndexOf(appA.Split(' ')[0]);
+            int scoreB = s_PreferenceList.IndexOf(appB.Split(' ')[0]);
 
             return scoreA < scoreB ? optionA : optionB;
-        }
-
-        ///
-        private string GetAppNameFromFolderName(string originalString)
-        {
-            return originalString.ToLower().Split(' ')[0];
         }
 
         /// <summary>
@@ -448,7 +477,7 @@ namespace FbxExporters.EditorTools {
                     }
                     string version = product.Substring ("maya".Length);
                     dccOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
-                    dccOptionName.Add (GetUniqueName (s_MayaName + version));
+                    dccOptionName.Add (GetUniqueDCCOptionName(kMayaOptionName + version));
                 }
 
                 if (product.StartsWith ("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
@@ -458,7 +487,7 @@ namespace FbxExporters.EditorTools {
                     }
                     string version = product.Substring ("3ds max ".Length);
                     dccOptionPath.Add (exePath);
-                    dccOptionName.Add (GetUniqueName (s_MaxName + version));
+                    dccOptionName.Add (GetUniqueDCCOptionName(kMaxOptionName + version));
                 }
             }
             instance.selectedDCCApp = instance.GetPreferredDCCApp();
@@ -565,7 +594,7 @@ namespace FbxExporters.EditorTools {
                     Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", newOption));
                     return;
                 }
-                optionName = GetUniqueName ("Maya " + version);
+                optionName = GetUniqueDCCOptionName("Maya " + version);
                 break;
             case DCCType.Max:
                 optionName = GetMaxOptionName (newOption);
@@ -608,7 +637,7 @@ namespace FbxExporters.EditorTools {
         /// <returns>The 3DsMax dropdown option label.</returns>
         /// <param name="exePath">Exe path.</param>
         public static string GetMaxOptionName(string exePath){
-            return GetUniqueName (Path.GetFileName(Path.GetDirectoryName (exePath)));
+            return GetUniqueDCCOptionName(Path.GetFileName(Path.GetDirectoryName (exePath)));
         }
 
         public static bool IsEarlierThanMax2017(string AppName){
