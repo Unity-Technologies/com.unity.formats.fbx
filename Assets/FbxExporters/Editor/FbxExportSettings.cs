@@ -98,8 +98,9 @@ namespace FbxExporters.EditorTools {
             var options = ExportSettings.GetDCCOptions();
             // make sure we never initially have browse selected
             if (exportSettings.selectedDCCApp == options.Length - 1) {
-                exportSettings.selectedDCCApp = 0;
+                exportSettings.selectedDCCApp = exportSettings.GetPreferredDCCApp();
             }
+
             int oldValue = exportSettings.selectedDCCApp;
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
             if (exportSettings.selectedDCCApp == options.Length - 1) {
@@ -135,16 +136,10 @@ namespace FbxExporters.EditorTools {
                     ExportSettings.DCCType foundDCC = ExportSettings.DCCType.Maya;
                     var foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Maya);
                     if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor) {
-                        if (ExportSettings.IsEarlierThanMax2017 (dccPath)) {
-                            Debug.LogError ("Earlier than 3ds Max 2017 is not supported");
-                            UnityEditor.EditorUtility.DisplayDialog (
-                                "Error adding 3D Application",
-                                "Unity Integration only supports 3ds Max 2017 or later",
-                                "Ok");
-                        } else {
-                            foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
-                            foundDCC = ExportSettings.DCCType.Max;
-                        }
+                        
+                        foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
+                        foundDCC = ExportSettings.DCCType.Max;
+                        
                     }
                     if (foundDCCPath == null) {
                         Debug.LogError (string.Format ("Could not find supported 3D application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
@@ -225,6 +220,12 @@ namespace FbxExporters.EditorTools {
     public class ExportSettings : ScriptableSingleton<ExportSettings>
     {
         public const string kDefaultSavePath = ".";
+        private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName, kBlenderOptionName };
+        //Any additional names require a space after the name
+        public const string kMaxOptionName = "3ds Max ";
+        public const string kMayaOptionName = "Maya ";
+        public const string kMayaLtOptionName = "MayaLT ";
+        public const string kBlenderOptionName = "Blender ";
 
         /// <summary>
         /// The path where all the different versions of Maya are installed
@@ -264,7 +265,7 @@ namespace FbxExporters.EditorTools {
 
         // List of names in order that they appear in option list
         [SerializeField]
-        private List<string> dccOptionNames;
+        private List<string> dccOptionNames = new List<string>();
         // List of paths in order that they appear in the option list
         [SerializeField]
         private List<string> dccOptionPaths;
@@ -283,7 +284,12 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         /// <returns>The unique name.</returns>
         /// <param name="name">Name.</param>
-        private static string GetUniqueName(string name){
+        public static string GetUniqueDCCOptionName(string name){
+            Debug.Assert(instance != null);
+            if (name == null)
+            {
+                return null;
+            }
             if (!instance.dccOptionNames.Contains(name)) {
                 return name;
             }
@@ -305,9 +311,127 @@ namespace FbxExporters.EditorTools {
             do {
                 uniqueName = string.Format (format, index, name);
                 index++;
-            } while (instance.dccOptionNames.Contains(name));
+            } while (instance.dccOptionNames.Contains(uniqueName));
 
             return uniqueName;
+        }
+
+        public void SetDCCOptionNames(List<string> newList)
+        {
+            dccOptionNames = newList;
+        }
+
+        public void ClearDCCOptionNames()
+        {
+            dccOptionNames.Clear();
+        }
+
+        /// <summary>
+        ///
+        /// Find the latest program available and make that the default choice.
+        /// Will always take any Maya version over any 3ds Max version.
+        ///
+        /// Returns the index of the most recent program in the list of dccOptionNames
+        ///
+        /// </summary>
+        public int GetPreferredDCCApp()
+        {
+            if (dccOptionNames == null)
+            {
+                return -1;
+            }
+
+            int newestDCCVersionIndex = -1;
+            int newestDCCVersionNumber = -1;
+            
+            for (int i = 0; i < dccOptionNames.Count; i++)
+            {
+                int versionToCheck = FindDCCVersion(dccOptionNames[i]);
+                if (versionToCheck == -1)
+                {
+                    continue;
+                }
+                if (versionToCheck > newestDCCVersionNumber)
+                {
+                    newestDCCVersionIndex = i;
+                    newestDCCVersionNumber = versionToCheck;
+                }
+                else if (versionToCheck == newestDCCVersionNumber)
+                {
+                    int selection = ChoosePreferredDCCApp(newestDCCVersionIndex, i);
+                    if (selection == i)
+                    {
+                        newestDCCVersionIndex = i;
+                        newestDCCVersionNumber = FindDCCVersion(dccOptionNames[i]);
+                    }
+                }
+            }
+            Debug.Assert(newestDCCVersionIndex >= -1 && newestDCCVersionIndex < dccOptionNames.Count);
+            return newestDCCVersionIndex;
+        }
+        /// <summary>
+        /// Takes the index of two program names from dccOptionNames and chooses our preferred one based on the preference list
+        /// This happens in case of a tie between two programs with the same release year / version
+        /// </summary>
+        /// <param name="optionA"></param>
+        /// <param name="optionB"></param>
+        /// <returns></returns>
+        private int ChoosePreferredDCCApp(int optionA, int optionB)
+        {
+            Debug.Assert(optionA >= 0 && optionB >= 0 && optionA < dccOptionNames.Count && optionB < dccOptionNames.Count);
+            if (dccOptionNames.Count == 0)
+            {
+                return -1;
+            }
+            var appA = dccOptionNames[optionA];
+            var appB = dccOptionNames[optionB];
+            if (appA == null || appB == null || appA.Length <= 0 || appB.Length <= 0)
+            {
+                return -1;
+            }
+
+            //We assume that the option names have a 
+            int scoreA = s_PreferenceList.IndexOf(appA.Split(' ')[0]);
+            int scoreB = s_PreferenceList.IndexOf(appB.Split(' ')[0]);
+
+            return scoreA < scoreB ? optionA : optionB;
+        }
+
+        /// <summary>
+        /// Finds the version based off of the title of the application
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns> the year/version  OR -1 if the year could not be parsed </returns>
+        private static int FindDCCVersion(string AppName)
+        {
+            if (AppName == null)
+            {
+                return -1;
+            }
+
+            int version;
+            string[] piecesArray = AppName.Split(' ');
+            if (piecesArray.Length == 0)
+            {
+                return -1;
+            }
+            //Get the number, which is always the last chunk separated by a space.
+            string number = piecesArray[piecesArray.Length - 1];
+
+            if (int.TryParse(number, out version))
+            {
+                return version;
+            }
+            else
+            {
+                float fVersion;
+                //In case we are looking at a Blender version- the int parse will fail so we'll need to parse it as a float.
+                if (float.TryParse(number, out fVersion))
+                {
+                   return (int)fVersion;
+                }
+                return -1;
+            }
         }
 
         /// <summary>
@@ -347,19 +471,24 @@ namespace FbxExporters.EditorTools {
                     }
                     string version = product.Substring ("maya".Length);
                     dccOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
-                    dccOptionName.Add (GetUniqueName ("Maya " + version));
+                    dccOptionName.Add (GetUniqueDCCOptionName(kMayaOptionName + version));
                 }
 
                 if (product.StartsWith ("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
                     var exePath = string.Format ("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe");
-                    if (IsEarlierThanMax2017 (exePath)) {
+
+                    string version = product.Substring("3ds max ".Length);
+                    var maxOptionName = GetUniqueDCCOptionName(kMaxOptionName + version);
+
+                    if (IsEarlierThanMax2017 (maxOptionName)) {
                         continue;
                     }
-                    string version = product.Substring ("3ds max ".Length);
+                    
                     dccOptionPath.Add (exePath);
-                    dccOptionName.Add (GetUniqueName ("3ds Max " + version));
+                    dccOptionName.Add (maxOptionName);
                 }
             }
+            instance.selectedDCCApp = instance.GetPreferredDCCApp();
         }
 
         /// <summary>
@@ -406,7 +535,7 @@ namespace FbxExporters.EditorTools {
                 var dccPath = instance.dccOptionPaths [i];
                 if (!File.Exists (dccPath)) {
                     if (i == instance.selectedDCCApp) {
-                        instance.selectedDCCApp = 0;
+                        instance.selectedDCCApp = instance.GetPreferredDCCApp();
                     }
                     namesToDelete.Add (instance.dccOptionNames [i]);
                     pathsToDelete.Add (dccPath);
@@ -463,11 +592,20 @@ namespace FbxExporters.EditorTools {
                     Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", newOption));
                     return;
                 }
-                optionName = GetUniqueName ("Maya " + version);
+                optionName = GetUniqueDCCOptionName("Maya " + version);
                 break;
             case DCCType.Max:
                 optionName = GetMaxOptionName (newOption);
-                break;
+                if (ExportSettings.IsEarlierThanMax2017(optionName))
+                {
+                    Debug.LogError("Earlier than 3ds Max 2017 is not supported");
+                    UnityEditor.EditorUtility.DisplayDialog(
+                        "Error adding 3D Application",
+                        "Unity Integration only supports 3ds Max 2017 or later",
+                        "Ok");
+                        return;
+                }
+                    break;
             default:
                 throw new System.NotImplementedException();
             }
@@ -506,14 +644,12 @@ namespace FbxExporters.EditorTools {
         /// <returns>The 3DsMax dropdown option label.</returns>
         /// <param name="exePath">Exe path.</param>
         public static string GetMaxOptionName(string exePath){
-            return GetUniqueName (Path.GetFileName(Path.GetDirectoryName (exePath)));
+            return GetUniqueDCCOptionName(Path.GetFileName(Path.GetDirectoryName (exePath)));
         }
 
-        public static bool IsEarlierThanMax2017(string exePath){
-            var name = Path.GetFileName (Path.GetDirectoryName (exePath)).ToLower();
-            name = name.Replace ("3ds max", "").Trim();
-            int version;
-            return int.TryParse (name, out version) && version < 2017;
+        public static bool IsEarlierThanMax2017(string AppName){
+            int version = FindDCCVersion(AppName);
+            return version != -1 && version < 2017;
         }
 
         public static string GetSelectedDCCPath()
