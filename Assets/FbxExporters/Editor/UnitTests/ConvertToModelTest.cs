@@ -214,17 +214,22 @@ namespace FbxExporters.UnitTests
             var capsule3 = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             var sphere3 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
+            capsule3.transform.parent = cube3.transform;
+            sphere3.transform.parent = cube3.transform;
+
             var dictionaryBroken = ConvertToModel.MapNameToSourceRecursive(cube, cube3);
 
             //We expect these to pass because we've given it an identical game object, as it would have after a normal export.
             Assert.AreSame(capsule2, dictionary[capsule.name]);
             Assert.AreSame(sphere2, dictionary[sphere.name]);
-            Assert.AreEqual(quad2, dictionary[quad.name]);
+            Assert.AreSame(quad2, dictionary[quad.name]);
 
             //the dictionary size should be equal to the amount of children + the parent
-            Assert.True(dictionary.Count == cube.transform.childCount + 1);
+            Assert.True(dictionaryBroken.Count == 4);
 
-            Assert.AreNotSame(quad, dictionaryBroken[quad.name]);
+            Assert.IsNull(dictionaryBroken[quad.name]);
+            Assert.AreSame(capsule3, dictionaryBroken[capsule.name]);
+            Assert.AreSame(sphere3, dictionaryBroken[sphere.name]);
         }
     }
 }
