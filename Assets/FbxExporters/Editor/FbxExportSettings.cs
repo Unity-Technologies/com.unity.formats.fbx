@@ -98,7 +98,7 @@ namespace FbxExporters.EditorTools {
             var options = ExportSettings.GetDCCOptions();
             // make sure we never initially have browse selected
             if (exportSettings.selectedDCCApp == options.Length - 1) {
-                exportSettings.selectedDCCApp = exportSettings.FindPreferredProgram();
+                exportSettings.selectedDCCApp = exportSettings.GetPreferredDCCApp();
             }
 
             int oldValue = exportSettings.selectedDCCApp;
@@ -226,7 +226,9 @@ namespace FbxExporters.EditorTools {
     public class ExportSettings : ScriptableSingleton<ExportSettings>
     {
         public const string kDefaultSavePath = ".";
-        private static List<string> preferenceList = new List<string>() {"maya", "mayalt", "3ds", "blender" };
+        private static List<string> s_PreferenceList = new List<string>() {"maya", "mayalt", "3ds", "blender" };
+        public static string s_MaxName = "3ds Max ";
+        public static string s_MayaName = "Maya ";
 
         /// <summary>
         /// The path where all the different versions of Maya are installed
@@ -285,7 +287,7 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         /// <returns>The unique name.</returns>
         /// <param name="name">Name.</param>
-        private static string GetUniqueName(string name){
+        public static string GetUniqueName(string name){
             if (!instance.dccOptionNames.Contains(name)) {
                 return name;
             }
@@ -307,7 +309,7 @@ namespace FbxExporters.EditorTools {
             do {
                 uniqueName = string.Format (format, index, name);
                 index++;
-            } while (instance.dccOptionNames.Contains(name));
+            } while (instance.dccOptionNames.Contains(uniqueName));
 
             return uniqueName;
         }
@@ -317,16 +319,20 @@ namespace FbxExporters.EditorTools {
         /// Find the latest program available and make that the default choice.
         /// Will always take any Maya version over any 3ds Max version.
         ///
-        /// Returns the index of the most recent program in the list of dccOptionPaths
+        /// Returns the index of the most recent program in the list of dccOptionNames
         ///
         /// </summary>
-        public int FindPreferredProgram()
+        public int GetPreferredDCCApp()
         {
+            if (dccOptionNames == null)
+            {
+                return -1;
+            }
 
-            int newestDCCVersionIndex = 0;
-            int newestDCCVersionNumber = 0;
+            int newestDCCVersionIndex = -1;
+            int newestDCCVersionNumber = -1;
             
-            for (int i = 0; i < dccOptionPaths.Count; i++)
+            for (int i = 0; i < dccOptionNames.Count; i++)
             {
                 int versionToCheck = FindDCCVersion(dccOptionNames[i]);
                 if (versionToCheck > newestDCCVersionNumber)
@@ -336,42 +342,36 @@ namespace FbxExporters.EditorTools {
                 }
                 else if (versionToCheck == newestDCCVersionNumber)
                 {
-                    string selection = PickPrefferedName(dccOptionNames[newestDCCVersionIndex], dccOptionNames[i]);
-                    if (selection == dccOptionNames[i])
+                    int selection = ChoosePreferredDCCApp(newestDCCVersionIndex, i);
+                    if (selection == i)
                     {
                         newestDCCVersionIndex = i;
                         newestDCCVersionNumber = FindDCCVersion(dccOptionNames[i]);
                     }
                 }
             }
-            Debug.Assert(newestDCCVersionIndex > -1 && newestDCCVersionIndex < dccOptionPaths.Count);
+            Debug.Assert(newestDCCVersionIndex >= -1 && newestDCCVersionIndex < dccOptionNames.Count);
             return newestDCCVersionIndex;
         }
         /// <summary>
-        /// Gives our preffered program name from two options. ACCEPTS ENTRIES FROM DCCOptionNames LIST
+        /// Takes the index of two program names from dccOptionNames and chooses our preferred one based on the preference list
+        /// This happens in case of a tie between two programs with the same release year / version
         /// </summary>
         /// <param name="optionA"></param>
         /// <param name="optionB"></param>
         /// <returns></returns>
-        private string PickPrefferedName(string optionA, string optionB)
+        private int ChoosePreferredDCCApp(int optionA, int optionB)
         {
-            string[] optionArray = new string[2];
-            optionArray[0] = optionA.ToLower().Split(' ')[0];
-            optionArray[1] = optionB.ToLower().Split(' ')[0];
-            int[] optionScores = new int[2];
+            int scoreA = s_PreferenceList.IndexOf(GetAppNameFromFolderName(dccOptionNames[optionA]));
+            int scoreB = s_PreferenceList.IndexOf(GetAppNameFromFolderName(dccOptionNames[optionB]));
 
-            for (int i = 0; i < 2; i++)
-            {
-                for (int j = 0; j < preferenceList.Count; j++)
-                {
-                    if (optionArray[i] == preferenceList[j])
-                    {
-                        optionScores[i] = j;
-                    }
-                }
-            }
+            return scoreA < scoreB ? optionA : optionB;
+        }
 
-            return optionScores[0] < optionScores[1] ? optionA : optionB;
+        ///
+        private string GetAppNameFromFolderName(string originalString)
+        {
+            return originalString.ToLower().Split(' ')[0];
         }
 
         /// <summary>
@@ -381,8 +381,17 @@ namespace FbxExporters.EditorTools {
         /// <returns> the year/version  OR -1 if the year could not be parsed </returns>
         private static int FindDCCVersion(string AppName)
         {
+            if (AppName == null)
+            {
+                return -1;
+            }
+
             int version;
             string[] piecesArray = AppName.Split(' ');
+            if (piecesArray.Length == 0)
+            {
+                return -1;
+            }
             //Get the number, which is always the last chunk separated by a space.
             string number = piecesArray[piecesArray.Length - 1];
 
@@ -439,7 +448,7 @@ namespace FbxExporters.EditorTools {
                     }
                     string version = product.Substring ("maya".Length);
                     dccOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
-                    dccOptionName.Add (GetUniqueName ("Maya " + version));
+                    dccOptionName.Add (GetUniqueName (s_MayaName + version));
                 }
 
                 if (product.StartsWith ("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
@@ -449,10 +458,10 @@ namespace FbxExporters.EditorTools {
                     }
                     string version = product.Substring ("3ds max ".Length);
                     dccOptionPath.Add (exePath);
-                    dccOptionName.Add (GetUniqueName ("3ds Max " + version));
+                    dccOptionName.Add (GetUniqueName (s_MaxName + version));
                 }
             }
-            instance.selectedDCCApp = instance.FindPreferredProgram();
+            instance.selectedDCCApp = instance.GetPreferredDCCApp();
         }
 
         /// <summary>
@@ -499,7 +508,7 @@ namespace FbxExporters.EditorTools {
                 var dccPath = instance.dccOptionPaths [i];
                 if (!File.Exists (dccPath)) {
                     if (i == instance.selectedDCCApp) {
-                        instance.selectedDCCApp = instance.FindPreferredProgram();
+                        instance.selectedDCCApp = instance.GetPreferredDCCApp();
                     }
                     namesToDelete.Add (instance.dccOptionNames [i]);
                     pathsToDelete.Add (dccPath);

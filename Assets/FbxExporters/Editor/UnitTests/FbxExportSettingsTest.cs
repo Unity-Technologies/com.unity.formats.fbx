@@ -181,21 +181,40 @@ namespace FbxExporters.UnitTests
 
         [Test]
         public void TestFindPreferredProgram()
-        {           
-            //Putting Maya 2017 and Max 2017 will also test our PickPreferredName function
-            ExportSettings.instance.dccOptionNames = new List<string> { "3ds Max 2000", "Maya 2016", "Maya 2017", "3ds max 2017" };
-            ExportSettings.instance.dccOptionPaths = new List<string> { "3ds Max 2000 path", "maya 2016 path", "maya 2017 path", "3ds max 2017 path"};
+        {
+            //Add a number of fake programs to the list, including some garbage ones
+            ExportSettings.instance.dccOptionNames = new List<string>();
+            ExportSettings.instance.dccOptionNames.Add(ExportSettings.GetUniqueName(ExportSettings.s_MaxName + "2000"));
+            ExportSettings.instance.dccOptionNames.Add(ExportSettings.GetUniqueName(ExportSettings.s_MayaName + "2016"));
+            ExportSettings.instance.dccOptionNames.Add(ExportSettings.GetUniqueName(ExportSettings.s_MayaName + "2017"));
+            ExportSettings.instance.dccOptionNames.Add(ExportSettings.GetUniqueName(ExportSettings.s_MaxName + "2017"));
+            ExportSettings.instance.dccOptionNames.Add(ExportSettings.GetUniqueName("Blender " + "2.67"));
+            ExportSettings.instance.dccOptionNames.Add(ExportSettings.GetUniqueName(""));
+            ExportSettings.instance.dccOptionNames.Add(ExportSettings.GetUniqueName(null));
+            ExportSettings.instance.dccOptionNames.Add(ExportSettings.GetUniqueName(ExportSettings.s_MayaName + "lt"));
+            ExportSettings.instance.dccOptionNames.Add(ExportSettings.GetUniqueName(ExportSettings.s_MayaName + "2017"));
 
-            int preferred = ExportSettings.instance.FindPreferredProgram();
+            int preferred = ExportSettings.instance.GetPreferredDCCApp();
             //While Maya 2017 and 3ds Max 2017 are tied for most recent, Maya 2017 should win because we prefer Maya.
             Assert.AreEqual(preferred, 2);
 
             ExportSettings.instance.dccOptionNames = new List<string> { "Blender 2.67", "Blender 3.0" };
-            ExportSettings.instance.dccOptionPaths = new List<string> { "Blender 2.67 path", "Blender 3.0 path" };
 
-            preferred = ExportSettings.instance.FindPreferredProgram();
+            preferred = ExportSettings.instance.GetPreferredDCCApp();
             //The function should be able to deal with floats well enough to give us a preferred version of soemthing like blender, which does not use the year.
             Assert.AreEqual(preferred, 1);
+
+            ExportSettings.instance.dccOptionNames.Clear();
+            //Try running it with an empty list
+            preferred = ExportSettings.instance.GetPreferredDCCApp();
+
+            Assert.AreEqual(preferred, -1);
+
+            ExportSettings.instance.dccOptionNames = null;
+            //Try running it with a null list
+            preferred = ExportSettings.instance.GetPreferredDCCApp();
+
+            Assert.AreEqual(preferred, -1);
         }
 
     }
