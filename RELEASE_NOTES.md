@@ -4,7 +4,16 @@ RELEASE NOTES
 
 NEW FEATURES
 
+* Export Settings: Set application with latest version as default selection in 3D application dropdown
+
+In case of a tie, use the following preference order: Maya > Maya LT > 3ds Max > Blender.
+
 * Updated user documentation
+
+FIXES
+
+* Exporter: Fix FBX exported from Unity causing crash when imported in 3ds Max.
+* Export Settings: Fix infinite loop when generating unique display name
 
 **Version**: sprint32
 
