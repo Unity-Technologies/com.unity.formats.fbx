@@ -140,9 +140,7 @@ namespace FbxExporters.Editor
         }}
 
         private static string MAYA_CLOSE_COMMAND { get {
-                return string.Format("scriptJob -idleEvent quit;",
-                    ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(),
-                    GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall()?1:0));
+                return string.Format("scriptJob -idleEvent quit;");
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
@@ -329,41 +327,44 @@ namespace FbxExporters.Editor
                 myProcess.StartInfo.CreateNoWindow = true;
                 myProcess.StartInfo.UseShellExecute = false;
 
+                string commandString;
+
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
-                    if (EditorTools.ExportSettings.instance.launchAfterInstallation)
-                    {
-                        myProcess.StartInfo.Arguments = string.Format("-command \"{0}\"", MAYA_CONFIG_COMMAND);
-                        myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
-                        myProcess.StartInfo.CreateNoWindow = false;
-                    }
-                    else
-                    {
-                        myProcess.StartInfo.Arguments = string.Format("-command \"{0}\"", MAYA_CONFIG_COMMAND + MAYA_CLOSE_COMMAND);
-                    }                    
+                    commandString = "-command \"{0}\"";
                     break;
                 case RuntimePlatform.OSXEditor:
-                    if (EditorTools.ExportSettings.instance.launchAfterInstallation)
-                    {
-                        myProcess.StartInfo.Arguments = string.Format(@"-command '{0}'", MAYA_CONFIG_COMMAND);
-                        myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
-                        myProcess.StartInfo.CreateNoWindow = false;
-                        }
-                    else
-                    {
-                        myProcess.StartInfo.Arguments = string.Format(@"-command '{0}'", MAYA_CONFIG_COMMAND + MAYA_CLOSE_COMMAND);
-                    }                    
+                    commandString = @"-command '{0}'";
                     break;
                 default:
                     throw new NotImplementedException ();
                 }
 
+                if (EditorTools.ExportSettings.instance.launchAfterInstallation)
+                {
+                    myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+                    myProcess.StartInfo.CreateNoWindow = false;
+                    myProcess.StartInfo.Arguments = string.Format(commandString, MAYA_CONFIG_COMMAND);
+                }
+                else
+                {
+                    myProcess.StartInfo.Arguments = string.Format(commandString, MAYA_CONFIG_COMMAND + MAYA_CLOSE_COMMAND);
+                }
+
                 myProcess.EnableRaisingEvents = true;
                 myProcess.Start();
-                myProcess.WaitForExit();
-                ExitCode = myProcess.ExitCode;
-                Debug.Log(string.Format("Ran maya: [{0}]\nWith args [{1}]\nResult {2}",
-                            mayaPath, myProcess.StartInfo.Arguments, ExitCode));
+
+                if (!EditorTools.ExportSettings.instance.launchAfterInstallation)
+                {
+                    myProcess.WaitForExit();
+                    ExitCode = myProcess.ExitCode;
+                    Debug.Log(string.Format("Ran maya: [{0}]\nWith args [{1}]\nResult {2}",
+                                mayaPath, myProcess.StartInfo.Arguments, ExitCode));
+                }
+                else
+                {
+                    ExitCode = 0;
+                }
             }
              catch (Exception e)
              {

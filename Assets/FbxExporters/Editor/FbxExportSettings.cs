@@ -168,7 +168,7 @@ namespace FbxExporters.EditorTools {
             }
 
             exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
-                new GUIContent("Launch program after installation:",
+                new GUIContent("Launch 3D Application:",
                     "Launch the selected application after unity integration is completed."),
                 exportSettings.launchAfterInstallation
             );
