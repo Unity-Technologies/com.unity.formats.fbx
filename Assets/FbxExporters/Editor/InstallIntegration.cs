@@ -133,8 +133,14 @@ namespace FbxExporters.Editor
             }
         }
 
-        private static string MAYA_COMMANDS { get {
-                return string.Format("configureUnityFbxForMaya {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6}; scriptJob -idleEvent quit;",
+        private static string MAYA_CONFIG_COMMAND { get {
+                return string.Format("configureUnityFbxForMaya {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6};",
+                    ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(),
+                    GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall() ? 1 : 0));
+        }}
+
+        private static string MAYA_CLOSE_COMMAND { get {
+                return string.Format("scriptJob -idleEvent quit;",
                     ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(),
                     GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall()?1:0));
         }}
@@ -325,10 +331,28 @@ namespace FbxExporters.Editor
 
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
-                    myProcess.StartInfo.Arguments = string.Format("-command \"{0}\"", MAYA_COMMANDS);
+                    if (EditorTools.ExportSettings.instance.launchAfterInstallation)
+                    {
+                        myProcess.StartInfo.Arguments = string.Format("-command \"{0}\"", MAYA_CONFIG_COMMAND);
+                        myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+                        myProcess.StartInfo.CreateNoWindow = false;
+                    }
+                    else
+                    {
+                        myProcess.StartInfo.Arguments = string.Format("-command \"{0}\"", MAYA_CONFIG_COMMAND + MAYA_CLOSE_COMMAND);
+                    }                    
                     break;
                 case RuntimePlatform.OSXEditor:
-                    myProcess.StartInfo.Arguments = string.Format(@"-command '{0}'", MAYA_COMMANDS);
+                    if (EditorTools.ExportSettings.instance.launchAfterInstallation)
+                    {
+                        myProcess.StartInfo.Arguments = string.Format(@"-command '{0}'", MAYA_CONFIG_COMMAND);
+                        myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+                        myProcess.StartInfo.CreateNoWindow = false;
+                        }
+                    else
+                    {
+                        myProcess.StartInfo.Arguments = string.Format(@"-command '{0}'", MAYA_CONFIG_COMMAND + MAYA_CLOSE_COMMAND);
+                    }                    
                     break;
                 default:
                     throw new NotImplementedException ();
@@ -340,11 +364,6 @@ namespace FbxExporters.Editor
                 ExitCode = myProcess.ExitCode;
                 Debug.Log(string.Format("Ran maya: [{0}]\nWith args [{1}]\nResult {2}",
                             mayaPath, myProcess.StartInfo.Arguments, ExitCode));
-
-                if (EditorTools.ExportSettings.instance.launchAfterInstallation)
-                {
-                    LaunchDCCApplication(mayaPath);
-                }
             }
              catch (Exception e)
              {
