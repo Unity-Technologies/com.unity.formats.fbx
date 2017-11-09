@@ -13,7 +13,7 @@ In case of a tie, use the following preference order: Maya > Maya LT > 3ds Max >
 FIXES
 
 * Exporter: Fix FBX exported from Unity causing crash when imported in 3ds Max.
-* Export Settings: Fix infinite loop when generating unique display name
+* Export Settings: Fix hang when adding multiple installations of the same version of a 3D application to the dropdown
 
 **Version**: sprint32
 
