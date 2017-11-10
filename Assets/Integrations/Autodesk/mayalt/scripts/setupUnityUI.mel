@@ -8,7 +8,9 @@ global proc setupUnityUI(){
     $parentMenu = $gMainFileMenu; \
     $pluginVersion = whatsNewVersion(); \
     menuItem -parent $parentMenu -insertAfter $kMenuInsertAfter -divider true -longDivider false -version $pluginVersion $kMenuDivider; \
-    menuItem -parent $parentMenu -insertAfter $kMenuDivider -subMenu true -label $kMenuLabel -tearOff true -version $pluginVersion $kMenuName;";
+    menuItem -parent $parentMenu -insertAfter $kMenuDivider -subMenu true -label $kMenuLabel -tearOff true -version $pluginVersion $kMenuName; \
+    menuItem -parent $kMenuName -label \"Import\" -version $pluginVersion; \
+    menuItem -parent $kMenuName -label \"Export\" -version $pluginVersion;";
 }
 
 global proc string whatsNewVersion(){
