@@ -89,8 +89,6 @@ namespace FbxExporters.EditorTools {
 
             EditorGUILayout.Space ();
 
-            GUILayout.BeginVertical("box");
-            GUILayout.Space(10);
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "3D Application:",
@@ -174,8 +172,6 @@ namespace FbxExporters.EditorTools {
                     "Launch the selected application after unity integration is completed."),
                 exportSettings.launchAfterInstallation
             );
-            GUILayout.Space(10);
-            GUILayout.EndVertical();
 
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
