@@ -1,0 +1,17 @@
+global string $kMenuName = "UnityFbxForMaya";
+global string $kMenuDivider = "UnityFbxForMayaDivider";
+global string $kMenuLabel = "Unity";
+global string $kMenuInsertAfter = "exportActiveFileOptions";
+
+global proc setupUnityUI(){
+    evalDeferred -lowestPriority "buildFileMenu; \
+    $parentMenu = $gMainFileMenu; \
+    $pluginVersion = whatsNewVersion(); \
+    menuItem -parent $parentMenu -insertAfter $kMenuInsertAfter -divider true -longDivider false -version $pluginVersion $kMenuDivider; \
+    menuItem -parent $parentMenu -insertAfter $kMenuDivider -subMenu true -label $kMenuLabel -tearOff true -version $pluginVersion $kMenuName;";
+}
+
+global proc string whatsNewVersion(){
+    return `about -q -version`;
+
+}
