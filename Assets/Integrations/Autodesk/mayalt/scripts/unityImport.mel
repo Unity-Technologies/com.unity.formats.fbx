@@ -1,0 +1,55 @@
+global proc unityImport(){
+    loadUnityDependencies;
+        
+    // set Unity project as the current workspace
+    $currWorkspace = `workspace -o -q`;
+    $unityProject = `optionVar -q "UnityProject"`;
+    
+    if ($unityProject != ""){
+        workspace -o $unityProject;
+    }
+    
+    $tempPath = "";
+    $tempName = "";
+    $origItemsInScene = "";
+    
+    $callbackId = -1;
+    $callbackId2 = -1;
+    
+    Import;
+    
+    if ($currWorkspace != "") {
+        workspace -o $currWorkspace;
+    }
+    
+}
+
+
+global proc int loadUnityPlugin(string $plugin){
+    if (`pluginInfo -q -loaded $plugin` == false){
+        loadPlugin $plugin;
+        if (`pluginInfo -q -loaded $plugin` == false){
+            return 0 /*false*/;
+        }
+    }
+    return 1 /*true*/;
+};
+
+
+global proc int loadUnityDependencies(){
+    // GamePipeline plugin 'SendToUnitySelection' command used in export
+    $pluginsToLoad = {"GamePipeline", "fbxmaya"};
+    
+    $ext = "mll";
+    if (`about -macOS` == true){
+        $ext = "bundle";
+    }
+            
+    // iterate over all the plugins, loading them with extenstion ext, and combining the results
+    // to return if any of the loads failed
+    $result = true;
+    for($plugin in $pluginsToLoad){
+        $result = $result && `loadUnityPlugin ($plugin + "." + $ext)`;
+    }
+    return $result;
+}
