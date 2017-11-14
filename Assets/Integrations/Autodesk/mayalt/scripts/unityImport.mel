@@ -1,29 +1,90 @@
 global proc unityImport(){
+    global string $UnityExportSet = "UnityFbxExportSet";
+    global string $UnityFbxFilePathAttr = "unityFbxFilePath";
+    global string $UnityFbxFileNameAttr = "unityFbxFileName";
+
     loadUnityDependencies;
         
-    // set Unity project as the current workspace
-    $currWorkspace = `workspace -o -q`;
     $unityProject = `optionVar -q "UnityProject"`;
     
-    if ($unityProject != ""){
-        workspace -o $unityProject;
+    $filePath = `fileDialog2 -dialogStyle 2 -caption "FBX Import" -dir ($unityProject + "/Assets") -fileFilter "*.fbx" -selectFileFilter "FBX" -fileMode 1`;
+    
+    
+    // store path and filename
+    if(size($filePath) <= 0){
+        return;
+    }
+    $filePathStr = $filePath[0];
+    $tempPath = dirname($filePathStr);
+    $tempName = basename($filePathStr, "");
+
+    // Gather everything that is in the scene
+    $origItemsInScene = `ls -tr -o -r true`;
+        
+    // Get or create the Unity Fbx Export Set
+    if (!setExists($UnityExportSet)){
+        // couldn't find export set so create it
+        sets -name $UnityExportSet;
+        // unlock set so we can add attributes to it
+        lockNode -lock false $UnityExportSet;
+    }    
+    // reset attribute values, in case import fails
+    storeAttribute($UnityExportSet, $UnityFbxFilePathAttr, "");
+    storeAttribute($UnityExportSet, $UnityFbxFileNameAttr, "");
+    
+    FBXImport -f $filePath;
+    
+    if ($tempPath != ""){
+        storeAttribute($UnityExportSet, $UnityFbxFilePathAttr, $tempPath);
+        
+        // Change Unity project if fbx is from a different Unity project.
+        // Get the project based on the folder structure (i.e. folder above Assets)
+        $head = dirname($tempPath);
+        $tail = basename($tempPath, "");
+        // Check that we are not at the root directory.
+        // dirname($head) returns the last directory name in the path, 
+        // or head if head is the root directory.
+        while ($head != "" && dirname($head) != $head){
+            if (`strcmp $tail "Assets"` == 0){
+                // this is a valid Unity project, so set it
+                optionVar -sv "UnityProject" $head;
+                break;
+            }
+            $head = dirname($head);
+            $tail = basename($head, "");
+        }
     }
     
-    $tempPath = "";
-    $tempName = "";
-    $origItemsInScene = "";
-    
-    $callbackId = -1;
-    $callbackId2 = -1;
-    
-    Import;
-    
-    if ($currWorkspace != "") {
-        workspace -o $currWorkspace;
+    if ($tempName != ""){
+        storeAttribute($UnityExportSet,$UnityFbxFileNameAttr,$tempName);
     }
     
+    if (setExists($UnityExportSet) == true){
+        // figure out what has been added after import
+        $itemsInScene = `ls -tr -o -r true`;
+        
+        $newItems = stringArrayRemove($origItemsInScene, $itemsInScene);
+        
+        // add newly imported items to set
+        if (size($newItems) > 0){
+            sets -include $UnityExportSet $newItems;
+        }
+        // lock set so it doesn't get deleted when empty
+        lockNode -lock true $UnityExportSet;    
+    }
 }
 
+global proc storeAttribute(string $node, string $attr, string $attrValue){
+    $attrType="string";
+    if (!attributeExists($attr, $node)){
+        addAttr -shortName $attr -storable true -dataType $attrType $node;
+    }
+    setAttr ($node+"."+$attr) -type $attrType $attrValue;
+}
+
+global proc int setExists(string $setName){
+    return stringArrayContains($setName, `listSets -allSets`);
+}
 
 global proc int loadUnityPlugin(string $plugin){
     if (`pluginInfo -q -loaded $plugin` == false){
