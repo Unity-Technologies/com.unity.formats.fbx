@@ -1,5 +1,20 @@
 RELEASE NOTES
 
+**Version**: 1.1.0b1
+
+NEW FEATURES
+
+* Export Settings: Set application with latest version as default selection in 3D application dropdown
+
+In case of a tie, use the following preference order: Maya > Maya LT > 3ds Max > Blender.
+
+* Updated user documentation
+
+FIXES
+
+* Exporter: Fix FBX exported from Unity causing crash when imported in 3ds Max.
+* Export Settings: Fix hang when adding multiple installations of the same version of a 3D application to the dropdown
+
 **Version**: sprint32
 
 NEW FEATURES

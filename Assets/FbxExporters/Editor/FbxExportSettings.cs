@@ -27,7 +27,7 @@ namespace FbxExporters.EditorTools {
                 GUILayout.Label ("Version: " + version, EditorStyles.centeredGreyMiniLabel);
                 EditorGUILayout.Space ();
             }
-
+            GUILayout.BeginVertical();
             exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
                 new GUIContent ("Convert to Maya Compatible Naming:",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
@@ -93,17 +93,12 @@ namespace FbxExporters.EditorTools {
             GUILayout.Label (new GUIContent (
                 "3D Application:",
                 "Select the 3D Application for which you would like to install the Unity integration."), GUILayout.Width(LabelWidth - 3));
-
+            
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
-            // make sure we never initially have browse selected
-            if (exportSettings.selectedDCCApp == options.Length - 1) {
-                exportSettings.selectedDCCApp = exportSettings.GetPreferredDCCApp();
-            }
 
-            int oldValue = exportSettings.selectedDCCApp;
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
-            if (exportSettings.selectedDCCApp == options.Length - 1) {
+            if (GUILayout.Button("Browse", EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
@@ -129,7 +124,6 @@ namespace FbxExporters.EditorTools {
                     // Therefore check both executable folder (for Mac) and its parent (for Windows)
                     if (md.Name.ToLower().StartsWith("mayalt") || md.Parent.Name.ToLower ().StartsWith ("mayalt")) {
                         Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", md.FullName));
-                        exportSettings.selectedDCCApp = oldValue;
                         return;
                     }
 
@@ -143,14 +137,11 @@ namespace FbxExporters.EditorTools {
                     }
                     if (foundDCCPath == null) {
                         Debug.LogError (string.Format ("Could not find supported 3D application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
-                        exportSettings.selectedDCCApp = oldValue;
                     } else {
                         dccPath = foundDCCPath;
                         ExportSettings.AddDCCOption (dccPath, foundDCC);
                     }
                     Repaint ();
-                } else {
-                    exportSettings.selectedDCCApp = oldValue;
                 }
             }
             GUILayout.EndHorizontal ();
@@ -162,8 +153,15 @@ namespace FbxExporters.EditorTools {
                 FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
             }
 
+            exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
+                new GUIContent("Launch 3D Application:",
+                    "Launch the selected application after unity integration is completed."),
+                exportSettings.launchAfterInstallation
+            );
+
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
+            GUILayout.EndVertical();
 
             if (GUI.changed) {
                 EditorUtility.SetDirty (exportSettings);
@@ -247,6 +245,7 @@ namespace FbxExporters.EditorTools {
         // Note: default values are set in LoadDefaults().
         public bool mayaCompatibleNames;
         public bool centerObjects;
+        public bool launchAfterInstallation;
 
         public int selectedDCCApp = 0;
 
@@ -274,6 +273,7 @@ namespace FbxExporters.EditorTools {
         {
             mayaCompatibleNames = true;
             centerObjects = true;
+            launchAfterInstallation = true;
             convertToModelSavePath = kDefaultSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
@@ -550,19 +550,17 @@ namespace FbxExporters.EditorTools {
 
             if (instance.dccOptionPaths.Count <= 0) {
                 return new GUIContent[]{
-                    new GUIContent("<No 3D Application found>"),
-                    new GUIContent("Browse...")
+                    new GUIContent("<No 3D Application found>")
                 };
             }
 
-            GUIContent[] optionArray = new GUIContent[instance.dccOptionPaths.Count+1];
+            GUIContent[] optionArray = new GUIContent[instance.dccOptionPaths.Count];
             for(int i = 0; i < instance.dccOptionPaths.Count; i++){
                 optionArray [i] = new GUIContent(
                     instance.dccOptionNames[i],
                     instance.dccOptionPaths[i]
                 );
             }
-            optionArray [optionArray.Length - 1] = new GUIContent("Browse...");
 
             return optionArray;
         }

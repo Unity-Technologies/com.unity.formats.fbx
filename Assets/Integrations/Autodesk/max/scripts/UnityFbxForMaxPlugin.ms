@@ -1,5 +1,5 @@
 -- MacroScripts that will perform actions
-macroScript UnityImport category:"Unity"
+macroScript UnityImport category:"Unity" tooltip:"Import FBX file from Unity project and auto-configure for exporting."
 (
     origObjects = #()
 
@@ -82,7 +82,7 @@ macroScript UnityImport category:"Unity"
         callbacks.removeScripts #postImport id:#unityPlugin
     )
 )
-macroScript UnityExport category:"Unity"
+macroScript UnityExport category:"Unity" tooltip:"Export a model to Unity"
 (
     fn unitToScaleFactor unit = (
         case unit of (
@@ -203,7 +203,7 @@ if (maxVersion())[1] >= 20000 then(
             (
                 global unityImportAction = createUnityImportAction unityImportTitle importMenu
                 global unityExportAction = createUnityExportAction unityExportTitle exportMenu
-                
+				                
                 menuMan.updateMenuBar() --update the menu bar
             )
 		)
