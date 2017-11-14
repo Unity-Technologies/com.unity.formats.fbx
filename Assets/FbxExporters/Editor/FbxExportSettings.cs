@@ -48,7 +48,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "Export Path:",
-                "Relative path for saving Model Prefabs."));
+                "Relative path for saving Model Prefabs."), GUILayout.Width(LabelWidth));
 
             var pathLabel = ExportSettings.GetRelativeSavePath();
             if (pathLabel == ".") { pathLabel = "(Assets root)"; }
@@ -92,7 +92,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "3D Application:",
-                "Select the 3D Application for which you would like to install the Unity integration."));
+                "Select the 3D Application for which you would like to install the Unity integration."), GUILayout.Width(LabelWidth));
 
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
