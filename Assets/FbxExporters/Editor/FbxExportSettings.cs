@@ -96,7 +96,6 @@ namespace FbxExporters.EditorTools {
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
 
-            int oldValue = exportSettings.selectedDCCApp;
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
             if (GUILayout.Button("Browse", EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
@@ -124,7 +123,6 @@ namespace FbxExporters.EditorTools {
                     // Therefore check both executable folder (for Mac) and its parent (for Windows)
                     if (md.Name.ToLower().StartsWith("mayalt") || md.Parent.Name.ToLower ().StartsWith ("mayalt")) {
                         Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", md.FullName));
-                        exportSettings.selectedDCCApp = oldValue;
                         return;
                     }
 
@@ -138,7 +136,6 @@ namespace FbxExporters.EditorTools {
                     }
                     if (foundDCCPath == null) {
                         Debug.LogError (string.Format ("Could not find supported 3D application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
-                        exportSettings.selectedDCCApp = oldValue;
                     } else {
                         dccPath = foundDCCPath;
                         ExportSettings.AddDCCOption (dccPath, foundDCC);
