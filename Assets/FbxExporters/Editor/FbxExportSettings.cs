@@ -98,7 +98,7 @@ namespace FbxExporters.EditorTools {
             var options = ExportSettings.GetDCCOptions();
 
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
-            if (GUILayout.Button(new GUIContent("...", "Browse for 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
+            if (GUILayout.Button(new GUIContent("...", "Browse to a 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
