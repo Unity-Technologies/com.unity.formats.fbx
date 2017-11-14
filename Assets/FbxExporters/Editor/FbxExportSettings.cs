@@ -10,9 +10,9 @@ namespace FbxExporters.EditorTools {
     [CustomEditor(typeof(ExportSettings))]
     public class ExportSettingsEditor : UnityEditor.Editor {
         Vector2 scrollPos = Vector2.zero;
-        const float LabelWidth = 225;
-        const float SelectableLabelMinWidth = 100;
-        const float BrowseButtonWidth = 55;
+        const float LabelWidth = 125;
+        const float SelectableLabelMinWidth = 90;
+        const float BrowseButtonWidth = 25;
 
         public override void OnInspectorGUI() {
             ExportSettings exportSettings = (ExportSettings)target;
@@ -29,7 +29,7 @@ namespace FbxExporters.EditorTools {
             }
             GUILayout.BeginVertical();
             exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
-                new GUIContent ("Convert to Maya Compatible Naming:",
+                new GUIContent ("Compatible Naming:",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
                     "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
                     "On export, convert the names of GameObjects so they are Maya compatible." +
@@ -57,7 +57,7 @@ namespace FbxExporters.EditorTools {
                 GUILayout.MinWidth(SelectableLabelMinWidth),
                 GUILayout.Height(EditorGUIUtility.singleLineHeight));
 
-            if (GUILayout.Button ("Browse", EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
+            if (GUILayout.Button ("...", EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
                 string initialPath = ExportSettings.GetAbsoluteSavePath();
 
                 // if the directory doesn't exist, set it to the default save path
@@ -98,7 +98,7 @@ namespace FbxExporters.EditorTools {
             var options = ExportSettings.GetDCCOptions();
 
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
-            if (GUILayout.Button("Browse", EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
+            if (GUILayout.Button("...", EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
