@@ -7,10 +7,11 @@ global proc setupUnityUI(){
     evalDeferred -lowestPriority "buildFileMenu; \
     $parentMenu = $gMainFileMenu; \
     $pluginVersion = whatsNewVersion(); \
+    source \"unityImport\"; \
     menuItem -parent $parentMenu -insertAfter $kMenuInsertAfter -divider true -longDivider false -version $pluginVersion $kMenuDivider; \
     menuItem -parent $parentMenu -insertAfter $kMenuDivider -subMenu true -label $kMenuLabel -tearOff true -version $pluginVersion $kMenuName; \
     menuItem -parent $kMenuName -label \"Import\" -version $pluginVersion -command \"unityImport\"; \
-    menuItem -parent $kMenuName -label \"Export\" -version $pluginVersion;";
+    menuItem -parent $kMenuName -label \"Export\" -version $pluginVersion -command \"unityExport\";";
 }
 
 global proc string whatsNewVersion(){

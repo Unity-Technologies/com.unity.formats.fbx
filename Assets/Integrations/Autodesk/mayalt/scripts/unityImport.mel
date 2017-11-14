@@ -1,7 +1,12 @@
+global string $UnityExportSet = "UnityFbxExportSet";
+global string $UnityFbxFilePathAttr = "unityFbxFilePath";
+global string $UnityFbxFileNameAttr = "unityFbxFileName";
+
 global proc unityImport(){
-    global string $UnityExportSet = "UnityFbxExportSet";
-    global string $UnityFbxFilePathAttr = "unityFbxFilePath";
-    global string $UnityFbxFileNameAttr = "unityFbxFileName";
+    // get the global variables
+    global string $UnityExportSet;
+    global string $UnityFbxFilePathAttr;
+    global string $UnityFbxFileNameAttr;
 
     loadUnityDependencies;
         
@@ -72,6 +77,66 @@ global proc unityImport(){
         // lock set so it doesn't get deleted when empty
         lockNode -lock true $UnityExportSet;    
     }
+}
+
+
+global proc unityExport(){
+    // get the global variables
+    global string $UnityExportSet;
+    global string $UnityFbxFilePathAttr;
+    global string $UnityFbxFileNameAttr;
+    
+    if(!loadUnityDependencies()){
+        return;
+    }
+    
+    if(!loadUnityFbxExportSettings()){
+        return;
+    }
+    
+    // select the export set for export, if it exists,
+    // otherwise take what is currently selected
+    $origSelection = `ls -sl`;
+    if (setExists($UnityExportSet)){
+        select -r -ne $UnityExportSet;
+    }
+    
+    $unity_fbx_file_path = getAttribute($UnityExportSet, $UnityFbxFilePathAttr);
+    $unity_fbx_file_name = getAttribute($UnityExportSet, $UnityFbxFileNameAttr);
+    
+    $strCmd = "";
+    if ($unity_fbx_file_path != "" && $unity_fbx_file_name != ""){
+        $strCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $unity_fbx_file_path + "/" + $unity_fbx_file_name + "\"";
+    }
+    else {
+        $strCmd = "SendToUnitySelection";
+    }
+    eval $strCmd;
+    
+    select -cl;
+    if (size($origSelection) > 0){    
+        select -add -ne $origSelection;
+    }
+}
+
+// Load the Export Settings from file
+global proc int loadUnityFbxExportSettings(){
+    $fileName = `optionVar -q "UnityFbxExportSettings"`;
+    
+    // check if the file exists
+    if (`file -q -ex $fileName` == false){
+        error ("Failed to find Unity Fbx Export Settings at: " + $fileName);
+        return false;
+    }
+    eval ("source \"" + $fileName + "\"");
+    return true;
+}
+
+global proc string getAttribute(string $node, string $attr){
+    if (`attributeExists $attr $node`){
+        return `getAttr ($node + "." + $attr)`;
+    }
+    return "";
 }
 
 global proc storeAttribute(string $node, string $attr, string $attrValue){
