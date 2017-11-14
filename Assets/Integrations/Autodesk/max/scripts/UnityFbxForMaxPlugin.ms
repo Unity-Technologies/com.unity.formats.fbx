@@ -1,5 +1,5 @@
 -- MacroScripts that will perform actions
-macroScript UnityImport category:"Unity" tooltip:"Import an FBX file directly from Unity"
+macroScript UnityImport category:"Unity" tooltip:"Import FBX file from Unity project and auto-configure for exporting."
 (
     origObjects = #()
 
@@ -82,7 +82,7 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file directly fr
         callbacks.removeScripts #postImport id:#unityPlugin
     )
 )
-macroScript UnityExport category:"Unity" tooltip:"Export an FBX file directly to Unity"
+macroScript UnityExport category:"Unity" tooltip:"Export a model to Unity"
 (
     fn unitToScaleFactor unit = (
         case unit of (
