@@ -57,7 +57,7 @@ namespace FbxExporters.EditorTools {
                 GUILayout.MinWidth(SelectableLabelMinWidth),
                 GUILayout.Height(EditorGUIUtility.singleLineHeight));
 
-            if (GUILayout.Button ("...", EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
+            if (GUILayout.Button (new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
                 string initialPath = ExportSettings.GetAbsoluteSavePath();
 
                 // if the directory doesn't exist, set it to the default save path
@@ -98,7 +98,7 @@ namespace FbxExporters.EditorTools {
             var options = ExportSettings.GetDCCOptions();
 
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
-            if (GUILayout.Button("...", EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
+            if (GUILayout.Button(new GUIContent("...", "Browse for 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
