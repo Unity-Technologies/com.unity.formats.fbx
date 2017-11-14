@@ -10,7 +10,7 @@ namespace FbxExporters.EditorTools {
     [CustomEditor(typeof(ExportSettings))]
     public class ExportSettingsEditor : UnityEditor.Editor {
         Vector2 scrollPos = Vector2.zero;
-        const float LabelWidth = 125;
+        const float LabelWidth = 130;
         const float SelectableLabelMinWidth = 90;
         const float BrowseButtonWidth = 25;
 
