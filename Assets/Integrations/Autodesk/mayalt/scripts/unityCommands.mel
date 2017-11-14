@@ -14,6 +14,7 @@ global proc unityImport(){
     
     $filePath = `fileDialog2 -dialogStyle 2 -caption "FBX Import" -dir ($unityProject + "/Assets") -fileFilter "*.fbx" -selectFileFilter "FBX" -fileMode 1`;
     
+    print $filePath;
     
     // store path and filename
     if(size($filePath) <= 0){
@@ -155,10 +156,10 @@ global proc int loadUnityPlugin(string $plugin){
     if (`pluginInfo -q -loaded $plugin` == false){
         loadPlugin $plugin;
         if (`pluginInfo -q -loaded $plugin` == false){
-            return 0 /*false*/;
+            return false;
         }
     }
-    return 1 /*true*/;
+    return true;
 };
 
 
