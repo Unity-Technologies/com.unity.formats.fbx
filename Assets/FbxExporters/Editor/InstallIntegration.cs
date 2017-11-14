@@ -63,6 +63,22 @@ namespace FbxExporters.Editor
         /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
         /// <param name="path">Path.</param>
         public abstract bool FolderAlreadyUnzippedAtPath (string path);
+
+        /// <summary>
+        /// Launches application at given path
+        /// </summary>
+        /// <param name="AppPath"></param>
+        public static void LaunchDCCApplication(string AppPath)
+        {
+            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+            myProcess.StartInfo.FileName = AppPath;
+            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+            myProcess.StartInfo.CreateNoWindow = false;
+            myProcess.StartInfo.UseShellExecute = false;
+
+            myProcess.EnableRaisingEvents = false;
+            myProcess.Start();
+        }
     }
 
 
@@ -117,10 +133,14 @@ namespace FbxExporters.Editor
             }
         }
 
-        private static string MAYA_COMMANDS { get {
-                return string.Format("configureUnityFbxForMaya {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6}; scriptJob -idleEvent quit;",
+        private static string MAYA_CONFIG_COMMAND { get {
+                return string.Format("configureUnityFbxForMaya {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6};",
                     ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(),
-                    GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall()?1:0));
+                    GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall() ? 1 : 0));
+        }}
+
+        private static string MAYA_CLOSE_COMMAND { get {
+                return string.Format("scriptJob -idleEvent quit;");
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
@@ -307,24 +327,45 @@ namespace FbxExporters.Editor
                 myProcess.StartInfo.CreateNoWindow = true;
                 myProcess.StartInfo.UseShellExecute = false;
 
+                string commandString;
+
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
-                    myProcess.StartInfo.Arguments = string.Format("-command \"{0}\"", MAYA_COMMANDS);
+                    commandString = "-command \"{0}\"";
                     break;
                 case RuntimePlatform.OSXEditor:
-                    myProcess.StartInfo.Arguments = string.Format(@"-command '{0}'", MAYA_COMMANDS);
+                    commandString = @"-command '{0}'";
                     break;
                 default:
                     throw new NotImplementedException ();
                 }
 
+                if (EditorTools.ExportSettings.instance.launchAfterInstallation)
+                {
+                    myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+                    myProcess.StartInfo.CreateNoWindow = false;
+                    myProcess.StartInfo.Arguments = string.Format(commandString, MAYA_CONFIG_COMMAND);
+                }
+                else
+                {
+                    myProcess.StartInfo.Arguments = string.Format(commandString, MAYA_CONFIG_COMMAND + MAYA_CLOSE_COMMAND);
+                }
+
                 myProcess.EnableRaisingEvents = true;
                 myProcess.Start();
-                myProcess.WaitForExit();
-                ExitCode = myProcess.ExitCode;
-                Debug.Log(string.Format("Ran maya: [{0}]\nWith args [{1}]\nResult {2}",
-                            mayaPath, myProcess.StartInfo.Arguments, ExitCode));
-             }
+
+                if (!EditorTools.ExportSettings.instance.launchAfterInstallation)
+                {
+                    myProcess.WaitForExit();
+                    ExitCode = myProcess.ExitCode;
+                    Debug.Log(string.Format("Ran maya: [{0}]\nWith args [{1}]\nResult {2}",
+                                mayaPath, myProcess.StartInfo.Arguments, ExitCode));
+                }
+                else
+                {
+                    ExitCode = 0;
+                }
+            }
              catch (Exception e)
              {
                 UnityEngine.Debug.LogError(string.Format ("Exception failed to start Maya ({0})", e.Message));
@@ -532,8 +573,13 @@ namespace FbxExporters.Editor
                 myProcess.WaitForExit();
                 ExitCode = myProcess.ExitCode;
 
+                if (EditorTools.ExportSettings.instance.launchAfterInstallation)
+                {
+                    LaunchDCCApplication(maxExe);
+                }
+
                 // TODO (UNI-29910): figure out what exactly causes this exit code + how to resolve
-                if(ExitCode == -1073740791){
+                if (ExitCode == -1073740791){
                     Debug.Log(string.Format("Detected 3ds max exitcode {0} -- safe to ignore", ExitCode));
                     ExitCode = 0;
                 }
@@ -545,7 +591,7 @@ namespace FbxExporters.Editor
             {
                 UnityEngine.Debug.LogError(string.Format ("Exception failed to start Max ({0})", e.Message));
                 ExitCode = -1;
-            }
+            }            
             return ExitCode;
         }
 

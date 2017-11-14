@@ -152,6 +152,12 @@ namespace FbxExporters.EditorTools {
                 FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
             }
 
+            exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
+                new GUIContent("Launch 3D Application:",
+                    "Launch the selected application after unity integration is completed."),
+                exportSettings.launchAfterInstallation
+            );
+
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
             GUILayout.EndVertical();
@@ -238,6 +244,7 @@ namespace FbxExporters.EditorTools {
         // Note: default values are set in LoadDefaults().
         public bool mayaCompatibleNames;
         public bool centerObjects;
+        public bool launchAfterInstallation;
 
         public int selectedDCCApp = 0;
 
@@ -265,6 +272,7 @@ namespace FbxExporters.EditorTools {
         {
             mayaCompatibleNames = true;
             centerObjects = true;
+            launchAfterInstallation = true;
             convertToModelSavePath = kDefaultSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
