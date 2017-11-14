@@ -5,6 +5,7 @@ macroScript UnityImport category:"Unity"
 
     persistent global unityFbxFilePathAttr
     persistent global unityFbxFileNameAttr
+    persistent global unityAskSetUnits
     
     global afterImport
     fn afterImport = (
@@ -29,6 +30,24 @@ macroScript UnityImport category:"Unity"
     fbxFileName = getOpenFileName caption:"Import FBX from Unity" filename:(unityProjectPath + "/Assets/")  types:"FBX (*.fbx)|*.fbx|"
     if fbxFileName != undefined then
     (
+        -- ask to set units to cm if not already
+        if (unityAskSetUnits == undefined or not unityAskSetUnits) and units.SystemType != #Centimeters then (
+            result = false
+            message = ("Detected system units set to "+units.SystemType+".\n\n" +
+                      "Using system units other than centimeters is not recommended for the Unity FBX " +
+                      "workflow and may result in unexpected scaling on export.\n\n" + 
+                      "Would you like to change the system units to centimeters?")
+            (
+                result = queryBox message title:"Warning, system units not set to centimeters"
+            )
+            if result then (
+                units.SystemType = #Centimeters
+            )
+            else (
+                unityAskSetUnits = true
+            )
+        )
+    
         -- reset persistent values, in case import fails
         unityFbxFilePathAttr = ""
         unityFbxFileNameAttr = ""
@@ -65,12 +84,25 @@ macroScript UnityImport category:"Unity"
 )
 macroScript UnityExport category:"Unity"
 (
+    fn unitToScaleFactor unit = (
+        case unit of (
+            #Inches: 2.54
+            #Feet: 30.48
+            #Miles: 160934
+            #Millimeters: 0.1
+            #Kilometers: 100000
+            #Meters: 100
+            default: 1
+        )
+    );
+
     fn loadUnityFbxExportSettings = (
         fbxExportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxExportSettings"
         if fbxExportSettings != undefined and doesFileExist fbxExportSettings then(
             filein fbxExportSettings
         )
-    )
+        FbxExporterSetParam "ScaleFactor" (unitToScaleFactor units.SystemType)
+    );
 
     -- Make sure the FbxExporter plugin is loaded
     pluginManager.loadClass FbxExporter
@@ -82,6 +114,9 @@ macroScript UnityExport category:"Unity"
     if not isdeleted exportSet and exportSet != undefined then(
         select exportSet
     )
+    
+    local origUnits = units.SystemType
+    units.SystemType = #Centimeters
     
     exportFileName = undefined
     if unityFbxFilePathAttr != undefined and unityFbxFileNameAttr != undefined then(
@@ -95,6 +130,8 @@ macroScript UnityExport category:"Unity"
     if exportFileName != undefined then (
         exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
     )
+    
+    units.SystemType = origUnits
     
     if origSelection != undefined then (
         select origSelection
@@ -212,7 +249,7 @@ else if (maxVersion())[1] == 19000 then (
 			local mainMenuBar = menuMan.getMainMenuBar()
 			local unityMenu = menuMan.createMenu unityMenuName
 			local unityMenuItem = menuMan.createSubMenuItem unityMenuName unityMenu
-			mainMenuBar.addItem unityMenuItem -1
+			mainMenuBar.addItem unityMenuItem (mainMenuBar.numItems())
 			
 			createUnityImportAction unityImportTitle unityMenu
 			createUnityExportAction unityExportTitle unityMenu

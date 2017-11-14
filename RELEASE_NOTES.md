@@ -1,5 +1,22 @@
 RELEASE NOTES
 
+**Version**: sprint32
+
+NEW FEATURES
+
+* 3DsMax Unity Integration: Added popup suggesting user set system units to centimeters
+
+Will only show up if system units are not already centimeters.
+Click "yes" to change system units to centimeters, "no" to leave units as is.
+If "no" is clicked, popup will not show up again for this session or .max file.
+
+FIXES
+
+* 3DsMax Unity Integration: In 3ds Max 2017 move the Unity menu before the Help menu in the main menu bar
+* 3DsMax Unity Integration: Fix so file units are always exported as cm. Adjust scaling according to system units
+                            e.g. a 3 meter cube in Max will export as a 300 cm cube in Unity
+
+
 **Version**: sprint31
 
 NEW FEATURES
