@@ -120,26 +120,11 @@ namespace FbxExporters.EditorTools {
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (dccPath)) {
-                    // get the directory of the executable
-                    var md = Directory.GetParent (dccPath);
-                    // UNI-29074 TODO: add Maya LT support
-                    // Check that the executable is not in a MayaLT directory (thus being MayaLT instead of Maya executable).
-                    // On Mac path resembles: /Applications/Autodesk/mayaLT2018/Maya.app
-                    // On Windows path resembles: C:\Program Files\Autodesk\MayaLT2018\bin\maya.exe
-                    // Therefore check both executable folder (for Mac) and its parent (for Windows)
-                    if (md.Name.ToLower().StartsWith("mayalt") || md.Parent.Name.ToLower ().StartsWith ("mayalt")) {
-                        Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", md.FullName));
-                        exportSettings.selectedDCCApp = oldValue;
-                        return;
-                    }
-
                     ExportSettings.DCCType foundDCC = ExportSettings.DCCType.Maya;
                     var foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Maya);
                     if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor) {
-                        
                         foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
                         foundDCC = ExportSettings.DCCType.Max;
-                        
                     }
                     if (foundDCCPath == null) {
                         Debug.LogError (string.Format ("Could not find supported 3D application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
@@ -464,11 +449,6 @@ namespace FbxExporters.EditorTools {
 
                 // Only accept those that start with 'maya' in either case.
                 if (product.StartsWith ("maya", StringComparison.InvariantCultureIgnoreCase)) {
-                    // UNI-29074 TODO: add Maya LT support
-                    // Reject MayaLT -- it doesn't have plugins.
-                    if (product.StartsWith ("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
-                        continue;
-                    }
                     string version = product.Substring ("maya".Length);
                     dccOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
                     dccOptionName.Add (GetUniqueDCCOptionName(kMayaOptionName + version));
@@ -585,13 +565,6 @@ namespace FbxExporters.EditorTools {
             switch (dcc) {
             case DCCType.Maya:
                 var version = AskMayaVersion(newOption);
-
-                // UNI-29074 TODO: add Maya LT support
-                // make sure this is not Maya LT
-                if (version.ToLower ().StartsWith ("lt")) {
-                    Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", newOption));
-                    return;
-                }
                 optionName = GetUniqueDCCOptionName("Maya " + version);
                 break;
             case DCCType.Max:
@@ -655,6 +628,11 @@ namespace FbxExporters.EditorTools {
         public static string GetSelectedDCCPath()
         {
             return (instance.dccOptionPaths.Count>0) ? instance.dccOptionPaths [instance.selectedDCCApp] : "";
+        }
+
+        public static string GetSelectedDCCName()
+        {
+            return (instance.dccOptionPaths.Count>0) ? instance.dccOptionNames [instance.selectedDCCApp] : "";
         }
 
         /// <summary>

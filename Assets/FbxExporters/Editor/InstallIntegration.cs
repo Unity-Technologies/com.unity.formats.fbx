@@ -695,6 +695,14 @@ namespace FbxExporters.Editor
         }
 
         /// <summary>
+        /// Gets the name of the selected DCC.
+        /// </summary>
+        /// <returns>The DCC name.</returns>
+        public static string GetDCCName() {
+            return FbxExporters.EditorTools.ExportSettings.GetSelectedDCCName ();
+        }
+
+        /// <summary>
         /// Opens a dialog showing whether the installation succeeded.
         /// </summary>
         /// <param name="dcc">Dcc name.</param>
@@ -729,7 +737,12 @@ namespace FbxExporters.Editor
             string dccType = System.IO.Path.GetFileNameWithoutExtension (dccExe).ToLower();
             DCCIntegration dccIntegration;
             if (dccType.Equals ("maya")) {
-                dccIntegration = new MayaIntegration ();
+                // could be Maya or Maya LT
+                if (GetDCCName ().ToLower ().Contains ("lt")) {
+                    dccIntegration = new MayaLTIntegration ();
+                } else {
+                    dccIntegration = new MayaIntegration ();
+                }
             } else if (dccType.Equals ("3dsmax")) {
                 dccIntegration = new MaxIntegration ();
             } else {
