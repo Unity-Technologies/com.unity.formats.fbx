@@ -45,6 +45,12 @@ namespace FbxExporters.EditorTools {
                 exportSettings.centerObjects
             );
 
+            exportSettings.ExportInBinary = EditorGUILayout.Toggle(
+                new GUIContent("Export in Binary:",
+                    "If false, will export files in ASCII format."),
+                exportSettings.ExportInBinary
+            );
+
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "Export Path:",
@@ -157,12 +163,6 @@ namespace FbxExporters.EditorTools {
                 new GUIContent("Launch 3D Application:",
                     "Launch the selected application after unity integration is completed."),
                 exportSettings.launchAfterInstallation
-            );
-
-            exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
-                new GUIContent("Export in Binary:",
-                    "If false, will export files in ASCII format."),
-                exportSettings.ExportInBinary
             );
 
             GUILayout.FlexibleSpace ();
