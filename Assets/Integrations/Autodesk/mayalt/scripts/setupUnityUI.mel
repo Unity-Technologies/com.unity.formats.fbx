@@ -13,6 +13,13 @@ global string $kExportLabel = "Export Model to Unity";
 
 
 global proc setupUnityUI(){
+
+    $isHeadless = `optionVar -q "UnityFbxForMaya_Headless"`;
+    if($isHeadless){
+        // headless install, don't add UI
+        return;
+    }
+
     evalDeferred -lowestPriority "buildFileMenu; \
     $parentMenu = $gMainFileMenu; \
     $pluginVersion = whatsNewVersion(); \
