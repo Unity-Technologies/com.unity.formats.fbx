@@ -8,13 +8,18 @@ global proc unityImport(){
     global string $UnityFbxFilePathAttr;
     global string $UnityFbxFileNameAttr;
 
-    loadUnityDependencies;
+    if(!loadUnityDependencies()){
+        error("Failed to load Unity dependencies");
+        return;
+    }
+    
+    if(!loadUnityFbxImportSettings()){
+        return;
+    }
         
     $unityProject = `optionVar -q "UnityProject"`;
     
     $filePath = `fileDialog2 -dialogStyle 2 -caption "FBX Import" -dir ($unityProject + "/Assets") -fileFilter "*.fbx" -selectFileFilter "FBX" -fileMode 1`;
-    
-    print $filePath;
     
     // store path and filename
     if(size($filePath) <= 0){
@@ -120,18 +125,32 @@ global proc unityExport(){
     }
 }
 
+
 // Load the Export Settings from file
 global proc int loadUnityFbxExportSettings(){
     $fileName = `optionVar -q "UnityFbxExportSettings"`;
-    
+    return loadUnityFbxSettings($fileName, "Export");
+}
+
+
+// Load the Import Settings from a file
+global proc int loadUnityFbxImportSettings(){
+    $fileName = `optionVar -q "UnityFbxImportSettings"`;
+    return loadUnityFbxSettings($fileName, "Import");
+}
+
+
+// Load a specified settings file
+global proc int loadUnityFbxSettings(string $fileName, string $settingType){
     // check if the file exists
     if (`file -q -ex $fileName` == false){
-        error ("Failed to find Unity Fbx Export Settings at: " + $fileName);
+        error ("Failed to find Unity Fbx "+$settingType+" Settings at: " + $fileName);
         return false;
     }
     eval ("source \"" + $fileName + "\"");
     return true;
 }
+
 
 global proc string getAttribute(string $node, string $attr){
     if (`attributeExists $attr $node`){
@@ -139,6 +158,7 @@ global proc string getAttribute(string $node, string $attr){
     }
     return "";
 }
+
 
 global proc storeAttribute(string $node, string $attr, string $attrValue){
     $attrType="string";
@@ -148,9 +168,11 @@ global proc storeAttribute(string $node, string $attr, string $attrValue){
     setAttr ($node+"."+$attr) -type $attrType $attrValue;
 }
 
+
 global proc int setExists(string $setName){
     return stringArrayContains($setName, `listSets -allSets`);
 }
+
 
 global proc int loadUnityPlugin(string $plugin){
     if (`pluginInfo -q -loaded $plugin` == false){
