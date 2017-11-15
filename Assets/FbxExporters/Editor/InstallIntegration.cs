@@ -70,7 +70,15 @@ namespace FbxExporters.Editor
     {
         public override string DccDisplayName { get { return "Maya"; } }
 
-        private const string MODULE_FILENAME = "UnityFbxForMaya";
+        public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMaya.zip"; } }
+
+        public const string TEMP_SAVE_PATH = "_safe_to_delete";
+
+        protected virtual string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel"; } }
+
+        protected virtual string MODULE_TEMPLATE_PATH { get { return "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt"; } }
+        protected virtual string MODULE_FILENAME { get { return "UnityFbxForMaya"; } }
+
         private const string PACKAGE_NAME = "FbxExporters";
         private const string VERSION_FILENAME = "README.txt";
         private const string VERSION_FIELD = "VERSION";
@@ -78,33 +86,30 @@ namespace FbxExporters.Editor
         private const string PROJECT_TAG = "{UnityProject}";
         private const string INTEGRATION_TAG = "{UnityIntegrationsPath}";
 
-        private const string FBX_EXPORT_SETTINGS_PATH = "/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel";
-
         private const string MAYA_INSTRUCTION_FILENAME = "_safe_to_delete/_temp.txt";
 
-        public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMaya.zip"; } }
-
-        public const string MODULE_TEMPLATE_PATH = "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt";
-
-        public const string TEMP_SAVE_PATH = "_safe_to_delete";
-
-
-        private static string MAYA_MODULES_PATH {
+        protected static string MAYA_DOCUMENTS_PATH {
             get {
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
-                    return "maya/modules";
+                    return "maya";
                 case RuntimePlatform.OSXEditor:
-                    return "Library/Preferences/Autodesk/Maya/modules";
+                    return "Library/Preferences/Autodesk/Maya";
                 default:
                     throw new NotImplementedException ();
                 }
             }
         }
 
+        private static string MAYA_MODULES_PATH {
+            get {
+                return System.IO.Path.Combine(GetUserFolder(), MAYA_DOCUMENTS_PATH + "/modules");
+            }
+        }
+
         // Use string to define escaped quote
         // Windows needs the backslash
-        private static string ESCAPED_QUOTE {
+        protected static string ESCAPED_QUOTE {
             get {
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
@@ -117,14 +122,14 @@ namespace FbxExporters.Editor
             }
         }
 
-        private static string MAYA_COMMANDS { get {
+        protected virtual string MAYA_COMMANDS { get {
                 return string.Format("configureUnityFbxForMaya {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6}; scriptJob -idleEvent quit;",
                     ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(),
                     GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall()?1:0));
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
-        private static string GetUserFolder()
+        protected static string GetUserFolder()
         {
             switch (Application.platform) {
             case RuntimePlatform.WindowsEditor:
@@ -141,12 +146,7 @@ namespace FbxExporters.Editor
             return false;
         }
 
-        public static string GetModulePath()
-        {
-            return System.IO.Path.Combine(GetUserFolder(), MAYA_MODULES_PATH);
-        }
-
-        public static string GetModuleTemplatePath()
+        public string GetModuleTemplatePath()
         {
             return System.IO.Path.Combine(INTEGRATION_FOLDER_PATH, MODULE_TEMPLATE_PATH);
         }
@@ -190,7 +190,7 @@ namespace FbxExporters.Editor
         /// Returns a relative path with forward slashes as path separators.
         /// </summary>
         /// <returns>The export settings path.</returns>
-        public static string GetExportSettingsPath()
+        public string GetExportSettingsPath()
         {
             return INTEGRATION_FOLDER_PATH + FBX_EXPORT_SETTINGS_PATH;
         }
@@ -290,7 +290,32 @@ namespace FbxExporters.Editor
             }
         }
 
-        public static int ConfigureMaya(string mayaPath)
+        /// <summary>
+        /// Creates the missing directories in path.
+        /// </summary>
+        /// <returns><c>true</c>, if directory was created, <c>false</c> otherwise.</returns>
+        /// <param name="path">Path to create.</param>
+        /// <param name="name">Display name of directory.</param>
+        protected static bool CreateDirectory(string path, string name){
+            try
+            {
+                System.IO.Directory.CreateDirectory(path);
+            }
+            catch (Exception xcp)
+            {
+                Debug.LogException(xcp);
+                Debug.LogError(string.Format("Failed to create {0} Folder {1}", name, path));
+                return false;
+            }
+
+            if (!System.IO.Directory.Exists(path)) {
+                Debug.LogError(string.Format("Failed to create {0} Folder {1}", name, path));
+                return false;
+            }
+            return true;
+        }
+
+        public int ConfigureMaya(string mayaPath)
         {
              int ExitCode = 0;
 
@@ -333,7 +358,7 @@ namespace FbxExporters.Editor
             return ExitCode;
         }
 
-        public static bool InstallMaya(bool verbose = false)
+        public virtual bool InstallMaya(bool verbose = false)
         {
             // What's happening here is that we copy the module template to
             // the module path, basically:
@@ -350,30 +375,16 @@ namespace FbxExporters.Editor
             }
 
             // Create the {USER} modules folder and empty it so it's ready to set up.
-            string modulePath = GetModulePath();
+            string modulePath = MAYA_MODULES_PATH;
             string moduleFilePath = System.IO.Path.Combine(modulePath, MODULE_FILENAME + ".mod");
             bool installed = false;
 
             if (!System.IO.Directory.Exists(modulePath))
             {
                 if (verbose) { Debug.Log(string.Format("Creating Maya Modules Folder {0}", modulePath)); }
-
-                try
-                {
-                    System.IO.Directory.CreateDirectory(modulePath);
-                }
-                catch (Exception xcp)
-                {
-                    Debug.LogException(xcp);
-                    Debug.LogError(string.Format("Failed to create Maya Modules Folder {0}", modulePath));
+                if (!CreateDirectory (modulePath, "Maya Modules")) {
                     return false;
                 }
-
-                if (!System.IO.Directory.Exists(modulePath)) {
-                    Debug.LogError(string.Format("Failed to create Maya Modules Folder {0}", modulePath));
-                    return false;
-                }
-
                 installed = false;
             }
             else
@@ -436,11 +447,11 @@ namespace FbxExporters.Editor
 
         public override int InstallIntegration (string mayaExe)
         {
-            if (!MayaIntegration.InstallMaya(verbose: true)) {
+            if (!InstallMaya(verbose: true)) {
                 return -1;
             }
 
-            return MayaIntegration.ConfigureMaya (mayaExe);
+            return ConfigureMaya (mayaExe);
         }
 
         /// <summary>
@@ -451,7 +462,116 @@ namespace FbxExporters.Editor
         /// <param name="path">Path.</param>
         public override bool FolderAlreadyUnzippedAtPath(string path)
         {
-            return System.IO.File.Exists (System.IO.Path.Combine (path, MayaIntegration.MODULE_TEMPLATE_PATH));
+            return System.IO.File.Exists (System.IO.Path.Combine (path, MODULE_TEMPLATE_PATH));
+        }
+    }
+
+    class MayaLTIntegration : MayaIntegration 
+    {
+        public override string DccDisplayName { get { return "Maya LT"; } }
+
+        public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMayaLT.zip"; } }
+
+        protected override string MODULE_TEMPLATE_PATH { get { return "Integrations/Autodesk/mayalt/" + MODULE_FILENAME + ".txt"; } }
+
+        protected override string MODULE_FILENAME { get { return "UnityFbxForMayaLT"; } }
+
+        protected override string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/mayalt/scripts/unityFbxExportSettings.mel"; } }
+
+        protected string FBX_IMPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/mayalt/scripts/unityFbxImportSettings.mel"; } }
+
+        private const string MAYA_USER_STARTUP_SCRIPT = "userSetup.mel";
+
+        private const string USER_STARTUP_CALL = "if(`exists setupUnityUI`){ setupUnityUI; }";
+
+        protected override string MAYA_COMMANDS { get {
+            return string.Format("configureUnityFbxForMayaLT {0}{1}{0} {0}{2}{0} {0}{3}{0} {4}; scriptJob -idleEvent quit;",
+                ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()?1:0));
+        }}
+
+
+        private static string MAYA_SCRIPTS_PATH {
+            get {
+                return System.IO.Path.Combine(GetUserFolder(), MAYA_DOCUMENTS_PATH + "/scripts");
+            }
+        }
+
+        /// <summary>
+        /// Gets the path to the import settings file.
+        /// Returns a relative path with forward slashes as path separators.
+        /// </summary>
+        /// <returns>The import settings path.</returns>
+        public string GetImportSettingsPath(){
+            return INTEGRATION_FOLDER_PATH + FBX_IMPORT_SETTINGS_PATH;
+        }
+
+        /// <summary>
+        /// Gets the user startup script path.
+        /// Returns a relative path with forward slashes as path separators.
+        /// </summary>
+        /// <returns>The user startup script path.</returns>
+        private static string GetUserStartupScriptPath(){
+            return MAYA_SCRIPTS_PATH + "/" + MAYA_USER_STARTUP_SCRIPT;
+        }
+
+        public override bool InstallMaya (bool verbose = false)
+        {
+            if (!base.InstallMaya (verbose)) {
+                return false;
+            }
+
+            // setup user startup script
+            string mayaStartupScript = GetUserStartupScriptPath ();
+            string fileContents = string.Format("\n{0}", USER_STARTUP_CALL);
+
+            // make sure scripts directory exists
+            if (!System.IO.Directory.Exists(MAYA_SCRIPTS_PATH))
+            {
+                if (verbose) { Debug.Log(string.Format("Creating Maya Scripts Folder {0}", MAYA_SCRIPTS_PATH)); }
+                if (!CreateDirectory (MAYA_SCRIPTS_PATH, "Maya Scripts")) {
+                    return false;
+                }
+            }
+            else if (System.IO.File.Exists (mayaStartupScript)) {
+                // script exists, check that the UI setup is being called
+                try{
+                    using (System.IO.StreamReader sr = new System.IO.StreamReader (mayaStartupScript)) {
+                        while (sr.Peek () >= 0) {
+                            string line = sr.ReadLine ();
+                            if (line.Trim().Contains (USER_STARTUP_CALL)) {
+                                // startup call already in the file, nothing to do
+                                return true;
+                            }
+                        }
+                    }
+                }
+                catch(Exception e){
+                    Debug.LogException(e);
+                    Debug.LogError(string.Format("Exception while reading user startup file ({0})", e.Message));
+                    return false;
+                }
+            }
+
+            // append text to file
+            try{
+                System.IO.File.AppendAllText (mayaStartupScript, fileContents);
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e);
+                Debug.LogError(string.Format("Exception while writing to user startup file ({0})", e.Message));
+                return false;
+            }
+            return true;
+        }
+
+        public override int InstallIntegration (string mayaLTExe)
+        {
+            if (!InstallMaya(verbose: true)) {
+                return -1;
+            }
+
+            return ConfigureMaya (mayaLTExe);
         }
     }
 
