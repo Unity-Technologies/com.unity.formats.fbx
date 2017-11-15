@@ -2,6 +2,9 @@ global string $kMenuName = "UnityFbxForMaya";
 global string $kMenuDivider = "UnityFbxForMayaDivider";
 global string $kMenuLabel = "Unity";
 global string $kMenuInsertAfter = "exportActiveFileOptions";
+global string $kImportIconPath = "import.png";
+global string $kExportIconPath = "export.png";
+global string $kUnityIconPath = "unity.png";
 
 global proc setupUnityUI(){
     evalDeferred -lowestPriority "buildFileMenu; \
@@ -9,9 +12,9 @@ global proc setupUnityUI(){
     $pluginVersion = whatsNewVersion(); \
     source \"unityCommands.mel\"; \
     menuItem -parent $parentMenu -insertAfter $kMenuInsertAfter -divider true -longDivider false -version $pluginVersion $kMenuDivider; \
-    menuItem -parent $parentMenu -insertAfter $kMenuDivider -subMenu true -label $kMenuLabel -tearOff true -version $pluginVersion $kMenuName; \
-    menuItem -parent $kMenuName -label \"Import\" -version $pluginVersion -command \"unityImport\"; \
-    menuItem -parent $kMenuName -label \"Export\" -version $pluginVersion -command \"unityExport\";";
+    menuItem -parent $parentMenu -insertAfter $kMenuDivider -subMenu true -label $kMenuLabel -tearOff true -ltVersion $pluginVersion -image $kUnityIconPath $kMenuName; \
+    menuItem -parent $kMenuName -label \"Import\" -ltVersion $pluginVersion -image $kImportIconPath -command \"unityImport\"; \
+    menuItem -parent $kMenuName -label \"Export\" -ltVersion $pluginVersion -image $kExportIconPath -command \"unityExport\";";
 }
 
 global proc string whatsNewVersion(){
