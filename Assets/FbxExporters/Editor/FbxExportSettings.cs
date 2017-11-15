@@ -45,11 +45,11 @@ namespace FbxExporters.EditorTools {
                 exportSettings.centerObjects
             );
 
-            exportSettings.ExportInBinary = EditorGUILayout.Toggle(
-                new GUIContent("Export in Binary:",
-                    "If false, will export files in ASCII format."),
-                exportSettings.ExportInBinary
-            );
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
+                " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth));
+            exportSettings.ExportFormatSelection = GUILayout.SelectionGrid(exportSettings.ExportFormatSelection, new string[]{"Binary", "ASCII"}, 1, EditorStyles.radioButton);
+            GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
@@ -252,7 +252,7 @@ namespace FbxExporters.EditorTools {
         public bool mayaCompatibleNames;
         public bool centerObjects;
         public bool launchAfterInstallation;
-        public bool ExportInBinary;
+        public int ExportFormatSelection;
 
         public int selectedDCCApp = 0;
 
@@ -281,7 +281,7 @@ namespace FbxExporters.EditorTools {
             mayaCompatibleNames = true;
             centerObjects = true;
             launchAfterInstallation = true;
-            ExportInBinary = true;
+            ExportFormatSelection = 0;
             convertToModelSavePath = kDefaultSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;

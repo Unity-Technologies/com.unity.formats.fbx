@@ -982,7 +982,7 @@ namespace FbxExporters
                         // Initialize the exporter.
                         // fileFormat must be binary if we are embedding textures
                         int fileFormat = -1;
-                        if (!EditorTools.ExportSettings.instance.ExportInBinary)
+                        if (EditorTools.ExportSettings.instance.ExportFormatSelection == 1)
                         {
                             fileFormat = fbxManager.GetIOPluginRegistry().FindWriterIDByDescription("FBX ascii (*.fbx)");
                         }                        
