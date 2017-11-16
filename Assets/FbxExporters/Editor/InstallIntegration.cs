@@ -682,8 +682,21 @@ namespace FbxExporters.Editor
 
         private static bool DecompressIntegrationZipFile(string zipPath, DCCIntegration dcc)
         {
-            // prompt user to enter location to unzip file
-            var unzipFolder = EditorUtility.OpenFolderPanel(string.Format("Select Location to Save {0} Integration", dcc.DccDisplayName),LastIntegrationSavePath,"");
+            string unzipFolder;
+            switch (Application.platform)
+            {
+                case RuntimePlatform.OSXEditor:
+                    unzipFolder = "/Applications/Autodesk";
+                    break;
+                case RuntimePlatform.WindowsEditor:
+                    unzipFolder = "C:/Program Files/Autodesk";
+                    break;
+                default:
+                    throw new System.NotImplementedException();
+            }
+
+            // prompt user to enter location to unzip file IF THEY WANT TO BE PROMPTED/////
+            unzipFolder = EditorUtility.OpenFolderPanel(string.Format("Select Location to Save {0} Integration", dcc.DccDisplayName),LastIntegrationSavePath,"");
             if (string.IsNullOrEmpty (unzipFolder)) {
                 // user has cancelled, do nothing
                 return false;
