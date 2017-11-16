@@ -45,11 +45,15 @@ namespace FbxExporters.EditorTools {
                 exportSettings.centerObjects
             );
 
+            EditorGUILayout.Space();
+
             GUILayout.BeginHorizontal();
             GUILayout.Label(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - 3));
             exportSettings.ExportFormatSelection = EditorGUILayout.Popup(exportSettings.ExportFormatSelection, new string[]{"Binary", "ASCII"});
             GUILayout.EndHorizontal();
+
+            EditorGUILayout.Space();
 
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
@@ -152,7 +156,9 @@ namespace FbxExporters.EditorTools {
             }
             GUILayout.EndHorizontal ();
 
-			var installIntegrationContent = new GUIContent(
+            EditorGUILayout.Space();
+
+            var installIntegrationContent = new GUIContent(
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
             if (GUILayout.Button (installIntegrationContent)) {
