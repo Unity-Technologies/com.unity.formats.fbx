@@ -10,9 +10,9 @@ namespace FbxExporters.EditorTools {
     [CustomEditor(typeof(ExportSettings))]
     public class ExportSettingsEditor : UnityEditor.Editor {
         Vector2 scrollPos = Vector2.zero;
-        const float LabelWidth = 225;
-        const float SelectableLabelMinWidth = 100;
-        const float BrowseButtonWidth = 55;
+        const float LabelWidth = 130;
+        const float SelectableLabelMinWidth = 90;
+        const float BrowseButtonWidth = 25;
 
         public override void OnInspectorGUI() {
             ExportSettings exportSettings = (ExportSettings)target;
@@ -27,9 +27,9 @@ namespace FbxExporters.EditorTools {
                 GUILayout.Label ("Version: " + version, EditorStyles.centeredGreyMiniLabel);
                 EditorGUILayout.Space ();
             }
-
+            GUILayout.BeginVertical();
             exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
-                new GUIContent ("Convert to Maya Compatible Naming:",
+                new GUIContent ("Compatible Naming:",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
                     "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
                     "On export, convert the names of GameObjects so they are Maya compatible." +
@@ -48,7 +48,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "Export Path:",
-                "Relative path for saving Model Prefabs."));
+                "Relative path for saving Model Prefabs."), GUILayout.Width(LabelWidth - 3));
 
             var pathLabel = ExportSettings.GetRelativeSavePath();
             if (pathLabel == ".") { pathLabel = "(Assets root)"; }
@@ -57,7 +57,7 @@ namespace FbxExporters.EditorTools {
                 GUILayout.MinWidth(SelectableLabelMinWidth),
                 GUILayout.Height(EditorGUIUtility.singleLineHeight));
 
-            if (GUILayout.Button ("Browse", EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
+            if (GUILayout.Button (new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
                 string initialPath = ExportSettings.GetAbsoluteSavePath();
 
                 // if the directory doesn't exist, set it to the default save path
@@ -92,18 +92,13 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "3D Application:",
-                "Select the 3D Application for which you would like to install the Unity integration."));
-
+                "Select the 3D Application for which you would like to install the Unity integration."), GUILayout.Width(LabelWidth - 3));
+            
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
-            // make sure we never initially have browse selected
-            if (exportSettings.selectedDCCApp == options.Length - 1) {
-                exportSettings.selectedDCCApp = exportSettings.GetPreferredDCCApp();
-            }
 
-            int oldValue = exportSettings.selectedDCCApp;
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
-            if (exportSettings.selectedDCCApp == options.Length - 1) {
+            if (GUILayout.Button(new GUIContent("...", "Browse to a 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
@@ -128,14 +123,11 @@ namespace FbxExporters.EditorTools {
                     }
                     if (foundDCCPath == null) {
                         Debug.LogError (string.Format ("Could not find supported 3D application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
-                        exportSettings.selectedDCCApp = oldValue;
                     } else {
                         dccPath = foundDCCPath;
                         ExportSettings.AddDCCOption (dccPath, foundDCC);
                     }
                     Repaint ();
-                } else {
-                    exportSettings.selectedDCCApp = oldValue;
                 }
             }
             GUILayout.EndHorizontal ();
@@ -147,8 +139,15 @@ namespace FbxExporters.EditorTools {
                 FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
             }
 
+            exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
+                new GUIContent("Launch 3D Application:",
+                    "Launch the selected application after unity integration is completed."),
+                exportSettings.launchAfterInstallation
+            );
+
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
+            GUILayout.EndVertical();
 
             if (GUI.changed) {
                 EditorUtility.SetDirty (exportSettings);
@@ -232,6 +231,7 @@ namespace FbxExporters.EditorTools {
         // Note: default values are set in LoadDefaults().
         public bool mayaCompatibleNames;
         public bool centerObjects;
+        public bool launchAfterInstallation;
 
         public int selectedDCCApp = 0;
 
@@ -259,6 +259,7 @@ namespace FbxExporters.EditorTools {
         {
             mayaCompatibleNames = true;
             centerObjects = true;
+            launchAfterInstallation = true;
             convertToModelSavePath = kDefaultSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
@@ -530,19 +531,17 @@ namespace FbxExporters.EditorTools {
 
             if (instance.dccOptionPaths.Count <= 0) {
                 return new GUIContent[]{
-                    new GUIContent("<No 3D Application found>"),
-                    new GUIContent("Browse...")
+                    new GUIContent("<No 3D Application found>")
                 };
             }
 
-            GUIContent[] optionArray = new GUIContent[instance.dccOptionPaths.Count+1];
+            GUIContent[] optionArray = new GUIContent[instance.dccOptionPaths.Count];
             for(int i = 0; i < instance.dccOptionPaths.Count; i++){
                 optionArray [i] = new GUIContent(
                     instance.dccOptionNames[i],
                     instance.dccOptionPaths[i]
                 );
             }
-            optionArray [optionArray.Length - 1] = new GUIContent("Browse...");
 
             return optionArray;
         }
