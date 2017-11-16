@@ -17,6 +17,83 @@ global string $UnityExportSet = "UnityFbxExportSet";
 global string $UnityFbxFilePathAttr = "unityFbxFilePath";
 global string $UnityFbxFileNameAttr = "unityFbxFileName";
 
+// Load a specified settings file
+proc int loadUnityFbxSettings(string $fileName, string $settingType){
+    // check if the file exists
+    if (`file -q -ex $fileName` == false){
+        error ("Failed to find Unity Fbx "+$settingType+" Settings at: " + $fileName);
+        return false;
+    }
+    eval ("source \"" + $fileName + "\"");
+    return true;
+}
+
+
+// Load the Export Settings from file
+proc int loadUnityFbxExportSettings(){
+    $fileName = `optionVar -q "UnityFbxExportSettings"`;
+    return loadUnityFbxSettings($fileName, "Export");
+}
+
+
+// Load the Import Settings from a file
+proc int loadUnityFbxImportSettings(){
+    $fileName = `optionVar -q "UnityFbxImportSettings"`;
+    return loadUnityFbxSettings($fileName, "Import");
+}
+
+
+proc string getAttribute(string $node, string $attr){
+    if (`attributeExists $attr $node`){
+        return `getAttr ($node + "." + $attr)`;
+    }
+    return "";
+}
+
+
+proc storeAttribute(string $node, string $attr, string $attrValue){
+    $attrType="string";
+    if (!attributeExists($attr, $node)){
+        addAttr -shortName $attr -storable true -dataType $attrType $node;
+    }
+    setAttr ($node+"."+$attr) -type $attrType $attrValue;
+}
+
+
+proc int setExists(string $setName){
+    return stringArrayContains($setName, `listSets -allSets`);
+}
+
+
+proc int loadUnityPlugin(string $plugin){
+    if (`pluginInfo -q -loaded $plugin` == false){
+        loadPlugin $plugin;
+        if (`pluginInfo -q -loaded $plugin` == false){
+            return false;
+        }
+    }
+    return true;
+};
+
+
+proc int loadUnityDependencies(){
+    // GamePipeline plugin 'SendToUnitySelection' command used in export
+    $pluginsToLoad = {"GamePipeline", "fbxmaya"};
+    
+    $ext = "mll";
+    if (`about -macOS` == true){
+        $ext = "bundle";
+    }
+            
+    // iterate over all the plugins, loading them with extenstion ext, and combining the results
+    // to return if any of the loads failed
+    $result = true;
+    for($plugin in $pluginsToLoad){
+        $result = $result && `loadUnityPlugin ($plugin + "." + $ext)`;
+    }
+    return $result;
+}
+
 global proc unityImport(){
     // get the global variables
     global string $UnityExportSet;
@@ -138,82 +215,4 @@ global proc unityExport(){
     if (size($origSelection) > 0){    
         select -add -ne $origSelection;
     }
-}
-
-
-// Load the Export Settings from file
-global proc int loadUnityFbxExportSettings(){
-    $fileName = `optionVar -q "UnityFbxExportSettings"`;
-    return loadUnityFbxSettings($fileName, "Export");
-}
-
-
-// Load the Import Settings from a file
-global proc int loadUnityFbxImportSettings(){
-    $fileName = `optionVar -q "UnityFbxImportSettings"`;
-    return loadUnityFbxSettings($fileName, "Import");
-}
-
-
-// Load a specified settings file
-global proc int loadUnityFbxSettings(string $fileName, string $settingType){
-    // check if the file exists
-    if (`file -q -ex $fileName` == false){
-        error ("Failed to find Unity Fbx "+$settingType+" Settings at: " + $fileName);
-        return false;
-    }
-    eval ("source \"" + $fileName + "\"");
-    return true;
-}
-
-
-global proc string getAttribute(string $node, string $attr){
-    if (`attributeExists $attr $node`){
-        return `getAttr ($node + "." + $attr)`;
-    }
-    return "";
-}
-
-
-global proc storeAttribute(string $node, string $attr, string $attrValue){
-    $attrType="string";
-    if (!attributeExists($attr, $node)){
-        addAttr -shortName $attr -storable true -dataType $attrType $node;
-    }
-    setAttr ($node+"."+$attr) -type $attrType $attrValue;
-}
-
-
-global proc int setExists(string $setName){
-    return stringArrayContains($setName, `listSets -allSets`);
-}
-
-
-global proc int loadUnityPlugin(string $plugin){
-    if (`pluginInfo -q -loaded $plugin` == false){
-        loadPlugin $plugin;
-        if (`pluginInfo -q -loaded $plugin` == false){
-            return false;
-        }
-    }
-    return true;
-};
-
-
-global proc int loadUnityDependencies(){
-    // GamePipeline plugin 'SendToUnitySelection' command used in export
-    $pluginsToLoad = {"GamePipeline", "fbxmaya"};
-    
-    $ext = "mll";
-    if (`about -macOS` == true){
-        $ext = "bundle";
-    }
-            
-    // iterate over all the plugins, loading them with extenstion ext, and combining the results
-    // to return if any of the loads failed
-    $result = true;
-    for($plugin in $pluginsToLoad){
-        $result = $result && `loadUnityPlugin ($plugin + "." + $ext)`;
-    }
-    return $result;
 }

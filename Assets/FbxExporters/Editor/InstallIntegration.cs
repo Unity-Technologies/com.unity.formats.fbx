@@ -319,8 +319,7 @@ namespace FbxExporters.Editor
         /// </summary>
         /// <returns><c>true</c>, if directory was created, <c>false</c> otherwise.</returns>
         /// <param name="path">Path to create.</param>
-        /// <param name="name">Display name of directory.</param>
-        protected static bool CreateDirectory(string path, string name){
+        protected static bool CreateDirectory(string path){
             try
             {
                 System.IO.Directory.CreateDirectory(path);
@@ -328,12 +327,10 @@ namespace FbxExporters.Editor
             catch (Exception xcp)
             {
                 Debug.LogException(xcp);
-                Debug.LogError(string.Format("Failed to create {0} Folder {1}", name, path));
                 return false;
             }
 
             if (!System.IO.Directory.Exists(path)) {
-                Debug.LogError(string.Format("Failed to create {0} Folder {1}", name, path));
                 return false;
             }
             return true;
@@ -427,7 +424,8 @@ namespace FbxExporters.Editor
             if (!System.IO.Directory.Exists(modulePath))
             {
                 if (verbose) { Debug.Log(string.Format("Creating Maya Modules Folder {0}", modulePath)); }
-                if (!CreateDirectory (modulePath, "Maya Modules")) {
+                if (!CreateDirectory (modulePath)) {
+                    Debug.LogError(string.Format("Failed to create Maya Modules Folder {0}", modulePath));
                     return false;
                 }
                 installed = false;
@@ -498,7 +496,8 @@ namespace FbxExporters.Editor
             if (!System.IO.Directory.Exists(MAYA_SCRIPTS_PATH))
             {
                 if (verbose) { Debug.Log(string.Format("Creating Maya Scripts Folder {0}", MAYA_SCRIPTS_PATH)); }
-                if (!CreateDirectory (MAYA_SCRIPTS_PATH, "Maya Scripts")) {
+                if (!CreateDirectory (MAYA_SCRIPTS_PATH)) {
+                    Debug.LogError(string.Format("Failed to create Maya Scripts Folder {0}", MAYA_SCRIPTS_PATH));
                     return false;
                 }
             }

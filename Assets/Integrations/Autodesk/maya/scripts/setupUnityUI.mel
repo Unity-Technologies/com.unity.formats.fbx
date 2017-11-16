@@ -13,19 +13,24 @@
 // #
 // ########################################################################
 
-global string $kMenuName = "UnityFbxForMaya";
-global string $kMenuDivider = "UnityFbxForMayaDivider";
-global string $kMenuLabel = "Unity";
-global string $kMenuInsertAfter = "exportActiveFileOptions";
+global string $unityMenuName = "UnityFbxForMaya";
+global string $unityMenuDivider = "UnityFbxForMayaDivider";
+global string $unityMenuLabel = "Unity";
+global string $unityMenuInsertAfter = "exportActiveFileOptions";
 
-global string $kImportIconPath = "import.png";
-global string $kExportIconPath = "export.png";
-global string $kUnityIconPath = "unity.png";
+global string $unityImportIconPath = "import.png";
+global string $unityExportIconPath = "export.png";
+global string $unityIconPath = "unity.png";
 
-global string $kFamilyLabel = "The UnityFbxForMaya plugin allows you to reliably exchange and review your work between Maya and Unity.";
-global string $kImportLabel = "Import FBX file from Unity Project and auto-configure for exporting";
-global string $kExportLabel = "Export Model to Unity";
+global string $unityFamilyLabel = "The UnityFbxForMaya plugin allows you to reliably exchange and review your work between Maya and Unity.";
+global string $unityImportLabel = "Import FBX file from Unity Project and auto-configure for exporting";
+global string $unityExportLabel = "Export Model to Unity";
 
+
+global proc string unityWhatsNewVersion(){
+    return `about -q -version`;
+
+}
 
 global proc setupUnityUI(){
 
@@ -37,15 +42,10 @@ global proc setupUnityUI(){
 
     evalDeferred -lowestPriority "buildFileMenu; \
     $parentMenu = $gMainFileMenu; \
-    $pluginVersion = whatsNewVersion(); \
+    $pluginVersion = unityWhatsNewVersion(); \
     source \"unityCommands.mel\"; \
-    menuItem -parent $parentMenu -insertAfter $kMenuInsertAfter -divider true -longDivider false -version $pluginVersion $kMenuDivider; \
-    menuItem -parent $parentMenu -insertAfter $kMenuDivider -subMenu true -label $kMenuLabel -tearOff true -version $pluginVersion -image $kUnityIconPath -annotation $kFamilyLabel $kMenuName; \
-    menuItem -parent $kMenuName -label \"Import\" -version $pluginVersion -image $kImportIconPath -annotation $kImportLabel -command \"unityImport\"; \
-    menuItem -parent $kMenuName -label \"Export\" -version $pluginVersion -image $kExportIconPath -annotation $kExportLabel -command \"unityExport\";";
-}
-
-global proc string whatsNewVersion(){
-    return `about -q -version`;
-
+    menuItem -parent $parentMenu -insertAfter $unityMenuInsertAfter -divider true -longDivider false -version $pluginVersion $unityMenuDivider; \
+    menuItem -parent $parentMenu -insertAfter $unityMenuDivider -subMenu true -label $unityMenuLabel -tearOff true -version $pluginVersion -image $unityIconPath -annotation $unityFamilyLabel $unityMenuName; \
+    menuItem -parent $unityMenuName -label \"Import\" -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command \"unityImport\"; \
+    menuItem -parent $unityMenuName -label \"Export\" -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command \"unityExport\";";
 }
