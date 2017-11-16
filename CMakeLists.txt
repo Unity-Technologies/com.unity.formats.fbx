@@ -215,7 +215,6 @@ add_custom_command(
         COMMAND "${CMAKE_COMMAND}" -E remove ${PACKAGE_PATH}
         COMMAND "${UNITY_EDITOR_PATH}" -batchmode -projectPath ${CMAKE_BINARY_DIR}/FbxExporterProject -exportPackage Assets/FbxExporters ${PACKAGE_PATH} -quit
         COMMENT "Creating Unity Package ${PACKAGE_PATH}"
-        DEPENDS UnityFbxExporterEditorDLL
     )
 add_custom_target(unitypackage DEPENDS ${PACKAGE_PATH} ${FBXSDK_PACKAGE_TARGET} ${MAYA_INTEGRATION_TARGET} ${MAX_INTEGRATION_TARGET} ${README_TARGET})
 
@@ -244,5 +243,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     install(FILES ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME} DESTINATION FbxExporters)
 else()
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/FbxExporters
-            DESTINATION .)
+            DESTINATION .
+            PATTERN "Editor/UnitTests" EXCLUDE
+            PATTERN "FbxTurnTableBase.cs" EXCLUDE
+            PATTERN "Editor/ReviewLastSavedModel.cs" EXCLUDE
+            PATTERN "Editor/EditorRotate.cs" EXCLUDE)
 endif()
