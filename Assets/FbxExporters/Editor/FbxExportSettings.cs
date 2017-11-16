@@ -111,7 +111,7 @@ namespace FbxExporters.EditorTools {
                     throw new System.NotImplementedException ();
                 }
 
-                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.DCCVendorLocations()[0], ext);
+                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.DCCVendorLocations[0], ext);
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (dccPath)) {
@@ -229,28 +229,36 @@ namespace FbxExporters.EditorTools {
         /// The paths where all the different versions of Maya are installed
         /// by default. Depends on the platform.
         /// </summary>
-        public static string[] DCCVendorLocations() {
-
-            if (Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS") != null)
-            {
-                string[] locations = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS").Split(';');
-                for (int i = 0; i < locations.Length; i++)
+        public static string[] DCCVendorLocations {
+            get{
+                var environmentVariable = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
+                if (environmentVariable != null)
                 {
-                    if (Directory.Exists(locations[i]))
+                    string[] locations = environmentVariable.Split(';');
+                    List<string> locationsList = new List<string>();
+                    for (int i = 0; i < locations.Length; i++)
                     {
-                        return locations;
+                        if (Directory.Exists(locations[i]))
+                        {
+                            locationsList.Add(locations[i]);
+                        }
+                    }
+                    if (locationsList.Count > 0)
+                    {
+                        return locationsList.ToArray();
                     }
                 }
-            }
 
-            switch (Application.platform) {
-        case RuntimePlatform.WindowsEditor:
-            return new string[]{ "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
-            case RuntimePlatform.OSXEditor:
-            return new string[]{ "/Applications/Autodesk" };
-        default:
-            throw new NotImplementedException ();
-        }            
+                switch (Application.platform)
+                {
+                    case RuntimePlatform.WindowsEditor:
+                        return new string[] { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
+                    case RuntimePlatform.OSXEditor:
+                        return new string[] { "/Applications/Autodesk" };
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
         }
 
         // Note: default values are set in LoadDefaults().
@@ -455,16 +463,16 @@ namespace FbxExporters.EditorTools {
             var dccOptionName = instance.dccOptionNames;
             var dccOptionPath = instance.dccOptionPaths;
 
-            for (int i = 0; i < DCCVendorLocations().Length; i++)
+            for (int i = 0; i < DCCVendorLocations.Length; i++)
             {
-                if (!Directory.Exists(DCCVendorLocations()[0]))
+                if (!Directory.Exists(DCCVendorLocations[i]))
                 {
                     // no autodesk products installed
                     continue;
                 }
                 // List that directory and find the right version:
                 // either the newest version, or the exact version we wanted.
-                var adskRoot = new System.IO.DirectoryInfo(DCCVendorLocations()[i]);
+                var adskRoot = new System.IO.DirectoryInfo(DCCVendorLocations[i]);
                 foreach (var productDir in adskRoot.GetDirectories())
                 {
                     var product = productDir.Name;
@@ -561,6 +569,7 @@ namespace FbxExporters.EditorTools {
             }
 
             if (instance.dccOptionPaths.Count <= 0) {
+                instance.selectedDCCApp = 0;
                 return new GUIContent[]{
                     new GUIContent("<No 3D Application found>")
                 };
