@@ -87,6 +87,55 @@ namespace FbxExporters.EditorTools {
             }
             GUILayout.EndHorizontal ();
 
+            GUILayout.BeginHorizontal ();
+            GUILayout.Label (new GUIContent (
+                "Integrations Path:",
+                "Relative path for saving 3D application integrations."), GUILayout.Width(LabelWidth - 3));
+
+            var IntegrationsPathLabel = ExportSettings.GetRelativeSavePath();
+            if (IntegrationsPathLabel == ".") { IntegrationsPathLabel = "(Assets root)"; }
+            EditorGUILayout.SelectableLabel(IntegrationsPathLabel,
+                EditorStyles.textField,
+                GUILayout.MinWidth(SelectableLabelMinWidth),
+                GUILayout.Height(EditorGUIUtility.singleLineHeight));
+
+            if (GUILayout.Button(new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
+            {
+                string initialPath = ExportSettings.GetAbsoluteSavePath();
+
+                // if the directory doesn't exist, set it to the default save path
+                // so we don't open somewhere unexpected
+                if (!System.IO.Directory.Exists(initialPath))
+                {
+                    initialPath = Application.dataPath;
+                }
+
+                string fullPath = EditorUtility.OpenFolderPanel(
+                        "Select Model Prefabs Path", initialPath, null
+                        );
+
+                // Unless the user canceled, make sure they chose something in the Assets folder.
+                if (!string.IsNullOrEmpty(fullPath))
+                {
+                    var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
+                    if (string.IsNullOrEmpty(relativePath))
+                    {
+                        Debug.LogWarning("Please select a location in the Assets folder");
+                    }
+                    else
+                    {
+                        ExportSettings.SetRelativeSavePath(relativePath);
+
+                        // Make sure focus is removed from the selectable label
+                        // otherwise it won't update
+                        GUIUtility.hotControl = 0;
+                        GUIUtility.keyboardControl = 0;
+                    }
+                }
+            }
+
+            GUILayout.EndHorizontal();
+
             EditorGUILayout.Space ();
 
             GUILayout.BeginHorizontal ();
