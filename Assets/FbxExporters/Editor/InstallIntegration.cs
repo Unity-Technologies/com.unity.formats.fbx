@@ -104,7 +104,8 @@ namespace FbxExporters.Editor
 
         private const string MAYA_USER_STARTUP_SCRIPT = "userSetup.mel";
 
-        private const string USER_STARTUP_CALL = "if(`exists setupUnityUI`){ setupUnityUI; }";
+        private const string UI_SETUP_FUNCTION = "setupUnityUI";
+        private string USER_STARTUP_CALL { get { return string.Format ("if(`exists {0}`){{ {0}; }}", UI_SETUP_FUNCTION); } }
 
         private static string MAYA_DOCUMENTS_PATH {
             get {
@@ -500,7 +501,7 @@ namespace FbxExporters.Editor
                     using (System.IO.StreamReader sr = new System.IO.StreamReader (mayaStartupScript)) {
                         while (sr.Peek () >= 0) {
                             string line = sr.ReadLine ();
-                            if (line.Trim().Contains (USER_STARTUP_CALL)) {
+                            if (line.Trim().Contains (UI_SETUP_FUNCTION)) {
                                 // startup call already in the file, nothing to do
                                 return true;
                             }
