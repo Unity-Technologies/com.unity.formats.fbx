@@ -88,12 +88,12 @@ namespace FbxExporters.Editor
 
         public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMaya.zip"; } }
 
-        public const string TEMP_SAVE_PATH = "_safe_to_delete";
+        private string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel"; } }
 
-        protected virtual string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel"; } }
+        private string FBX_IMPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/maya/scripts/unityFbxImportSettings.mel"; } }
 
-        protected virtual string MODULE_TEMPLATE_PATH { get { return "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt"; } }
-        protected virtual string MODULE_FILENAME { get { return "UnityFbxForMaya"; } }
+        private string MODULE_TEMPLATE_PATH { get { return "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt"; } }
+        private string MODULE_FILENAME { get { return "UnityFbxForMaya"; } }
 
         private const string PACKAGE_NAME = "FbxExporters";
         private const string VERSION_FILENAME = "README.txt";
@@ -102,9 +102,11 @@ namespace FbxExporters.Editor
         private const string PROJECT_TAG = "{UnityProject}";
         private const string INTEGRATION_TAG = "{UnityIntegrationsPath}";
 
-        private const string MAYA_INSTRUCTION_FILENAME = "_safe_to_delete/_temp.txt";
+        private const string MAYA_USER_STARTUP_SCRIPT = "userSetup.mel";
 
-        protected static string MAYA_DOCUMENTS_PATH {
+        private const string USER_STARTUP_CALL = "if(`exists setupUnityUI`){ setupUnityUI; }";
+
+        private static string MAYA_DOCUMENTS_PATH {
             get {
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
@@ -123,6 +125,12 @@ namespace FbxExporters.Editor
             }
         }
 
+        private static string MAYA_SCRIPTS_PATH {
+            get {
+                return System.IO.Path.Combine(GetUserFolder(), MAYA_DOCUMENTS_PATH + "/scripts");
+            }
+        }
+
         // Use string to define escaped quote
         // Windows needs the backslash
         protected static string ESCAPED_QUOTE {
@@ -138,11 +146,10 @@ namespace FbxExporters.Editor
             }
         }
 
-        protected virtual string MAYA_CONFIG_COMMAND { get {
-                return string.Format("configureUnityFbxForMaya {0}{1}{0} {0}{2}{0} {0}{3}{0} {0}{4}{0} {0}{5}{0} {6};",
-                    ESCAPED_QUOTE, GetProjectPath(), GetAppPath(), GetTempSavePath(),
-                    GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall() ? 1 : 0));
-        }}
+        protected string MAYA_CONFIG_COMMAND { get {
+                return string.Format("configureUnityFbxForMaya {0}{1}{0} {0}{2}{0} {0}{3}{0} {4};",
+                    ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()?1:0));
+            }}
 
         private string MAYA_CLOSE_COMMAND { get {
                 return string.Format("scriptJob -idleEvent quit;");
@@ -171,38 +178,9 @@ namespace FbxExporters.Editor
             return System.IO.Path.Combine(INTEGRATION_FOLDER_PATH, MODULE_TEMPLATE_PATH);
         }
 
-        public static string GetAppPath()
-        {
-            return EditorApplication.applicationPath.Replace("\\","/");
-        }
-
         public static string GetPackagePath()
         {
             return System.IO.Path.Combine(Application.dataPath, PACKAGE_NAME);
-        }
-
-        public static string GetTempSavePath()
-        {
-            return TEMP_SAVE_PATH.Replace("\\", "/");
-        }
-
-        /// <summary>
-        /// Gets the maya instruction path relative to the Assets folder.
-        /// Assets folder is not included in the path.
-        /// </summary>
-        /// <returns>The relative maya instruction path.</returns>
-        public static string GetMayaInstructionPath()
-        {
-            return MAYA_INSTRUCTION_FILENAME;
-        }
-
-        /// <summary>
-        /// Gets the full maya instruction path as an absolute Unity path.
-        /// </summary>
-        /// <returns>The full maya instruction path.</returns>
-        public static string GetFullMayaInstructionPath()
-        {
-            return Application.dataPath + "/" + FbxExporters.Editor.MayaIntegration.GetMayaInstructionPath ();
         }
 
         /// <summary>
@@ -213,6 +191,24 @@ namespace FbxExporters.Editor
         public string GetExportSettingsPath()
         {
             return INTEGRATION_FOLDER_PATH + FBX_EXPORT_SETTINGS_PATH;
+        }
+
+        /// <summary>
+        /// Gets the path to the import settings file.
+        /// Returns a relative path with forward slashes as path separators.
+        /// </summary>
+        /// <returns>The import settings path.</returns>
+        public string GetImportSettingsPath(){
+            return INTEGRATION_FOLDER_PATH + FBX_IMPORT_SETTINGS_PATH;
+        }
+
+        /// <summary>
+        /// Gets the user startup script path.
+        /// Returns a relative path with forward slashes as path separators.
+        /// </summary>
+        /// <returns>The user startup script path.</returns>
+        private static string GetUserStartupScriptPath(){
+            return MAYA_SCRIPTS_PATH + "/" + MAYA_USER_STARTUP_SCRIPT;
         }
 
         public static string GetPackageVersion()
@@ -399,7 +395,7 @@ namespace FbxExporters.Editor
             return ExitCode;
         }
 
-        public virtual bool InstallMaya(bool verbose = false)
+        public bool InstallMaya(bool verbose = false)
         {
             // What's happening here is that we copy the module template to
             // the module path, basically:
@@ -482,87 +478,10 @@ namespace FbxExporters.Editor
                 // TODO: print message package already installed else where
             }
 
-            return true;
+            return SetupUserStartupScript (verbose);
         }
 
-
-        public override int InstallIntegration (string mayaExe)
-        {
-            if (!InstallMaya(verbose: true)) {
-                return -1;
-            }
-
-            return ConfigureMaya (mayaExe);
-        }
-
-        /// <summary>
-        /// Determines if folder is already unzipped at the specified path
-        /// by checking if UnityFbxForMaya.txt exists at expected location.
-        /// </summary>
-        /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
-        /// <param name="path">Path.</param>
-        public override bool FolderAlreadyUnzippedAtPath(string path)
-        {
-            if (string.IsNullOrEmpty (path)) {
-                return false;
-            }
-            return System.IO.File.Exists (System.IO.Path.Combine (path, MODULE_TEMPLATE_PATH));
-        }
-    }
-
-    class MayaLTIntegration : MayaIntegration 
-    {
-        public override string DccDisplayName { get { return "Maya LT"; } }
-
-        public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMayaLT.zip"; } }
-
-        protected override string MODULE_TEMPLATE_PATH { get { return "Integrations/Autodesk/mayalt/" + MODULE_FILENAME + ".txt"; } }
-
-        protected override string MODULE_FILENAME { get { return "UnityFbxForMayaLT"; } }
-
-        protected override string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/mayalt/scripts/unityFbxExportSettings.mel"; } }
-
-        protected string FBX_IMPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/mayalt/scripts/unityFbxImportSettings.mel"; } }
-
-        private const string MAYA_USER_STARTUP_SCRIPT = "userSetup.mel";
-
-        private const string USER_STARTUP_CALL = "if(`exists setupUnityUI`){ setupUnityUI; }";
-
-        protected override string MAYA_CONFIG_COMMAND { get {
-            return string.Format("configureUnityFbxForMayaLT {0}{1}{0} {0}{2}{0} {0}{3}{0} {4};",
-                ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()?1:0));
-        }}
-
-        private static string MAYA_SCRIPTS_PATH {
-            get {
-                return System.IO.Path.Combine(GetUserFolder(), MAYA_DOCUMENTS_PATH + "/scripts");
-            }
-        }
-
-        /// <summary>
-        /// Gets the path to the import settings file.
-        /// Returns a relative path with forward slashes as path separators.
-        /// </summary>
-        /// <returns>The import settings path.</returns>
-        public string GetImportSettingsPath(){
-            return INTEGRATION_FOLDER_PATH + FBX_IMPORT_SETTINGS_PATH;
-        }
-
-        /// <summary>
-        /// Gets the user startup script path.
-        /// Returns a relative path with forward slashes as path separators.
-        /// </summary>
-        /// <returns>The user startup script path.</returns>
-        private static string GetUserStartupScriptPath(){
-            return MAYA_SCRIPTS_PATH + "/" + MAYA_USER_STARTUP_SCRIPT;
-        }
-
-        public override bool InstallMaya (bool verbose = false)
-        {
-            if (!base.InstallMaya (verbose)) {
-                return false;
-            }
-
+        private bool SetupUserStartupScript(bool verbose = false){
             // setup user startup script
             string mayaStartupScript = GetUserStartupScriptPath ();
             string fileContents = string.Format("\n{0}", USER_STARTUP_CALL);
@@ -608,14 +527,33 @@ namespace FbxExporters.Editor
             return true;
         }
 
-        public override int InstallIntegration (string mayaLTExe)
+        public override int InstallIntegration (string mayaExe)
         {
             if (!InstallMaya(verbose: true)) {
                 return -1;
             }
 
-            return ConfigureMaya (mayaLTExe);
+            return ConfigureMaya (mayaExe);
         }
+
+        /// <summary>
+        /// Determines if folder is already unzipped at the specified path
+        /// by checking if UnityFbxForMaya.txt exists at expected location.
+        /// </summary>
+        /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
+        /// <param name="path">Path.</param>
+        public override bool FolderAlreadyUnzippedAtPath(string path)
+        {
+            if (string.IsNullOrEmpty (path)) {
+                return false;
+            }
+            return System.IO.File.Exists (System.IO.Path.Combine (path, MODULE_TEMPLATE_PATH));
+        }
+    }
+
+    class MayaLTIntegration : MayaIntegration 
+    {
+        public override string DccDisplayName { get { return "Maya LT"; } }
     }
 
     class MaxIntegration : DCCIntegration

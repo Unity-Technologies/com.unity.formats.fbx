@@ -33,7 +33,7 @@ namespace FbxExporters
                 foreach (var assetPath in importedAssets) {
                     if (assetPath.StartsWith(tempSavePath) && assetPath.EndsWith(".fbx")) {
                         // if the instruction file exists, then run the turntable and delete the file
-                        string instructionFile = FbxExporters.Editor.MayaIntegration.GetFullMayaInstructionPath ();
+                        string instructionFile = "";//FbxExporters.Editor.MayaIntegration.GetFullMayaInstructionPath ();
                         if(System.IO.File.Exists(instructionFile)){
                             LastSavedModel ();
                             System.IO.File.Delete (instructionFile);
