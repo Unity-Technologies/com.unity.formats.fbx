@@ -48,7 +48,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal();
             GUILayout.Label(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth));
-            exportSettings.ExportFormatSelection = GUILayout.SelectionGrid(exportSettings.ExportFormatSelection, new string[]{"Binary", "ASCII"}, 1, EditorStyles.radioButton);
+            exportSettings.ExportFormatSelection = GUILayout.SelectionGrid(exportSettings.ExportFormatSelection, new string[]{"Binary", "ASCII"}, 2, EditorStyles.radioButton);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal ();

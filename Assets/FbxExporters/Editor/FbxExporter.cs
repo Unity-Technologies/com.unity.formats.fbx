@@ -54,6 +54,12 @@ namespace FbxExporters
 
             public const string PACKAGE_UI_NAME = "FBX Exporter";
 
+            public enum ExportFormat
+            {
+                Binary = 0,
+                ASCII = 1
+            }
+
             /// <summary>
             /// Create instance of exporter.
             /// </summary>
@@ -982,7 +988,7 @@ namespace FbxExporters
                         // Initialize the exporter.
                         // fileFormat must be binary if we are embedding textures
                         int fileFormat = -1;
-                        if (EditorTools.ExportSettings.instance.ExportFormatSelection == 1)
+                        if (EditorTools.ExportSettings.instance.ExportFormatSelection == (int)ExportFormat.ASCII)
                         {
                             fileFormat = fbxManager.GetIOPluginRegistry().FindWriterIDByDescription("FBX ascii (*.fbx)");
                         }                        
