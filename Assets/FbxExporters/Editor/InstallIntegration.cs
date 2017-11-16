@@ -636,13 +636,6 @@ namespace FbxExporters.Editor
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
 
-        private static string DefaultIntegrationSavePath
-        {
-            get{
-                return Application.dataPath;
-            }
-        }
-
         public static void InstallDCCIntegration ()
         {
             var dccExe = GetDCCExe ();
@@ -674,7 +667,7 @@ namespace FbxExporters.Editor
             if (System.IO.File.Exists (zipPath)) {
                 return DecompressIntegrationZipFile (zipPath, dcc);
             }
-            dcc.SetIntegrationFolderPath (DefaultIntegrationSavePath);
+            dcc.SetIntegrationFolderPath (EditorTools.ExportSettings.GetIntegrationSavePath());
             return true;
         }
 
