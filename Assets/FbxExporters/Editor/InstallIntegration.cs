@@ -643,8 +643,6 @@ namespace FbxExporters.Editor
             }
         }
 
-        private static string LastIntegrationSavePath = DefaultIntegrationSavePath;
-
         public static void InstallDCCIntegration ()
         {
             var dccExe = GetDCCExe ();
@@ -683,24 +681,7 @@ namespace FbxExporters.Editor
         private static bool DecompressIntegrationZipFile(string zipPath, DCCIntegration dcc)
         {
             string unzipFolder;
-            switch (Application.platform)
-            {
-                case RuntimePlatform.OSXEditor:
-                    unzipFolder = "/Applications/Autodesk";
-                    break;
-                case RuntimePlatform.WindowsEditor:
-                    unzipFolder = "C:/Program Files/Autodesk";
-                    break;
-                default:
-                    throw new System.NotImplementedException();
-            }
-
-            // prompt user to enter location to unzip file IF THEY WANT TO BE PROMPTED/////
-            unzipFolder = EditorUtility.OpenFolderPanel(string.Format("Select Location to Save {0} Integration", dcc.DccDisplayName),LastIntegrationSavePath,"");
-            if (string.IsNullOrEmpty (unzipFolder)) {
-                // user has cancelled, do nothing
-                return false;
-            }
+            unzipFolder = EditorTools.ExportSettings.GetIntegrationSavePath();
 
             // check that this is a valid location to unzip the file
             if (!DirectoryHasWritePermission (unzipFolder)) {
@@ -717,8 +698,6 @@ namespace FbxExporters.Editor
                     return false;
                 }
             }
-
-            LastIntegrationSavePath = unzipFolder;
 
             // if file already unzipped in this location, then prompt user
             // if they would like to continue unzipping or use what is there

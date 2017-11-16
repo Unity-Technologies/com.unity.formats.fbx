@@ -92,16 +92,15 @@ namespace FbxExporters.EditorTools {
                 "Integrations Path:",
                 "Relative path for saving 3D application integrations."), GUILayout.Width(LabelWidth - 3));
 
-            var IntegrationsPathLabel = ExportSettings.GetRelativeSavePath();
-            if (IntegrationsPathLabel == ".") { IntegrationsPathLabel = "(Assets root)"; }
+            var IntegrationsPathLabel = ExportSettings.GetIntegrationSavePath();
             EditorGUILayout.SelectableLabel(IntegrationsPathLabel,
                 EditorStyles.textField,
                 GUILayout.MinWidth(SelectableLabelMinWidth),
                 GUILayout.Height(EditorGUIUtility.singleLineHeight));
 
-            if (GUILayout.Button(new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
+            if (GUILayout.Button(new GUIContent("...", "Browse to a new location for saving 3D application integrations"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
-                string initialPath = ExportSettings.GetAbsoluteSavePath();
+                string initialPath = ExportSettings.GetIntegrationSavePath();
 
                 // if the directory doesn't exist, set it to the default save path
                 // so we don't open somewhere unexpected
@@ -111,26 +110,18 @@ namespace FbxExporters.EditorTools {
                 }
 
                 string fullPath = EditorUtility.OpenFolderPanel(
-                        "Select Model Prefabs Path", initialPath, null
+                        "Select Integrations Path", initialPath, null
                         );
 
                 // Unless the user canceled, make sure they chose something in the Assets folder.
                 if (!string.IsNullOrEmpty(fullPath))
                 {
-                    var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
-                    if (string.IsNullOrEmpty(relativePath))
-                    {
-                        Debug.LogWarning("Please select a location in the Assets folder");
-                    }
-                    else
-                    {
-                        ExportSettings.SetRelativeSavePath(relativePath);
+                    ExportSettings.SetIntegrationSavePath(fullPath);
 
-                        // Make sure focus is removed from the selectable label
-                        // otherwise it won't update
-                        GUIUtility.hotControl = 0;
-                        GUIUtility.keyboardControl = 0;
-                    }
+                    // Make sure focus is removed from the selectable label
+                    // otherwise it won't update
+                    GUIUtility.hotControl = 0;
+                    GUIUtility.keyboardControl = 0;                    
                 }
             }
 
@@ -296,6 +287,8 @@ namespace FbxExporters.EditorTools {
         public bool centerObjects;
         public bool launchAfterInstallation;
 
+        public string IntegrationSavePath;
+
         public int selectedDCCApp = 0;
 
         /// <summary>
@@ -324,6 +317,7 @@ namespace FbxExporters.EditorTools {
             centerObjects = true;
             launchAfterInstallation = true;
             convertToModelSavePath = kDefaultSavePath;
+            IntegrationSavePath = Directory.GetCurrentDirectory().ToString();
             dccOptionPaths = null;
             dccOptionNames = null;
         }
@@ -734,6 +728,16 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         public static void SetRelativeSavePath(string newPath) {
             instance.convertToModelSavePath = NormalizePath(newPath, isRelative: true);
+        }
+
+        public static string GetIntegrationSavePath()
+        {
+            return instance.IntegrationSavePath;
+        }
+
+        public static void SetIntegrationSavePath(string newPath)
+        {
+            instance.IntegrationSavePath = newPath;
         }
 
         /// <summary>
