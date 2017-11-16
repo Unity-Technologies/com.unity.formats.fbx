@@ -55,6 +55,21 @@ namespace FbxExporters
             public const string PACKAGE_UI_NAME = "FBX Exporter";
 
             /// <summary>
+            /// name of the scene's default camera
+            /// </summary>
+            private static string DefaultCamera = "";
+
+            /// <summary>
+            /// name prefix for custom properties
+            /// </summary>
+            const string NamePrefix = "Unity_";
+
+            private static string MakeName (string basename)
+            {
+                return NamePrefix + basename;
+            }
+
+            /// <summary>
             /// Create instance of exporter.
             /// </summary>
             static ModelExporter Create ()
@@ -748,6 +763,105 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Exports camera component
+            /// </summary>
+            protected FbxCamera ExportCamera (Camera unityCamera, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                FbxCamera fbxCamera = FbxCamera.Create (fbxScene.GetFbxManager(), unityCamera.name);
+
+                float aspectRatio = unityCamera.aspect;
+
+                // Configure FilmBack settings: 35mm TV Projection (0.816 x 0.612)
+                float apertureHeightInInches = 0.612f;
+                float apertureWidthInInches = aspectRatio * apertureHeightInInches;
+
+                FbxCamera.EProjectionType projectionType =
+                    unityCamera.orthographic ? FbxCamera.EProjectionType.eOrthogonal : FbxCamera.EProjectionType.ePerspective;
+
+                fbxCamera.ProjectionType.Set(projectionType);
+                fbxCamera.SetAspect (FbxCamera.EAspectRatioMode.eFixedRatio, aspectRatio, 1.0f);
+                fbxCamera.FilmAspectRatio.Set(aspectRatio);
+                fbxCamera.SetApertureWidth (apertureWidthInInches);
+                fbxCamera.SetApertureHeight (apertureHeightInInches);
+                fbxCamera.SetApertureMode (FbxCamera.EApertureMode.eFocalLength);
+
+                // FOV / Focal Length
+                fbxCamera.FocalLength.Set(fbxCamera.ComputeFocalLength (unityCamera.fieldOfView));
+
+                // NearPlane
+                fbxCamera.SetNearPlane (unityCamera.nearClipPlane);
+
+                // FarPlane
+                fbxCamera.SetFarPlane (unityCamera.farClipPlane);
+
+                // Export backgroundColor as a custom property
+                // NOTE: export on fbxNode so that it will show up in Maya
+                ExportColorProperty (fbxNode, unityCamera.backgroundColor,
+                    MakeName("backgroundColor"), 
+                    "The color with which the screen will be cleared.");
+
+                // Export clearFlags as a custom property
+                // NOTE: export on fbxNode so that it will show up in Maya
+                ExportIntProperty (fbxNode, (int)unityCamera.clearFlags,
+                    MakeName("clearFlags"), 
+                    "How the camera clears the background.");
+
+                return fbxCamera;
+            }
+
+            /// <summary>
+            /// configures default camera for the scene
+            /// </summary>
+            protected void SetDefaultCamera (FbxScene fbxScene)
+            {
+                if (DefaultCamera == "")
+                    DefaultCamera = Globals.FBXSDK_CAMERA_PERSPECTIVE;
+
+                fbxScene.GetGlobalSettings ().SetDefaultCamera (DefaultCamera);
+            }
+
+            /// <summary>
+            /// Export Component's color property
+            /// </summary>
+            FbxProperty ExportColorProperty (FbxObject fbxObject, Color value, string name, string label)
+            {
+                // create a custom property for component value
+                var fbxProperty = FbxProperty.Create (fbxObject, Globals.FbxColor4DT, name, label);
+                if (!fbxProperty.IsValid ()) {
+                    throw new System.NullReferenceException ();
+                }
+
+                FbxColor fbxColor = new FbxColor(value.r, value.g, value.b, value.a );
+
+                fbxProperty.Set (fbxColor);
+
+                // Must be marked user-defined or it won't be shown in most DCCs
+                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eUserDefined, true);
+                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eAnimatable, true);
+
+                return fbxProperty;
+            }
+
+            /// <summary>
+            /// Export Component's int property
+            /// </summary>
+            FbxProperty ExportIntProperty (FbxObject fbxObject, int value, string name, string label)
+            {
+                // create a custom property for component value
+                var fbxProperty = FbxProperty.Create (fbxObject, Globals.FbxIntDT, name, label);
+                if (!fbxProperty.IsValid ()) {
+                    throw new System.NullReferenceException ();
+                }
+                fbxProperty.Set (value);
+
+                // Must be marked user-defined or it won't be shown in most DCCs
+                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eUserDefined, true);
+                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eAnimatable, true);
+
+                return fbxProperty;
+            }
+
+            /// <summary>
             /// Ensures that the inputted name is unique.
             /// If a duplicate name is found, then it is incremented.
             /// e.g. Sphere becomes Sphere_1
@@ -1059,6 +1173,10 @@ namespace FbxExporters
                                 }
                             }
                         }
+
+                        // Set the scene's default camera.
+                        SetDefaultCamera (fbxScene);
+
                         // Export the scene to the file.
                         status = fbxExporter.Export (fbxScene);
 
