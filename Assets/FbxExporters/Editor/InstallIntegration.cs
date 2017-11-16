@@ -503,6 +503,9 @@ namespace FbxExporters.Editor
         /// <param name="path">Path.</param>
         public override bool FolderAlreadyUnzippedAtPath(string path)
         {
+            if (string.IsNullOrEmpty (path)) {
+                return false;
+            }
             return System.IO.File.Exists (System.IO.Path.Combine (path, MODULE_TEMPLATE_PATH));
         }
     }
@@ -726,6 +729,9 @@ namespace FbxExporters.Editor
         /// <param name="path">Path.</param>
         public override bool FolderAlreadyUnzippedAtPath(string path)
         {
+            if (string.IsNullOrEmpty (path)) {
+                return false;
+            }
             return System.IO.File.Exists (System.IO.Path.Combine (path, MaxIntegration.PluginPath));
         }
     }
