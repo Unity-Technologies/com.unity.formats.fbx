@@ -144,7 +144,7 @@ namespace FbxExporters.Editor
                     GetExportSettingsPath(), GetMayaInstructionPath(), (IsHeadlessInstall() ? 1 : 0));
         }}
 
-        private static string MAYA_CLOSE_COMMAND { get {
+        private string MAYA_CLOSE_COMMAND { get {
                 return string.Format("scriptJob -idleEvent quit;");
         }}
         private static Char[] FIELD_SEPARATORS = new Char[] {':'};
@@ -525,11 +525,10 @@ namespace FbxExporters.Editor
 
         private const string USER_STARTUP_CALL = "if(`exists setupUnityUI`){ setupUnityUI; }";
 
-        protected override string MAYA_COMMANDS { get {
-            return string.Format("configureUnityFbxForMayaLT {0}{1}{0} {0}{2}{0} {0}{3}{0} {4}; scriptJob -idleEvent quit;",
+        protected override string MAYA_CONFIG_COMMAND { get {
+            return string.Format("configureUnityFbxForMayaLT {0}{1}{0} {0}{2}{0} {0}{3}{0} {4};",
                 ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()?1:0));
         }}
-
 
         private static string MAYA_SCRIPTS_PATH {
             get {
