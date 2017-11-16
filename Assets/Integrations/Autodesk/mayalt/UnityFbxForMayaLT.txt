@@ -13,4 +13,6 @@
 #
 ########################################################################
 
-+ MAYAVERSION:2017 UnityFbxForMayaLT {Version} {UnityIntegrationsPath}/Integrations/Autodesk/mayalt
++ MAYAVERSION:2017LT UnityFbxForMayaLT {Version} {UnityIntegrationsPath}/Integrations/Autodesk/mayalt
+
++ MAYAVERSION:2018LT UnityFbxForMayaLT {Version} {UnityIntegrationsPath}/Integrations/Autodesk/mayalt
