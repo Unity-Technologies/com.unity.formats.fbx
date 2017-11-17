@@ -104,6 +104,38 @@ namespace FbxExporters.EditorTools {
             }
             GUILayout.EndHorizontal ();
 
+            GUILayout.BeginHorizontal ();
+            GUILayout.Label (new GUIContent (
+                "Integrations Path:",
+                "Installation path for 3D application integrations."), GUILayout.Width(LabelWidth - 3));
+
+            var IntegrationsPathLabel = ExportSettings.GetIntegrationSavePath();
+            EditorGUILayout.SelectableLabel(IntegrationsPathLabel,
+                EditorStyles.textField,
+                GUILayout.MinWidth(SelectableLabelMinWidth),
+                GUILayout.Height(EditorGUIUtility.singleLineHeight));
+
+            if (GUILayout.Button(new GUIContent("...", "Browse to a new installation path for 3D application integrations"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
+            {
+                string initialPath = ExportSettings.GetIntegrationSavePath();
+
+                string fullPath = EditorUtility.OpenFolderPanel(
+                        "Select Integrations Path", initialPath, null
+                        );
+
+                if (!string.IsNullOrEmpty(fullPath))
+                {
+                    ExportSettings.SetIntegrationSavePath(fullPath);
+
+                    // Make sure focus is removed from the selectable label
+                    // otherwise it won't update
+                    GUIUtility.hotControl = 0;
+                    GUIUtility.keyboardControl = 0;                    
+                }
+            }
+
+            GUILayout.EndHorizontal();
+
             EditorGUILayout.Space ();
 
             GUILayout.BeginHorizontal ();
@@ -272,6 +304,8 @@ namespace FbxExporters.EditorTools {
         public bool launchAfterInstallation;
         public int ExportFormatSelection;
 
+        public string IntegrationSavePath;
+
         public int selectedDCCApp = 0;
 
         /// <summary>
@@ -301,6 +335,7 @@ namespace FbxExporters.EditorTools {
             launchAfterInstallation = true;
             ExportFormatSelection = 0;
             convertToModelSavePath = kDefaultSavePath;
+            IntegrationSavePath = Directory.GetCurrentDirectory().ToString();
             dccOptionPaths = null;
             dccOptionNames = null;
         }
@@ -724,6 +759,22 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         public static void SetRelativeSavePath(string newPath) {
             instance.convertToModelSavePath = NormalizePath(newPath, isRelative: true);
+        }
+
+        public static string GetIntegrationSavePath()
+        {
+            //If the save path gets messed up and ends up not being valid, just use the project folder as the default
+            if (string.IsNullOrEmpty(instance.IntegrationSavePath.Trim()) || !Directory.Exists(instance.IntegrationSavePath))
+            {
+                //The project folder, above the asset folder
+                Directory.GetCurrentDirectory().ToString();
+            }
+            return instance.IntegrationSavePath;
+        }
+
+        public static void SetIntegrationSavePath(string newPath)
+        {
+            instance.IntegrationSavePath = newPath;
         }
 
         /// <summary>
