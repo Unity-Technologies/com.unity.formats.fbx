@@ -731,7 +731,8 @@ namespace FbxExporters.EditorTools {
 
         public static string GetIntegrationSavePath()
         {
-            if (!instance.IntegrationSavePath.Contains("/"))
+            //If the save path gets messed up and ends up not being valid, just use the project folder as the default
+            if (instance.IntegrationSavePath.Trim() == "")
             {
                 //The project folder, above the asset folder
                 Directory.GetCurrentDirectory().ToString();
