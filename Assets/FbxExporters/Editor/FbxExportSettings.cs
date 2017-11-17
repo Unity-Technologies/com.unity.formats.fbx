@@ -90,7 +90,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "Integrations Path:",
-                "Absolute path for saving 3D application integrations."), GUILayout.Width(LabelWidth - 3));
+                "Installation path for 3D application integrations."), GUILayout.Width(LabelWidth - 3));
 
             var IntegrationsPathLabel = ExportSettings.GetIntegrationSavePath();
             EditorGUILayout.SelectableLabel(IntegrationsPathLabel,
@@ -98,7 +98,7 @@ namespace FbxExporters.EditorTools {
                 GUILayout.MinWidth(SelectableLabelMinWidth),
                 GUILayout.Height(EditorGUIUtility.singleLineHeight));
 
-            if (GUILayout.Button(new GUIContent("...", "Browse to a new location for saving 3D application integrations"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
+            if (GUILayout.Button(new GUIContent("...", "Browse to a new installation path for 3D application integrations"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
                 string initialPath = ExportSettings.GetIntegrationSavePath();
 
