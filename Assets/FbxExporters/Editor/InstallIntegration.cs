@@ -111,7 +111,7 @@ namespace FbxExporters.Editor
 
         private const string MAYA_USER_STARTUP_SCRIPT = "userSetup.mel";
 
-        private const string UI_SETUP_FUNCTION = "setupUnityUI";
+        private const string UI_SETUP_FUNCTION = "unitySetupUI";
         private string USER_STARTUP_CALL { get { return string.Format ("if(`exists {0}`){{ {0}; }}", UI_SETUP_FUNCTION); } }
 
         private static string MAYA_DOCUMENTS_PATH {
@@ -155,7 +155,7 @@ namespace FbxExporters.Editor
         }
 
         protected string MAYA_CONFIG_COMMAND { get {
-                return string.Format("configureUnityFbxForMaya {0}{1}{0} {0}{2}{0} {0}{3}{0} {4};",
+                return string.Format("unityConfigure {0}{1}{0} {0}{2}{0} {0}{3}{0} {4};",
                     ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()?1:0));
             }}
 

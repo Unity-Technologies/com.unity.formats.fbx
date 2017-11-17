@@ -17,7 +17,7 @@ global proc string unityWhatsNewVersion(){
 
 }
 
-global proc setupUnityUI(){
+global proc unitySetupUI(){
 
     $isHeadless = `optionVar -q "UnityFbxForMaya_Headless"`;
     if($isHeadless){

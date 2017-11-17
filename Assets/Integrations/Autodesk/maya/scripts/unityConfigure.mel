@@ -1,4 +1,4 @@
-global proc configureUnityFbxForMaya(
+global proc unityConfigure(
     string $unityProject,
     string $unityFbxExportSettings,
     string $unityFbxImportSettings,
