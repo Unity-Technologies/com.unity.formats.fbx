@@ -102,13 +102,6 @@ namespace FbxExporters.EditorTools {
             {
                 string initialPath = ExportSettings.GetIntegrationSavePath();
 
-                // if the directory doesn't exist, set it to the default save path
-                // so we don't open somewhere unexpected
-                if (!System.IO.Directory.Exists(initialPath))
-                {
-                    initialPath = ExportSettings.GetIntegrationSavePath();
-                }
-
                 string fullPath = EditorUtility.OpenFolderPanel(
                         "Select Integrations Path", initialPath, null
                         );
