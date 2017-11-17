@@ -765,9 +765,17 @@ namespace FbxExporters
             /// <summary>
             /// Exports camera component
             /// </summary>
-            protected FbxCamera ExportCamera (Camera unityCamera, FbxScene fbxScene, FbxNode fbxNode)
+            protected bool ExportCamera (GameObject unityGO, FbxScene fbxScene, FbxNode fbxNode)
             {
+                Camera unityCamera = unityGO.GetComponent<Camera> ();
+                if (unityCamera == null) {
+                    return false;
+                }
+
                 FbxCamera fbxCamera = FbxCamera.Create (fbxScene.GetFbxManager(), unityCamera.name);
+                if (fbxCamera == null) {
+                    return false;
+                }
 
                 float aspectRatio = unityCamera.aspect;
 
@@ -789,10 +797,10 @@ namespace FbxExporters
                 fbxCamera.FocalLength.Set(fbxCamera.ComputeFocalLength (unityCamera.fieldOfView));
 
                 // NearPlane
-                fbxCamera.SetNearPlane (unityCamera.nearClipPlane);
+                fbxCamera.SetNearPlane (unityCamera.nearClipPlane*100);
 
                 // FarPlane
-                fbxCamera.SetFarPlane (unityCamera.farClipPlane);
+                fbxCamera.SetFarPlane (unityCamera.farClipPlane*100);
 
                 // Export backgroundColor as a custom property
                 // NOTE: export on fbxNode so that it will show up in Maya
@@ -806,7 +814,12 @@ namespace FbxExporters
                     MakeName("clearFlags"), 
                     "How the camera clears the background.");
 
-                return fbxCamera;
+                fbxNode.SetNodeAttribute (fbxCamera);
+
+                // make the last camera exported the default camera
+                DefaultCamera = fbxNode.GetName ();
+
+                return true;
             }
 
             /// <summary>
@@ -909,8 +922,8 @@ namespace FbxExporters
 
                 ExportTransform ( unityGo.transform, fbxNode, newCenter, exportType);
 
-                // try exporting mesh as an instance, export regularly if we cannot
-                if (!ExportInstance (unityGo, fbxNode, fbxScene)) {
+                // try exporting mesh as an instance or camera, export regularly if we cannot
+                if (!ExportInstance (unityGo, fbxNode, fbxScene) && !ExportCamera(unityGo, fbxScene, fbxNode)) {
                     ExportMesh (unityGo, fbxNode);
                 }
 
