@@ -6,7 +6,7 @@ NEW FEATURES
 
 * Added Maya LT Integration
 
-Replaced Maya python implementation with MEL script to use with both Maya and Maya LT.
+Replaced Maya python implementation with MEL script, which is used by both Maya and Maya LT.
 
 NOTE: it is no longer possible to unload the plugin using Maya's plugin manager.
 
