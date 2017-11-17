@@ -733,6 +733,7 @@ namespace FbxExporters.EditorTools {
         {
             if (!instance.IntegrationSavePath.Contains("/"))
             {
+                //The project folder, above the asset folder
                 Directory.GetCurrentDirectory().ToString();
             }
             return instance.IntegrationSavePath;
