@@ -106,7 +106,7 @@ namespace FbxExporters.EditorTools {
                 // so we don't open somewhere unexpected
                 if (!System.IO.Directory.Exists(initialPath))
                 {
-                    initialPath = Application.dataPath;
+                    initialPath = exportSettings.IntegrationSavePath;
                 }
 
                 string fullPath = EditorUtility.OpenFolderPanel(
