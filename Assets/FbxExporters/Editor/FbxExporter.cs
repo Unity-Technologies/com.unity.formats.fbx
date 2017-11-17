@@ -568,10 +568,10 @@ namespace FbxExporters
             /// <summary>
             /// Exports a unity mesh and attaches it to the node as an FbxMesh.
             /// </summary>
-            void ExportMesh (MeshInfo meshInfo, FbxNode fbxNode)
+            bool ExportMesh (MeshInfo meshInfo, FbxNode fbxNode)
             {
                 if (!meshInfo.IsValid) {
-                    return;
+                    return false;
                 }
 
                 NumMeshes++;
@@ -661,6 +661,7 @@ namespace FbxExporters
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
                 fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
+                return true;
             }
 
             /// <summary>
@@ -1611,12 +1612,12 @@ namespace FbxExporters
             /// This goes through the callback system to find the right mesh and
             /// allow plugins to substitute their own meshes.
             /// </summary>
-            void ExportMesh (GameObject gameObject, FbxNode fbxNode)
+            bool ExportMesh (GameObject gameObject, FbxNode fbxNode)
             {
                 // First allow the object-based callbacks to have a hack at it.
                 foreach(var callback in MeshForObjectCallbacks) {
                     if (callback(this, gameObject, fbxNode)) {
-                        return;
+                        return true;
                     }
                 }
 
@@ -1650,7 +1651,7 @@ namespace FbxExporters
                             GetMeshForComponent callback;
                             if (MeshForComponentCallbacks.TryGetValue (componentType, out callback)) {
                                 if (callback (this, monoBehaviour, fbxNode)) {
-                                    return;
+                                    return true;
                                 }
                             }
                             componentType = componentType.BaseType;
@@ -1664,15 +1665,16 @@ namespace FbxExporters
                 if (meshFilter) {
                     var renderer = gameObject.GetComponent<Renderer>();
                     var materials = renderer ? renderer.sharedMaterials : null;
-                    ExportMesh(new MeshInfo(meshFilter.sharedMesh, materials), fbxNode);
+                    return ExportMesh(new MeshInfo(meshFilter.sharedMesh, materials), fbxNode);
                 } else {
                     var smr = defaultComponent as SkinnedMeshRenderer;
                     if (smr) {
                         var mesh = new Mesh();
                         smr.BakeMesh(mesh);
                         var materials = smr.sharedMaterials;
-                        ExportMesh(new MeshInfo(mesh, materials), fbxNode);
+                        bool result = ExportMesh(new MeshInfo(mesh, materials), fbxNode);
                         Object.DestroyImmediate(mesh);
+                        return result;
                     }
                 }
             }
