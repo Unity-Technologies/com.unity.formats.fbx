@@ -1,5 +1,27 @@
 RELEASE NOTES
 
+**Version**: sprint34
+
+NEW FEATURES
+
+* Added Maya LT Integration
+
+* Export Settings: Added option to launch 3D application after installing integration
+
+* Export Settings: Added option to export FBX as ASCII or Binary
+
+* Export Settings: Added integration unzip location field
+
+Use new field to select where to unzip the integration zip file, instead of being asked each time
+"Install Unity Integration" button is clicked.
+
+FIXES
+* Export Settings: Moved "Browse" button out of the dropdown
+* Unity 3ds Max Integration: Added tooltips to the import/export menu items
+* Export Settings: Align checkboxes, text fields, and dropdown
+* Fbx Prefab: Add tooltip to "Source Fbx Asset" field
+* Export Settings: Search for 3D applicaitons in multiple vendor locations (e.g. C:/ and D:/ drive)
+
 **Version**: 1.1.0b1
 
 NEW FEATURES
