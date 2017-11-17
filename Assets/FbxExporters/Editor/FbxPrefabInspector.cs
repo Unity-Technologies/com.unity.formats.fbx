@@ -18,7 +18,7 @@ namespace FbxExporters.EditorTools {
 
             var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
             var oldFbxAsset = fbxPrefabUtility.GetFbxAsset();
-            var newFbxAsset = EditorGUILayout.ObjectField("Source Fbx Asset", oldFbxAsset,
+            var newFbxAsset = EditorGUILayout.ObjectField(new GUIContent("Source Fbx Asset", "The FBX file that is linked to this Prefab"), oldFbxAsset,
                     typeof(GameObject), allowSceneObjects: false) as GameObject;
             if (newFbxAsset && !AssetDatabase.GetAssetPath(newFbxAsset).EndsWith(".fbx")) {
                 Debug.LogError("FbxPrefab must point to an Fbx asset (or none).");

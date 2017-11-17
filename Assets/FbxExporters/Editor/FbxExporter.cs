@@ -1,10 +1,3 @@
-// ***********************************************************************
-// Copyright (c) 2017 Unity Technologies. All rights reserved.
-//
-// Licensed under the ##LICENSENAME##.
-// See LICENSE.md file in the project root for full license information.
-// ***********************************************************************
-
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
@@ -53,6 +46,12 @@ namespace FbxExporters
             const int UnitScaleFactor = 100;
 
             public const string PACKAGE_UI_NAME = "FBX Exporter";
+
+            public enum ExportFormat
+            {
+                Binary = 0,
+                ASCII = 1
+            }
 
             /// <summary>
             /// Create instance of exporter.
@@ -981,7 +980,11 @@ namespace FbxExporters
 
                         // Initialize the exporter.
                         // fileFormat must be binary if we are embedding textures
-                        int fileFormat = fbxManager.GetIOPluginRegistry ().FindWriterIDByDescription ("FBX ascii (*.fbx)");
+                        int fileFormat = -1;
+                        if (EditorTools.ExportSettings.instance.ExportFormatSelection == (int)ExportFormat.ASCII)
+                        {
+                            fileFormat = fbxManager.GetIOPluginRegistry().FindWriterIDByDescription("FBX ascii (*.fbx)");
+                        }                        
                         
                         status = fbxExporter.Initialize (m_tempFilePath, fileFormat, fbxManager.GetIOSettings ());
                         // Check that initialization of the fbxExporter was successful

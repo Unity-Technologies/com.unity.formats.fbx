@@ -52,6 +52,16 @@ namespace FbxExporters.EditorTools {
                 exportSettings.centerObjects
             );
 
+            EditorGUILayout.Space();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
+                " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - 3));
+            exportSettings.ExportFormatSelection = EditorGUILayout.Popup(exportSettings.ExportFormatSelection, new string[]{"Binary", "ASCII"});
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.Space();
+
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "Export Path:",
@@ -118,7 +128,7 @@ namespace FbxExporters.EditorTools {
                     throw new System.NotImplementedException ();
                 }
 
-                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.kDefaultAdskRoot, ext);
+                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.GetFirstValidVendorLocation(), ext);
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (dccPath)) {
@@ -139,7 +149,9 @@ namespace FbxExporters.EditorTools {
             }
             GUILayout.EndHorizontal ();
 
-			var installIntegrationContent = new GUIContent(
+            EditorGUILayout.Space();
+
+            var installIntegrationContent = new GUIContent(
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
             if (GUILayout.Button (installIntegrationContent)) {
@@ -219,18 +231,37 @@ namespace FbxExporters.EditorTools {
         public const string kBlenderOptionName = "Blender ";
 
         /// <summary>
-        /// The path where all the different versions of Maya are installed
+        /// The paths where all the different versions of Maya are installed
         /// by default. Depends on the platform.
         /// </summary>
-        public static string kDefaultAdskRoot {
+        public static string[] DCCVendorLocations {
             get{
-                switch (Application.platform) {
-                case RuntimePlatform.WindowsEditor:
-                    return "C:/Program Files/Autodesk";
-                case RuntimePlatform.OSXEditor:
-                    return "/Applications/Autodesk";
-                default:
-                    throw new NotImplementedException ();
+                var environmentVariable = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
+                if (environmentVariable != null)
+                {
+                    string[] locations = environmentVariable.Split(';');
+                    List<string> locationsList = new List<string>();
+                    for (int i = 0; i < locations.Length; i++)
+                    {
+                        if (Directory.Exists(locations[i]))
+                        {
+                            locationsList.Add(locations[i]);
+                        }
+                    }
+                    if (locationsList.Count > 0)
+                    {
+                        return locationsList.ToArray();
+                    }
+                }
+
+                switch (Application.platform)
+                {
+                    case RuntimePlatform.WindowsEditor:
+                        return new string[] { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
+                    case RuntimePlatform.OSXEditor:
+                        return new string[] { "/Applications/Autodesk" };
+                    default:
+                        throw new NotImplementedException();
                 }
             }
         }
@@ -239,6 +270,7 @@ namespace FbxExporters.EditorTools {
         public bool mayaCompatibleNames;
         public bool centerObjects;
         public bool launchAfterInstallation;
+        public int ExportFormatSelection;
 
         public int selectedDCCApp = 0;
 
@@ -267,6 +299,7 @@ namespace FbxExporters.EditorTools {
             mayaCompatibleNames = true;
             centerObjects = true;
             launchAfterInstallation = true;
+            ExportFormatSelection = 0;
             convertToModelSavePath = kDefaultSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
@@ -437,46 +470,65 @@ namespace FbxExporters.EditorTools {
             var dccOptionName = instance.dccOptionNames;
             var dccOptionPath = instance.dccOptionPaths;
 
-            // If the location is given by the environment, use it.
-            var location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
-            if (!string.IsNullOrEmpty(location)) {
-                location = location.TrimEnd('/');
-                dccOptionPath.Add (GetMayaExePath (location.Replace ("\\", "/")));
-                dccOptionName.Add ("MAYA_LOCATION");
-            }
-
-            if (!Directory.Exists (kDefaultAdskRoot)) {
-                // no autodesk products installed
-                return;
-            }
-            // List that directory and find the right version:
-            // either the newest version, or the exact version we wanted.
-            var adskRoot = new System.IO.DirectoryInfo(kDefaultAdskRoot);
-            foreach(var productDir in adskRoot.GetDirectories()) {
-                var product = productDir.Name;
-
-                // Only accept those that start with 'maya' in either case.
-                if (product.StartsWith ("maya", StringComparison.InvariantCultureIgnoreCase)) {
-                    string version = product.Substring ("maya".Length);
-                    dccOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
-                    dccOptionName.Add (GetUniqueDCCOptionName(kMayaOptionName + version));
+            for (int i = 0; i < DCCVendorLocations.Length; i++)
+            {
+                if (!Directory.Exists(DCCVendorLocations[i]))
+                {
+                    // no autodesk products installed
+                    continue;
                 }
+                // List that directory and find the right version:
+                // either the newest version, or the exact version we wanted.
+                var adskRoot = new System.IO.DirectoryInfo(DCCVendorLocations[i]);
+                foreach (var productDir in adskRoot.GetDirectories())
+                {
+                    var product = productDir.Name;
 
-                if (product.StartsWith ("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
-                    var exePath = string.Format ("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe");
-
-                    string version = product.Substring("3ds max ".Length);
-                    var maxOptionName = GetUniqueDCCOptionName(kMaxOptionName + version);
-
-                    if (IsEarlierThanMax2017 (maxOptionName)) {
+                    // Only accept those that start with 'maya' in either case.
+                    if (product.StartsWith ("maya", StringComparison.InvariantCultureIgnoreCase)) {
+                        string version = product.Substring ("maya".Length);
+                        dccOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
+                        dccOptionName.Add (GetUniqueDCCOptionName(kMayaOptionName + version));
                         continue;
                     }
-                    
-                    dccOptionPath.Add (exePath);
-                    dccOptionName.Add (maxOptionName);
+
+                    if (product.StartsWith("3ds max", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        var exePath = string.Format("{0}/{1}", productDir.FullName.Replace("\\", "/"), "3dsmax.exe");
+
+                        string version = product.Substring("3ds max ".Length);
+                        var maxOptionName = GetUniqueDCCOptionName(kMaxOptionName + version);
+
+                        if (IsEarlierThanMax2017(maxOptionName))
+                        {
+                            continue;
+                        }
+
+                        dccOptionPath.Add(exePath);
+                        dccOptionName.Add(maxOptionName);
+                    }
                 }
             }
             instance.selectedDCCApp = instance.GetPreferredDCCApp();
+        }
+
+        /// <summary>
+        /// Returns the first valid folder in our list of vendor locations
+        /// </summary>
+        /// <returns>The first valid vendor location</returns>
+        public static string GetFirstValidVendorLocation()
+        {
+            string[] locations = DCCVendorLocations;
+            for (int i = 0; i < locations.Length; i++)
+            {
+                //Look through the list of locations we have and take the first valid one
+                if (Directory.Exists(locations[i]))
+                {
+                    return locations[i];
+                }
+            }
+            //if no valid locations exist, just take us to the project folder
+            return Directory.GetCurrentDirectory();
         }
 
         /// <summary>
@@ -537,6 +589,7 @@ namespace FbxExporters.EditorTools {
             }
 
             if (instance.dccOptionPaths.Count <= 0) {
+                instance.selectedDCCApp = 0;
                 return new GUIContent[]{
                     new GUIContent("<No 3D Application found>")
                 };
