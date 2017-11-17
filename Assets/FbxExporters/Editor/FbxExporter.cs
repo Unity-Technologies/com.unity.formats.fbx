@@ -791,10 +791,13 @@ namespace FbxExporters
                 fbxCamera.FilmAspectRatio.Set(aspectRatio);
                 fbxCamera.SetApertureWidth (apertureWidthInInches);
                 fbxCamera.SetApertureHeight (apertureHeightInInches);
-                fbxCamera.SetApertureMode (FbxCamera.EApertureMode.eFocalLength);
+                fbxCamera.SetApertureMode (FbxCamera.EApertureMode.eVertical);
 
-                // FOV / Focal Length
+                // Focal Length
                 fbxCamera.FocalLength.Set(fbxCamera.ComputeFocalLength (unityCamera.fieldOfView));
+
+                // Field of View
+                fbxCamera.FieldOfView.Set (unityCamera.fieldOfView);
 
                 // NearPlane
                 fbxCamera.SetNearPlane (unityCamera.nearClipPlane*100);
