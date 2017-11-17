@@ -122,9 +122,7 @@ file(REMOVE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAX_INTEGRATION_ZIP_NAME}
 file(GLOB_RECURSE META_FILES "${CMAKE_SOURCE_DIR}/Assets/Integrations/*.meta")
 
 add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
-    IF(META_FILES)
-        COMMAND ${CMAKE_COMMAND} -E remove ${META_FILES}
-    ENDIF
+    COMMAND ${CMAKE_COMMAND} -E remove ${META_FILES}
     COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
        "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya" 
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets
@@ -135,9 +133,7 @@ add_custom_target(${MAYA_INTEGRATION_TARGET} DEPENDS ${MAYA_INTEGRATION_ZIP_NAME
 
 
 add_custom_command(OUTPUT ${MAX_INTEGRATION_ZIP_NAME}
-    IF(META_FILES)
-        COMMAND ${CMAKE_COMMAND} -E remove ${META_FILES}
-    ENDIF
+    COMMAND ${CMAKE_COMMAND} -E remove ${META_FILES}
     COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAX_INTEGRATION_ZIP_NAME} --format=zip
        "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/max"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets
