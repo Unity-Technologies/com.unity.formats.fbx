@@ -203,7 +203,7 @@ if (maxVersion())[1] >= 20000 then(
             (
                 global unityImportAction = createUnityImportAction unityImportTitle importMenu
                 global unityExportAction = createUnityExportAction unityExportTitle exportMenu
-				                
+                
                 menuMan.updateMenuBar() --update the menu bar
             )
 		)
