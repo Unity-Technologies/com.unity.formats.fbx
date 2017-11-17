@@ -111,7 +111,7 @@ namespace FbxExporters.EditorTools {
                     throw new System.NotImplementedException ();
                 }
 
-                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.DCCVendorLocations[0], ext);
+                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.GetFirstValidVendorLocation(), ext);
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (dccPath)) {
@@ -509,6 +509,25 @@ namespace FbxExporters.EditorTools {
                 }
             }
             instance.selectedDCCApp = instance.GetPreferredDCCApp();
+        }
+
+        /// <summary>
+        /// Returns the first valid folder in our list of vendor locations
+        /// </summary>
+        /// <returns>The first valid vendor location</returns>
+        public static string GetFirstValidVendorLocation()
+        {
+            string[] locations = DCCVendorLocations;
+            for (int i = 0; i < locations.Length; i++)
+            {
+                //Look through the list of locations we have and take the first valid one
+                if (Directory.Exists(locations[i]))
+                {
+                    return locations[i];
+                }
+            }
+            //if no valid locations exist, just take us to the project folder
+            return Directory.GetCurrentDirectory();
         }
 
         /// <summary>
