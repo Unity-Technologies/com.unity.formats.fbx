@@ -12,6 +12,7 @@ global string $unityImportLabel = "Import FBX file from Unity Project and auto-c
 global string $unityExportLabel = "Export Model to Unity";
 
 global string $unityCommandsFile = "unityCommands.mel";
+global string $unityLoadCommandFiles;
 global string $unityImportMenuName = "Import";
 global string $unityExportMenuName = "Export";
 global string $unityImportCommand = "unityImport";
@@ -23,17 +24,21 @@ global proc string unityWhatsNewVersion(){
 }
 
 global proc unitySetupUI(){
+    global string $unityLoadCommandFiles;
+    global string $unityCommandsFile;
 
     $isHeadless = `optionVar -q "UnityFbxForMaya_Headless"`;
     if($isHeadless){
         // headless install, don't add UI
         return;
     }
-
+    
+    $unityLoadCommandFiles = ("source " + $unityCommandsFile);
+    
     evalDeferred -lowestPriority "buildFileMenu; \
     $parentMenu = $gMainFileMenu; \
     $pluginVersion = unityWhatsNewVersion(); \
-    source $unityCommandsFile; \
+    eval ($unityLoadCommandFiles); \
     menuItem -parent $parentMenu -insertAfter $unityMenuInsertAfter -divider true -longDivider false -version $pluginVersion $unityMenuDivider; \
     menuItem -parent $parentMenu -insertAfter $unityMenuDivider -subMenu true -label $unityMenuLabel -tearOff true -version $pluginVersion -image $unityIconPath -annotation $unityFamilyLabel $unityMenuName; \
     menuItem -parent $unityMenuName -label $unityImportMenuName -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command $unityImportCommand; \
