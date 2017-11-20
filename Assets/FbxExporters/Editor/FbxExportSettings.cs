@@ -183,12 +183,6 @@ namespace FbxExporters.EditorTools {
                 FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
             }
 
-            exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
-                new GUIContent("Launch 3D Application:",
-                    "Launch the selected 3d application after Unity integration is completed."),
-                exportSettings.launchAfterInstallation
-            );
-
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
             GUILayout.EndVertical();
