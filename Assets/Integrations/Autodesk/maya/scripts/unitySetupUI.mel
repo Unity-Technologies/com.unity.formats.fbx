@@ -12,7 +12,6 @@ global string $unityImportLabel = "Import FBX file from Unity Project and auto-c
 global string $unityExportLabel = "Export Model to Unity";
 
 global string $unityCommandsFile = "unityCommands.mel";
-global string $unityLoadCommandFiles;
 global string $unityImportMenuName = "Import";
 global string $unityExportMenuName = "Export";
 global string $unityImportCommand = "unityImport";
@@ -24,23 +23,43 @@ global proc string unityWhatsNewVersion(){
 }
 
 global proc unitySetupUI(){
-    global string $unityLoadCommandFiles;
-    global string $unityCommandsFile;
-
     $isHeadless = `optionVar -q "UnityFbxForMaya_Headless"`;
     if($isHeadless){
         // headless install, don't add UI
         return;
     }
     
-    $unityLoadCommandFiles = ("source " + $unityCommandsFile);
+    evalDeferred -lowestPriority "unityInstallUI";
+}
+
+global proc unityInstallUI(){
+    global string $unityMenuName;
+    global string $unityMenuDivider;
+    global string $unityMenuLabel;
+    global string $unityMenuInsertAfter;
+
+    global string $unityImportIconPath;
+    global string $unityExportIconPath;
+    global string $unityIconPath;
+
+    global string $unityFamilyLabel;
+    global string $unityImportLabel;
+    global string $unityExportLabel;
+
+    global string $unityCommandsFile;
+    global string $unityImportMenuName;
+    global string $unityExportMenuName;
+    global string $unityImportCommand;
+    global string $unityExportCommand;
     
-    evalDeferred -lowestPriority "buildFileMenu; \
-    $parentMenu = $gMainFileMenu; \
-    $pluginVersion = unityWhatsNewVersion(); \
-    eval ($unityLoadCommandFiles); \
-    menuItem -parent $parentMenu -insertAfter $unityMenuInsertAfter -divider true -longDivider false -version $pluginVersion $unityMenuDivider; \
-    menuItem -parent $parentMenu -insertAfter $unityMenuDivider -subMenu true -label $unityMenuLabel -tearOff true -version $pluginVersion -image $unityIconPath -annotation $unityFamilyLabel $unityMenuName; \
-    menuItem -parent $unityMenuName -label $unityImportMenuName -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command $unityImportCommand; \
-    menuItem -parent $unityMenuName -label $unityExportMenuName -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command $unityExportCommand;";
+    global string $gMainFileMenu;
+
+    buildFileMenu;
+    $parentMenu = $gMainFileMenu;
+    $pluginVersion = unityWhatsNewVersion();
+    eval ("source " + $unityCommandsFile);
+    menuItem -parent $parentMenu -insertAfter $unityMenuInsertAfter -divider true -longDivider false -version $pluginVersion $unityMenuDivider;
+    menuItem -parent $parentMenu -insertAfter $unityMenuDivider -subMenu true -label $unityMenuLabel -tearOff true -version $pluginVersion -image $unityIconPath -annotation $unityFamilyLabel $unityMenuName;
+    menuItem -parent $unityMenuName -label $unityImportMenuName -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command $unityImportCommand;
+    menuItem -parent $unityMenuName -label $unityExportMenuName -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command $unityExportCommand;
 }
