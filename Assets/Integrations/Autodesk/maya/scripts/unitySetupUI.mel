@@ -24,8 +24,14 @@ global proc unitySetupUI(){
         // headless install, don't add UI
         return;
     }
-
+    
     evalDeferred -lowestPriority "buildFileMenu; \
+    \
+        $removeOtherMenu = `optionVar -q \"UnityFbxForMaya_RemoveOtherMenu\"`;\
+    if($removeOtherMenu){\
+        menu -e -visible false \"sendToUnityMenu\";\
+    }\
+    \
     $parentMenu = $gMainFileMenu; \
     $pluginVersion = unityWhatsNewVersion(); \
     source \"unityCommands.mel\"; \

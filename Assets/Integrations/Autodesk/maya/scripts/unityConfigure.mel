@@ -2,13 +2,15 @@ global proc unityConfigure(
     string $unityProject,
     string $unityFbxExportSettings,
     string $unityFbxImportSettings,
-    int $headless)
+    int $headless,
+    int $removeOtherMenu)
 {
     // configure plugin settings
     optionVar -stringValue "UnityProject" $unityProject;
     optionVar -stringValue "UnityFbxExportSettings" $unityFbxExportSettings;
     optionVar -stringValue "UnityFbxImportSettings" $unityFbxImportSettings;
     optionVar -intValue "UnityFbxForMaya_Headless" $headless;
+    optionVar -intValue "UnityFbxForMaya_RemoveOtherMenu" $removeOtherMenu;
 
     return;
 }
