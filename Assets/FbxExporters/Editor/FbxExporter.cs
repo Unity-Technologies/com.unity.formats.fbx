@@ -1677,6 +1677,8 @@ namespace FbxExporters
                         return result;
                     }
                 }
+
+                return false;
             }
 
             /// <summary>
