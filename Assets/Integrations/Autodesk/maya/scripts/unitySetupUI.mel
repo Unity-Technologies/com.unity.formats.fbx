@@ -11,6 +11,11 @@ global string $unityFamilyLabel = "The UnityFbxForMaya plugin allows you to reli
 global string $unityImportLabel = "Import FBX file from Unity Project and auto-configure for exporting";
 global string $unityExportLabel = "Export Model to Unity";
 
+global string $unityCommandsFile = "unityCommands.mel";
+global string $unityImportMenuName = "Import";
+global string $unityExportMenuName = "Export";
+global string $unityImportCommand = "unityImport";
+global string $unityExportCommand = "unityExport";
 
 global proc string unityWhatsNewVersion(){
     return `about -q -version`;
@@ -28,9 +33,9 @@ global proc unitySetupUI(){
     evalDeferred -lowestPriority "buildFileMenu; \
     $parentMenu = $gMainFileMenu; \
     $pluginVersion = unityWhatsNewVersion(); \
-    source \"unityCommands.mel\"; \
+    source $unityCommandsFile; \
     menuItem -parent $parentMenu -insertAfter $unityMenuInsertAfter -divider true -longDivider false -version $pluginVersion $unityMenuDivider; \
     menuItem -parent $parentMenu -insertAfter $unityMenuDivider -subMenu true -label $unityMenuLabel -tearOff true -version $pluginVersion -image $unityIconPath -annotation $unityFamilyLabel $unityMenuName; \
-    menuItem -parent $unityMenuName -label \"Import\" -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command \"unityImport\"; \
-    menuItem -parent $unityMenuName -label \"Export\" -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command \"unityExport\";";
+    menuItem -parent $unityMenuName -label $unityImportMenuName -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command $unityImportCommand; \
+    menuItem -parent $unityMenuName -label $unityExportMenuName -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command $unityExportCommand;";
 }
