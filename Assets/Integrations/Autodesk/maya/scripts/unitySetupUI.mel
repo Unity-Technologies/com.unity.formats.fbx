@@ -12,7 +12,7 @@ global string $unityImportLabel = "Import FBX file from Unity Project and auto-c
 global string $unityExportLabel = "Export Model to Unity";
 
 global string $removeOtherMenuString = "UnityFbxForMaya_RemoveOtherMenu";
-global string $sendToUnityString = "sendToUnityMenu";
+global string $unitySendToUnityMenuName = "sendToUnityMenu";
 
 
 global proc string unityWhatsNewVersion(){
@@ -23,7 +23,7 @@ global proc string unityWhatsNewVersion(){
 global proc unitySetupUI(){
 
 global string $removeOtherMenuString;
-global string $sendToUnityString;
+global string $unitySendToUnityMenuName;
 
     $isHeadless = `optionVar -q "UnityFbxForMaya_Headless"`;
     if($isHeadless){
@@ -35,7 +35,7 @@ global string $sendToUnityString;
     \
     $removeOtherMenu = `optionVar -q $removeOtherMenuString`;\
     if($removeOtherMenu){\
-        menu -e -visible false $sendToUnityString;\
+        menu -e -visible false $unitySendToUnityMenuName;\
     }\
     \
     $parentMenu = $gMainFileMenu; \
