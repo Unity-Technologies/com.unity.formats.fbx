@@ -27,6 +27,8 @@ namespace FbxExporters.EditorTools {
                 GUILayout.Label ("Version: " + version, EditorStyles.centeredGreyMiniLabel);
                 EditorGUILayout.Space ();
             }
+            EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
             GUILayout.BeginVertical();
             exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
                 new GUIContent ("Compatible Naming:",
@@ -48,17 +50,20 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.Space();
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
-                " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - 3));
+            EditorGUILayout.LabelField(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
+                " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - 17));
             exportSettings.ExportFormatSelection = EditorGUILayout.Popup(exportSettings.ExportFormatSelection, new string[]{"Binary", "ASCII"});
             GUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
+            EditorGUI.indentLevel--;
+            EditorGUILayout.LabelField("Integration", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
 
             GUILayout.BeginHorizontal ();
-            GUILayout.Label (new GUIContent (
+            EditorGUILayout.LabelField(new GUIContent (
                 "Export Path:",
-                "Relative path for saving Model Prefabs."), GUILayout.Width(LabelWidth - 3));
+                "Relative path for saving Model Prefabs."), GUILayout.Width(LabelWidth - 17));
 
             var pathLabel = ExportSettings.GetRelativeSavePath();
             if (pathLabel == ".") { pathLabel = "(Assets root)"; }
@@ -98,9 +103,9 @@ namespace FbxExporters.EditorTools {
             GUILayout.EndHorizontal ();
 
             GUILayout.BeginHorizontal ();
-            GUILayout.Label (new GUIContent (
+            EditorGUILayout.LabelField(new GUIContent (
                 "Integrations Path:",
-                "Installation path for 3D application integrations."), GUILayout.Width(LabelWidth - 3));
+                "Installation path for 3D application integrations."), GUILayout.Width(LabelWidth - 17));
 
             var IntegrationsPathLabel = ExportSettings.GetIntegrationSavePath();
             EditorGUILayout.SelectableLabel(IntegrationsPathLabel,
@@ -132,9 +137,9 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.Space ();
 
             GUILayout.BeginHorizontal ();
-            GUILayout.Label (new GUIContent (
+            EditorGUILayout.LabelField(new GUIContent (
                 "3D Application:",
-                "Select the 3D Application for which you would like to install the Unity integration."), GUILayout.Width(LabelWidth - 3));
+                "Select the 3D Application for which you would like to install the Unity integration."), GUILayout.Width(LabelWidth - 17));
             
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
