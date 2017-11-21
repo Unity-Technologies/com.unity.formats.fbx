@@ -1,5 +1,5 @@
 -- MacroScripts that will perform actions
-macroScript UnityImport category:"Unity" tooltip:"Import FBX file from Unity project and auto-configure for exporting."
+macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unity project and auto-configure for exporting"
 (
     origObjects = #()
 

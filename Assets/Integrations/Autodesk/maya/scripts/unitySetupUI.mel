@@ -8,12 +8,16 @@ global string $unityExportIconPath = "export.png";
 global string $unityIconPath = "unity.png";
 
 global string $unityFamilyLabel = "The UnityFbxForMaya plugin allows you to reliably exchange and review your work between Maya and Unity.";
-global string $unityImportLabel = "Import FBX file from Unity Project and auto-configure for exporting";
+global string $unityImportLabel = "Import an FBX file from a Unity project and auto-configure for exporting";
 global string $unityExportLabel = "Export Model to Unity";
 
+global string $unityCommandsFile = "unityCommands.mel";
+global string $unityImportMenuName = "Import";
+global string $unityExportMenuName = "Export";
+global string $unityImportCommand = "unityImport";
+global string $unityExportCommand = "unityExport";
 global string $unityRemoveSendToUnityMenuOption = "UnityFbxForMaya_removeSendToUnityMenu";
 global string $unitySendToUnityMenuName = "sendToUnityMenu";
-
 
 global proc string unityWhatsNewVersion(){
     return `about -q -version`;
@@ -21,7 +25,6 @@ global proc string unityWhatsNewVersion(){
 }
 
 global proc unitySetupUI(){
-
     global string $removeOtherMenuString;
     global string $unitySendToUnityMenuName;
 
@@ -29,20 +32,44 @@ global proc unitySetupUI(){
     if($isHeadless){
         // headless install, don't add UI
         return;
-    }
+    }    
+
+    evalDeferred -lowestPriority "unityInstallUI";
+}
+
+global proc unityInstallUI(){
+    global string $unityMenuName;
+    global string $unityMenuDivider;
+    global string $unityMenuLabel;
+    global string $unityMenuInsertAfter;
+
+    global string $unityImportIconPath;
+    global string $unityExportIconPath;
+    global string $unityIconPath;
+
+    global string $unityFamilyLabel;
+    global string $unityImportLabel;
+    global string $unityExportLabel;
+    global string $unityCommandsFile;
+    global string $unityImportMenuName;
+    global string $unityExportMenuName;
+    global string $unityImportCommand;
+    global string $unityExportCommand;
     
-    evalDeferred -lowestPriority "buildFileMenu; \
-    \
-    $removeOtherMenu = `optionVar -q $unityRemoveSendToUnityMenuOption`;\
-    if($removeOtherMenu){\
-        menu -e -visible false $unitySendToUnityMenuName;\
-    }\
-    \
-    $parentMenu = $gMainFileMenu; \
-    $pluginVersion = unityWhatsNewVersion(); \
-    source \"unityCommands.mel\"; \
-    menuItem -parent $parentMenu -insertAfter $unityMenuInsertAfter -divider true -longDivider false -version $pluginVersion $unityMenuDivider; \
-    menuItem -parent $parentMenu -insertAfter $unityMenuDivider -subMenu true -label $unityMenuLabel -tearOff true -version $pluginVersion -image $unityIconPath -annotation $unityFamilyLabel $unityMenuName; \
-    menuItem -parent $unityMenuName -label \"Import\" -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command \"unityImport\"; \
-    menuItem -parent $unityMenuName -label \"Export\" -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command \"unityExport\";";
+    global string $gMainFileMenu;
+
+    buildFileMenu;
+    $parentMenu = $gMainFileMenu;
+    $pluginVersion = unityWhatsNewVersion();
+    eval ("source " + $unityCommandsFile);
+    menuItem -parent $parentMenu -insertAfter $unityMenuInsertAfter -divider true -longDivider false -version $pluginVersion $unityMenuDivider;
+    menuItem -parent $parentMenu -insertAfter $unityMenuDivider -subMenu true -label $unityMenuLabel -tearOff true -version $pluginVersion -image $unityIconPath -annotation $unityFamilyLabel $unityMenuName;
+    menuItem -parent $unityMenuName -label $unityImportMenuName -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command $unityImportCommand;
+    menuItem -parent $unityMenuName -label $unityExportMenuName -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command $unityExportCommand;
+    
+    $removeOtherMenu = `optionVar -q $unityRemoveSendToUnityMenuOption`;
+    if($removeOtherMenu){
+        menu -e -visible false $unitySendToUnityMenuName;
+    }    
+
 }

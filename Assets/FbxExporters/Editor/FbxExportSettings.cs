@@ -1,10 +1,3 @@
-// ***********************************************************************
-// Copyright (c) 2017 Unity Technologies. All rights reserved.
-//
-// Licensed under the ##LICENSENAME##.
-// See LICENSE.md file in the project root for full license information.
-// ***********************************************************************
-
 using System;
 using System.IO;
 using UnityEditorInternal;
@@ -191,8 +184,8 @@ namespace FbxExporters.EditorTools {
             }
 
             exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
-                new GUIContent("Launch 3D Application:",
-                    "Launch the selected application after unity integration is completed."),
+                new GUIContent("Keep 3D Application opened:",
+                    "Keep the selected 3D application open after Unity integration install has completed."),
                 exportSettings.launchAfterInstallation
             );
 
@@ -261,12 +254,17 @@ namespace FbxExporters.EditorTools {
     public class ExportSettings : ScriptableSingleton<ExportSettings>
     {
         public const string kDefaultSavePath = ".";
-        private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName, kBlenderOptionName };
+        private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};
         //Any additional names require a space after the name
         public const string kMaxOptionName = "3ds Max ";
         public const string kMayaOptionName = "Maya ";
         public const string kMayaLtOptionName = "MayaLT ";
-        public const string kBlenderOptionName = "Blender ";
+
+        private static string DefaultIntegrationSavePath {
+            get{
+                return Path.GetDirectoryName(Application.dataPath);
+            }
+        }
 
         /// <summary>
         /// The paths where all the different versions of Maya are installed
@@ -343,7 +341,7 @@ namespace FbxExporters.EditorTools {
             HideSendToUnityMenu = true;
             ExportFormatSelection = 0;
             convertToModelSavePath = kDefaultSavePath;
-            IntegrationSavePath = Directory.GetCurrentDirectory().ToString();
+            IntegrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
         }
@@ -494,7 +492,7 @@ namespace FbxExporters.EditorTools {
             else
             {
                 float fVersion;
-                //In case we are looking at a Blender version- the int parse will fail so we'll need to parse it as a float.
+                //In case we are looking at something with a decimal based version- the int parse will fail so we'll need to parse it as a float.
                 if (float.TryParse(number, out fVersion))
                 {
                    return (int)fVersion;
@@ -708,7 +706,7 @@ namespace FbxExporters.EditorTools {
 
             // Output is like: Maya 2018, Cut Number 201706261615
             // We want the stuff after 'Maya ' and before the comma.
-            // TODO: less brittle! Consider also the mel command "about -version".
+            // (Uni-31601) less brittle! Consider also the mel command "about -version".
             var commaIndex = resultString.IndexOf(',');
             return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
         }
@@ -775,7 +773,7 @@ namespace FbxExporters.EditorTools {
             if (string.IsNullOrEmpty(instance.IntegrationSavePath.Trim()) || !Directory.Exists(instance.IntegrationSavePath))
             {
                 //The project folder, above the asset folder
-                Directory.GetCurrentDirectory().ToString();
+                instance.IntegrationSavePath = DefaultIntegrationSavePath;
             }
             return instance.IntegrationSavePath;
         }
