@@ -8,7 +8,7 @@ global string $unityExportIconPath = "export.png";
 global string $unityIconPath = "unity.png";
 
 global string $unityFamilyLabel = "The UnityFbxForMaya plugin allows you to reliably exchange and review your work between Maya and Unity.";
-global string $unityImportLabel = "Import FBX file from Unity Project and auto-configure for exporting";
+global string $unityImportLabel = "Import an FBX file from a Unity project and auto-configure for exporting";
 global string $unityExportLabel = "Export Model to Unity";
 
 global string $unityCommandsFile = "unityCommands.mel";
