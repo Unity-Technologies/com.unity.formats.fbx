@@ -255,6 +255,12 @@ namespace FbxExporters.EditorTools {
         public const string kMayaLtOptionName = "MayaLT ";
         public const string kBlenderOptionName = "Blender ";
 
+        private static string DefaultIntegrationSavePath {
+            get{
+                return Path.GetDirectoryName(Application.dataPath);
+            }
+        }
+
         /// <summary>
         /// The paths where all the different versions of Maya are installed
         /// by default. Depends on the platform.
@@ -328,7 +334,7 @@ namespace FbxExporters.EditorTools {
             launchAfterInstallation = true;
             ExportFormatSelection = 0;
             convertToModelSavePath = kDefaultSavePath;
-            IntegrationSavePath = Directory.GetCurrentDirectory().ToString();
+            IntegrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
         }
@@ -760,7 +766,7 @@ namespace FbxExporters.EditorTools {
             if (string.IsNullOrEmpty(instance.IntegrationSavePath.Trim()) || !Directory.Exists(instance.IntegrationSavePath))
             {
                 //The project folder, above the asset folder
-                Directory.GetCurrentDirectory().ToString();
+                instance.IntegrationSavePath = DefaultIntegrationSavePath;
             }
             return instance.IntegrationSavePath;
         }

@@ -4,6 +4,8 @@ RELEASE NOTES
 
 NEW FEATURES
 
+* Ship all C# scripts as source code
+
 * Added Maya LT Integration
 
 Replaced Maya python implementation with MEL script, which is used by both Maya and Maya LT.
