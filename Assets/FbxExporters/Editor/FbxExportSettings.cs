@@ -693,7 +693,7 @@ namespace FbxExporters.EditorTools {
 
             // Output is like: Maya 2018, Cut Number 201706261615
             // We want the stuff after 'Maya ' and before the comma.
-            // TODO: less brittle! Consider also the mel command "about -version".
+            // (Uni-31601) less brittle! Consider also the mel command "about -version".
             var commaIndex = resultString.IndexOf(',');
             return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
         }

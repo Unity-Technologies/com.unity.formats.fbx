@@ -773,11 +773,11 @@ namespace FbxExporters
                     // same node), we line up the components in the order they
                     // appear. This never happens in stock Unity, someone must have
                     // added an AssetPostprocessor for it to occur.
-                    // TODO: do something smarter.
+                    // (Uni-31604) do something smarter.
                     //
                     // If the node isn't going to be in the prefab, we don't care
                     // about what components might be on it.
-                    foreach(var name in m_nodesInUpdatedPrefab)
+                    foreach (var name in m_nodesInUpdatedPrefab)
                     {
                         if (!m_new.HasNode(name)) {
                             // It's not in the FBX, so clearly we're not updating any components.
@@ -794,18 +794,12 @@ namespace FbxExporters
                             List<string> prefabValues = null; // get them only if we need them.
 
                             // If we have multiple identical-type components, match them up by index.
-                            // TODO: match them up to minimize the diff instead.
                             int oldN = oldValues.Count;
                             int newN = newValues.Count;
                             for(int i = 0, n = System.Math.Max(oldN, newN); i < n; ++i) {
                                 if (/* isNew */ i < newN) {
                                     var newValue = newValues[i];
-
-                                    // Special case on Transform: if we reparented
-                                    // this node then always update the transform
-                                    // (UNI-25526). That's because when we do the
-                                    // reparenting, it changes the 'prefabValue' in
-                                    // a complicated way.
+                                    
                                     var isReparentedTransform = (typename == "UnityEngine.Transform"
                                         && m_reparentings.ContainsKey(name));
 
