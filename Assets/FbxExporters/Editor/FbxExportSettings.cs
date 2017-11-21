@@ -176,13 +176,6 @@ namespace FbxExporters.EditorTools {
 
             EditorGUILayout.Space();
 
-            var installIntegrationContent = new GUIContent(
-                    "Install Unity Integration",
-                    "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
-            if (GUILayout.Button (installIntegrationContent)) {
-                FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
-            }
-
             exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
                 new GUIContent("Keep 3D Application opened:",
                     "Keep the selected 3D application open after Unity integration install has completed."),
@@ -190,10 +183,22 @@ namespace FbxExporters.EditorTools {
             );
 
             exportSettings.HideSendToUnityMenu = EditorGUILayout.Toggle(
-                new GUIContent("Hide 'SendToUnity' menu (Maya only):",
-                    "Hide the GamePipeline menu in Maya, can help avoid confusion with Fbx export menu (will only affect maya integration)"),
+                new GUIContent("Replace native menu:",
+                    "Replace Maya's native 'Send to Unity' menu with the UnityFbxForMaya's Export"),
                 exportSettings.HideSendToUnityMenu
             );
+
+            EditorGUILayout.Space();
+
+
+            var installIntegrationContent = new GUIContent(
+                    "Install Unity Integration",
+                    "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
+            if (GUILayout.Button (installIntegrationContent)) {
+                FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
+            }
+
+
 
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
