@@ -773,7 +773,7 @@ namespace FbxExporters
                     // same node), we line up the components in the order they
                     // appear. This never happens in stock Unity, someone must have
                     // added an AssetPostprocessor for it to occur.
-                    // (Uni-31604) do something smarter.
+                    // (Uni-31604) Improve how the auto-updater classifies components
                     //
                     // If the node isn't going to be in the prefab, we don't care
                     // about what components might be on it.

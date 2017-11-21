@@ -467,7 +467,7 @@ namespace FbxExporters.Editor
             {
                 throw new NotImplementedException();
 
-                // (Uni-31606)
+                // (Uni-31606) Parse maya mod file during installation and find location
             }
 
             return SetupUserStartupScript (verbose);
