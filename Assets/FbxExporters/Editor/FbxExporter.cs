@@ -748,9 +748,9 @@ namespace FbxExporters
 
                 if (!SharedMeshes.TryGetValue (unityPrefabParent.name, out fbxMesh))
                 {
-                    ExportMesh (unityGo, fbxNode);
-                    if (fbxNode.GetMesh() != null) {
-                        SharedMeshes [unityPrefabParent.name] = fbxNode.GetMesh();
+                    if (ExportMesh (unityGo, fbxNode) && fbxNode.GetMesh() != null) {
+                        SharedMeshes [unityPrefabParent.name] = fbxNode.GetMesh ();
+                        return true;
                     }
                 }
 
