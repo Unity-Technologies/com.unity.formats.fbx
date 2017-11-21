@@ -56,6 +56,9 @@ global proc unityInstallUI(){
     global string $unityImportCommand;
     global string $unityExportCommand;
     
+    global string $unityRemoveSendToUnityMenuOption;
+    global string $unitySendToUnityMenuName;
+    
     global string $gMainFileMenu;
 
     buildFileMenu;
@@ -67,8 +70,8 @@ global proc unityInstallUI(){
     menuItem -parent $unityMenuName -label $unityImportMenuName -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command $unityImportCommand;
     menuItem -parent $unityMenuName -label $unityExportMenuName -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command $unityExportCommand;
     
-    $removeOtherMenu = `optionVar -q $unityRemoveSendToUnityMenuOption`;
-    if($removeOtherMenu){
+    $unityRemoveSendToUnityMenuOption = `optionVar -q $unityRemoveSendToUnityMenuOption`;
+    if($unityRemoveSendToUnityMenuOption){
         menu -e -visible false $unitySendToUnityMenuName;
     }    
 
