@@ -11,7 +11,7 @@ global string $unityFamilyLabel = "The UnityFbxForMaya plugin allows you to reli
 global string $unityImportLabel = "Import FBX file from Unity Project and auto-configure for exporting";
 global string $unityExportLabel = "Export Model to Unity";
 
-global string $removeSendToUnityMenuString = "UnityFbxForMaya_removeSendToUnityMenu";
+global string $unityRemoveSendToUnityMenuOption = "UnityFbxForMaya_removeSendToUnityMenu";
 global string $unitySendToUnityMenuName = "sendToUnityMenu";
 
 
@@ -33,7 +33,7 @@ global proc unitySetupUI(){
     
     evalDeferred -lowestPriority "buildFileMenu; \
     \
-    $removeOtherMenu = `optionVar -q $removeSendToUnityMenuString`;\
+    $removeOtherMenu = `optionVar -q $unityRemoveSendToUnityMenuOption`;\
     if($removeOtherMenu){\
         menu -e -visible false $unitySendToUnityMenuName;\
     }\
