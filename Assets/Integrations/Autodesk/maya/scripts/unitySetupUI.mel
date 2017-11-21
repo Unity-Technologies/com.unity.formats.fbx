@@ -22,8 +22,8 @@ global proc string unityWhatsNewVersion(){
 
 global proc unitySetupUI(){
 
-global string $removeOtherMenuString;
-global string $unitySendToUnityMenuName;
+    global string $removeOtherMenuString;
+    global string $unitySendToUnityMenuName;
 
     $isHeadless = `optionVar -q "UnityFbxForMaya_Headless"`;
     if($isHeadless){
