@@ -196,10 +196,10 @@ namespace FbxExporters.EditorTools {
                 exportSettings.launchAfterInstallation
             );
 
-            exportSettings.HideOtherMenuMaya = EditorGUILayout.Toggle(
+            exportSettings.HideSendToUnityMenu = EditorGUILayout.Toggle(
                 new GUIContent("Hide 'SendToUnity' menu (Maya only):",
                     "Hide the GamePipeline menu in Maya, can help avoid confusion with Fbx export menu (will only affect maya integration)"),
-                exportSettings.HideOtherMenuMaya
+                exportSettings.HideSendToUnityMenu
             );
 
             GUILayout.FlexibleSpace ();
@@ -308,9 +308,8 @@ namespace FbxExporters.EditorTools {
         public bool mayaCompatibleNames;
         public bool centerObjects;
         public bool launchAfterInstallation;
-        public bool HideOtherMenuMaya;
+        public bool HideSendToUnityMenu;
         public int ExportFormatSelection;
-
 
         public string IntegrationSavePath;
 
@@ -341,7 +340,7 @@ namespace FbxExporters.EditorTools {
             mayaCompatibleNames = true;
             centerObjects = true;
             launchAfterInstallation = true;
-            HideOtherMenuMaya = true;
+            HideSendToUnityMenu = true;
             ExportFormatSelection = 0;
             convertToModelSavePath = kDefaultSavePath;
             IntegrationSavePath = Directory.GetCurrentDirectory().ToString();
