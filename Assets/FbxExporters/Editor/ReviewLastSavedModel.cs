@@ -189,7 +189,7 @@ namespace FbxExporters
                 System.Collections.Generic.List<UnityEngine.SceneManagement.Scene> scenes
                       = new System.Collections.Generic.List<UnityEngine.SceneManagement.Scene> ();
 
-                string desiredSceneName = "";//FbxExporters.EditorTools.ExportSettings.GetTurnTableSceneName ();
+                string desiredSceneName = "";
                 if (string.IsNullOrEmpty (desiredSceneName)) {
                     desiredSceneName = DefaultSceneName;
                 }
@@ -212,7 +212,7 @@ namespace FbxExporters
                 // if turntable scene not added to list of scenes
                 if (!scene.IsValid () || !scene.isLoaded) 
                 {
-                    string scenePath = "";//FbxExporters.EditorTools.ExportSettings.GetTurnTableScenePath ();
+                    string scenePath = "";
                     if (string.IsNullOrEmpty(scenePath)) {
                         // and if for some reason the turntable scene is missing create an empty scene
                         // NOTE: we cannot use NewScene because it will force me to save the modified Untitled scene

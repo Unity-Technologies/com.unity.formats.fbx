@@ -189,7 +189,6 @@ namespace FbxExporters.UnitTests
             testList.Add(ExportSettings.GetUniqueDCCOptionName(ExportSettings.kMayaOptionName + "2016"));
             testList.Add(ExportSettings.GetUniqueDCCOptionName(ExportSettings.kMayaOptionName + "2017"));
             testList.Add(ExportSettings.GetUniqueDCCOptionName(ExportSettings.kMaxOptionName + "2017"));
-            testList.Add(ExportSettings.GetUniqueDCCOptionName(ExportSettings.kBlenderOptionName + "2.67"));
             testList.Add(ExportSettings.GetUniqueDCCOptionName(""));
             testList.Add(ExportSettings.GetUniqueDCCOptionName(null));
             testList.Add(ExportSettings.GetUniqueDCCOptionName(ExportSettings.kMayaLtOptionName));
@@ -200,13 +199,6 @@ namespace FbxExporters.UnitTests
             int preferred = ExportSettings.instance.GetPreferredDCCApp();
             //While Maya 2017 and 3ds Max 2017 are tied for most recent, Maya 2017 should win because we prefer Maya.
             Assert.AreEqual(preferred, 9);
-
-            List<string> blenderList = new List<string> { "Blender 2.67", "Blender 3.0" };
-            ExportSettings.instance.SetDCCOptionNames(blenderList);
-
-            preferred = ExportSettings.instance.GetPreferredDCCApp();
-            //The function should be able to deal with floats well enough to give us a preferred version of soemthing like blender, which does not use the year.
-            Assert.AreEqual(preferred, 1);
 
             ExportSettings.instance.ClearDCCOptionNames();
             //Try running it with an empty list

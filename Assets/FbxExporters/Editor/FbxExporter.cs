@@ -236,7 +236,7 @@ namespace FbxExporters
                     // set texture coordinates per vertex
                     FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
 
-                    // TODO: only copy unique UVs into this array, and index appropriately
+                    // (Uni-31596) only copy unique UVs into this array, and index appropriately
                     for (int n = 0; n < mesh.VertexColors.Length; n++) {
                         // Converting to Color from Color32, as Color32 stores the colors
                         // as ints between 0-255, while FbxColor and Color
@@ -289,7 +289,7 @@ namespace FbxExporters
                         // set texture coordinates per vertex
                         FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
 
-                        // TODO: only copy unique UVs into this array, and index appropriately
+                        // (Uni-31596) only copy unique UVs into this array, and index appropriately
                         for (int n = 0; n < uvs[i].Length; n++) {
                             fbxElementArray.Add (new FbxVector2 (uvs[i] [n] [0],
                                 uvs[i] [n] [1]));
@@ -1242,7 +1242,7 @@ namespace FbxExporters
                     } }
 
                 /// <summary>
-                /// TODO: Gets the binormals for the vertices.
+                /// Gets the binormals for the vertices.
                 /// </summary>
                 /// <value>The normals.</value>
                 private Vector3[] m_Binormals;
@@ -1270,7 +1270,7 @@ namespace FbxExporters
                 }
 
                 /// <summary>
-                /// TODO: Gets the tangents for the vertices.
+                /// Gets the tangents for the vertices.
                 /// </summary>
                 /// <value>The tangents.</value>
                 private Vector4[] m_tangents;
@@ -1282,7 +1282,7 @@ namespace FbxExporters
                     } }
 
                 /// <summary>
-                /// TODO: Gets the vertex colors for the vertices.
+                /// Gets the vertex colors for the vertices.
                 /// </summary>
                 /// <value>The vertex colors.</value>
                 private Color32 [] m_vertexColors;

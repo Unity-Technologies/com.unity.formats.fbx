@@ -430,8 +430,9 @@ namespace FbxExporters.Editor
 
                 if (installed)
                 {
-                    // FIXME: remove this when we support parsing existing .mod files
-                    try {
+                    // (Uni-31606): remove this when we support parsing existing .mod files
+                    try
+                    {
                         if (verbose) { Debug.Log(string.Format("Deleting module file {0}", moduleFilePath)); }
                         System.IO.File.Delete(moduleFilePath);
                         installed = false;
@@ -466,15 +467,7 @@ namespace FbxExporters.Editor
             {
                 throw new NotImplementedException();
 
-                // TODO: parse installed .mod file
-
-                // TODO: if maya version not installed add
-
-                // TODO: else check installation path
-
-                // TODO: if installation path different
-
-                // TODO: print message package already installed else where
+                // (Uni-31606) Parse maya mod file during installation and find location
             }
 
             return SetupUserStartupScript (verbose);
