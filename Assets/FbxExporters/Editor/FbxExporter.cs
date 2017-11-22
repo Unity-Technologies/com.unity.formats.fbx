@@ -801,10 +801,10 @@ namespace FbxExporters
                 fbxCamera.FieldOfView.Set (unityCamera.fieldOfView);
 
                 // NearPlane
-                fbxCamera.SetNearPlane (unityCamera.nearClipPlane*100);
+                fbxCamera.SetNearPlane (unityCamera.nearClipPlane*UnitScaleFactor);
 
                 // FarPlane
-                fbxCamera.SetFarPlane (unityCamera.farClipPlane*100);
+                fbxCamera.SetFarPlane (unityCamera.farClipPlane*UnitScaleFactor);
 
                 // Export backgroundColor as a custom property
                 // NOTE: export on fbxNode so that it will show up in Maya

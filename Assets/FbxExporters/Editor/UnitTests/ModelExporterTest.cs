@@ -323,5 +323,59 @@ namespace FbxExporters.UnitTests
             assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
             Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
         }
+
+        [Test]
+        public void TestExportCamera(){
+            // create a Unity camera
+            GameObject cameraObj = new GameObject("TestCamera");
+            Camera camera = cameraObj.AddComponent<Camera> ();
+
+            // change some of the default settings
+            camera.orthographic = false;
+            camera.aspect = 0.5f;
+            camera.fieldOfView = 17.5f;
+            camera.nearClipPlane = 1.2f;
+            camera.farClipPlane = 1345;
+
+            // export the camera
+            string filename = GetRandomFbxFilePath();
+            var fbxCamera = ExportCamera (filename, cameraObj);
+            CompareCameraValues (camera, fbxCamera);
+
+            // test export orthographic camera
+            camera.orthographic = true;
+            camera.aspect = 1.2f;
+            camera.fieldOfView = 78;
+            camera.nearClipPlane = 19;
+            camera.farClipPlane = 500.6f;
+
+            fbxCamera = ExportCamera (filename, cameraObj);
+            CompareCameraValues (camera, fbxCamera);
+            Assert.AreEqual (camera.orthographicSize, fbxCamera.orthographicSize);
+        }
+
+        /// <summary>
+        /// Exports the camera.
+        /// </summary>
+        /// <returns>The exported camera.</returns>
+        /// <param name="filename">Filename.</param>
+        /// <param name="cameraObj">Camera object.</param>
+        private Camera ExportCamera(string filename, GameObject cameraObj){
+            ModelExporter.ExportObject (filename, cameraObj);
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            var fbxCamera = fbxObj.GetComponent<Camera> ();
+
+            Assert.IsNotNull (fbxCamera);
+            return fbxCamera;
+        }
+
+        private void CompareCameraValues(Camera camera, Camera fbxCamera){
+            Assert.AreEqual (camera.orthographic, fbxCamera.orthographic);
+            Assert.AreEqual (camera.aspect, fbxCamera.aspect);
+            Assert.AreEqual (camera.fieldOfView, fbxCamera.fieldOfView);
+            Assert.AreEqual (camera.nearClipPlane, fbxCamera.nearClipPlane);
+            Assert.AreEqual (camera.farClipPlane, fbxCamera.farClipPlane);
+        }
     }
 }
