@@ -183,8 +183,8 @@ namespace FbxExporters.EditorTools {
             );
 
             exportSettings.HideSendToUnityMenu = EditorGUILayout.Toggle(
-                new GUIContent("Replace native menu:",
-                    "Replace Maya's native 'Send to Unity' menu with the UnityFbxForMaya's Export"),
+                new GUIContent("Hide native menu:",
+                    "Replace Maya's native 'Send to Unity' menu with the Unity Integration's menu"),
                 exportSettings.HideSendToUnityMenu
             );
 
