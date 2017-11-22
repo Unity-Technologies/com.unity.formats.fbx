@@ -174,88 +174,93 @@ namespace FbxExporters
                 // Set the normals on Layer 0.
                 FbxLayer fbxLayer = GetOrCreateLayer(fbxMesh);
 
-                using (var fbxLayerElement = FbxLayerElementNormal.Create (fbxMesh, "Normals")) {
-                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
-                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
+                if (mesh.Normals != null && mesh.Normals.Length > 0 && mesh.Normals.Length == unmergedTriangles.Length) {
+                    using (var fbxLayerElement = FbxLayerElementNormal.Create (fbxMesh, "Normals")) {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
 
-                    // Add one normal per each vertex face index (3 per triangle)
-                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+                        // Add one normal per each vertex face index (3 per triangle)
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
 
-                    for (int n = 0; n < unmergedTriangles.Length; n++) {
-                        int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (ConvertNormalToRightHanded (mesh.Normals [unityTriangle]));
+                        for (int n = 0; n < unmergedTriangles.Length; n++) {
+                            int unityTriangle = unmergedTriangles [n];
+                            fbxElementArray.Add (ConvertNormalToRightHanded (mesh.Normals [unityTriangle]));
+                        }
+
+                        fbxLayer.SetNormals (fbxLayerElement);
                     }
-
-                    fbxLayer.SetNormals (fbxLayerElement);
                 }
 
-                /// Set the binormals on Layer 0. 
-                using (var fbxLayerElement = FbxLayerElementBinormal.Create (fbxMesh, "Binormals")) 
-                {
-                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
-                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
+                /// Set the binormals on Layer 0.
+                if (mesh.Binormals != null && mesh.Binormals.Length > 0 && mesh.Binormals.Length == unmergedTriangles.Length) {
+                    using (var fbxLayerElement = FbxLayerElementBinormal.Create (fbxMesh, "Binormals")) {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
 
-                    // Add one normal per each vertex face index (3 per triangle)
-                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+                        // Add one normal per each vertex face index (3 per triangle)
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
 
-                    for (int n = 0; n < unmergedTriangles.Length; n++) {
-                        int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (ConvertNormalToRightHanded (mesh.Binormals [unityTriangle]));
+                        for (int n = 0; n < unmergedTriangles.Length; n++) {
+                            int unityTriangle = unmergedTriangles [n];
+                            fbxElementArray.Add (ConvertNormalToRightHanded (mesh.Binormals [unityTriangle]));
+                        }
+                        fbxLayer.SetBinormals (fbxLayerElement);
                     }
-                    fbxLayer.SetBinormals (fbxLayerElement);
                 }
 
                 /// Set the tangents on Layer 0.
-                using (var fbxLayerElement = FbxLayerElementTangent.Create (fbxMesh, "Tangents")) 
-                {
-                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
-                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
+                if (mesh.Tangents != null && mesh.Tangents.Length > 0 && mesh.Tangents.Length == unmergedTriangles.Length) {
+                    using (var fbxLayerElement = FbxLayerElementTangent.Create (fbxMesh, "Tangents")) {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
 
-                    // Add one normal per each vertex face index (3 per triangle)
-                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+                        // Add one normal per each vertex face index (3 per triangle)
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
 
-                    for (int n = 0; n < unmergedTriangles.Length; n++) {
-                        int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (ConvertNormalToRightHanded(
-                            new Vector3(
-                                mesh.Tangents[unityTriangle][0],
-                                mesh.Tangents[unityTriangle][1],
-                                mesh.Tangents[unityTriangle][2]
-                            )));
+                        for (int n = 0; n < unmergedTriangles.Length; n++) {
+                            int unityTriangle = unmergedTriangles [n];
+                            fbxElementArray.Add (ConvertNormalToRightHanded (
+                                new Vector3 (
+                                    mesh.Tangents [unityTriangle] [0],
+                                    mesh.Tangents [unityTriangle] [1],
+                                    mesh.Tangents [unityTriangle] [2]
+                                )));
+                        }
+                        fbxLayer.SetTangents (fbxLayerElement);
                     }
-                    fbxLayer.SetTangents (fbxLayerElement);
                 }
 
                 ExportUVs (fbxMesh, mesh, unmergedTriangles);
 
-                using (var fbxLayerElement = FbxLayerElementVertexColor.Create (fbxMesh, "VertexColors")) 
-                {
-                    fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
-                    fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
+                if (mesh.VertexColors != null && mesh.VertexColors.Length > 0) {
+                    using (var fbxLayerElement = FbxLayerElementVertexColor.Create (fbxMesh, "VertexColors")) {
+                        fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
+                        fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
 
-                    // set texture coordinates per vertex
-                    FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
+                        // set texture coordinates per vertex
+                        FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
 
-                    // (Uni-31596) only copy unique UVs into this array, and index appropriately
-                    for (int n = 0; n < mesh.VertexColors.Length; n++) {
-                        // Converting to Color from Color32, as Color32 stores the colors
-                        // as ints between 0-255, while FbxColor and Color
-                        // use doubles between 0-1
-                        Color color = mesh.VertexColors [n];
-                        fbxElementArray.Add (new FbxColor (color.r,
-                            color.g,
-                            color.b,
-                            color.a));
+                        // (Uni-31596) only copy unique UVs into this array, and index appropriately
+                        for (int n = 0; n < mesh.VertexColors.Length; n++) {
+                            // Converting to Color from Color32, as Color32 stores the colors
+                            // as ints between 0-255, while FbxColor and Color
+                            // use doubles between 0-1
+                            Color color = mesh.VertexColors [n];
+                            fbxElementArray.Add (new FbxColor (color.r,
+                                color.g,
+                                color.b,
+                                color.a));
+                        }
+
+                        // For each face index, point to a texture uv
+                        FbxLayerElementArray fbxIndexArray = fbxLayerElement.GetIndexArray ();
+                        fbxIndexArray.SetCount (unmergedTriangles.Length);
+
+                        for (int i = 0; i < unmergedTriangles.Length; i++) {
+                            fbxIndexArray.SetAt (i, unmergedTriangles [i]);
+                        }
+                        fbxLayer.SetVertexColors (fbxLayerElement);
                     }
-
-                    // For each face index, point to a texture uv
-                    FbxLayerElementArray fbxIndexArray = fbxLayerElement.GetIndexArray ();
-                    fbxIndexArray.SetCount (unmergedTriangles.Length);
-
-                    for(int i = 0; i < unmergedTriangles.Length; i++){
-                        fbxIndexArray.SetAt (i, unmergedTriangles [i]);
-                    }
-                    fbxLayer.SetVertexColors (fbxLayerElement);
                 }
             }
 
@@ -1257,13 +1262,17 @@ namespace FbxExporters
                             var normals = Normals;
                             var tangents = Tangents;
 
-                            m_Binormals = new Vector3 [normals.Length];
+                            if (normals != null && normals.Length > 0 &&
+                                tangents != null && tangents.Length > 0 &&
+                                normals.Length == tangents.Length
+                            ) {
+                                m_Binormals = new Vector3 [normals.Length];
 
-                            for (int i = 0; i < normals.Length; i++)
-                                m_Binormals [i] = Vector3.Cross (normals [i],
-                                    tangents [i])
+                                for (int i = 0; i < normals.Length; i++)
+                                    m_Binormals [i] = Vector3.Cross (normals [i],
+                                        tangents [i])
                                     * tangents [i].w;
-
+                            }
                         }
                         return m_Binormals;
                     }
