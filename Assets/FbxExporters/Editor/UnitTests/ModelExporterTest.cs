@@ -326,13 +326,17 @@ namespace FbxExporters.UnitTests
 
         [Test]
         public void TestExportCamera(){
+            // NOTE: even though the aspect ratio is exported,
+            //       it does not get imported back into Unity.
+            //       Therefore don't modify or check if camera.aspect is the same
+            //       after export.
+
             // create a Unity camera
             GameObject cameraObj = new GameObject("TestCamera");
             Camera camera = cameraObj.AddComponent<Camera> ();
 
             // change some of the default settings
             camera.orthographic = false;
-            camera.aspect = 0.5f;
             camera.fieldOfView = 17.5f;
             camera.nearClipPlane = 1.2f;
             camera.farClipPlane = 1345;
@@ -344,7 +348,6 @@ namespace FbxExporters.UnitTests
 
             // test export orthographic camera
             camera.orthographic = true;
-            camera.aspect = 1.2f;
             camera.fieldOfView = 78;
             camera.nearClipPlane = 19;
             camera.farClipPlane = 500.6f;
@@ -370,12 +373,11 @@ namespace FbxExporters.UnitTests
             return fbxCamera;
         }
 
-        private void CompareCameraValues(Camera camera, Camera fbxCamera){
+        private void CompareCameraValues(Camera camera, Camera fbxCamera, float delta=0.001f){
             Assert.AreEqual (camera.orthographic, fbxCamera.orthographic);
-            Assert.AreEqual (camera.aspect, fbxCamera.aspect);
-            Assert.AreEqual (camera.fieldOfView, fbxCamera.fieldOfView);
-            Assert.AreEqual (camera.nearClipPlane, fbxCamera.nearClipPlane);
-            Assert.AreEqual (camera.farClipPlane, fbxCamera.farClipPlane);
+            Assert.AreEqual (camera.fieldOfView, fbxCamera.fieldOfView, delta);
+            Assert.AreEqual (camera.nearClipPlane, fbxCamera.nearClipPlane, delta);
+            Assert.AreEqual (camera.farClipPlane, fbxCamera.farClipPlane, delta);
         }
     }
 }
