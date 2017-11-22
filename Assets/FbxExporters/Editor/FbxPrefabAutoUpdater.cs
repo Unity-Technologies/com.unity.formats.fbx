@@ -983,13 +983,24 @@ namespace FbxExporters
                                 prefabComponent = prefabXfo.gameObject.AddComponent(fbxComponent.t);
                                 Log("created component {0}:{1}", nodeName, fbxComponent.t);
                             }
-                            // Check that the component exists before copying to it.
-                            // This happens for Rect Transform components as the fbx
-                            // contains a Transform which it tries to add/update on the
-                            // prefab, but fails because you cannot have both a Transform
-                            // and a Rect Transform
-                            // UNI-29179 TODO: better handling of Rect Transforms
+
                             if (!prefabComponent) {
+                                
+                                index = prefabComponents.FindIndex(x => x.GetType() == typeof(RectTransform));
+                                prefabComponent = prefabComponents[index];
+                                prefabComponents.RemoveAt(index);
+
+                                GameObject tempGameObject = new GameObject();
+                                Transform tempTransform = tempGameObject.transform;
+
+                                UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponent.jsonValue, tempTransform);
+
+                                prefabComponent.gameObject.GetComponent<RectTransform>().rotation = tempTransform.rotation;
+                                prefabComponent.gameObject.GetComponent<RectTransform>().position = tempTransform.position;
+                                prefabComponent.gameObject.GetComponent<RectTransform>().localScale = tempTransform.localScale;
+                                GameObject.DestroyImmediate(tempGameObject);
+
+                                Log("updated component {0}:{1}", nodeName, typeof(RectTransform));
                                 continue;
                             }
                             // Now set the values.
