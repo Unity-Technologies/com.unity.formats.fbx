@@ -23,7 +23,7 @@ endif()
 message(STATUS "Building for ${CMAKE_BUILD_TYPE}")
 
 if (NOT DEFINED PACKAGE_VERSION OR "${PACKAGE_VERSION}" STREQUAL "")
-    set(PACKAGE_VERSION "1.1.0b1")
+    set(PACKAGE_VERSION "sprint34")
 endif()
 message(STATUS "Using Package Version: ${PACKAGE_VERSION}")
 
@@ -94,14 +94,6 @@ add_custom_target(
 
 ###########################################################################
 # Add target to replace the unity package version number in files
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-  set(VERSION_AS_STRING "\\'${PACKAGE_VERSION}\\'")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-  set(VERSION_AS_STRING "'${PACKAGE_VERSION}'")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set(VERSION_AS_STRING "\\'${PACKAGE_VERSION}\\'")
-endif()
-
 set(README_TARGET readme_replace)
 add_custom_target(
     ${README_TARGET}
@@ -110,11 +102,6 @@ add_custom_target(
             "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/README.txt"
             ".*VERSION.*:.*"
             "VERSION: ${PACKAGE_VERSION}"
-    COMMAND ${PYTHON_EXECUTABLE}
-            "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
-            "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scripts/UnityFbxForMaya/version.py"
-            ".*VERSION.*=.*"
-            "VERSION = ${VERSION_AS_STRING}"
     DEPENDS "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
     COMMENT "Replacing version number in files with ${PACKAGE_VERSION}"
 )
@@ -131,12 +118,6 @@ set(MAX_INTEGRATION_ZIP_NAME "UnityFbxForMax.zip")
 file(REMOVE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME}")
 file(REMOVE "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAX_INTEGRATION_ZIP_NAME}")
 
-# remove .pyc files that we don't want to ship
-file(GLOB PYC_FILES "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scripts/unityOneClick/*.pyc")
-IF( PYC_FILES )
-    file(REMOVE ${PYC_FILES})
-ENDIF()
-
 # remove .meta files from Integrations
 file(GLOB_RECURSE META_FILES "${CMAKE_SOURCE_DIR}/Assets/Integrations/*.meta")
 
@@ -146,7 +127,6 @@ add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
     ENDIF
     COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_SOURCE_DIR}/Assets/FbxExporters/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
        "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya" 
-       "${CMAKE_SOURCE_DIR}/Assets/Integrations/.gitignore"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Assets
     COMMENT "Zipping Maya Integration folder"
     DEPENDS ${README_TARGET}

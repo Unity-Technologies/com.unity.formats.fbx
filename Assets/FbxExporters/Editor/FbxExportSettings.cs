@@ -45,6 +45,16 @@ namespace FbxExporters.EditorTools {
                 exportSettings.centerObjects
             );
 
+            EditorGUILayout.Space();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
+                " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - 3));
+            exportSettings.ExportFormatSelection = EditorGUILayout.Popup(exportSettings.ExportFormatSelection, new string[]{"Binary", "ASCII"});
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.Space();
+
             GUILayout.BeginHorizontal ();
             GUILayout.Label (new GUIContent (
                 "Export Path:",
@@ -87,6 +97,38 @@ namespace FbxExporters.EditorTools {
             }
             GUILayout.EndHorizontal ();
 
+            GUILayout.BeginHorizontal ();
+            GUILayout.Label (new GUIContent (
+                "Integrations Path:",
+                "Installation path for 3D application integrations."), GUILayout.Width(LabelWidth - 3));
+
+            var IntegrationsPathLabel = ExportSettings.GetIntegrationSavePath();
+            EditorGUILayout.SelectableLabel(IntegrationsPathLabel,
+                EditorStyles.textField,
+                GUILayout.MinWidth(SelectableLabelMinWidth),
+                GUILayout.Height(EditorGUIUtility.singleLineHeight));
+
+            if (GUILayout.Button(new GUIContent("...", "Browse to a new installation path for 3D application integrations"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
+            {
+                string initialPath = ExportSettings.GetIntegrationSavePath();
+
+                string fullPath = EditorUtility.OpenFolderPanel(
+                        "Select Integrations Path", initialPath, null
+                        );
+
+                if (!string.IsNullOrEmpty(fullPath))
+                {
+                    ExportSettings.SetIntegrationSavePath(fullPath);
+
+                    // Make sure focus is removed from the selectable label
+                    // otherwise it won't update
+                    GUIUtility.hotControl = 0;
+                    GUIUtility.keyboardControl = 0;                    
+                }
+            }
+
+            GUILayout.EndHorizontal();
+
             EditorGUILayout.Space ();
 
             GUILayout.BeginHorizontal ();
@@ -111,29 +153,15 @@ namespace FbxExporters.EditorTools {
                     throw new System.NotImplementedException ();
                 }
 
-                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.kDefaultAdskRoot, ext);
+                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.GetFirstValidVendorLocation(), ext);
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (dccPath)) {
-                    // get the directory of the executable
-                    var md = Directory.GetParent (dccPath);
-                    // UNI-29074 TODO: add Maya LT support
-                    // Check that the executable is not in a MayaLT directory (thus being MayaLT instead of Maya executable).
-                    // On Mac path resembles: /Applications/Autodesk/mayaLT2018/Maya.app
-                    // On Windows path resembles: C:\Program Files\Autodesk\MayaLT2018\bin\maya.exe
-                    // Therefore check both executable folder (for Mac) and its parent (for Windows)
-                    if (md.Name.ToLower().StartsWith("mayalt") || md.Parent.Name.ToLower ().StartsWith ("mayalt")) {
-                        Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", md.FullName));
-                        return;
-                    }
-
                     ExportSettings.DCCType foundDCC = ExportSettings.DCCType.Maya;
                     var foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Maya);
                     if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor) {
-                        
                         foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
                         foundDCC = ExportSettings.DCCType.Max;
-                        
                     }
                     if (foundDCCPath == null) {
                         Debug.LogError (string.Format ("Could not find supported 3D application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
@@ -146,7 +174,9 @@ namespace FbxExporters.EditorTools {
             }
             GUILayout.EndHorizontal ();
 
-			var installIntegrationContent = new GUIContent(
+            EditorGUILayout.Space();
+
+            var installIntegrationContent = new GUIContent(
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
             if (GUILayout.Button (installIntegrationContent)) {
@@ -154,8 +184,8 @@ namespace FbxExporters.EditorTools {
             }
 
             exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
-                new GUIContent("Launch 3D Application:",
-                    "Launch the selected application after unity integration is completed."),
+                new GUIContent("Keep 3D Application opened:",
+                    "Keep the selected 3D application open after Unity integration install has completed."),
                 exportSettings.launchAfterInstallation
             );
 
@@ -218,26 +248,50 @@ namespace FbxExporters.EditorTools {
     public class ExportSettings : ScriptableSingleton<ExportSettings>
     {
         public const string kDefaultSavePath = ".";
-        private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName, kBlenderOptionName };
+        private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};
         //Any additional names require a space after the name
         public const string kMaxOptionName = "3ds Max ";
         public const string kMayaOptionName = "Maya ";
         public const string kMayaLtOptionName = "MayaLT ";
-        public const string kBlenderOptionName = "Blender ";
+
+        private static string DefaultIntegrationSavePath {
+            get{
+                return Path.GetDirectoryName(Application.dataPath);
+            }
+        }
 
         /// <summary>
-        /// The path where all the different versions of Maya are installed
+        /// The paths where all the different versions of Maya are installed
         /// by default. Depends on the platform.
         /// </summary>
-        public static string kDefaultAdskRoot {
+        public static string[] DCCVendorLocations {
             get{
-                switch (Application.platform) {
-                case RuntimePlatform.WindowsEditor:
-                    return "C:/Program Files/Autodesk";
-                case RuntimePlatform.OSXEditor:
-                    return "/Applications/Autodesk";
-                default:
-                    throw new NotImplementedException ();
+                var environmentVariable = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
+                if (environmentVariable != null)
+                {
+                    string[] locations = environmentVariable.Split(';');
+                    List<string> locationsList = new List<string>();
+                    for (int i = 0; i < locations.Length; i++)
+                    {
+                        if (Directory.Exists(locations[i]))
+                        {
+                            locationsList.Add(locations[i]);
+                        }
+                    }
+                    if (locationsList.Count > 0)
+                    {
+                        return locationsList.ToArray();
+                    }
+                }
+
+                switch (Application.platform)
+                {
+                    case RuntimePlatform.WindowsEditor:
+                        return new string[] { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
+                    case RuntimePlatform.OSXEditor:
+                        return new string[] { "/Applications/Autodesk" };
+                    default:
+                        throw new NotImplementedException();
                 }
             }
         }
@@ -246,6 +300,9 @@ namespace FbxExporters.EditorTools {
         public bool mayaCompatibleNames;
         public bool centerObjects;
         public bool launchAfterInstallation;
+        public int ExportFormatSelection;
+
+        public string IntegrationSavePath;
 
         public int selectedDCCApp = 0;
 
@@ -274,7 +331,9 @@ namespace FbxExporters.EditorTools {
             mayaCompatibleNames = true;
             centerObjects = true;
             launchAfterInstallation = true;
+            ExportFormatSelection = 0;
             convertToModelSavePath = kDefaultSavePath;
+            IntegrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
         }
@@ -425,7 +484,7 @@ namespace FbxExporters.EditorTools {
             else
             {
                 float fVersion;
-                //In case we are looking at a Blender version- the int parse will fail so we'll need to parse it as a float.
+                //In case we are looking at something with a decimal based version- the int parse will fail so we'll need to parse it as a float.
                 if (float.TryParse(number, out fVersion))
                 {
                    return (int)fVersion;
@@ -444,51 +503,65 @@ namespace FbxExporters.EditorTools {
             var dccOptionName = instance.dccOptionNames;
             var dccOptionPath = instance.dccOptionPaths;
 
-            // If the location is given by the environment, use it.
-            var location = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
-            if (!string.IsNullOrEmpty(location)) {
-                location = location.TrimEnd('/');
-                dccOptionPath.Add (GetMayaExePath (location.Replace ("\\", "/")));
-                dccOptionName.Add ("MAYA_LOCATION");
-            }
-
-            if (!Directory.Exists (kDefaultAdskRoot)) {
-                // no autodesk products installed
-                return;
-            }
-            // List that directory and find the right version:
-            // either the newest version, or the exact version we wanted.
-            var adskRoot = new System.IO.DirectoryInfo(kDefaultAdskRoot);
-            foreach(var productDir in adskRoot.GetDirectories()) {
-                var product = productDir.Name;
-
-                // Only accept those that start with 'maya' in either case.
-                if (product.StartsWith ("maya", StringComparison.InvariantCultureIgnoreCase)) {
-                    // UNI-29074 TODO: add Maya LT support
-                    // Reject MayaLT -- it doesn't have plugins.
-                    if (product.StartsWith ("mayalt", StringComparison.InvariantCultureIgnoreCase)) {
-                        continue;
-                    }
-                    string version = product.Substring ("maya".Length);
-                    dccOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
-                    dccOptionName.Add (GetUniqueDCCOptionName(kMayaOptionName + version));
+            for (int i = 0; i < DCCVendorLocations.Length; i++)
+            {
+                if (!Directory.Exists(DCCVendorLocations[i]))
+                {
+                    // no autodesk products installed
+                    continue;
                 }
+                // List that directory and find the right version:
+                // either the newest version, or the exact version we wanted.
+                var adskRoot = new System.IO.DirectoryInfo(DCCVendorLocations[i]);
+                foreach (var productDir in adskRoot.GetDirectories())
+                {
+                    var product = productDir.Name;
 
-                if (product.StartsWith ("3ds max", StringComparison.InvariantCultureIgnoreCase)) {
-                    var exePath = string.Format ("{0}/{1}", productDir.FullName.Replace ("\\", "/"), "3dsmax.exe");
-
-                    string version = product.Substring("3ds max ".Length);
-                    var maxOptionName = GetUniqueDCCOptionName(kMaxOptionName + version);
-
-                    if (IsEarlierThanMax2017 (maxOptionName)) {
+                    // Only accept those that start with 'maya' in either case.
+                    if (product.StartsWith ("maya", StringComparison.InvariantCultureIgnoreCase)) {
+                        string version = product.Substring ("maya".Length);
+                        dccOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
+                        dccOptionName.Add (GetUniqueDCCOptionName(kMayaOptionName + version));
                         continue;
                     }
-                    
-                    dccOptionPath.Add (exePath);
-                    dccOptionName.Add (maxOptionName);
+
+                    if (product.StartsWith("3ds max", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        var exePath = string.Format("{0}/{1}", productDir.FullName.Replace("\\", "/"), "3dsmax.exe");
+
+                        string version = product.Substring("3ds max ".Length);
+                        var maxOptionName = GetUniqueDCCOptionName(kMaxOptionName + version);
+
+                        if (IsEarlierThanMax2017(maxOptionName))
+                        {
+                            continue;
+                        }
+
+                        dccOptionPath.Add(exePath);
+                        dccOptionName.Add(maxOptionName);
+                    }
                 }
             }
             instance.selectedDCCApp = instance.GetPreferredDCCApp();
+        }
+
+        /// <summary>
+        /// Returns the first valid folder in our list of vendor locations
+        /// </summary>
+        /// <returns>The first valid vendor location</returns>
+        public static string GetFirstValidVendorLocation()
+        {
+            string[] locations = DCCVendorLocations;
+            for (int i = 0; i < locations.Length; i++)
+            {
+                //Look through the list of locations we have and take the first valid one
+                if (Directory.Exists(locations[i]))
+                {
+                    return locations[i];
+                }
+            }
+            //if no valid locations exist, just take us to the project folder
+            return Directory.GetCurrentDirectory();
         }
 
         /// <summary>
@@ -549,6 +622,7 @@ namespace FbxExporters.EditorTools {
             }
 
             if (instance.dccOptionPaths.Count <= 0) {
+                instance.selectedDCCApp = 0;
                 return new GUIContent[]{
                     new GUIContent("<No 3D Application found>")
                 };
@@ -583,13 +657,6 @@ namespace FbxExporters.EditorTools {
             switch (dcc) {
             case DCCType.Maya:
                 var version = AskMayaVersion(newOption);
-
-                // UNI-29074 TODO: add Maya LT support
-                // make sure this is not Maya LT
-                if (version.ToLower ().StartsWith ("lt")) {
-                    Debug.LogError (string.Format("Unity Integration does not support Maya LT: \"{0}\"", newOption));
-                    return;
-                }
                 optionName = GetUniqueDCCOptionName("Maya " + version);
                 break;
             case DCCType.Max:
@@ -631,7 +698,7 @@ namespace FbxExporters.EditorTools {
 
             // Output is like: Maya 2018, Cut Number 201706261615
             // We want the stuff after 'Maya ' and before the comma.
-            // TODO: less brittle! Consider also the mel command "about -version".
+            // (Uni-31601) less brittle! Consider also the mel command "about -version".
             var commaIndex = resultString.IndexOf(',');
             return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
         }
@@ -653,6 +720,11 @@ namespace FbxExporters.EditorTools {
         public static string GetSelectedDCCPath()
         {
             return (instance.dccOptionPaths.Count>0) ? instance.dccOptionPaths [instance.selectedDCCApp] : "";
+        }
+
+        public static string GetSelectedDCCName()
+        {
+            return (instance.dccOptionPaths.Count>0) ? instance.dccOptionNames [instance.selectedDCCApp] : "";
         }
 
         /// <summary>
@@ -685,6 +757,22 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         public static void SetRelativeSavePath(string newPath) {
             instance.convertToModelSavePath = NormalizePath(newPath, isRelative: true);
+        }
+
+        public static string GetIntegrationSavePath()
+        {
+            //If the save path gets messed up and ends up not being valid, just use the project folder as the default
+            if (string.IsNullOrEmpty(instance.IntegrationSavePath.Trim()) || !Directory.Exists(instance.IntegrationSavePath))
+            {
+                //The project folder, above the asset folder
+                instance.IntegrationSavePath = DefaultIntegrationSavePath;
+            }
+            return instance.IntegrationSavePath;
+        }
+
+        public static void SetIntegrationSavePath(string newPath)
+        {
+            instance.IntegrationSavePath = newPath;
         }
 
         /// <summary>

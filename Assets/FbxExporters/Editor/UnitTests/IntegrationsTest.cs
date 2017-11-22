@@ -1,3 +1,10 @@
+// ***********************************************************************
+// Copyright (c) 2017 Unity Technologies. All rights reserved.
+//
+// Licensed under the ##LICENSENAME##.
+// See LICENSE.md file in the project root for full license information.
+// ***********************************************************************
+
 using UnityEngine;
 using UnityEditor;
 using System.IO;
@@ -27,25 +34,56 @@ namespace FbxExporters.UnitTests
 
         [Test]
         public void BasicTest() {
-            Assert.IsFalse(Editor.MayaIntegration.IsHeadlessInstall());
+            // test Maya integration
+           {
+                var mayaIntegration = new Editor.MayaIntegration ();
 
-            LogNonEmptyString("module path", Editor.MayaIntegration.GetModulePath());
-            LogNonEmptyString("module template path", Editor.MayaIntegration.GetModuleTemplatePath());
+                LogNonEmptyString ("display name", mayaIntegration.DccDisplayName);
+                LogNonEmptyString ("integration zip path", mayaIntegration.IntegrationZipPath);
 
-            LogNonEmptyString("app path", Editor.MayaIntegration.GetAppPath());
-            LogNonEmptyString("project path", Editor.MayaIntegration.GetProjectPath());
-            LogNonEmptyString("package path", Editor.MayaIntegration.GetPackagePath());
-            LogNonEmptyString("package version", Editor.MayaIntegration.GetPackageVersion());
-            LogNonEmptyString("temp path", Editor.MayaIntegration.GetTempSavePath());
-            LogNonEmptyString("export settings path", Editor.MayaIntegration.GetExportSettingsPath ());
-            LogNonEmptyString ("instruction path", Editor.MayaIntegration.GetMayaInstructionPath ());
-            LogNonEmptyString ("full instruction path", Editor.MayaIntegration.GetFullMayaInstructionPath ());
+                Assert.IsFalse (Editor.MayaIntegration.IsHeadlessInstall ());
 
-            // test that the paths don't contain backslashes
-            Assert.IsFalse(Editor.MayaIntegration.GetAppPath().Contains("\\"));
-            Assert.IsFalse(Editor.MayaIntegration.GetProjectPath().Contains("\\"));
-            Assert.IsFalse(Editor.MayaIntegration.GetTempSavePath().Contains("\\"));
-            Assert.IsFalse(Editor.MayaIntegration.GetExportSettingsPath ().Contains("\\"));
+                LogNonEmptyString ("module template path", mayaIntegration.GetModuleTemplatePath ());
+                LogNonEmptyString ("package path", Editor.MayaIntegration.GetPackagePath ());
+
+                LogNonEmptyString ("export settings path", mayaIntegration.GetExportSettingsPath ());
+                LogNonEmptyString ("package version", Editor.MayaIntegration.GetPackageVersion ());
+
+                // check if folder is unzipped at invalid paths
+                Assert.IsFalse (mayaIntegration.FolderAlreadyUnzippedAtPath (null));
+                Assert.IsFalse (mayaIntegration.FolderAlreadyUnzippedAtPath (""));
+                Assert.IsFalse (mayaIntegration.FolderAlreadyUnzippedAtPath ("X:/a/b/a/c"));
+
+                // test that the paths don't contain backslashes
+                Assert.IsFalse (Editor.MayaIntegration.GetProjectPath ().Contains ("\\"));
+                Assert.IsFalse (mayaIntegration.GetExportSettingsPath ().Contains ("\\"));
+            }
+
+            // test Maya LT integration
+            {
+                var mayaLTIntegration = new Editor.MayaLTIntegration ();
+
+                // make sure that the values we get are for Maya LT since it inherits a lot from Maya Integration
+                Assert.AreEqual ("Maya LT", mayaLTIntegration.DccDisplayName);
+            }
+
+            // test 3ds Max integration
+            {
+                var maxIntegration = new Editor.MaxIntegration ();
+
+                LogNonEmptyString ("display name", maxIntegration.DccDisplayName);
+                LogNonEmptyString ("integration zip path", maxIntegration.IntegrationZipPath);
+
+                // check getting absolute path
+                var absPath = Editor.MaxIntegration.GetAbsPath ("foo");
+                Assert.IsTrue (System.IO.Path.IsPathRooted (absPath));
+                Assert.IsFalse (absPath.Contains ("\\"));
+
+                // check if folder is unzipped at invalid paths
+                Assert.IsFalse (maxIntegration.FolderAlreadyUnzippedAtPath (null));
+                Assert.IsFalse (maxIntegration.FolderAlreadyUnzippedAtPath (""));
+                Assert.IsFalse (maxIntegration.FolderAlreadyUnzippedAtPath ("X:/a/b/a/c"));
+            }
         }
     }
 }

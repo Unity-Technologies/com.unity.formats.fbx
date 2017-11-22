@@ -1,0 +1,8 @@
+FBXResetImport;
+
+FBXImportAxisConversionEnable -v true;
+FBXImportCameras -v true;
+FBXImportLights -v true;
+
+// Add and update animation
+FBXImportMode -v merge;
