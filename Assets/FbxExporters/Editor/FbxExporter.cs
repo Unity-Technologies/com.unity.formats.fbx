@@ -766,7 +766,7 @@ namespace FbxExporters
             /// <summary>
             /// Exports camera component
             /// </summary>
-            protected bool ExportCamera (GameObject unityGO, FbxScene fbxScene, FbxNode fbxNode, bool addAsChildNode=false)
+            protected bool ExportCamera (GameObject unityGO, FbxScene fbxScene, FbxNode fbxNode)
             {
                 Camera unityCamera = unityGO.GetComponent<Camera> ();
                 if (unityCamera == null) {
@@ -806,29 +806,22 @@ namespace FbxExporters
                 // FarPlane
                 fbxCamera.SetFarPlane (unityCamera.farClipPlane*100);
 
-                FbxNode cameraNode = fbxNode;
-                // fbxNode already has a node attribute, so add the camera as a child of fbxNode
-                if (addAsChildNode) {
-                    cameraNode = FbxNode.Create (fbxScene, GetUniqueName (unityGO.name + "_Camera"));
-                    fbxNode.AddChild (cameraNode);
-                }
-
                 // Export backgroundColor as a custom property
                 // NOTE: export on fbxNode so that it will show up in Maya
-                ExportColorProperty (cameraNode, unityCamera.backgroundColor,
+                ExportColorProperty (fbxNode, unityCamera.backgroundColor,
                     MakeName("backgroundColor"), 
                     "The color with which the screen will be cleared.");
 
                 // Export clearFlags as a custom property
                 // NOTE: export on fbxNode so that it will show up in Maya
-                ExportIntProperty (cameraNode, (int)unityCamera.clearFlags,
+                ExportIntProperty (fbxNode, (int)unityCamera.clearFlags,
                     MakeName("clearFlags"), 
                     "How the camera clears the background.");
 
-                cameraNode.SetNodeAttribute (fbxCamera);
+                fbxNode.SetNodeAttribute (fbxCamera);
 
                 // make the last camera exported the default camera
-                DefaultCamera = cameraNode.GetName ();
+                DefaultCamera = fbxNode.GetName ();
 
                 return true;
             }
@@ -939,10 +932,10 @@ namespace FbxExporters
                     exportedMesh = ExportMesh (unityGo, fbxNode);
                 }
 
-                // try export camera
-                // if a mesh has already been added to fbxNode, add camera as child node of fbxNode
-                bool addAsChildNode = exportedMesh? true : false; // adding this extra step so it's clearer what we are passing
-                ExportCamera(unityGo, fbxScene, fbxNode, addAsChildNode);
+                // export camera, but only if no mesh was exported
+                if (!exportedMesh) {
+                    ExportCamera (unityGo, fbxScene, fbxNode);
+                }
 
                 if (Verbose)
                     Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
