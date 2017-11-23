@@ -695,7 +695,7 @@ namespace FbxExporters.Editor
                 message = string.Format("Failed to configure {0}, please check logs (exitcode={1}).", dcc, exitCode);
             } else {
                 title = string.Format("Completed installation of {0} Integration.", dcc);
-                message = string.Format("Enjoy the new Unity menu in {0}.", dcc);
+                message = string.Format("You can enjoy the new Unity menu in {0} when loading is complete.", dcc);
             }
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
