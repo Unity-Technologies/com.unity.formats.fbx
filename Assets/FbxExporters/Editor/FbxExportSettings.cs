@@ -13,6 +13,7 @@ namespace FbxExporters.EditorTools {
         const float LabelWidth = 130;
         const float SelectableLabelMinWidth = 90;
         const float BrowseButtonWidth = 25;
+        const float FieldOffset = 17;
 
         public override void OnInspectorGUI() {
             ExportSettings exportSettings = (ExportSettings)target;
@@ -51,7 +52,7 @@ namespace FbxExporters.EditorTools {
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
-                " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - 17));
+                " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
             exportSettings.ExportFormatSelection = EditorGUILayout.Popup(exportSettings.ExportFormatSelection, new string[]{"Binary", "ASCII"});
             GUILayout.EndHorizontal();
 
@@ -63,7 +64,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal ();
             EditorGUILayout.LabelField(new GUIContent (
                 "Export Path:",
-                "Relative path for saving Model Prefabs."), GUILayout.Width(LabelWidth - 17));
+                "Relative path for saving Model Prefabs."), GUILayout.Width(LabelWidth - FieldOffset));
 
             var pathLabel = ExportSettings.GetRelativeSavePath();
             if (pathLabel == ".") { pathLabel = "(Assets root)"; }
@@ -105,7 +106,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal ();
             EditorGUILayout.LabelField(new GUIContent (
                 "Integrations Path:",
-                "Installation path for 3D application integrations."), GUILayout.Width(LabelWidth - 17));
+                "Installation path for 3D application integrations."), GUILayout.Width(LabelWidth - FieldOffset));
 
             var IntegrationsPathLabel = ExportSettings.GetIntegrationSavePath();
             EditorGUILayout.SelectableLabel(IntegrationsPathLabel,
@@ -139,7 +140,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.BeginHorizontal ();
             EditorGUILayout.LabelField(new GUIContent (
                 "3D Application:",
-                "Select the 3D Application for which you would like to install the Unity integration."), GUILayout.Width(LabelWidth - 17));
+                "Select the 3D Application for which you would like to install the Unity integration."), GUILayout.Width(LabelWidth - FieldOffset));
             
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
