@@ -991,14 +991,21 @@ namespace FbxExporters
                                 prefabComponents.RemoveAt(index);
 
                                 GameObject tempGameObject = new GameObject();
-                                Transform tempTransform = tempGameObject.transform;
+                                try
+                                {
+                                    
+                                    Transform tempTransform = tempGameObject.transform;
 
-                                UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponent.jsonValue, tempTransform);
+                                    UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponent.jsonValue, tempTransform);
 
-                                prefabComponent.gameObject.GetComponent<RectTransform>().rotation = tempTransform.rotation;
-                                prefabComponent.gameObject.GetComponent<RectTransform>().position = tempTransform.position;
-                                prefabComponent.gameObject.GetComponent<RectTransform>().localScale = tempTransform.localScale;
-                                GameObject.DestroyImmediate(tempGameObject);
+                                    prefabComponent.gameObject.GetComponent<RectTransform>().rotation = tempTransform.rotation;
+                                    prefabComponent.gameObject.GetComponent<RectTransform>().position = tempTransform.position;
+                                    prefabComponent.gameObject.GetComponent<RectTransform>().localScale = tempTransform.localScale;
+                                }
+                                finally
+                                {
+                                    GameObject.DestroyImmediate(tempGameObject);
+                                }
 
                                 Log("updated component {0}:{1}", nodeName, typeof(RectTransform));
                                 continue;
