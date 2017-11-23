@@ -174,7 +174,7 @@ namespace FbxExporters
                 // Set the normals on Layer 0.
                 FbxLayer fbxLayer = GetOrCreateLayer(fbxMesh);
 
-                if (mesh.Normals != null && mesh.Normals.Length > 0 && mesh.Normals.Length == unmergedTriangles.Length) {
+                if (mesh.HasValidNormals(unmergedTriangles.Length)) {
                     using (var fbxLayerElement = FbxLayerElementNormal.Create (fbxMesh, "Normals")) {
                         fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
                         fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
@@ -192,7 +192,7 @@ namespace FbxExporters
                 }
 
                 /// Set the binormals on Layer 0.
-                if (mesh.Binormals != null && mesh.Binormals.Length > 0 && mesh.Binormals.Length == unmergedTriangles.Length) {
+                if (mesh.HasValidBinormals(unmergedTriangles.Length)) {
                     using (var fbxLayerElement = FbxLayerElementBinormal.Create (fbxMesh, "Binormals")) {
                         fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
                         fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
@@ -209,7 +209,7 @@ namespace FbxExporters
                 }
 
                 /// Set the tangents on Layer 0.
-                if (mesh.Tangents != null && mesh.Tangents.Length > 0 && mesh.Tangents.Length == unmergedTriangles.Length) {
+                if (mesh.HasValidTangents(unmergedTriangles.Length)) {
                     using (var fbxLayerElement = FbxLayerElementTangent.Create (fbxMesh, "Tangents")) {
                         fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
                         fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eDirect);
@@ -232,7 +232,7 @@ namespace FbxExporters
 
                 ExportUVs (fbxMesh, mesh, unmergedTriangles);
 
-                if (mesh.VertexColors != null && mesh.VertexColors.Length > 0) {
+                if (mesh.HasValidVertexColors(unmergedTriangles.Length)) {
                     using (var fbxLayerElement = FbxLayerElementVertexColor.Create (fbxMesh, "VertexColors")) {
                         fbxLayerElement.SetMappingMode (FbxLayerElement.EMappingMode.eByPolygonVertex);
                         fbxLayerElement.SetReferenceMode (FbxLayerElement.EReferenceMode.eIndexToDirect);
@@ -1262,9 +1262,8 @@ namespace FbxExporters
                             var normals = Normals;
                             var tangents = Tangents;
 
-                            if (normals != null && normals.Length > 0 &&
-                                tangents != null && tangents.Length > 0 &&
-                                normals.Length == tangents.Length
+                            if (IsValidArray<Vector3>(normals) &&
+                                IsValidArray<Vector4>(tangents, normals.Length)
                             ) {
                                 m_Binormals = new Vector3 [normals.Length];
 
@@ -1344,6 +1343,36 @@ namespace FbxExporters
                             this.Materials = new Material[] { DefaultMaterial };
                         }
                     }
+                }
+
+                /// <summary>
+                /// Determines whether this instance is a valid array with the specified length.
+                /// </summary>
+                /// <returns><c>true</c> if this instance is valid array; otherwise, <c>false</c>.</returns>
+                /// <param name="array">Array.</param>
+                /// <param name="expectedLength">Expected length.</param>
+                /// <typeparam name="T">The 1st type parameter.</typeparam>
+                public static bool IsValidArray<T>(T[] array, int expectedLength = -1)
+                {
+                    return array != null &&
+                        array.Length > 0 &&
+                        (expectedLength >= 0 ? array.Length == expectedLength : true);
+                }
+
+                public bool HasValidNormals(int expectedLength){
+                    return IsValidArray<Vector3> (Normals, expectedLength);
+                }
+
+                public bool HasValidBinormals(int expectedLength){
+                    return IsValidArray<Vector3> (Binormals, expectedLength);
+                }
+
+                public bool HasValidTangents(int expectedLength){
+                    return IsValidArray<Vector4> (Tangents, expectedLength);
+                }
+
+                public bool HasValidVertexColors(int expectedLength){
+                    return IsValidArray<Color32> (VertexColors, expectedLength);
                 }
             }
 
