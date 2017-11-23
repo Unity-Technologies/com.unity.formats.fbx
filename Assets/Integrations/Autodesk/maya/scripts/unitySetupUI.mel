@@ -7,6 +7,7 @@ global string $unityImportIconPath = "import.png";
 global string $unityExportIconPath = "export.png";
 global string $unityIconPath = "unity.png";
 
+global string $unityPluginVersion = "{Version}";
 global string $unityFamilyLabel = "The UnityFbxForMaya plugin allows you to reliably exchange and review your work between Maya and Unity.";
 global string $unityImportLabel = "Import an FBX file from a Unity project and auto-configure for exporting";
 global string $unityExportLabel = "Export Model to Unity";
@@ -32,6 +33,11 @@ global proc unitySetupUI(){
     evalDeferred -lowestPriority "unityInstallUI";
 }
 
+global proc unitySetLabelVersion(string $label){
+    global string $unityPluginVersion;
+    return `format -stringArg $label -stringArg $unityPluginVersion "^1s (v.^2s)"`;
+}
+
 global proc unityInstallUI(){
     global string $unityMenuName;
     global string $unityMenuDivider;
@@ -42,6 +48,7 @@ global proc unityInstallUI(){
     global string $unityExportIconPath;
     global string $unityIconPath;
 
+    global string $unityPluginVersion;
     global string $unityFamilyLabel;
     global string $unityImportLabel;
     global string $unityExportLabel;
@@ -53,7 +60,12 @@ global proc unityInstallUI(){
     global string $unityExportCommand;
     
     global string $gMainFileMenu;
-
+    
+    // update family label
+    $unityFamilyLabel = unitySetLabelVersion($unityFamilyLabel);
+    $unityImportLabel = unitySetLabelVersion($unityImportLabel);
+    $unityExportLabel = unitySetLabelVersion($unityExportLabel);
+    
     buildFileMenu;
     $parentMenu = $gMainFileMenu;
     $pluginVersion = unityWhatsNewVersion();
