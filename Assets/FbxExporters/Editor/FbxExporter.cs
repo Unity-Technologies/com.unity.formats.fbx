@@ -683,7 +683,6 @@ namespace FbxExporters
                 FbxDouble3 fbxRotate;
                 UnityEngine.Vector3 unityScale;
 
-
                 switch (exportType) {
                 case TransformExportType.Reset:
                     unityTranslate = Vector3.zero;

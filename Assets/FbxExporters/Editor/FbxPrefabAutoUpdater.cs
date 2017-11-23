@@ -1007,8 +1007,8 @@ namespace FbxExporters
                                     UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponent.jsonValue, tempTransform);
 
                                     var rectTransform = prefabComponent as RectTransform;
-                                    rectTransform.localRotation = tempTransform.rotation;
-                                    rectTransform.localPosition = tempTransform.position;
+                                    rectTransform.localRotation = tempTransform.localRotation;
+                                    rectTransform.localPosition = tempTransform.localPosition;
                                     rectTransform.localScale = tempTransform.localScale;
                                 }
                                 finally
