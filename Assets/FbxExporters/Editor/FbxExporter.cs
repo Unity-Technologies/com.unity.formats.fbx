@@ -184,8 +184,11 @@ namespace FbxExporters
             /// <summary>
             /// Export the mesh's attributes using layer 0.
             /// </summary>
-            void ExportComponentAttributes (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
+            private bool ExportComponentAttributes (MeshInfo mesh, FbxMesh fbxMesh, int[] unmergedTriangles)
             {
+                // return true if any attribute was exported
+                bool exportedAttribute = false;
+
                 // Set the normals on Layer 0.
                 FbxLayer fbxLayer = GetOrCreateLayer(fbxMesh);
 
@@ -202,6 +205,7 @@ namespace FbxExporters
                     }
 
                     fbxLayer.SetNormals (fbxLayerElement);
+                    exportedAttribute = true;
                 }
 
                 /// Set the binormals on Layer 0. 
@@ -218,6 +222,7 @@ namespace FbxExporters
                         fbxElementArray.Add (ConvertNormalToRightHanded (mesh.Binormals [unityTriangle]));
                     }
                     fbxLayer.SetBinormals (fbxLayerElement);
+                    exportedAttribute = true;
                 }
 
                 /// Set the tangents on Layer 0.
@@ -239,9 +244,10 @@ namespace FbxExporters
                             )));
                     }
                     fbxLayer.SetTangents (fbxLayerElement);
+                    exportedAttribute = true;
                 }
 
-                ExportUVs (fbxMesh, mesh, unmergedTriangles);
+                exportedAttribute = exportedAttribute || ExportUVs (fbxMesh, mesh, unmergedTriangles);
 
                 using (var fbxLayerElement = FbxLayerElementVertexColor.Create (fbxMesh, "VertexColors")) 
                 {
@@ -271,7 +277,9 @@ namespace FbxExporters
                         fbxIndexArray.SetAt (i, unmergedTriangles [i]);
                     }
                     fbxLayer.SetVertexColors (fbxLayerElement);
+                    exportedAttribute = true;
                 }
+                return exportedAttribute;
             }
 
             /// <summary>
@@ -280,7 +288,7 @@ namespace FbxExporters
             /// <param name="fbxMesh">Fbx mesh.</param>
             /// <param name="mesh">Mesh.</param>
             /// <param name="unmergedTriangles">Unmerged triangles.</param>
-            static void ExportUVs(FbxMesh fbxMesh, MeshInfo mesh, int[] unmergedTriangles)
+            private static bool ExportUVs(FbxMesh fbxMesh, MeshInfo mesh, int[] unmergedTriangles)
             {
                 Vector2[][] uvs = new Vector2[][] {
                     mesh.UV,
@@ -321,6 +329,9 @@ namespace FbxExporters
                     }
                     k++;
                 }
+
+                // if we incremented k, then at least on set of UV's were exported
+                return k > 0;
             }
 
             /// <summary>
@@ -366,26 +377,26 @@ namespace FbxExporters
             /// <param name="unityPropName">Unity property name, e.g. "_MainTex".</param>
             /// <param name="fbxMaterial">Fbx material.</param>
             /// <param name="fbxPropName">Fbx property name, e.g. <c>FbxSurfaceMaterial.sDiffuse</c>.</param>
-            public void ExportTexture (Material unityMaterial, string unityPropName,
+            public bool ExportTexture (Material unityMaterial, string unityPropName,
                                        FbxSurfaceMaterial fbxMaterial, string fbxPropName)
             {
                 if (!unityMaterial) {
-                    return;
+                    return false;
                 }
 
                 // Get the texture on this property, if any.
                 if (!unityMaterial.HasProperty (unityPropName)) {
-                    return;
+                    return false;
                 }
                 var unityTexture = unityMaterial.GetTexture (unityPropName);
                 if (!unityTexture) {
-                    return;
+                    return false;
                 }
 
                 // Find its filename
                 var textureSourceFullPath = AssetDatabase.GetAssetPath (unityTexture);
                 if (textureSourceFullPath == "") {
-                    return;
+                    return false;
                 }
 
                 // get absolute filepath to texture
@@ -399,7 +410,7 @@ namespace FbxExporters
                 var fbxMaterialProperty = fbxMaterial.FindProperty (fbxPropName);
                 if (fbxMaterialProperty == null || !fbxMaterialProperty.IsValid ()) {
                     Debug.Log ("property not found");
-                    return;
+                    return false;
                 }
 
                 // Find or create an fbx texture and link it up to the fbx material.
@@ -411,6 +422,8 @@ namespace FbxExporters
                     TextureMap.Add (textureSourceFullPath, fbxTexture);
                 }
                 TextureMap [textureSourceFullPath].ConnectDstProperty (fbxMaterialProperty);
+
+                return true;
             }
 
             /// <summary>
@@ -431,7 +444,7 @@ namespace FbxExporters
             /// <summary>
             /// Export (and map) a Unity PBS material to FBX classic material
             /// </summary>
-            public FbxSurfaceMaterial ExportMaterial (Material unityMaterial, FbxScene fbxScene)
+            public bool ExportMaterial (Material unityMaterial, FbxScene fbxScene, FbxNode fbxNode)
             {
                 if (!unityMaterial) {
                     unityMaterial = DefaultMaterial;
@@ -439,7 +452,8 @@ namespace FbxExporters
 
                 var unityName = unityMaterial.name;
                 if (MaterialMap.ContainsKey (unityName)) {
-                    return MaterialMap [unityName];
+                    fbxNode.AddMaterial (MaterialMap [unityName]);
+                    return true;
                 }
 
                 var fbxName = ExportSettings.mayaCompatibleNames
@@ -482,7 +496,8 @@ namespace FbxExporters
                 }
 
                 MaterialMap.Add (unityName, fbxMaterial);
-                return fbxMaterial;
+                fbxNode.AddMaterial (fbxMaterial);
+                return true;
             }
 
             /// <summary>
@@ -558,10 +573,10 @@ namespace FbxExporters
             ///
             /// Use fbxNode.GetMesh() to access the exported mesh.
             /// </summary>
-            public void ExportMesh (Mesh mesh, FbxNode fbxNode, Material[] materials = null)
+            public bool ExportMesh (Mesh mesh, FbxNode fbxNode, Material[] materials = null)
             {
                 var meshInfo = new MeshInfo(mesh, materials);
-                ExportMesh(meshInfo, fbxNode);
+                return ExportMesh(meshInfo, fbxNode);
             }
 
             /// <summary>
@@ -649,8 +664,7 @@ namespace FbxExporters
 
                 // Set up materials per submesh.
                 foreach (var mat in meshInfo.Materials) {
-                    var fbxMaterial = ExportMaterial (mat, fbxScene);
-                    fbxNode.AddMaterial (fbxMaterial);
+                    ExportMaterial (mat, fbxScene, fbxNode);
                 }
                 AssignLayerElementMaterial (fbxMesh, meshInfo.mesh, meshInfo.Materials.Length);
 
@@ -687,7 +701,7 @@ namespace FbxExporters
             }
 
             // get a fbxNode's global default position.
-            protected void ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, Vector3 newCenter, TransformExportType exportType)
+            protected bool ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, Vector3 newCenter, TransformExportType exportType)
             {
                 // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
                 // This causes issues when converting euler to quaternion, causing the final
@@ -726,7 +740,7 @@ namespace FbxExporters
                 fbxNode.LclRotation.Set (fbxRotate);
                 fbxNode.LclScaling.Set (fbxScale);
 
-                return;
+                return true;
             }
 
             /// <summary>
@@ -779,6 +793,7 @@ namespace FbxExporters
 
                 float aspectRatio = unityCamera.aspect;
 
+                #region Configure Film Camera from Game Camera
                 // Configure FilmBack settings: 35mm TV Projection (0.816 x 0.612)
                 float apertureHeightInInches = 0.612f;
                 float apertureWidthInInches = aspectRatio * apertureHeightInInches;
@@ -804,6 +819,7 @@ namespace FbxExporters
 
                 // FarPlane
                 fbxCamera.SetFarPlane (unityCamera.farClipPlane*UnitScaleFactor);
+                #endregion
 
                 // Export backgroundColor as a custom property
                 // NOTE: export on fbxNode so that it will show up in Maya
@@ -839,7 +855,7 @@ namespace FbxExporters
             /// <summary>
             /// Export Component's color property
             /// </summary>
-            FbxProperty ExportColorProperty (FbxObject fbxObject, Color value, string name, string label)
+            bool ExportColorProperty (FbxObject fbxObject, Color value, string name, string label)
             {
                 // create a custom property for component value
                 var fbxProperty = FbxProperty.Create (fbxObject, Globals.FbxColor4DT, name, label);
@@ -855,13 +871,13 @@ namespace FbxExporters
                 fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eUserDefined, true);
                 fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eAnimatable, true);
 
-                return fbxProperty;
+                return true;
             }
 
             /// <summary>
             /// Export Component's int property
             /// </summary>
-            FbxProperty ExportIntProperty (FbxObject fbxObject, int value, string name, string label)
+            bool ExportIntProperty (FbxObject fbxObject, int value, string name, string label)
             {
                 // create a custom property for component value
                 var fbxProperty = FbxProperty.Create (fbxObject, Globals.FbxIntDT, name, label);
@@ -874,7 +890,7 @@ namespace FbxExporters
                 fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eUserDefined, true);
                 fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eAnimatable, true);
 
-                return fbxProperty;
+                return true;
             }
 
             /// <summary>

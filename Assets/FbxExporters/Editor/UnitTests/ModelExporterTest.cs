@@ -52,13 +52,17 @@ namespace FbxExporters.UnitTests
             // Test non-static functions.
             using (var fbxManager = FbxManager.Create()) {
                 var fbxScene = FbxScene.Create(fbxManager, "scene");
+                var fbxNode = FbxNode.Create (fbxScene, "node");
                 var exporter = new ModelExporter();
 
                 // Test ExportMaterial: it exports and it re-exports
-                var fbxMaterial = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene)
-                    as FbxSurfaceLambert;
+                bool result = exporter.ExportMaterial (ModelExporter.DefaultMaterial, fbxScene, fbxNode);
+                Assert.IsTrue (result);
+                var fbxMaterial = fbxNode.GetMaterial (0);
                 Assert.That(fbxMaterial, Is.Not.Null);
-                var fbxMaterial2 = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene);
+
+                result = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene, fbxNode);
+                var fbxMaterial2 = fbxNode.GetMaterial (1);
                 Assert.AreEqual(fbxMaterial, fbxMaterial2);
 
                 // Test ExportTexture: it finds the same texture for the default-material (it doesn't create a new one)
