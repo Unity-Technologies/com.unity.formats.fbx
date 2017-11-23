@@ -149,7 +149,7 @@ namespace FbxExporters.Editor
 
         protected string MAYA_CONFIG_COMMAND { get {
                 return string.Format("unityConfigure {0}{1}{0} {0}{2}{0} {0}{3}{0} {4} {5};",
-                    ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()?1:0), (HideSendToUnityMenu()?1:0));
+                    ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()?1:0), (HideSendToUnityMenu?1:0));
             }}
 
         private string MAYA_CLOSE_COMMAND { get {
@@ -174,9 +174,11 @@ namespace FbxExporters.Editor
             return false;
         }
 
-        public static bool HideSendToUnityMenu()
+        public static bool HideSendToUnityMenu
         {
-            return EditorTools.ExportSettings.instance.HideSendToUnityMenu;
+            get{
+                return EditorTools.ExportSettings.instance.HideSendToUnityMenu;
+            }
         }
 
         public string GetModuleTemplatePath()

@@ -177,7 +177,7 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.Space();
 
             exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
-                new GUIContent("Keep 3D Application opened:",
+                new GUIContent("Keep open:",
                     "Keep the selected 3D application open after Unity integration install has completed."),
                 exportSettings.launchAfterInstallation
             );
@@ -197,8 +197,6 @@ namespace FbxExporters.EditorTools {
             if (GUILayout.Button (installIntegrationContent)) {
                 FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
             }
-
-
 
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
