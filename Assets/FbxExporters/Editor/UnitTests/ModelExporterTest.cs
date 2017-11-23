@@ -316,5 +316,66 @@ namespace FbxExporters.UnitTests
             assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
             Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
         }
+
+        [Test]
+        public void TestNodeVisibility()
+        {
+            // create test hierarchy
+            // root (enabled)
+            // -- parent1 (enabled)
+            // -- parent2 (disabled)
+            // ---- child1 (disabled)
+            // ---- child2 (enabled)
+
+            var root = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            root.name = "root";
+            var parent1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            parent1.name = "parent1";
+            var parent2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            parent2.name = "parent2";
+            var child1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            child1.name = "child1";
+            var child2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            child2.name = "child2";
+
+            parent1.transform.SetParent (root.transform);
+            parent2.transform.SetParent (root.transform);
+            child1.transform.SetParent (parent2.transform);
+            child2.transform.SetParent (parent2.transform);
+
+            root.SetActive (true);
+            parent1.SetActive (true);
+            child2.SetActive (true);
+            parent2.SetActive (false);
+            child1.SetActive (false);
+
+            string filename = GetRandomFbxFilePath ();
+            ModelExporter.ExportObject (filename, root);
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+
+            // check root
+            CheckObjectVisibility (fbxObj, true);
+
+            // check child nodes
+            foreach (Transform child in fbxObj.transform) {
+                var isParent1 = child.name.Equals ("parent1");
+                CheckObjectVisibility (child.gameObject, isParent1);
+
+                if (isParent1) {
+                    // all of parent1's children should be disabled
+                    foreach (Transform c in child) {
+                        CheckObjectVisibility (c.gameObject, false);
+                    }
+                }
+            }
+        }
+
+        private void CheckObjectVisibility(GameObject obj, bool expectedVisibility){
+            Assert.IsTrue (obj.activeSelf);
+            var renderer = obj.GetComponent<MeshRenderer> ();
+            Assert.IsNotNull (renderer);
+            Assert.AreEqual(expectedVisibility, renderer.enabled);
+        }
     }
 }
