@@ -33,7 +33,7 @@ global proc unitySetupUI(){
     evalDeferred -lowestPriority "unityInstallUI";
 }
 
-global proc unitySetLabelVersion(string $label){
+global proc string unitySetLabelVersion(string $label){
     global string $unityPluginVersion;
     return `format -stringArg $label -stringArg $unityPluginVersion "^1s (v.^2s)"`;
 }
