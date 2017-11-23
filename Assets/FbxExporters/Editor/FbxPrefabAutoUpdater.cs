@@ -306,6 +306,9 @@ namespace FbxExporters
                         m_children.Add(child.name, new FbxRepresentation(child, isRoot: false));
                     }
                     foreach(var component in xfo.GetComponents<Component>()) {
+                        // ignore missing components
+                        if (component == null) { continue; }
+
                         // Don't save the prefab link, to avoid a logic loop.
                         if (component is FbxPrefab) { continue; }
 
@@ -759,6 +762,10 @@ namespace FbxExporters
                         componentTypes[componentType.ToString()] = componentType;
                     }
                     foreach(var component in prefab.GetComponentsInChildren<Component>()) {
+                        // ignore missing components
+                        if (component == null) {
+                            continue;
+                        }
                         var componentType = component.GetType();
                         componentTypes[componentType.ToString()] = componentType;
                     }
