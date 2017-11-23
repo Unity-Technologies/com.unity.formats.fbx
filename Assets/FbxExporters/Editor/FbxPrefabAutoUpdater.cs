@@ -984,23 +984,32 @@ namespace FbxExporters
                                 Log("created component {0}:{1}", nodeName, fbxComponent.t);
                             }
 
+                            //If the prefabComponent has not been assigned yet,
+                            //it means that we couldn't find it, and that we tried to add it but that it seems like it already exists.
                             if (!prefabComponent) {
-                                
+                                //This is to confirm that it is a RectTransform
                                 index = prefabComponents.FindIndex(x => x.GetType() == typeof(RectTransform));
+
+                                if (index < 0)
+                                {
+                                    Log("The component could not be found or added, and was not a RectTransform");
+                                    continue;
+                                }
+
                                 prefabComponent = prefabComponents[index];
                                 prefabComponents.RemoveAt(index);
 
                                 GameObject tempGameObject = new GameObject();
                                 try
-                                {
-                                    
+                                {                                    
                                     Transform tempTransform = tempGameObject.transform;
 
                                     UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponent.jsonValue, tempTransform);
 
-                                    prefabComponent.gameObject.GetComponent<RectTransform>().rotation = tempTransform.rotation;
-                                    prefabComponent.gameObject.GetComponent<RectTransform>().position = tempTransform.position;
-                                    prefabComponent.gameObject.GetComponent<RectTransform>().localScale = tempTransform.localScale;
+                                    var rectTransform = prefabComponent as RectTransform;
+                                    rectTransform.rotation = tempTransform.rotation;
+                                    rectTransform.position = tempTransform.position;
+                                    rectTransform.localScale = tempTransform.localScale;
                                 }
                                 finally
                                 {

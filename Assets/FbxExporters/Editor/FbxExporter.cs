@@ -683,41 +683,22 @@ namespace FbxExporters
                 FbxDouble3 fbxRotate;
                 UnityEngine.Vector3 unityScale;
 
-                RectTransform uiComponent = unityTransform.gameObject.GetComponent<RectTransform>();
 
                 switch (exportType) {
                 case TransformExportType.Reset:
                     unityTranslate = Vector3.zero;
                     fbxRotate = new FbxDouble3 (0);
                     unityScale = Vector3.one;
-                    if (uiComponent != null) // if this component is a RectTransform
-                        {
-                        unityTranslate = uiComponent.localPosition;
-                        fbxRotate = ConvertQuaternionToXYZEuler(uiComponent.localRotation);
-                        unityScale = uiComponent.localScale;
-                    }
                     break;
                 case TransformExportType.Global:
                     unityTranslate = GetRecenteredTranslation(unityTransform, newCenter);
                     fbxRotate = ConvertQuaternionToXYZEuler(unityTransform.rotation);
                     unityScale = unityTransform.lossyScale;
-                    if (uiComponent != null) // if this component is a RectTransform
-                    {
-                        unityTranslate = GetRecenteredTranslation(uiComponent.transform, newCenter);
-                        fbxRotate = ConvertQuaternionToXYZEuler(uiComponent.rotation);
-                        unityScale = uiComponent.lossyScale;
-                    }
                     break;
                 default: /*case TransformExportType.Local*/
                     unityTranslate = unityTransform.localPosition;
                     fbxRotate = ConvertQuaternionToXYZEuler(unityTransform.localRotation);
                     unityScale = unityTransform.localScale;
-                    if(uiComponent != null) // if this component is a RectTransform
-                        {
-                        unityTranslate = uiComponent.localPosition;
-                        fbxRotate = ConvertQuaternionToXYZEuler(uiComponent.localRotation);
-                        unityScale = uiComponent.localScale;
-                    }
                     break;
                 }
 
