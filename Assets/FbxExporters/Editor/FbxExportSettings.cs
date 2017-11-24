@@ -601,15 +601,15 @@ namespace FbxExporters.EditorTools {
                 FindDCCInstalls ();
             }
 
+            // store the selected app
+            var currentSelection = instance.dccOptionPaths[instance.selectedDCCApp];
+
             // remove options that no longer exist
             List<string> pathsToDelete = new List<string>();
             List<string> namesToDelete = new List<string>();
             for(int i = 0; i < instance.dccOptionPaths.Count; i++) {
                 var dccPath = instance.dccOptionPaths [i];
                 if (!File.Exists (dccPath)) {
-                    if (i == instance.selectedDCCApp) {
-                        instance.selectedDCCApp = instance.GetPreferredDCCApp();
-                    }
                     namesToDelete.Add (instance.dccOptionNames [i]);
                     pathsToDelete.Add (dccPath);
                 }
@@ -619,6 +619,13 @@ namespace FbxExporters.EditorTools {
             }
             foreach (var str in namesToDelete) {
                 instance.dccOptionNames.Remove (str);
+            }
+
+            // set the selected DCC app to the previous selection
+            instance.selectedDCCApp = instance.dccOptionPaths.IndexOf (currentSelection);
+            if (instance.selectedDCCApp < 0) {
+                // find preferred app if previous selection no longer exists
+                instance.selectedDCCApp = instance.GetPreferredDCCApp ();
             }
 
             if (instance.dccOptionPaths.Count <= 0) {
@@ -635,7 +642,6 @@ namespace FbxExporters.EditorTools {
                     instance.dccOptionPaths[i]
                 );
             }
-
             return optionArray;
         }
 
