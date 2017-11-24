@@ -76,6 +76,13 @@ proc int loadUnityDependencies(){
     for($plugin in $pluginsToLoad){
         $result = $result && `loadUnityPlugin ($plugin + "." + $ext)`;
     }
+    
+    $removeSendToUnityMenu = `optionVar -q "UnityFbxForMaya_removeSendToUnityMenu"`;
+    if($removeSendToUnityMenu){
+        //Remove the GamePipeline 'SendToUnity' button
+        menu -e -visible false "sendToUnityMenu";
+    }
+    
     return $result;
 }
 
