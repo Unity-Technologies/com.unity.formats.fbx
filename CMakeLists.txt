@@ -102,6 +102,11 @@ add_custom_target(
             "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/README.txt"
             ".*VERSION.*:.*"
             "VERSION: ${PACKAGE_VERSION}"
+    COMMAND ${PYTHON_EXECUTABLE}
+            "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
+            "${CMAKE_SOURCE_DIR}/Assets/Integrations/Autodesk/maya/scripts/unitySetupUI.mel"
+            "{Version}"
+            "${PACKAGE_VERSION}"        
     DEPENDS "${CMAKE_SOURCE_DIR}/scripts/file-search-replace.py"
     COMMENT "Replacing version number in files with ${PACKAGE_VERSION}"
 )
