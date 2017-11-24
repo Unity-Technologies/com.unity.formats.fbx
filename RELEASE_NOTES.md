@@ -14,7 +14,7 @@ Categories are: Export Options and Integration
 
 * Maya Unity Integration: Added export setting option to hide native "File->Send To Unity" menu
 
-* Unity 3D application Integration: Different installation popup message if "Keep 3D Application opened" checked
+* Unity 3D application Integration: Different installation popup message if "Keep open" checked
 
 To avoid misleading successful installation message popping up before installation completes, instead of 
 "Enjoy the new Unity menu in {3DApp}", show "Installing Unity menu in {3DApp}, application will open once installation is complete",
@@ -29,7 +29,7 @@ NOTE: a disabled FBX node will be imported into Unity as an enabled GameObject w
 NOTE: in 3ds Max disabled objects will still be visible
 
 FIXES
-* Export Settings: Changed "Launch 3D Application" to "Keep 3D Application opened"
+* Export Settings: Changed "Launch 3D Application" to "Keep open"
 * Fbx Exporter: cleaned up code: removed TODO's, unused, and commented out code
 * Export Settings: Fix settings giving error when updating to sprint34 package
 * Fbx Exporter: fix error when exporting meshes with missing normals, tangents, binormals, or vertex colors
