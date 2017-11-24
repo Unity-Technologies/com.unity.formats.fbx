@@ -750,6 +750,8 @@ namespace FbxExporters.Editor
                 return false;
             }
 
+            EditorTools.ExportSettings.instance.IntegrationSavePath = unzipFolder;
+
             // check that this is a valid location to unzip the file
             if (!DirectoryHasWritePermission (unzipFolder)) {
                 // display dialog to try again or cancel
