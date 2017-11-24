@@ -345,6 +345,7 @@ namespace FbxExporters.Editor
                 myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                 myProcess.StartInfo.CreateNoWindow = true;
                 myProcess.StartInfo.UseShellExecute = false;
+                myProcess.StartInfo.RedirectStandardError = true;
 
                 string commandString;
 
@@ -379,6 +380,14 @@ namespace FbxExporters.Editor
                     ExitCode = myProcess.ExitCode;
                     Debug.Log(string.Format("Ran maya: [{0}]\nWith args [{1}]\nResult {2}",
                                 mayaPath, myProcess.StartInfo.Arguments, ExitCode));
+
+                    // see if we got any error messages
+                    if(ExitCode != 0){
+                        string stderr = myProcess.StandardError.ReadToEnd();
+                        if(!string.IsNullOrEmpty(stderr)){
+                            Debug.LogError(string.Format("Maya installation error (exit code: {0}): {1}", ExitCode, stderr));
+                        }
+                    }
                 }
                 else
                 {
@@ -618,6 +627,7 @@ namespace FbxExporters.Editor
                 myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                 myProcess.StartInfo.CreateNoWindow = true;
                 myProcess.StartInfo.UseShellExecute = false;
+                myProcess.StartInfo.RedirectStandardError = true;
 
                 myProcess.StartInfo.Arguments = string.Format("-q -silent -mxs \"{0}\"", installScript);
 
@@ -635,6 +645,14 @@ namespace FbxExporters.Editor
                 if (ExitCode == -1073740791){
                     Debug.Log(string.Format("Detected 3ds max exitcode {0} -- safe to ignore", ExitCode));
                     ExitCode = 0;
+                }
+
+                // print any errors
+                if(ExitCode != 0){
+                    string stderr = myProcess.StandardError.ReadToEnd();
+                    if(!string.IsNullOrEmpty(stderr)){
+                        Debug.LogError(string.Format("3ds Max installation error (exit code: {0}): {1}", ExitCode, stderr));
+                    }
                 }
 
                 Debug.Log(string.Format("Ran max: [{0}]\nWith args [{1}]\nResult {2}",
