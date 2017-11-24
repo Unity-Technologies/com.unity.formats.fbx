@@ -742,8 +742,13 @@ namespace FbxExporters.Editor
 
         private static bool DecompressIntegrationZipFile(string zipPath, DCCIntegration dcc)
         {
-            string unzipFolder;
-            unzipFolder = EditorTools.ExportSettings.GetIntegrationSavePath();
+            // prompt user to enter location to unzip file
+            var unzipFolder = EditorUtility.OpenFolderPanel(string.Format("Select Location to Save {0} Integration", dcc.DccDisplayName), EditorTools.ExportSettings.GetIntegrationSavePath(), "");
+            if (string.IsNullOrEmpty(unzipFolder))
+            {
+                // user has cancelled, do nothing
+                return false;
+            }
 
             // check that this is a valid location to unzip the file
             if (!DirectoryHasWritePermission (unzipFolder)) {

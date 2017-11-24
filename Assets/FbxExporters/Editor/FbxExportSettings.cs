@@ -97,38 +97,6 @@ namespace FbxExporters.EditorTools {
             }
             GUILayout.EndHorizontal ();
 
-            GUILayout.BeginHorizontal ();
-            GUILayout.Label (new GUIContent (
-                "Integrations Path:",
-                "Installation path for 3D application integrations."), GUILayout.Width(LabelWidth - 3));
-
-            var IntegrationsPathLabel = ExportSettings.GetIntegrationSavePath();
-            EditorGUILayout.SelectableLabel(IntegrationsPathLabel,
-                EditorStyles.textField,
-                GUILayout.MinWidth(SelectableLabelMinWidth),
-                GUILayout.Height(EditorGUIUtility.singleLineHeight));
-
-            if (GUILayout.Button(new GUIContent("...", "Browse to a new installation path for 3D application integrations"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
-            {
-                string initialPath = ExportSettings.GetIntegrationSavePath();
-
-                string fullPath = EditorUtility.OpenFolderPanel(
-                        "Select Integrations Path", initialPath, null
-                        );
-
-                if (!string.IsNullOrEmpty(fullPath))
-                {
-                    ExportSettings.SetIntegrationSavePath(fullPath);
-
-                    // Make sure focus is removed from the selectable label
-                    // otherwise it won't update
-                    GUIUtility.hotControl = 0;
-                    GUIUtility.keyboardControl = 0;                    
-                }
-            }
-
-            GUILayout.EndHorizontal();
-
             EditorGUILayout.Space ();
 
             GUILayout.BeginHorizontal ();
