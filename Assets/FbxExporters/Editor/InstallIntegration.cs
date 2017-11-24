@@ -627,7 +627,7 @@ namespace FbxExporters.Editor
                 myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                 myProcess.StartInfo.CreateNoWindow = true;
                 myProcess.StartInfo.UseShellExecute = false;
-                myProcess.StartInfo.RedirectStandardError = true;
+                myProcess.StartInfo.RedirectStandardOutput = true;
 
                 myProcess.StartInfo.Arguments = string.Format("-q -silent -mxs \"{0}\"", installScript);
 
@@ -649,7 +649,7 @@ namespace FbxExporters.Editor
 
                 // print any errors
                 if(ExitCode != 0){
-                    string stderr = myProcess.StandardError.ReadToEnd();
+                    string stderr = myProcess.StandardOutput.ReadToEnd();
                     if(!string.IsNullOrEmpty(stderr)){
                         Debug.LogError(string.Format("3ds Max installation error (exit code: {0}): {1}", ExitCode, stderr));
                     }
