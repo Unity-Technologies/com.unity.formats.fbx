@@ -180,6 +180,7 @@ namespace FbxExporters
                             prefabFileName, fbxFullPath));
                 }
 
+                toConvert.name = Path.GetFileNameWithoutExtension (fbxFullPath);
                 return toConvert;
             }
 
