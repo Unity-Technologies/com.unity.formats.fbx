@@ -61,10 +61,8 @@ global proc unityInstallUI(){
     
     global string $gMainFileMenu;
     
-    // update family label
+    // update family label with version
     $unityFamilyLabel = unitySetLabelVersion($unityFamilyLabel);
-    $unityImportLabel = unitySetLabelVersion($unityImportLabel);
-    $unityExportLabel = unitySetLabelVersion($unityExportLabel);
     
     buildFileMenu;
     $parentMenu = $gMainFileMenu;
