@@ -52,13 +52,17 @@ namespace FbxExporters.UnitTests
             // Test non-static functions.
             using (var fbxManager = FbxManager.Create()) {
                 var fbxScene = FbxScene.Create(fbxManager, "scene");
+                var fbxNode = FbxNode.Create (fbxScene, "node");
                 var exporter = new ModelExporter();
 
                 // Test ExportMaterial: it exports and it re-exports
-                var fbxMaterial = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene)
-                    as FbxSurfaceLambert;
+                bool result = exporter.ExportMaterial (ModelExporter.DefaultMaterial, fbxScene, fbxNode);
+                Assert.IsTrue (result);
+                var fbxMaterial = fbxNode.GetMaterial (0);
                 Assert.That(fbxMaterial, Is.Not.Null);
-                var fbxMaterial2 = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene);
+
+                result = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene, fbxNode);
+                var fbxMaterial2 = fbxNode.GetMaterial (1);
                 Assert.AreEqual(fbxMaterial, fbxMaterial2);
 
                 // Test ExportTexture: it finds the same texture for the default-material (it doesn't create a new one)
@@ -315,6 +319,126 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
             assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
             Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
+        }
+
+        [Test]
+        public void TestExportCamera(){
+            // NOTE: even though the aspect ratio is exported,
+            //       it does not get imported back into Unity.
+            //       Therefore don't modify or check if camera.aspect is the same
+            //       after export.
+
+            // create a Unity camera
+            GameObject cameraObj = new GameObject("TestCamera");
+            Camera camera = cameraObj.AddComponent<Camera> ();
+
+            // change some of the default settings
+            camera.orthographic = false;
+            camera.fieldOfView = 17.5f;
+            camera.nearClipPlane = 1.2f;
+            camera.farClipPlane = 1345;
+
+            // export the camera
+            string filename = GetRandomFbxFilePath();
+            var fbxCamera = ExportCamera (filename, cameraObj);
+            CompareCameraValues (camera, fbxCamera);
+
+            // test export orthographic camera
+            camera.orthographic = true;
+            camera.fieldOfView = 78;
+            camera.nearClipPlane = 19;
+            camera.farClipPlane = 500.6f;
+
+            fbxCamera = ExportCamera (filename, cameraObj);
+            CompareCameraValues (camera, fbxCamera);
+            Assert.AreEqual (camera.orthographicSize, fbxCamera.orthographicSize);
+        }
+
+        /// <summary>
+        /// Exports the camera.
+        /// </summary>
+        /// <returns>The exported camera.</returns>
+        /// <param name="filename">Filename.</param>
+        /// <param name="cameraObj">Camera object.</param>
+        private Camera ExportCamera(string filename, GameObject cameraObj){
+            ModelExporter.ExportObject (filename, cameraObj);
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            var fbxCamera = fbxObj.GetComponent<Camera> ();
+
+            Assert.IsNotNull (fbxCamera);
+            return fbxCamera;
+        }
+
+        private void CompareCameraValues(Camera camera, Camera fbxCamera, float delta=0.001f){
+            Assert.AreEqual (camera.orthographic, fbxCamera.orthographic);
+            Assert.AreEqual (camera.fieldOfView, fbxCamera.fieldOfView, delta);
+            Assert.AreEqual (camera.nearClipPlane, fbxCamera.nearClipPlane, delta);
+            Assert.AreEqual (camera.farClipPlane, fbxCamera.farClipPlane, delta);
+        }
+
+        [Test]
+        public void TestNodeVisibility()
+        {
+            // create test hierarchy
+            // root (enabled)
+            // -- parent1 (enabled)
+            // ---- child3 (disabled)
+            // -- parent2 (disabled)
+            // ---- child1 (disabled)
+            // ---- child2 (enabled)
+
+            var root = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            root.name = "root";
+            var parent1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            parent1.name = "parent1";
+            var parent2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            parent2.name = "parent2";
+            var child1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            child1.name = "child1";
+            var child2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            child2.name = "child2";
+            var child3 = GameObject.CreatePrimitive (PrimitiveType.Cube);
+            child3.name = "child3";
+
+            parent1.transform.SetParent (root.transform);
+            parent2.transform.SetParent (root.transform);
+            child1.transform.SetParent (parent2.transform);
+            child2.transform.SetParent (parent2.transform);
+            child3.transform.SetParent (parent1.transform);
+
+            root.SetActive (true);
+            parent1.SetActive (true);
+            child2.SetActive (true);
+            parent2.SetActive (false);
+            child1.SetActive (false);
+            child3.SetActive (false);
+
+            string filename = GetRandomFbxFilePath ();
+            ModelExporter.ExportObject (filename, root);
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+
+            // check root
+            CheckObjectVisibility (fbxObj, true);
+
+            // check child nodes
+            foreach (Transform child in fbxObj.transform) {
+                var isParent1 = child.name.Equals ("parent1");
+                CheckObjectVisibility (child.gameObject, isParent1);
+
+                // all children should be disabled
+                foreach (Transform c in child) {
+                    CheckObjectVisibility (c.gameObject, false);
+                }
+            }
+        }
+
+        private void CheckObjectVisibility(GameObject obj, bool expectedVisibility){
+            Assert.IsTrue (obj.activeSelf);
+            var renderer = obj.GetComponent<MeshRenderer> ();
+            Assert.IsNotNull (renderer);
+            Assert.AreEqual(expectedVisibility, renderer.enabled);
         }
     }
 }
