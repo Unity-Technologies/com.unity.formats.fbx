@@ -1,5 +1,41 @@
 RELEASE NOTES
 
+**Version**: sprint35
+
+NEW FEATURES
+
+* Fbx Exporter: Added camera export support
+
+NOTE: for GameObjects that have both a mesh and a camera component, only the mesh will be exported.
+
+* Export Settings: Grouped settings visually into 2 categories
+
+Categories are: Export Options and Integration
+
+* Maya Unity Integration: Added export setting option to hide native "File->Send To Unity" menu
+
+* Unity 3D application Integration: Different installation popup message if "Keep 3D Application opened" checked
+
+To avoid misleading successful installation message popping up before installation completes, instead of 
+"Enjoy the new Unity menu in {3DApp}", show "Installing Unity menu in {3DApp}, application will open once installation is complete",
+if user selected to launch the 3D application after installation.
+
+* Maya Unity Integration: Added Unity plugin version to File->Unity menu item's tooltip
+
+* Fbx Exporter: Export GameObject visibility
+
+Set FbxNode visibility based on whether a GameObject is enabled.
+NOTE: a disabled FBX node will be imported into Unity as an enabled GameObject with a disabled Mesh Renderer.
+NOTE: in 3ds Max disabled objects will still be visible
+
+FIXES
+* Export Settings: Changed "Launch 3D Application" to "Keep 3D Application opened"
+* Fbx Exporter: cleaned up code: removed TODO's, unused, and commented out code
+* Export Settings: Fix settings giving error when updating to sprint34 package
+* Fbx Exporter: fix error when exporting meshes with missing normals, tangents, binormals, or vertex colors
+* Export Settings: Fix empty dropdown selection when uninstalling 3D applications
+* Convert to Linked Prefab: fix prefab instance name differing from prefab file name when filename is incremented
+
 **Version**: sprint34
 
 NEW FEATURES
