@@ -52,13 +52,17 @@ namespace FbxExporters.UnitTests
             // Test non-static functions.
             using (var fbxManager = FbxManager.Create()) {
                 var fbxScene = FbxScene.Create(fbxManager, "scene");
+                var fbxNode = FbxNode.Create (fbxScene, "node");
                 var exporter = new ModelExporter();
 
                 // Test ExportMaterial: it exports and it re-exports
-                var fbxMaterial = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene)
-                    as FbxSurfaceLambert;
+                bool result = exporter.ExportMaterial (ModelExporter.DefaultMaterial, fbxScene, fbxNode);
+                Assert.IsTrue (result);
+                var fbxMaterial = fbxNode.GetMaterial (0);
                 Assert.That(fbxMaterial, Is.Not.Null);
-                var fbxMaterial2 = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene);
+
+                result = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene, fbxNode);
+                var fbxMaterial2 = fbxNode.GetMaterial (1);
                 Assert.AreEqual(fbxMaterial, fbxMaterial2);
 
                 // Test ExportTexture: it finds the same texture for the default-material (it doesn't create a new one)
@@ -315,6 +319,62 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
             assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
             Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
+        }
+
+        [Test]
+        public void TestExportCamera(){
+            // NOTE: even though the aspect ratio is exported,
+            //       it does not get imported back into Unity.
+            //       Therefore don't modify or check if camera.aspect is the same
+            //       after export.
+
+            // create a Unity camera
+            GameObject cameraObj = new GameObject("TestCamera");
+            Camera camera = cameraObj.AddComponent<Camera> ();
+
+            // change some of the default settings
+            camera.orthographic = false;
+            camera.fieldOfView = 17.5f;
+            camera.nearClipPlane = 1.2f;
+            camera.farClipPlane = 1345;
+
+            // export the camera
+            string filename = GetRandomFbxFilePath();
+            var fbxCamera = ExportCamera (filename, cameraObj);
+            CompareCameraValues (camera, fbxCamera);
+
+            // test export orthographic camera
+            camera.orthographic = true;
+            camera.fieldOfView = 78;
+            camera.nearClipPlane = 19;
+            camera.farClipPlane = 500.6f;
+
+            fbxCamera = ExportCamera (filename, cameraObj);
+            CompareCameraValues (camera, fbxCamera);
+            Assert.AreEqual (camera.orthographicSize, fbxCamera.orthographicSize);
+        }
+
+        /// <summary>
+        /// Exports the camera.
+        /// </summary>
+        /// <returns>The exported camera.</returns>
+        /// <param name="filename">Filename.</param>
+        /// <param name="cameraObj">Camera object.</param>
+        private Camera ExportCamera(string filename, GameObject cameraObj){
+            ModelExporter.ExportObject (filename, cameraObj);
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            var fbxCamera = fbxObj.GetComponent<Camera> ();
+
+            Assert.IsNotNull (fbxCamera);
+            return fbxCamera;
+        }
+
+        private void CompareCameraValues(Camera camera, Camera fbxCamera, float delta=0.001f){
+            Assert.AreEqual (camera.orthographic, fbxCamera.orthographic);
+            Assert.AreEqual (camera.fieldOfView, fbxCamera.fieldOfView, delta);
+            Assert.AreEqual (camera.nearClipPlane, fbxCamera.nearClipPlane, delta);
+            Assert.AreEqual (camera.farClipPlane, fbxCamera.farClipPlane, delta);
         }
     }
 }
