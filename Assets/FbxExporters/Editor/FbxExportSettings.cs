@@ -602,7 +602,7 @@ namespace FbxExporters.EditorTools {
             }
 
             // store the selected app
-            var currentSelection = instance.dccOptionPaths[instance.selectedDCCApp];
+            var prevSelection = instance.dccOptionPaths[instance.selectedDCCApp];
 
             // remove options that no longer exist
             List<string> pathsToDelete = new List<string>();
@@ -622,7 +622,7 @@ namespace FbxExporters.EditorTools {
             }
 
             // set the selected DCC app to the previous selection
-            instance.selectedDCCApp = instance.dccOptionPaths.IndexOf (currentSelection);
+            instance.selectedDCCApp = instance.dccOptionPaths.IndexOf (prevSelection);
             if (instance.selectedDCCApp < 0) {
                 // find preferred app if previous selection no longer exists
                 instance.selectedDCCApp = instance.GetPreferredDCCApp ();
