@@ -247,7 +247,7 @@ namespace FbxExporters
                     exportedAttribute = true;
                 }
 
-                exportedAttribute = exportedAttribute || ExportUVs (fbxMesh, mesh, unmergedTriangles);
+                exportedAttribute |= ExportUVs (fbxMesh, mesh, unmergedTriangles);
 
                 using (var fbxLayerElement = FbxLayerElementVertexColor.Create (fbxMesh, "VertexColors")) 
                 {
