@@ -696,7 +696,7 @@ namespace FbxExporters.Editor
             } else {
                 if (EditorTools.ExportSettings.instance.launchAfterInstallation)
                 {
-                    customMessage = "Enjoy the new Unity menu in {0}, when it's done loading";
+                    customMessage = "Installing Unity menu in {0}, application will open once installation is complete";
                 }
                 else
                 {
