@@ -944,6 +944,8 @@ namespace FbxExporters
                     return -1;
                 }
 
+                fbxNode.SetVisibility (unityGo.activeSelf);
+
                 ExportTransform ( unityGo.transform, fbxNode, newCenter, exportType);
 
                 // try export mesh
