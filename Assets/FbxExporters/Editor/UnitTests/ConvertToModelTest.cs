@@ -233,5 +233,28 @@ namespace FbxExporters.UnitTests
             Assert.AreSame(capsule3, dictionaryBroken[capsule.name]);
             Assert.AreSame(sphere3, dictionaryBroken[sphere.name]);
         }
+
+        [Test]
+        public void TestInstanceNameMatchesFilename()
+        {
+            // create a cube, export it to random filename
+            // make sure instance name gets updated when converting to prefab
+
+            // Get a random directory.
+            var path = GetRandomFileNamePath(extName: ".fbx");
+
+            // Create a cube.
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+            // Convert it to a prefab -- but keep the cube.
+            var cubePrefabInstance = ConvertToModel.Convert(cube,
+                fbxFullPath: path);
+
+            Assert.That (cube);
+            Assert.That (cubePrefabInstance);
+            Assert.AreSame (cube, cubePrefabInstance);
+
+            Assert.AreEqual (Path.GetFileNameWithoutExtension (path), cube.name);
+        }
     }
 }
