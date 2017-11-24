@@ -10,9 +10,11 @@ namespace FbxExporters.EditorTools {
     [CustomEditor(typeof(ExportSettings))]
     public class ExportSettingsEditor : UnityEditor.Editor {
         Vector2 scrollPos = Vector2.zero;
-        const float LabelWidth = 130;
+        const float LabelWidth = 144;
         const float SelectableLabelMinWidth = 90;
         const float BrowseButtonWidth = 25;
+        const float FieldOffset = 18;
+        const float BrowseButtonOffset = 5;
 
         public override void OnInspectorGUI() {
             ExportSettings exportSettings = (ExportSettings)target;
@@ -27,6 +29,8 @@ namespace FbxExporters.EditorTools {
                 GUILayout.Label ("Version: " + version, EditorStyles.centeredGreyMiniLabel);
                 EditorGUILayout.Space ();
             }
+            EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
             GUILayout.BeginVertical();
             exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
                 new GUIContent ("Compatible Naming:",
@@ -45,20 +49,16 @@ namespace FbxExporters.EditorTools {
                 exportSettings.centerObjects
             );
 
-            EditorGUILayout.Space();
-
             GUILayout.BeginHorizontal();
-            GUILayout.Label(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
-                " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - 3));
+            EditorGUILayout.LabelField(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
+                " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
             exportSettings.ExportFormatSelection = EditorGUILayout.Popup(exportSettings.ExportFormatSelection, new string[]{"Binary", "ASCII"});
             GUILayout.EndHorizontal();
 
-            EditorGUILayout.Space();
-
-            GUILayout.BeginHorizontal ();
-            GUILayout.Label (new GUIContent (
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent(
                 "Export Path:",
-                "Relative path for saving Model Prefabs."), GUILayout.Width(LabelWidth - 3));
+                "Relative path for saving Model Prefabs."), GUILayout.Width(LabelWidth - FieldOffset));
 
             var pathLabel = ExportSettings.GetRelativeSavePath();
             if (pathLabel == ".") { pathLabel = "(Assets root)"; }
@@ -66,26 +66,36 @@ namespace FbxExporters.EditorTools {
                 EditorStyles.textField,
                 GUILayout.MinWidth(SelectableLabelMinWidth),
                 GUILayout.Height(EditorGUIUtility.singleLineHeight));
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
 
-            if (GUILayout.Button (new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width (BrowseButtonWidth))) {
+            GUILayout.Space(LabelWidth + BrowseButtonOffset);
+
+            if (GUILayout.Button(new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
+            {
                 string initialPath = ExportSettings.GetAbsoluteSavePath();
 
                 // if the directory doesn't exist, set it to the default save path
                 // so we don't open somewhere unexpected
-                if (!System.IO.Directory.Exists (initialPath)) {
+                if (!System.IO.Directory.Exists(initialPath))
+                {
                     initialPath = Application.dataPath;
                 }
 
-                string fullPath = EditorUtility.OpenFolderPanel (
+                string fullPath = EditorUtility.OpenFolderPanel(
                         "Select Model Prefabs Path", initialPath, null
                         );
 
                 // Unless the user canceled, make sure they chose something in the Assets folder.
-                if (!string.IsNullOrEmpty (fullPath)) {
+                if (!string.IsNullOrEmpty(fullPath))
+                {
                     var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
-                    if (string.IsNullOrEmpty(relativePath)) {
-                        Debug.LogWarning ("Please select a location in the Assets folder");
-                    } else {
+                    if (string.IsNullOrEmpty(relativePath))
+                    {
+                        Debug.LogWarning("Please select a location in the Assets folder");
+                    }
+                    else
+                    {
                         ExportSettings.SetRelativeSavePath(relativePath);
 
                         // Make sure focus is removed from the selectable label
@@ -95,18 +105,28 @@ namespace FbxExporters.EditorTools {
                     }
                 }
             }
-            GUILayout.EndHorizontal ();
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+            EditorGUI.indentLevel--;
+            EditorGUILayout.LabelField("Integration", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
 
             GUILayout.BeginHorizontal ();
-            GUILayout.Label (new GUIContent (
+            EditorGUILayout.LabelField(new GUIContent (
                 "Integrations Path:",
-                "Installation path for 3D application integrations."), GUILayout.Width(LabelWidth - 3));
+                "Installation path for 3D application integrations."), GUILayout.Width(LabelWidth - FieldOffset));
 
             var IntegrationsPathLabel = ExportSettings.GetIntegrationSavePath();
             EditorGUILayout.SelectableLabel(IntegrationsPathLabel,
                 EditorStyles.textField,
                 GUILayout.MinWidth(SelectableLabelMinWidth),
                 GUILayout.Height(EditorGUIUtility.singleLineHeight));
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+
+            GUILayout.Space(LabelWidth + BrowseButtonOffset);
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new installation path for 3D application integrations"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
@@ -129,17 +149,21 @@ namespace FbxExporters.EditorTools {
 
             GUILayout.EndHorizontal();
 
-            EditorGUILayout.Space ();
-
             GUILayout.BeginHorizontal ();
-            GUILayout.Label (new GUIContent (
+            EditorGUILayout.LabelField(new GUIContent (
                 "3D Application:",
-                "Select the 3D Application for which you would like to install the Unity integration."), GUILayout.Width(LabelWidth - 3));
+                "Select the 3D Application for which you would like to install the Unity integration."), GUILayout.Width(LabelWidth - FieldOffset));
             
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
 
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
+
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+
+            GUILayout.Space(LabelWidth + BrowseButtonOffset);
+
             if (GUILayout.Button(new GUIContent("...", "Browse to a 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
                 switch (Application.platform) {
