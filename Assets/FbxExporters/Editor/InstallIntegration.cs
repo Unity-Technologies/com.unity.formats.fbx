@@ -696,13 +696,21 @@ namespace FbxExporters.Editor
         /// </summary>
         /// <param name="dcc">Dcc name.</param>
         private static void ShowSuccessDialog(string dcc, int exitCode){
-            string title, message;
+            string title, message, customMessage;
             if (exitCode != 0) {
                 title = string.Format("Failed to install {0} Integration.", dcc);
                 message = string.Format("Failed to configure {0}, please check logs (exitcode={1}).", dcc, exitCode);
             } else {
-                title = string.Format("Completed installation of {0} Integration.", dcc);
-                message = string.Format("Enjoy the new Unity menu in {0}.", dcc);
+                if (EditorTools.ExportSettings.instance.launchAfterInstallation)
+                {
+                    customMessage = "Installing Unity menu in {0}, application will open once installation is complete";
+                }
+                else
+                {
+                    customMessage = "Enjoy the new Unity menu in {0}.";
+                }
+                title = string.Format("Completing installation of {0} Integration.", dcc);
+                message = string.Format(customMessage, dcc);
             }
             UnityEditor.EditorUtility.DisplayDialog (title, message, "Ok");
         }
