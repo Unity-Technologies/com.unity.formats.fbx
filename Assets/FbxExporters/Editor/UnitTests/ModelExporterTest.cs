@@ -323,6 +323,7 @@ namespace FbxExporters.UnitTests
             // create test hierarchy
             // root (enabled)
             // -- parent1 (enabled)
+            // ---- child3 (disabled)
             // -- parent2 (disabled)
             // ---- child1 (disabled)
             // ---- child2 (enabled)
@@ -337,17 +338,21 @@ namespace FbxExporters.UnitTests
             child1.name = "child1";
             var child2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
             child2.name = "child2";
+            var child3 = GameObject.CreatePrimitive (PrimitiveType.Cube);
+            child3.name = "child3";
 
             parent1.transform.SetParent (root.transform);
             parent2.transform.SetParent (root.transform);
             child1.transform.SetParent (parent2.transform);
             child2.transform.SetParent (parent2.transform);
+            child3.transform.SetParent (parent1.transform);
 
             root.SetActive (true);
             parent1.SetActive (true);
             child2.SetActive (true);
             parent2.SetActive (false);
             child1.SetActive (false);
+            child3.SetActive (false);
 
             string filename = GetRandomFbxFilePath ();
             ModelExporter.ExportObject (filename, root);
@@ -362,11 +367,9 @@ namespace FbxExporters.UnitTests
                 var isParent1 = child.name.Equals ("parent1");
                 CheckObjectVisibility (child.gameObject, isParent1);
 
-                if (isParent1) {
-                    // all of parent1's children should be disabled
-                    foreach (Transform c in child) {
-                        CheckObjectVisibility (c.gameObject, false);
-                    }
+                // all children should be disabled
+                foreach (Transform c in child) {
+                    CheckObjectVisibility (c.gameObject, false);
                 }
             }
         }
