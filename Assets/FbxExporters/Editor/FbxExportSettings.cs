@@ -14,7 +14,7 @@ namespace FbxExporters.EditorTools {
         const float SelectableLabelMinWidth = 90;
         const float BrowseButtonWidth = 25;
         const float FieldOffset = 18;
-        const float BrowseButtonOffset = 3;
+        const float BrowseButtonOffset = 5;
 
         public override void OnInspectorGUI() {
             ExportSettings exportSettings = (ExportSettings)target;
@@ -69,7 +69,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
 
-            EditorGUILayout.LabelField("",GUILayout.Width(LabelWidth - BrowseButtonOffset));
+            GUILayout.Space(LabelWidth + BrowseButtonOffset);
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
@@ -126,7 +126,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
 
-            EditorGUILayout.LabelField("", GUILayout.Width(LabelWidth - BrowseButtonOffset));
+            GUILayout.Space(LabelWidth + BrowseButtonOffset);
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new installation path for 3D application integrations"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
@@ -162,7 +162,7 @@ namespace FbxExporters.EditorTools {
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
 
-            EditorGUILayout.LabelField("", GUILayout.Width(LabelWidth - BrowseButtonOffset));
+            GUILayout.Space(LabelWidth + BrowseButtonOffset);
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
