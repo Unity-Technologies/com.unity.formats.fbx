@@ -200,18 +200,27 @@ namespace FbxExporters.EditorTools {
 
             EditorGUILayout.Space();
 
+            exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
+                new GUIContent("Keep open:",
+                    "Keep the selected 3D application open after Unity integration install has completed."),
+                exportSettings.launchAfterInstallation
+            );
+
+            exportSettings.HideSendToUnityMenu = EditorGUILayout.Toggle(
+                new GUIContent("Hide native menu:",
+                    "Replace Maya's native 'Send to Unity' menu with the Unity Integration's menu"),
+                exportSettings.HideSendToUnityMenu
+            );
+
+            EditorGUILayout.Space();
+
+
             var installIntegrationContent = new GUIContent(
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
             if (GUILayout.Button (installIntegrationContent)) {
                 FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
             }
-
-            exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
-                new GUIContent("Keep 3D Application opened:",
-                    "Keep the selected 3D application open after Unity integration install has completed."),
-                exportSettings.launchAfterInstallation
-            );
 
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
@@ -324,6 +333,7 @@ namespace FbxExporters.EditorTools {
         public bool mayaCompatibleNames;
         public bool centerObjects;
         public bool launchAfterInstallation;
+        public bool HideSendToUnityMenu;
         public int ExportFormatSelection;
 
         public string IntegrationSavePath;
@@ -355,6 +365,7 @@ namespace FbxExporters.EditorTools {
             mayaCompatibleNames = true;
             centerObjects = true;
             launchAfterInstallation = true;
+            HideSendToUnityMenu = true;
             ExportFormatSelection = 0;
             convertToModelSavePath = kDefaultSavePath;
             IntegrationSavePath = DefaultIntegrationSavePath;

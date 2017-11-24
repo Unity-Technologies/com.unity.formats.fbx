@@ -16,6 +16,8 @@ global string $unityImportMenuName = "Import";
 global string $unityExportMenuName = "Export";
 global string $unityImportCommand = "unityImport";
 global string $unityExportCommand = "unityExport";
+global string $unityRemoveSendToUnityMenuOption = "UnityFbxForMaya_removeSendToUnityMenu";
+global string $unitySendToUnityMenuName = "sendToUnityMenu";
 
 global proc string unityWhatsNewVersion(){
     return `about -q -version`;
@@ -23,12 +25,13 @@ global proc string unityWhatsNewVersion(){
 }
 
 global proc unitySetupUI(){
+
     $isHeadless = `optionVar -q "UnityFbxForMaya_Headless"`;
     if($isHeadless){
         // headless install, don't add UI
         return;
-    }
-    
+    }    
+
     evalDeferred -lowestPriority "unityInstallUI";
 }
 
@@ -45,12 +48,14 @@ global proc unityInstallUI(){
     global string $unityFamilyLabel;
     global string $unityImportLabel;
     global string $unityExportLabel;
-
     global string $unityCommandsFile;
     global string $unityImportMenuName;
     global string $unityExportMenuName;
     global string $unityImportCommand;
     global string $unityExportCommand;
+    
+    global string $unityRemoveSendToUnityMenuOption;
+    global string $unitySendToUnityMenuName;
     
     global string $gMainFileMenu;
 
@@ -62,4 +67,10 @@ global proc unityInstallUI(){
     menuItem -parent $parentMenu -insertAfter $unityMenuDivider -subMenu true -label $unityMenuLabel -tearOff true -version $pluginVersion -image $unityIconPath -annotation $unityFamilyLabel $unityMenuName;
     menuItem -parent $unityMenuName -label $unityImportMenuName -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command $unityImportCommand;
     menuItem -parent $unityMenuName -label $unityExportMenuName -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command $unityExportCommand;
+    
+    $unityRemoveSendToUnityMenuOption = `optionVar -q $unityRemoveSendToUnityMenuOption`;
+    if($unityRemoveSendToUnityMenuOption){
+        menu -e -visible false $unitySendToUnityMenuName;
+    }    
+
 }
