@@ -149,7 +149,7 @@ namespace FbxExporters.Editor
 
         protected string MAYA_CONFIG_COMMAND { get {
                 return string.Format("unityConfigure {0}{1}{0} {0}{2}{0} {0}{3}{0} {4} {5};",
-                    ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()?1:0), (HideSendToUnityMenu));
+                    ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()), (HideSendToUnityMenu));
             }}
 
         private string MAYA_CLOSE_COMMAND { get {
@@ -169,9 +169,9 @@ namespace FbxExporters.Editor
             }
         }
 
-        public static bool IsHeadlessInstall ()
+        public static int IsHeadlessInstall ()
         {
-            return false;
+            return 0;
         }
 
         public static int HideSendToUnityMenu
