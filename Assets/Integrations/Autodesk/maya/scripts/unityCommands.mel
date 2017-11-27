@@ -2,6 +2,14 @@ global string $UnityExportSet = "UnityFbxExportSet";
 global string $UnityFbxFilePathAttr = "unityFbxFilePath";
 global string $UnityFbxFileNameAttr = "unityFbxFileName";
 
+global proc removeNativeMenuOnLoad(){
+    $removeSendToUnityMenu = `optionVar -q "UnityFbxForMaya_removeSendToUnityMenu"`;
+    if($removeSendToUnityMenu && `menu -exists "sendToUnityMenu"`){
+        //Remove the GamePipeline 'SendToUnity' button
+        menu -e -visible false "sendToUnityMenu";
+    }
+}
+
 // Load a specified settings file
 proc int loadUnityFbxSettings(string $fileName, string $settingType){
     // check if the file exists
@@ -49,7 +57,6 @@ proc int setExists(string $setName){
     return stringArrayContains($setName, `listSets -allSets`);
 }
 
-
 proc int loadUnityPlugin(string $plugin){
     if (`pluginInfo -q -loaded $plugin` == false){
         loadPlugin $plugin;
@@ -77,11 +84,7 @@ proc int loadUnityDependencies(){
         $result = $result && `loadUnityPlugin ($plugin + "." + $ext)`;
     }
     
-    $removeSendToUnityMenu = `optionVar -q "UnityFbxForMaya_removeSendToUnityMenu"`;
-    if($removeSendToUnityMenu && `menu -exists "sendToUnityMenu"`){
-        //Remove the GamePipeline 'SendToUnity' button
-        menu -e -visible false "sendToUnityMenu";
-    }
+    evalDeferred -low "removeNativeMenuOnLoad";
     
     return $result;
 }
