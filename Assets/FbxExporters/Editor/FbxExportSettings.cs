@@ -330,10 +330,10 @@ namespace FbxExporters.EditorTools {
         }
 
         // Note: default values are set in LoadDefaults().
-        public bool mayaCompatibleNames;
-        public bool centerObjects;
-        public bool launchAfterInstallation;
-        public bool HideSendToUnityMenu;
+        public bool mayaCompatibleNames = true;
+        public bool centerObjects = true;
+        public bool launchAfterInstallation = true;
+        public bool HideSendToUnityMenu = true;
         public int ExportFormatSelection;
 
         public string IntegrationSavePath;
@@ -1024,25 +1024,11 @@ namespace FbxExporters.EditorTools {
                 try {
                     var fileData = System.IO.File.ReadAllText(filePath);                    
                     EditorJsonUtility.FromJsonOverwrite(fileData, s_Instance);
-                    checkForNewVariables(fileData);
                 } catch(Exception xcp) {
                     // Quash the exception and take the default settings.
                     Debug.LogException(xcp);
                     LoadDefaults();
                 }
-            }
-        }
-
-        /// <summary>
-        /// Check the FBXSettings for any variables we don't know about yet. (in case we are using a new version of the importer)
-        /// We'll want to update this with any new significant UI options.
-        /// </summary>
-        /// <param name="FileData"></param>
-        private void checkForNewVariables(string FileData)
-        {
-            if (!FileData.Contains("HideSendToUnityMenu"))
-            {
-                ExportSettings.instance.HideSendToUnityMenu = true;
             }
         }
 
