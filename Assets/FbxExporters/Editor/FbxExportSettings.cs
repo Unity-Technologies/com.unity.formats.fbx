@@ -1022,7 +1022,7 @@ namespace FbxExporters.EditorTools {
                 LoadDefaults();
             } else {
                 try {
-                    var fileData = System.IO.File.ReadAllText(filePath);                    
+                    var fileData = System.IO.File.ReadAllText(filePath);
                     EditorJsonUtility.FromJsonOverwrite(fileData, s_Instance);
                 } catch(Exception xcp) {
                     // Quash the exception and take the default settings.
