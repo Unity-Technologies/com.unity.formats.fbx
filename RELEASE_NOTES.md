@@ -6,6 +6,11 @@ NEW FEATURES
 
 * Fbx Exporter: Added camera export support
 
+Export game camera as film camera, with filmback settings set to 35 mm TV Projection (0.816 x 0.612).
+The camera aperture with always have a height of 0.612 inches, while the width will depend on the aspect of the Unity camera,
+as camera width = aspectRatio * height.
+NOTE: the field of view will show up as a different value in Maya. This is because Unity display's the vertical FOV,
+      Maya displays the horizontal FOV.
 NOTE: for GameObjects that have both a mesh and a camera component, only the mesh will be exported.
 
 * Export Settings: Grouped settings visually into 2 categories
