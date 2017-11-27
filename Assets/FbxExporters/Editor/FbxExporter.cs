@@ -807,7 +807,6 @@ namespace FbxExporters
                     unityCamera.orthographic ? FbxCamera.EProjectionType.eOrthogonal : FbxCamera.EProjectionType.ePerspective;
 
                 fbxCamera.ProjectionType.Set(projectionType);
-                fbxCamera.SetAspect (FbxCamera.EAspectRatioMode.eFixedRatio, aspectRatio, 1.0f);
                 fbxCamera.FilmAspectRatio.Set(aspectRatio);
                 fbxCamera.SetApertureWidth (apertureWidthInInches);
                 fbxCamera.SetApertureHeight (apertureHeightInInches);
