@@ -55,6 +55,56 @@ namespace FbxExporters.UnitTests
         }
 
         [Test]
+        public void RectTransformTest ()
+        {
+            //Create a hierarchy with a RectTransform
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            capsule.AddComponent<RectTransform>();
+            
+            capsule.GetComponent<RectTransform>().localScale = new Vector3(1,2,3);
+            capsule.GetComponent<RectTransform>().localPosition = new Vector3(100,200,300);
+
+            capsule.transform.parent = cube.transform;
+
+            GameObject originalFBX = ExportSelection(cube);
+
+            //instantiate our hierarchy as a prefab
+            var oldInstance = PrefabUtility.InstantiatePrefab(originalFBX) as GameObject;
+            Assert.IsTrue(oldInstance);
+
+            Debug.Log("ORIGINAL: " + oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localScale);
+
+            //Get the file path of our original hierarchy
+            string filePath = AssetDatabase.GetAssetPath(originalFBX);
+
+            //Create an "updated" hierarchy
+            var cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var capsule2 = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            capsule2.AddComponent<RectTransform>();
+
+            capsule2.GetComponent<RectTransform>().localScale = new Vector3(3, 2, 1);
+            capsule2.GetComponent<RectTransform>().localPosition = new Vector3(300, 200, 100);
+
+            capsule2.transform.parent = cube2.transform;
+
+            GameObject newFBX = ExportSelection(cube2);            
+
+            //export our updated hierarchy to the same file path as the original
+            SleepForFileTimestamp();
+            FbxExporters.Editor.ModelExporter.ExportObject(filePath, cube2);
+            AssetDatabase.Refresh();
+
+            var newInstance = PrefabUtility.InstantiatePrefab(newFBX) as GameObject;
+            Assert.IsTrue(newInstance);
+
+            Debug.Log("NEW BOI: " + newInstance.transform.GetChild(0).GetComponent<RectTransform>().localScale);
+
+            AssertSameHierarchy(cube2, oldInstance, ignoreRootName: true, ignoreRootTransform: true);
+
+        }
+
+        [Test]
         public void ReplaceTest ()
         {
             // Instantiate the prefab.
