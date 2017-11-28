@@ -3,6 +3,7 @@ using UnityEditor;
 using NUnit.Framework;
 using System.IO;
 using System.Collections.Generic;
+using FbxExporters.Editor;
 
 namespace FbxExporters.UnitTests
 {
@@ -57,6 +58,9 @@ namespace FbxExporters.UnitTests
         [Test]
         public void RectTransformTest ()
         {
+            // Get a random directory.
+            var path = m_fbxPath;
+
             //Create a hierarchy with a RectTransform
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
@@ -67,16 +71,14 @@ namespace FbxExporters.UnitTests
 
             capsule.transform.parent = cube.transform;
 
-            GameObject originalFBX = ExportSelection(cube);
+            string filePath = Application.dataPath + "/cube.fbx";
 
             //instantiate our hierarchy as a prefab
-            var oldInstance = PrefabUtility.InstantiatePrefab(originalFBX) as GameObject;
+            var oldInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath);
             Assert.IsTrue(oldInstance);
 
-            Debug.Log("ORIGINAL: " + oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localScale);
-
-            //Get the file path of our original hierarchy
-            string filePath = AssetDatabase.GetAssetPath(originalFBX);
+            Assert.AreEqual(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localScale, new Vector3(1, 2, 3));
+            Assert.AreEqual(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localPosition, new Vector3(100, 200, 300));
 
             //Create an "updated" hierarchy
             var cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -86,22 +88,18 @@ namespace FbxExporters.UnitTests
             capsule2.GetComponent<RectTransform>().localScale = new Vector3(3, 2, 1);
             capsule2.GetComponent<RectTransform>().localPosition = new Vector3(300, 200, 100);
 
-            capsule2.transform.parent = cube2.transform;
-
-            GameObject newFBX = ExportSelection(cube2);            
+            capsule2.transform.parent = cube2.transform;        
 
             //export our updated hierarchy to the same file path as the original
             SleepForFileTimestamp();
             FbxExporters.Editor.ModelExporter.ExportObject(filePath, cube2);
             AssetDatabase.Refresh();
 
-            var newInstance = PrefabUtility.InstantiatePrefab(newFBX) as GameObject;
-            Assert.IsTrue(newInstance);
+            Assert.AreEqual(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localScale, new Vector3(3,2,1));
+            Assert.AreEqual(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localPosition, new Vector3(300, 200, 100));
 
-            Debug.Log("NEW BOI: " + newInstance.transform.GetChild(0).GetComponent<RectTransform>().localScale);
-
-            AssertSameHierarchy(cube2, oldInstance, ignoreRootName: true, ignoreRootTransform: true);
-
+            GameObject.DestroyImmediate(cube);
+            GameObject.DestroyImmediate(cube2);
         }
 
         [Test]
