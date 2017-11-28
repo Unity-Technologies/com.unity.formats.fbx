@@ -32,6 +32,8 @@ global proc unitySetupUI(){
         // headless install, don't add UI
         return;
     }    
+    
+    loadPlugin "GamePipeline.mll";
 
     evalDeferred -lowestPriority "unityInstallUI";
 }
