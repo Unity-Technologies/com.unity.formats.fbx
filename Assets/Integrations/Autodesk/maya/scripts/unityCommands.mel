@@ -68,7 +68,7 @@ proc int loadUnityPlugin(string $plugin){
 };
 
 
-proc int loadUnityDependencies(){
+global proc int loadUnityDependencies(){
     // GamePipeline plugin 'SendToUnitySelection' command used in export
     $pluginsToLoad = {"GamePipeline", "fbxmaya"};
     
@@ -84,7 +84,7 @@ proc int loadUnityDependencies(){
         $result = $result && `loadUnityPlugin ($plugin + "." + $ext)`;
     }
     
-    evalDeferred -low "unityRemoveNativeMenuOnLoad";
+    unityRemoveNativeMenuOnLoad();
     
     return $result;
 }
