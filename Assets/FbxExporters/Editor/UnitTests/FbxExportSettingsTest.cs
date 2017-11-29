@@ -198,7 +198,7 @@ namespace FbxExporters.UnitTests
 
             int preferred = ExportSettings.instance.GetPreferredDCCApp();
             //While Maya 2017 and 3ds Max 2017 are tied for most recent, Maya 2017 should win because we prefer Maya.
-            Assert.AreEqual(preferred, 9);
+            Assert.AreEqual(preferred, 8);
 
             ExportSettings.instance.ClearDCCOptionNames();
             //Try running it with an empty list
