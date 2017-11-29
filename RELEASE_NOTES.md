@@ -1,5 +1,49 @@
 RELEASE NOTES
 
+**Version**: sprint35
+
+NEW FEATURES
+
+* Fbx Exporter: Added camera export support
+
+Export game camera as film camera, with filmback settings set to 35 mm TV Projection (0.816 x 0.612).
+The camera aperture with always have a height of 0.612 inches, while the width will depend on the aspect of the Unity camera,
+as camera width = aspectRatio * height.
+The projection type (perspective/orthogonal), aspect ratio, focal length, field of view, near plane, and far plane are also
+exported. Background color and clear flags are exported as custom properties.
+The last camera exported is set to the default camera in the FBX file.
+NOTE: the field of view will show up as a different value in Maya. This is because Unity display's the vertical FOV,
+      Maya displays the horizontal FOV.
+NOTE: for GameObjects that have both a mesh and a camera component, only the mesh will be exported.
+
+* Export Settings: Grouped settings visually into 2 categories
+
+Categories are: Export Options and Integration
+
+* Maya Unity Integration: Added export setting option to hide native "File->Send To Unity" menu
+
+* Unity 3D application Integration: Different installation popup message if "Keep open" checked
+
+To avoid misleading successful installation message popping up before installation completes, instead of 
+"Enjoy the new Unity menu in {3DApp}", show "Installing Unity menu in {3DApp}, application will open once installation is complete",
+if user selected to launch the 3D application after installation.
+
+* Maya Unity Integration: Added Unity plugin version to File->Unity menu item's tooltip
+
+* Fbx Exporter: Export GameObject visibility
+
+Set FbxNode visibility based on whether a GameObject is enabled.
+NOTE: a disabled FBX node will be imported into Unity as an enabled GameObject with a disabled Mesh Renderer.
+NOTE: in 3ds Max disabled objects will still be visible
+
+FIXES
+* Export Settings: Changed "Launch 3D Application" to "Keep open"
+* Fbx Exporter: cleaned up code: removed TODO's, unused, and commented out code
+* Export Settings: Fix settings giving error when updating to sprint34 package
+* Fbx Exporter: fix error when exporting meshes with missing normals, tangents, binormals, or vertex colors
+* Export Settings: Fix empty dropdown selection when uninstalling 3D applications
+* Convert to Linked Prefab: fix prefab instance name differing from prefab file name when filename is incremented
+
 **Version**: sprint34
 
 NEW FEATURES

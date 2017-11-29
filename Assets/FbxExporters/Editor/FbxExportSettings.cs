@@ -294,10 +294,10 @@ namespace FbxExporters.EditorTools {
         }
 
         // Note: default values are set in LoadDefaults().
-        public bool mayaCompatibleNames;
-        public bool centerObjects;
-        public bool launchAfterInstallation;
-        public bool HideSendToUnityMenu;
+        public bool mayaCompatibleNames = true;
+        public bool centerObjects = true;
+        public bool launchAfterInstallation = true;
+        public bool HideSendToUnityMenu = true;
         public int ExportFormatSelection;
 
         public string IntegrationSavePath;

@@ -78,7 +78,7 @@ proc int loadUnityDependencies(){
     }
     
     $removeSendToUnityMenu = `optionVar -q "UnityFbxForMaya_removeSendToUnityMenu"`;
-    if($removeSendToUnityMenu){
+    if($removeSendToUnityMenu && `menu -exists "sendToUnityMenu"`){
         //Remove the GamePipeline 'SendToUnity' button
         menu -e -visible false "sendToUnityMenu";
     }
