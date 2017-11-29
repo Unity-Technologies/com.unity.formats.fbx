@@ -264,10 +264,12 @@ namespace FbxExporters.EditorTools {
         public static string[] DCCVendorLocations {
             get{
                 var environmentVariable = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
+                var mayaLocation = System.Environment.GetEnvironmentVariable("MAYA_LOCATION");
+                List<string> locationsList = new List<string>();
+
                 if (environmentVariable != null)
                 {
-                    string[] locations = environmentVariable.Split(';');
-                    List<string> locationsList = new List<string>();
+                    string[] locations = environmentVariable.Split(';');                    
                     for (int i = 0; i < locations.Length; i++)
                     {
                         if (Directory.Exists(locations[i]))
@@ -275,10 +277,19 @@ namespace FbxExporters.EditorTools {
                             locationsList.Add(locations[i]);
                         }
                     }
-                    if (locationsList.Count > 0)
+                }
+
+                if (mayaLocation != null)
+                {
+                    if (Directory.Exists(mayaLocation))
                     {
-                        return locationsList.ToArray();
+                        locationsList.Add(mayaLocation);
                     }
+                }
+
+                if (locationsList.Count > 0)
+                {
+                    return locationsList.ToArray();
                 }
 
                 switch (Application.platform)
