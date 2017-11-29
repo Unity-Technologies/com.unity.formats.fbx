@@ -17,8 +17,6 @@ global string $unityImportMenuName = "Import";
 global string $unityExportMenuName = "Export";
 global string $unityImportCommand = "unityImport";
 global string $unityExportCommand = "unityExport";
-global string $unityRemoveSendToUnityMenuOption = "UnityFbxForMaya_removeSendToUnityMenu";
-global string $unitySendToUnityMenuName = "sendToUnityMenu";
 
 global proc string unityWhatsNewVersion(){
     return `about -q -version`;
@@ -63,9 +61,6 @@ global proc unityInstallUI(){
     global string $unityExportMenuName;
     global string $unityImportCommand;
     global string $unityExportCommand;
-    
-    global string $unityRemoveSendToUnityMenuOption;
-    global string $unitySendToUnityMenuName;
     
     global string $gMainFileMenu;
     
