@@ -839,6 +839,11 @@ namespace FbxExporters
 
                 fbxNode.SetNodeAttribute (fbxCamera);
 
+                // set +90 post rotation to counteract for FBX camera's facing +X direction by default
+                fbxNode.SetPostRotation(FbxNode.EPivotSet.eSourcePivot, new FbxVector4(0,90,0));
+                // have to set rotation active to true in order for post rotation to be applied
+                fbxNode.SetRotationActive (true);
+
                 // make the last camera exported the default camera
                 DefaultCamera = fbxNode.GetName ();
 
