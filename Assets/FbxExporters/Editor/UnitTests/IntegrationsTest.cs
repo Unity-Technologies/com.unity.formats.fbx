@@ -41,7 +41,7 @@ namespace FbxExporters.UnitTests
                 LogNonEmptyString ("display name", mayaIntegration.DccDisplayName);
                 LogNonEmptyString ("integration zip path", mayaIntegration.IntegrationZipPath);
 
-                Assert.IsFalse (Editor.MayaIntegration.IsHeadlessInstall () == 0);
+                Assert.IsTrue (Editor.MayaIntegration.IsHeadlessInstall () == 0);
 
                 LogNonEmptyString ("module template path", mayaIntegration.GetModuleTemplatePath ());
                 LogNonEmptyString ("package path", Editor.MayaIntegration.GetPackagePath ());
