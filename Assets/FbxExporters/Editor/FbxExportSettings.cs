@@ -599,9 +599,9 @@ namespace FbxExporters.EditorTools {
                 instance.dccOptionNames = new List<string> ();
                 FindDCCInstalls ();
             }
-
-            // store the selected app
-            var prevSelection = instance.dccOptionPaths[instance.selectedDCCApp];
+            // store the selected app if any
+            string prevSelection = instance.dccOptionPaths.Count > 0 && instance.selectedDCCApp >=0 ?
+                instance.dccOptionPaths[instance.selectedDCCApp] : null;
 
             // remove options that no longer exist
             List<string> pathsToDelete = new List<string>();
