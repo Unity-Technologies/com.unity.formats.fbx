@@ -178,13 +178,15 @@ namespace FbxExporters.EditorTools {
 
             EditorGUILayout.Space();
 
-
+            // disable button if no 3D application is available
+            EditorGUI.BeginDisabledGroup (ExportSettings.IsDCCDropdownEmpty()? true : false);
             var installIntegrationContent = new GUIContent(
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
             if (GUILayout.Button (installIntegrationContent)) {
                 FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
             }
+            EditorGUI.EndDisabledGroup ();
 
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
@@ -729,7 +731,12 @@ namespace FbxExporters.EditorTools {
 
         public static string GetSelectedDCCName()
         {
-            return (instance.dccOptionPaths.Count>0) ? instance.dccOptionNames [instance.selectedDCCApp] : "";
+            return (instance.dccOptionNames.Count>0) ? instance.dccOptionNames [instance.selectedDCCApp] : "";
+        }
+
+        public static bool IsDCCDropdownEmpty()
+        {
+            return instance.dccOptionPaths.Count <= 0;
         }
 
         /// <summary>
