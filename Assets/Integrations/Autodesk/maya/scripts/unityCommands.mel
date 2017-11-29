@@ -2,7 +2,7 @@ global string $UnityExportSet = "UnityFbxExportSet";
 global string $UnityFbxFilePathAttr = "unityFbxFilePath";
 global string $UnityFbxFileNameAttr = "unityFbxFileName";
 
-proc unityRemoveNativeMenuOnLoad(){
+global proc unityRemoveNativeMenuOnLoad(){
     $removeSendToUnityMenu = `optionVar -q "UnityFbxForMaya_removeSendToUnityMenu"`;
     if($removeSendToUnityMenu && `menu -exists "sendToUnityMenu"`){
         //Remove the GamePipeline 'SendToUnity' button

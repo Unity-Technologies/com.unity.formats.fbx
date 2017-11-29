@@ -81,9 +81,6 @@ global proc unityInstallUI(){
     menuItem -parent $unityMenuName -label $unityImportMenuName -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command $unityImportCommand;
     menuItem -parent $unityMenuName -label $unityExportMenuName -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command $unityExportCommand;
 
-    $unityRemoveSendToUnityMenuOption = `optionVar -q $unityRemoveSendToUnityMenuOption`;
-    if($unityRemoveSendToUnityMenuOption && `menu -exists $unitySendToUnityMenuName`){
-        menu -e -visible false $unitySendToUnityMenuName;
-    }    
+    unityRemoveNativeMenuOnLoad(); 
 
 }
