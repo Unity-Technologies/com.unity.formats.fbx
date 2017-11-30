@@ -264,7 +264,6 @@ namespace FbxExporters.EditorTools {
         public static string[] DCCVendorLocations {
             get{
                 var environmentVariable = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
-                var mayaLocation = System.Environment.GetEnvironmentVariable("MAYA_LOCATION");
                 List<string> locationsList = new List<string>();
 
                 if (environmentVariable != null)
@@ -281,7 +280,7 @@ namespace FbxExporters.EditorTools {
                     {
                         return locationsList.ToArray();
                     }
-                }                
+                }
 
                 switch (Application.platform)
                 {
@@ -714,7 +713,14 @@ namespace FbxExporters.EditorTools {
             // We want the stuff after 'Maya ' and before the comma.
             // (Uni-31601) less brittle! Consider also the mel command "about -version".
             var commaIndex = resultString.IndexOf(',');
-            return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
+            if (!string.IsNullOrEmpty(resultString.Trim()))
+            {
+                return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
+            }
+            else
+            {
+                return "unknown";
+            }
         }
 
         /// <summary>
