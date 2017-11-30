@@ -16,8 +16,6 @@ global string $unityImportMenuName = "Import";
 global string $unityExportMenuName = "Export";
 global string $unityImportCommand = "unityImport";
 global string $unityExportCommand = "unityExport";
-global string $unityRemoveSendToUnityMenuOption = "UnityFbxForMaya_removeSendToUnityMenu";
-global string $unitySendToUnityMenuName = "sendToUnityMenu";
 
 global proc string unityWhatsNewVersion(){
     return `about -q -version`;
@@ -25,12 +23,15 @@ global proc string unityWhatsNewVersion(){
 }
 
 global proc unitySetupUI(){
-
+    global string $unityCommandsFile;
     $isHeadless = `optionVar -q "UnityFbxForMaya_Headless"`;
     if($isHeadless){
         // headless install, don't add UI
         return;
     }    
+    
+    eval ("source " + $unityCommandsFile);
+    loadUnityDependencies();
 
     evalDeferred -lowestPriority "unityInstallUI";
 }
@@ -55,9 +56,6 @@ global proc unityInstallUI(){
     global string $unityImportCommand;
     global string $unityExportCommand;
     
-    global string $unityRemoveSendToUnityMenuOption;
-    global string $unitySendToUnityMenuName;
-    
     global string $gMainFileMenu;
     
     buildFileMenu;
@@ -68,10 +66,7 @@ global proc unityInstallUI(){
     menuItem -parent $parentMenu -insertAfter $unityMenuDivider -subMenu true -label $unityMenuLabel -tearOff true -version $pluginVersion -image $unityIconPath -annotation $unityFamilyLabel $unityMenuName;
     menuItem -parent $unityMenuName -label $unityImportMenuName -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command $unityImportCommand;
     menuItem -parent $unityMenuName -label $unityExportMenuName -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command $unityExportCommand;
-    
-    $unityRemoveSendToUnityMenuOption = `optionVar -q $unityRemoveSendToUnityMenuOption`;
-    if($unityRemoveSendToUnityMenuOption && `menu -exists $unitySendToUnityMenuName`){
-        menu -e -visible false $unitySendToUnityMenuName;
-    }    
+
+    unityRemoveNativeMenuOnLoad(); 
 
 }
