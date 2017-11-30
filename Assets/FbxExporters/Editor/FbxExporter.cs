@@ -943,6 +943,10 @@ namespace FbxExporters
                     return -1;
                 }
 
+                // Default inheritance type is RrSs, which causes scaling issues in Maya.
+                // Use RSrs as the scaling inhertiance instead.
+                fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
+
                 fbxNode.SetVisibility (unityGo.activeSelf);
 
                 ExportTransform ( unityGo.transform, fbxNode, newCenter, exportType);
