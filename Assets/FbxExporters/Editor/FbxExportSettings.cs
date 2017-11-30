@@ -277,20 +277,11 @@ namespace FbxExporters.EditorTools {
                             locationsList.Add(locations[i]);
                         }
                     }
-                }
-
-                if (mayaLocation != null)
-                {
-                    if (Directory.Exists(mayaLocation))
+                    if (locationsList.Count > 0)
                     {
-                        locationsList.Add(mayaLocation);
+                        return locationsList.ToArray();
                     }
-                }
-
-                if (locationsList.Count > 0)
-                {
-                    return locationsList.ToArray();
-                }
+                }                
 
                 switch (Application.platform)
                 {
@@ -551,6 +542,13 @@ namespace FbxExporters.EditorTools {
                         dccOptionName.Add(maxOptionName);
                     }
                 }
+            }
+            var location = System.Environment.GetEnvironmentVariable("MAYA_LOCATION");
+            if (!string.IsNullOrEmpty(location))
+            {
+                location = location.TrimEnd('/');
+                dccOptionPath.Add(GetMayaExePath(location.Replace("\\", "/")));
+                dccOptionName.Add("MAYA_LOCATION");
             }
             instance.selectedDCCApp = instance.GetPreferredDCCApp();
         }
