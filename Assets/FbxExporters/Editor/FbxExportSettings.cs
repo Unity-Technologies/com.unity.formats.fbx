@@ -276,10 +276,23 @@ namespace FbxExporters.EditorTools {
                             locationsList.Add(locations[i]);
                         }
                     }
-                    if (locationsList.Count > 0)
+                }
+
+                //Check the surrounding area around MAYA_LOCATION for any other Applications we may want.
+                System.Environment.SetEnvironmentVariable("MAYA_LOCATION", "C:/Program Files/Autodesk/pickles/bin");
+                var location = System.Environment.GetEnvironmentVariable("MAYA_LOCATION");
+                if (!string.IsNullOrEmpty(location))
+                {
+                    var possibleLocation = Directory.GetParent(Directory.GetParent(location).ToString());
+                    if (possibleLocation.Exists)
                     {
-                        return locationsList.ToArray();
+                        locationsList.Add(possibleLocation.ToString());
                     }
+                }
+
+                    if (locationsList.Count > 0)
+                {
+                    return locationsList.ToArray();
                 }
 
                 switch (Application.platform)
@@ -546,8 +559,13 @@ namespace FbxExporters.EditorTools {
             if (!string.IsNullOrEmpty(location))
             {
                 location = location.TrimEnd('/');
-                dccOptionPath.Add(GetMayaExePath(location.Replace("\\", "/")));
-                dccOptionName.Add("MAYA_LOCATION");
+                string pathToAdd = GetMayaExePath(location.Replace("\\", "/"));
+                //If this path is already a part of our list, don't add it
+                if (!dccOptionPath.Contains(pathToAdd))
+                {
+                    dccOptionPath.Add(pathToAdd);
+                    dccOptionName.Add("MAYA_LOCATION");
+                }
             }
             instance.selectedDCCApp = instance.GetPreferredDCCApp();
         }
@@ -670,6 +688,14 @@ namespace FbxExporters.EditorTools {
             switch (dcc) {
             case DCCType.Maya:
                 var version = AskMayaVersion(newOption);
+                    if (version == null)
+                    {
+                        Debug.LogError("This version of Maya could not be launched properly");
+                        UnityEditor.EditorUtility.DisplayDialog("Error Loading 3D Application",
+                            "There was a problem loading this version of Maya",
+                            "Ok");
+                        return;
+                    }
                 optionName = GetUniqueDCCOptionName("Maya " + version);
                 break;
             case DCCType.Max:
@@ -719,7 +745,9 @@ namespace FbxExporters.EditorTools {
             }
             else
             {
-                return "unknown";
+                //This probably means we tried to launch Maya to check the version but it was some sort of fake maya.
+                //We'll just return null and throw an error for it.
+                return null;
             }
         }
 
