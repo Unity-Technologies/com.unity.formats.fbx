@@ -955,8 +955,6 @@ namespace FbxExporters
                 // Use RSrs as the scaling inhertiance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
-                fbxNode.SetVisibility (unityGo.activeSelf);
-
                 ExportTransform ( unityGo.transform, fbxNode, newCenter, exportType);
 
                 // try export mesh
