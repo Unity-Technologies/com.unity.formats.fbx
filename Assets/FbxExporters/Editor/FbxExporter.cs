@@ -945,6 +945,8 @@ namespace FbxExporters
 
                 // Default inheritance type in FBX is RrSs, which causes scaling issues in Maya as
                 // both Maya and Unity use RSrs inheritance by default.
+                // Note: MotionBuilder uses RrSs inheritance by default as well, though it is possible
+                //       to select a different inheritance type in the UI.
                 // Use RSrs as the scaling inhertiance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
