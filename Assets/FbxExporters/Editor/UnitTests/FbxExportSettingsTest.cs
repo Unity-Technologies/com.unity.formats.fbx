@@ -213,5 +213,22 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual(preferred, -1);
         }
 
+        [Test]
+        public void TestGetDCCOptions()
+        {
+            string projectPath = Application.dataPath;
+
+            var firstPath = Directory.CreateDirectory(projectPath + "/GetDCCOptionsTestFolder/3ds max 3000");
+
+            FileInfo firstExe = new FileInfo(firstPath + "3dsmax.exe");
+            firstExe.Create();
+
+
+            List<string> testPathList = new List<string>();
+            testPathList.Add("C:/Program Files/Autodesk/3ds Max 2025/3dsmax.exe"); //bogus path which should be removed
+            testPathList.Add("C:/Program Files/Autodesk/3ds Max 2020/3dsmax.exe");
+            testPathList.Add("C:/Program Files/Autodesk/3ds Max 2018/3dsmax.exe");
+        }
+
     }
 }
