@@ -179,7 +179,7 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.Space();
 
             // disable button if no 3D application is available
-            EditorGUI.BeginDisabledGroup (ExportSettings.IsDCCDropdownEmpty()? true : false);
+            EditorGUI.BeginDisabledGroup (ExportSettings.CanInstall()? true : false);
             var installIntegrationContent = new GUIContent(
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
@@ -602,8 +602,7 @@ namespace FbxExporters.EditorTools {
                 FindDCCInstalls ();
             }
             // store the selected app if any
-            string prevSelection = instance.dccOptionPaths.Count > 0 && instance.selectedDCCApp >=0 ?
-                instance.dccOptionPaths[instance.selectedDCCApp] : null;
+            string prevSelection = GetSelectedDCCPath();
 
             // remove options that no longer exist
             List<string> pathsToDelete = new List<string>();
@@ -726,15 +725,19 @@ namespace FbxExporters.EditorTools {
 
         public static string GetSelectedDCCPath()
         {
-            return (instance.dccOptionPaths.Count>0) ? instance.dccOptionPaths [instance.selectedDCCApp] : "";
+            return (instance.dccOptionPaths.Count>0 &&
+                instance.selectedDCCApp >= 0 &&
+                instance.selectedDCCApp < instance.dccOptionPaths.Count) ? instance.dccOptionPaths [instance.selectedDCCApp] : "";
         }
 
         public static string GetSelectedDCCName()
         {
-            return (instance.dccOptionNames.Count>0) ? instance.dccOptionNames [instance.selectedDCCApp] : "";
+            return (instance.dccOptionNames.Count>0 &&
+                instance.selectedDCCApp >= 0 &&
+                instance.selectedDCCApp < instance.dccOptionNames.Count) ? instance.dccOptionNames [instance.selectedDCCApp] : "";
         }
 
-        public static bool IsDCCDropdownEmpty()
+        public static bool CanInstall()
         {
             return instance.dccOptionPaths.Count <= 0;
         }
