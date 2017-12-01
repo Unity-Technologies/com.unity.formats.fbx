@@ -217,17 +217,22 @@ namespace FbxExporters.UnitTests
         public void TestGetDCCOptions()
         {
             string projectPath = Application.dataPath;
-
+            Debug.Log(projectPath);
             var firstPath = Directory.CreateDirectory(projectPath + "/GetDCCOptionsTestFolder/3ds max 3000");
-
-            FileInfo firstExe = new FileInfo(firstPath + "3dsmax.exe");
+            var secondPath = Directory.CreateDirectory(projectPath + "/GetDCCOptionsTestFolder/3ds max 3001");
+            FileInfo firstExe = new FileInfo(projectPath + "/GetDCCOptionsTestFolder/3ds max 3000/3dsmax.exe");            
             firstExe.Create();
+            firstExe.Open(FileMode.Open);
 
 
             List<string> testPathList = new List<string>();
-            testPathList.Add("C:/Program Files/Autodesk/3ds Max 2025/3dsmax.exe"); //bogus path which should be removed
-            testPathList.Add("C:/Program Files/Autodesk/3ds Max 2020/3dsmax.exe");
+            testPathList.Add(projectPath + "/GetDCCOptionsTestFolder/3ds max 3001"); //bogus path which should be removed
+            testPathList.Add(projectPath + "/GetDCCOptionsTestFolder/3ds max 3000");
             testPathList.Add("C:/Program Files/Autodesk/3ds Max 2018/3dsmax.exe");
+
+            firstExe.Delete();
+            firstPath.Delete();
+            secondPath.Delete();
         }
 
     }
