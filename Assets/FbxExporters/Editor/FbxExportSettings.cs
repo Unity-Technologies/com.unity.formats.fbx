@@ -179,7 +179,7 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.Space();
 
             // disable button if no 3D application is available
-            EditorGUI.BeginDisabledGroup (ExportSettings.CanInstall()? true : false);
+            EditorGUI.BeginDisabledGroup (!ExportSettings.CanInstall());
             var installIntegrationContent = new GUIContent(
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
@@ -739,7 +739,7 @@ namespace FbxExporters.EditorTools {
 
         public static bool CanInstall()
         {
-            return instance.dccOptionPaths.Count <= 0;
+            return instance.dccOptionPaths.Count > 0;
         }
 
         /// <summary>
