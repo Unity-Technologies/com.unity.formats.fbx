@@ -279,18 +279,32 @@ namespace FbxExporters.EditorTools {
                 }
 
                 //Check the surrounding area around MAYA_LOCATION for any other Applications we may want.
-                System.Environment.SetEnvironmentVariable("MAYA_LOCATION", "C:/Program Files/Autodesk/pickles/bin");
                 var location = System.Environment.GetEnvironmentVariable("MAYA_LOCATION");
                 if (!string.IsNullOrEmpty(location))
                 {
-                    var possibleLocation = Directory.GetParent(Directory.GetParent(location).ToString());
-                    if (possibleLocation.Exists)
+                    //If we are on Windows, we need only go up one location to get to the "Autodesk" folder.
+                    var possibleLocation = Directory.GetParent(location).ToString();
+
+                    if (Application.platform == RuntimePlatform.OSXEditor)
+                    {
+                        int appIndex = location.IndexOf("Maya.app");
+
+                        //If we found 'Maya.app' in the location string, we're going to trim it and everything after it out
+                        //This way our possibleLocation will be more uniform between windows and mac
+                        if (appIndex != -1)
+                        {
+                            possibleLocation = location.Substring(0, (appIndex - 1));
+                            possibleLocation = Directory.GetParent(Directory.GetParent(location).ToString()).ToString();
+                        }                        
+                    }
+
+                    if (Directory.Exists(possibleLocation))
                     {
                         locationsList.Add(possibleLocation.ToString());
                     }
                 }
 
-                    if (locationsList.Count > 0)
+                if (locationsList.Count > 0)
                 {
                     return locationsList.ToArray();
                 }
@@ -561,7 +575,7 @@ namespace FbxExporters.EditorTools {
                 location = location.TrimEnd('/');
                 string pathToAdd = GetMayaExePath(location.Replace("\\", "/"));
                 //If this path is already a part of our list, don't add it
-                if (!dccOptionPath.Contains(pathToAdd))
+                if (!dccOptionPath.Contains(pathToAdd) && Directory.Exists(pathToAdd))
                 {
                     dccOptionPath.Add(pathToAdd);
                     dccOptionName.Add("MAYA_LOCATION");
@@ -688,14 +702,14 @@ namespace FbxExporters.EditorTools {
             switch (dcc) {
             case DCCType.Maya:
                 var version = AskMayaVersion(newOption);
-                    if (version == null)
-                    {
-                        Debug.LogError("This version of Maya could not be launched properly");
-                        UnityEditor.EditorUtility.DisplayDialog("Error Loading 3D Application",
-                            "There was a problem loading this version of Maya",
-                            "Ok");
-                        return;
-                    }
+                if (version == null)
+                {
+                    Debug.LogError("This version of Maya could not be launched properly");
+                    UnityEditor.EditorUtility.DisplayDialog("Error Loading 3D Application",
+                        "Failed to add Maya option, could not get version number from maya.exe",
+                        "Ok");
+                    return;
+                }
                 optionName = GetUniqueDCCOptionName("Maya " + version);
                 break;
             case DCCType.Max:
@@ -745,7 +759,7 @@ namespace FbxExporters.EditorTools {
             }
             else
             {
-                //This probably means we tried to launch Maya to check the version but it was some sort of fake maya.
+                //This probably means we tried to launch Maya to check the version but it was some sort of broken maya.
                 //We'll just return null and throw an error for it.
                 return null;
             }
