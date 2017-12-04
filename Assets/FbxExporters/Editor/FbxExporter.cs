@@ -124,6 +124,13 @@ namespace FbxExporters
             }
             static Material s_defaultMaterial = null;
 
+            static Dictionary<UnityEngine.LightType, FbxLight.EType> MapLightType = new Dictionary<UnityEngine.LightType, FbxLight.EType> () {
+                { UnityEngine.LightType.Directional,    FbxLight.EType.eDirectional },
+                { UnityEngine.LightType.Spot,           FbxLight.EType.eSpot },
+                { UnityEngine.LightType.Point,          FbxLight.EType.ePoint },
+                { UnityEngine.LightType.Area,           FbxLight.EType.eArea },
+            };
+
             /// <summary>
             /// Gets the version number of the FbxExporters plugin from the readme.
             /// </summary>
@@ -851,6 +858,125 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Exports light component.
+            /// Supported types: point, spot and directional
+            /// Cookie => Gobo
+            /// </summary>
+            protected bool ExportLight (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                Light unityLight = unityGo.GetComponent<Light> ();
+
+                if (unityLight == null)
+                    return false;
+
+                FbxLight.EType fbxLightType;
+
+                // Is light type supported?
+                if (!MapLightType.TryGetValue (unityLight.type, out fbxLightType))
+                    return false;
+                
+                FbxLight fbxLight = FbxLight.Create (fbxScene.GetFbxManager (), unityLight.name);
+
+                // Set the type of the light.      
+                fbxLight.LightType.Set(fbxLightType);
+
+                switch (unityLight.type) 
+                {
+                case LightType.Directional : {
+                        break;
+                    }
+                case LightType.Spot : {
+                        // Set the angle of the light's spotlight cone in degrees.
+                        fbxLight.InnerAngle.Set(unityLight.spotAngle);
+                        fbxLight.OuterAngle.Set(unityLight.spotAngle);
+                        break;
+                    }
+                case LightType.Point : {
+                        break;
+                    }
+                case LightType.Area : {
+                        // TODO: areaSize: The size of the area light by scaling the node XY
+                        break;
+                    }
+                }
+
+                // Export bounceIntensity as custom property
+                // NOTE: export on fbxNode so that it will show up in Maya
+                ExportFloatProperty (fbxNode, unityLight.bounceIntensity, 
+                    MakeName("bounceIntensity"), 
+                    "The multiplier that defines the strength of the bounce lighting.");
+
+                // The color of the light.
+                var unityLightColor = unityLight.color;
+
+                fbxLight.Color.Set (new FbxDouble3(unityLightColor.r, unityLightColor.g, unityLightColor.b));
+
+                // Export colorTemperature as custom property
+                ExportFloatProperty (fbxNode, unityLight.colorTemperature,
+                    MakeName("colorTemperature"),
+                    "The color temperature of the light. Correlated Color Temperature (abbreviated as CCT) is multiplied with the color filter when calculating the final color of a light source.The color temperature of the electromagnetic radiation emitted from an ideal black body is defined as its surface temperature in Kelvin.White is 6500K according to the D65 standard. Candle light is 1800K.If you want to use lightsUseCCT, lightsUseLinearIntensity has to be enabled to ensure physically correct output. See Also: GraphicsSettings.lightsUseLinearIntensity, GraphicsSettings.lightsUseCCT.");
+
+                // TODO: commandBufferCount Number of command buffers set up on this light (Read Only).
+
+                // cookie            The cookie texture projected by the light.
+                var unityCookieTexture = unityLight.cookie;
+
+                if (unityCookieTexture !=null)
+                {
+                    // Find its filename
+                    var textureSourceFullPath = AssetDatabase.GetAssetPath (unityCookieTexture);
+                    if (textureSourceFullPath != "") {
+
+                        // get absolute filepath to texture
+                        textureSourceFullPath = Path.GetFullPath (textureSourceFullPath);
+
+                        fbxLight.FileName.Set (textureSourceFullPath);
+                        fbxLight.DrawGroundProjection.Set (true);
+                        fbxLight.DrawVolumetricLight.Set (true);
+                        fbxLight.DrawFrontFacingVolumetricLight.Set (false);
+                    }
+                }
+
+                // Export cookieSize as custom property
+                ExportFloatProperty (fbxNode, unityLight.cookieSize,
+                    MakeName("cookieSize"),
+                    "The size of a directional light's cookie.");
+
+                // TODO: cullingMask       This is used to light certain objects in the scene selectively.
+                // TODO: flare             The flare asset to use for this light.
+
+                // Set the Intensity of a light is multiplied with the Light color.
+                fbxLight.Intensity.Set (unityLight.intensity * 100.0f /*compensate for Maya scaling by system units*/ );
+
+                // TODO: isBaked           Is the light contribution already stored in lightmaps and/or lightprobes (Read Only).
+                // TODO: lightmapBakeType  This property describes what part of a light's contribution can be baked.
+
+                // Set the range of the light.
+                // applies-to: Point & Spot
+                // => FarAttenuationStart, FarAttenuationEnd
+                fbxLight.FarAttenuationStart.Set (0.01f /* none zero start */);
+                fbxLight.FarAttenuationEnd.Set(unityLight.range);
+
+                // TODO: renderMode        How to render the light.
+
+                // shadows           Set how this light casts shadows
+                // applies-to: Point & Spot
+                bool unityLightCastShadows = unityLight.shadows != LightShadows.None;
+                fbxLight.CastShadows.Set (unityLightCastShadows);
+
+                // TODO: shadowBias        Shadow mapping constant bias.
+                // TODO: shadowCustomResolution The custom resolution of the shadow map.
+                // TODO: shadowNearPlane   Near plane value to use for shadow frustums.
+                // TODO: shadowNormalBias  Shadow mapping normal-based bias.
+                // TODO: shadowResolution  The resolution of the shadow map.
+                // TODO: shadowStrength    Strength of light's shadows.
+
+                fbxNode.SetNodeAttribute (fbxLight);
+
+                return true;
+            }
+
+            /// <summary>
             /// configures default camera for the scene
             /// </summary>
             protected void SetDefaultCamera (FbxScene fbxScene)
@@ -881,6 +1007,26 @@ namespace FbxExporters
                 fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eAnimatable, true);
 
                 return true;
+            }
+
+            /// <summary>
+            /// Export Unity Property as a Float Property
+            /// </summary>
+            FbxProperty ExportFloatProperty (FbxObject fbxObject, float value, string name, string label )
+            {
+                // add (not particularly useful) custom data: how many Unity
+                // components does the unity object have?
+                var fbxProperty = FbxProperty.Create (fbxObject, Globals.FbxDoubleDT, name, label);
+                if (!fbxProperty.IsValid ()) {
+                    throw new System.NullReferenceException ();
+                }
+                fbxProperty.Set (value);
+
+                // Must be marked user-defined or it won't be shown in most DCCs
+                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eUserDefined, true);
+                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eAnimatable, true);
+
+                return fbxProperty;
             }
 
             /// <summary>
@@ -964,8 +1110,14 @@ namespace FbxExporters
                 }
 
                 // export camera, but only if no mesh was exported
+                bool exportedCamera = false;
                 if (!exportedMesh) {
-                    ExportCamera (unityGo, fbxScene, fbxNode);
+                    exportedCamera = ExportCamera (unityGo, fbxScene, fbxNode);
+                }
+
+                // export light, but only if no mesh or camera was exported
+                if (!exportedMesh && !exportedCamera) {
+                    ExportLight (unityGo, fbxScene, fbxNode);
                 }
 
                 if (Verbose)
