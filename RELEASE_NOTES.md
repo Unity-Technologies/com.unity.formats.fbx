@@ -1,5 +1,11 @@
 RELEASE NOTES
 
+**Version**: 1.2.0b1
+
+NEW FEATURES
+
+* Updated User documentation
+
 **Version**: sprint35
 
 NEW FEATURES
