@@ -65,11 +65,7 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.SelectableLabel(pathLabel,
                 EditorStyles.textField,
                 GUILayout.MinWidth(SelectableLabelMinWidth),
-                GUILayout.Height(EditorGUIUtility.singleLineHeight));
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-
-            GUILayout.Space(LabelWidth + BrowseButtonOffset);
+                GUILayout.Height(EditorGUIUtility.singleLineHeight));            
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
@@ -105,6 +101,7 @@ namespace FbxExporters.EditorTools {
                     }
                 }
             }
+
             GUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
@@ -122,11 +119,6 @@ namespace FbxExporters.EditorTools {
             var options = ExportSettings.GetDCCOptions();
 
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
-
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-
-            GUILayout.Space(LabelWidth + BrowseButtonOffset);
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
