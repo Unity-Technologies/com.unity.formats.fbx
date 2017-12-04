@@ -899,22 +899,10 @@ namespace FbxExporters
                         break;
                     }
                 }
-
-                // Export bounceIntensity as custom property
-                // NOTE: export on fbxNode so that it will show up in Maya
-                ExportFloatProperty (fbxNode, unityLight.bounceIntensity, 
-                    MakeName("bounceIntensity"), 
-                    "The multiplier that defines the strength of the bounce lighting.");
-
                 // The color of the light.
                 var unityLightColor = unityLight.color;
 
                 fbxLight.Color.Set (new FbxDouble3(unityLightColor.r, unityLightColor.g, unityLightColor.b));
-
-                // Export colorTemperature as custom property
-                ExportFloatProperty (fbxNode, unityLight.colorTemperature,
-                    MakeName("colorTemperature"),
-                    "The color temperature of the light. Correlated Color Temperature (abbreviated as CCT) is multiplied with the color filter when calculating the final color of a light source.The color temperature of the electromagnetic radiation emitted from an ideal black body is defined as its surface temperature in Kelvin.White is 6500K according to the D65 standard. Candle light is 1800K.If you want to use lightsUseCCT, lightsUseLinearIntensity has to be enabled to ensure physically correct output. See Also: GraphicsSettings.lightsUseLinearIntensity, GraphicsSettings.lightsUseCCT.");
 
                 // TODO: commandBufferCount Number of command buffers set up on this light (Read Only).
 
@@ -937,11 +925,6 @@ namespace FbxExporters
                     }
                 }
 
-                // Export cookieSize as custom property
-                ExportFloatProperty (fbxNode, unityLight.cookieSize,
-                    MakeName("cookieSize"),
-                    "The size of a directional light's cookie.");
-
                 // TODO: cullingMask       This is used to light certain objects in the scene selectively.
                 // TODO: flare             The flare asset to use for this light.
 
@@ -955,7 +938,7 @@ namespace FbxExporters
                 // applies-to: Point & Spot
                 // => FarAttenuationStart, FarAttenuationEnd
                 fbxLight.FarAttenuationStart.Set (0.01f /* none zero start */);
-                fbxLight.FarAttenuationEnd.Set(unityLight.range);
+                fbxLight.FarAttenuationEnd.Set(unityLight.range*UnitScaleFactor);
 
                 // TODO: renderMode        How to render the light.
 
@@ -1012,26 +995,6 @@ namespace FbxExporters
                 fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eAnimatable, true);
 
                 return true;
-            }
-
-            /// <summary>
-            /// Export Unity Property as a Float Property
-            /// </summary>
-            FbxProperty ExportFloatProperty (FbxObject fbxObject, float value, string name, string label )
-            {
-                // add (not particularly useful) custom data: how many Unity
-                // components does the unity object have?
-                var fbxProperty = FbxProperty.Create (fbxObject, Globals.FbxDoubleDT, name, label);
-                if (!fbxProperty.IsValid ()) {
-                    throw new System.NullReferenceException ();
-                }
-                fbxProperty.Set (value);
-
-                // Must be marked user-defined or it won't be shown in most DCCs
-                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eUserDefined, true);
-                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eAnimatable, true);
-
-                return fbxProperty;
             }
 
             /// <summary>
