@@ -973,6 +973,11 @@ namespace FbxExporters
 
                 fbxNode.SetNodeAttribute (fbxLight);
 
+                // set +90 post rotation on x to counteract for FBX light's facing -Y direction by default
+                fbxNode.SetPostRotation(FbxNode.EPivotSet.eSourcePivot, new FbxVector4(90,0,0));
+                // have to set rotation active to true in order for post rotation to be applied
+                fbxNode.SetRotationActive (true);
+
                 return true;
             }
 
