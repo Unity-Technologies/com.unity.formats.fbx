@@ -283,7 +283,11 @@ namespace FbxExporters.EditorTools {
                 if (!string.IsNullOrEmpty(location))
                 {
                     //If we are on Windows, we need only go up one location to get to the "Autodesk" folder.
-                    var possibleLocation = Directory.GetParent(location).ToString();
+                    string possibleLocation = location;
+                    if (Directory.GetParent(location) != null)
+                    {
+                        possibleLocation = Directory.GetParent(location).ToString();
+                    }
 
                     if (Application.platform == RuntimePlatform.OSXEditor)
                     {
@@ -291,14 +295,16 @@ namespace FbxExporters.EditorTools {
 
                         //If we found 'Maya.app' in the location string, we're going to trim it and everything after it out
                         //This way our possibleLocation will be more uniform between windows and mac
-                        if (appIndex != -1)
+                        if (appIndex >= 0 && 
+                            Directory.GetParent(location) != null && 
+                            Directory.GetParent(Directory.GetParent(location).ToString()) != null)
                         {
                             possibleLocation = location.Substring(0, (appIndex - 1));
-                            possibleLocation = Directory.GetParent(Directory.GetParent(location).ToString()).ToString();
+                            possibleLocation = Directory.GetParent(Directory.GetParent(possibleLocation).ToString()).ToString();
                         }                        
                     }
 
-                    if (Directory.Exists(possibleLocation))
+                    if (!string.IsNullOrEmpty(possibleLocation) && Directory.Exists(possibleLocation))
                     {
                         locationsList.Add(possibleLocation.ToString());
                     }
