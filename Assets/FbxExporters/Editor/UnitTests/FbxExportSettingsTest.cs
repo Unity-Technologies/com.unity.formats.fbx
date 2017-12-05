@@ -216,27 +216,38 @@ namespace FbxExporters.UnitTests
         [Test]
         public void TestGetDCCOptions()
         {
-            string projectPath = Application.dataPath;
-            var firstPath = Directory.CreateDirectory(projectPath + "/GetDCCOptionsTestFolder/3ds max 3000");
-            var secondPath = Directory.CreateDirectory(projectPath + "/GetDCCOptionsTestFolder/3ds max 3001");
-            FileInfo firstExe = new FileInfo(projectPath + "/GetDCCOptionsTestFolder/3ds max 3000/3dsmax.exe");
+            //Make a folder structure to mimic an 'autodesk' type hierarchy
+            string testFolder = Application.dataPath + "/GetGetDCCOptionsTestFolder";
+            Directory.CreateDirectory(testFolder + "/3ds max 3000");
+            Directory.CreateDirectory(testFolder + "/3ds max 3001");
+
+            //Create any files we need within the folders
+            FileInfo firstExe = new FileInfo(testFolder + "/3ds max 3000/3dsmax.exe");
             using (FileStream s = firstExe.Create()) {}
 
+            //Add the paths which will be copied to DCCOptionPaths
             List<string> testPathList = new List<string>();
-            testPathList.Add(projectPath + "/GetDCCOptionsTestFolder/3ds max 3001"); //bogus path which should be removed
-            testPathList.Add(projectPath + "/GetDCCOptionsTestFolder/3ds max 3000");
+            testPathList.Add(testFolder + "/3ds Max 3000/3dsmax.exe"); //this path is valid!
+            testPathList.Add(testFolder + "/3ds Max 3001/3dsmax.exe");
+            testPathList.Add(null);
+            testPathList.Add("cookies/milk/foo/bar");
 
+            //Add the names which will be copied to DCCOptionNames
             List<string> testNameList = new List<string>();
-            testNameList.Add("3ds max 3001");
+            testNameList.Add("3dsmax 3000");
+            testNameList.Add("3dsmax 3001");
+            testNameList.Add(null);
+            testNameList.Add("Cookies & Milk");
 
             ExportSettings.instance.SetDCCOptionNames(testNameList);
             ExportSettings.instance.SetDCCOptionPaths(testPathList);
 
             GUIContent[] options = ExportSettings.GetDCCOptions();
-            Debug.Log(options.Length);
 
-            firstPath.Delete(true);
-            secondPath.Delete(true);
+            //We expect 1, as the others are purposefully bogus
+            Assert.AreEqual(options.Length, 1);
+
+            Directory.Delete(testFolder, true);
         }
 
     }
