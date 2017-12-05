@@ -1265,6 +1265,9 @@ namespace FbxExporters
                 } catch (IOException) {
                 }
 
+                // refresh the database so Unity knows the file's been deleted
+                AssetDatabase.Refresh();
+
                 if (File.Exists (m_lastFilePath)) {
                     Debug.LogWarning ("Failed to delete file: " + m_lastFilePath);
                 }
