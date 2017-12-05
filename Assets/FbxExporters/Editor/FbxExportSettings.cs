@@ -157,13 +157,13 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.Space();
 
             exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
-                new GUIContent("Keep open:",
+                new GUIContent("Keep Open:",
                     "Keep the selected 3D application open after Unity integration install has completed."),
                 exportSettings.launchAfterInstallation
             );
 
             exportSettings.HideSendToUnityMenu = EditorGUILayout.Toggle(
-                new GUIContent("Hide native menu:",
+                new GUIContent("Hide Native Menu:",
                     "Replace Maya's native 'Send to Unity' menu with the Unity Integration's menu"),
                 exportSettings.HideSendToUnityMenu
             );
