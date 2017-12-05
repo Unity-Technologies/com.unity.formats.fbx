@@ -289,16 +289,19 @@ namespace FbxExporters.EditorTools {
 
                         //If we found 'Maya.app' in the location string, we're going to trim it and everything after it out.
                         //This way our possibleLocation will be more uniform between windows and mac.
-
-                        //get everything up until 'maya.exe'
-                        string subLocation = location.Substring(0, (appIndex - 1));
-
-                        var parentDirectory = Directory.GetParent(subLocation);
-
-                        if (appIndex >= 0 && parentDirectory != null)
+                                               
+                        //make sure we found "maya.app."
+                        if (appIndex >= 0)
                         {
-                            possibleLocation = parentDirectory.ToString();
-                            Debug.Log(possibleLocation.ToString());
+                            //get everything up until 'maya.app' 
+                            string subLocation = location.Substring(0, (appIndex - 1));
+
+                            var parentDirectory = Directory.GetParent(subLocation);
+
+                            if (parentDirectory != null)
+                            {
+                                possibleLocation = parentDirectory.ToString();
+                            }
                         }                        
                     }
 
