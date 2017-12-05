@@ -154,6 +154,13 @@ fn createUnityExportAction title parentMenu = (
 	createUnityActionItem "UnityExport" "Unity" title parentMenu;
 );
 
+global unityResetExportOptions;
+fn unityResetExportOptions = (
+    unityFbxFilePathAttr=undefined;
+    unityFbxFileNameAttr=undefined;
+    unityAskSetUnits=undefined;
+);
+
 -- Setup UI in existing Import/Export menus if using 3ds Max 2018+
 if (maxVersion())[1] >= 20000 then(
 	global importMenuName = "File-Import"
@@ -221,6 +228,11 @@ if (maxVersion())[1] >= 20000 then(
 			exportMenu.removeItem unityExportAction; \
 		 )"
 	)
+    
+    -- when opening a new scene, reset the export options to make
+    -- sure we don't accidentally overwrite anything
+    callbacks.addScript #postSceneReset ("unityResetExportOptions()")
+    callbacks.addScript #systemPreNew ("unityResetExportOptions()")
 )
 else if (maxVersion())[1] == 19000 then (
 	-- for 3ds Max 2017
@@ -266,6 +278,11 @@ else if (maxVersion())[1] == 19000 then (
 			menuMan.unRegisterMenu unityMenu; \
 		 )"
 	)
+    
+    -- when opening a new scene, reset the export options to make
+    -- sure we don't accidentally overwrite anything
+    callbacks.addScript #postSceneReset ("unityResetExportOptions()")
+    callbacks.addScript #systemPreNew ("unityResetExportOptions()")
 )
 else(
     print "Error: Unity Integration only supports 3ds Max 2017 or later"

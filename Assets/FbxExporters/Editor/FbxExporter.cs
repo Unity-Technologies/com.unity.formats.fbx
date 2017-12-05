@@ -839,6 +839,11 @@ namespace FbxExporters
 
                 fbxNode.SetNodeAttribute (fbxCamera);
 
+                // set +90 post rotation to counteract for FBX camera's facing +X direction by default
+                fbxNode.SetPostRotation(FbxNode.EPivotSet.eSourcePivot, new FbxVector4(0,90,0));
+                // have to set rotation active to true in order for post rotation to be applied
+                fbxNode.SetRotationActive (true);
+
                 // make the last camera exported the default camera
                 DefaultCamera = fbxNode.GetName ();
 
@@ -943,7 +948,12 @@ namespace FbxExporters
                     return -1;
                 }
 
-                fbxNode.SetVisibility (unityGo.activeSelf);
+                // Default inheritance type in FBX is RrSs, which causes scaling issues in Maya as
+                // both Maya and Unity use RSrs inheritance by default.
+                // Note: MotionBuilder uses RrSs inheritance by default as well, though it is possible
+                //       to select a different inheritance type in the UI.
+                // Use RSrs as the scaling inhertiance instead.
+                fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
                 ExportTransform ( unityGo.transform, fbxNode, newCenter, exportType);
 

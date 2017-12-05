@@ -3,6 +3,7 @@ using UnityEditor;
 using NUnit.Framework;
 using System.IO;
 using System.Collections.Generic;
+using FbxExporters.Editor;
 
 namespace FbxExporters.UnitTests
 {
@@ -52,6 +53,62 @@ namespace FbxExporters.UnitTests
             var imported = new HashSet<string>( new string [] { "Assets/path/to/foo.fbx", m_fbxPath } );
             Assert.IsTrue(FbxPrefabAutoUpdater.MayHaveFbxPrefabToFbxAsset(m_prefabPath, fbxPrefabPath,
                         imported));
+        }
+
+        [Test]
+        public void RectTransformTest ()
+        {
+            Vector3 scaleForward = new Vector3(1,2,3);
+            Vector3 positionForward = new Vector3(100, 200, 300);
+            Vector3 rotationForward = new Vector3(1,2,3);
+
+            Vector3 scaleBackward = new Vector3(3, 2, 1);
+            Vector3 positionBackward = new Vector3(300, 200, 100);
+            Vector3 rotationBackward = new Vector3(3,2,1);
+
+            //Create a hierarchy with a RectTransform
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            capsule.AddComponent<RectTransform>();
+            
+            capsule.GetComponent<RectTransform>().localScale = scaleForward;
+            capsule.GetComponent<RectTransform>().localPosition = positionForward;
+            capsule.GetComponent<RectTransform>().localRotation = Quaternion.Euler(rotationForward);
+
+            capsule.transform.parent = cube.transform;
+
+            string filePath = GetRandomFbxFilePath();
+
+            //instantiate our hierarchy as a prefab
+            var oldInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath);
+            Assert.IsTrue(oldInstance);
+
+            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localScale == scaleForward);
+            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localPosition == positionForward);
+            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localRotation == Quaternion.Euler(rotationForward));
+
+            //Create an "updated" hierarchy
+            var cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var capsule2 = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            capsule2.AddComponent<RectTransform>();
+
+            capsule2.GetComponent<RectTransform>().localScale = scaleBackward;
+            capsule2.GetComponent<RectTransform>().localPosition = positionBackward;
+            capsule2.GetComponent<RectTransform>().localRotation = Quaternion.Euler(rotationBackward);
+
+            capsule2.transform.parent = cube2.transform;        
+
+            //export our updated hierarchy to the same file path as the original
+            SleepForFileTimestamp();
+            FbxExporters.Editor.ModelExporter.ExportObject(filePath, cube2);
+            AssetDatabase.Refresh();
+
+            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localScale == scaleBackward);
+            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localPosition == positionBackward);
+            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localRotation == Quaternion.Euler(rotationBackward));
+
+            GameObject.DestroyImmediate(cube);
+            GameObject.DestroyImmediate(cube2);
         }
 
         [Test]

@@ -306,6 +306,9 @@ namespace FbxExporters
                         m_children.Add(child.name, new FbxRepresentation(child, isRoot: false));
                     }
                     foreach(var component in xfo.GetComponents<Component>()) {
+                        // ignore missing components
+                        if (component == null) { continue; }
+
                         // Don't save the prefab link, to avoid a logic loop.
                         if (component is FbxPrefab) { continue; }
 
@@ -759,6 +762,10 @@ namespace FbxExporters
                         componentTypes[componentType.ToString()] = componentType;
                     }
                     foreach(var component in prefab.GetComponentsInChildren<Component>()) {
+                        // ignore missing components
+                        if (component == null) {
+                            continue;
+                        }
                         var componentType = component.GetType();
                         componentTypes[componentType.ToString()] = componentType;
                     }
@@ -983,13 +990,40 @@ namespace FbxExporters
                                 prefabComponent = prefabXfo.gameObject.AddComponent(fbxComponent.t);
                                 Log("created component {0}:{1}", nodeName, fbxComponent.t);
                             }
-                            // Check that the component exists before copying to it.
-                            // This happens for Rect Transform components as the fbx
-                            // contains a Transform which it tries to add/update on the
-                            // prefab, but fails because you cannot have both a Transform
-                            // and a Rect Transform
-                            // UNI-29179 TODO: better handling of Rect Transforms
+
+                            //If the prefabComponent has not been assigned yet,
+                            //it means that we couldn't find it, and that we tried to add it but that it seems like it already exists.
                             if (!prefabComponent) {
+                                //This is to confirm that it is a RectTransform
+                                index = prefabComponents.FindIndex(x => x.GetType() == typeof(RectTransform));
+
+                                if (index < 0)
+                                {
+                                    Log("The component could not be found or added, and was not a RectTransform");
+                                    continue;
+                                }
+
+                                prefabComponent = prefabComponents[index];
+                                prefabComponents.RemoveAt(index);
+
+                                GameObject tempGameObject = new GameObject();
+                                try
+                                {                                    
+                                    Transform tempTransform = tempGameObject.transform;
+
+                                    UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponent.jsonValue, tempTransform);
+
+                                    var rectTransform = prefabComponent as RectTransform;
+                                    rectTransform.localRotation = tempTransform.localRotation;
+                                    rectTransform.localPosition = tempTransform.localPosition;
+                                    rectTransform.localScale = tempTransform.localScale;
+                                }
+                                finally
+                                {
+                                    GameObject.DestroyImmediate(tempGameObject);
+                                }
+
+                                Log("updated component {0}:{1}", nodeName, typeof(RectTransform));
                                 continue;
                             }
                             // Now set the values.

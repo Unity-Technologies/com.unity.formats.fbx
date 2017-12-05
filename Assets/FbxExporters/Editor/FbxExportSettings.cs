@@ -65,11 +65,7 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.SelectableLabel(pathLabel,
                 EditorStyles.textField,
                 GUILayout.MinWidth(SelectableLabelMinWidth),
-                GUILayout.Height(EditorGUIUtility.singleLineHeight));
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-
-            GUILayout.Space(LabelWidth + BrowseButtonOffset);
+                GUILayout.Height(EditorGUIUtility.singleLineHeight));            
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
@@ -105,6 +101,7 @@ namespace FbxExporters.EditorTools {
                     }
                 }
             }
+
             GUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
@@ -122,11 +119,6 @@ namespace FbxExporters.EditorTools {
             var options = ExportSettings.GetDCCOptions();
 
             exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
-
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-
-            GUILayout.Space(LabelWidth + BrowseButtonOffset);
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
@@ -178,13 +170,15 @@ namespace FbxExporters.EditorTools {
 
             EditorGUILayout.Space();
 
-
+            // disable button if no 3D application is available
+            EditorGUI.BeginDisabledGroup (!ExportSettings.CanInstall());
             var installIntegrationContent = new GUIContent(
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
             if (GUILayout.Button (installIntegrationContent)) {
                 FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
             }
+            EditorGUI.EndDisabledGroup ();
 
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
@@ -649,9 +643,8 @@ namespace FbxExporters.EditorTools {
                 instance.dccOptionNames = new List<string> ();
                 FindDCCInstalls ();
             }
-
-            // store the selected app
-            var prevSelection = instance.dccOptionPaths[instance.selectedDCCApp];
+            // store the selected app if any
+            string prevSelection = GetSelectedDCCPath();
 
             // remove options that no longer exist
             List<string> pathsToDelete = new List<string>();
@@ -791,12 +784,21 @@ namespace FbxExporters.EditorTools {
 
         public static string GetSelectedDCCPath()
         {
-            return (instance.dccOptionPaths.Count>0) ? instance.dccOptionPaths [instance.selectedDCCApp] : "";
+            return (instance.dccOptionPaths.Count>0 &&
+                instance.selectedDCCApp >= 0 &&
+                instance.selectedDCCApp < instance.dccOptionPaths.Count) ? instance.dccOptionPaths [instance.selectedDCCApp] : "";
         }
 
         public static string GetSelectedDCCName()
         {
-            return (instance.dccOptionPaths.Count>0) ? instance.dccOptionNames [instance.selectedDCCApp] : "";
+            return (instance.dccOptionNames.Count>0 &&
+                instance.selectedDCCApp >= 0 &&
+                instance.selectedDCCApp < instance.dccOptionNames.Count) ? instance.dccOptionNames [instance.selectedDCCApp] : "";
+        }
+
+        public static bool CanInstall()
+        {
+            return instance.dccOptionPaths.Count > 0;
         }
 
         /// <summary>
