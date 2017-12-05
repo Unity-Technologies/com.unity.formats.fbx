@@ -270,6 +270,11 @@ namespace FbxExporters.EditorTools {
                             locationsList.Add(locations[i]);
                         }
                     }
+                    //If we found anything, just return the list
+                    if (locationsList.Count > 0)
+                    {
+                        return locationsList.ToArray();
+                    }
                 }
 
                 //Check the surrounding area around MAYA_LOCATION for any other Applications we may want.
@@ -289,7 +294,7 @@ namespace FbxExporters.EditorTools {
 
                         //If we found 'Maya.app' in the location string, we're going to trim it and everything after it out.
                         //This way our possibleLocation will be more uniform between windows and mac.
-                                               
+
                         //make sure we found "maya.app."
                         if (appIndex >= 0)
                         {
@@ -302,7 +307,7 @@ namespace FbxExporters.EditorTools {
                             {
                                 possibleLocation = parentDirectory.ToString();
                             }
-                        }                        
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(possibleLocation) && Directory.Exists(possibleLocation))
@@ -311,17 +316,14 @@ namespace FbxExporters.EditorTools {
                     }
                 }
 
-                if (locationsList.Count > 0)
-                {
-                    return locationsList.ToArray();
-                }
-
                 switch (Application.platform)
                 {
                     case RuntimePlatform.WindowsEditor:
-                        return new string[] { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
+                        locationsList.AddRange(new string[] { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" });
+                        return locationsList.ToArray();
                     case RuntimePlatform.OSXEditor:
-                        return new string[] { "/Applications/Autodesk" };
+                        locationsList.AddRange(new string[] { "/Applications/Autodesk" });
+                        return locationsList.ToArray();
                     default:
                         throw new NotImplementedException();
                 }
