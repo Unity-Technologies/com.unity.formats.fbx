@@ -349,6 +349,7 @@ namespace FbxExporters.UnitTests
             camera.nearClipPlane = 19;
             camera.farClipPlane = 500.6f;
 
+            filename = GetRandomFbxFilePath (); // export to a different file
             fbxCamera = ExportCamera (filename, cameraObj);
             CompareCameraValues (camera, fbxCamera);
             Assert.AreEqual (camera.orthographicSize, fbxCamera.orthographicSize);
