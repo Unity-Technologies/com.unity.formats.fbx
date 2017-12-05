@@ -216,38 +216,52 @@ namespace FbxExporters.UnitTests
         [Test]
         public void TestGetDCCOptions()
         {
+            //Our.exe file
+            string executableName = "/maya.exe";
+
+            //Our folder names
+            string firstSubFolder = "/maya 3000";
+            string secondSubFolder = "/maya 3001";
+
             //Make a folder structure to mimic an 'autodesk' type hierarchy
-            string testFolder = Application.dataPath + "/GetGetDCCOptionsTestFolder";
-            Directory.CreateDirectory(testFolder + "/3ds max 3000");
-            Directory.CreateDirectory(testFolder + "/3ds max 3001");
+            string testFolder = Path.GetRandomFileName();
+            var firstPath = Directory.CreateDirectory(testFolder + firstSubFolder);
+            var secondPath = Directory.CreateDirectory(testFolder + secondSubFolder);
 
-            //Create any files we need within the folders
-            FileInfo firstExe = new FileInfo(testFolder + "/3ds max 3000/3dsmax.exe");
-            using (FileStream s = firstExe.Create()) {}
+            try
+            {
+                //Create any files we need within the folders
+                FileInfo firstExe = new FileInfo(testFolder + firstSubFolder + executableName);
+                using (FileStream s = firstExe.Create()) { }
 
-            //Add the paths which will be copied to DCCOptionPaths
-            List<string> testPathList = new List<string>();
-            testPathList.Add(testFolder + "/3ds Max 3000/3dsmax.exe"); //this path is valid!
-            testPathList.Add(testFolder + "/3ds Max 3001/3dsmax.exe");
-            testPathList.Add(null);
-            testPathList.Add("cookies/milk/foo/bar");
+                //Add the paths which will be copied to DCCOptionPaths
+                List<string> testPathList = new List<string>();
+                testPathList.Add((firstPath.FullName + executableName)); //this path is valid!
+                testPathList.Add(secondPath.FullName + executableName);
+                testPathList.Add(null);
+                testPathList.Add("cookies/milk/foo/bar");
 
-            //Add the names which will be copied to DCCOptionNames
-            List<string> testNameList = new List<string>();
-            testNameList.Add("3dsmax 3000");
-            testNameList.Add("3dsmax 3001");
-            testNameList.Add(null);
-            testNameList.Add("Cookies & Milk");
+                //Add the names which will be copied to DCCOptionNames
+                List<string> testNameList = new List<string>();
+                testNameList.Add(firstSubFolder.TrimStart('/'));
+                testNameList.Add(secondSubFolder.TrimStart('/'));
+                testNameList.Add(null);
+                testNameList.Add("Cookies & Milk");
 
-            ExportSettings.instance.SetDCCOptionNames(testNameList);
-            ExportSettings.instance.SetDCCOptionPaths(testPathList);
+                ExportSettings.instance.SetDCCOptionNames(testNameList);
+                ExportSettings.instance.SetDCCOptionPaths(testPathList);
 
-            GUIContent[] options = ExportSettings.GetDCCOptions();
+                GUIContent[] options = ExportSettings.GetDCCOptions();
 
-            //We expect 1, as the others are purposefully bogus
-            Assert.AreEqual(options.Length, 1);
+                //We expect 1, as the others are purposefully bogus
+                Assert.AreEqual(options.Length, 1);
 
-            Directory.Delete(testFolder, true);
+                Assert.IsTrue(options[0].text == "maya 3000");
+            }
+            finally
+            {
+                Directory.Delete(testFolder, true);
+            }
         }
 
     }
