@@ -901,38 +901,10 @@ namespace FbxExporters
                 }
                 // The color of the light.
                 var unityLightColor = unityLight.color;
-
                 fbxLight.Color.Set (new FbxDouble3(unityLightColor.r, unityLightColor.g, unityLightColor.b));
 
-                // TODO: commandBufferCount Number of command buffers set up on this light (Read Only).
-
-                // cookie            The cookie texture projected by the light.
-                var unityCookieTexture = unityLight.cookie;
-
-                if (unityCookieTexture !=null)
-                {
-                    // Find its filename
-                    var textureSourceFullPath = AssetDatabase.GetAssetPath (unityCookieTexture);
-                    if (textureSourceFullPath != "") {
-
-                        // get absolute filepath to texture
-                        textureSourceFullPath = Path.GetFullPath (textureSourceFullPath);
-
-                        fbxLight.FileName.Set (textureSourceFullPath);
-                        fbxLight.DrawGroundProjection.Set (true);
-                        fbxLight.DrawVolumetricLight.Set (true);
-                        fbxLight.DrawFrontFacingVolumetricLight.Set (false);
-                    }
-                }
-
-                // TODO: cullingMask       This is used to light certain objects in the scene selectively.
-                // TODO: flare             The flare asset to use for this light.
-
                 // Set the Intensity of a light is multiplied with the Light color.
-                fbxLight.Intensity.Set (unityLight.intensity * 100.0f /*compensate for Maya scaling by system units*/ );
-
-                // TODO: isBaked           Is the light contribution already stored in lightmaps and/or lightprobes (Read Only).
-                // TODO: lightmapBakeType  This property describes what part of a light's contribution can be baked.
+                fbxLight.Intensity.Set (unityLight.intensity * UnitScaleFactor /*compensate for Maya scaling by system units*/ );
 
                 // Set the range of the light.
                 // applies-to: Point & Spot
@@ -940,19 +912,10 @@ namespace FbxExporters
                 fbxLight.FarAttenuationStart.Set (0.01f /* none zero start */);
                 fbxLight.FarAttenuationEnd.Set(unityLight.range*UnitScaleFactor);
 
-                // TODO: renderMode        How to render the light.
-
                 // shadows           Set how this light casts shadows
                 // applies-to: Point & Spot
                 bool unityLightCastShadows = unityLight.shadows != LightShadows.None;
                 fbxLight.CastShadows.Set (unityLightCastShadows);
-
-                // TODO: shadowBias        Shadow mapping constant bias.
-                // TODO: shadowCustomResolution The custom resolution of the shadow map.
-                // TODO: shadowNearPlane   Near plane value to use for shadow frustums.
-                // TODO: shadowNormalBias  Shadow mapping normal-based bias.
-                // TODO: shadowResolution  The resolution of the shadow map.
-                // TODO: shadowStrength    Strength of light's shadows.
 
                 fbxNode.SetNodeAttribute (fbxLight);
 
