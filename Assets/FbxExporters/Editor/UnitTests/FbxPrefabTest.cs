@@ -251,7 +251,7 @@ namespace FbxExporters.UnitTests
                 // transform changed, Parent3 was created.
                 Assert.AreEqual (1, updateSet.NumUpdates);
                 Assert.That (updateSet.Updated, Is.EquivalentTo (new string [] {
-                    "Parent2", "Parent3"
+                    "Parent2", "Parent3", "Child3"
                 }
                 ));
 
