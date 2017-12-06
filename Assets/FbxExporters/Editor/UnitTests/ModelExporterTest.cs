@@ -361,13 +361,24 @@ namespace FbxExporters.UnitTests
         /// <param name="filename">Filename.</param>
         /// <param name="cameraObj">Camera object.</param>
         private Camera ExportCamera(string filename, GameObject cameraObj){
-            ModelExporter.ExportObject (filename, cameraObj);
+            ExportComponent<Camera> (filename, cameraObj);
+        }
+
+        /// <summary>
+        /// Exports the GameObject and returns component of type T.
+        /// </summary>
+        /// <returns>The component.</returns>
+        /// <param name="filename">Filename.</param>
+        /// <param name="obj">Object.</param>
+        /// <typeparam name="T">The component type.</typeparam>
+        private T ExportComponent<T>(string filename, GameObject obj) where T : Component {
+            ModelExporter.ExportObject (filename, obj);
 
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
-            var fbxCamera = fbxObj.GetComponent<Camera> ();
+            var fbxComponent = fbxObj.GetComponent<T> ();
 
-            Assert.IsNotNull (fbxCamera);
-            return fbxCamera;
+            Assert.IsNotNull (fbxComponent);
+            return fbxComponent;
         }
 
         private void CompareCameraValues(Camera camera, Camera fbxCamera, float delta=0.001f){
@@ -375,6 +386,36 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual (camera.fieldOfView, fbxCamera.fieldOfView, delta);
             Assert.AreEqual (camera.nearClipPlane, fbxCamera.nearClipPlane, delta);
             Assert.AreEqual (camera.farClipPlane, fbxCamera.farClipPlane, delta);
+        }
+
+        [Test]
+        public void TestExportLight()
+        {
+            // create a Unity light
+            GameObject lightObj = new GameObject("TestLight");
+            Light light = lightObj.AddComponent<Light> ();
+
+            light.type = LightType.Spot;
+            light.spotAngle = 55.4f;
+            light.color = Color.blue;
+            light.intensity = 2.3f;
+            light.range = 45;
+            light.shadows = LightShadows.Soft;
+
+            string filename = GetRandomFbxFilePath ();
+            var fbxLight = ExportComponent<Light> (filename, lightObj);
+            CompareLightValues (light, fbxLight);
+        }
+
+        private void CompareLightValues(Light light, Light fbxLight, float delta=0.001f){
+            Assert.AreEqual (light.type, fbxLight.type);
+            if (light.type == LightType.Spot) {
+                Assert.AreEqual (light.spotAngle, fbxLight.spotAngle, delta);
+            }
+            Assert.AreEqual (light.color, fbxLight.color);
+            Assert.AreEqual (light.intensity, fbxLight.intensity, delta);
+            Assert.AreEqual (light.range, fbxLight.range, delta);
+            // compare shadows
         }
     }
 }
