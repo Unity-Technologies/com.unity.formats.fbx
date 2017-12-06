@@ -282,23 +282,27 @@ namespace FbxExporters.EditorTools {
                 var location = System.Environment.GetEnvironmentVariable("MAYA_LOCATION");
                 if (!string.IsNullOrEmpty(location))
                 {
-                    //If we are on Windows, we need only go up one location to get to the "Autodesk" folder.
                     string possibleLocation = null;
-                    if (Directory.GetParent(location) != null)
+                    if (Application.platform == RuntimePlatform.WindowsEditor)
                     {
-                        possibleLocation = Directory.GetParent(location).ToString();
-
-                        //Make sure the user defined path is not included in the default paths
-                        for (int i = 0; i < WindowsDefaultLocations.Count; i++)
+                        //If we are on Windows, we need only go up one location to get to the "Autodesk" folder.                        
+                        if (Directory.GetParent(location) != null)
                         {
-                            if (WindowsDefaultLocations[i].Equals(possibleLocation))
+                            possibleLocation = Directory.GetParent(location).ToString();
+
+                            //Make sure the user defined path is not included in the default paths
+                            for (int i = 0; i < WindowsDefaultLocations.Count; i++)
                             {
-                                possibleLocation = null;
+                                //we don't want a minute difference in slashes or capitalization to throw off our check
+                                if (WindowsDefaultLocations[i].Replace("\\", "/").ToLower().Equals(possibleLocation.Replace("\\", "/").ToLower()))
+                                {
+                                    possibleLocation = null;
+                                    continue;
+                                }
                             }
                         }
                     }
-
-                    if (Application.platform == RuntimePlatform.OSXEditor)
+                    else if (Application.platform == RuntimePlatform.OSXEditor)
                     {
                         //We can assume our path is: /Applications/Autodesk/maya2017/Maya.app/Contents
                         //So we need to go up three folders.
@@ -316,19 +320,38 @@ namespace FbxExporters.EditorTools {
                                     //Make sure the user defined path is not included in the default paths
                                     for (int i = 0; i < OSXDefaultLocations.Count; i++)
                                     {
-                                        if (OSXDefaultLocations[i].Equals(possibleLocation))
+                                        //we don't want a minute difference in slashes or capitalization to throw off our check
+                                        if (OSXDefaultLocations[i].Replace("\\", "/").ToLower().Equals(possibleLocation.Replace("\\", "/").ToLower()))
                                         {
                                             possibleLocation = null;
+                                            continue;
                                         }
                                     }
                                 }
                             }
                         }
                     }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
 
                     if (!string.IsNullOrEmpty(possibleLocation) && Directory.Exists(possibleLocation))
                     {
-                        locationsList.Add(possibleLocation.ToString());
+                        bool foundDuplicate = false;
+                        for (int i = 0; i < locationsList.Count; i++)
+                        {
+                            if (locationsList[i].Replace("\\", "/").ToLower().Equals(possibleLocation.Replace("\\", "/").ToLower()))
+                            {
+                                foundDuplicate = true;
+                                break;
+                            }
+                        }
+
+                        if (!foundDuplicate)
+                        {
+                            locationsList.Add(possibleLocation.ToString());
+                        }
                     }
                 }
 
