@@ -692,6 +692,67 @@ namespace FbxExporters.Editor
         }
     }
 
+    class BlenderIntegration : DCCIntegration
+    {
+        public override string DccDisplayName { get { return "Blender"; } }
+
+        public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForBlender.zip"; } }
+
+        private string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/blender/scripts/unityFbxExportSettings.py"; } }
+
+        private string FBX_IMPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/blender/scripts/unityFbxImportSettings.py"; } }
+
+        private string MODULE_TEMPLATE_PATH { get { return "Integrations/Autodesk/blender/" + MODULE_FILENAME + ".txt"; } }
+        private string MODULE_FILENAME { get { return "UnityFbxForBlender"; } }
+
+        private const string PACKAGE_NAME = "FbxExporters";
+        private const string VERSION_FILENAME = "README.txt";
+        private const string VERSION_FIELD = "VERSION";
+        private const string VERSION_TAG = "{Version}";
+        private const string PROJECT_TAG = "{UnityProject}";
+        private const string INTEGRATION_TAG = "{UnityIntegrationsPath}";
+
+        private const string MAYA_USER_STARTUP_SCRIPT = "userSetup.mel";
+
+        private const string UI_SETUP_FUNCTION = "unitySetupUI";
+        private string USER_STARTUP_CALL { get { return string.Format("if(`exists {0}`){{ {0}; }}", UI_SETUP_FUNCTION); } }
+
+        private static string BLENDER_MODULES_PATH {
+            get {
+                return System.IO.Path.Combine(GetUserFolder(), BLENDER_DOCUMENTS_PATH + "/modules");
+            }
+        }
+
+        private static string BLENDER_SCRIPTS_PATH {
+            get {
+                return System.IO.Path.Combine(GetUserFolder(), BLENDER_DOCUMENTS_PATH + "/scripts");
+            }
+        }
+
+        // Use string to define escaped quote
+        // Windows needs the backslash
+        protected static string ESCAPED_QUOTE {
+            get {
+                switch (Application.platform)
+                {
+                    case RuntimePlatform.WindowsEditor:
+                        return "\\\"";
+                    case RuntimePlatform.OSXEditor:
+                        return "\"";
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+        }
+
+        protected string MAYA_CONFIG_COMMAND {
+            get {
+                return string.Format("unityConfigure {0}{1}{0} {0}{2}{0} {0}{3}{0} {4};",
+                    ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()));
+            }
+        }
+    }
+
     class IntegrationsUI
     {
         /// <summary>
