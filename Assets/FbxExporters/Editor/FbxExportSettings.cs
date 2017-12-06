@@ -259,6 +259,8 @@ namespace FbxExporters.EditorTools {
             get{
                 var environmentVariable = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
                 List<string> locationsList = new List<string>();
+                List<string> WindowsDefaultLocations = new List<string>() { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
+                List<string> OSXDefaultLocations = new List<string>() { "/Applications/Autodesk" };
 
                 if (environmentVariable != null)
                 {
@@ -285,6 +287,15 @@ namespace FbxExporters.EditorTools {
                     if (Directory.GetParent(location) != null)
                     {
                         possibleLocation = Directory.GetParent(location).ToString();
+
+                        //Make sure the user defined path is not included in the default paths
+                        for (int i = 0; i < WindowsDefaultLocations.Count; i++)
+                        {
+                            if (WindowsDefaultLocations[i].Equals(possibleLocation))
+                            {
+                                possibleLocation = null;
+                            }
+                        }
                     }
 
                     if (Application.platform == RuntimePlatform.OSXEditor)
@@ -301,6 +312,15 @@ namespace FbxExporters.EditorTools {
                                 if (autoDeskFolder != null)
                                 {
                                     possibleLocation = autoDeskFolder.ToString();
+
+                                    //Make sure the user defined path is not included in the default paths
+                                    for (int i = 0; i < OSXDefaultLocations.Count; i++)
+                                    {
+                                        if (OSXDefaultLocations[i].Equals(possibleLocation))
+                                        {
+                                            possibleLocation = null;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -315,10 +335,10 @@ namespace FbxExporters.EditorTools {
                 switch (Application.platform)
                 {
                     case RuntimePlatform.WindowsEditor:
-                        locationsList.AddRange(new string[] { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" });
+                        locationsList.AddRange(WindowsDefaultLocations);
                         break;
                     case RuntimePlatform.OSXEditor:
-                        locationsList.AddRange(new string[] { "/Applications/Autodesk" });
+                        locationsList.AddRange(OSXDefaultLocations);
                         break;
                     default:
                         throw new NotImplementedException();
