@@ -231,12 +231,12 @@ namespace FbxExporters.UnitTests
             try
             {
                 //Create any files we need within the folders
-                FileInfo firstExe = new FileInfo(testFolder + firstSubFolder + executableName);
+                FileInfo firstExe = new FileInfo(firstPath.FullName + executableName);
                 using (FileStream s = firstExe.Create()) { }
 
                 //Add the paths which will be copied to DCCOptionPaths
                 List<string> testPathList = new List<string>();
-                testPathList.Add((firstPath.FullName + executableName)); //this path is valid!
+                testPathList.Add(firstPath.FullName + executableName); //this path is valid!
                 testPathList.Add(secondPath.FullName + executableName);
                 testPathList.Add(null);
                 testPathList.Add("cookies/milk/foo/bar");
