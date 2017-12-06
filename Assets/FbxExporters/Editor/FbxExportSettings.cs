@@ -320,13 +320,14 @@ namespace FbxExporters.EditorTools {
                 {
                     case RuntimePlatform.WindowsEditor:
                         locationsList.AddRange(new string[] { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" });
-                        return locationsList.ToArray();
+                        break;
                     case RuntimePlatform.OSXEditor:
                         locationsList.AddRange(new string[] { "/Applications/Autodesk" });
-                        return locationsList.ToArray();
+                        break;
                     default:
                         throw new NotImplementedException();
                 }
+                return locationsList.ToArray();
             }
         }
 
