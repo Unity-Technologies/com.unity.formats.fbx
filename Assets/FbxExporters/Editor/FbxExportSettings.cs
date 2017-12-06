@@ -277,12 +277,11 @@ namespace FbxExporters.EditorTools {
                     }
                 }
 
-                //Check the surrounding area around MAYA_LOCATION for any other Applications we may want.
                 var location = System.Environment.GetEnvironmentVariable("MAYA_LOCATION");
                 if (!string.IsNullOrEmpty(location))
                 {
                     //If we are on Windows, we need only go up one location to get to the "Autodesk" folder.
-                    string possibleLocation = location;
+                    string possibleLocation = null;
                     if (Directory.GetParent(location) != null)
                     {
                         possibleLocation = Directory.GetParent(location).ToString();
@@ -290,22 +289,19 @@ namespace FbxExporters.EditorTools {
 
                     if (Application.platform == RuntimePlatform.OSXEditor)
                     {
-                        int appIndex = location.IndexOf("Maya.app");
-
-                        //If we found 'Maya.app' in the location string, we're going to trim it and everything after it out.
-                        //This way our possibleLocation will be more uniform between windows and mac.
-
-                        //make sure we found "maya.app."
-                        if (appIndex >= 0)
+                        //We can assume our path is: /Applications/Autodesk/maya2017/Maya.app/Contents
+                        //So we need to go up three folders.
+                        var appFolder = Directory.GetParent(location);
+                        if (appFolder != null)
                         {
-                            //get everything up until 'maya.app' 
-                            string subLocation = location.Substring(0, (appIndex - 1));
-
-                            var parentDirectory = Directory.GetParent(subLocation);
-
-                            if (parentDirectory != null)
+                            var versionFolder = Directory.GetParent(appFolder.ToString());
+                            if (versionFolder != null)
                             {
-                                possibleLocation = parentDirectory.ToString();
+                                var autoDeskFolder = Directory.GetParent(versionFolder.ToString());
+                                if (autoDeskFolder != null)
+                                {
+                                    possibleLocation = autoDeskFolder.ToString();
+                                }
                             }
                         }
                     }
