@@ -6,6 +6,11 @@ NEW FEATURES
 
 * Updated User documentation
 
+FIXES
+
+* Export Settings: Moved browse ("...") buttons for 3D Application/Export Path next to dropdown/path fields
+* Export Settings: Made "Keep Open" and "Hide Native Menu" labels camel case
+
 **Version**: sprint35
 
 NEW FEATURES
