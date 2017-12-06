@@ -213,5 +213,56 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual(preferred, -1);
         }
 
+        [Test]
+        public void TestGetDCCOptions()
+        {
+            //Our.exe file
+            string executableName = "/maya.exe";
+
+            //Our folder names
+            string firstSubFolder = "/maya 3000";
+            string secondSubFolder = "/maya 3001";
+
+            //Make a folder structure to mimic an 'autodesk' type hierarchy
+            string testFolder = Path.GetRandomFileName();
+            var firstPath = Directory.CreateDirectory(testFolder + firstSubFolder);
+            var secondPath = Directory.CreateDirectory(testFolder + secondSubFolder);
+
+            try
+            {
+                //Create any files we need within the folders
+                FileInfo firstExe = new FileInfo(firstPath.FullName + executableName);
+                using (FileStream s = firstExe.Create()) { }
+
+                //Add the paths which will be copied to DCCOptionPaths
+                List<string> testPathList = new List<string>();
+                testPathList.Add(firstPath.FullName + executableName); //this path is valid!
+                testPathList.Add(secondPath.FullName + executableName);
+                testPathList.Add(null);
+                testPathList.Add("cookies/milk/foo/bar");
+
+                //Add the names which will be copied to DCCOptionNames
+                List<string> testNameList = new List<string>();
+                testNameList.Add(firstSubFolder.TrimStart('/'));
+                testNameList.Add(secondSubFolder.TrimStart('/'));
+                testNameList.Add(null);
+                testNameList.Add("Cookies & Milk");
+
+                ExportSettings.instance.SetDCCOptionNames(testNameList);
+                ExportSettings.instance.SetDCCOptionPaths(testPathList);
+
+                GUIContent[] options = ExportSettings.GetDCCOptions();
+
+                //We expect 1, as the others are purposefully bogus
+                Assert.AreEqual(options.Length, 1);
+
+                Assert.IsTrue(options[0].text == "maya 3000");
+            }
+            finally
+            {
+                Directory.Delete(testFolder, true);
+            }
+        }
+
     }
 }

@@ -373,6 +373,11 @@ namespace FbxExporters.EditorTools {
             dccOptionNames = newList;
         }
 
+        public void SetDCCOptionPaths(List<string> newList)
+        {
+            dccOptionPaths = newList;
+        }
+
         public void ClearDCCOptionNames()
         {
             dccOptionNames.Clear();
