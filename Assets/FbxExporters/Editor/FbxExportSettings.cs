@@ -288,16 +288,19 @@ namespace FbxExporters.EditorTools {
                         //If we are on Windows, we need only go up one location to get to the "Autodesk" folder.                        
                         if (Directory.GetParent(location) != null)
                         {
+                            //'Directory.GetParent()' will take care of any double backslashes the user may have added
                             possibleLocation = Directory.GetParent(location).ToString();
 
                             //Make sure the user defined path is not included in the default paths
                             for (int i = 0; i < WindowsDefaultLocations.Count; i++)
                             {
                                 //we don't want a minute difference in slashes or capitalization to throw off our check
-                                if (WindowsDefaultLocations[i].Replace("\\", "/").ToLower().Equals(possibleLocation.Replace("\\", "/").ToLower()))
+                                if (WindowsDefaultLocations[i] != null && 
+                                    possibleLocation != null &&
+                                    WindowsDefaultLocations[i].Replace("\\", "/").ToLower().Equals(possibleLocation.Replace("\\", "/").ToLower()))
                                 {
                                     possibleLocation = null;
-                                    continue;
+                                    break;
                                 }
                             }
                         }
@@ -338,20 +341,7 @@ namespace FbxExporters.EditorTools {
 
                     if (!string.IsNullOrEmpty(possibleLocation) && Directory.Exists(possibleLocation))
                     {
-                        bool foundDuplicate = false;
-                        for (int i = 0; i < locationsList.Count; i++)
-                        {
-                            if (locationsList[i].Replace("\\", "/").ToLower().Equals(possibleLocation.Replace("\\", "/").ToLower()))
-                            {
-                                foundDuplicate = true;
-                                break;
-                            }
-                        }
-
-                        if (!foundDuplicate)
-                        {
-                            locationsList.Add(possibleLocation.ToString());
-                        }
+                        locationsList.Add(possibleLocation.ToString());
                     }
                 }
 
