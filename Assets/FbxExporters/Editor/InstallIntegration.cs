@@ -698,11 +698,11 @@ namespace FbxExporters.Editor
 
         public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForBlender.zip"; } }
 
-        private string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/blender/scripts/unityFbxExportSettings.py"; } }
+        private string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/blender/scripts/unityFbxExportSettings.py"; } }
 
-        private string FBX_IMPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/blender/scripts/unityFbxImportSettings.py"; } }
+        private string FBX_IMPORT_SETTINGS_PATH { get { return "/Integrations/blender/scripts/unityFbxImportSettings.py"; } }
 
-        private string MODULE_TEMPLATE_PATH { get { return "Integrations/Autodesk/blender/" + MODULE_FILENAME + ".txt"; } }
+        private string MODULE_TEMPLATE_PATH { get { return "Integrations/blender/" + MODULE_FILENAME + ".txt"; } }
         private string MODULE_FILENAME { get { return "UnityFbxForBlender"; } }
 
         private const string PACKAGE_NAME = "FbxExporters";
@@ -712,10 +712,26 @@ namespace FbxExporters.Editor
         private const string PROJECT_TAG = "{UnityProject}";
         private const string INTEGRATION_TAG = "{UnityIntegrationsPath}";
 
-        private const string MAYA_USER_STARTUP_SCRIPT = "userSetup.mel";
+        private const string BLENDER_USER_STARTUP_SCRIPT = "userSetup.py";
 
         private const string UI_SETUP_FUNCTION = "unitySetupUI";
         private string USER_STARTUP_CALL { get { return string.Format("if(`exists {0}`){{ {0}; }}", UI_SETUP_FUNCTION); } }
+
+        private static string BLENDER_DOCUMENTS_PATH
+        {
+            get
+            {
+                switch (Application.platform)
+                {
+                    case RuntimePlatform.WindowsEditor:
+                        return "blender";
+                    case RuntimePlatform.OSXEditor:
+                        return "Library/Preferences/Blender";
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+        }
 
         private static string BLENDER_MODULES_PATH {
             get {
@@ -745,12 +761,68 @@ namespace FbxExporters.Editor
             }
         }
 
-        protected string MAYA_CONFIG_COMMAND {
+        protected string BLENDER_CONFIG_COMMAND {
             get {
                 return string.Format("unityConfigure {0}{1}{0} {0}{2}{0} {0}{3}{0} {4};",
-                    ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()));
+                    ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath());
             }
         }
+
+        private static Char[] FIELD_SEPARATORS = new Char[] { ':' };
+
+        protected static string GetUserFolder()
+        {
+            switch (Application.platform)
+            {
+                case RuntimePlatform.WindowsEditor:
+                    return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+                case RuntimePlatform.OSXEditor:
+                    return System.Environment.GetEnvironmentVariable("HOME");
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public string GetModuleTemplatePath()
+        {
+            return System.IO.Path.Combine(INTEGRATION_FOLDER_PATH, MODULE_TEMPLATE_PATH);
+        }
+
+        public static string GetPackagePath()
+        {
+            return System.IO.Path.Combine(Application.dataPath, PACKAGE_NAME);
+        }
+
+        /// <summary>
+        /// Gets the path to the export settings file.
+        /// Returns a relative path with forward slashes as path separators.
+        /// </summary>
+        /// <returns>The export settings path.</returns>
+        public string GetExportSettingsPath()
+        {
+            return INTEGRATION_FOLDER_PATH + FBX_EXPORT_SETTINGS_PATH;
+        }
+
+        /// <summary>
+        /// Gets the path to the import settings file.
+        /// Returns a relative path with forward slashes as path separators.
+        /// </summary>
+        /// <returns>The import settings path.</returns>
+        public string GetImportSettingsPath()
+        {
+            return INTEGRATION_FOLDER_PATH + FBX_IMPORT_SETTINGS_PATH;
+        }
+
+        /// <summary>
+        /// Gets the user startup script path.
+        /// Returns a relative path with forward slashes as path separators.
+        /// </summary>
+        /// <returns>The user startup script path.</returns>
+        private static string GetUserStartupScriptPath()
+        {
+            return BLENDER_SCRIPTS_PATH + "/" + BLENDER_USER_STARTUP_SCRIPT;
+        }
+
     }
 
     class IntegrationsUI
