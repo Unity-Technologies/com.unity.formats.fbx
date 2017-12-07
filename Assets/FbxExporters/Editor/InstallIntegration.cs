@@ -823,6 +823,189 @@ namespace FbxExporters.Editor
             return BLENDER_SCRIPTS_PATH + "/" + BLENDER_USER_STARTUP_SCRIPT;
         }
 
+        /// <summary>
+        /// Determines if folder is already unzipped at the specified path
+        /// by checking if UnityFbxForMaya.txt exists at expected location.
+        /// </summary>
+        /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
+        /// <param name="path">Path.</param>
+        public override bool FolderAlreadyUnzippedAtPath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return false;
+            }
+            return System.IO.File.Exists(System.IO.Path.Combine(path, MODULE_TEMPLATE_PATH));
+        }
+
+        public override int InstallIntegration(string blenderExe)
+        {
+            if (!InstallBlender(verbose: true))
+            {
+                return -1;
+            }
+
+            return ConfigureBlender(blenderExe);
+        }
+
+        public bool InstallBlender(bool verbose = false)
+        {
+            // What's happening here is that we copy the module template to
+            // the module path, basically:
+            // - copy the template to the user Maya module path
+            // - search-and-replace its tags
+            // - done.
+            // But it's complicated because we can't trust any files actually exist.
+
+            string moduleTemplatePath = GetModuleTemplatePath();
+            if (!System.IO.File.Exists(moduleTemplatePath))
+            {
+                Debug.LogError(string.Format("Missing Maya module file at: \"{0}\"", moduleTemplatePath));
+                return false;
+            }
+
+            // Create the {USER} modules folder and empty it so it's ready to set up.
+            string modulePath = BLENDER_MODULES_PATH;
+            string moduleFilePath = System.IO.Path.Combine(modulePath, MODULE_FILENAME + ".mod");
+            bool installed = false;
+
+            if (!System.IO.Directory.Exists(modulePath))
+            {
+                if (verbose) { Debug.Log(string.Format("Creating Maya Modules Folder {0}", modulePath)); }
+                if (!CreateDirectory(modulePath))
+                {
+                    Debug.LogError(string.Format("Failed to create Maya Modules Folder {0}", modulePath));
+                    return false;
+                }
+                installed = false;
+            }
+            else
+            {
+                // detect if UnityFbxForMaya.mod is installed
+                installed = System.IO.File.Exists(moduleFilePath);
+
+                if (installed)
+                {
+                    // (Uni-31606): remove this when we support parsing existing .mod files
+                    try
+                    {
+                        if (verbose) { Debug.Log(string.Format("Deleting module file {0}", moduleFilePath)); }
+                        System.IO.File.Delete(moduleFilePath);
+                        installed = false;
+                    }
+                    catch (Exception xcp)
+                    {
+                        Debug.LogException(xcp);
+                        Debug.LogWarning(string.Format("Failed to delete plugin module file {0}", moduleFilePath));
+                    }
+                }
+            }
+
+            // if not installed
+            if (!installed)
+            {
+                Dictionary<string, string> Tokens = new Dictionary<string, string>()
+                {
+                    {VERSION_TAG, GetPackageVersion() },
+                    {PROJECT_TAG, GetProjectPath() },
+                    {INTEGRATION_TAG, INTEGRATION_FOLDER_PATH },
+                 };
+
+                // parse template, replace "{UnityProject}" with project path
+                List<string> lines = ParseTemplateFile(moduleTemplatePath, Tokens);
+
+                if (verbose) Debug.Log(string.Format("Copying plugin module file to {0}", moduleFilePath));
+
+                // write out .mod file
+                WriteFile(moduleFilePath, lines);
+            }
+            else
+            {
+                throw new NotImplementedException();
+
+                // (Uni-31606) Parse maya mod file during installation and find location
+            }
+
+            return SetupUserStartupScript(verbose);
+        }
+
+        public int ConfigureBlender(string mayaPath)
+        {
+            int ExitCode = 0;
+
+            try
+            {
+                if (!System.IO.File.Exists(mayaPath))
+                {
+                    Debug.LogError(string.Format("No maya installation found at {0}", mayaPath));
+                    return -1;
+                }
+
+                System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+                myProcess.StartInfo.FileName = mayaPath;
+                myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                myProcess.StartInfo.CreateNoWindow = true;
+                myProcess.StartInfo.UseShellExecute = false;
+                myProcess.StartInfo.RedirectStandardError = true;
+
+                string commandString;
+
+                switch (Application.platform)
+                {
+                    case RuntimePlatform.WindowsEditor:
+                        commandString = "-command \"{0}\"";
+                        break;
+                    case RuntimePlatform.OSXEditor:
+                        commandString = @"-command '{0}'";
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+
+                if (EditorTools.ExportSettings.instance.launchAfterInstallation)
+                {
+                    myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+                    myProcess.StartInfo.CreateNoWindow = false;
+                    myProcess.StartInfo.Arguments = string.Format(commandString, BLENDER_CONFIG_COMMAND);
+                }
+                else
+                {
+                    myProcess.StartInfo.Arguments = string.Format(commandString, BLENDER_CONFIG_COMMAND);
+                }
+
+                myProcess.EnableRaisingEvents = true;
+                myProcess.Start();
+
+                if (!EditorTools.ExportSettings.instance.launchAfterInstallation)
+                {
+                    myProcess.WaitForExit();
+                    ExitCode = myProcess.ExitCode;
+                    Debug.Log(string.Format("Ran maya: [{0}]\nWith args [{1}]\nResult {2}",
+                                mayaPath, myProcess.StartInfo.Arguments, ExitCode));
+
+                    // see if we got any error messages
+                    if (ExitCode != 0)
+                    {
+                        string stderr = myProcess.StandardError.ReadToEnd();
+                        if (!string.IsNullOrEmpty(stderr))
+                        {
+                            Debug.LogError(string.Format("Maya installation error (exit code: {0}): {1}", ExitCode, stderr));
+                        }
+                    }
+                }
+                else
+                {
+                    ExitCode = 0;
+                }
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogError(string.Format("Exception failed to start Maya ({0})", e.Message));
+                ExitCode = -1;
+            }
+            return ExitCode;
+        }
+
     }
 
     class IntegrationsUI
