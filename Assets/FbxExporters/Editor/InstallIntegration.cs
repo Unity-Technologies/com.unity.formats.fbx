@@ -848,6 +848,182 @@ namespace FbxExporters.Editor
             return ConfigureBlender(blenderExe);
         }
 
+        public static string GetPackageVersion()
+        {
+            string result = null;
+
+            try
+            {
+                string FileName = System.IO.Path.Combine(GetPackagePath(), VERSION_FILENAME);
+
+                System.IO.StreamReader sr = new System.IO.StreamReader(FileName);
+
+                // Read the first line of text
+                string line = sr.ReadLine();
+
+                // Continue to read until you reach end of file
+                while (line != null)
+                {
+                    if (line.StartsWith(VERSION_FIELD, StringComparison.CurrentCulture))
+                    {
+                        string[] fields = line.Split(FIELD_SEPARATORS);
+
+                        if (fields.Length > 1)
+                        {
+                            result = fields[1];
+                        }
+                        break;
+                    }
+                    line = sr.ReadLine();
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(string.Format("Exception failed to read file containing package version ({0})", e.Message));
+            }
+
+            return result;
+        }
+
+        private static List<string> ParseTemplateFile(string FileName, Dictionary<string, string> Tokens)
+        {
+            List<string> lines = new List<string>();
+
+            try
+            {
+                // Pass the file path and file name to the StreamReader constructor
+                System.IO.StreamReader sr = new System.IO.StreamReader(FileName);
+
+                // Read the first line of text
+                string line = sr.ReadLine();
+
+                // Continue to read until you reach end of file
+                while (line != null)
+                {
+                    foreach (KeyValuePair<string, string> entry in Tokens)
+                    {
+                        line = line.Replace(entry.Key, entry.Value);
+                    }
+                    lines.Add(line);
+
+                    //Read the next line
+                    line = sr.ReadLine();
+                }
+
+                //close the file
+                sr.Close();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(string.Format("Exception reading module file template ({0})", e.Message));
+            }
+
+            return lines;
+        }
+
+        private static void WriteFile(string FileName, List<string> Lines)
+        {
+            try
+            {
+                //Pass the filepath and filename to the StreamWriter Constructor
+                System.IO.StreamWriter sw = new System.IO.StreamWriter(FileName);
+
+                foreach (string line in Lines)
+                {
+                    //Write a line of text
+                    sw.WriteLine(line);
+                }
+
+                //Close the file
+                sw.Close();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                Debug.LogError(string.Format("Exception while writing module file ({0})", e.Message));
+            }
+        }
+
+        /// <summary>
+        /// Creates the missing directories in path.
+        /// </summary>
+        /// <returns><c>true</c>, if directory was created, <c>false</c> otherwise.</returns>
+        /// <param name="path">Path to create.</param>
+        protected static bool CreateDirectory(string path)
+        {
+            try
+            {
+                System.IO.Directory.CreateDirectory(path);
+            }
+            catch (Exception xcp)
+            {
+                Debug.LogException(xcp);
+                return false;
+            }
+
+            if (!System.IO.Directory.Exists(path))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private bool SetupUserStartupScript(bool verbose = false)
+        {
+            // setup user startup script
+            string blenderStartupScript = GetUserStartupScriptPath();
+            string fileContents = string.Format("\n{0}", USER_STARTUP_CALL);
+
+            // make sure scripts directory exists
+            if (!System.IO.Directory.Exists(BLENDER_SCRIPTS_PATH))
+            {
+                if (verbose) { Debug.Log(string.Format("Creating Blender Scripts Folder {0}", BLENDER_SCRIPTS_PATH)); }
+                if (!CreateDirectory(BLENDER_SCRIPTS_PATH))
+                {
+                    Debug.LogError(string.Format("Failed to create Blender Scripts Folder {0}", BLENDER_SCRIPTS_PATH));
+                    return false;
+                }
+            }
+            else if (System.IO.File.Exists(blenderStartupScript))
+            {
+                // script exists, check that the UI setup is being called
+                try
+                {
+                    using (System.IO.StreamReader sr = new System.IO.StreamReader(blenderStartupScript))
+                    {
+                        while (sr.Peek() >= 0)
+                        {
+                            string line = sr.ReadLine();
+                            if (line.Trim().Contains(UI_SETUP_FUNCTION))
+                            {
+                                // startup call already in the file, nothing to do
+                                return true;
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    Debug.LogError(string.Format("Exception while reading user startup file ({0})", e.Message));
+                    return false;
+                }
+            }
+
+            // append text to file
+            try
+            {
+                System.IO.File.AppendAllText(blenderStartupScript, fileContents);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                Debug.LogError(string.Format("Exception while writing to user startup file ({0})", e.Message));
+                return false;
+            }
+            return true;
+        }
+
         public bool InstallBlender(bool verbose = false)
         {
             // What's happening here is that we copy the module template to
@@ -860,7 +1036,7 @@ namespace FbxExporters.Editor
             string moduleTemplatePath = GetModuleTemplatePath();
             if (!System.IO.File.Exists(moduleTemplatePath))
             {
-                Debug.LogError(string.Format("Missing Maya module file at: \"{0}\"", moduleTemplatePath));
+                Debug.LogError(string.Format("Missing Blender module file at: \"{0}\"", moduleTemplatePath));
                 return false;
             }
 
@@ -871,10 +1047,10 @@ namespace FbxExporters.Editor
 
             if (!System.IO.Directory.Exists(modulePath))
             {
-                if (verbose) { Debug.Log(string.Format("Creating Maya Modules Folder {0}", modulePath)); }
+                if (verbose) { Debug.Log(string.Format("Creating Blender Modules Folder {0}", modulePath)); }
                 if (!CreateDirectory(modulePath))
                 {
-                    Debug.LogError(string.Format("Failed to create Maya Modules Folder {0}", modulePath));
+                    Debug.LogError(string.Format("Failed to create Blender Modules Folder {0}", modulePath));
                     return false;
                 }
                 installed = false;
@@ -937,7 +1113,7 @@ namespace FbxExporters.Editor
             {
                 if (!System.IO.File.Exists(mayaPath))
                 {
-                    Debug.LogError(string.Format("No maya installation found at {0}", mayaPath));
+                    Debug.LogError(string.Format("No Blender installation found at {0}", mayaPath));
                     return -1;
                 }
 
@@ -980,7 +1156,7 @@ namespace FbxExporters.Editor
                 {
                     myProcess.WaitForExit();
                     ExitCode = myProcess.ExitCode;
-                    Debug.Log(string.Format("Ran maya: [{0}]\nWith args [{1}]\nResult {2}",
+                    Debug.Log(string.Format("Ran Blender: [{0}]\nWith args [{1}]\nResult {2}",
                                 mayaPath, myProcess.StartInfo.Arguments, ExitCode));
 
                     // see if we got any error messages
@@ -989,7 +1165,7 @@ namespace FbxExporters.Editor
                         string stderr = myProcess.StandardError.ReadToEnd();
                         if (!string.IsNullOrEmpty(stderr))
                         {
-                            Debug.LogError(string.Format("Maya installation error (exit code: {0}): {1}", ExitCode, stderr));
+                            Debug.LogError(string.Format("Blender installation error (exit code: {0}): {1}", ExitCode, stderr));
                         }
                     }
                 }
@@ -1000,7 +1176,7 @@ namespace FbxExporters.Editor
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(string.Format("Exception failed to start Maya ({0})", e.Message));
+                UnityEngine.Debug.LogError(string.Format("Exception failed to start Blender ({0})", e.Message));
                 ExitCode = -1;
             }
             return ExitCode;
