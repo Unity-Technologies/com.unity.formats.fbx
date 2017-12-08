@@ -38,13 +38,7 @@ namespace FbxExporters.Editor
 			}
 		}
 
-		[MenuItem ("File/Repair Missing Scripts", false)]
-		public static void Menu ()
-		{
-			ReplaceGUIDInTextAssets ();
-		}
-
-		private static bool ReplaceGUIDInTextAssets ()
+		public static bool ReplaceGUIDInTextAssets ()
 		{
 			// search project for assets containing old GUID
 
