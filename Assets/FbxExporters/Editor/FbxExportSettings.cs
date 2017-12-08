@@ -4,6 +4,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FbxExporters.EditorTools {
 
@@ -251,131 +252,113 @@ namespace FbxExporters.EditorTools {
             }
         }
 
-        /// <summary>
-        /// The paths where all the different versions of Maya are installed
-        /// by default. Depends on the platform.
-        /// </summary>
-        public static string[] DCCVendorLocations {
-            get{
-                var environmentVariable = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
-                List<string> locationsList = new List<string>();
-                List<string> WindowsDefaultLocations = new List<string>() { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
-                List<string> OSXDefaultLocations = new List<string>() { "/Applications/Autodesk" };
-                bool foundVendorLocation = false;
+        private static string GetVendorLocationFromEnv(string env)
+        {
+            string result = null;
 
-                if (environmentVariable != null)
-                {
-                    string[] locations = environmentVariable.Split(';');                    
-                    for (int i = 0; i < locations.Length; i++)
-                    {
-                        if (Directory.Exists(locations[i]))
-                        {
-                            locationsList.Add(locations[i]);
-                        }
-                    }
-                    //If we found anything, just return the list
-                    if (locationsList.Count > 0)
-                    {
-                        foundVendorLocation = true;
-                    }
-                }
+            if (string.IsNullOrEmpty(env))
+                return null;
 
-                var location = System.Environment.GetEnvironmentVariable("MAYA_LOCATION");
-                if (!string.IsNullOrEmpty(location))
-                {
-                    string possibleLocation = null;
-                    if (Application.platform == RuntimePlatform.WindowsEditor)
-                    {
-                        //If we are on Windows, we need only go up one location to get to the "Autodesk" folder.                        
-                        if (Directory.GetParent(location) != null)
-                        {
-                            //'Directory.GetParent()' will take care of any double backslashes the user may have added
-                            possibleLocation = Directory.GetParent(location).ToString();
+            string location = Environment.GetEnvironmentVariable(env);
 
-                            //We only need to remove duplicates of default locations if we are using the default locations-
-                            //We only use default locations if we do not use the user specified vendor locations
-                            if (!foundVendorLocation)
-                            {
-                                //Make sure the user defined path is not included in the default paths
-                                for (int i = 0; i < WindowsDefaultLocations.Count; i++)
-                                {
-                                    //we don't want a minute difference in slashes or capitalization to throw off our check
-                                    if (WindowsDefaultLocations[i] != null &&
-                                        possibleLocation != null &&
-                                        WindowsDefaultLocations[i].Replace("\\", "/").ToLower().Equals(possibleLocation.Replace("\\", "/").ToLower()))
-                                    {
-                                        possibleLocation = null;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (Application.platform == RuntimePlatform.OSXEditor)
-                    {
-                        //We can assume our path is: /Applications/Autodesk/maya2017/Maya.app/Contents
-                        //So we need to go up three folders.
+            if (string.IsNullOrEmpty(location))
+                return null;
 
-                        //Remove any extra slashes on the end
-                        //Maya would accept a single slash in either direction, so we should be able to
-                        location.TrimEnd('/');
-                        location.TrimEnd('\\');
+            if (!Directory.Exists(location))
+                return null;
 
-                        var appFolder = Directory.GetParent(location);
-                        if (appFolder != null)
-                        {
-                            var versionFolder = Directory.GetParent(appFolder.ToString());
-                            if (versionFolder != null)
-                            {
-                                var autoDeskFolder = Directory.GetParent(versionFolder.ToString());
-                                if (autoDeskFolder != null)
-                                {
-                                    possibleLocation = autoDeskFolder.ToString();
+            //Remove any extra slashes on the end
+            //Maya would accept a single slash in either direction, so we should be able to
+            location = location.Replace("\\", "/");
+            location.TrimEnd('/');
 
-                                    //Make sure the user defined path is not included in the default paths
-                                    for (int i = 0; i < OSXDefaultLocations.Count; i++)
-                                    {
-                                        //we don't want a minute difference in slashes or capitalization to throw off our check
-                                        if (OSXDefaultLocations[i].Replace("\\", "/").ToLower().Equals(possibleLocation.Replace("\\", "/").ToLower()))
-                                        {
-                                            possibleLocation = null;
-                                            continue;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        throw new NotImplementedException();
-                    }
-
-                    if (!string.IsNullOrEmpty(possibleLocation) && Directory.Exists(possibleLocation))
-                    {
-                        locationsList.Add(possibleLocation.ToString());
-                    }
-                }
-
-                if (foundVendorLocation)
-                {
-                    return locationsList.ToArray();
-                }
-
-                switch (Application.platform)
-                {
-                    case RuntimePlatform.WindowsEditor:
-                        locationsList.AddRange(WindowsDefaultLocations);
-                        break;
-                    case RuntimePlatform.OSXEditor:
-                        locationsList.AddRange(OSXDefaultLocations);
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
-                return locationsList.ToArray();
+            if (Application.platform == RuntimePlatform.WindowsEditor)
+            {
+                //If we are on Windows, we need only go up one location to get to the "Autodesk" folder.                        
+                result = Directory.GetParent(location).ToString();
             }
+            else if (Application.platform == RuntimePlatform.OSXEditor)
+            {
+                //We can assume our path is: /Applications/Autodesk/maya2017/Maya.app/Contents
+                //So we need to go up three folders.                
+
+                var appFolder = Directory.GetParent(location);
+                if (appFolder != null)
+                {
+                    var versionFolder = Directory.GetParent(appFolder.ToString());
+                    if (versionFolder != null)
+                    {
+                        var autoDeskFolder = Directory.GetParent(versionFolder.ToString());
+                        if (autoDeskFolder != null)
+                        {
+                            result = autoDeskFolder.ToString();
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
+
+        // Returns a set of valid vendor folder paths with no trailing '/'
+        private static HashSet<string> GetCustomVendorLocations()
+        {
+            HashSet<string> result = new HashSet<string>();
+
+            var environmentVariable = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
+
+            if (!string.IsNullOrEmpty(environmentVariable))
+            {
+                string[] locations = environmentVariable.Split(';');
+                for (int i = 0; i < locations.Length; i++)
+                {
+                    if (Directory.Exists(locations[i]))
+                    {
+                        result.Add(locations[i]);
+                    }
+                }
+            }
+            
+
+            return result;
+        }
+
+        private static HashSet<string> GetDefaultVendorLocations()
+        {
+            if (Application.platform == RuntimePlatform.WindowsEditor)
+                return new HashSet<string>() { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
+            else if (Application.platform == RuntimePlatform.OSXEditor)
+                return new HashSet<string>() { "/Applications/Autodesk" };
+
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Retrieve available vendor locations.
+        /// If there is valid alternative vendor locations, do not use defaults
+        /// always use MAYA_LOCATION when available
+        /// </summary>
+        public static string[] DCCVendorLocations
+        {
+            get
+            {
+                HashSet<string> result = GetCustomVendorLocations();
+
+                if (result == null || result.Count < 1)
+                {
+                    result = GetDefaultVendorLocations();
+                }
+
+                var additionalLocation = GetVendorLocationFromEnv("MAYA_LOCATION");
+
+                if (!string.IsNullOrEmpty(additionalLocation))
+                {
+                    result.Add(additionalLocation);
+                }
+
+                return result.ToArray<string>();
+            }
+        }      
 
         // Note: default values are set in LoadDefaults().
         public bool mayaCompatibleNames = true;
