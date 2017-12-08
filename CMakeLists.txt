@@ -254,3 +254,5 @@ else()
             PATTERN "Editor/ReviewLastSavedModel.cs" EXCLUDE
             PATTERN "Editor/EditorRotate.cs" EXCLUDE)
 endif()
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/meta/FbxExporters
+        DESTINATION .)
