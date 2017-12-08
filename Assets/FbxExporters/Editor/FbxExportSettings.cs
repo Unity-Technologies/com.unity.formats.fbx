@@ -261,6 +261,7 @@ namespace FbxExporters.EditorTools {
                 List<string> locationsList = new List<string>();
                 List<string> WindowsDefaultLocations = new List<string>() { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
                 List<string> OSXDefaultLocations = new List<string>() { "/Applications/Autodesk" };
+                bool foundVendorLocation = false;
 
                 if (environmentVariable != null)
                 {
@@ -275,7 +276,7 @@ namespace FbxExporters.EditorTools {
                     //If we found anything, just return the list
                     if (locationsList.Count > 0)
                     {
-                        return locationsList.ToArray();
+                        foundVendorLocation = true;
                     }
                 }
 
@@ -291,16 +292,21 @@ namespace FbxExporters.EditorTools {
                             //'Directory.GetParent()' will take care of any double backslashes the user may have added
                             possibleLocation = Directory.GetParent(location).ToString();
 
-                            //Make sure the user defined path is not included in the default paths
-                            for (int i = 0; i < WindowsDefaultLocations.Count; i++)
+                            //We only need to remove duplicates of default locations if we are using the default locations-
+                            //We only use default locations if we do not use the user specified vendor locations
+                            if (!foundVendorLocation)
                             {
-                                //we don't want a minute difference in slashes or capitalization to throw off our check
-                                if (WindowsDefaultLocations[i] != null && 
-                                    possibleLocation != null &&
-                                    WindowsDefaultLocations[i].Replace("\\", "/").ToLower().Equals(possibleLocation.Replace("\\", "/").ToLower()))
+                                //Make sure the user defined path is not included in the default paths
+                                for (int i = 0; i < WindowsDefaultLocations.Count; i++)
                                 {
-                                    possibleLocation = null;
-                                    break;
+                                    //we don't want a minute difference in slashes or capitalization to throw off our check
+                                    if (WindowsDefaultLocations[i] != null &&
+                                        possibleLocation != null &&
+                                        WindowsDefaultLocations[i].Replace("\\", "/").ToLower().Equals(possibleLocation.Replace("\\", "/").ToLower()))
+                                    {
+                                        possibleLocation = null;
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -309,6 +315,12 @@ namespace FbxExporters.EditorTools {
                     {
                         //We can assume our path is: /Applications/Autodesk/maya2017/Maya.app/Contents
                         //So we need to go up three folders.
+
+                        //Remove any extra slashes on the end
+                        //Maya would accept a single slash in either direction, so we should be able to
+                        location.TrimEnd('/');
+                        location.TrimEnd('\\');
+
                         var appFolder = Directory.GetParent(location);
                         if (appFolder != null)
                         {
@@ -343,6 +355,11 @@ namespace FbxExporters.EditorTools {
                     {
                         locationsList.Add(possibleLocation.ToString());
                     }
+                }
+
+                if (foundVendorLocation)
+                {
+                    return locationsList.ToArray();
                 }
 
                 switch (Application.platform)
