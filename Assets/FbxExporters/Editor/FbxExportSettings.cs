@@ -180,6 +180,29 @@ namespace FbxExporters.EditorTools {
             }
             EditorGUI.EndDisabledGroup ();
 
+            EditorGUILayout.Space ();
+
+            EditorGUI.indentLevel--;
+            EditorGUILayout.LabelField("Repair Missing Scripts", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+
+            EditorGUILayout.Space ();
+
+            var repairMissingScripts = new GUIContent (
+                "Repair Missing Scripts",
+                "Repair missing FbxPrefab scripts in text assets");
+            if (GUILayout.Button (repairMissingScripts)) {
+                bool result = FbxExporters.Editor.RepairMissingScripts.ReplaceGUIDInTextAssets ();
+                if (result) {
+                    UnityEditor.EditorUtility.DisplayDialog ("Finished Repairing Scripts",
+                        "Repaired missing scripts in text serialized assets", "Ok");
+                } else {
+                    UnityEditor.EditorUtility.DisplayDialog ("Finished Repairing Scripts",
+                        "Couldn't find any assets needing repair", "Ok");
+                }
+            }
+            
+
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
             GUILayout.EndVertical();
