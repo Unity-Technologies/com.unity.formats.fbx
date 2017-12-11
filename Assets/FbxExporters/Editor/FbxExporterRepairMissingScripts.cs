@@ -94,7 +94,7 @@ namespace FbxExporters.Editor
 
                             if (line.Contains (ForumPackageSearchID)) {
                                 line = line.Replace (ForumPackageSearchID, CurrentPackageSearchID);
-                                modified |= true;
+                                modified = true;
                             }
 
                             sw.WriteLine (line);
