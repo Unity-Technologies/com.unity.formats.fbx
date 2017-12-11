@@ -71,8 +71,9 @@ namespace FbxExporters.Editor
 				var sr = new StreamReader (path);
 
                 // verify that this is a text file
+                var firstLine = "";
                 if(sr.Peek() > -1){
-                    var firstLine = sr.ReadLine();
+                    firstLine = sr.ReadLine();
                     if(!firstLine.StartsWith("%YAML")){
                         sr.Close ();
                         return false;
@@ -80,6 +81,10 @@ namespace FbxExporters.Editor
                 }
 
 				var sw = new StreamWriter (path + ".remap", false);
+
+                if(!string.IsNullOrEmpty(firstLine)){
+                    sw.WriteLine(firstLine);
+                }
 
 				while (sr.Peek () > -1) {
 					var line = sr.ReadLine ();
