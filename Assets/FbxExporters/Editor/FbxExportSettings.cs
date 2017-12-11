@@ -180,6 +180,30 @@ namespace FbxExporters.EditorTools {
             }
             EditorGUI.EndDisabledGroup ();
 
+            if (!HideRepairMissingScripts ()) {
+                EditorGUILayout.Space ();
+
+                EditorGUI.indentLevel--;
+                EditorGUILayout.LabelField ("Repair Missing Scripts", EditorStyles.boldLabel);
+                EditorGUI.indentLevel++;
+
+                EditorGUILayout.Space ();
+
+                var repairMissingScripts = new GUIContent (
+                                           "Repair Missing Scripts",
+                                           "Repair missing FbxPrefab scripts in text assets");
+                if (GUILayout.Button (repairMissingScripts)) {
+                    bool result = FbxExporters.Editor.RepairMissingScripts.ReplaceGUIDInTextAssets ();
+                    if (result) {
+                        UnityEditor.EditorUtility.DisplayDialog ("Finished Repairing Scripts",
+                            "Repaired missing scripts in text serialized assets", "Ok");
+                    } else {
+                        UnityEditor.EditorUtility.DisplayDialog ("Finished Repairing Scripts",
+                            "Couldn't find any assets needing repair", "Ok");
+                    }
+                }
+            }
+
             GUILayout.FlexibleSpace ();
             GUILayout.EndScrollView ();
             GUILayout.EndVertical();
@@ -188,6 +212,11 @@ namespace FbxExporters.EditorTools {
                 EditorUtility.SetDirty (exportSettings);
                 exportSettings.Save ();
             }
+        }
+
+        private static bool HideRepairMissingScripts(){
+            var docPath = Application.dataPath + "/FbxExporters/FBX_Exporter_User_Guide_v1.1.0b1.pdf";
+            return File.Exists(docPath)? false : true;
         }
 
         private static string TryFindDCC(string dccPath, string ext, ExportSettings.DCCType dccType){

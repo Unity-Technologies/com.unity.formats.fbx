@@ -20,7 +20,8 @@
 **/.idea/
 
 ## Unity ##
-*.meta
+[Aa]ssets/**/*.meta
+![Aa]ssets/FbxExporters/**/*.meta
 [Pp]rojectSettings/*.asset
 [Pp]rojectSettings/*.txt
 
