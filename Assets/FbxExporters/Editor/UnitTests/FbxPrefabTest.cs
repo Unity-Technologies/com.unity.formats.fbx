@@ -425,10 +425,16 @@ namespace FbxExporters.UnitTests
             var newCopyPath = ModelExporter.ExportObject(
                 GetRandomFbxFilePath(), root);
             SleepForFileTimestamp();
+
+            var destFile = new FbxPrefabAutoUpdater.FbxPrefabUtility (original.GetComponent<FbxPrefab> ()).GetFbxAssetPath ();
+            if (System.IO.File.Exists (destFile)) {
+                System.IO.File.Delete (destFile);
+            }
+            AssetDatabase.Refresh ();
             System.IO.File.Copy(
                 newCopyPath,
-                new FbxPrefabAutoUpdater.FbxPrefabUtility(original.GetComponent<FbxPrefab>()).GetFbxAssetPath(),
-                overwrite: true);
+                destFile,
+                overwrite: false);
             AssetDatabase.Refresh();
 
             // Make sure the update took.
