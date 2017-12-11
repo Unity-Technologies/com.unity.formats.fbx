@@ -6,10 +6,19 @@ NEW FEATURES
 
 * Updated User documentation
 
+* Ship all C# scripts as DLLs
+
+* Updated meta files to match original asset store release (1.0.0b1)
+
 FIXES
 
 * Export Settings: Moved browse ("...") buttons for 3D Application/Export Path next to dropdown/path fields
 * Export Settings: Made "Keep Open" and "Hide Native Menu" labels camel case
+* Added script to fix FbxPrefab component links when updating from forum release (1.1.0b1)
+
+If previous installation was version 1.1.0b1, then a "Repair Missing Scripts" button will appear in the
+FBX export settings inspector. Clicking the button will repair all prefabs and scene files serialized as text.
+To repair binary files, first convert asset serialization mode to "Force Text" in Editor Settings (Edit->Project Settings->Editor).
 
 **Version**: sprint35
 
