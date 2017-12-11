@@ -214,9 +214,9 @@ namespace FbxExporters.EditorTools {
             }
         }
 
-        private static bool HideRepairMissingScripts(){
-            var version = FbxExporters.Editor.ModelExporter.GetVersionFromReadme ();
-            return version.Equals ("1.1.0b1")? false : true;
+        private bool HideRepairMissingScripts(){
+            var docPath = Application.dataPath + "/FbxExporters/FBX_Exporter_User_Guide_v1.1.0b1.pdf";
+            return File.Exists(docPath)? false : true;
         }
 
         private static string TryFindDCC(string dccPath, string ext, ExportSettings.DCCType dccType){
