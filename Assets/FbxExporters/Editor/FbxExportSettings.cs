@@ -214,7 +214,7 @@ namespace FbxExporters.EditorTools {
             }
         }
 
-        private bool HideRepairMissingScripts(){
+        private static bool HideRepairMissingScripts(){
             var docPath = Application.dataPath + "/FbxExporters/FBX_Exporter_User_Guide_v1.1.0b1.pdf";
             return File.Exists(docPath)? false : true;
         }

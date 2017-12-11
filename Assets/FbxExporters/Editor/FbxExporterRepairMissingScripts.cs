@@ -65,7 +65,7 @@ namespace FbxExporters.Editor
 		private static bool ReplaceGUIDInFile (string path)
 		{
 			// try to read file, assume it's a text file for now
-			int modified = 0;
+			bool modified = false;
 
 			try {
 				var sr = new StreamReader (path);
@@ -90,8 +90,8 @@ namespace FbxExporters.Editor
 					var line = sr.ReadLine ();
 
 					if (line.Contains (ForumPackageSearchID)) {
-						modified++;
 						line = line.Replace (ForumPackageSearchID, CurrentPackageSearchID);
+                        modified |= true;
 					}
 
 					sw.WriteLine (line);
@@ -100,7 +100,7 @@ namespace FbxExporters.Editor
 				sr.Close ();
 				sw.Close ();
 
-				if (modified > 0) {
+				if (modified) {
 					File.Delete (path);
 					File.Move (path + ".remap", path);
 					return true;
