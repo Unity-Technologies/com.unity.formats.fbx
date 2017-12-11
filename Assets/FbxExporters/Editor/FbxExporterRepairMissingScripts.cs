@@ -68,44 +68,46 @@ namespace FbxExporters.Editor
             bool modified = false;
 
             try {
-                var sr = new StreamReader (path);
-
-                // verify that this is a text file
-                var firstLine = "";
-                if (sr.Peek () > -1) {
-                    firstLine = sr.ReadLine ();
-                    if (!firstLine.StartsWith ("%YAML")) {
-                        sr.Close ();
-                        return false;
-                    }
+                var tmpFile = Path.GetTempFileName();
+                if(string.IsNullOrEmpty(tmpFile)){
+                    return false;
                 }
 
-                var sw = new StreamWriter (path + ".remap", false);
-
-                if (!string.IsNullOrEmpty (firstLine)) {
-                    sw.WriteLine (firstLine);
-                }
-
-                while (sr.Peek () > -1) {
-                    var line = sr.ReadLine ();
-
-                    if (line.Contains (ForumPackageSearchID)) {
-                        line = line.Replace (ForumPackageSearchID, CurrentPackageSearchID);
-                        modified |= true;
+                using(var sr = new StreamReader (path)){
+                    // verify that this is a text file
+                    var firstLine = "";
+                    if (sr.Peek () > -1) {
+                        firstLine = sr.ReadLine ();
+                        if (!firstLine.StartsWith ("%YAML")) {
+                            sr.Close ();
+                            return false;
+                        }
                     }
 
-                    sw.WriteLine (line);
-                }
+                    using(var sw = new StreamWriter (tmpFile, false)){
+                        if (!string.IsNullOrEmpty (firstLine)) {
+                            sw.WriteLine (firstLine);
+                        }
 
-                sr.Close ();
-                sw.Close ();
+                        while (sr.Peek () > -1) {
+                            var line = sr.ReadLine ();
+
+                            if (line.Contains (ForumPackageSearchID)) {
+                                line = line.Replace (ForumPackageSearchID, CurrentPackageSearchID);
+                                modified |= true;
+                            }
+
+                            sw.WriteLine (line);
+                        }
+                    }
+                }
 
                 if (modified) {
                     File.Delete (path);
-                    File.Move (path + ".remap", path);
+                    File.Move (tmpFile, path);
                     return true;
                 } else {
-                    File.Delete (path + ".remap");
+                    File.Delete (tmpFile);
                 }
             } catch (IOException e) {
                 Debug.LogError (string.Format ("Failed to replace GUID in file {0} (error={1})", path, e));
