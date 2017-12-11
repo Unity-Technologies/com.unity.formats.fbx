@@ -281,8 +281,6 @@ namespace FbxExporters.EditorTools {
             {
                 //We can assume our path is: /Applications/Autodesk/maya2017/Maya.app/Contents
                 //So we need to go up three folders.                
-				Debug.Log(string.Format("parsing location {0}",location));
-
 
                 var appFolder = Directory.GetParent(location);
                 if (appFolder != null)
@@ -478,8 +476,6 @@ namespace FbxExporters.EditorTools {
             
             for (int i = 0; i < dccOptionNames.Count; i++)
             {
-				Debug.Log(string.Format("check name for version : {0}", dccOptionNames[i]));
-
                 int versionToCheck = FindDCCVersion(dccOptionNames[i]);
                 if (versionToCheck == -1)
                 {
@@ -504,8 +500,7 @@ namespace FbxExporters.EditorTools {
                 }
             }
 
-			Debug.Log(string.Format("found index : {0} {1}", result, dccOptionNames.Count));
-            Debug.Assert(result > -1 && result < dccOptionNames.Count);
+            //Debug.Assert(result > -1 && result < dccOptionNames.Count);
 
             return result;
         }
@@ -590,8 +585,6 @@ namespace FbxExporters.EditorTools {
 			// find dcc installation from vendor locations
             for (int i = 0; i < DCCVendorLocations.Length; i++)
             {
-				Debug.Log( "checking vendor location for installs " + DCCVendorLocations[i] );
-
                 if (!Directory.Exists(DCCVendorLocations[i]))
                 {
                     // no autodesk products installed
@@ -602,8 +595,6 @@ namespace FbxExporters.EditorTools {
                 var adskRoot = new System.IO.DirectoryInfo(DCCVendorLocations[i]);
                 foreach (var productDir in adskRoot.GetDirectories())
 				{
-					Debug.Log( "product " + productDir.FullName );
-
                     var product = productDir.Name;
 
                     // Only accept those that start with 'maya' in either case.
