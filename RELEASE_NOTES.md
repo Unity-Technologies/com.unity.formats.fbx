@@ -14,6 +14,10 @@ FIXES
 
 * Export Settings: Moved browse ("...") buttons for 3D Application/Export Path next to dropdown/path fields
 * Export Settings: Made "Keep Open" and "Hide Native Menu" labels camel case
+* Exporter: Fix so normals/binormals/tangents/vertex colors are exported if they exist
+
+Weren't being exported for primitives or meshes that had less vertices than triangles.
+
 * Added script to fix FbxPrefab component links when updating from forum release (1.1.0b1)
 
 If previous installation was version 1.1.0b1, then a "Repair Missing Scripts" button will appear in the
