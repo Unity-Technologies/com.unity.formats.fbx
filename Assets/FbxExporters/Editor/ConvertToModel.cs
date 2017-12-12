@@ -337,6 +337,10 @@ namespace FbxExporters
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
                 // copy over meshes, materials, and nothing else
                 foreach (var component in from.GetComponents<Component>()) {
+                    if (component == null) {
+                        continue;
+                    }
+
                     var json = EditorJsonUtility.ToJson(component);
                     if (string.IsNullOrEmpty (json)) {
                         // this happens for missing scripts
@@ -348,6 +352,10 @@ namespace FbxExporters
 
                     // Find the component to copy to.
                     for (int i = 0, n = originalComponents.Count; i < n; i++) {
+                        if (originalComponents [i] == null) {
+                            continue;
+                        }
+
                         if (originalComponents[i].GetType() == expectedType) {
                             // We have found the component we are looking for,
                             // remove it so we don't try to copy to it again
