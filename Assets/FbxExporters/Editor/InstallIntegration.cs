@@ -1105,20 +1105,20 @@ namespace FbxExporters.Editor
             return SetupUserStartupScript(verbose);
         }
 
-        public int ConfigureBlender(string mayaPath)
+        public int ConfigureBlender(string blenderPath)
         {
             int ExitCode = 0;
 
             try
             {
-                if (!System.IO.File.Exists(mayaPath))
+                if (!System.IO.File.Exists(blenderPath))
                 {
-                    Debug.LogError(string.Format("No Blender installation found at {0}", mayaPath));
+                    Debug.LogError(string.Format("No Blender installation found at {0}", blenderPath));
                     return -1;
                 }
 
                 System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
-                myProcess.StartInfo.FileName = mayaPath;
+                myProcess.StartInfo.FileName = blenderPath;
                 myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                 myProcess.StartInfo.CreateNoWindow = true;
                 myProcess.StartInfo.UseShellExecute = false;
@@ -1157,7 +1157,7 @@ namespace FbxExporters.Editor
                     myProcess.WaitForExit();
                     ExitCode = myProcess.ExitCode;
                     Debug.Log(string.Format("Ran Blender: [{0}]\nWith args [{1}]\nResult {2}",
-                                mayaPath, myProcess.StartInfo.Arguments, ExitCode));
+                                blenderPath, myProcess.StartInfo.Arguments, ExitCode));
 
                     // see if we got any error messages
                     if (ExitCode != 0)
@@ -1242,8 +1242,13 @@ namespace FbxExporters.Editor
                     dccIntegration = new MayaIntegration ();
                 }
             } else if (dccType.Equals ("3dsmax")) {
-                dccIntegration = new MaxIntegration ();
-            } else {
+                dccIntegration = new MaxIntegration ();                
+            }
+            else if (dccType.Equals("blender"))
+            {
+                dccIntegration = new BlenderIntegration();
+            }
+            else {
                 throw new System.NotImplementedException ();
             }
 
