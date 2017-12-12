@@ -1512,7 +1512,7 @@ namespace FbxExporters
                 }
 
                 public bool HasValidNormals(){
-                    return Normals != null && Normals.Length >= Vertices.Length;
+                    return Normals != null && Normals.Length >= 0;
                 }
 
                 public bool HasValidBinormals(){
@@ -1520,11 +1520,11 @@ namespace FbxExporters
                 }
 
                 public bool HasValidTangents(){
-                    return Tangents != null && Tangents.Length >= Vertices.Length;
+                    return Tangents != null && Tangents.Length >= 0;
                 }
 
                 public bool HasValidVertexColors(){
-                    return VertexColors != null && VertexColors.Length >= Vertices.Length;
+                    return VertexColors != null && VertexColors.Length >= 0;
                 }
             }
 
