@@ -213,7 +213,7 @@ namespace FbxExporters.EditorTools {
                     }
                 } else {
                     UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
-                        "Couldn't find any text assets that require updating", "Ok");
+                        "Couldn't find any prefab or scene files that require updating", "Ok");
                 }
             }
 
