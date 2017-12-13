@@ -209,7 +209,7 @@ namespace FbxExporters.EditorTools {
                         componentUpdater.ReplaceGUIDInTextAssets ();
                     } else {
                         var assetsToRepair = componentUpdater.GetAssetsToRepair ();
-                        Debug.LogFormat ("Failed to update the FbxPrefab components in the following files: {0}", string.Join (", ", assetsToRepair));
+                        Debug.LogFormat ("Failed to update the FbxPrefab components in the following files:\n{0}", string.Join ("\n", assetsToRepair));
                     }
                 } else {
                     UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
