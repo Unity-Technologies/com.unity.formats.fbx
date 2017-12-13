@@ -180,27 +180,40 @@ namespace FbxExporters.EditorTools {
             }
             EditorGUI.EndDisabledGroup ();
 
-            if (!HideRepairMissingScripts ()) {
-                EditorGUILayout.Space ();
+            EditorGUILayout.Space ();
 
-                EditorGUI.indentLevel--;
-                EditorGUILayout.LabelField ("Repair Missing Scripts", EditorStyles.boldLabel);
-                EditorGUI.indentLevel++;
+            EditorGUI.indentLevel--;
+            EditorGUILayout.LabelField ("Run Component Updater", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
 
-                EditorGUILayout.Space ();
+            EditorGUILayout.Space ();
 
-                var repairMissingScripts = new GUIContent (
-                                           "Repair Missing Scripts",
-                                           "Repair missing FbxPrefab scripts in text assets");
-                if (GUILayout.Button (repairMissingScripts)) {
-                    bool result = FbxExporters.Editor.RepairMissingScripts.ReplaceGUIDInTextAssets ();
+            var repairMissingScripts = new GUIContent (
+                                       "Run Component Updater",
+                                        "If the forum package 1.1.0b1 was previously installed, then links to the FbxPrefab component " +
+                                        "in assets created with the FBX exporter will need updating.\n" +
+                                        "Run this button to update all FbxPrefab references in text serialized prefabs and scene files.");
+
+            if (GUILayout.Button (repairMissingScripts)) {
+                var componentUpdater = new FbxExporters.Editor.RepairMissingScripts ();
+                var filesToRepairCount = componentUpdater.GetAssetsToRepairCount ();
+                var dialogTitle = "FBX Exporter Component Updater";
+                if (filesToRepairCount > 0) {
+                    bool result = UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
+                        string.Format("Found {0} prefab and/or scene file(s) with components requiring update.\n\n" +
+                        "If you choose 'Go Ahead', the FbxPrefab components in these assets " +
+                        "will be automatically updated to work with the latest FBX exporter.\n" +
+                            "You should make a backup before proceeding.", filesToRepairCount),
+                        "I Made a Backup. Go Ahead!", "No Thanks");
                     if (result) {
-                        UnityEditor.EditorUtility.DisplayDialog ("Finished Repairing Scripts",
-                            "Repaired missing scripts in text serialized assets", "Ok");
+                        componentUpdater.ReplaceGUIDInTextAssets ();
                     } else {
-                        UnityEditor.EditorUtility.DisplayDialog ("Finished Repairing Scripts",
-                            "Couldn't find any assets needing repair", "Ok");
+                        var assetsToRepair = componentUpdater.GetAssetsToRepair ();
+                        Debug.LogFormat ("Failed to update the FbxPrefab components in the following files:\n{0}", string.Join ("\n", assetsToRepair));
                     }
+                } else {
+                    UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
+                        "Couldn't find any text assets that require updating", "Ok");
                 }
             }
 
@@ -212,11 +225,6 @@ namespace FbxExporters.EditorTools {
                 EditorUtility.SetDirty (exportSettings);
                 exportSettings.Save ();
             }
-        }
-
-        private static bool HideRepairMissingScripts(){
-            var docPath = Application.dataPath + "/FbxExporters/FBX_Exporter_User_Guide_v1.1.0b1.pdf";
-            return File.Exists(docPath)? false : true;
         }
 
         private static string TryFindDCC(string dccPath, string ext, ExportSettings.DCCType dccType){
