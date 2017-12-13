@@ -200,7 +200,7 @@ namespace FbxExporters.EditorTools {
                 var dialogTitle = "FBX Prefab Component Updater";
                 if (filesToRepairCount > 0) {
                     bool result = UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
-                        string.Format("Found {0} prefab and/or scene file(s) with components requiring update.\n\n" +
+                        string.Format("Found {0} prefab(s) and/or scene(s) with components requiring update.\n\n" +
                         "If you choose 'Go Ahead', the FbxPrefab components in these assets " +
                         "will be automatically updated to work with the latest FBX exporter.\n" +
                             "You should make a backup before proceeding.", filesToRepairCount),
@@ -213,7 +213,7 @@ namespace FbxExporters.EditorTools {
                     }
                 } else {
                     UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
-                        "Couldn't find any prefab or scene files that require updating", "Ok");
+                        "Couldn't find any prefabs or scenes that require updating", "Ok");
                 }
             }
 
