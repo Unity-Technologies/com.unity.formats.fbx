@@ -377,5 +377,36 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual (camera.nearClipPlane, fbxCamera.nearClipPlane, delta);
             Assert.AreEqual (camera.farClipPlane, fbxCamera.farClipPlane, delta);
         }
+
+        [Test]
+        public void TestComponentAttributeExport()
+        {
+            // test exporting of normals, tangents, uvs, and vertex colors
+            // Note: won't test binormals as they are not imported into Unity
+
+            var quad = GameObject.CreatePrimitive (PrimitiveType.Quad);
+            var quadMeshFilter = quad.GetComponent<MeshFilter> ();
+            var quadMesh = quadMeshFilter.sharedMesh;
+
+            // create a simple mesh (just a quad)
+            // this is to make sure we don't accidentally modify the
+            // Unity internal Quad primitive.
+            var mesh = new Mesh();
+            mesh.name = "Test";
+
+            mesh.vertices = quadMesh.vertices;
+            mesh.triangles = quadMesh.triangles;
+            mesh.normals = quadMesh.normals;
+            mesh.colors = quadMesh.colors;
+
+            var gameObject = new GameObject ();
+            var meshFilter = gameObject.AddComponent<MeshFilter> ();
+            gameObject.AddComponent<MeshRenderer> ();
+
+            meshFilter.sharedMesh = mesh;
+
+            // don't need quad anymore
+            Object.DestroyImmediate(quad);
+        }
     }
 }
