@@ -180,27 +180,33 @@ namespace FbxExporters.EditorTools {
             }
             EditorGUI.EndDisabledGroup ();
 
-            if (!HideRepairMissingScripts ()) {
-                EditorGUILayout.Space ();
+            EditorGUILayout.Space ();
 
-                EditorGUI.indentLevel--;
-                EditorGUILayout.LabelField ("Repair Missing Scripts", EditorStyles.boldLabel);
-                EditorGUI.indentLevel++;
+            EditorGUI.indentLevel--;
+            EditorGUILayout.LabelField ("Run Component Updater", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
 
-                EditorGUILayout.Space ();
+            EditorGUILayout.Space ();
 
-                var repairMissingScripts = new GUIContent (
-                                           "Repair Missing Scripts",
-                                           "Repair missing FbxPrefab scripts in text assets");
-                if (GUILayout.Button (repairMissingScripts)) {
-                    bool result = FbxExporters.Editor.RepairMissingScripts.ReplaceGUIDInTextAssets ();
+            var repairMissingScripts = new GUIContent (
+                                       "Run Component Updater",
+                                       "Repair missing FbxPrefab scripts in text assets");
+            if (GUILayout.Button (repairMissingScripts)) {
+                var componentUpdater = new FbxExporters.Editor.RepairMissingScripts ();
+                var filesToRepairCount = componentUpdater.GetAssetsToRepairCount ();
+                if (filesToRepairCount > 0) {
+                    bool result = UnityEditor.EditorUtility.DisplayDialog ("Component Updater",
+                        string.Format("Found {0} text assets with components requiring update.\n\n" +
+                        "If you choose 'Go Ahead', the components in these text serialized assets " +
+                        "will be automatically updated to work with the latest FBX exporter.\n" +
+                            "You should make a backup before proceeding.", filesToRepairCount),
+                        "I Made a Backup. Go Ahead!", "No Thanks");
                     if (result) {
-                        UnityEditor.EditorUtility.DisplayDialog ("Finished Repairing Scripts",
-                            "Repaired missing scripts in text serialized assets", "Ok");
-                    } else {
-                        UnityEditor.EditorUtility.DisplayDialog ("Finished Repairing Scripts",
-                            "Couldn't find any assets needing repair", "Ok");
+                        componentUpdater.ReplaceGUIDInTextAssets ();
                     }
+                } else {
+                    UnityEditor.EditorUtility.DisplayDialog ("Component Updater",
+                        "Couldn't find any text assets requiring update", "Ok");
                 }
             }
 
@@ -212,11 +218,6 @@ namespace FbxExporters.EditorTools {
                 EditorUtility.SetDirty (exportSettings);
                 exportSettings.Save ();
             }
-        }
-
-        private static bool HideRepairMissingScripts(){
-            var docPath = Application.dataPath + "/FbxExporters/FBX_Exporter_User_Guide_v1.1.0b1.pdf";
-            return File.Exists(docPath)? false : true;
         }
 
         private static string TryFindDCC(string dccPath, string ext, ExportSettings.DCCType dccType){
