@@ -183,7 +183,7 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.Space ();
 
             EditorGUI.indentLevel--;
-            EditorGUILayout.LabelField ("Run Component Updater", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField ("FBX Prefab Component Updater", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
             EditorGUILayout.Space ();
@@ -197,7 +197,7 @@ namespace FbxExporters.EditorTools {
             if (GUILayout.Button (repairMissingScripts)) {
                 var componentUpdater = new FbxExporters.Editor.RepairMissingScripts ();
                 var filesToRepairCount = componentUpdater.GetAssetsToRepairCount ();
-                var dialogTitle = "FBX Exporter Component Updater";
+                var dialogTitle = "FBX Prefab Component Updater";
                 if (filesToRepairCount > 0) {
                     bool result = UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
                         string.Format("Found {0} prefab and/or scene file(s) with components requiring update.\n\n" +
