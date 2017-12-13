@@ -38,16 +38,28 @@ namespace FbxExporters.Editor
         }
 
         private string[] m_assetsToRepair;
+        private string[] AssetsToRepair{
+            get{
+                if (m_assetsToRepair == null) {
+                    m_assetsToRepair = FindAssetsToRepair ();
+                }
+                return m_assetsToRepair;
+            }
+        }
 
         public RepairMissingScripts(){
-            m_assetsToRepair = GetAssetsToRepair ();
+            
         }
 
         public int GetAssetsToRepairCount(){
-            return (m_assetsToRepair != null) ? m_assetsToRepair.Length : 0;
+            return AssetsToRepair.Length;
         }
 
-        public static string[] GetAssetsToRepair()
+        public string[] GetAssetsToRepair(){
+            return AssetsToRepair;
+        }
+
+        public static string[] FindAssetsToRepair()
         {
             // search project for assets containing old GUID
 
@@ -97,12 +109,8 @@ namespace FbxExporters.Editor
 
         public bool ReplaceGUIDInTextAssets ()
         {
-            if (m_assetsToRepair == null) {
-                return false;
-            }
-
             bool replacedGUID = false;
-            foreach (string file in m_assetsToRepair) {
+            foreach (string file in AssetsToRepair) {
                 replacedGUID |= ReplaceGUIDInFile (file);
             }
             if (replacedGUID) {
@@ -154,6 +162,8 @@ namespace FbxExporters.Editor
                 if (modified) {
                     File.Delete (path);
                     File.Move (tmpFile, path);
+
+                    Debug.LogFormat("Updated FbxPrefab components in file {0}", path);
                     return true;
                 } else {
                     File.Delete (tmpFile);

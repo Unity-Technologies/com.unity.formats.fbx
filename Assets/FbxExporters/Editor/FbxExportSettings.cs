@@ -190,23 +190,29 @@ namespace FbxExporters.EditorTools {
 
             var repairMissingScripts = new GUIContent (
                                        "Run Component Updater",
-                                       "Repair missing FbxPrefab scripts in text assets");
+                                        "If the forum package 1.1.0b1 was previously installed, then links to the FbxPrefab component in your assets will need updating." +
+                                        " Run this button to update all FbxPrefab references in your text serialized prefabs and scene files.");
+
             if (GUILayout.Button (repairMissingScripts)) {
                 var componentUpdater = new FbxExporters.Editor.RepairMissingScripts ();
                 var filesToRepairCount = componentUpdater.GetAssetsToRepairCount ();
+                var dialogTitle = "FBX Exporter Component Updater";
                 if (filesToRepairCount > 0) {
-                    bool result = UnityEditor.EditorUtility.DisplayDialog ("Component Updater",
-                        string.Format("Found {0} text assets with components requiring update.\n\n" +
+                    bool result = UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
+                        string.Format("Found {0} text asset(s) with components requiring update.\n\n" +
                         "If you choose 'Go Ahead', the components in these text serialized assets " +
                         "will be automatically updated to work with the latest FBX exporter.\n" +
                             "You should make a backup before proceeding.", filesToRepairCount),
                         "I Made a Backup. Go Ahead!", "No Thanks");
                     if (result) {
                         componentUpdater.ReplaceGUIDInTextAssets ();
+                    } else {
+                        var assetsToRepair = componentUpdater.GetAssetsToRepair ();
+                        Debug.LogFormat ("Failed to update the FbxPrefab components in the following files: {0}", string.Join (", ", assetsToRepair));
                     }
                 } else {
-                    UnityEditor.EditorUtility.DisplayDialog ("Component Updater",
-                        "Couldn't find any text assets requiring update", "Ok");
+                    UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
+                        "Couldn't find any text assets that require updating", "Ok");
                 }
             }
 
