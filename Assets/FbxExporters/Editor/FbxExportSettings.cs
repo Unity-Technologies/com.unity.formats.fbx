@@ -200,7 +200,7 @@ namespace FbxExporters.EditorTools {
                 var dialogTitle = "FBX Exporter Component Updater";
                 if (filesToRepairCount > 0) {
                     bool result = UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
-                        string.Format("Found {0} text asset(s) with components requiring update.\n\n" +
+                        string.Format("Found {0} prefab and/or scene file(s) with components requiring update.\n\n" +
                         "If you choose 'Go Ahead', the components in these text serialized assets " +
                         "will be automatically updated to work with the latest FBX exporter.\n" +
                             "You should make a backup before proceeding.", filesToRepairCount),

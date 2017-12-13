@@ -47,10 +47,6 @@ namespace FbxExporters.Editor
             }
         }
 
-        public RepairMissingScripts(){
-            
-        }
-
         public int GetAssetsToRepairCount(){
             return AssetsToRepair.Length;
         }
