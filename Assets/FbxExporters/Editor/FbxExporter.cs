@@ -1516,7 +1516,9 @@ namespace FbxExporters
                 }
 
                 public bool HasValidBinormals(){
-                    return HasValidNormals () && HasValidTangents () && Binormals != null;
+                    return HasValidNormals () &&
+                        HasValidTangents () &&
+                        Binormals != null;
                 }
 
                 public bool HasValidTangents(){

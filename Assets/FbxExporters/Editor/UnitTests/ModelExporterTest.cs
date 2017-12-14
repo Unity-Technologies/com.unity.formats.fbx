@@ -362,13 +362,7 @@ namespace FbxExporters.UnitTests
         /// <param name="filename">Filename.</param>
         /// <param name="cameraObj">Camera object.</param>
         private Camera ExportCamera(string filename, GameObject cameraObj){
-            ModelExporter.ExportObject (filename, cameraObj);
-
-            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
-            var fbxCamera = fbxObj.GetComponent<Camera> ();
-
-            Assert.IsNotNull (fbxCamera);
-            return fbxCamera;
+            return ExportComponent<Camera> (filename, cameraObj);
         }
 
         private void CompareCameraValues(Camera camera, Camera fbxCamera, float delta=0.001f){
@@ -376,6 +370,92 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual (camera.fieldOfView, fbxCamera.fieldOfView, delta);
             Assert.AreEqual (camera.nearClipPlane, fbxCamera.nearClipPlane, delta);
             Assert.AreEqual (camera.farClipPlane, fbxCamera.farClipPlane, delta);
+        }
+
+        /// <summary>
+        /// Exports the GameObject and returns component of type T.
+        /// </summary>
+        /// <returns>The component.</returns>
+        /// <param name="filename">Filename.</param>
+        /// <param name="obj">Object.</param>
+        /// <typeparam name="T">The component type.</typeparam>
+        private T ExportComponent<T>(string filename, GameObject obj) where T : Component {
+            ModelExporter.ExportObject (filename, obj);
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            var fbxComponent = fbxObj.GetComponent<T> ();
+
+            Assert.IsNotNull (fbxComponent);
+            return fbxComponent;
+        }
+
+        [Test]
+        public void TestComponentAttributeExport()
+        {
+            // test exporting of normals, tangents, uvs, and vertex colors
+            // Note: won't test binormals as they are not imported into Unity
+
+            var quad = GameObject.CreatePrimitive (PrimitiveType.Quad);
+            var quadMeshFilter = quad.GetComponent<MeshFilter> ();
+            var quadMesh = quadMeshFilter.sharedMesh;
+
+            // create a simple mesh (just a quad)
+            // this is to make sure we don't accidentally modify the
+            // Unity internal Quad primitive.
+            var mesh = new Mesh();
+            mesh.name = "Test";
+
+            mesh.vertices = quadMesh.vertices;
+            mesh.triangles = quadMesh.triangles;
+            mesh.tangents = quadMesh.tangents;
+            mesh.normals = quadMesh.normals;
+            mesh.colors = quadMesh.colors;
+
+            Assert.IsNotNull (mesh.tangents);
+            Assert.IsNotNull (mesh.vertices);
+            Assert.IsNotNull (mesh.triangles);
+            Assert.IsNotNull (mesh.normals);
+            Assert.IsNotNull (mesh.colors);
+
+            var gameObject = new GameObject ();
+            var meshFilter = gameObject.AddComponent<MeshFilter> ();
+
+            meshFilter.sharedMesh = mesh;
+
+            // don't need quad anymore
+            Object.DestroyImmediate(quad);
+
+            // try exporting default values
+            string filename = GetRandomFbxFilePath();
+            var fbxMeshFilter = ExportComponent<MeshFilter> (filename, gameObject);
+            var fbxMesh = fbxMeshFilter.sharedMesh;
+            CompareMeshComponentAttributes (mesh, fbxMesh);
+
+            // try exporting mesh without vertex colors
+            mesh.colors = new Color[]{ };
+
+            filename = GetRandomFbxFilePath();
+            fbxMeshFilter = ExportComponent<MeshFilter> (filename, gameObject);
+            fbxMesh = fbxMeshFilter.sharedMesh;
+            CompareMeshComponentAttributes (mesh, fbxMesh);
+
+            Object.DestroyImmediate (mesh);
+        }
+
+        private void CompareMeshComponentAttributes(Mesh mesh, Mesh fbxMesh)
+        {
+            Assert.IsNotNull (fbxMesh);
+            Assert.IsNotNull (fbxMesh.vertices);
+            Assert.IsNotNull (fbxMesh.triangles);
+            Assert.IsNotNull (fbxMesh.normals);
+            Assert.IsNotNull (fbxMesh.colors);
+            Assert.IsNotNull (fbxMesh.tangents);
+
+            Assert.AreEqual (mesh.vertices, fbxMesh.vertices);
+            Assert.AreEqual (mesh.triangles, fbxMesh.triangles);
+            Assert.AreEqual (mesh.normals, fbxMesh.normals);
+            Assert.AreEqual (mesh.colors, fbxMesh.colors);
+            Assert.AreEqual (mesh.tangents, fbxMesh.tangents);
         }
     }
 }
