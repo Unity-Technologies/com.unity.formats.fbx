@@ -1430,7 +1430,7 @@ namespace FbxExporters
                             var normals = Normals;
                             var tangents = Tangents;
 
-                            if (HasValidNormals() && HasValidTangents()) {
+                            if (HasValidNormals() && HasValidTangents() && normals.Length == tangents.Length) {
                                 m_Binormals = new Vector3 [normals.Length];
 
                                 for (int i = 0; i < normals.Length; i++)
@@ -1512,19 +1512,22 @@ namespace FbxExporters
                 }
 
                 public bool HasValidNormals(){
-                    return Normals != null && Normals.Length >= 0;
+                    return Normals != null && Normals.Length > 0;
                 }
 
                 public bool HasValidBinormals(){
-                    return HasValidNormals () && HasValidTangents () && Binormals != null;
+                    return HasValidNormals () &&
+                        HasValidTangents () &&
+                        Normals.Length == Tangents.Length &&
+                        Binormals != null;
                 }
 
                 public bool HasValidTangents(){
-                    return Tangents != null && Tangents.Length >= 0;
+                    return Tangents != null && Tangents.Length > 0;
                 }
 
                 public bool HasValidVertexColors(){
-                    return VertexColors != null && VertexColors.Length >= 0;
+                    return VertexColors != null && VertexColors.Length > 0;
                 }
             }
 
