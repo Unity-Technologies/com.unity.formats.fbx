@@ -819,6 +819,10 @@ namespace FbxExporters
                                         // Already updated => skip.
                                         continue;
                                     }
+                                    Debug.Log ("update component for: " + name + ": " + typename);
+                                    if (i < oldN) {
+                                        Debug.LogWarning ("oldvalue : " + oldValues [i] + ", new value: " + newValue);
+                                    }
                                     Append (m_componentsToUpdate, name,
                                         new ComponentValue(componentTypes[typename], newValue));
                                 } else {
@@ -910,6 +914,7 @@ namespace FbxExporters
 
                         Log("{0}: created new GameObject", name);
                         updatedNodes.Add(newNode);
+                        Debug.LogWarning ("created: " + newNode.name);
                     }
 
                     // Implement the reparenting in two phases to avoid making loops, e.g.
@@ -937,6 +942,7 @@ namespace FbxExporters
 
                         Log("changed {0} parent to {1}", name, parentNode.name);
                         updatedNodes.Add(childNode.gameObject);
+                        Debug.LogWarning ("changed name: " + childNode.name);
                     }
 
                     // Destroy the old nodes. Remember that DestroyImmediate recursively
@@ -957,6 +963,7 @@ namespace FbxExporters
                         var typesToDestroy = kvp.Value;
                         var prefabXfo = prefabNodes[nodeName];
                         updatedNodes.Add(prefabXfo.gameObject);
+                        Debug.LogWarning ("destroy component: " + prefabXfo.name);
 
                         foreach(var componentType in typesToDestroy) {
                             var component = prefabXfo.GetComponent(componentType);
@@ -973,6 +980,7 @@ namespace FbxExporters
                         var fbxComponents = kvp.Value;
                         var prefabXfo = prefabNodes[nodeName];
                         updatedNodes.Add(prefabXfo.gameObject);
+                        Debug.LogWarning ("update component: " + prefabXfo.name);
 
                         // Copy the components once so we can match them up even if there's multiple fbxComponents.
                         List<Component> prefabComponents = new List<Component>(prefabXfo.GetComponents<Component>());
@@ -990,6 +998,8 @@ namespace FbxExporters
                                 prefabComponent = prefabXfo.gameObject.AddComponent(fbxComponent.t);
                                 Log("created component {0}:{1}", nodeName, fbxComponent.t);
                             }
+
+                            Debug.LogWarning ("prefab component: " + prefabComponent.GetType().Name);
 
                             //If the prefabComponent has not been assigned yet,
                             //it means that we couldn't find it, and that we tried to add it but that it seems like it already exists.
