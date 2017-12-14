@@ -305,7 +305,9 @@ namespace FbxExporters.EditorTools {
             return result;
         }
 
-        // Returns a set of valid vendor folder paths with no trailing '/'
+        /// <summary>
+        /// Returns a set of valid vendor folder paths with no trailing '/'
+        /// </summary>
         private static HashSet<string> GetCustomVendorLocations()
         {
             HashSet<string> result = new HashSet<string>();
