@@ -249,6 +249,10 @@ namespace FbxExporters.UnitTests
 
                 // Make sure we got the right changes. Parent2 got its
                 // transform changed, Parent3 was created.
+                // Child3 had the fileID in its MeshFilter changed, as the
+                // fileID depends on the order in the FBX file. Therefore,
+                // adding/deleting/moving nodes can affect the fileID of
+                // other objects in the scene.
                 Assert.AreEqual (1, updateSet.NumUpdates);
                 Assert.That (updateSet.Updated, Is.EquivalentTo (new string [] {
                     "Parent2", "Parent3", "Child3"
