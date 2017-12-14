@@ -20,8 +20,8 @@ Weren't being exported for primitives or meshes that had less vertices than tria
 
 * Added script to fix FbxPrefab component links when updating from forum release (1.1.0b1)
 
-If previous installation was version 1.1.0b1, then a "Repair Missing Scripts" button will appear in the
-FBX export settings inspector. Clicking the button will repair all prefabs and scene files serialized as text.
+A "Run Component Updater" button will appear in the FBX export settings inspector. 
+Clicking the button will repair all prefabs and scene files serialized as text.
 To repair binary files, first convert asset serialization mode to "Force Text" in Editor Settings (Edit->Project Settings->Editor).
 
 **Version**: sprint35
