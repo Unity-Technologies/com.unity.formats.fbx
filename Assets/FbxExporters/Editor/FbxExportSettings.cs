@@ -315,11 +315,11 @@ namespace FbxExporters.EditorTools {
             if (!string.IsNullOrEmpty(environmentVariable))
             {
                 string[] locations = environmentVariable.Split(';');
-                for (int i = 0; i < locations.Length; i++)
+                foreach (var location in locations)
                 {
-                    if (Directory.Exists(locations[i]))
+                    if (Directory.Exists(location))
                     {
-                        result.Add(locations[i]);
+                        result.Add(location);
                     }
                 }
             }
