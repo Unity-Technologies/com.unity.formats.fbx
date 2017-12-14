@@ -361,7 +361,7 @@ namespace FbxExporters.UnitTests
         /// <param name="filename">Filename.</param>
         /// <param name="cameraObj">Camera object.</param>
         private Camera ExportCamera(string filename, GameObject cameraObj){
-            ExportComponent<Camera> (filename, cameraObj);
+            return ExportComponent<Camera> (filename, cameraObj);
         }
 
         /// <summary>
@@ -405,6 +405,16 @@ namespace FbxExporters.UnitTests
             string filename = GetRandomFbxFilePath ();
             var fbxLight = ExportComponent<Light> (filename, lightObj);
             CompareLightValues (light, fbxLight);
+
+            light.type = LightType.Point;
+            light.color = Color.red;
+            light.intensity = 0.4f;
+            light.range = 120;
+            light.shadows = LightShadows.Hard;
+
+            filename = GetRandomFbxFilePath ();
+            fbxLight = ExportComponent<Light> (filename, lightObj);
+            CompareLightValues (light, fbxLight);
         }
 
         private void CompareLightValues(Light light, Light fbxLight, float delta=0.001f){
@@ -415,7 +425,16 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual (light.color, fbxLight.color);
             Assert.AreEqual (light.intensity, fbxLight.intensity, delta);
             Assert.AreEqual (light.range, fbxLight.range, delta);
+
             // compare shadows
+            // make sure that if we exported without shadows, don't import with shadows
+            if (light.shadows == LightShadows.None) {
+                Assert.AreEqual (LightShadows.None, fbxLight.shadows);
+            } else {
+                Assert.AreNotEqual (LightShadows.None, fbxLight.shadows);
+            }
+
+            Assert.IsTrue (light.transform.rotation == fbxLight.transform.rotation);
         }
     }
 }
