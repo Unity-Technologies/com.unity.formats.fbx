@@ -270,7 +270,7 @@ namespace FbxExporters.EditorTools {
             //Remove any extra slashes on the end
             //Maya would accept a single slash in either direction, so we should be able to
             location = location.Replace("\\", "/");
-			location = location.TrimEnd('/');
+            location = location.TrimEnd('/');
 
             if (Application.platform == RuntimePlatform.WindowsEditor)
             {
@@ -480,9 +480,9 @@ namespace FbxExporters.EditorTools {
                 int versionToCheck = FindDCCVersion(dccOptionNames[i]);
                 if (versionToCheck == -1)
                 {
-					if (dccOptionNames[i]=="MAYA_LOCATION")
-						return i;
-					
+                    if (dccOptionNames[i]=="MAYA_LOCATION")
+                        return i;
+                    
                     continue;
                 }
                 if (versionToCheck > newestDCCVersionNumber)
@@ -538,14 +538,14 @@ namespace FbxExporters.EditorTools {
         /// <returns> the year/version  OR -1 if the year could not be parsed </returns>
         private static int FindDCCVersion(string AppName)
         {
-			if (string.IsNullOrEmpty(AppName))
+            if (string.IsNullOrEmpty(AppName))
             {
                 return -1;
             }
-			AppName = AppName.Trim();
-			if (string.IsNullOrEmpty(AppName)) 
-				return -1;
-				
+            AppName = AppName.Trim();
+            if (string.IsNullOrEmpty(AppName)) 
+                return -1;
+                
             string[] piecesArray = AppName.Split(' ');
             if (piecesArray.Length < 2)
             {
@@ -554,7 +554,7 @@ namespace FbxExporters.EditorTools {
             //Get the number, which is always the last chunk separated by a space.
             string number = piecesArray[piecesArray.Length - 1];
 
-			int version;
+            int version;
             if (int.TryParse(number, out version))
             {
                 return version;
@@ -581,7 +581,7 @@ namespace FbxExporters.EditorTools {
             var dccOptionNames = instance.dccOptionNames;
             var dccOptionPaths = instance.dccOptionPaths;
 
-			// find dcc installation from vendor locations
+            // find dcc installation from vendor locations
             for (int i = 0; i < DCCVendorLocations.Length; i++)
             {
                 if (!Directory.Exists(DCCVendorLocations[i]))
@@ -593,7 +593,7 @@ namespace FbxExporters.EditorTools {
                 // either the newest version, or the exact version we wanted.
                 var adskRoot = new System.IO.DirectoryInfo(DCCVendorLocations[i]);
                 foreach (var productDir in adskRoot.GetDirectories())
-				{
+                {
                     var product = productDir.Name;
 
                     // Only accept those that start with 'maya' in either case.
@@ -622,12 +622,12 @@ namespace FbxExporters.EditorTools {
                 }
             }
 
-			// add extra locations defined by special environment variables
-			string location = GetMayaLocationFromEnvironmentVariable("MAYA_LOCATION");
+            // add extra locations defined by special environment variables
+            string location = GetMayaLocationFromEnvironmentVariable("MAYA_LOCATION");
 
-			if (!string.IsNullOrEmpty(location))
+            if (!string.IsNullOrEmpty(location))
             {
-				dccOptionPaths.Add(GetMayaExePathFromLocation(location));
+                dccOptionPaths.Add(GetMayaExePathFromLocation(location));
                 dccOptionNames.Add("MAYA_LOCATION");
             }
 
