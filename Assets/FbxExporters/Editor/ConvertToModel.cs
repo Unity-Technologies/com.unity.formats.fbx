@@ -337,6 +337,7 @@ namespace FbxExporters
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
                 // copy over meshes, materials, and nothing else
                 foreach (var component in from.GetComponents<Component>()) {
+                    // ignore missing components
                     if (component == null) {
                         continue;
                     }
@@ -352,6 +353,7 @@ namespace FbxExporters
 
                     // Find the component to copy to.
                     for (int i = 0, n = originalComponents.Count; i < n; i++) {
+                        // ignore missing components
                         if (originalComponents [i] == null) {
                             continue;
                         }
