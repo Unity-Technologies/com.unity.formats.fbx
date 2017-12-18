@@ -243,7 +243,7 @@ namespace FbxExporters.EditorTools {
         //Any additional names require a space after the name
         public const string kMaxOptionName = "3ds Max ";
         public const string kMayaOptionName = "Maya ";
-        public const string kMayaLtOptionName = "MayaLT ";
+        public const string kMayaLtOptionName = "Maya LT";
 
         private static string DefaultIntegrationSavePath {
             get{
@@ -447,10 +447,24 @@ namespace FbxExporters.EditorTools {
                 return -1;
             }
 
-            //We assume that the option names have a 
-            int scoreA = s_PreferenceList.IndexOf(appA.Split(' ')[0]);
-            int scoreB = s_PreferenceList.IndexOf(appB.Split(' ')[0]);
+            int scoreA = -1;
+            int scoreB = -1;
 
+            for( int i = 0; i < s_PreferenceList.Count; i++ )
+            {
+                if (appA.StartsWith(s_PreferenceList[i]))
+                {
+                    scoreA = i;
+                }
+            }
+
+            for (int i = 0; i < s_PreferenceList.Count; i++)
+            {
+                if (appB.StartsWith(s_PreferenceList[i]))
+                {
+                    scoreB = i;
+                }
+            } 
             return scoreA < scoreB ? optionA : optionB;
         }
 
@@ -479,13 +493,18 @@ namespace FbxExporters.EditorTools {
             {
                 return version;
             }
+            else if (AppName.Contains("LT"))
+            {
+                int.TryParse(number.Substring(2), out version);
+                return version;
+            }
             else
             {
                 float fVersion;
                 //In case we are looking at something with a decimal based version- the int parse will fail so we'll need to parse it as a float.
                 if (float.TryParse(number, out fVersion))
                 {
-                   return (int)fVersion;
+                    return (int)fVersion;
                 }
                 return -1;
             }
