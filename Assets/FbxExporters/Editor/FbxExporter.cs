@@ -124,6 +124,13 @@ namespace FbxExporters
             }
             static Material s_defaultMaterial = null;
 
+            static Dictionary<UnityEngine.LightType, FbxLight.EType> MapLightType = new Dictionary<UnityEngine.LightType, FbxLight.EType> () {
+                { UnityEngine.LightType.Directional,    FbxLight.EType.eDirectional },
+                { UnityEngine.LightType.Spot,           FbxLight.EType.eSpot },
+                { UnityEngine.LightType.Point,          FbxLight.EType.ePoint },
+                { UnityEngine.LightType.Area,           FbxLight.EType.eArea },
+            };
+
             /// <summary>
             /// Gets the version number of the FbxExporters plugin from the readme.
             /// </summary>
@@ -825,18 +832,6 @@ namespace FbxExporters
                 fbxCamera.SetFarPlane (unityCamera.farClipPlane*UnitScaleFactor);
                 #endregion
 
-                // Export backgroundColor as a custom property
-                // NOTE: export on fbxNode so that it will show up in Maya
-                ExportColorProperty (fbxNode, unityCamera.backgroundColor,
-                    MakeName("backgroundColor"), 
-                    "The color with which the screen will be cleared.");
-
-                // Export clearFlags as a custom property
-                // NOTE: export on fbxNode so that it will show up in Maya
-                ExportIntProperty (fbxNode, (int)unityCamera.clearFlags,
-                    MakeName("clearFlags"), 
-                    "How the camera clears the background.");
-
                 fbxNode.SetNodeAttribute (fbxCamera);
 
                 // set +90 post rotation to counteract for FBX camera's facing +X direction by default
@@ -851,6 +846,76 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Exports light component.
+            /// Supported types: point, spot and directional
+            /// Cookie => Gobo
+            /// </summary>
+            protected bool ExportLight (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                Light unityLight = unityGo.GetComponent<Light> ();
+
+                if (unityLight == null)
+                    return false;
+
+                FbxLight.EType fbxLightType;
+
+                // Is light type supported?
+                if (!MapLightType.TryGetValue (unityLight.type, out fbxLightType))
+                    return false;
+                
+                FbxLight fbxLight = FbxLight.Create (fbxScene.GetFbxManager (), unityLight.name);
+
+                // Set the type of the light.      
+                fbxLight.LightType.Set(fbxLightType);
+
+                switch (unityLight.type) 
+                {
+                case LightType.Directional : {
+                        break;
+                    }
+                case LightType.Spot : {
+                        // Set the angle of the light's spotlight cone in degrees.
+                        fbxLight.InnerAngle.Set(unityLight.spotAngle);
+                        fbxLight.OuterAngle.Set(unityLight.spotAngle);
+                        break;
+                    }
+                case LightType.Point : {
+                        break;
+                    }
+                case LightType.Area : {
+                        // TODO: areaSize: The size of the area light by scaling the node XY
+                        break;
+                    }
+                }
+                // The color of the light.
+                var unityLightColor = unityLight.color;
+                fbxLight.Color.Set (new FbxDouble3(unityLightColor.r, unityLightColor.g, unityLightColor.b));
+
+                // Set the Intensity of a light is multiplied with the Light color.
+                fbxLight.Intensity.Set (unityLight.intensity * UnitScaleFactor /*compensate for Maya scaling by system units*/ );
+
+                // Set the range of the light.
+                // applies-to: Point & Spot
+                // => FarAttenuationStart, FarAttenuationEnd
+                fbxLight.FarAttenuationStart.Set (0.01f /* none zero start */);
+                fbxLight.FarAttenuationEnd.Set(unityLight.range*UnitScaleFactor);
+
+                // shadows           Set how this light casts shadows
+                // applies-to: Point & Spot
+                bool unityLightCastShadows = unityLight.shadows != LightShadows.None;
+                fbxLight.CastShadows.Set (unityLightCastShadows);
+
+                fbxNode.SetNodeAttribute (fbxLight);
+
+                // set +90 post rotation on x to counteract for FBX light's facing -Y direction by default
+                fbxNode.SetPostRotation(FbxNode.EPivotSet.eSourcePivot, new FbxVector4(90,0,0));
+                // have to set rotation active to true in order for post rotation to be applied
+                fbxNode.SetRotationActive (true);
+
+                return true;
+            }
+
+            /// <summary>
             /// configures default camera for the scene
             /// </summary>
             protected void SetDefaultCamera (FbxScene fbxScene)
@@ -859,47 +924,6 @@ namespace FbxExporters
                     DefaultCamera = Globals.FBXSDK_CAMERA_PERSPECTIVE;
 
                 fbxScene.GetGlobalSettings ().SetDefaultCamera (DefaultCamera);
-            }
-
-            /// <summary>
-            /// Export Component's color property
-            /// </summary>
-            bool ExportColorProperty (FbxObject fbxObject, Color value, string name, string label)
-            {
-                // create a custom property for component value
-                var fbxProperty = FbxProperty.Create (fbxObject, Globals.FbxColor4DT, name, label);
-                if (!fbxProperty.IsValid ()) {
-                    throw new System.NullReferenceException ();
-                }
-
-                FbxColor fbxColor = new FbxColor(value.r, value.g, value.b, value.a );
-
-                fbxProperty.Set (fbxColor);
-
-                // Must be marked user-defined or it won't be shown in most DCCs
-                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eUserDefined, true);
-                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eAnimatable, true);
-
-                return true;
-            }
-
-            /// <summary>
-            /// Export Component's int property
-            /// </summary>
-            bool ExportIntProperty (FbxObject fbxObject, int value, string name, string label)
-            {
-                // create a custom property for component value
-                var fbxProperty = FbxProperty.Create (fbxObject, Globals.FbxIntDT, name, label);
-                if (!fbxProperty.IsValid ()) {
-                    throw new System.NullReferenceException ();
-                }
-                fbxProperty.Set (value);
-
-                // Must be marked user-defined or it won't be shown in most DCCs
-                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eUserDefined, true);
-                fbxProperty.ModifyFlag (FbxPropertyFlags.EFlags.eAnimatable, true);
-
-                return true;
             }
 
             /// <summary>
@@ -964,8 +988,14 @@ namespace FbxExporters
                 }
 
                 // export camera, but only if no mesh was exported
+                bool exportedCamera = false;
                 if (!exportedMesh) {
-                    ExportCamera (unityGo, fbxScene, fbxNode);
+                    exportedCamera = ExportCamera (unityGo, fbxScene, fbxNode);
+                }
+
+                // export light, but only if no mesh or camera was exported
+                if (!exportedMesh && !exportedCamera) {
+                    ExportLight (unityGo, fbxScene, fbxNode);
                 }
 
                 if (Verbose)
@@ -1317,6 +1347,9 @@ namespace FbxExporters
                     File.Delete (m_lastFilePath);
                 } catch (IOException) {
                 }
+
+                // refresh the database so Unity knows the file's been deleted
+                AssetDatabase.Refresh();
 
                 if (File.Exists (m_lastFilePath)) {
                     Debug.LogWarning ("Failed to delete file: " + m_lastFilePath);
