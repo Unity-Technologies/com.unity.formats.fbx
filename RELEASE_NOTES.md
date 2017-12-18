@@ -4,14 +4,12 @@ RELEASE NOTES
 
 NEW FEATURES
 
-* Updated User documentation
-
-* Ship all C# scripts as DLLs
-
+* Updated User Guide documentation
 * Updated meta files to match original asset store release (1.0.0b1)
 
 FIXES
 
+* Revert to shipping DLLs not source
 * Export Settings: Moved browse ("...") buttons for 3D Application/Export Path next to dropdown/path fields
 * Export Settings: Made "Keep Open" and "Hide Native Menu" labels camel case
 * Exporter: Fix so normals/binormals/tangents/vertex colors are exported if they exist
