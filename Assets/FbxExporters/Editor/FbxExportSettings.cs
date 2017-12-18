@@ -497,6 +497,7 @@ namespace FbxExporters.EditorTools {
             }
             else
             {
+                //remove any letters in the string in a final attempt to extract an int from it (this will happen with MayaLT, for example)
                 string AppNameCopy = AppName;
                 string stringWithoutLetters = System.Text.RegularExpressions.Regex.Replace(AppNameCopy, "[^0-9]", "");
 
