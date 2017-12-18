@@ -219,13 +219,13 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual(preferred, 0);
 
             //Testing the results of only having a maya install
-            ExportSettings.instance.SetDCCOptionNames(new List<string> { ExportSettings.kMayaOptionName + "2018" }); //hardcoded because the constant is changed in another branch but not this one at this time
+            ExportSettings.instance.SetDCCOptionNames(new List<string> { ExportSettings.kMayaOptionName + "2018" });
             preferred = ExportSettings.instance.GetPreferredDCCApp();
 
             Assert.AreEqual(preferred, 0);
 
             //Testing the results of only having a max install
-            ExportSettings.instance.SetDCCOptionNames(new List<string> { ExportSettings.kMaxOptionName + "2018" }); //hardcoded because the constant is changed in another branch but not this one at this time
+            ExportSettings.instance.SetDCCOptionNames(new List<string> { ExportSettings.kMaxOptionName + "2018" });
             preferred = ExportSettings.instance.GetPreferredDCCApp();
 
             Assert.AreEqual(preferred, 0);
