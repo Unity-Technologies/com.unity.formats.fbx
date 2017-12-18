@@ -457,6 +457,12 @@ namespace FbxExporters.EditorTools {
             dccOptionNames.Clear();
         }
 
+        public void ClearDCCOptions()
+        {
+            SetDCCOptionNames(null);
+            SetDCCOptionPaths(null);
+        }
+
         /// <summary>
         ///
         /// Find the latest program available and make that the default choice.

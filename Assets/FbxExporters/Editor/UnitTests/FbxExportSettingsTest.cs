@@ -267,6 +267,24 @@ namespace FbxExporters.UnitTests
 		[Test]
         public void FindDCCInstallsTest1()
         {
+
+            /*
+             * different directory roots denoted by ' (eg.) (maya 2017 in rootDir1) = a (maya 2017 in rootDir2) = a'
+             * a (maya2017)
+             * b (maya2018)
+             * c (mayaLT2017)
+             * d (mayaLT2018)
+             * e (3dsmax2017)
+             * f (3dsmax2018)
+             */
+
+            // case 1.1: VI=a ML=b', result=2
+            // case 1.2: VL=a ML=d' result=2
+            // case 1.3: VL=c ML=b' result=2
+            // case 1.4: VL=c ML=d' result=2
+            // case 1.5: VL=e ML=b' result=2
+            // case 1.6: VL=e ML=d' result=2
+
             string rootDir1 = GetRandomFileNamePath(extName: "");
             string rootDir2 = GetRandomFileNamePath(extName: "");
 
@@ -327,7 +345,7 @@ namespace FbxExporters.UnitTests
 
                 //SetUp
                 //make the hierarchy for the single app path we need
-                CreateDummyInstalls(vendorInstallFolders);
+                VendorLocations_Setup(vendorInstallFolders);
 
                 TestLocations(envVendorLocations, envMayaLocation, expectedResult);
 
@@ -354,8 +372,7 @@ namespace FbxExporters.UnitTests
             SetEnvironmentVariables(vendorLocation, mayaLocation);
 
             //Nullify these lists so that we guarantee that FindDccInstalls will be called.
-            ExportSettings.instance.SetDCCOptionNames(null);
-            ExportSettings.instance.SetDCCOptionPaths(null);
+            ExportSettings.instance.ClearDCCOptions();
 
             GUIContent[] options = ExportSettings.GetDCCOptions();
 
@@ -382,7 +399,7 @@ namespace FbxExporters.UnitTests
         /// <param name="mayaLocationPath"></param>
         public void SetEnvironmentVariables(string vendorLocation, string mayaLocationPath)
         {
-            if (vendorLocation != null)
+            if (!string.IsNullOrEmpty(vendorLocation))
             {
                 //if the given vendor location isn't null, set the environment variable to it.
                 System.Environment.SetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS", vendorLocation);
@@ -394,7 +411,7 @@ namespace FbxExporters.UnitTests
             }
         }
 
-        public void CreateDummyInstalls(List<string> paths)
+        public void VendorLocations_Setup(List<string> paths)
         {
             foreach (var pathToExe in paths)
             {
