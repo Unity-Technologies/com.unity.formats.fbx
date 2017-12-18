@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace FbxExporters.UnitTests
 {
-    public class FbxExportSettingsTest {
+    public class FbxExportSettingsTest : ExporterTestBase{
         ExportSettings m_originalSettings;
 
         // We read two private fields for the test.
@@ -211,6 +211,152 @@ namespace FbxExporters.UnitTests
             preferred = ExportSettings.instance.GetPreferredDCCApp();
 
             Assert.AreEqual(preferred, -1);
+        }
+
+        [Test]
+        public void FindDCCInstallsTest1()
+        {
+            string rootDir1 = GetRandomFileNamePath(extName: "");
+            string rootDir2 = GetRandomFileNamePath(extName: "");
+
+            var data = new List<Dictionary<string, List<string>>>()
+             {
+                #region valid test case 1 data (unique locations, one in vendor, one for maya_loc)
+                new Dictionary<string,List<string>>()
+                {
+                    {"VENDOR_INSTALLS", new List<string>(){ rootDir1 + "/Maya2017/bin/maya.exe", rootDir2 + "/Maya2018/bin/maya.exe"} },
+                    {"VENDOR_LOCATIONS", new List<string>(){ rootDir1 } },
+                    {"MAYA_LOCATION", new List<string>(){ rootDir2 + "/Maya2018" } },
+                    {"expectedResult", new List<string>(){ 2.ToString() }}
+                },
+                new Dictionary<string,List<string>>()
+                {
+                    {"VENDOR_INSTALLS", new List<string>(){ rootDir1 + "/Maya2017/bin/maya.exe", rootDir2 + "/MayaLT2018/bin/maya.exe" } },
+                    {"VENDOR_LOCATIONS", new List<string>(){ rootDir1 } },
+                    {"MAYA_LOCATION", new List<string>(){ rootDir2 + "/MayaLT2018" } },
+                    {"expectedResult", new List<string>(){ 2.ToString() }}
+                },
+                new Dictionary<string,List<string>>()
+                {
+                    {"VENDOR_INSTALLS", new List<string>(){ rootDir1 + "/MayaLT2017/bin/maya.exe", rootDir2 + "/Maya2018/bin/maya.exe" } },
+                    {"VENDOR_LOCATIONS", new List<string>(){ rootDir1 } },
+                    {"MAYA_LOCATION", new List<string>(){ rootDir2 + "/Maya2018" } },
+                    {"expectedResult", new List<string>(){ 2.ToString() }}
+                },
+                new Dictionary<string,List<string>>()
+                {
+                    {"VENDOR_INSTALLS", new List<string>(){ rootDir1 + "/MayaLT2017/bin/maya.exe", rootDir2 + "/MayaLT2018/bin/maya.exe" } },
+                    {"VENDOR_LOCATIONS", new List<string>(){ rootDir1 } },
+                    {"MAYA_LOCATION", new List<string>(){ rootDir2 + "/MayaLT2018" } },
+                    {"expectedResult", new List<string>(){ 2.ToString() }}
+                },
+                new Dictionary<string,List<string>>()
+                {
+                    {"VENDOR_INSTALLS", new List<string>(){ rootDir1 + "/3ds Max 2017/3dsmax.exe", rootDir2 + "/Maya2018/bin/maya.exe" } },
+                    {"VENDOR_LOCATIONS", new List<string>(){ rootDir1 } },
+                    {"MAYA_LOCATION", new List<string>(){ rootDir2 + "/Maya2018" } },
+                    {"expectedResult", new List<string>(){ 2.ToString() }}
+                },
+                new Dictionary<string,List<string>>()
+                {
+                    {"VENDOR_INSTALLS", new List<string>(){ rootDir1 + "/3ds Max 2017/3dsmax.exe", rootDir2 + "/MayaLT2018/bin/maya.exe" } },
+                    {"VENDOR_LOCATIONS", new List<string>(){ rootDir1 } },
+                    {"MAYA_LOCATION", new List<string>(){ rootDir2 + "/MayaLT2018" } },
+                    {"expectedResult", new List<string>(){ 2.ToString() }}
+                },
+                #endregion
+            };
+
+            for (int idx = 0; idx < data.Count; idx++)
+            {
+                List<string> vendorInstallFolders = data[idx]["VENDOR_INSTALLS"];
+                string envVendorLocations = string.Join(";", data[idx]["VENDOR_LOCATIONS"].ToArray());
+                string envMayaLocation = data[idx]["MAYA_LOCATION"][0];
+                int expectedResult = int.Parse(data[idx]["expectedResult"][0]);
+
+                //SetUp
+                //make the hierarchy for the single app path we need
+                CreateDummyInstalls(vendorInstallFolders);
+
+                TestLocations(envVendorLocations, envMayaLocation, expectedResult);
+
+                //TearDown
+                VendorLocations_TearDown(vendorInstallFolders);
+            }
+        }
+
+        //TearDown
+        public void VendorLocations_TearDown(List<string> vendorInstallFolders)
+        {
+            //Clean up vendor location(s)
+            foreach (var vendorLocation in vendorInstallFolders)
+            {
+                Directory.Delete(Directory.GetParent(Path.GetDirectoryName(vendorLocation)).FullName, true);
+            }
+        }
+        
+        public void TestLocations(string vendorLocation, string mayaLocation, int expectedResult)
+        {
+            //Mayalocation should remain a List because we want to keep using the dictionary which must be of lists (maybe should make an overload)
+
+            //Set Environment Variables
+            SetEnvironmentVariables(vendorLocation, mayaLocation);
+
+            //Nullify these lists so that we guarantee that FindDccInstalls will be called.
+            ExportSettings.instance.SetDCCOptionNames(null);
+            ExportSettings.instance.SetDCCOptionPaths(null);
+
+            GUIContent[] options = ExportSettings.GetDCCOptions();
+
+            #region //LOGS TO DISPLAY WHAT WE'RE TESTING
+            Debug.Log("Directories in VendorLocation:");
+            foreach (var directory in Directory.GetDirectories(vendorLocation))
+            {
+                Debug.Log(directory);
+            }
+
+            Debug.Log("MAYA_LOCATION: \n" + mayaLocation);
+
+            Debug.Log("END OF TEST \n \n");
+            #endregion
+
+            Assert.AreEqual(options.Length, expectedResult);
+
+        }
+
+        /// <summary>
+        /// Sets environment variables to what is passed in, resets the dccOptionNames & dccOptionPaths, and calls FindDCCInstalls()
+        /// </summary>
+        /// <param name="vendorLocations"></param>
+        /// <param name="mayaLocationPath"></param>
+        public void SetEnvironmentVariables(string vendorLocation, string mayaLocationPath)
+        {
+            if (vendorLocation != null)
+            {
+                //if the given vendor location isn't null, set the environment variable to it.
+                System.Environment.SetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS", vendorLocation);
+            }
+            if (mayaLocationPath != null)
+            {
+                //if the given MAYA_LOCATION isn't null, set the environment variable to it
+                System.Environment.SetEnvironmentVariable("MAYA_LOCATION", mayaLocationPath);
+            }
+        }
+
+        public void CreateDummyInstalls(List<string> paths)
+        {
+            foreach (var pathToExe in paths)
+            {
+                //make the directory
+                Directory.CreateDirectory(Path.GetDirectoryName(pathToExe));
+                if (Path.GetFileName(pathToExe) != null)
+                {
+
+                    //make the file (if we can)
+                    FileInfo newExe = new FileInfo(pathToExe);
+                    using (FileStream s = newExe.Create()) { }
+                }
+            }
         }
 
     }

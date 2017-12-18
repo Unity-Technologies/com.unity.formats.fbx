@@ -300,8 +300,6 @@ namespace FbxExporters.EditorTools {
                     }
                 }
             }
-
-			Debug.Log(string.Format("found location {0}",result));
             return result;
         }
 
@@ -681,6 +679,11 @@ namespace FbxExporters.EditorTools {
             default:
                 throw new NotImplementedException ();
             }
+        }
+
+        public void SetDCCOptionPaths(List<string> newList)
+        {
+            dccOptionPaths = newList;
         }
 
         public static GUIContent[] GetDCCOptions(){
