@@ -294,7 +294,7 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         public static string[] DCCVendorLocations {
             get{
-                var environmentVariable = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
+                var environmentVariable = Environment.GetEnvironmentVariable("UNITY_3DAPP_VENDOR_LOCATIONS");
                 if (environmentVariable != null)
                 {
                     string[] locations = environmentVariable.Split(';');
@@ -408,6 +408,11 @@ namespace FbxExporters.EditorTools {
         public void SetDCCOptionNames(List<string> newList)
         {
             dccOptionNames = newList;
+        }
+
+        public void SetDCCOptionPaths(List<string> newList)
+        {
+            dccOptionPaths = newList;
         }
 
         public void ClearDCCOptionNames()
