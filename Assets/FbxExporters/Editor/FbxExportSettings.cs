@@ -455,6 +455,7 @@ namespace FbxExporters.EditorTools {
                 if (appA.StartsWith(s_PreferenceList[i]))
                 {
                     scoreA = i;
+                    break;
                 }
             }
 
@@ -463,6 +464,7 @@ namespace FbxExporters.EditorTools {
                 if (appB.StartsWith(s_PreferenceList[i]))
                 {
                     scoreB = i;
+                    break;
                 }
             } 
             return scoreA < scoreB ? optionA : optionB;
@@ -493,13 +495,16 @@ namespace FbxExporters.EditorTools {
             {
                 return version;
             }
-            else if (AppName.Contains("LT"))
-            {
-                int.TryParse(number.Substring(2), out version);
-                return version;
-            }
             else
             {
+                string AppNameCopy = AppName;
+                string stringWithoutLetters = System.Text.RegularExpressions.Regex.Replace(AppNameCopy, "[^0-9]", "");
+
+                if (int.TryParse(stringWithoutLetters, out version))
+                {
+                    return version;
+                }
+
                 float fVersion;
                 //In case we are looking at something with a decimal based version- the int parse will fail so we'll need to parse it as a float.
                 if (float.TryParse(number, out fVersion))
