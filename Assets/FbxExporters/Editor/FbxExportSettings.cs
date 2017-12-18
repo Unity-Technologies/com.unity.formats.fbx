@@ -285,16 +285,12 @@ namespace FbxExporters.EditorTools {
                 var appFolder = Directory.GetParent(location);
                 if (appFolder != null)
                 {
-					Debug.Log(string.Format("parsing appFolder {0}",appFolder.ToString()));
                     var versionFolder = Directory.GetParent(appFolder.ToString());
                     if (versionFolder != null)
                     {
                         var autoDeskFolder = Directory.GetParent(versionFolder.ToString());
-						Debug.Log(string.Format("parsing versionFolder {0}",versionFolder.ToString()));
                         if (autoDeskFolder != null)
                         {
-							Debug.Log(string.Format("return autoDeskFolder {0}",autoDeskFolder.ToString()));
-
                             result = autoDeskFolder.ToString();
                         }
                     }
@@ -363,7 +359,7 @@ namespace FbxExporters.EditorTools {
 
                 return result.ToArray<string>();
             }
-        }      
+        }
 
         // Note: default values are set in LoadDefaults().
         public bool mayaCompatibleNames = true;
@@ -504,8 +500,6 @@ namespace FbxExporters.EditorTools {
                     }
                 }
             }
-
-            //Debug.Assert(result > -1 && result < dccOptionNames.Count);
 
             return result;
         }
@@ -684,11 +678,6 @@ namespace FbxExporters.EditorTools {
             default:
                 throw new NotImplementedException ();
             }
-        }
-
-        public void SetDCCOptionPaths(List<string> newList)
-        {
-            dccOptionPaths = newList;
         }
 
         public static GUIContent[] GetDCCOptions(){
