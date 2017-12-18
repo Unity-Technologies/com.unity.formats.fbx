@@ -1,4 +1,19 @@
-RELEASE NOTES
+﻿RELEASE NOTES
+
+**Version**: sprint36
+
+NEW FEATURES
+*FbxExporter: Don't export visibility
+
+FIXES
+*FbxPrefabAutoUpdater: Now accepts updates to RectTransforms
+*FbxExporter: Fix so camera exports with correct rotation
+*MayaIntegration: Fix so the "SendToUnity" button in Maya is hidden on startup
+*FbxPrefabAutoUpdater: Fix updating gameObjects with missing components
+*UnityIntegration: Catch and print installation errors from 3D applications
+*FbxExporter: Fix incorrect scaling when importing into Maya
+*FbxExportSettings: Fix vendor location environmnet variable pointing to empty folder
+*MaxIntegration: Reset export path on new scene
 
 **Version**: sprint35
 
