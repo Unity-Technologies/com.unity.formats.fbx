@@ -380,20 +380,26 @@ namespace FbxExporters.UnitTests
                 },
 #endif
                 #endregion
+                #region case 3 data (EMPTY vendor locations, one for maya location)
+                new Dictionary<string,List<string>>()
+                {
+                    {"VENDOR_INSTALLS", new List<string>(){ MayaPath (rootDir2, "LT2018") } },
+                    {"VENDOR_LOCATIONS", new List<string>(){ rootDir1 } },
+                    {"MAYA_LOCATION", new List<string>(){ MayaPath (rootDir2, "LT2018", false) } },
+                    {"expectedResult", new List<string>(){ 1.ToString () }},
+                    {"expected3DApp", new List<string>(){ 0.ToString() }}
+                },
+                #endregion
             };
 
             for (int idx = 0; idx < data.Count; idx++)
             {
-                List<string> vendorInstallFolders = data[idx]["VENDOR_INSTALLS"];
-                string envVendorLocations = string.Join(";", data[idx]["VENDOR_LOCATIONS"].ToArray());
-                string envMayaLocation = data[idx]["MAYA_LOCATION"][0];
-                int expectedResult = int.Parse(data[idx]["expectedResult"][0]);
-
+                List<string> vendorInstallFolders = data [idx] ["VENDOR_INSTALLS"];
                 //SetUp
                 //make the hierarchy for the single app path we need
                 VendorLocations_Setup(vendorInstallFolders);
 
-                TestLocations(envVendorLocations, envMayaLocation, expectedResult);
+                TestLocations(data[idx]);
 
                 //TearDown
                 VendorLocations_TearDown(vendorInstallFolders);
@@ -450,19 +456,28 @@ namespace FbxExporters.UnitTests
             }
         }
 
-        private void TestLocations(string vendorLocation, string mayaLocation, int expectedResult)
+        private void TestLocations(Dictionary<string,List<string>> data)
         {
+            string envVendorLocations = string.Join (";", data ["VENDOR_LOCATIONS"].ToArray ());
+            string envMayaLocation = data ["MAYA_LOCATION"] [0];
+            int expectedResult = int.Parse (data ["expectedResult"] [0]);
+
             //Mayalocation should remain a List because we want to keep using the dictionary which must be of lists (maybe should make an overload)
 
             //Set Environment Variables
-            SetEnvironmentVariables(vendorLocation, mayaLocation);
+            SetEnvironmentVariables(envVendorLocations, envMayaLocation);
 
             //Nullify these lists so that we guarantee that FindDccInstalls will be called.
             ExportSettings.instance.ClearDCCOptions();
 
             GUIContent[] options = ExportSettings.GetDCCOptions();
-
             Assert.AreEqual(options.Length, expectedResult);
+
+            if (data.ContainsKey("expected3DApp"))
+            {
+                int preferred = ExportSettings.instance.GetPreferredDCCApp ();
+                Assert.AreEqual(preferred, int.Parse(data["expected3DApp"][0]) );
+            }
         }
 
     }
