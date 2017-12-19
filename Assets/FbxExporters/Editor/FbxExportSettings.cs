@@ -264,13 +264,13 @@ namespace FbxExporters.EditorTools {
             if (string.IsNullOrEmpty(location))
                 return null;
 
-            if (!Directory.Exists(location))
-                return null;
-
             //Remove any extra slashes on the end
             //Maya would accept a single slash in either direction, so we should be able to
             location = location.Replace("\\", "/");
             location = location.TrimEnd('/');
+
+            if (!Directory.Exists(location))
+                return null;
 
             if (Application.platform == RuntimePlatform.WindowsEditor)
             {
@@ -327,9 +327,32 @@ namespace FbxExporters.EditorTools {
         private static HashSet<string> GetDefaultVendorLocations()
         {
             if (Application.platform == RuntimePlatform.WindowsEditor)
-                return new HashSet<string>() { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
+            {
+                HashSet<string> windowsDefaults = new HashSet<string>() { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
+                HashSet<string> existingDirectories = new HashSet<string>();
+                foreach (string path in windowsDefaults)
+                {
+                    if (Directory.Exists(path))
+                    {
+                        existingDirectories.Add(path);
+                    }
+                }
+                return existingDirectories;
+
+            }
             else if (Application.platform == RuntimePlatform.OSXEditor)
-                return new HashSet<string>() { "/Applications/Autodesk" };
+            {
+                HashSet<string> MacOSDefaults = new HashSet<string>() { "/Applications/Autodesk" };
+                HashSet<string> existingDirectories = new HashSet<string>();
+                foreach (string path in MacOSDefaults)
+                {
+                    if (Directory.Exists(path))
+                    {
+                        existingDirectories.Add(path);
+                    }
+                }
+                return existingDirectories;
+            }
 
             throw new NotImplementedException();
         }
@@ -807,10 +830,18 @@ namespace FbxExporters.EditorTools {
             // Output is like: Maya 2018, Cut Number 201706261615
             // We want the stuff after 'Maya ' and before the comma.
             // (Uni-31601) less brittle! Consider also the mel command "about -version".
-            var commaIndex = resultString.IndexOf(',');
-            if (!string.IsNullOrEmpty(resultString.Trim()))
+            if (string.IsNullOrEmpty(resultString))
             {
-                return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
+                return null;
+            }
+
+            resultString = resultString.Trim();
+            var commaIndex = resultString.IndexOf(',');
+
+            if (commaIndex != -1)
+            {
+                const int versionStart = 5; // length of "Maya "
+                return resultString.Length > versionStart ? resultString.Substring(0, commaIndex).Substring(versionStart) : null;
             }
             else
             {

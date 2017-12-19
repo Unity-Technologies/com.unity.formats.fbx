@@ -10,6 +10,10 @@ namespace FbxExporters.UnitTests
     public class FbxExportSettingsTest : ExporterTestBase{
         ExportSettings m_originalSettings;
 
+        //For resetting environment variables:
+        string originalVendorLocation = null;
+        string originalMayaLocation = null;
+
         // We read two private fields for the test.
         static System.Reflection.FieldInfo s_InstanceField; // static
         static System.Reflection.FieldInfo s_SavePathField; // member
@@ -356,6 +360,10 @@ namespace FbxExporters.UnitTests
         //TearDown
         public void VendorLocations_TearDown(List<string> vendorInstallFolders)
         {
+            //Put the environment variables back to what they were originally
+            System.Environment.SetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS", originalVendorLocation);
+            System.Environment.SetEnvironmentVariable("MAYA_LOCATION", originalMayaLocation);
+
             //Clean up vendor location(s)
             foreach (var vendorLocation in vendorInstallFolders)
             {
@@ -412,6 +420,10 @@ namespace FbxExporters.UnitTests
 
         public void VendorLocations_Setup(List<string> paths)
         {
+            //Preserve our environment variables for later
+            originalVendorLocation = System.Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
+            originalMayaLocation = System.Environment.GetEnvironmentVariable("MAYA_LOCATION");
+
             foreach (var pathToExe in paths)
             {
                 //make the directory
