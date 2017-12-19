@@ -4,6 +4,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FbxExporters.EditorTools {
 
@@ -288,39 +289,135 @@ namespace FbxExporters.EditorTools {
             }
         }
 
-        /// <summary>
-        /// The paths where all the different versions of Maya are installed
-        /// by default. Depends on the platform.
-        /// </summary>
-        public static string[] DCCVendorLocations {
-            get{
-                var environmentVariable = Environment.GetEnvironmentVariable("UNITY_3DAPP_VENDOR_LOCATIONS");
-                if (environmentVariable != null)
+        private static string GetMayaLocationFromEnvironmentVariable(string env)
+        {
+            string result = null;
+
+            if (string.IsNullOrEmpty(env))
+                return null;
+
+            string location = Environment.GetEnvironmentVariable(env);
+
+            if (string.IsNullOrEmpty(location))
+                return null;
+
+            //Remove any extra slashes on the end
+            //Maya would accept a single slash in either direction, so we should be able to
+            location = location.Replace("\\", "/");
+            location = location.TrimEnd('/');
+
+            if (!Directory.Exists(location))
+                return null;
+
+            if (Application.platform == RuntimePlatform.WindowsEditor)
+            {
+                //If we are on Windows, we need only go up one location to get to the "Autodesk" folder.                        
+                result = Directory.GetParent(location).ToString();
+            }
+            else if (Application.platform == RuntimePlatform.OSXEditor)
+            {
+                //We can assume our path is: /Applications/Autodesk/maya2017/Maya.app/Contents
+                //So we need to go up three folders.                
+
+                var appFolder = Directory.GetParent(location);
+                if (appFolder != null)
                 {
-                    string[] locations = environmentVariable.Split(';');
-                    List<string> locationsList = new List<string>();
-                    for (int i = 0; i < locations.Length; i++)
+                    var versionFolder = Directory.GetParent(appFolder.ToString());
+                    if (versionFolder != null)
                     {
-                        if (Directory.Exists(locations[i]))
+                        var autoDeskFolder = Directory.GetParent(versionFolder.ToString());
+                        if (autoDeskFolder != null)
                         {
-                            locationsList.Add(locations[i]);
+                            result = autoDeskFolder.ToString();
                         }
                     }
-                    if (locationsList.Count > 0)
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns a set of valid vendor folder paths with no trailing '/'
+        /// </summary>
+        private static HashSet<string> GetCustomVendorLocations()
+        {
+            HashSet<string> result = new HashSet<string>();
+
+            var environmentVariable = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
+
+            if (!string.IsNullOrEmpty(environmentVariable))
+            {
+                string[] locations = environmentVariable.Split(';');
+                foreach (var location in locations)
+                {
+                    if (Directory.Exists(location))
                     {
-                        return locationsList.ToArray();
+                        result.Add(location);
                     }
                 }
+            }
+            
 
-                switch (Application.platform)
+            return result;
+        }
+
+        private static HashSet<string> GetDefaultVendorLocations()
+        {
+            if (Application.platform == RuntimePlatform.WindowsEditor)
+            {
+                HashSet<string> windowsDefaults = new HashSet<string>() { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
+                HashSet<string> existingDirectories = new HashSet<string>();
+                foreach (string path in windowsDefaults)
                 {
-                    case RuntimePlatform.WindowsEditor:
-                        return new string[] { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
-                    case RuntimePlatform.OSXEditor:
-                        return new string[] { "/Applications/Autodesk" };
-                    default:
-                        throw new NotImplementedException();
+                    if (Directory.Exists(path))
+                    {
+                        existingDirectories.Add(path);
+                    }
                 }
+                return existingDirectories;
+
+            }
+            else if (Application.platform == RuntimePlatform.OSXEditor)
+            {
+                HashSet<string> MacOSDefaults = new HashSet<string>() { "/Applications/Autodesk" };
+                HashSet<string> existingDirectories = new HashSet<string>();
+                foreach (string path in MacOSDefaults)
+                {
+                    if (Directory.Exists(path))
+                    {
+                        existingDirectories.Add(path);
+                    }
+                }
+                return existingDirectories;
+            }
+
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Retrieve available vendor locations.
+        /// If there is valid alternative vendor locations, do not use defaults
+        /// always use MAYA_LOCATION when available
+        /// </summary>
+        public static string[] DCCVendorLocations
+        {
+            get
+            {
+                HashSet<string> result = GetCustomVendorLocations();
+
+                if (result == null || result.Count < 1)
+                {
+                    result = GetDefaultVendorLocations();
+                }
+
+                var additionalLocation = GetMayaLocationFromEnvironmentVariable("MAYA_LOCATION");
+
+                if (!string.IsNullOrEmpty(additionalLocation))
+                {
+                    result.Add(additionalLocation);
+                }
+
+                return result.ToArray<string>();
             }
         }
 
@@ -420,13 +517,19 @@ namespace FbxExporters.EditorTools {
             dccOptionNames.Clear();
         }
 
+        public void ClearDCCOptions()
+        {
+            SetDCCOptionNames(null);
+            SetDCCOptionPaths(null);
+        }
+
         /// <summary>
         ///
         /// Find the latest program available and make that the default choice.
         /// Will always take any Maya version over any 3ds Max version.
         ///
         /// Returns the index of the most recent program in the list of dccOptionNames
-        ///
+        /// Returns -1 on error.
         /// </summary>
         public int GetPreferredDCCApp()
         {
@@ -435,7 +538,7 @@ namespace FbxExporters.EditorTools {
                 return -1;
             }
 
-            int newestDCCVersionIndex = -1;
+            int result = -1;
             int newestDCCVersionNumber = -1;
             
             for (int i = 0; i < dccOptionNames.Count; i++)
@@ -443,25 +546,28 @@ namespace FbxExporters.EditorTools {
                 int versionToCheck = FindDCCVersion(dccOptionNames[i]);
                 if (versionToCheck == -1)
                 {
+                    if (dccOptionNames[i]=="MAYA_LOCATION")
+                        return i;
+                    
                     continue;
                 }
                 if (versionToCheck > newestDCCVersionNumber)
                 {
-                    newestDCCVersionIndex = i;
+                    result = i;
                     newestDCCVersionNumber = versionToCheck;
                 }
                 else if (versionToCheck == newestDCCVersionNumber)
                 {
-                    int selection = ChoosePreferredDCCApp(newestDCCVersionIndex, i);
+                    int selection = ChoosePreferredDCCApp(result, i);
                     if (selection == i)
                     {
-                        newestDCCVersionIndex = i;
+                        result = i;
                         newestDCCVersionNumber = FindDCCVersion(dccOptionNames[i]);
                     }
                 }
             }
-            Debug.Assert(newestDCCVersionIndex >= -1 && newestDCCVersionIndex < dccOptionNames.Count);
-            return newestDCCVersionIndex;
+
+            return result;
         }
         /// <summary>
         /// Takes the index of two program names from dccOptionNames and chooses our preferred one based on the preference list
@@ -498,20 +604,23 @@ namespace FbxExporters.EditorTools {
         /// <returns> the year/version  OR -1 if the year could not be parsed </returns>
         private static int FindDCCVersion(string AppName)
         {
-            if (AppName == null)
+            if (string.IsNullOrEmpty(AppName))
             {
                 return -1;
             }
-
-            int version;
+            AppName = AppName.Trim();
+            if (string.IsNullOrEmpty(AppName)) 
+                return -1;
+                
             string[] piecesArray = AppName.Split(' ');
-            if (piecesArray.Length == 0)
+            if (piecesArray.Length < 2)
             {
                 return -1;
             }
             //Get the number, which is always the last chunk separated by a space.
             string number = piecesArray[piecesArray.Length - 1];
 
+            int version;
             if (int.TryParse(number, out version))
             {
                 return version;
@@ -535,9 +644,10 @@ namespace FbxExporters.EditorTools {
         /// If MAYA_LOCATION is set, add this to the list as well.
         /// </summary>
         private static void FindDCCInstalls() {
-            var dccOptionName = instance.dccOptionNames;
-            var dccOptionPath = instance.dccOptionPaths;
+            var dccOptionNames = instance.dccOptionNames;
+            var dccOptionPaths = instance.dccOptionPaths;
 
+            // find dcc installation from vendor locations
             for (int i = 0; i < DCCVendorLocations.Length; i++)
             {
                 if (!Directory.Exists(DCCVendorLocations[i]))
@@ -555,8 +665,8 @@ namespace FbxExporters.EditorTools {
                     // Only accept those that start with 'maya' in either case.
                     if (product.StartsWith ("maya", StringComparison.InvariantCultureIgnoreCase)) {
                         string version = product.Substring ("maya".Length);
-                        dccOptionPath.Add (GetMayaExePath (productDir.FullName.Replace ("\\", "/")));
-                        dccOptionName.Add (GetUniqueDCCOptionName(kMayaOptionName + version));
+                        dccOptionPaths.Add (GetMayaExePathFromLocation (productDir.FullName.Replace ("\\", "/")));
+                        dccOptionNames.Add (GetUniqueDCCOptionName(kMayaOptionName + version));
                         continue;
                     }
 
@@ -572,11 +682,21 @@ namespace FbxExporters.EditorTools {
                             continue;
                         }
 
-                        dccOptionPath.Add(exePath);
-                        dccOptionName.Add(maxOptionName);
+                        dccOptionPaths.Add(exePath);
+                        dccOptionNames.Add(maxOptionName);
                     }
                 }
             }
+
+            // add extra locations defined by special environment variables
+            string location = GetMayaLocationFromEnvironmentVariable("MAYA_LOCATION");
+
+            if (!string.IsNullOrEmpty(location))
+            {
+                dccOptionPaths.Add(GetMayaExePathFromLocation(location));
+                dccOptionNames.Add("MAYA_LOCATION");
+            }
+
             instance.selectedDCCApp = instance.GetPreferredDCCApp();
         }
 
@@ -604,7 +724,7 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         /// <returns>The maya exe path.</returns>
         /// <param name="location">Location of Maya install.</param>
-        private static string GetMayaExePath(string location)
+        private static string GetMayaExePathFromLocation(string location)
         {
             switch (Application.platform) {
             case RuntimePlatform.WindowsEditor:
@@ -684,7 +804,7 @@ namespace FbxExporters.EditorTools {
         public static void AddDCCOption(string newOption, DCCType dcc){
             if (Application.platform == RuntimePlatform.OSXEditor && dcc == DCCType.Maya) {
                 // on OSX we get a path ending in .app, which is not quite the exe
-                newOption = GetMayaExePath(newOption);
+                newOption = GetMayaExePathFromLocation(newOption);
             }
 
             var dccOptionPaths = instance.dccOptionPaths;
@@ -697,6 +817,14 @@ namespace FbxExporters.EditorTools {
             switch (dcc) {
             case DCCType.Maya:
                 var version = AskMayaVersion(newOption);
+                if (version == null)
+                {
+                    Debug.LogError("This version of Maya could not be launched properly");
+                    UnityEditor.EditorUtility.DisplayDialog("Error Loading 3D Application",
+                        "Failed to add Maya option, could not get version number from maya.exe",
+                        "Ok");
+                    return;
+                }
                 optionName = GetUniqueDCCOptionName("Maya " + version);
                 break;
             case DCCType.Max:
@@ -739,8 +867,25 @@ namespace FbxExporters.EditorTools {
             // Output is like: Maya 2018, Cut Number 201706261615
             // We want the stuff after 'Maya ' and before the comma.
             // (Uni-31601) less brittle! Consider also the mel command "about -version".
+            if (string.IsNullOrEmpty(resultString))
+            {
+                return null;
+            }
+
+            resultString = resultString.Trim();
             var commaIndex = resultString.IndexOf(',');
-            return resultString.Substring(0, commaIndex).Substring("Maya ".Length);
+
+            if (commaIndex != -1)
+            {
+                const int versionStart = 5; // length of "Maya "
+                return resultString.Length > versionStart ? resultString.Substring(0, commaIndex).Substring(versionStart) : null;
+            }
+            else
+            {
+                //This probably means we tried to launch Maya to check the version but it was some sort of broken maya.
+                //We'll just return null and throw an error for it.
+                return null;
+            }
         }
 
         /// <summary>
