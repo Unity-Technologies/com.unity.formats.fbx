@@ -453,7 +453,7 @@ namespace FbxExporters.EditorTools {
             for( int i = 0; i < s_PreferenceList.Count; i++ )
             {
                 //The constant without any spaces
-                string currentApp = s_PreferenceList[i].Replace(" ", "");
+                string currentApp = System.Text.RegularExpressions.Regex.Replace(s_PreferenceList[i], @"[\s^0-9]", "");
                 //The potential app, without any numbers or spaces
                 string comparingApp = System.Text.RegularExpressions.Regex.Replace(appA, @"[\s^0-9]", "");
 
@@ -468,7 +468,7 @@ namespace FbxExporters.EditorTools {
             for (int i = 0; i < s_PreferenceList.Count; i++)
             {
                 //The constant without any spaces
-                string currentApp = s_PreferenceList[i].Replace(" ", "");
+                string currentApp = System.Text.RegularExpressions.Regex.Replace(s_PreferenceList[i], @"[\s^0-9]", "");
                 //The potential app, without any numbers or spaces
                 string comparingApp = System.Text.RegularExpressions.Regex.Replace(appB, @"[\s^0-9]", "");
 
