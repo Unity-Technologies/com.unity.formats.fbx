@@ -343,7 +343,7 @@ namespace FbxExporters.EditorTools {
         {
             HashSet<string> result = new HashSet<string>();
 
-            var environmentVariable = Environment.GetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
+            var environmentVariable = Environment.GetEnvironmentVariable("UNITY_3DAPP_VENDOR_LOCATIONS");
 
             if (!string.IsNullOrEmpty(environmentVariable))
             {
