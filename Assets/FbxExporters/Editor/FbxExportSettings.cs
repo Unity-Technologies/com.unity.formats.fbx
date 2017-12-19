@@ -447,17 +447,18 @@ namespace FbxExporters.EditorTools {
                 return -1;
             }
 
-            int scoreA = -1;
-            int scoreB = -1;
+            int scoreA = s_PreferenceList.FindIndex(app => RemoveSpacesAndNumbers(app).Equals(RemoveSpacesAndNumbers(appA)));
 
-            scoreA = s_PreferenceList.FindIndex(app => RemoveSpacesAndNumbers(app).Equals(RemoveSpacesAndNumbers(appA)));
-
-            scoreB = s_PreferenceList.FindIndex(app => RemoveSpacesAndNumbers(app).Equals(RemoveSpacesAndNumbers(appB)));
+            int scoreB = s_PreferenceList.FindIndex(app => RemoveSpacesAndNumbers(app).Equals(RemoveSpacesAndNumbers(appB)));
 
             return scoreA < scoreB ? optionA : optionB;
         }
 
-        public string RemoveSpacesAndNumbers(string s)
+        /// <summary>
+        /// Takes a given string and removes any spaces or numbers from it
+        /// </summary>
+        /// <param name="s"></param>
+        public static string RemoveSpacesAndNumbers(string s)
         {
             return System.Text.RegularExpressions.Regex.Replace(s, @"[\s^0-9]", "");
         }
