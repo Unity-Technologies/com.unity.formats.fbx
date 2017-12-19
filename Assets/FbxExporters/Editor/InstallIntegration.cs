@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace FbxExporters.Editor
 {
-    abstract class DCCIntegration
+    public abstract class DCCIntegration
     {
         public abstract string DccDisplayName { get; }
         public abstract string IntegrationZipPath { get; }
@@ -82,7 +82,7 @@ namespace FbxExporters.Editor
     }
 
 
-    class MayaIntegration : DCCIntegration
+    public class MayaIntegration : DCCIntegration
     {
         public override string DccDisplayName { get { return "Maya"; } }
 
