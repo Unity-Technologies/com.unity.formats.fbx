@@ -213,7 +213,7 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual(preferred, -1);
 
             //Testing the results of only having a mayaLT install
-            ExportSettings.instance.SetDCCOptionNames(new List<string> { "Maya LT"+ "2018" }); //hardcoded because the constant is changed in another branch but not this one at this time
+            ExportSettings.instance.SetDCCOptionNames(new List<string> { ExportSettings.kMayaLtOptionName + "2018" }); //hardcoded because the constant is changed in another branch but not this one at this time
             preferred = ExportSettings.instance.GetPreferredDCCApp();
 
             Assert.AreEqual(preferred, 0);
@@ -229,6 +229,12 @@ namespace FbxExporters.UnitTests
             preferred = ExportSettings.instance.GetPreferredDCCApp();
 
             Assert.AreEqual(preferred, 0);
+
+            //Testing the preference priority
+            ExportSettings.instance.SetDCCOptionNames(new List<string> { ExportSettings.kMaxOptionName + "2018", ExportSettings.kMayaOptionName + "2018", ExportSettings.kMayaLtOptionName + "2018" });
+            preferred = ExportSettings.instance.GetPreferredDCCApp();
+
+            Assert.AreEqual(preferred, 1);
         }
 
         [Test]

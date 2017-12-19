@@ -450,36 +450,16 @@ namespace FbxExporters.EditorTools {
             int scoreA = -1;
             int scoreB = -1;
 
-            for( int i = 0; i < s_PreferenceList.Count; i++ )
-            {
-                //The constant without any spaces
-                string currentApp = System.Text.RegularExpressions.Regex.Replace(s_PreferenceList[i], @"[\s^0-9]", "");
-                //The potential app, without any numbers or spaces
-                string comparingApp = System.Text.RegularExpressions.Regex.Replace(appA, @"[\s^0-9]", "");
+            scoreA = s_PreferenceList.FindIndex(app => RemoveSpacesAndNumbers(app).Equals(RemoveSpacesAndNumbers(appA)));
 
-                if (currentApp.Equals(comparingApp))
-                {
-                    scoreA = i;
-                    break;
-                }
-                
-            }
-
-            for (int i = 0; i < s_PreferenceList.Count; i++)
-            {
-                //The constant without any spaces
-                string currentApp = System.Text.RegularExpressions.Regex.Replace(s_PreferenceList[i], @"[\s^0-9]", "");
-                //The potential app, without any numbers or spaces
-                string comparingApp = System.Text.RegularExpressions.Regex.Replace(appB, @"[\s^0-9]", "");
-
-                if (currentApp.Equals(comparingApp))
-                {
-                    scoreB = i;
-                    break;
-                }
-            }
+            scoreB = s_PreferenceList.FindIndex(app => RemoveSpacesAndNumbers(app).Equals(RemoveSpacesAndNumbers(appB)));
 
             return scoreA < scoreB ? optionA : optionB;
+        }
+
+        public string RemoveSpacesAndNumbers(string s)
+        {
+            return System.Text.RegularExpressions.Regex.Replace(s, @"[\s^0-9]", "");
         }
 
         /// <summary>
