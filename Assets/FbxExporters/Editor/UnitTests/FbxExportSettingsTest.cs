@@ -410,7 +410,7 @@ namespace FbxExporters.UnitTests
         private void VendorLocations_Setup (List<string> paths)
         {
             //Preserve our environment variables for later
-            originalVendorLocation = System.Environment.GetEnvironmentVariable ("UNITY_FBX_3DAPP_VENDOR_LOCATIONS");
+            originalVendorLocation = System.Environment.GetEnvironmentVariable ("UNITY_3DAPP_VENDOR_LOCATIONS");
             originalMayaLocation = System.Environment.GetEnvironmentVariable ("MAYA_LOCATION");
 
             foreach (var pathToExe in paths) {
@@ -429,7 +429,7 @@ namespace FbxExporters.UnitTests
         private void VendorLocations_TearDown(List<string> vendorInstallFolders)
         {
             //Put the environment variables back to what they were originally
-            System.Environment.SetEnvironmentVariable("UNITY_FBX_3DAPP_VENDOR_LOCATIONS", originalVendorLocation);
+            System.Environment.SetEnvironmentVariable("UNITY_3DAPP_VENDOR_LOCATIONS", originalVendorLocation);
             System.Environment.SetEnvironmentVariable("MAYA_LOCATION", originalMayaLocation);
 
             //Clean up vendor location(s)
@@ -448,7 +448,7 @@ namespace FbxExporters.UnitTests
         {
             if (!string.IsNullOrEmpty (vendorLocation)) {
                 //if the given vendor location isn't null, set the environment variable to it.
-                System.Environment.SetEnvironmentVariable ("UNITY_FBX_3DAPP_VENDOR_LOCATIONS", vendorLocation);
+                System.Environment.SetEnvironmentVariable ("UNITY_3DAPP_VENDOR_LOCATIONS", vendorLocation);
             }
             if (mayaLocationPath != null) {
                 //if the given MAYA_LOCATION isn't null, set the environment variable to it
