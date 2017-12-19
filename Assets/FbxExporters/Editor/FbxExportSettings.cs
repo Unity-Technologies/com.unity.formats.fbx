@@ -452,21 +452,33 @@ namespace FbxExporters.EditorTools {
 
             for( int i = 0; i < s_PreferenceList.Count; i++ )
             {
-                if (appA.StartsWith(s_PreferenceList[i]))
+                //The constant without any spaces
+                string currentApp = s_PreferenceList[i].Replace(" ", "");
+                //The potential app, without any numbers or spaces
+                string comparingApp = System.Text.RegularExpressions.Regex.Replace(appA, @"[\s^0-9]", "");
+
+                if (currentApp.Equals(comparingApp))
                 {
                     scoreA = i;
                     break;
                 }
+                
             }
 
             for (int i = 0; i < s_PreferenceList.Count; i++)
             {
-                if (appB.StartsWith(s_PreferenceList[i]))
+                //The constant without any spaces
+                string currentApp = s_PreferenceList[i].Replace(" ", "");
+                //The potential app, without any numbers or spaces
+                string comparingApp = System.Text.RegularExpressions.Regex.Replace(appB, @"[\s^0-9]", "");
+
+                if (currentApp.Equals(comparingApp))
                 {
                     scoreB = i;
                     break;
                 }
-            } 
+            }
+
             return scoreA < scoreB ? optionA : optionB;
         }
 
