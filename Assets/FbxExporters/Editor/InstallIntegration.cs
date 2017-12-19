@@ -560,12 +560,12 @@ namespace FbxExporters.Editor
         }
     }
 
-    class MayaLTIntegration : MayaIntegration 
+    public class MayaLTIntegration : MayaIntegration 
     {
         public override string DccDisplayName { get { return "Maya LT"; } }
     }
 
-    class MaxIntegration : DCCIntegration
+    public class MaxIntegration : DCCIntegration
     {
         public override string DccDisplayName { get { return "3Ds Max"; } }
 
