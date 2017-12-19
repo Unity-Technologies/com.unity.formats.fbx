@@ -281,7 +281,7 @@ namespace FbxExporters.EditorTools {
         //Any additional names require a space after the name
         public const string kMaxOptionName = "3ds Max ";
         public const string kMayaOptionName = "Maya ";
-        public const string kMayaLtOptionName = "MayaLT ";
+        public const string kMayaLtOptionName = "Maya LT";
 
         private static string DefaultIntegrationSavePath {
             get{
@@ -590,11 +590,20 @@ namespace FbxExporters.EditorTools {
                 return -1;
             }
 
-            //We assume that the option names have a 
-            int scoreA = s_PreferenceList.IndexOf(appA.Split(' ')[0]);
-            int scoreB = s_PreferenceList.IndexOf(appB.Split(' ')[0]);
+            int scoreA = s_PreferenceList.FindIndex(app => RemoveSpacesAndNumbers(app).Equals(RemoveSpacesAndNumbers(appA)));
+
+            int scoreB = s_PreferenceList.FindIndex(app => RemoveSpacesAndNumbers(app).Equals(RemoveSpacesAndNumbers(appB)));
 
             return scoreA < scoreB ? optionA : optionB;
+        }
+
+        /// <summary>
+        /// Takes a given string and removes any spaces or numbers from it
+        /// </summary>
+        /// <param name="s"></param>
+        public static string RemoveSpacesAndNumbers(string s)
+        {
+            return System.Text.RegularExpressions.Regex.Replace(s, @"[\s^0-9]", "");
         }
 
         /// <summary>
@@ -627,11 +636,20 @@ namespace FbxExporters.EditorTools {
             }
             else
             {
+                //remove any letters in the string in a final attempt to extract an int from it (this will happen with MayaLT, for example)
+                string AppNameCopy = AppName;
+                string stringWithoutLetters = System.Text.RegularExpressions.Regex.Replace(AppNameCopy, "[^0-9]", "");
+
+                if (int.TryParse(stringWithoutLetters, out version))
+                {
+                    return version;
+                }
+
                 float fVersion;
                 //In case we are looking at something with a decimal based version- the int parse will fail so we'll need to parse it as a float.
                 if (float.TryParse(number, out fVersion))
                 {
-                   return (int)fVersion;
+                    return (int)fVersion;
                 }
                 return -1;
             }
