@@ -265,9 +265,8 @@ namespace FbxExporters.UnitTests
         }
 
 		[Test]
-        public void FindDCCInstallsTest1()
+        public void VendorLocationInstallationTest1()
         {
-
             /*
              * different directory roots denoted by ' (eg.) (maya 2017 in rootDir1) = a (maya 2017 in rootDir2) = a'
              * a (maya2017)
@@ -278,7 +277,7 @@ namespace FbxExporters.UnitTests
              * f (3dsmax2018)
              */
 
-            // case 1.1: VI=a ML=b', result=2
+            // case 1.1: VI=a ML=b' result=2
             // case 1.2: VL=a ML=d' result=2
             // case 1.3: VL=c ML=b' result=2
             // case 1.4: VL=c ML=d' result=2
