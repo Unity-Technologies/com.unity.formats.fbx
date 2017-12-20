@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
@@ -889,8 +890,6 @@ namespace FbxExporters
                 {
                     Log("{0}: performing updates", prefabInstance.name);
 
-                    int[] unityVersion = null;
-                    
                     var updatedNodes = new HashSet<GameObject>();
 
                     // Gather up all the nodes in the prefab so we can look up
@@ -1019,21 +1018,15 @@ namespace FbxExporters
                                     rectTransform.localRotation = tempTransform.localRotation;
                                     rectTransform.localPosition = tempTransform.localPosition;
                                     rectTransform.localScale = tempTransform.localScale;
-                                    #region force update of rect transform 2017.3 or newer
-                                    if (unityVersion == null) {
-                                        unityVersion = new int [2];
 
-                                        var versionParts = Application.unityVersion.Split ('.');
-
-                                        unityVersion [0] = int.Parse (versionParts [0]);
-                                        unityVersion [1] = int.Parse (versionParts [1]);
-                                    }
-                                    Debug.Assert (unityVersion.Length > 1);
-
-                                    // force RectTransform to update (2017.3 or newer)
-                                    if (unityVersion [0] > 2017 || unityVersion [0] == 2017 && unityVersion [1] >= 3)
-                                        rectTransform.ForceUpdateRectTransforms ();
-                                    
+									#region force update of rect transform 2017.3 or newer 
+									// using reflection so we can continue to compile against versions 2017.1
+									// Retrieve the method you are looking for
+									System.Reflection.MethodInfo methodInfo = 
+										rectTransform.GetType().GetMethod("ForceUpdateRectTransforms");
+									// Invoke the method on the instance 
+									if (methodInfo!=null)
+										methodInfo.Invoke(rectTransform, null);
                                     #endregion
                                 }
                                 finally
