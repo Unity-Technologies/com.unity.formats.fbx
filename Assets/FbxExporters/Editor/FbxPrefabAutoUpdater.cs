@@ -1035,7 +1035,7 @@ namespace FbxExporters
                                         rectTransform.ForceUpdateRectTransforms ();
                                     
                                     #endregion
-                                    }
+                                }
                                 finally
                                 {
                                     GameObject.DestroyImmediate(tempGameObject);
