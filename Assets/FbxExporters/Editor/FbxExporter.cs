@@ -693,10 +693,6 @@ namespace FbxExporters
             /// </summary>
             protected bool ExportSkinnedMesh (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
             {
-                /*Animator unityAnimator = unityGo.GetComponent<Animator> ();
-                if (unityAnimator == null)
-                    return;*/
-
                 SkinnedMeshRenderer unitySkin
                 = unityGo.GetComponent<SkinnedMeshRenderer> ();
 
@@ -708,10 +704,6 @@ namespace FbxExporters
                 if (!mesh) {
                     return false;
                 }
-
-                // TODO: do we need this?
-                // create node hierarchy
-                //ExportNodeHierarchy (unityGo, fbxNode);
 
                 // export skeleton
                 if (!ExportSkeleton (unitySkin, fbxScene)) {
@@ -732,24 +724,11 @@ namespace FbxExporters
                     return false;
                 }
 
-                // lookup node w skin renderer
-                FbxNode fbxMeshNode = fbxNode;//MapUnityObjectToFbxNode[unitySkin.gameObject];
-
-                // export material for mesh
-                //var fbxMaterial = ExportMaterial (meshInfo.Materials, fbxScene);
-                //fbxMeshNode.AddMaterial (fbxMaterial);
-
-                // set the fbxNode containing the mesh
-                //fbxMeshNode.SetNodeAttribute (fbxMesh);
-                //fbxMeshNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
-
-                //fbxRootNode.AddChild (fbxMeshNode);
-
                 // bind mesh to skeleton
-                ExportSkin (unitySkin, meshInfo, fbxScene, fbxMesh, fbxMeshNode);
+                ExportSkin (unitySkin, meshInfo, fbxScene, fbxMesh, fbxNode);
 
                 // add bind pose
-                ExportBindPose (fbxNode, fbxMeshNode, fbxScene);
+                ExportBindPose (fbxNode, fbxScene);
 
                 if (Verbose)
                     Debug.Log (string.Format ("exporting {0} {1}", "Skin", fbxNode.GetName ()));
@@ -795,16 +774,10 @@ namespace FbxExporters
                     // its corresponding parent, or to the scene if there is none.
                     FbxNode fbxBoneNode;
                     if (!MapUnityObjectToFbxNode.TryGetValue(unityBoneTransform.gameObject, out fbxBoneNode)) {
-                        /*var unityParent = unityBoneTransform.parent;
-                        FbxNode fbxParent;
-                        if (MapUnityObjectToFbxNode.TryGetValue(unityParent.gameObject, out fbxParent)) {
-                            fbxBoneNode = FbxNode.Create (fbxParent, unityBoneTransform.name);
-                        } else {*/
-                            if (ExportSettings.mayaCompatibleNames) {
-                                unityBoneTransform.name = ConvertToMayaCompatibleName (unityBoneTransform.name);
-                            }
-                            fbxBoneNode = FbxNode.Create (fbxScene, unityBoneTransform.name);
-                        //}
+                        if (ExportSettings.mayaCompatibleNames) {
+                            unityBoneTransform.name = ConvertToMayaCompatibleName (unityBoneTransform.name);
+                        }
+                        fbxBoneNode = FbxNode.Create (fbxScene, unityBoneTransform.name);
                         MapUnityObjectToFbxNode.Add(unityBoneTransform.gameObject, fbxBoneNode);
                     }
 
@@ -814,25 +787,25 @@ namespace FbxExporters
                         var fbxSkeletonType = index.ContainsKey(unityBoneTransform.parent)
                             ? FbxSkeleton.EType.eLimbNode : FbxSkeleton.EType.eRoot;
                         fbxSkeleton.SetSkeletonType (fbxSkeletonType);
-                        fbxSkeleton.Size.Set (1.0f);
+                        fbxSkeleton.Size.Set (1.0f*UnitScaleFactor);
                         fbxBoneNode.SetNodeAttribute (fbxSkeleton);
-                        if (Verbose) { Debug.Log("Converted " + unityBoneTransform.name + " to a " + fbxSkeletonType + " bone"); }
+                        //if (Verbose) { Debug.Log("Converted " + unityBoneTransform.name + " to a " + fbxSkeletonType + " bone"); }
                     }
                 }
 
                 // Step 2: connect up the hierarchy.
-                /*foreach (var unityBone in bones) {
-                    var fbxBone = MapUnityObjectToFbxNode[unityBone.gameObject];
-                    var fbxParent = MapUnityObjectToFbxNode[unityBone.parent.gameObject];
-                    fbxParent.AddChild(fbxBone);
-                }*/
+                foreach (var unityBone in bones) {
+                    var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
+                    if (unityBone.parent != null) {
+                        var fbxParent = MapUnityObjectToFbxNode [unityBone.parent.gameObject];
+                        fbxParent.AddChild (fbxBone);
+                    }
+                }
 
                 // Step 3: set up the transforms.
                 for (int boneIndex = 0, n = bones.Length; boneIndex < n; boneIndex++) {
                     var unityBone = bones[boneIndex];
                     var fbxBone = MapUnityObjectToFbxNode[unityBone.gameObject];
-
-                    Debug.Log ("bone: " + unityBone.name);
 
                     Matrix4x4 pose;
                     if (fbxBone.GetSkeleton().GetSkeletonType() == FbxSkeleton.EType.eRoot) {
@@ -860,7 +833,7 @@ namespace FbxExporters
                     matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
 
                     // Bones should have zero rotation, and use a pivot instead.
-                    fbxBone.LclTranslation.Set (new FbxDouble3(translation.X, translation.Y, translation.Z));
+                    fbxBone.LclTranslation.Set (new FbxDouble3(translation.X*UnitScaleFactor, translation.Y*UnitScaleFactor, translation.Z*UnitScaleFactor));
                     fbxBone.LclRotation.Set (new FbxDouble3(0,0,0));
                     fbxBone.LclScaling.Set (new FbxDouble3 (scale.X, scale.Y, scale.Z));
 
@@ -952,9 +925,9 @@ namespace FbxExporters
             /// <summary>
             /// Export bind pose of mesh to skeleton
             /// </summary>
-            protected bool ExportBindPose (FbxNode fbxRootNode, FbxNode fbxMeshNode, FbxScene fbxScene)
+            protected bool ExportBindPose (FbxNode fbxMeshNode, FbxScene fbxScene)
             {
-                FbxPose fbxPose = FbxPose.Create (fbxScene, fbxRootNode.GetName());
+                FbxPose fbxPose = FbxPose.Create (fbxScene, fbxMeshNode.GetName());
 
                 // set as bind pose
                 fbxPose.SetIsBindPose (true);
@@ -984,43 +957,6 @@ namespace FbxExporters
 
                 return true;
             }
-
-            /// <summary>
-            /// Get a mesh renderer's mesh.
-            /// </summary>
-            /*private MeshInfo GetSkinnedMeshInfo (GameObject gameObject)
-            {
-                // Verify that we are rendering. Otherwise, don't export.
-                var renderer = gameObject.GetComponentInChildren<SkinnedMeshRenderer> ();
-                if (!renderer || !renderer.enabled) {
-                    Debug.LogError ("could not find renderer");
-                    return new MeshInfo ();
-                }
-
-                var mesh = renderer.sharedMesh;
-                if (!mesh) {
-                    Debug.LogError ("Could not find mesh");
-                    return new MeshInfo ();
-                }
-
-                return new MeshInfo (gameObject, mesh, renderer);
-            }*/
-
-            /// <summary>
-            /// Create the node hierarchy and store the mapping from Unity
-            /// object to FBX node.
-            /// </summary>
-            /*protected void ExportNodeHierarchy (GameObject unityGo, FbxNode fbxParentNode)
-            {
-                FbxNode fbxNode = FbxNode.Create (fbxParentNode, unityGo.name);
-
-                MapUnityObjectToFbxNode [unityGo] = fbxNode;
-
-                foreach (Transform unityChild in unityGo.transform)
-                {
-                    ExportNodeHierarchy (unityChild.gameObject, fbxNode);
-                }
-            }*/
 
             /// <summary>
             /// Takes a Quaternion and returns a Euler with XYZ rotation order.
@@ -1250,7 +1186,6 @@ namespace FbxExporters
 
                 if (!alreadyExported) {
                     Debug.Log ("here: " + unityGo.name);
-
 
                     ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
 
