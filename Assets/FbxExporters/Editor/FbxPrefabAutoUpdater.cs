@@ -1019,14 +1019,14 @@ namespace FbxExporters
                                     rectTransform.localPosition = tempTransform.localPosition;
                                     rectTransform.localScale = tempTransform.localScale;
 
-									#region force update of rect transform 2017.3 or newer 
-									// using reflection so we can continue to compile against versions 2017.1
-									// Retrieve the method you are looking for
-									System.Reflection.MethodInfo methodInfo = 
-										rectTransform.GetType().GetMethod("ForceUpdateRectTransforms");
-									// Invoke the method on the instance 
-									if (methodInfo!=null)
-										methodInfo.Invoke(rectTransform, null);
+                                    #region force update of rect transform 2017.3 or newer 
+                                    // using reflection so we can continue to compile against versions 2017.1
+                                    // Retrieve the method you are looking for
+                                    System.Reflection.MethodInfo methodInfo = 
+                                        rectTransform.GetType().GetMethod("ForceUpdateRectTransforms");
+                                    // Invoke the method on the instance 
+                                    if (methodInfo!=null)
+                                        methodInfo.Invoke(rectTransform, null);
                                     #endregion
                                 }
                                 finally
