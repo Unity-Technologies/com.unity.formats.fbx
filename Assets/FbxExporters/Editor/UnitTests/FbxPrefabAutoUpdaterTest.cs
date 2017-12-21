@@ -21,91 +21,99 @@ namespace FbxExporters.UnitTests
         [SetUp]
         public void Init ()
         {
-            var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            m_fbx = ExportSelection(capsule);
-            m_fbxPath = AssetDatabase.GetAssetPath(m_fbx);
+            var capsule = GameObject.CreatePrimitive (PrimitiveType.Capsule);
+            m_fbx = ExportSelection (capsule);
+            m_fbxPath = AssetDatabase.GetAssetPath (m_fbx);
 
             // Instantiate the fbx and create a prefab from it.
             // Delete the object right away (don't even wait for term).
-            var fbxInstance = PrefabUtility.InstantiatePrefab(m_fbx) as GameObject;
-            new FbxPrefabAutoUpdater.FbxPrefabUtility(fbxInstance.AddComponent<FbxPrefab>()).SetSourceModel(m_fbx);
-            m_prefabPath = GetRandomPrefabAssetPath();
-            m_prefab = PrefabUtility.CreatePrefab(m_prefabPath, fbxInstance);
+            var fbxInstance = PrefabUtility.InstantiatePrefab (m_fbx) as GameObject;
+            new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxInstance.AddComponent<FbxPrefab> ()).SetSourceModel (m_fbx);
+            m_prefabPath = GetRandomPrefabAssetPath ();
+            m_prefab = PrefabUtility.CreatePrefab (m_prefabPath, fbxInstance);
             AssetDatabase.Refresh ();
-            Assert.AreEqual(m_prefabPath, AssetDatabase.GetAssetPath(m_prefab));
-            GameObject.DestroyImmediate(fbxInstance);
+            Assert.AreEqual (m_prefabPath, AssetDatabase.GetAssetPath (m_prefab));
+            GameObject.DestroyImmediate (fbxInstance);
         }
 
         [Test]
         public void BasicTest ()
         {
-            var fbxPrefabPath = FbxPrefabAutoUpdater.FindFbxPrefabAssetPath();
-            Assert.IsFalse(string.IsNullOrEmpty(fbxPrefabPath));
-            Assert.IsTrue(fbxPrefabPath.EndsWith(FbxPrefabAutoUpdater.FBX_PREFAB_FILE));
+            var fbxPrefabPath = FbxPrefabAutoUpdater.FindFbxPrefabAssetPath ();
+            Assert.IsFalse (string.IsNullOrEmpty (fbxPrefabPath));
+            Assert.IsTrue (fbxPrefabPath.EndsWith (FbxPrefabAutoUpdater.FBX_PREFAB_FILE));
 
-            Assert.IsTrue(FbxPrefabAutoUpdater.IsFbxAsset("Assets/path/to/foo.fbx"));
-            Assert.IsFalse(FbxPrefabAutoUpdater.IsFbxAsset("Assets/path/to/foo.png"));
+            Assert.IsTrue (FbxPrefabAutoUpdater.IsFbxAsset ("Assets/path/to/foo.fbx"));
+            Assert.IsFalse (FbxPrefabAutoUpdater.IsFbxAsset ("Assets/path/to/foo.png"));
 
-            Assert.IsTrue(FbxPrefabAutoUpdater.IsPrefabAsset("Assets/path/to/foo.prefab"));
-            Assert.IsFalse(FbxPrefabAutoUpdater.IsPrefabAsset("Assets/path/to/foo.fbx"));
-            Assert.IsFalse(FbxPrefabAutoUpdater.IsPrefabAsset("Assets/path/to/foo.png"));
+            Assert.IsTrue (FbxPrefabAutoUpdater.IsPrefabAsset ("Assets/path/to/foo.prefab"));
+            Assert.IsFalse (FbxPrefabAutoUpdater.IsPrefabAsset ("Assets/path/to/foo.fbx"));
+            Assert.IsFalse (FbxPrefabAutoUpdater.IsPrefabAsset ("Assets/path/to/foo.png"));
 
-            var imported = new HashSet<string>( new string [] { "Assets/path/to/foo.fbx", m_fbxPath } );
-            Assert.IsTrue(FbxPrefabAutoUpdater.MayHaveFbxPrefabToFbxAsset(m_prefabPath, fbxPrefabPath,
+            var imported = new HashSet<string> (new string [] { "Assets/path/to/foo.fbx", m_fbxPath });
+            Assert.IsTrue (FbxPrefabAutoUpdater.MayHaveFbxPrefabToFbxAsset (m_prefabPath, fbxPrefabPath,
                         imported));
         }
 
         [Test]
         public void RectTransformTest ()
         {
-            Vector3 scaleForward = new Vector3(1,2,3);
-            Vector3 positionForward = new Vector3(100, 200, 300);
-            Vector3 rotationForward = new Vector3(1,2,3);
+            Vector3 scaleForward = new Vector3 (1, 2, 3);
+            Vector3 positionForward = new Vector3 (100, 200, 300);
+            Vector3 rotationForward = new Vector3 (1, 2, 3);
 
-            Vector3 scaleBackward = new Vector3(3, 2, 1);
-            Vector3 positionBackward = new Vector3(300, 200, 100);
-            Vector3 rotationBackward = new Vector3(3,2,1);
+            Vector3 scaleBackward = new Vector3 (3, 2, 1);
+            Vector3 positionBackward = new Vector3 (300, 200, 100);
+            Vector3 rotationBackward = new Vector3 (3, 2, 1);
 
             //Create a hierarchy with a RectTransform
-            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            capsule.AddComponent<RectTransform>();
-            
-            capsule.GetComponent<RectTransform>().localScale = scaleForward;
-            capsule.GetComponent<RectTransform>().localPosition = positionForward;
-            capsule.GetComponent<RectTransform>().localRotation = Quaternion.Euler(rotationForward);
+            var cube = GameObject.CreatePrimitive (PrimitiveType.Cube);
+            var capsule = GameObject.CreatePrimitive (PrimitiveType.Capsule);
+            capsule.transform.SetParent (cube.transform);
 
-            capsule.transform.parent = cube.transform;
+            var rectTransform = capsule.AddComponent<RectTransform> ();
 
-            string filePath = GetRandomFbxFilePath();
+            rectTransform.localScale = scaleForward;
+            rectTransform.localPosition = positionForward;
+            rectTransform.localRotation = Quaternion.Euler (rotationForward);
+#if UNITY_2017_3_OR_NEWER
+            rectTransform.ForceUpdateRectTransforms ();
+#endif
+
+            string filePath1 = GetRandomFbxFilePath ();
 
             //instantiate our hierarchy as a prefab
-            var oldInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath);
-            Assert.IsTrue(oldInstance);
+            var oldInstance = ConvertToModel.Convert (cube, fbxFullPath: filePath1);
+            Assert.IsTrue (oldInstance);
 
-            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localScale == scaleForward);
-            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localPosition == positionForward);
-            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localRotation == Quaternion.Euler(rotationForward));
+            rectTransform = oldInstance.transform.GetChild (0).GetComponent<RectTransform> ();
+
+            Assert.IsTrue (rectTransform.localScale == scaleForward);
+            Assert.IsTrue (rectTransform.localPosition == positionForward);
+            Assert.IsTrue (rectTransform.localRotation == Quaternion.Euler (rotationForward));
 
             //Create an "updated" hierarchy
-            var cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            var capsule2 = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            capsule2.AddComponent<RectTransform>();
+            var cube2 = GameObject.CreatePrimitive (PrimitiveType.Cube);
+            var capsule2 = GameObject.CreatePrimitive (PrimitiveType.Capsule);
+            capsule2.transform.SetParent (cube2.transform);
 
-            capsule2.GetComponent<RectTransform>().localScale = scaleBackward;
-            capsule2.GetComponent<RectTransform>().localPosition = positionBackward;
-            capsule2.GetComponent<RectTransform>().localRotation = Quaternion.Euler(rotationBackward);
+            rectTransform = capsule2.AddComponent<RectTransform> ();
 
-            capsule2.transform.parent = cube2.transform;        
-
+            rectTransform.localScale = scaleBackward;
+            rectTransform.localPosition = positionBackward;
+            rectTransform.localRotation = Quaternion.Euler (rotationBackward);
+#if UNITY_2017_3_OR_NEWER
+            rectTransform.ForceUpdateRectTransforms ();
+#endif
             //export our updated hierarchy to the same file path as the original
             SleepForFileTimestamp();
-            FbxExporters.Editor.ModelExporter.ExportObject(filePath, cube2);
+            FbxExporters.Editor.ModelExporter.ExportObject(filePath1, cube2);
             AssetDatabase.Refresh();
 
-            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localScale == scaleBackward);
-            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localPosition == positionBackward);
-            Assert.IsTrue(oldInstance.transform.GetChild(0).GetComponent<RectTransform>().localRotation == Quaternion.Euler(rotationBackward));
+            rectTransform = oldInstance.transform.GetChild (0).GetComponent<RectTransform> ();
+            Assert.IsTrue(rectTransform.localScale == scaleBackward);
+            Assert.IsTrue(rectTransform.localPosition == positionBackward);
+            Assert.IsTrue(rectTransform.localRotation == Quaternion.Euler(rotationBackward));
 
             GameObject.DestroyImmediate(cube);
             GameObject.DestroyImmediate(cube2);
