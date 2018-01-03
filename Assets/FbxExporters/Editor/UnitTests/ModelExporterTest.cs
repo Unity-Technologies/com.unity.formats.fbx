@@ -380,7 +380,7 @@ namespace FbxExporters.UnitTests
 
         [Test]
         public void TestSkinnedMeshExport(){
-            var fbxPath = "Cowboy/3D assets/Cowboy/cowboyMidPoly(riged).fbx";
+            var fbxPath = "Cowboy/3D assets/Cowboy/cowboyMidPoly(riged).fbx";//"DefaultMale.fbx";
 
             // add fbx to scene
             GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
@@ -421,6 +421,7 @@ namespace FbxExporters.UnitTests
                 var exportedBone = exportedBones [i];
 
                 Assert.AreEqual (originalBone.name, exportedBone.name);
+                Assert.AreEqual (originalBone.parent, exportedBone.parent);
 
                 Debug.Log ("bone name: " + originalBone.name);
 
@@ -429,6 +430,73 @@ namespace FbxExporters.UnitTests
                 Assert.AreEqual (originalBone.localRotation, exportedBone.localRotation);
                 Assert.AreEqual (originalBone.localScale, exportedBone.localScale);*/
             }
+
+            // compare bind poses
+            var origMesh = originalSkinnedMesh.sharedMesh;
+            Assert.IsNotNull (origMesh);
+            var exportedMesh = exportedSkinnedMesh.sharedMesh;
+            Assert.IsNotNull (exportedMesh);
+
+            var origBindposes = origMesh.bindposes;
+            Assert.IsNotNull (origBindposes);
+            var exportedBindposes = exportedMesh.bindposes;
+            Assert.IsNotNull (exportedBindposes);
+
+            Assert.AreEqual(origBindposes.Length, exportedBindposes.Length);
+
+            for (int i = 0; i < origBindposes.Length; i++) {
+                var origBp = origBindposes [i];
+                var expBp = exportedBindposes [i];
+
+
+                Debug.Log ("bind pose bone: " + originalBones [i].name);
+
+                Vector3 origPos = origBp.GetColumn(3);
+                var origQ = Quaternion.LookRotation(
+                    origBp.GetColumn(2),
+                    origBp.GetColumn(1)
+                );
+                Vector3 origS = new Vector3(
+                    origBp.GetColumn(0).magnitude,
+                    origBp.GetColumn(1).magnitude,
+                    origBp.GetColumn(2).magnitude
+                );
+
+                Vector3 expPos = expBp.GetColumn(3);
+                var expQ = Quaternion.LookRotation(
+                    expBp.GetColumn(2),
+                    expBp.GetColumn(1)
+                );
+                Vector3 expS = new Vector3(
+                    expBp.GetColumn(0).magnitude,
+                    expBp.GetColumn(1).magnitude,
+                    expBp.GetColumn(2).magnitude
+                );
+
+                Debug.Log ("original TRS: " + origPos + ", " + origQ.eulerAngles + ", " + origS);
+                Debug.Log ("exported TRS: " + expPos + ", " + expQ.eulerAngles + ", " + expS);
+
+                for (int j = 0; j < 4; j++) {
+                    for (int k = 0; k < 4; k++) {
+                        Assert.AreEqual (origBp.GetColumn (j)[k], expBp.GetColumn (j)[k], 0.001);
+                    }
+                }
+            }
+
+            // compare bone weights
+            var origWeights = origMesh.boneWeights;
+            Assert.IsNotNull (origWeights);
+            var expWeights = exportedMesh.boneWeights;
+            Assert.IsNotNull (expWeights);
+
+            Debug.Log ("orig mesh vertices: " + origMesh.vertexCount);
+            Debug.Log ("exp mesh vertices: " + exportedMesh.vertexCount);
+
+            //Assert.AreEqual (origWeights.Length, expWeights.Length);
+
+            /*for (int i = 0, n = Mathf.Min(origWeights.Length, expWeights.Length); i < n; i++) {
+                Assert.AreEqual (origWeights [i], expWeights [i]);
+            }*/
         }
     }
 }
