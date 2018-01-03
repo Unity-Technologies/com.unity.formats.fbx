@@ -377,5 +377,58 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual (camera.nearClipPlane, fbxCamera.nearClipPlane, delta);
             Assert.AreEqual (camera.farClipPlane, fbxCamera.farClipPlane, delta);
         }
+
+        [Test]
+        public void TestSkinnedMeshExport(){
+            var fbxPath = "Cowboy/3D assets/Cowboy/cowboyMidPoly(riged).fbx";
+
+            // add fbx to scene
+            GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
+            Assert.IsNotNull (originalFbxObj);
+            GameObject originalGO = GameObject.Instantiate (originalFbxObj);
+            Assert.IsTrue (originalGO);
+
+            // export fbx
+            // get GameObject
+            string filename = GetRandomFbxFilePath();
+            ModelExporter.ExportObject (filename, originalGO);
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.IsTrue (fbxObj);
+
+            var originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
+            Assert.IsNotNull (originalSkinnedMesh);
+
+            var exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
+            Assert.IsNotNull (exportedSkinnedMesh);
+
+            Assert.IsTrue (originalSkinnedMesh.name == exportedSkinnedMesh.name ||
+                (originalSkinnedMesh.transform.parent == null && exportedSkinnedMesh.transform.parent == null));
+
+            // check if skeletons match
+            // compare bones
+            var originalBones = originalSkinnedMesh.bones;
+            var exportedBones = exportedSkinnedMesh.bones;
+
+            Assert.IsNotNull (originalBones);
+            Assert.IsNotNull (exportedBones);
+
+            Assert.AreEqual (originalBones.Length, exportedBones.Length);
+
+            Debug.Log ("bone count: " + originalBones.Length);
+
+            for(int i = 0; i < originalBones.Length; i++){
+                var originalBone = originalBones [i];
+                var exportedBone = exportedBones [i];
+
+                Assert.AreEqual (originalBone.name, exportedBone.name);
+
+                Debug.Log ("bone name: " + originalBone.name);
+
+                // compare transforms
+                /*Assert.AreEqual(originalBone.localPosition, exportedBone.localPosition);
+                Assert.AreEqual (originalBone.localRotation, exportedBone.localRotation);
+                Assert.AreEqual (originalBone.localScale, exportedBone.localScale);*/
+            }
+        }
     }
 }
