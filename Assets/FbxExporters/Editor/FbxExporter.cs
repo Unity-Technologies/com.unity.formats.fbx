@@ -728,7 +728,7 @@ namespace FbxExporters
                 ExportSkin (unitySkin, meshInfo, fbxScene, fbxMesh, fbxNode);
 
                 // add bind pose
-                ExportBindPose (fbxNode, fbxScene);
+                ExportBindPose (unitySkin, fbxNode, fbxScene);
 
                 if (Verbose)
                     Debug.Log (string.Format ("exporting {0} {1}", "Skin", fbxNode.GetName ()));
@@ -795,8 +795,8 @@ namespace FbxExporters
 
                 // Step 2: connect up the hierarchy.
                 foreach (var unityBone in bones) {
-                    var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
-                    if (unityBone.parent != null) {
+                    if (unityBone.parent != null && MapUnityObjectToFbxNode.ContainsKey(unityBone.parent.gameObject)) {
+                        var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
                         var fbxParent = MapUnityObjectToFbxNode [unityBone.parent.gameObject];
                         fbxParent.AddChild (fbxBone);
                     }
@@ -833,13 +833,13 @@ namespace FbxExporters
                     matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
 
                     // Bones should have zero rotation, and use a pivot instead.
-                    fbxBone.LclTranslation.Set (new FbxDouble3(translation.X*UnitScaleFactor, translation.Y*UnitScaleFactor, translation.Z*UnitScaleFactor));
+                    fbxBone.LclTranslation.Set (new FbxDouble3(-translation.X*UnitScaleFactor, translation.Y*UnitScaleFactor, translation.Z*UnitScaleFactor));
                     fbxBone.LclRotation.Set (new FbxDouble3(0,0,0));
                     fbxBone.LclScaling.Set (new FbxDouble3 (scale.X, scale.Y, scale.Z));
 
                     fbxBone.SetRotationActive (true);
                     fbxBone.SetPivotState (FbxNode.EPivotSet.eSourcePivot, FbxNode.EPivotState.ePivotReference);
-                    fbxBone.SetPreRotation (FbxNode.EPivotSet.eSourcePivot, new FbxVector4 (rotation.X, rotation.Y, rotation.Z));
+                    fbxBone.SetPreRotation (FbxNode.EPivotSet.eSourcePivot, new FbxVector4 (rotation.X, -rotation.Y, -rotation.Z));
                 }
 
                 return true;
@@ -866,7 +866,7 @@ namespace FbxExporters
                     FbxCluster fbxCluster = FbxCluster.Create (fbxScene, "BoneWeightCluster");
 
                     fbxCluster.SetLink (fbxBoneNode);
-                    fbxCluster.SetLinkMode (FbxCluster.ELinkMode.eTotalOne);
+                    fbxCluster.SetLinkMode (FbxCluster.ELinkMode.eNormalize);
 
                     boneCluster.Add (i, fbxCluster);
 
@@ -894,6 +894,16 @@ namespace FbxExporters
             /// </summary>
             private void SetVertexWeights (MeshInfo meshInfo, Dictionary<int, FbxCluster> boneCluster)
             {
+                // Create control points.
+                Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
+                var vertices = meshInfo.Vertices;
+                for (int v = 0, n = meshInfo.VertexCount; v < n; v++) {
+                    if (ControlPointToIndex.ContainsKey (vertices [v])) {
+                        continue;
+                    }
+                    ControlPointToIndex [vertices [v]] = ControlPointToIndex.Count();
+                }
+
                 // set the vertex weights for each bone
                 for (int i = 0; i < meshInfo.BoneWeights.Length; i++) {
                     var boneWeights = meshInfo.BoneWeights;
@@ -917,7 +927,8 @@ namespace FbxExporters
                         if (!boneCluster.ContainsKey (indices [j])) {
                             continue;
                         }
-                        boneCluster [indices [j]].AddControlPointIndex (i, weights [j]);
+                        //boneCluster [indices [j]].AddControlPointIndex (i, weights [j]);
+                        boneCluster [indices [j]].AddControlPointIndex (ControlPointToIndex[meshInfo.Vertices[i]], weights [j]);
                     }
                 }
             }
@@ -925,7 +936,7 @@ namespace FbxExporters
             /// <summary>
             /// Export bind pose of mesh to skeleton
             /// </summary>
-            protected bool ExportBindPose (FbxNode fbxMeshNode, FbxScene fbxScene)
+            protected bool ExportBindPose (SkinnedMeshRenderer skinnedMesh, FbxNode fbxMeshNode, FbxScene fbxScene)
             {
                 FbxPose fbxPose = FbxPose.Create (fbxScene, fbxMeshNode.GetName());
 
@@ -933,8 +944,9 @@ namespace FbxExporters
                 fbxPose.SetIsBindPose (true);
 
                 // assume each bone node has one weighted vertex cluster
-                foreach (FbxNode fbxNode in MapUnityObjectToFbxNode.Values)
-                {
+                for (int i = 0; i < skinnedMesh.bones.Length; i++) {
+                    FbxNode fbxBoneNode = MapUnityObjectToFbxNode [skinnedMesh.bones[i].gameObject];
+
                     // EvaluateGlobalTransform returns an FbxAMatrix (affine matrix)
                     // which has to be converted to an FbxMatrix so that it can be passed to fbxPose.Add().
                     // The hierarchy for FbxMatrix and FbxAMatrix is as follows:
@@ -945,9 +957,9 @@ namespace FbxExporters
                     //
                     // Therefore we can't convert directly from FbxAMatrix to FbxMatrix,
                     // however FbxMatrix has a constructor that takes an FbxAMatrix.
-                    FbxMatrix fbxBindMatrix = new FbxMatrix(fbxNode.EvaluateGlobalTransform ());
+                    FbxMatrix fbxBindMatrix = new FbxMatrix(fbxBoneNode.EvaluateGlobalTransform ());
 
-                    fbxPose.Add (fbxNode, fbxBindMatrix);
+                    fbxPose.Add (fbxBoneNode, fbxBindMatrix);
                 }
 
                 fbxPose.Add (fbxMeshNode, new FbxMatrix (fbxMeshNode.EvaluateGlobalTransform ()));
