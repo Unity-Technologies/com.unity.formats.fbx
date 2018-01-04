@@ -1192,16 +1192,10 @@ namespace FbxExporters
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
                 if (!alreadyExported) {
-                    Debug.Log ("here: " + unityGo.name);
-
                     ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
 
                     // try export mesh
                     bool exportedMesh = ExportInstance (unityGo, fbxNode, fbxScene);
-
-                    if (!exportedMesh) {
-                        exportedMesh = ExportSkinnedMesh (unityGo, fbxScene, fbxNode);
-                    }
 
                     if (!exportedMesh) {
                         exportedMesh = ExportMesh (unityGo, fbxNode);
@@ -2001,11 +1995,15 @@ namespace FbxExporters
                 } else {
                     var smr = defaultComponent as SkinnedMeshRenderer;
                     if (smr) {
-                        var mesh = new Mesh();
-                        smr.BakeMesh(mesh);
-                        var materials = smr.sharedMaterials;
-                        bool result = ExportMesh(new MeshInfo(mesh, materials), fbxNode);
-                        Object.DestroyImmediate(mesh);
+                        var result = ExportSkinnedMesh (gameObject, fbxNode.GetScene (), fbxNode);
+                        if(!result){
+                            // fall back to exporting as a static mesh
+                            var mesh = new Mesh();
+                            smr.BakeMesh(mesh);
+                            var materials = smr.sharedMaterials;
+                            result = ExportMesh(new MeshInfo(mesh, materials), fbxNode);
+                            Object.DestroyImmediate(mesh);
+                        }
                         return result;
                     }
                 }
