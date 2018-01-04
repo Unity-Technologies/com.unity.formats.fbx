@@ -590,6 +590,9 @@ namespace FbxExporters
                 return ExportMesh(meshInfo, fbxNode);
             }
 
+            /// <summary>
+            /// Keeps track of the index of each point in the exported vertex array.
+            /// </summary>
             private Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
 
             /// <summary>
@@ -791,7 +794,6 @@ namespace FbxExporters
                         fbxSkeleton.SetSkeletonType (fbxSkeletonType);
                         fbxSkeleton.Size.Set (1.0f*UnitScaleFactor);
                         fbxBoneNode.SetNodeAttribute (fbxSkeleton);
-                        //if (Verbose) { Debug.Log("Converted " + unityBoneTransform.name + " to a " + fbxSkeletonType + " bone"); }
                     }
                 }
 
@@ -1165,14 +1167,12 @@ namespace FbxExporters
                     unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
                 }
 
+                // create an FbxNode and add it as a child of parent
                 FbxNode fbxNode;
                 bool alreadyExported = MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode);
                 if (!alreadyExported) {
                     fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
                 }
-
-                // create an FbxNode and add it as a child of parent
-                //FbxNode fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
                 NumNodes++;
 
                 numObjectsExported++;
@@ -1209,8 +1209,8 @@ namespace FbxExporters
                     MapUnityObjectToFbxNode.Add (unityGo, fbxNode);
                 }
 
-                //if (Verbose)
-                //    Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
+                if (Verbose)
+                    Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
 
                 fbxNodeParent.AddChild (fbxNode);
 
