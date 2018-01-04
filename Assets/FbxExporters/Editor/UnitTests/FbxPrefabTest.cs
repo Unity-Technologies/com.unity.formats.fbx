@@ -221,6 +221,62 @@ namespace FbxExporters.UnitTests
             return newModel;
         }
 
+		[Test]
+		public void AnimationWithLightTest()
+		{
+			string filename = GetRandomFbxFilePath ();
+			GameObject go = new GameObject ();
+			Light light = go.AddComponent(typeof (Light)) as Light;
+			Animation anim = go.AddComponent (typeof(Animation)) as Animation;
+
+			Keyframe[] keys;
+			keys = new Keyframe[3];
+			keys[0] = new Keyframe(0.0f, 0.25f);
+			keys[1] = new Keyframe(1.0f, 0.5f);
+			keys[2] = new Keyframe(2.0f, 1.0f);
+
+			AnimationCurve curve = new AnimationCurve (keys);
+
+			AnimationClip clip = new AnimationClip ();
+
+			clip.legacy = true;
+
+			clip.SetCurve ("", typeof(Light), "m_Intensity", curve);
+
+			anim.AddClip (clip, "test");
+
+			//export the object
+			var exported = FbxExporters.Editor.ModelExporter.ExportObject(filename , go);
+
+			//acquire exported file
+			GameObject asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+
+			//access the exported game objects' light
+			Light foundLight = asset.GetComponent (typeof(Light)) as Light;
+
+			//Check that the light exists
+			Assert.IsNotNull (foundLight);
+
+			//Set the time of the animation to 0 seconds
+			clip.SampleAnimation(asset, 0.0f);
+
+			//check that the value matches the key at 0 seconds
+			Assert.AreEqual (foundLight.intensity, 0.25f);
+
+			//Set the time of the animation to 1 second
+			clip.SampleAnimation(asset, 1.0f);
+
+			//check that the value matches the key at 1 second
+			Assert.AreEqual (foundLight.intensity, 0.5f);
+
+			//Set the time of the animation to 2 seconds
+			clip.SampleAnimation(asset, 2.0f);
+
+			//check that the value matches the key at 2 seconds
+			Assert.AreEqual (foundLight.intensity, 1.0f);
+
+		}
+
         [Test]
         public void BasicTest() {
             // Verify we start in the right place.
