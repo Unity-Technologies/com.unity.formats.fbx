@@ -382,7 +382,7 @@ namespace FbxExporters.UnitTests
         public void TestSkinnedMeshExport(){
             // for now use this cowboy taken from the asset store as the test file
             // TODO: find a better/simpler test file
-            var fbxPath = "Cowboy/3D assets/Cowboy/cowboyMidPoly(riged).fbx";
+            var fbxPath = "FbxExporters/Editor/UnitTests/Models/Cowboy/cowboyMidPoly(riged).fbx";
 
             // add fbx to scene
             GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
