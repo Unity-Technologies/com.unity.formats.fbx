@@ -840,6 +840,7 @@ namespace FbxExporters
                     fbxBone.LclRotation.Set (new FbxDouble3(0,0,0));
                     fbxBone.LclScaling.Set (new FbxDouble3 (scale.X, scale.Y, scale.Z));
 
+                    // TODO (UNI-34294): add detailed comment about why we export rotation as pre-rotation
                     fbxBone.SetRotationActive (true);
                     fbxBone.SetPivotState (FbxNode.EPivotSet.eSourcePivot, FbxNode.EPivotState.ePivotReference);
                     fbxBone.SetPreRotation (FbxNode.EPivotSet.eSourcePivot, new FbxVector4 (rotation.X, -rotation.Y, -rotation.Z));
