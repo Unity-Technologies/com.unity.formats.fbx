@@ -380,7 +380,9 @@ namespace FbxExporters.UnitTests
 
         [Test]
         public void TestSkinnedMeshExport(){
-            var fbxPath = "Cowboy/3D assets/Cowboy/cowboyMidPoly(riged).fbx";//"DefaultMale.fbx";
+            // for now use this cowboy taken from the asset store as the test file
+            // TODO: find a better/simpler test file
+            var fbxPath = "Cowboy/3D assets/Cowboy/cowboyMidPoly(riged).fbx";
 
             // add fbx to scene
             GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
@@ -414,8 +416,6 @@ namespace FbxExporters.UnitTests
 
             Assert.AreEqual (originalBones.Length, exportedBones.Length);
 
-            Debug.Log ("bone count: " + originalBones.Length);
-
             for(int i = 0; i < originalBones.Length; i++){
                 var originalBone = originalBones [i];
                 var exportedBone = exportedBones [i];
@@ -423,12 +423,8 @@ namespace FbxExporters.UnitTests
                 Assert.AreEqual (originalBone.name, exportedBone.name);
                 Assert.AreEqual (originalBone.parent, exportedBone.parent);
 
-                Debug.Log ("bone name: " + originalBone.name);
-
-                // compare transforms
-                /*Assert.AreEqual(originalBone.localPosition, exportedBone.localPosition);
-                Assert.AreEqual (originalBone.localRotation, exportedBone.localRotation);
-                Assert.AreEqual (originalBone.localScale, exportedBone.localScale);*/
+                // NOTE: not comparing transforms as the exported transforms are taken from
+                //       the bind pose whereas the originals are not necessarily.
             }
 
             // compare bind poses
@@ -448,34 +444,6 @@ namespace FbxExporters.UnitTests
                 var origBp = origBindposes [i];
                 var expBp = exportedBindposes [i];
 
-
-                Debug.Log ("bind pose bone: " + originalBones [i].name);
-
-                Vector3 origPos = origBp.GetColumn(3);
-                var origQ = Quaternion.LookRotation(
-                    origBp.GetColumn(2),
-                    origBp.GetColumn(1)
-                );
-                Vector3 origS = new Vector3(
-                    origBp.GetColumn(0).magnitude,
-                    origBp.GetColumn(1).magnitude,
-                    origBp.GetColumn(2).magnitude
-                );
-
-                Vector3 expPos = expBp.GetColumn(3);
-                var expQ = Quaternion.LookRotation(
-                    expBp.GetColumn(2),
-                    expBp.GetColumn(1)
-                );
-                Vector3 expS = new Vector3(
-                    expBp.GetColumn(0).magnitude,
-                    expBp.GetColumn(1).magnitude,
-                    expBp.GetColumn(2).magnitude
-                );
-
-                Debug.Log ("original TRS: " + origPos + ", " + origQ.eulerAngles + ", " + origS);
-                Debug.Log ("exported TRS: " + expPos + ", " + expQ.eulerAngles + ", " + expS);
-
                 for (int j = 0; j < 4; j++) {
                     for (int k = 0; k < 4; k++) {
                         Assert.AreEqual (origBp.GetColumn (j)[k], expBp.GetColumn (j)[k], 0.001);
@@ -483,20 +451,14 @@ namespace FbxExporters.UnitTests
                 }
             }
 
-            // compare bone weights
+            // TODO: find a way to compare bone weights.
+            //       The boneweights are by vertex, and duplicate vertices
+            //       are removed on export so the lists are not necessarily
+            //       the same length or order.
             var origWeights = origMesh.boneWeights;
             Assert.IsNotNull (origWeights);
             var expWeights = exportedMesh.boneWeights;
             Assert.IsNotNull (expWeights);
-
-            Debug.Log ("orig mesh vertices: " + origMesh.vertexCount);
-            Debug.Log ("exp mesh vertices: " + exportedMesh.vertexCount);
-
-            //Assert.AreEqual (origWeights.Length, expWeights.Length);
-
-            /*for (int i = 0, n = Mathf.Min(origWeights.Length, expWeights.Length); i < n; i++) {
-                Assert.AreEqual (origWeights [i], expWeights [i]);
-            }*/
         }
     }
 }
