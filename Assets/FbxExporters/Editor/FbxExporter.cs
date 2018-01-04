@@ -590,6 +590,8 @@ namespace FbxExporters
                 return ExportMesh(meshInfo, fbxNode);
             }
 
+            private Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
+
             /// <summary>
             /// Exports a unity mesh and attaches it to the node as an FbxMesh.
             /// </summary>
@@ -607,7 +609,7 @@ namespace FbxExporters
                 FbxMesh fbxMesh = FbxMesh.Create (fbxScene, "Scene");
 
                 // Create control points.
-                Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
+                ControlPointToIndex.Clear();
                 {
                     var vertices = meshInfo.Vertices;
                     for (int v = 0, n = meshInfo.VertexCount; v < n; v++) {
@@ -898,16 +900,6 @@ namespace FbxExporters
             /// </summary>
             private void SetVertexWeights (MeshInfo meshInfo, Dictionary<int, FbxCluster> boneCluster)
             {
-                // Create control points.
-                Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
-                var vertices = meshInfo.Vertices;
-                for (int v = 0, n = meshInfo.VertexCount; v < n; v++) {
-                    if (ControlPointToIndex.ContainsKey (vertices [v])) {
-                        continue;
-                    }
-                    ControlPointToIndex [vertices [v]] = ControlPointToIndex.Count();
-                }
-
                 // set the vertex weights for each bone
                 for (int i = 0; i < meshInfo.BoneWeights.Length; i++) {
                     var boneWeights = meshInfo.BoneWeights;
@@ -931,7 +923,6 @@ namespace FbxExporters
                         if (!boneCluster.ContainsKey (indices [j])) {
                             continue;
                         }
-                        //boneCluster [indices [j]].AddControlPointIndex (i, weights [j]);
                         boneCluster [indices [j]].AddControlPointIndex (ControlPointToIndex[meshInfo.Vertices[i]], weights [j]);
                     }
                 }
