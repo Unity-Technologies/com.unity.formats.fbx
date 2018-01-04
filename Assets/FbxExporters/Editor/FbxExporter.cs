@@ -711,7 +711,7 @@ namespace FbxExporters
                     return false;
                 }
 
-                var meshInfo = new MeshInfo (unitySkin.sharedMesh, null);
+                var meshInfo = new MeshInfo (unitySkin.sharedMesh, unitySkin.sharedMaterials);
 
                 // export skin mesh
                 FbxMesh fbxMesh = null;
