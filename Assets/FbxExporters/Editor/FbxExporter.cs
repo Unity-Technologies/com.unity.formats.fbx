@@ -1154,7 +1154,7 @@ namespace FbxExporters
                 if (!unityAnimClip) return;
 
                 if (Verbose)
-                    Debug.Log (string.Format ("exporting clip {1} for {0}", unityRoot.name, unityAnimClip.name));
+                    Debug.Log (string.Format ("Exporting clip {1} for {0}", unityRoot.name, unityAnimClip.name));
 
                 // setup anim stack
                 FbxAnimStack fbxAnimStack = FbxAnimStack.Create (fbxScene, unityAnimClip.name);
@@ -1199,7 +1199,7 @@ namespace FbxExporters
                     int index = QuaternionCurve.GetQuaternionIndex (unityCurveBinding.propertyName);
                     if (index == -1) {
                         if (Verbose)
-                            Debug.Log (string.Format ("export binding {1} for {0}", unityCurveBinding.propertyName, unityObj.ToString ()));
+                            Debug.Log (string.Format ("Export animation binding {1} for {0}", unityCurveBinding.propertyName, unityObj.ToString ()));
 
                         /* Some normal property (e.g. translation), export right away */
                         ExportAnimCurve (unityObj, unityAnimCurve, unityCurveBinding.propertyName,
@@ -1261,7 +1261,7 @@ namespace FbxExporters
                 var director = unityRoot.GetComponent<UnityEngine.Playables.PlayableDirector> ();
                 if (director)
                 {
-                    Debug.Log(string.Format("exporting animationclips from playabledirector on {0} not supported", unityRoot.name));
+                    Debug.LogWarning(string.Format("Exporting animation from PlayableDirector on {0} not supported", unityRoot.name));
                     // TODO: export animationclips from playabledirector
                 }
 
@@ -1367,7 +1367,7 @@ namespace FbxExporters
                 }
 
                 if (Verbose)
-                    Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
+                    Debug.Log (string.Format ("Exporting node {0}", fbxNode.GetName ()));
 
                 fbxNodeParent.AddChild (fbxNode);
 
@@ -2174,7 +2174,7 @@ namespace FbxExporters
             {
             }
 
-            public bool Verbose { private set {;} get { return Debug.unityLogger.logEnabled; } }
+            public bool Verbose { private set {;} get { return false; } }
 
             /// <summary>
             /// manage the selection of a filename
