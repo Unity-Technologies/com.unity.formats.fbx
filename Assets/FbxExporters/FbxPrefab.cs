@@ -27,7 +27,8 @@ namespace FbxExporters
         [System.Serializable]
         public struct StringPair { public string FBXObjectName; public string UnityObjectName; }
 
-        public StringPair[] m_nameMapping;
+        [SerializeField]
+        StringPair[] m_nameMapping;
 
         /// <summary>
         /// Which FBX file does this refer to?
@@ -57,10 +58,6 @@ namespace FbxExporters
             get
             {
                 return m_nameMapping;
-            }
-            set
-            {
-                m_nameMapping = value;
             }
         }
 
