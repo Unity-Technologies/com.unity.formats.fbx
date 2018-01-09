@@ -1004,6 +1004,21 @@ namespace FbxExporters
                         return true;
                     }
 
+                    if (unityPropertyName.StartsWith ("m_LocalScale.x", ct) || unityPropertyName.EndsWith ("S.x", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_X);
+                        return true;
+                    }
+                    if (unityPropertyName.StartsWith ("m_LocalScale.y", ct) || unityPropertyName.EndsWith ("S.y", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
+                        return true;
+                    }
+
+                    if (unityPropertyName.StartsWith ("m_LocalScale.z", ct) || unityPropertyName.EndsWith ("S.z", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                        return true;
+                    }
+
+
                     prop = new FbxPropertyChannelPair ();
                     return false;
                 }

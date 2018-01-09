@@ -8,62 +8,113 @@ namespace FbxExporters.UnitTests
 {
     public class AnimationComponentTestDataClass
     {
-        static float[] m_keydata1 = new float [3 * 2] {1.0f, 0f, 2.0f, 100.0f, 3.0f, 0.0f};
+        static float [] m_keytimes1 = new float [3] {1f, 2f, 3f};
+        static float [] m_keyvalues1 = new float [3] {0f, 100f, 0f};
+        static float [] m_keyvalues2 = new float [3] {1f, 100f, 1f};
 
-    	public static IEnumerable TestCases {
-    		get {
-                yield return new TestCaseData (m_keydata1, typeof(Transform), "m_LocalPosition.x").Returns (1);
-    		}
-    	}
+        public static IEnumerable TestCases {
+            get {
+                yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof(Transform), "m_LocalScale.x").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof(Transform), "m_LocalScale.y").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof(Transform), "m_LocalScale.z").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalRotation.x").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalRotation.y").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalRotation.z").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalPosition.x").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalPosition.y").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalPosition.z").Returns (1);
+            }
+        }
     }
 
     [TestFixture]
     public class FbxAnimationTest : ExporterTestBase
     {
-        protected static void DebugLogAnimCurve (AnimationCurve animCurve)
+        protected void AnimClipTest (AnimationClip animClipExpected, AnimationClip animClipActual)
         {
-        	int idx = 0;
-        	foreach (var key in animCurve.keys) {
-        		Debug.Log (string.Format ("key[{0}] {1} {2}", idx++, key.time, key.value));
-        	}
+            Assert.That (animClipActual.name, Is.EqualTo(animClipExpected.name));
+            Assert.That (animClipActual.legacy, Is.EqualTo(animClipExpected.legacy));
+            Assert.That (animClipActual.isLooping, Is.EqualTo(animClipExpected.isLooping));
+            Assert.That (animClipActual.wrapMode, Is.EqualTo(animClipExpected.wrapMode));
+
+            // TODO: Uni-34489
+            Assert.That (animClipActual.length, Is.EqualTo(animClipExpected.length).Within (Mathf.Epsilon), "animClip length doesn't match");
+        }
+
+        protected void AnimCurveTest (float [] keyTimesExpected, float [] keyValuesExpected, AnimationCurve animCurveActual)
+        {
+            int numKeysExpected = keyTimesExpected.Length;
+
+            // TODO : Uni-34492 number of keys don't match
+            Assert.That (animCurveActual.length, Is.EqualTo(numKeysExpected), "animcurve number of keys doesn't match");
+
+            //check imported animation against original
+            Assert.That(new ListMapper(animCurveActual.keys).Property ("time"), Is.EqualTo(keyTimesExpected), "key time doesn't match");
+            Assert.That(new ListMapper(animCurveActual.keys).Property ("value"), Is.EqualTo(keyValuesExpected), "key value doesn't match");
+
+            return ;
+        }
+
+        [TearDown]
+        public override void Term ()
+        {
+            return;
         }
 
         [Test, TestCaseSource (typeof (AnimationComponentTestDataClass), "TestCases")]
-        public int SinglePropertyLegacyAnimTest (float [] keydata, System.Type propertyType, string propertyName )
+        public int SinglePropertyLegacyAnimTest (float [] keytimes, float [] keyvalues, System.Type propertyType, string propertyName )
         {
-        	string filePath = GetRandomFbxFilePath ();
-        	GameObject go = new GameObject ();
-            go.name = "orig_"+propertyName;
-        	Animation animOrig = go.AddComponent (typeof (Animation)) as Animation;
+            string path = GetRandomFbxFilePath ();
 
-            int expectedNumKeys = keydata.Length / 2;
+            // TODO: add extra parent so that we can test export/import of transforms
+            GameObject goRoot = new GameObject ();
+            goRoot.name = "root_"+propertyName;
+
+            GameObject goModel = new GameObject ();
+            goModel.name = "model_"+propertyName;
+            goModel.transform.parent = goRoot.transform;
+
+            Animation animOrig = goModel.AddComponent (typeof (Animation)) as Animation;
+
+            int numKeys = Mathf.Min(keytimes.Length, keyvalues.Length);
 
             // initialize keys
-        	Keyframe [] keys = new Keyframe [expectedNumKeys];
+            Keyframe [] keys = new Keyframe [numKeys];
 
-            for (int idx = 0; idx < expectedNumKeys; idx++)
+            for (int idx = 0; idx < numKeys; idx++)
             {
-                keys[idx].time  = keydata [(idx*2)+0];
-                keys[idx].value = keydata [(idx*2)+1];
+                keys[idx].time  = keytimes [idx];
+                keys[idx].value = keyvalues [idx];
             }
 
-        	AnimationCurve animCurveOrig = new AnimationCurve (keys);
+            AnimationCurve animCurveOrig = new AnimationCurve (keys);
 
-        	AnimationClip animClipOrig = new AnimationClip ();
+            AnimationClip animClipOriginal = new AnimationClip ();
 
-        	animClipOrig.legacy = true;
+            animClipOriginal.legacy = true;
+            animClipOriginal.name = "anim_" + propertyName;
+                
+            animClipOriginal.SetCurve ("", propertyType, propertyName, animCurveOrig);
 
-        	animClipOrig.SetCurve ("", propertyType, propertyName, animCurveOrig);
+            animOrig.AddClip (animClipOriginal, "anim_" + propertyName );
 
-        	animOrig.AddClip (animClipOrig, "anim_" + propertyName );
+            //export the object
+            var exportedFilePath = ModelExporter.ExportObject (path, goRoot);
+            Assert.That (exportedFilePath, Is.EqualTo(path));
 
-        	//export the object
-        	var exportedFilePath = ModelExporter.ExportObject (filePath, go);
-            Assert.AreEqual (exportedFilePath, filePath);
+            // TODO: Uni-34492 change importer settings of (newly exported model) 
+            // so that it's not resampled and it is legacy animation
+            {
+                ModelImporter modelImporter = AssetImporter.GetAtPath (path) as ModelImporter;
+                modelImporter.resampleCurves = false;
+                AssetDatabase.ImportAsset (path);
+                modelImporter.animationType = ModelImporterAnimationType.Legacy;
+                AssetDatabase.ImportAsset (path);
+            }
 
-        	//acquire imported object from exported file
-        	Object[] goAssetImported = AssetDatabase.LoadAllAssetsAtPath (filePath);
-            Assert.IsNotNull (goAssetImported);
+            //acquire imported object from exported file
+            Object[] goAssetImported = AssetDatabase.LoadAllAssetsAtPath (path);
+            Assert.That(goAssetImported, Is.Not.Null);
 
             // TODO : configure object so that it imports w Legacy Animation
 
@@ -73,44 +124,23 @@ namespace FbxExporters.UnitTests
                 animClipImported = o as AnimationClip;
                 if (animClipImported) break;
             }
-            Assert.IsNotNull (animClipImported);
+            Assert.That (animClipImported, Is.Not.Null);
 
             // TODO : configure import settings so we don't need to force legacy
             animClipImported.legacy = true;
-            Assert.AreEqual (animClipImported.legacy, true);
 
-            {
-                var go2 = Object.Instantiate (goAssetImported [0]) as GameObject;
-                Assert.IsNotNull (go2);
-                go2.name = "imported_" + propertyName;
-                Animation anim2 = go2.AddComponent (typeof (Animation)) as Animation;
-                anim2.AddClip (animClipImported, "anim2_" + propertyName );
-            }
-
-
-            // TODO : check clip properties match
-
+            // check clip properties match
+            AnimClipTest (animClipOriginal, animClipImported);
+                            
             // check animCurve & keys
             int result = 0;
 
             foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (animClipImported)) 
             {
                 AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, curveBinding);
-                Assert.IsNotNull (animCurveImported);
+                Assert.That(animCurveImported, Is.Not.Null);
 
-                DebugLogAnimCurve (animCurveImported);
-
-                Assert.AreEqual (expectedNumKeys, animCurveImported.length);
-
-                //check imported animation against original
-                int idx = 0;
-                foreach (var key in animCurveImported.keys) 
-                {
-                    Assert.AreEqual (key.time, keydata [(idx * 2) + 0]);
-                    Assert.AreEqual (key.value, keydata [(idx * 2) + 1]);
-
-                    idx++;
-                }
+                AnimCurveTest (keytimes, keyvalues, animCurveImported);
 
                 result++;
             }
