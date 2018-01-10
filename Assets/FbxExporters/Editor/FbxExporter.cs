@@ -926,6 +926,10 @@ namespace FbxExporters
                 FbxScene fbxScene,
                 FbxAnimLayer fbxAnimLayer)
             {
+                if (Verbose) {
+                    Debug.Log ("Exporting animation for " + unityObj.ToString() + " (" + unityPropertyName + ")");
+                }
+
                 FbxPropertyChannelPair fbxPropertyChannelPair;
                 if (!FbxPropertyChannelPair.TryGetValue (unityPropertyName, out fbxPropertyChannelPair)) {
                     Debug.LogWarning (string.Format ("no mapping from Unity '{0}' to fbx property", unityPropertyName));
@@ -949,10 +953,6 @@ namespace FbxExporters
                 if (!fbxProperty.IsValid ()) {
                     Debug.LogError (string.Format ("no fbx property {0} found on {1} ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
                     return;
-                }
-
-                if (Verbose) {
-                    Debug.Log ("Exporting animation for " + unityObj.ToString() + " (" + unityPropertyName + ")");
                 }
 
                 // Create the AnimCurve on the channel
@@ -990,20 +990,7 @@ namespace FbxExporters
                 {
                     System.StringComparison ct = System.StringComparison.CurrentCulture;
 
-                    if (unityPropertyName.StartsWith ("m_LocalPosition.x", ct) || unityPropertyName.EndsWith ("T.x", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_X);
-                        return true;
-                    }
-                    if (unityPropertyName.StartsWith ("m_LocalPosition.y", ct) || unityPropertyName.EndsWith ("T.y", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
-                        return true;
-                    }
-
-                    if (unityPropertyName.StartsWith ("m_LocalPosition.z", ct) || unityPropertyName.EndsWith ("T.z", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
-                        return true;
-                    }
-
+                    // Transform Scaling
                     if (unityPropertyName.StartsWith ("m_LocalScale.x", ct) || unityPropertyName.EndsWith ("S.x", ct)) {
                         prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_X);
                         return true;
@@ -1012,12 +999,26 @@ namespace FbxExporters
                         prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
                         return true;
                     }
-
                     if (unityPropertyName.StartsWith ("m_LocalScale.z", ct) || unityPropertyName.EndsWith ("S.z", ct)) {
                         prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
                         return true;
                     }
 
+                    // NOTE: Transform Rotation handled by QuaternionCurve
+    
+                    // Transform Translation
+                    if (unityPropertyName.StartsWith ("m_LocalPosition.x", ct) || unityPropertyName.EndsWith ("T.x", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_X);
+                        return true;
+                    }
+                    if (unityPropertyName.StartsWith ("m_LocalPosition.y", ct) || unityPropertyName.EndsWith ("T.y", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
+                        return true;
+                    }
+                    if (unityPropertyName.StartsWith ("m_LocalPosition.z", ct) || unityPropertyName.EndsWith ("T.z", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                        return true;
+                    }
 
                     prop = new FbxPropertyChannelPair ();
                     return false;
@@ -1169,7 +1170,7 @@ namespace FbxExporters
                 if (!unityAnimClip) return;
 
                 if (Verbose)
-                    Debug.Log (string.Format ("Exporting clip {1} for {0}", unityRoot.name, unityAnimClip.name));
+                    Debug.Log (string.Format ("Exporting animation clip ({1}) for {0}", unityRoot.name, unityAnimClip.name));
 
                 // setup anim stack
                 FbxAnimStack fbxAnimStack = FbxAnimStack.Create (fbxScene, unityAnimClip.name);
@@ -1183,7 +1184,7 @@ namespace FbxExporters
                 // Custom frame rate isn't really supported in FBX SDK (there's
                 // a bug), so try hard to find the nearest time mode.
                 FbxTime.EMode timeMode = FbxTime.EMode.eCustom;
-                double precision = 1e-6;
+                double precision = Mathf.Epsilon;
                 while (timeMode == FbxTime.EMode.eCustom && precision < 1000) {
                     timeMode = FbxTime.ConvertFrameRateToTimeMode (unityAnimClip.frameRate, precision);
                     precision *= 10;
@@ -1212,10 +1213,8 @@ namespace FbxExporters
                     if (unityAnimCurve == null) { continue; }
 
                     int index = QuaternionCurve.GetQuaternionIndex (unityCurveBinding.propertyName);
-                    if (index == -1) {
-                        if (Verbose)
-                            Debug.Log (string.Format ("Export animation binding {1} for {0}", unityCurveBinding.propertyName, unityObj.ToString ()));
-
+                    if (index == -1) 
+                    {
                         /* Some normal property (e.g. translation), export right away */
                         ExportAnimCurve (unityObj, unityAnimCurve, unityCurveBinding.propertyName,
                             fbxScene, fbxAnimLayer);
@@ -2189,7 +2188,7 @@ namespace FbxExporters
             {
             }
 
-            public bool Verbose { private set {;} get { return false; } }
+            public bool Verbose { private set {;} get { return true; } }
 
             /// <summary>
             /// manage the selection of a filename

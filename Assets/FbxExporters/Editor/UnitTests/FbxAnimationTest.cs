@@ -8,21 +8,21 @@ namespace FbxExporters.UnitTests
 {
     public class AnimationComponentTestDataClass
     {
-        static float [] m_keytimes1 = new float [3] {1f, 2f, 3f};
-        static float [] m_keyvalues1 = new float [3] {0f, 100f, 0f};
-        static float [] m_keyvalues2 = new float [3] {1f, 100f, 1f};
+        static float [] m_keytimes1 = new float [3] { 1f, 2f, 3f };
+        static float [] m_keyvalues1 = new float [3] { 0f, 100f, 0f };
+        static float [] m_keyvalues2 = new float [3] { 1f, 100f, 1f };
 
         public static IEnumerable TestCases {
             get {
-                yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof(Transform), "m_LocalScale.x").Returns (1);
-                yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof(Transform), "m_LocalScale.y").Returns (1);
-                yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof(Transform), "m_LocalScale.z").Returns (1);
-                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalRotation.x").Returns (1);
-                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalRotation.y").Returns (1);
-                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalRotation.z").Returns (1);
-                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalPosition.x").Returns (1);
-                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalPosition.y").Returns (1);
-                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof(Transform), "m_LocalPosition.z").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof (Transform), "m_LocalScale.x").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof (Transform), "m_LocalScale.y").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof (Transform), "m_LocalScale.z").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof (Transform), "m_LocalRotation.x").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof (Transform), "m_LocalRotation.y").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof (Transform), "m_LocalRotation.z").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof (Transform), "m_LocalPosition.x").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof (Transform), "m_LocalPosition.y").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof (Transform), "m_LocalPosition.z").Returns (1);
             }
         }
     }
@@ -30,21 +30,43 @@ namespace FbxExporters.UnitTests
     [TestFixture]
     public class FbxAnimationTest : ExporterTestBase
     {
-        protected void AnimClipTest (AnimationClip animClipExpected, AnimationClip animClipActual)
+        [TearDown]
+        public override void Term ()
         {
-            Assert.That (animClipActual.name, Is.EqualTo(animClipExpected.name));
-            Assert.That (animClipActual.legacy, Is.EqualTo(animClipExpected.legacy));
-            Assert.That (animClipActual.isLooping, Is.EqualTo(animClipExpected.isLooping));
-            Assert.That (animClipActual.wrapMode, Is.EqualTo(animClipExpected.wrapMode));
-
-            // TODO: Uni-34489
-            Assert.That (animClipActual.length, Is.EqualTo(animClipExpected.length).Within (Mathf.Epsilon), "animClip length doesn't match");
         }
 
-        protected void AnimCurveTest (float [] keyTimesExpected, float [] keyValuesExpected, AnimationCurve animCurveActual)
+        protected void DumpAnimCurve(AnimationCurve animCurve, string message, float [] keyTimesExpected = null, float[] keyValuesExpected = null)
+        {
+            int idx = 0;
+            foreach (var key in animCurve.keys) {
+                if (keyTimesExpected!=null && keyValuesExpected!=null) {
+                    Debug.Log (string.Format ("{5} keys[{0}] {1}({3}) {2} ({4})", 
+                                              idx, key.time, key.value, 
+                                              keyTimesExpected [idx], keyValuesExpected [idx],
+                                              message));
+                } else{
+                    Debug.Log (string.Format ("{3} keys[{0}] {1} {2}", idx, key.time, key.value, message));
+                }
+                idx++;
+            }
+        }
+
+        protected void AnimClipTest (AnimationClip animClipExpected, AnimationClip animClipActual)
+        {
+            Assert.That (animClipActual.name, Is.EqualTo (animClipExpected.name));
+            Assert.That (animClipActual.legacy, Is.EqualTo (animClipExpected.legacy));
+            Assert.That (animClipActual.isLooping, Is.EqualTo (animClipExpected.isLooping));
+            Assert.That (animClipActual.wrapMode, Is.EqualTo (animClipExpected.wrapMode));
+
+            // TODO: Uni-34489
+            Assert.That (animClipActual.length, Is.EqualTo (animClipExpected.length).Within (Mathf.Epsilon), "animClip length doesn't match");
+        }
+
+        protected void AnimCurveTest (float [] keyTimesExpected, float [] keyValuesExpected, AnimationCurve animCurveActual, string message)
         {
             int numKeysExpected = keyTimesExpected.Length;
 
+            DumpAnimCurve (animCurveActual, message, keyTimesExpected, keyValuesExpected);
             // TODO : Uni-34492 number of keys don't match
             Assert.That (animCurveActual.length, Is.EqualTo(numKeysExpected), "animcurve number of keys doesn't match");
 
@@ -53,12 +75,6 @@ namespace FbxExporters.UnitTests
             Assert.That(new ListMapper(animCurveActual.keys).Property ("value"), Is.EqualTo(keyValuesExpected), "key value doesn't match");
 
             return ;
-        }
-
-        [TearDown]
-        public override void Term ()
-        {
-            return;
         }
 
         [Test, TestCaseSource (typeof (AnimationComponentTestDataClass), "TestCases")]
@@ -140,9 +156,11 @@ namespace FbxExporters.UnitTests
                 AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, curveBinding);
                 Assert.That(animCurveImported, Is.Not.Null);
 
-                AnimCurveTest (keytimes, keyvalues, animCurveImported);
-
-                result++;
+                if (propertyName == curveBinding.propertyName) 
+                {
+                    AnimCurveTest (keytimes, keyvalues, animCurveImported, curveBinding.propertyName);
+                    result++;
+                }
             }
 
             return result;
