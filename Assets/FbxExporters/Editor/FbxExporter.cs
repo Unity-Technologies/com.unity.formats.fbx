@@ -2255,7 +2255,7 @@ namespace FbxExporters
             {
             }
 
-            public bool Verbose { private set {;} get { return true; } }
+            public bool Verbose { private set {;} get { return false; } }
 
             /// <summary>
             /// manage the selection of a filename
