@@ -441,13 +441,13 @@ namespace FbxExporters.UnitTests
         [Test]
         public void AnimationWithLightTest()
         {
-			string filename = GetRandomFbxFilePath ();
+			string filename = GetRandomFbxFilePath();
 			GameObject go = new GameObject ();
+            go.name = "original";
 			Light light = go.AddComponent(typeof (Light)) as Light;
 			Animation anim = go.AddComponent (typeof(Animation)) as Animation;
 
-			Keyframe[] keys;
-			keys = new Keyframe[3];
+            Keyframe[] keys = new Keyframe[3];
 			keys[0] = new Keyframe(0.0f, 0.25f);
 			keys[1] = new Keyframe(1.0f, 0.5f);
 			keys[2] = new Keyframe(2.0f, 1.0f);
@@ -463,35 +463,47 @@ namespace FbxExporters.UnitTests
 			anim.AddClip (clip, "test");
 
 			//export the object
-			var exported = FbxExporters.Editor.ModelExporter.ExportObject(filename , go);
+			var exported = ModelExporter.ExportObject(filename , go);
 
-			//acquire exported file
-			GameObject asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.That(exported, Is.EqualTo(filename));
 
-			//access the exported game objects' light
-			Light foundLight = asset.GetComponent (typeof(Light)) as Light;
+            // TODO: Uni-34492 change importer settings of (newly exported model) 
+            // so that it's not resampled and it is legacy animation
+            {
+                ModelImporter modelImporter = AssetImporter.GetAtPath(filename) as ModelImporter;
+                Assert.That(modelImporter, Is.Not.Null);
+                modelImporter.resampleCurves = false;
+                AssetDatabase.ImportAsset(filename);
+                modelImporter.animationType = ModelImporterAnimationType.Legacy;
+                AssetDatabase.ImportAsset(filename);
+            }
+            
+            Object[] objects = AssetDatabase.LoadAllAssetsAtPath(filename);
 
-			//Check that the light exists
-			Assert.IsNotNull (foundLight);
+            AnimationClip exportedClip = null;
+            foreach (Object o in objects)
+            {
+                exportedClip = o as AnimationClip;
+                if (exportedClip != null) break;
+            }
 
-			//Set the time of the animation to 0 seconds
-			clip.SampleAnimation(asset, 0.0f);
+            exportedClip.legacy = true;
 
-			//check that the value matches the key at 0 seconds
-			Assert.AreEqual (foundLight.intensity, 0.25f);
+            Assert.IsNotNull(exportedClip);
+            EditorCurveBinding exportedEditorCurveBinding = AnimationUtility.GetCurveBindings(exportedClip)[0];
 
-			//Set the time of the animation to 1 second
-			clip.SampleAnimation(asset, 1.0f);
+            AnimationCurve exportedCurve = AnimationUtility.GetEditorCurve(exportedClip, exportedEditorCurveBinding);
 
-			//check that the value matches the key at 1 second
-			Assert.AreEqual (foundLight.intensity, 0.5f);
+            Assert.That(exportedCurve.keys.Length, Is.EqualTo(keys.Length));
 
-			//Set the time of the animation to 2 seconds
-			clip.SampleAnimation(asset, 2.0f);
+            Debug.Log(AnimationUtility.GetEditorCurve(clip, AnimationUtility.GetCurveBindings(clip)[0]).keys[1].value);
+            Debug.Log(AnimationUtility.GetEditorCurve(exportedClip, AnimationUtility.GetCurveBindings(exportedClip)[0]).keys[1].value);
 
-			//check that the value matches the key at 2 seconds
-			Assert.AreEqual (foundLight.intensity, 1.0f);
-
+            for (int i = 0; i < exportedCurve.keys.Length; i++)
+            {
+                Assert.That(exportedCurve.keys[i].time == keys[i].time);
+                Assert.That(exportedCurve.keys[i].value == keys[i].value);
+            }
 		}
 
         [Test]

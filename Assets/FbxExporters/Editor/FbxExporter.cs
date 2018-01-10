@@ -920,55 +920,74 @@ namespace FbxExporters
             /// NOTE: This is not used for rotations, because we need to convert from
             /// quaternion to euler and various other stuff.
             /// </summary>
-            protected void ExportAnimCurve (UnityEngine.Object unityObj,
+            protected void ExportAnimCurve(UnityEngine.Object unityObj,
                 AnimationCurve unityAnimCurve,
                 string unityPropertyName,
                 FbxScene fbxScene,
                 FbxAnimLayer fbxAnimLayer)
             {
                 FbxPropertyChannelPair fbxPropertyChannelPair;
-                if (!FbxPropertyChannelPair.TryGetValue (unityPropertyName, out fbxPropertyChannelPair)) {
-                    Debug.LogWarning (string.Format ("no mapping from Unity '{0}' to fbx property", unityPropertyName));
+                if (!FbxPropertyChannelPair.TryGetValue(unityPropertyName, out fbxPropertyChannelPair))
+                {
+                    Debug.LogWarning(string.Format("no mapping from Unity '{0}' to fbx property", unityPropertyName));
                     return;
                 }
 
-                GameObject unityGo = GetGameObject (unityObj);
-                if (unityGo == null) {
-                    Debug.LogError (string.Format ("cannot find gameobject for {0}", unityObj.ToString()));
+                GameObject unityGo = GetGameObject(unityObj);
+                if (unityGo == null && !unityObj)
+                {
+                    Debug.LogError(string.Format("cannot find gameobject for {0}", unityObj.ToString()));
                     return;
                 }
 
                 FbxNode fbxNode;
-                if (!MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
-                    Debug.LogError ( string.Format("no fbx node for {0}", unityGo.ToString()));
+                if (!MapUnityObjectToFbxNode.TryGetValue(unityGo, out fbxNode))
+                {
+                    Debug.LogError(string.Format("no fbx node for {0}", unityGo.ToString()));
                     return;
                 }
-
                 // map unity property name to fbx property
-                var fbxProperty = fbxNode.FindProperty (fbxPropertyChannelPair.Property, false);
-                if (!fbxProperty.IsValid ()) {
-                    Debug.LogError (string.Format ("no fbx property {0} found on {1} ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
+                var fbxProperty = fbxNode.FindProperty(fbxPropertyChannelPair.Property, false);
+                if (!fbxProperty.IsValid())
+                {
+                    var fbxNodeAttribute = fbxNode.GetNodeAttribute();
+                    if (fbxNodeAttribute != null)
+                    {
+                        fbxProperty = fbxNodeAttribute.FindProperty(fbxPropertyChannelPair.Property, false);
+                    }
+                }
+                if (!fbxProperty.IsValid())
+                {
+                    Debug.LogError(string.Format("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName()));
                     return;
                 }
 
-                if (Verbose) {
-                    Debug.Log ("Exporting animation for " + unityObj.ToString() + " (" + unityPropertyName + ")");
+                if (Verbose)
+                {
+                    Debug.Log("Exporting animation for " + unityObj.ToString() + " (" + unityPropertyName + ")");
                 }
 
+                FbxAnimCurve fbxAnimCurve;
                 // Create the AnimCurve on the channel
-                FbxAnimCurve fbxAnimCurve = fbxProperty.GetCurve (fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
+                if (fbxPropertyChannelPair.Channel != null)
+                    fbxAnimCurve = fbxProperty.GetCurve(fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
+                else
+                {
+                    fbxAnimCurve = fbxProperty.GetCurve(fbxAnimLayer, true);
+                }
 
                 // copy Unity AnimCurve to FBX AnimCurve.
-                fbxAnimCurve.KeyModifyBegin ();
+                fbxAnimCurve.KeyModifyBegin();
 
-                for (int keyIndex = 0, n = unityAnimCurve.length; keyIndex < n; ++keyIndex) {
-                    var key = unityAnimCurve [keyIndex];
-                    var fbxTime = FbxTime.FromSecondDouble (key.time);
-                    fbxAnimCurve.KeyAdd (fbxTime);
-                    fbxAnimCurve.KeySet (keyIndex, fbxTime, key.value);
+                for (int keyIndex = 0, n = unityAnimCurve.length; keyIndex < n; ++keyIndex)
+                {
+                    var key = unityAnimCurve[keyIndex];
+                    var fbxTime = FbxTime.FromSecondDouble(key.time);
+                    fbxAnimCurve.KeyAdd(fbxTime);
+                    fbxAnimCurve.KeySet(keyIndex, fbxTime, key.value);
                 }
 
-                fbxAnimCurve.KeyModifyEnd ();
+                fbxAnimCurve.KeyModifyEnd();
             }
 
             /// <summary>
@@ -994,6 +1013,7 @@ namespace FbxExporters
                         prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_X);
                         return true;
                     }
+
                     if (unityPropertyName.StartsWith ("m_LocalPosition.y", ct) || unityPropertyName.EndsWith ("T.y", ct)) {
                         prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
                         return true;
@@ -1001,6 +1021,12 @@ namespace FbxExporters
 
                     if (unityPropertyName.StartsWith ("m_LocalPosition.z", ct) || unityPropertyName.EndsWith ("T.z", ct)) {
                         prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                        return true;
+                    }
+
+                    if (unityPropertyName.StartsWith("m_Intensity", ct) || unityPropertyName.EndsWith("T.z", ct))
+                    {
+                        prop = new FbxPropertyChannelPair("Intensity", null);
                         return true;
                     }
 
@@ -1945,9 +1971,9 @@ namespace FbxExporters
                     return xform.gameObject;
                 } else if (obj is UnityEngine.GameObject) {
                     return obj as UnityEngine.GameObject;
-                } else if (obj is MonoBehaviour) {
-                    var mono = obj as MonoBehaviour;
-                    return mono.gameObject;
+                } else if (obj is Behaviour) {
+                    var behaviour = obj as Behaviour;
+                    return behaviour.gameObject;
                 }
 
                 return null;
