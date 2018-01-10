@@ -30,13 +30,13 @@ namespace FbxExporters.UnitTests
         }
         public static IEnumerable TestCases2 {
             get {
-                yield return new TestCaseData (m_keytimes1, m_keyEulerValues3, typeof (Transform), new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" } ).Returns (4);
+                yield return new TestCaseData (m_keytimes1, m_keyEulerValues3, typeof (Transform), new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" } ).Returns (3);
             }
         }
         // specify gimbal conditions for rotation
         public static IEnumerable TestCases3 {
             get {
-                yield return new TestCaseData (m_keytimes1, m_keyEulerValues4, typeof (Transform), new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" } ).Returns (4);
+                yield return new TestCaseData (m_keytimes1, m_keyEulerValues4, typeof (Transform), new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" } ).Returns (3);
             }
         }
     }
@@ -118,11 +118,11 @@ namespace FbxExporters.UnitTests
             public override int NumComponents { get { return propertyNames.Length; } }
             public override float [] GetKeyValues (int id)
             {
-                return (from e in keyEulerValues select Quaternion.Euler(e).Get(id)).ToArray ();
+                return (from e in keyEulerValues select Quaternion.Euler(e)[id]).ToArray ();
             }
             public override float [] GetAltKeyValues (int id)
             {
-                return (from e in keyEulerValues select e.Get(id)).ToArray ();
+                return (from e in keyEulerValues select e[id]).ToArray ();
             }
 
             public override string GetComponentName (int id) { return propertyNames[id]; }
