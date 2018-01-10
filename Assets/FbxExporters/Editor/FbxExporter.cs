@@ -8,6 +8,66 @@ using System.Linq;
 
 namespace FbxExporters
 {
+    namespace CustomExtensions
+    {
+        //Extension methods must be defined in a static class
+        public static class QuaternionExtension
+        {
+            // This is an extension method for the Quaternion class
+            // The first parameter takes the "this" modifier
+            // and specifies the type for which the method is defined.
+            public static float Get (this Quaternion q, int id)
+            {
+                switch (id) {
+                case 0: return q.x;
+                case 1: return q.y;
+                case 2: return q.z;
+                case 3: return q.w;
+                default: throw new System.IndexOutOfRangeException ();
+                }
+            }
+        }
+
+        //Extension methods must be defined in a static class
+        public static class Vector3Extension
+        {
+            // This is an extension method for the Vector3 class
+            // The first parameter takes the "this" modifier
+            // and specifies the type for which the method is defined.
+            public static float Get (this Vector3 v, int id)
+            {
+                switch (id) {
+                case 0: return v.x;
+                case 1: return v.y;
+                case 2: return v.z;
+                default: throw new System.IndexOutOfRangeException ();
+                }
+            }
+        }
+        //Extension methods must be defined in a static class
+        public static class AnimationCurveExtension
+        {
+            // This is an extension method for the AnimationCurve class
+            // The first parameter takes the "this" modifier
+            // and specifies the type for which the method is defined.
+            public static void Dump (this AnimationCurve animCurve, string message, float [] keyTimesExpected = null, float [] keyValuesExpected = null)
+            {
+                int idx = 0;
+                foreach (var key in animCurve.keys) {
+                    if (keyTimesExpected != null && keyValuesExpected != null) {
+                        Debug.Log (string.Format ("{5} keys[{0}] {1}({3}) {2} ({4})",
+                                                  idx, key.time, key.value,
+                                                  keyTimesExpected [idx], keyValuesExpected [idx],
+                                                  message));
+                    } else {
+                        Debug.Log (string.Format ("{3} keys[{0}] {1} {2}", idx, key.time, key.value, message));
+                    }
+                    idx++;
+                }
+            }
+        }
+    }
+
     namespace Editor
     {
         public class ModelExporter : System.IDisposable
@@ -1076,8 +1136,9 @@ namespace FbxExporters
                 Key [] ComputeKeys(UnityEngine.Quaternion restRotation, FbxNode node) {
                     // Get the source pivot pre-rotation if any, so we can
                     // remove it from the animation we get from Unity.
-                    var fbxPreRotationEuler = node.GetRotationActive() ? node.GetPreRotation(FbxNode.EPivotSet.eSourcePivot)
-                        : new FbxVector4();
+                    var fbxPreRotationEuler = node.GetRotationActive() 
+                                                  ? node.GetPreRotation(FbxNode.EPivotSet.eSourcePivot)
+                                                  : new FbxVector4();
                     var fbxPreRotationInverse = new FbxQuaternion();
                     fbxPreRotationInverse.ComposeSphericalXYZ(fbxPreRotationEuler);
                     fbxPreRotationInverse.Inverse();
@@ -1129,32 +1190,33 @@ namespace FbxExporters
                 }
 
                 public void Animate(Transform unityTransform, FbxNode fbxNode, FbxAnimLayer fbxAnimLayer, bool Verbose) {
+
                     /* Find or create the three curves. */
-                    var x = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_X, true);
-                    var y = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Y, true);
-                    var z = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Z, true);
+                    var fbxAnimCurveX = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_X, true);
+                    var fbxAnimCurveY = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Y, true);
+                    var fbxAnimCurveZ = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Z, true);
 
                     /* set the keys */
-                    x.KeyModifyBegin();
-                    y.KeyModifyBegin();
-                    z.KeyModifyBegin();
+                    fbxAnimCurveX.KeyModifyBegin();
+                    fbxAnimCurveY.KeyModifyBegin();
+                    fbxAnimCurveZ.KeyModifyBegin();
 
                     var keys = ComputeKeys(unityTransform.localRotation, fbxNode);
                     for(int i = 0, n = keys.Length; i < n; ++i) {
                         var key = keys[i];
-                        x.KeyAdd(key.time);
-                        x.KeySet(i, key.time, (float)key.euler.X);
+                        fbxAnimCurveX.KeyAdd(key.time);
+                        fbxAnimCurveX.KeySet(i, key.time, (float)key.euler.X);
 
-                        y.KeyAdd(key.time);
-                        y.KeySet(i, key.time, (float)key.euler.Y);
+                        fbxAnimCurveY.KeyAdd(key.time);
+                        fbxAnimCurveY.KeySet(i, key.time, (float)key.euler.Y);
 
-                        z.KeyAdd(key.time);
-                        z.KeySet(i, key.time, (float)key.euler.Z);
+                        fbxAnimCurveZ.KeyAdd(key.time);
+                        fbxAnimCurveZ.KeySet(i, key.time, (float)key.euler.Z);
                     }
 
-                    z.KeyModifyEnd();
-                    y.KeyModifyEnd();
-                    x.KeyModifyEnd();
+                    fbxAnimCurveZ.KeyModifyEnd();
+                    fbxAnimCurveY.KeyModifyEnd();
+                    fbxAnimCurveX.KeyModifyEnd();
 
                     if (Verbose) {
                         Debug.Log("Exported rotation animation for " + fbxNode.GetName());
@@ -1212,6 +1274,11 @@ namespace FbxExporters
                     AnimationCurve unityAnimCurve = AnimationUtility.GetEditorCurve (unityAnimClip, unityCurveBinding);
                     if (unityAnimCurve == null) { continue; }
 
+                    if (Verbose)
+                    {
+                        Debug.Log (string.Format ("Exporting animation curve bound to {0} {1}", unityCurveBinding.propertyName, unityCurveBinding.path));
+                    }
+
                     int index = QuaternionCurve.GetQuaternionIndex (unityCurveBinding.propertyName);
                     if (index == -1) 
                     {
@@ -1240,7 +1307,7 @@ namespace FbxExporters
 
                     FbxNode fbxNode;
                     if (!MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
-                        Debug.LogError (string.Format ("no fbxnode found for '0'", unityGo.name));
+                        Debug.LogError (string.Format ("no FbxNode found for {0}", unityGo.name));
                         continue;
                     }
                     quat.Animate (unityGo.transform, fbxNode, fbxAnimLayer, Verbose);
