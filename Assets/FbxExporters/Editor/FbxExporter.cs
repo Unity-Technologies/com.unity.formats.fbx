@@ -1030,37 +1030,31 @@ namespace FbxExporters
                         return true;
                     }
 
-                    if (unityPropertyName.StartsWith("m_Intensity", ct) || unityPropertyName.EndsWith("T.z", ct))
+                    if (unityPropertyName.StartsWith("m_Intensity", ct))
                     {
                         prop = new FbxPropertyChannelPair("Intensity", null);
                         return true;
                     }
 
-                    if (unityPropertyName.StartsWith("m_SpotAngle", ct) || unityPropertyName.EndsWith("T.z", ct))
+                    if (unityPropertyName.StartsWith("m_SpotAngle", ct))
                     {
                         prop = new FbxPropertyChannelPair("OuterAngle", null);
                         return true;
                     }
 
-                    if (unityPropertyName.StartsWith("m_Color", ct) || unityPropertyName.EndsWith("T.z", ct))
-                    {
-                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR);
-                        return true;
-                    }
-
-                    if (unityPropertyName.StartsWith("m_Color.r", ct) || unityPropertyName.EndsWith("T.z", ct))
+                    if (unityPropertyName.StartsWith("m_Color.r", ct))
                     {
                         prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_RED);
                         return true;
                     }
 
-                    if (unityPropertyName.StartsWith("m_Color.g", ct) || unityPropertyName.EndsWith("T.z", ct))
+                    if (unityPropertyName.StartsWith("m_Color.g", ct))
                     {
                         prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_GREEN);
                         return true;
                     }
 
-                    if (unityPropertyName.StartsWith("m_Color.b", ct) || unityPropertyName.EndsWith("T.z", ct))
+                    if (unityPropertyName.StartsWith("m_Color.b", ct))
                     {
                         prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_BLUE);
                         return true;
