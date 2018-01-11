@@ -741,6 +741,20 @@ namespace FbxExporters
                 return true;
             }
 
+            private bool IsBone(Transform t, Dictionary<Transform, int> bones){
+                if (bones.ContainsKey (t)) {
+                    return true;
+                }
+
+                foreach (Transform child in t) {
+                    if (IsBone (child, bones)) {
+                        //Debug.LogError ("our child is a bone: " + t.name);
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             /// <summary>
             /// Export bones of skinned mesh, if this is a skinned mesh with
             /// bones and bind poses.
@@ -772,39 +786,14 @@ namespace FbxExporters
                 }
 
                 // Step 1: create the bones.
-                for (int boneIndex = 0, n = bones.Length; boneIndex < n; boneIndex++) {
-                    Transform unityBoneTransform = bones [boneIndex];
-
-                    // Create the bone node if we haven't already. Parent it to
-                    // its corresponding parent, or to the scene if there is none.
-                    FbxNode fbxBoneNode;
-                    if (!MapUnityObjectToFbxNode.TryGetValue(unityBoneTransform.gameObject, out fbxBoneNode)) {
-                        if (ExportSettings.mayaCompatibleNames) {
-                            unityBoneTransform.name = ConvertToMayaCompatibleName (unityBoneTransform.name);
-                        }
-                        fbxBoneNode = FbxNode.Create (fbxScene, unityBoneTransform.name);
-                        MapUnityObjectToFbxNode.Add(unityBoneTransform.gameObject, fbxBoneNode);
-                    }
-
-                    // Set it up as a skeleton node if we haven't already.
-                    if (fbxBoneNode.GetSkeleton() == null) {
-                        FbxSkeleton fbxSkeleton = FbxSkeleton.Create (fbxScene, unityBoneTransform.name + "_Skel");
-
-                        var fbxSkeletonType = skinnedMesh.rootBone != unityBoneTransform//index.ContainsKey(unityBoneTransform.parent)
-                            ? FbxSkeleton.EType.eLimbNode : FbxSkeleton.EType.eRoot;
-                        fbxSkeleton.SetSkeletonType (fbxSkeletonType);
-                        fbxSkeleton.Size.Set (1.0f*UnitScaleFactor);
-                        fbxBoneNode.SetNodeAttribute (fbxSkeleton);
-                    }
-                }
-
-                List<Transform> boneList = new List<Transform> (bones);
-                Queue<Transform> q = new Queue<Transform> ();
-                q.Enqueue (skinnedMesh.rootBone);
+                List<Transform> boneList = new List<Transform> ();
+                Queue<Transform> q = new Queue<Transform> (bones);
                 while (q.Count > 0) {
                     var v = q.Dequeue ();
 
-                    if (!index.ContainsKey (v) && v.childCount > 0) {
+                    if (IsBone(v, index)) {
+                        // Create the bone node if we haven't already. Parent it to
+                        // its corresponding parent, or to the scene if there is none.
                         FbxNode fbxBoneNode;
                         if (!MapUnityObjectToFbxNode.TryGetValue (v.gameObject, out fbxBoneNode)) {
                             if (ExportSettings.mayaCompatibleNames) {
@@ -826,16 +815,11 @@ namespace FbxExporters
                             fbxBoneNode.SetNodeAttribute (fbxSkeleton);
                         }
 
-                        if (v.parent != null && MapUnityObjectToFbxNode.ContainsKey(v.parent.gameObject)) {
-                            var fbxParent = MapUnityObjectToFbxNode [v.parent.gameObject];
-                            fbxParent.AddChild (fbxBoneNode);
-                        }
-
                         boneList.Add (v);
-                    }
 
-                    foreach (Transform child in v) {
-                        q.Enqueue (child);
+                        foreach (Transform child in v) {
+                            q.Enqueue (child);
+                        }
                     }
                 }
 
@@ -854,24 +838,26 @@ namespace FbxExporters
                     var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
 
                     Matrix4x4 pose;
-                    if (boneIndex < bones.Length) {
+                    if (index.ContainsKey(unityBone)) {
+                        int i = index[unityBone];
+
                         if (fbxBone.GetSkeleton().GetSkeletonType() == FbxSkeleton.EType.eRoot) {
                             // bind pose is local -> root. We want root -> local, so invert.
                             var parentTransform = skinnedMesh.transform;
                             var parentMatrix = Matrix4x4.TRS (parentTransform.localPosition, parentTransform.localRotation, parentTransform.localScale);
 
-                            pose = parentMatrix * bindPoses[boneIndex].inverse;
+                            pose = parentMatrix * bindPoses[i].inverse;
                         } else {
                             if (index.ContainsKey (unityBone.parent)) {
                                 // Bind pose is local -> parent -> ... -> root.
                                 // We want parent -> local.
                                 // Invert our bind pose to get root -> local.
                                 // The apply parent -> root to leave just parent -> local.
-                                pose = bindPoses [index [unityBone.parent]] * bindPoses [boneIndex].inverse;
+                                pose = bindPoses [index [unityBone.parent]] * bindPoses [i].inverse;
                             } else if (unityBone.parent != null) {
                                 //var parentPose = Matrix4x4.TRS (unityBone.parent.localPosition, unityBone.parent.localRotation, unityBone.parent.localScale);
                                 var parentPose = unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
-                                pose = parentPose * bindPoses [boneIndex].inverse;
+                                pose = parentPose * bindPoses [i].inverse;
                             } else {
                                 pose = Matrix4x4.identity;
                             }
