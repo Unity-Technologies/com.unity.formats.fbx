@@ -64,9 +64,6 @@ namespace FbxExporters.UnitTests
 
             Assert.That(exportedCurve.keys.Length, Is.EqualTo(keys.Length));
 
-            Debug.Log(AnimationUtility.GetEditorCurve(clip, AnimationUtility.GetCurveBindings(clip)[0]).keys[1].value);
-            Debug.Log(AnimationUtility.GetEditorCurve(exportedClip, AnimationUtility.GetCurveBindings(exportedClip)[0]).keys[1].value);
-
             for (int i = 0; i < exportedCurve.keys.Length; i++)
             {
                 Assert.That(exportedCurve.keys[i].time == keys[i].time);

@@ -984,6 +984,14 @@ namespace FbxExporters
                 for (int keyIndex = 0, n = unityAnimCurve.length; keyIndex < n; ++keyIndex)
                 {
                     var key = unityAnimCurve[keyIndex];
+
+                    switch (fbxProperty.GetName())
+                    {
+                        case "Intensity":
+                            key.value *= 100.0f;
+                            break;
+                    }
+
                     var fbxTime = FbxTime.FromSecondDouble(key.time);
                     fbxAnimCurve.KeyAdd(fbxTime);
                     fbxAnimCurve.KeySet(keyIndex, fbxTime, key.value);
