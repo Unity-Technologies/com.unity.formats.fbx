@@ -786,44 +786,48 @@ namespace FbxExporters
                 }
 
                 // Step 1: create the bones.
-                List<Transform> boneList = new List<Transform> ();
-                Queue<Transform> q = new Queue<Transform> (bones);
-                while (q.Count > 0) {
-                    var v = q.Dequeue ();
+                HashSet<Transform> boneSet = new HashSet<Transform> ();
+                var s = new Stack<Transform> ();
+                s.Push(skinnedMesh.rootBone);
+                while (s.Count > 0) {
+                    var t = s.Pop();
 
-                    if (IsBone(v, index)) {
-                        // Create the bone node if we haven't already. Parent it to
-                        // its corresponding parent, or to the scene if there is none.
-                        FbxNode fbxBoneNode;
-                        if (!MapUnityObjectToFbxNode.TryGetValue (v.gameObject, out fbxBoneNode)) {
-                            if (ExportSettings.mayaCompatibleNames) {
-                                v.name = ConvertToMayaCompatibleName (v.name);
+                    if (IsBone(t, index)) {
+                        if (!boneSet.Contains (t)) {
+                            // Create the bone node if we haven't already. Parent it to
+                            // its corresponding parent, or to the scene if there is none.
+                            FbxNode fbxBoneNode;
+                            if (!MapUnityObjectToFbxNode.TryGetValue (t.gameObject, out fbxBoneNode)) {
+                                if (ExportSettings.mayaCompatibleNames) {
+                                    t.name = ConvertToMayaCompatibleName (t.name);
+                                }
+                                fbxBoneNode = FbxNode.Create (fbxScene, t.name);
+                                fbxBoneNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
+                                MapUnityObjectToFbxNode.Add (t.gameObject, fbxBoneNode);
                             }
-                            fbxBoneNode = FbxNode.Create (fbxScene, v.name);
-                            fbxBoneNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
-                            MapUnityObjectToFbxNode.Add (v.gameObject, fbxBoneNode);
-                        }
 
-                        // Set it up as a skeleton node if we haven't already.
-                        if (fbxBoneNode.GetSkeleton() == null) {
-                            FbxSkeleton fbxSkeleton = FbxSkeleton.Create (fbxScene, v.name + "_Skel");
+                            // Set it up as a skeleton node if we haven't already.
+                            if (fbxBoneNode.GetSkeleton () == null) {
+                                FbxSkeleton fbxSkeleton = FbxSkeleton.Create (fbxScene, t.name + "_Skel");
 
-                            var fbxSkeletonType = skinnedMesh.rootBone != v//index.ContainsKey(unityBoneTransform.parent)
+                                var fbxSkeletonType = skinnedMesh.rootBone != t
                                 ? FbxSkeleton.EType.eLimbNode : FbxSkeleton.EType.eRoot;
-                            fbxSkeleton.SetSkeletonType (fbxSkeletonType);
-                            fbxSkeleton.Size.Set (1.0f*UnitScaleFactor);
-                            fbxBoneNode.SetNodeAttribute (fbxSkeleton);
+                                fbxSkeleton.SetSkeletonType (fbxSkeletonType);
+                                fbxSkeleton.Size.Set (1.0f * UnitScaleFactor);
+                                fbxBoneNode.SetNodeAttribute (fbxSkeleton);
+                            }
+
+                            boneSet.Add (t);
                         }
 
-                        boneList.Add (v);
-
-                        foreach (Transform child in v) {
-                            q.Enqueue (child);
+                        foreach (Transform child in t) {
+                            s.Push (child);
                         }
                     }
                 }
 
                 // Step 2: connect up the hierarchy.
+                var boneList = boneSet.ToArray();
                 foreach (var unityBone in boneList) {
                     if (unityBone.parent != null && MapUnityObjectToFbxNode.ContainsKey(unityBone.parent.gameObject)) {
                         var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
@@ -832,8 +836,45 @@ namespace FbxExporters
                     }
                 }
 
+                // Get bindposes
+                var boneToBindPose = new Dictionary<Transform, Matrix4x4>();
+                for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
+                    var unityBone = boneList [boneIndex];
+
+                    Matrix4x4 pose;
+                    if (index.ContainsKey (unityBone)) {
+                        int i = index [unityBone];
+                        pose = bindPoses [i];
+                    } else {
+                        pose = unityBone.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
+                    }
+                    boneToBindPose.Add (unityBone, pose);
+                }
+
                 // Step 3: set up the transforms.
-                for (int boneIndex = 0, n = boneList.Count; boneIndex < n; boneIndex++) {
+                for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
+                    var unityBone = boneList [boneIndex];
+                    var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
+
+                    Matrix4x4 pose;
+
+                    var bindPose = boneToBindPose [unityBone];
+
+                    if (fbxBone.GetSkeleton ().GetSkeletonType () == FbxSkeleton.EType.eRoot) {
+                        // bind pose is local -> root. We want root -> local, so invert.
+                        var parentTransform = skinnedMesh.transform;
+                        var parentMatrix = Matrix4x4.TRS (parentTransform.localPosition, parentTransform.localRotation, parentTransform.localScale);
+
+                        pose = parentMatrix * bindPose.inverse;
+                    } else {
+                        // Bind pose is local -> parent -> ... -> root.
+                        // We want parent -> local.
+                        // Invert our bind pose to get root -> local.
+                        // The apply parent -> root to leave just parent -> local.
+                        pose = boneToBindPose [unityBone.parent] * bindPose.inverse;
+                    }
+
+                /*for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
                     var unityBone = boneList [boneIndex];
                     var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
 
@@ -864,41 +905,6 @@ namespace FbxExporters
                         }
                     } else {
                          pose = Matrix4x4.TRS (unityBone.localPosition, unityBone.localRotation, unityBone.localScale);
-                    }
-
-                /*for (int boneIndex = 0, n = bones.Length; boneIndex < n; boneIndex++) {
-                    var unityBone = bones[boneIndex];
-                    var fbxBone = MapUnityObjectToFbxNode[unityBone.gameObject];
-
-                    Matrix4x4 pose;
-                    if (fbxBone.GetSkeleton().GetSkeletonType() == FbxSkeleton.EType.eRoot) {
-                        // bind pose is local -> root. We want root -> local, so invert.
-                        var parentTransform = skinnedMesh.transform;
-                        var parentMatrix = Matrix4x4.TRS (parentTransform.localPosition, parentTransform.localRotation, parentTransform.localScale);
-
-                        pose = parentMatrix * bindPoses[boneIndex].inverse;
-                    } else {
-                        if (index.ContainsKey (unityBone.parent)) {
-                            // Bind pose is local -> parent -> ... -> root.
-                            // We want parent -> local.
-                            // Invert our bind pose to get root -> local.
-                            // The apply parent -> root to leave just parent -> local.
-                            pose = bindPoses [index [unityBone.parent]] * bindPoses [boneIndex].inverse;
-                        } else if (unityBone.parent != null) {
-                            //var parentPose = Matrix4x4.TRS (unityBone.parent.localPosition, unityBone.parent.localRotation, unityBone.parent.localScale);
-                            var parentPose = unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
-                            //var p = unityBone.parent;
-                            //while (p != null && !index.ContainsKey (p)) {
-                            //    p = p.parent;
-                            //}
-                            //if (p != null) {
-                            //    parentPose = bindPoses [index [p]];
-                            //}
-
-                            pose = parentPose * bindPoses [boneIndex].inverse;
-                        } else {
-                            pose = Matrix4x4.identity;
-                        }
                     }*/
 
                     // FBX is transposed relative to Unity: transpose as we convert.
