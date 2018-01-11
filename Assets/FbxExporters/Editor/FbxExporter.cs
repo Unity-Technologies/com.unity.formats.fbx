@@ -977,7 +977,6 @@ namespace FbxExporters
                 {
                     fbxAnimCurve = fbxProperty.GetCurve(fbxAnimLayer, true);
                 }
-
                 // copy Unity AnimCurve to FBX AnimCurve.
                 fbxAnimCurve.KeyModifyBegin();
 
@@ -985,13 +984,10 @@ namespace FbxExporters
                 {
                     var key = unityAnimCurve[keyIndex];
 
-                    switch (fbxProperty.GetName())
+                    if (fbxProperty.GetName() == "Intensity")
                     {
-                        case "Intensity":
                             key.value *= 100.0f;
-                            break;
                     }
-
                     var fbxTime = FbxTime.FromSecondDouble(key.time);
                     fbxAnimCurve.KeyAdd(fbxTime);
                     fbxAnimCurve.KeySet(keyIndex, fbxTime, key.value);
@@ -1037,6 +1033,36 @@ namespace FbxExporters
                     if (unityPropertyName.StartsWith("m_Intensity", ct) || unityPropertyName.EndsWith("T.z", ct))
                     {
                         prop = new FbxPropertyChannelPair("Intensity", null);
+                        return true;
+                    }
+
+                    if (unityPropertyName.StartsWith("m_SpotAngle", ct) || unityPropertyName.EndsWith("T.z", ct))
+                    {
+                        prop = new FbxPropertyChannelPair("OuterAngle", null);
+                        return true;
+                    }
+
+                    if (unityPropertyName.StartsWith("m_Color", ct) || unityPropertyName.EndsWith("T.z", ct))
+                    {
+                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR);
+                        return true;
+                    }
+
+                    if (unityPropertyName.StartsWith("m_Color.r", ct) || unityPropertyName.EndsWith("T.z", ct))
+                    {
+                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_RED);
+                        return true;
+                    }
+
+                    if (unityPropertyName.StartsWith("m_Color.g", ct) || unityPropertyName.EndsWith("T.z", ct))
+                    {
+                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_GREEN);
+                        return true;
+                    }
+
+                    if (unityPropertyName.StartsWith("m_Color.b", ct) || unityPropertyName.EndsWith("T.z", ct))
+                    {
+                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_BLUE);
                         return true;
                     }
 
