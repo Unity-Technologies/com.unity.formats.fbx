@@ -970,7 +970,9 @@ namespace FbxExporters
                 FbxAnimCurve fbxAnimCurve;
                 // Create the AnimCurve on the channel
                 if (fbxPropertyChannelPair.Channel != null)
+                {
                     fbxAnimCurve = fbxProperty.GetCurve(fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
+                }
                 else
                 {
                     fbxAnimCurve = fbxProperty.GetCurve(fbxAnimLayer, true);
