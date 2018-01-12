@@ -712,7 +712,7 @@ namespace FbxExporters
 
                 // export skeleton
                 if (!ExportSkeleton (unitySkin, fbxScene)) {
-                    Debug.LogError("failed to export skeleton");
+                    Debug.LogWarning("failed to export skeleton");
                     return false;
                 }
 
