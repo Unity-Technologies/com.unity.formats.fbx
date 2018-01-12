@@ -126,6 +126,56 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Which components map from Unity Object to Fbx Object
+            /// </summary>
+            ///
+            public enum FbxNodeRelationType
+            {
+                NodeAttribute,
+                Property,
+                Material
+            }
+
+            public static Dictionary<System.Type, KeyValuePair<System.Type,FbxNodeRelationType>> MapsToFbxObject = new Dictionary<System.Type, KeyValuePair<System.Type,FbxNodeRelationType>> ()
+            {
+                { typeof(Transform),            new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxProperty), FbxNodeRelationType.Property) },
+                { typeof(MeshFilter),           new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxMesh), FbxNodeRelationType.NodeAttribute) },
+                { typeof(SkinnedMeshRenderer),  new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxMesh), FbxNodeRelationType.NodeAttribute) },
+                { typeof(Light),                new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxLight), FbxNodeRelationType.NodeAttribute) },
+                { typeof(Camera),               new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxCamera), FbxNodeRelationType.NodeAttribute) },
+                { typeof(Material),             new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxSurfaceMaterial), FbxNodeRelationType.Material) },
+            };
+
+            /// <summary>
+            /// Return True is Unity component is animatable
+            ///
+            public static bool IsAnimatable (System.Type componentType) { return GetAnimatableProperties (componentType).Any (); }
+
+            private static HashSet<System.Type> m_animatableTypes = new HashSet<System.Type> () { typeof (System.Single) };
+
+            public static IEnumerable<System.Reflection.PropertyInfo> GetAnimatableProperties (System.Type componentType)
+            {
+            	return from p in componentType.GetProperties ()
+            		   where IsAnimatableProperty (p)
+            		   select p;
+            }
+
+            private static bool IsAnimatableProperty (System.Reflection.PropertyInfo p)
+            {
+            	// assume any custom attribute is System.ObsoleteAttribute
+            	return m_animatableTypes.Contains (p.PropertyType) &&
+            							!p.GetCustomAttributes (true).Any ();
+            }
+
+            /// <summary>
+            /// Which components map to FbxProperty
+            /// </summary>
+            public static HashSet<System.Type> MapsToFbxProperty = new HashSet<System.Type> ()
+            {
+                typeof(Transform),
+            };
+
+            /// <summary>
             /// Map Unity material name to FBX material object
             /// </summary>
             Dictionary<string, FbxSurfaceMaterial> MaterialMap = new Dictionary<string, FbxSurfaceMaterial> ();
@@ -2273,7 +2323,7 @@ namespace FbxExporters
             {
             }
 
-            public bool Verbose { private set {;} get { return false; } }
+            public bool Verbose { private set {;} get { return true; } }
 
             /// <summary>
             /// manage the selection of a filename

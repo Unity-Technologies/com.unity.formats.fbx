@@ -12,20 +12,25 @@ namespace FbxExporters.UnitTests
 
     public class AnimationTestDataClass
     {
-        static float [] m_keytimes1 = new float [3] { 1f, 2f, 3f };
-        static float [] m_keyvalues1 = new float [3] { 0f, 100f, 0f };
-        static float [] m_keyvalues2 = new float [3] { 1f, 100f, 1f };
-        static Vector3 [] m_keyEulerValues3 = new Vector3 [3] { new Vector3 (0f, 80f, 0f), new Vector3 (80f, 0f, 0f), new Vector3 (0f, 0f, 80f) };
-        static Vector3 [] m_keyEulerValues4 = new Vector3 [3] { new Vector3 (0f, 270f, 0f), new Vector3 (270f, 0f, 0f), new Vector3 (0f, 0f, 270f) };
+        public static IEnumerable<System.Type> m_componentTypes = 
+            typeof (Component).Assembly.GetTypes ().
+            Where (t => typeof (Component).IsAssignableFrom (t) && 
+                   ModelExporter.IsAnimatable(t) && ModelExporter.MapsToFbxObject.ContainsKey(t));
+
+        public static float [] m_keytimes1 = new float [3] { 1f, 2f, 3f };
+        public static float [] m_keyFloatValues1 = new float [3] { 0f, 100f, 0f };
+        public static float [] m_keyvalues2 = new float [3] { 1f, 100f, 1f };
+        public static Vector3 [] m_keyEulerValues3 = new Vector3 [3] { new Vector3 (0f, 80f, 0f), new Vector3 (80f, 0f, 0f), new Vector3 (0f, 0f, 80f) };
+        public static Vector3 [] m_keyEulerValues4 = new Vector3 [3] { new Vector3 (0f, 270f, 0f), new Vector3 (270f, 0f, 0f), new Vector3 (0f, 0f, 270f) };
 
         public static IEnumerable TestCases1 {
             get {
                 yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof (Transform), "m_LocalScale.x").Returns (1);
                 yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof (Transform), "m_LocalScale.y").Returns (1);
                 yield return new TestCaseData (m_keytimes1, m_keyvalues2, typeof (Transform), "m_LocalScale.z").Returns (1);
-                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof (Transform), "m_LocalPosition.x").Returns (1);
-                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof (Transform), "m_LocalPosition.y").Returns (1);
-                yield return new TestCaseData (m_keytimes1, m_keyvalues1, typeof (Transform), "m_LocalPosition.z").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyFloatValues1, typeof (Transform), "m_LocalPosition.x").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyFloatValues1, typeof (Transform), "m_LocalPosition.y").Returns (1);
+                yield return new TestCaseData (m_keytimes1, m_keyFloatValues1, typeof (Transform), "m_LocalPosition.z").Returns (1);
             }
         }
         public static IEnumerable TestCases2 {
@@ -37,6 +42,13 @@ namespace FbxExporters.UnitTests
         public static IEnumerable TestCases3 {
             get {
                 yield return new TestCaseData (m_keytimes1, m_keyEulerValues4, typeof (Transform), new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" } ).Returns (3);
+            }
+        }
+        // specify one of each component type
+        public static IEnumerable TestCases4 { 
+            get {
+                foreach (var cType in m_componentTypes)
+                    yield return new TestCaseData (cType).Returns(1);
             }
         }
     }
@@ -86,7 +98,7 @@ namespace FbxExporters.UnitTests
         public class KeyData
         {
             public float [] keyTimesInSeconds;
-            public System.Type propertyType;
+            public System.Type componentType;
 
             public virtual int NumKeys { get { return 0; } }
             public virtual int NumComponents { get { return 0; } }
@@ -107,6 +119,18 @@ namespace FbxExporters.UnitTests
             public override float[] GetKeyValues (int id) { return keyFloatValues; }
             public override string  GetComponentName (int id) { return propertyName; }
             public override int     FindComponent (string name) { return (name == propertyName) ? 0 : -1; }
+        }
+
+        public class SingleKeyData : KeyData
+        {
+        	public string[] propertyNames;
+        	public System.Single [] keyFloatValues;
+
+        	public override int NumKeys { get { return Mathf.Min (keyTimesInSeconds.Length, keyFloatValues.Length); } }
+        	public override int NumComponents { get { return propertyNames.Length; } }
+        	public override float [] GetKeyValues (int id) { return keyFloatValues; }
+        	public override string GetComponentName (int id) { return propertyNames[id]; }
+        	public override int FindComponent (string name) { return System.Array.IndexOf (propertyNames, name); }
         }
 
         public class QuaternionKeyData : KeyData
@@ -132,128 +156,156 @@ namespace FbxExporters.UnitTests
             }
         }
 
-        [Test, TestCaseSource (typeof (AnimationTestDataClass), "TestCases1")]
-        public int SimplePropertyAnimTest (float [] keyTimesInSeconds, float [] keyValues, System.Type propertyType, string componentName)
+        public int AnimTest (KeyData keyData, string name)
         {
-            KeyData keyData = new ComponentKeyData { propertyName = componentName, propertyType = propertyType, keyTimesInSeconds = keyTimesInSeconds, keyFloatValues = keyValues };
+        	string path = GetRandomFbxFilePath ();
+
+        	// TODO: add extra parent so that we can test export/import of transforms
+        	GameObject goRoot = new GameObject ();
+        	goRoot.name = "root_" + name;
+
+        	GameObject goModel = new GameObject ();
+        	goModel.name = "model_" + name;
+        	goModel.transform.parent = goRoot.transform;
+
+            // check for component and add if missing
+            var goComponent = goModel.GetComponent (keyData.componentType);
+            if (!goComponent)
+                goModel.AddComponent (keyData.componentType);
+                   
+        	Animation animOrig = goModel.AddComponent (typeof (Animation)) as Animation;
+
+        	AnimationClip animClipOriginal = new AnimationClip ();
+
+        	animClipOriginal.legacy = true;
+        	animClipOriginal.name = "anim_" + name;
+
+        	for (int id = 0; id < keyData.NumComponents; id++) {
+        		// initialize keys
+        		Keyframe [] keys = new Keyframe [keyData.NumKeys];
+
+        		for (int idx = 0; idx < keyData.NumKeys; idx++) {
+        			keys [idx].time = keyData.keyTimesInSeconds [idx];
+        			keys [idx].value = keyData.GetKeyValues (id) [idx];
+        		}
+        		AnimationCurve animCurveOriginal = new AnimationCurve (keys);
+
+        		animClipOriginal.SetCurve ("", keyData.componentType, keyData.GetComponentName (id), animCurveOriginal);
+        	}
+
+        	animOrig.AddClip (animClipOriginal, animClipOriginal.name);
+        	animOrig.clip = animClipOriginal;
+
+        	//export the object
+        	var exportedFilePath = ModelExporter.ExportObject (path, goRoot);
+        	Assert.That (exportedFilePath, Is.EqualTo (path));
+
+        	// TODO: Uni-34492 change importer settings of (newly exported model) 
+        	// so that it's not resampled and it is legacy animation
+        	{
+        		ModelImporter modelImporter = AssetImporter.GetAtPath (path) as ModelImporter;
+        		modelImporter.resampleCurves = false;
+        		AssetDatabase.ImportAsset (path);
+        		modelImporter.animationType = ModelImporterAnimationType.Legacy;
+        		AssetDatabase.ImportAsset (path);
+        	}
+
+        	//acquire imported object from exported file
+        	Object [] goAssetImported = AssetDatabase.LoadAllAssetsAtPath (path);
+        	Assert.That (goAssetImported, Is.Not.Null);
+
+        	// TODO : configure object so that it imports w Legacy Animation
+
+        	AnimationClip animClipImported = null;
+        	foreach (Object o in goAssetImported) {
+        		animClipImported = o as AnimationClip;
+        		if (animClipImported) break;
+        	}
+        	Assert.That (animClipImported, Is.Not.Null, "expected imported clip");
+
+        	// TODO : configure import settings so we don't need to force legacy
+        	animClipImported.legacy = true;
+
+        	// check clip properties match
+        	AnimClipTest (animClipOriginal, animClipImported);
+
+        	// check animCurve & keys
+        	int result = 0;
+
+        	foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (animClipImported)) {
+        		AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, curveBinding);
+        		Assert.That (animCurveImported, Is.Not.Null);
+
+        		string altPropertyName;
+
+        		MapAltPropertyName.TryGetValue (curveBinding.propertyName, out altPropertyName);
+
+        		bool hasAltPropertyName = !string.IsNullOrEmpty (altPropertyName);
+
+        		if (!hasAltPropertyName)
+        			altPropertyName = curveBinding.propertyName;
+
+        		int id = keyData.FindComponent (altPropertyName);
+
+        		if (id != -1) {
+        			AnimCurveTest (keyData.keyTimesInSeconds, hasAltPropertyName ? keyData.GetAltKeyValues (id) : keyData.GetKeyValues (id), animCurveImported, curveBinding.propertyName);
+        			result++;
+        		}
+        	}
+
+        	return result;
+        }
+
+        [Test, TestCaseSource (typeof (AnimationTestDataClass), "TestCases1")]
+        public int SimplePropertyAnimTest (float [] keyTimesInSeconds, float [] keyValues, System.Type componentType, string componentName)
+        {
+            KeyData keyData = new ComponentKeyData { propertyName = componentName, componentType = componentType, keyTimesInSeconds = keyTimesInSeconds, keyFloatValues = keyValues };
 
             return AnimTest (keyData, componentName);
         }
 
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "TestCases2")]
-        public int QuaternionPropertyAnimTest (float [] keyTimesInSeconds, Vector3 [] keyValues, System.Type propertyType, string[] componentNames)
+        public int QuaternionPropertyAnimTest (float [] keyTimesInSeconds, Vector3 [] keyValues, System.Type componentType, string[] componentNames)
         {
-            KeyData keyData = new QuaternionKeyData { propertyNames = componentNames, propertyType = propertyType, keyTimesInSeconds = keyTimesInSeconds, keyEulerValues = keyValues };
+            KeyData keyData = new QuaternionKeyData { propertyNames = componentNames, componentType = componentType, keyTimesInSeconds = keyTimesInSeconds, keyEulerValues = keyValues };
 
-            return AnimTest (keyData, propertyType.ToString() + "_Quaternion");
+            return AnimTest (keyData, componentType.ToString() + "_Quaternion");
         }
 
         [Ignore("Uni-34804 gimbal conditions")]
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "TestCases3")]
-        public int GimbalConditionsAnimTest (float [] keyTimesInSeconds, Vector3 [] keyValues, System.Type propertyType, string [] componentNames)
+        public int GimbalConditionsAnimTest (float [] keyTimesInSeconds, Vector3 [] keyValues, System.Type componentType, string [] componentNames)
         {
-            KeyData keyData = new QuaternionKeyData { propertyNames = componentNames, propertyType = propertyType, keyTimesInSeconds = keyTimesInSeconds, keyEulerValues = keyValues };
+            KeyData keyData = new QuaternionKeyData { propertyNames = componentNames, componentType = componentType, keyTimesInSeconds = keyTimesInSeconds, keyEulerValues = keyValues };
 
-            return AnimTest (keyData, propertyType.ToString () + "_Quaternion");
+            return AnimTest (keyData, componentType.ToString () + "_Quaternion");
         }
 
-        public int AnimTest (KeyData keyData, string name)
+        [Test, TestCaseSource (typeof (AnimationTestDataClass), "TestCases4")]
+        public int ComponentSingleAnimTest (System.Type componentType)
         {
-            string path = GetRandomFbxFilePath ();
+            Debug.Log (string.Format ("ComponentAnimTest {0}", componentType.ToString()));
 
-            // TODO: add extra parent so that we can test export/import of transforms
-            GameObject goRoot = new GameObject ();
-            goRoot.name = "root_"+name;
-
-            GameObject goModel = new GameObject ();
-            goModel.name = "model_"+name;
-            goModel.transform.parent = goRoot.transform;
-
-            Animation animOrig = goModel.AddComponent (typeof (Animation)) as Animation;
-
-            AnimationClip animClipOriginal = new AnimationClip ();
-
-            animClipOriginal.legacy = true;
-            animClipOriginal.name = "anim_" + name;
-
-            for (int id = 0; id < keyData.NumComponents; id++)
+            if (!ModelExporter.MapsToFbxObject.ContainsKey(componentType))
             {
-                // initialize keys
-                Keyframe [] keys = new Keyframe [keyData.NumKeys];
-
-                for (int idx = 0; idx < keyData.NumKeys; idx++) {
-                    keys [idx].time = keyData.keyTimesInSeconds [idx];
-                    keys [idx].value = keyData.GetKeyValues (id) [idx];
-                }
-                AnimationCurve animCurveOriginal = new AnimationCurve (keys);
-
-                animClipOriginal.SetCurve ("", keyData.propertyType, keyData.GetComponentName(id), animCurveOriginal);
+                Debug.Log (string.Format ("skipping {0}; fbx export not supported", componentType.ToString()));
+                return 1;                
             }
 
-            animOrig.AddClip (animClipOriginal, animClipOriginal.name);
-            animOrig.clip = animClipOriginal;
+            string[] propertyNames = (from p in ModelExporter.GetAnimatableProperties (componentType) select p.Name).ToArray();
+            float [] keyTimesInSeconds = AnimationTestDataClass.m_keytimes1;
+            float [] keyValues = AnimationTestDataClass.m_keyFloatValues1;
 
-            //export the object
-            var exportedFilePath = ModelExporter.ExportObject (path, goRoot);
-            Assert.That (exportedFilePath, Is.EqualTo(path));
-
-            // TODO: Uni-34492 change importer settings of (newly exported model) 
-            // so that it's not resampled and it is legacy animation
+            if (propertyNames.Length == 0)
             {
-                ModelImporter modelImporter = AssetImporter.GetAtPath (path) as ModelImporter;
-                modelImporter.resampleCurves = false;
-                AssetDatabase.ImportAsset (path);
-                modelImporter.animationType = ModelImporterAnimationType.Legacy;
-                AssetDatabase.ImportAsset (path);
+                Debug.Log (string.Format ("skipping {0}; no animatable Single properties found", componentType.ToString()));
+                return 1;                
             }
 
-            //acquire imported object from exported file
-            Object[] goAssetImported = AssetDatabase.LoadAllAssetsAtPath (path);
-            Assert.That(goAssetImported, Is.Not.Null);
+            KeyData keyData = new SingleKeyData { propertyNames = propertyNames, componentType = componentType, keyTimesInSeconds = keyTimesInSeconds, keyFloatValues = keyValues };
 
-            // TODO : configure object so that it imports w Legacy Animation
-
-            AnimationClip animClipImported = null;
-            foreach (Object o in goAssetImported)
-            {
-                animClipImported = o as AnimationClip;
-                if (animClipImported) break;
-            }
-            Assert.That (animClipImported, Is.Not.Null);
-
-            // TODO : configure import settings so we don't need to force legacy
-            animClipImported.legacy = true;
-
-            // check clip properties match
-            AnimClipTest (animClipOriginal, animClipImported);
-                            
-            // check animCurve & keys
-            int result = 0;
-
-            foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (animClipImported)) 
-            {
-                AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, curveBinding);
-                Assert.That(animCurveImported, Is.Not.Null);
-
-                string altPropertyName;
-
-                MapAltPropertyName.TryGetValue (curveBinding.propertyName, out altPropertyName);
-
-                bool hasAltPropertyName = !string.IsNullOrEmpty (altPropertyName);
-
-                if (!hasAltPropertyName)
-                    altPropertyName = curveBinding.propertyName;
-
-                int id = keyData.FindComponent (altPropertyName);
-
-                if (id!=-1)
-                {
-                    AnimCurveTest (keyData.keyTimesInSeconds, hasAltPropertyName ? keyData.GetAltKeyValues(id) : keyData.GetKeyValues(id), animCurveImported, curveBinding.propertyName);
-                    result++;
-                }
-            }
-
-            return result;
+            return AnimTest (keyData, componentType.ToString () + "SingleAnimTest") <= propertyNames.Length ? 1 : 0;
         }
+
     }
 }
