@@ -874,39 +874,6 @@ namespace FbxExporters
                         pose = boneToBindPose [unityBone.parent] * bindPose.inverse;
                     }
 
-                /*for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
-                    var unityBone = boneList [boneIndex];
-                    var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
-
-                    Matrix4x4 pose;
-                    if (index.ContainsKey(unityBone)) {
-                        int i = index[unityBone];
-
-                        if (fbxBone.GetSkeleton().GetSkeletonType() == FbxSkeleton.EType.eRoot) {
-                            // bind pose is local -> root. We want root -> local, so invert.
-                            var parentTransform = skinnedMesh.transform;
-                            var parentMatrix = Matrix4x4.TRS (parentTransform.localPosition, parentTransform.localRotation, parentTransform.localScale);
-
-                            pose = parentMatrix * bindPoses[i].inverse;
-                        } else {
-                            if (index.ContainsKey (unityBone.parent)) {
-                                // Bind pose is local -> parent -> ... -> root.
-                                // We want parent -> local.
-                                // Invert our bind pose to get root -> local.
-                                // The apply parent -> root to leave just parent -> local.
-                                pose = bindPoses [index [unityBone.parent]] * bindPoses [i].inverse;
-                            } else if (unityBone.parent != null) {
-                                //var parentPose = Matrix4x4.TRS (unityBone.parent.localPosition, unityBone.parent.localRotation, unityBone.parent.localScale);
-                                var parentPose = unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
-                                pose = parentPose * bindPoses [i].inverse;
-                            } else {
-                                pose = Matrix4x4.identity;
-                            }
-                        }
-                    } else {
-                         pose = Matrix4x4.TRS (unityBone.localPosition, unityBone.localRotation, unityBone.localScale);
-                    }*/
-
                     // FBX is transposed relative to Unity: transpose as we convert.
                     FbxMatrix matrix = new FbxMatrix ();
                     matrix.SetColumn (0, new FbxVector4 (pose.GetRow (0).x, pose.GetRow (0).y, pose.GetRow (0).z, pose.GetRow (0).w));
