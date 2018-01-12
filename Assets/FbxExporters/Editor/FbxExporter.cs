@@ -755,6 +755,8 @@ namespace FbxExporters
                 return false;
             }
 
+            private Dictionary<SkinnedMeshRenderer, Transform[]> SkinnedMeshToBonesMap = new Dictionary<SkinnedMeshRenderer, Transform[]> ();
+
             /// <summary>
             /// Export bones of skinned mesh, if this is a skinned mesh with
             /// bones and bind poses.
@@ -837,6 +839,7 @@ namespace FbxExporters
                 }
 
                 // Get bindposes
+                SkinnedMeshToBonesMap.Add (skinnedMesh, boneList);
                 var boneToBindPose = new Dictionary<Transform, Matrix4x4>();
                 for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
                     var unityBone = boneList [boneIndex];
@@ -986,8 +989,12 @@ namespace FbxExporters
                 fbxPose.SetIsBindPose (true);
 
                 // assume each bone node has one weighted vertex cluster
-                for (int i = 0; i < skinnedMesh.bones.Length; i++) {
-                    FbxNode fbxBoneNode = MapUnityObjectToFbxNode [skinnedMesh.bones[i].gameObject];
+                Transform[] bones;
+                if (!SkinnedMeshToBonesMap.TryGetValue (skinnedMesh, out bones)) {
+                    return false;
+                }
+                for (int i = 0; i < bones.Length; i++) {
+                    FbxNode fbxBoneNode = MapUnityObjectToFbxNode [bones[i].gameObject];
 
                     // EvaluateGlobalTransform returns an FbxAMatrix (affine matrix)
                     // which has to be converted to an FbxMatrix so that it can be passed to fbxPose.Add().
