@@ -24,6 +24,9 @@ namespace FbxExporters
     /// </summary>
     public /*static*/ class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
     {
+        public delegate string getFBXNameFn(string nodeName);
+
+
         #if UNITY_EDITOR
         public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
         #else
@@ -159,6 +162,40 @@ namespace FbxExporters
                 m_fbxPrefab = fbxPrefab;
             }
 
+            // Check if the user has specified a new name in the inspector
+            public string getUnityObjectName(string fbxObjectName)
+            {
+                string newNameInUnity = fbxObjectName;
+               // UnityEngine.Assertions.Assert.IsTrue(m_fbxPrefab != null);
+                //UnityEngine.Assertions.Assert.IsTrue(m_fbxPrefab.NameMapping != null);
+                if (fbxObjectName != "" && m_fbxPrefab.NameMapping != null) {
+                    for (int i = 0; i < m_fbxPrefab.NameMapping.Length; i++)
+                    {
+                        if (fbxObjectName == m_fbxPrefab.NameMapping[i].FBXObjectName) {
+                            newNameInUnity = m_fbxPrefab.NameMapping[i].UnityObjectName;
+                            break;
+                        }
+                    }
+                }
+                return newNameInUnity;
+            }
+
+            // Check if the user has specified an old name in the inspector
+            public string getFBXObjectName(string unityObjectName)
+            {
+                string oldNameInFBX = unityObjectName;
+                if (unityObjectName != "" && m_fbxPrefab.NameMapping != null) {
+                    for (int i = 0; i < m_fbxPrefab.NameMapping.Length; i++)
+                    {
+                        if (unityObjectName == m_fbxPrefab.NameMapping[i].UnityObjectName) {
+                            oldNameInFBX = m_fbxPrefab.NameMapping[i].FBXObjectName;
+                            break;
+                        }
+                    }
+                }
+                return oldNameInFBX;
+            }
+
             /// <summary>
             /// Utility function: log a message, make clear it's the prefab update.
             /// </summary>
@@ -283,6 +320,8 @@ namespace FbxExporters
                 /// <summary>
                 /// Children of this node.
                 /// The key is the name, which is assumed to be unique.
+                /// Old fbx data, new fbx data should have FBX Object Name
+                /// Prefab data should have FBX Object Name
                 /// The value is, recursively, the representation of that subtree.
                 /// </summary>
                 Dictionary<string, FbxRepresentation> m_children = new Dictionary<string, FbxRepresentation>();
@@ -300,11 +339,12 @@ namespace FbxExporters
                 /// <summary>
                 /// Build a hierarchical representation based on a transform.
                 /// </summary>
-                public FbxRepresentation(Transform xfo, bool isRoot = true)
+                public FbxRepresentation(Transform xfo, getFBXNameFn getFBXName, bool isRoot = true)
                 {
                     m_children = new Dictionary<string, FbxRepresentation>();
-                    foreach(Transform child in xfo) {
-                        m_children.Add(child.name, new FbxRepresentation(child, isRoot: false));
+                    
+                    foreach (Transform child in xfo) {
+                        m_children.Add(child.name, new FbxRepresentation(child, getFBXName, isRoot: false));
                     }
                     foreach(var component in xfo.GetComponents<Component>()) {
                         // ignore missing components
@@ -406,7 +446,7 @@ namespace FbxExporters
                     return builder.ToString();
                 }
 
-                void InitFromJson(string json, ref int index)
+                void InitFromJson(string json, getFBXNameFn getFBXName, ref int index)
                 {
                     Consume('{', json, ref index);
                     if (Consume('}', json, ref index, required: false)) {
@@ -417,13 +457,15 @@ namespace FbxExporters
                             string name = ReadString(json, ref index);
                             Consume(':', json, ref index);
 
+
                             // hack: If the name starts with a '-' it's the name
                             // of a gameobject, and we parse it recursively. Otherwise
                             // it's the name of a component, and we store its value as a string.
                             bool isChild = (name.Length > 0) && (name[0] == '-');
                             if (isChild) {
-                                var subrep = new FbxRepresentation(json, ref index);
+                                var subrep = new FbxRepresentation(json, getFBXName, ref index);
                                 Add(ref m_children, name.Substring(1), subrep);
+                                //Add(ref m_children, getFBXName(name.Substring(1)), subrep);
                             } else {
                                 string jsonComponent = ReadString(json, ref index);
                                 Append(ref m_components, name, jsonComponent);
@@ -433,14 +475,14 @@ namespace FbxExporters
                     }
                 }
 
-                public FbxRepresentation(string json, ref int index) {
-                    InitFromJson(json, ref index);
+                public FbxRepresentation(string json, getFBXNameFn fn, ref int index) {
+                    InitFromJson(json, fn, ref index);
                 }
 
-                public FbxRepresentation(string json) {
+                public FbxRepresentation(string json, getFBXNameFn fn) {
                     if (string.IsNullOrEmpty(json)) { return; }
                     int index = 0;
-                    InitFromJson(json, ref index);
+                    InitFromJson(json, fn, ref index);
                 }
 
                 void ToJsonHelper(System.Text.StringBuilder builder) {
@@ -529,13 +571,13 @@ namespace FbxExporters
                     /// </summary>
                     void InitHelper(FbxRepresentation fbxrep, string nodeName)
                     {
-                        foreach(var typename in fbxrep.ComponentTypes) {
+                        foreach (var typename in fbxrep.ComponentTypes) {
                             var jsonValues = fbxrep.GetComponentValues(typename);
-                            foreach(var jsonValue in jsonValues) {
+                            foreach (var jsonValue in jsonValues) {
                                 Append(ref m_components, nodeName, typename, jsonValue);
                             }
                         }
-                        foreach(var child in fbxrep.ChildNames) {
+                        foreach (var child in fbxrep.ChildNames) {
                             m_parents.Add(child, nodeName);
                             InitHelper(fbxrep.GetChild(child), child);
                         }
@@ -546,7 +588,7 @@ namespace FbxExporters
                         InitHelper(fbxrep, "");
                     }
 
-                    public Data(Transform xfo) : this (new FbxRepresentation(xfo)) {
+                    public Data(Transform xfo, getFBXNameFn fn) : this(new FbxRepresentation(xfo, getFBXName: fn)) {
                     }
 
                     /// <summary>
@@ -613,10 +655,12 @@ namespace FbxExporters
                     }
                 }
 
+                private FbxPrefab m_fbxPrefab;
+                private FbxPrefabUtility m_fbxPrefabUtility;
                 /// <summary>
                 /// Data for the hierarchy of the old fbx file, the new fbx file, and the prefab.
                 /// </summary>
-                Data m_old, m_new, m_prefab;
+                Data m_oldFbxData, m_newFbxData, m_prefabData;
 
                 /// <summary>
                 /// Names of the new nodes to create in step 1.
@@ -628,7 +672,7 @@ namespace FbxExporters
                 /// Map from name of node in the prefab to name of node in prefab or newNodes.
                 /// This is all the nodes in the prefab that need to be reparented.
                 /// </summary>
-                Dictionary<string,string> m_reparentings;
+                Dictionary<string, string> m_reparentings;
 
                 /// <summary>
                 /// Names of the nodes in the prefab to destroy in step 3.
@@ -637,10 +681,18 @@ namespace FbxExporters
                 HashSet<string> m_nodesToDestroy;
 
                 /// <summary>
+                /// Names of the nodes that will be renamed in the prefab
+                /// in step 3.
+                /// </summary>
+                HashSet<string> m_nodesToRename;
+
+                /// <summary>
                 /// Names of the nodes that the prefab will have after we implement
                 /// steps 1, 2, and 3.
                 /// </summary>
                 HashSet<string> m_nodesInUpdatedPrefab;
+
+
 
                 /// <summary>
                 /// Components to destroy in step 4a.
@@ -674,17 +726,33 @@ namespace FbxExporters
                     // Figure out which nodes to add to the prefab, which nodes in the prefab to destroy.
                     Initialize(ref m_nodesToCreate);
                     Initialize(ref m_nodesToDestroy);
-                    foreach(var name in m_old.NodeNames.Union(m_new.NodeNames)) {
-                        var isOld = m_old.HasNode(name);
-                        var isNew = m_new.HasNode(name);
-                        if (isOld != isNew) {
+                    Initialize(ref m_nodesToRename);
+
+
+                    foreach (var nodeName in m_oldFbxData.NodeNames.Union(m_newFbxData.NodeNames)) {
+                        var isOldFBXNodeName = m_oldFbxData.HasNode(nodeName);
+                        var isNewFBXNodeName = m_newFbxData.HasNode(nodeName);
+
+                        if (isOldFBXNodeName != isNewFBXNodeName) {
+
+                            // If there is a mapping for the old name, skip it. We will add the new name to the nodes to rename
+                            if (m_newFbxData.HasNode(m_fbxPrefabUtility.getFBXObjectName(nodeName)) && isOldFBXNodeName) {
+                                continue;
+                            }
+
                             // A node was added or deleted in the DCC.
                             // Do the same in Unity if it wasn't already done.
-                            var isPrefab = m_prefab.HasNode(name);
-                            if (!isNew && isPrefab) {
-                                m_nodesToDestroy.Add(name);
-                            } else if (isNew && !isPrefab) {
-                                m_nodesToCreate.Add(name);
+                            var isPrefab = m_prefabData.HasNode(nodeName);
+                            // If the New FBX has a node that has to be renamed in the prefab
+                            if (isNewFBXNodeName && m_oldFbxData.HasNode(m_fbxPrefabUtility.getUnityObjectName(nodeName))) {
+                                // FBX Node Name of New FBX Data
+                                m_nodesToRename.Add(nodeName);
+                            // If it's an old name that is present in the prefab, add it to the list to destroy
+                            } else if (!isNewFBXNodeName && isPrefab) {
+                                m_nodesToDestroy.Add(nodeName);
+                            // If it's an new name that is not present in the prefab, add it to the list to destroy
+                            } else if (isNewFBXNodeName && !isPrefab) {
+                                m_nodesToCreate.Add(nodeName);
                             }
                         }
                     }
@@ -692,11 +760,11 @@ namespace FbxExporters
                     // Figure out what nodes will exist after we create and destroy.
                     Initialize(ref m_nodesInUpdatedPrefab);
                     m_nodesInUpdatedPrefab.Add(""); // the root is nameless
-                    foreach(var node in m_prefab.NodeNames.Union(m_nodesToCreate)) {
-                        if (m_nodesToDestroy.Contains(node)) {
+                    foreach(var nodeName in m_prefabData.NodeNames.Union(m_nodesToCreate)) {
+                        if (m_nodesToDestroy.Contains(nodeName)) {
                             continue;
                         }
-                        m_nodesInUpdatedPrefab.Add(node);
+                        m_nodesInUpdatedPrefab.Add(nodeName);
                     }
                 }
 
@@ -705,6 +773,7 @@ namespace FbxExporters
                     Initialize(ref m_reparentings);
 
                     // Among prefab nodes we're not destroying, see if we need to change their parent.
+                    // x (means deleted)
                     // Cases for the parent:
                     //   old  new  prefab
                     //    a    a     a   => no action
@@ -715,34 +784,39 @@ namespace FbxExporters
                     //    x    a     a   => no action
                     //    x    a     b   => conflict! switch to a for now (todo!)
                     //    x    x     a   => no action. Todo: what if a is being destroyed? conflict!
-                    foreach(var name in m_prefab.NodeNames) {
-                        if (name == "") {
+                    foreach (var prefabNodeName in m_prefabData.NodeNames) {
+                        if (prefabNodeName == "") {
                             // Don't reparent the root.
                             continue;
                         }
-                        if (m_nodesToDestroy.Contains(name)) {
+                        if (m_nodesToDestroy.Contains(prefabNodeName)) {
                             // Don't bother reparenting, we'll be destroying this anyway.
                             continue;
                         }
 
-                        var prefabParent = m_prefab.GetParent(name);
-                        var oldParent = m_old.GetParent(name);
-                        var newParent = m_new.GetParent(name);
+                        var prefabParent = m_prefabData.GetParent(prefabNodeName);
+                        var oldParent = m_oldFbxData.GetParent(prefabNodeName);
+                        var newParent = m_newFbxData.GetParent(prefabNodeName);
+
+                        // If it's a nameMapping, don't add a reparenting, we'll rename it later
+                        if (oldParent == m_fbxPrefabUtility.getUnityObjectName(newParent)) {
+                            continue;
+                        }
 
                         if (oldParent != newParent && prefabParent != newParent) {
                             // Conflict in this case:
                             // if (oldParent != prefabParent && !ShouldDestroy(prefabParent))
 
                             // For now, 'newParent' always wins:
-                            m_reparentings.Add(name, newParent);
+                            m_reparentings.Add(prefabNodeName, newParent);
                         }
                     }
 
                     // All new nodes need to be reparented no matter what.
                     // We're guaranteed we didn't already add them because we only
                     // looped over what exists in the prefab now.
-                    foreach(var name in m_nodesToCreate) {
-                        m_reparentings.Add(name, m_new.GetParent(name));
+                    foreach(var nodeName in m_nodesToCreate) {
+                        m_reparentings.Add(nodeName, m_newFbxData.GetParent(nodeName));
                     }
                 }
 
@@ -785,56 +859,58 @@ namespace FbxExporters
                     //
                     // If the node isn't going to be in the prefab, we don't care
                     // about what components might be on it.
-                    foreach (var name in m_nodesInUpdatedPrefab)
+                    foreach (var nodeNameInUpdatedPrefab in m_nodesInUpdatedPrefab)
                     {
-                        if (!m_new.HasNode(name)) {
+                        if (!m_newFbxData.HasNode(nodeNameInUpdatedPrefab)) {
                             // It's not in the FBX, so clearly we're not updating any components.
                             // We don't need to check if it's in m_prefab because
                             // we're only iterating over those.
                             continue;
                         }
-                        var allTypes = m_old.GetComponentTypes(name).Union(
-                            m_new.GetComponentTypes(name));
+                        var allTypes = m_oldFbxData.GetComponentTypes(nodeNameInUpdatedPrefab).Union(
+                            m_newFbxData.GetComponentTypes(nodeNameInUpdatedPrefab));
 
                         foreach(var typename in allTypes) {
-                            var oldValues = m_old.GetComponentValues(name, typename);
-                            var newValues = m_new.GetComponentValues(name, typename);
+                            var oldValues = m_oldFbxData.GetComponentValues(nodeNameInUpdatedPrefab, typename);
+                            var newValues = m_newFbxData.GetComponentValues(nodeNameInUpdatedPrefab, typename);
                             List<string> prefabValues = null; // get them only if we need them.
 
                             // If we have multiple identical-type components, match them up by index.
-                            int oldN = oldValues.Count;
-                            int newN = newValues.Count;
-                            for(int i = 0, n = System.Math.Max(oldN, newN); i < n; ++i) {
-                                if (/* isNew */ i < newN) {
+                            for(int i = 0, n = System.Math.Max(oldValues.Count, newValues.Count); i < n; ++i) {
+                                Log(oldValues[i]);
+                                Log(newValues[i]);
+                                if (/* isNew */ i < newValues.Count) {
                                     var newValue = newValues[i];
                                     
                                     var isReparentedTransform = (typename == "UnityEngine.Transform"
-                                        && m_reparentings.ContainsKey(name));
+                                        && m_reparentings.ContainsKey(nodeNameInUpdatedPrefab));
 
-                                    if (/* isOld */ i < oldN && oldValues[i] == newValue && !isReparentedTransform) {
+                                    if (/* isOld */ i < oldValues.Count && oldValues[i] == newValue && !isReparentedTransform) {
                                         // No change from the old => skip.
                                         continue;
                                     }
-                                    if (prefabValues == null) { prefabValues = m_prefab.GetComponentValues(name, typename); }
+                                    if (prefabValues == null) { prefabValues = m_prefabData.GetComponentValues(nodeNameInUpdatedPrefab, typename); }
                                     if (i < prefabValues.Count && prefabValues[i] == newValue && !isReparentedTransform) {
                                         // Already updated => skip.
                                         continue;
                                     }
-                                    Append (m_componentsToUpdate, name,
+                                    Append (m_componentsToUpdate, nodeNameInUpdatedPrefab,
                                         new ComponentValue(componentTypes[typename], newValue));
                                 } else {
                                     // Not in the new, but is in the old, so delete
                                     // it if it's not already deleted from the
                                     // prefab.
-                                    if (prefabValues == null) { prefabValues = m_prefab.GetComponentValues(name, typename); }
+                                    if (prefabValues == null) { prefabValues = m_prefabData.GetComponentValues(nodeNameInUpdatedPrefab, typename); }
                                     if (i < prefabValues.Count) {
-                                        Append (m_componentsToDestroy, name, componentTypes[typename]);
+                                        Append (m_componentsToDestroy, nodeNameInUpdatedPrefab, componentTypes[typename]);
                                     }
                                 }
                             }
                         }
                     }
                 }
+
+
 
                 /// <summary>
                 /// Discover what needs to happen.
@@ -852,9 +928,12 @@ namespace FbxExporters
                     Transform newFbx,
                     FbxPrefab prefab)
                 {
-                    m_old = new Data(oldFbx);
-                    m_new = new Data(newFbx);
-                    m_prefab = new Data(prefab.transform);
+                    m_fbxPrefab = prefab;
+                    m_fbxPrefabUtility = new FbxPrefabUtility(m_fbxPrefab);
+
+                    m_oldFbxData = new Data(oldFbx);
+                    m_newFbxData = new Data(newFbx, m_fbxPrefabUtility.getFBXObjectName);
+                    m_prefabData = new Data(prefab.transform, a => a);                    
 
                     ClassifyDestroyCreateNodes();
                     ClassifyReparenting();
@@ -864,6 +943,7 @@ namespace FbxExporters
                 public bool NeedsUpdates() {
                     return m_nodesToDestroy.Count > 0
                         || m_nodesToCreate.Count > 0
+                        || m_nodesToRename.Count > 0
                         || m_reparentings.Count > 0
                         || m_componentsToDestroy.Count > 0
                         || m_componentsToUpdate.Count > 0
@@ -879,8 +959,8 @@ namespace FbxExporters
                 ///    4a. delete components no longer used
                 ///    4b. create new components
                 ///    4c. update component values
-                ///    (A) and (B) are largely about meshfilter/meshrenderer,
-                ///    (C) is about transforms (and materials?)
+                ///    (4a.) and (4b.) are largely about meshfilter/meshrenderer,
+                ///    (4c.) is about transforms (and materials?)
                 ///
                 /// Return the set of GameObject that were created or reparented
                 /// in 1 and 2; or that were updated in 4. Does not return the destroyed
@@ -896,20 +976,20 @@ namespace FbxExporters
                     // nodes. We use the empty string for the root node.
                     var prefabRoot = prefabInstance.transform;
                     var prefabNodes = new Dictionary<string, Transform>();
-                    foreach(var node in prefabInstance.GetComponentsInChildren<Transform>()) {
-                        if (node == prefabRoot) {
-                            prefabNodes[""] = node;
+                    foreach(var nodeTransform in prefabInstance.GetComponentsInChildren<Transform>()) {
+                        if (nodeTransform == prefabRoot) {
+                            prefabNodes[""] = nodeTransform;
                         } else {
-                            prefabNodes.Add(node.name, node);
+                            prefabNodes.Add(nodeTransform.name, nodeTransform);
                         }
                     }
 
                     // Create new nodes.
-                    foreach(var name in m_nodesToCreate) {
-                        var newNode = new GameObject(name);
-                        prefabNodes.Add(name, newNode.transform);
+                    foreach (var nodeName in m_nodesToCreate) {
+                        var newNode = new GameObject(nodeName);
+                        prefabNodes.Add(nodeName, newNode.transform);
 
-                        Log("{0}: created new GameObject", name);
+                        Log("{0}: created new GameObject", nodeName);
                         updatedNodes.Add(newNode);
                     }
 
@@ -942,13 +1022,13 @@ namespace FbxExporters
 
                     // Destroy the old nodes. Remember that DestroyImmediate recursively
                     // destroys, so avoid errors.
-                    foreach(var nameToDestroy in m_nodesToDestroy) {
-                        var xfoToDestroy = prefabNodes[nameToDestroy];
+                    foreach(var nodeNameToDestroy in m_nodesToDestroy) {
+                        var xfoToDestroy = prefabNodes[nodeNameToDestroy];
                         if (xfoToDestroy) {
                             GameObject.DestroyImmediate(xfoToDestroy.gameObject);
                         }
-                        Log("destroyed {0}", nameToDestroy);
-                        prefabNodes.Remove(nameToDestroy);
+                        Log("destroyed {0}", nodeNameToDestroy);
+                        prefabNodes.Remove(nodeNameToDestroy);
                     }
 
                     // Destroy the old components.
@@ -967,12 +1047,21 @@ namespace FbxExporters
                             }
                         }
                     }
+                    
+                    // Rename old nodes (unity names) into new nodes (FBX names).
+                    foreach (var FBXNodeNameToRename in m_nodesToRename)
+                    {
+                        string test = prefabNodes[m_fbxPrefabUtility.getUnityObjectName(FBXNodeNameToRename)].name;
+                        prefabNodes[m_fbxPrefabUtility.getUnityObjectName(FBXNodeNameToRename)].name = FBXNodeNameToRename;
+                        Log("Renamed {0} into {1}", m_fbxPrefabUtility.getUnityObjectName(FBXNodeNameToRename), FBXNodeNameToRename);
+                    }
 
                     // Create or update the new components.
-                    foreach(var kvp in m_componentsToUpdate) {
-                        var nodeName = kvp.Key;
+                    foreach (var kvp in m_componentsToUpdate) {
+                        var componentName = kvp.Key;
+                        Debug.Log("Component: " + componentName);
                         var fbxComponents = kvp.Value;
-                        var prefabXfo = prefabNodes[nodeName];
+                        var prefabXfo = prefabNodes[componentName];
                         updatedNodes.Add(prefabXfo.gameObject);
 
                         // Copy the components once so we can match them up even if there's multiple fbxComponents.
@@ -986,10 +1075,10 @@ namespace FbxExporters
                                 // Don't match this index again.
                                 prefabComponent = prefabComponents[index];
                                 prefabComponents.RemoveAt(index);
-                                Log("updated component {0}:{1}", nodeName, fbxComponent.t);
+                                Log("updated component {0}:{1}", componentName, fbxComponent.t);
                             } else {
                                 prefabComponent = prefabXfo.gameObject.AddComponent(fbxComponent.t);
-                                Log("created component {0}:{1}", nodeName, fbxComponent.t);
+                                Log("created component {0}:{1}", componentName, fbxComponent.t);
                             }
 
                             //If the prefabComponent has not been assigned yet,
@@ -1034,7 +1123,7 @@ namespace FbxExporters
                                     GameObject.DestroyImmediate(tempGameObject);
                                 }
 
-                                Log("updated component {0}:{1}", nodeName, typeof(RectTransform));
+                                Log("updated component {0}:{1}", componentName, typeof(RectTransform));
                                 continue;
                             }
                             // Now set the values.
@@ -1073,6 +1162,7 @@ namespace FbxExporters
                 if (!m_fbxPrefab.FbxModel) {
                     return;
                 }
+                FbxPrefabUtility m_fbxPrefabUtility = new FbxPrefabUtility(m_fbxPrefab);
 
                 // First write down what we want to do.
                 var updates = new UpdateList(GetFbxHistory(), m_fbxPrefab.FbxModel.transform, m_fbxPrefab);
@@ -1103,7 +1193,7 @@ namespace FbxExporters
                 FbxPrefab.CallOnUpdate (fbxPrefabInstance, updatedObjects);
 
                 // Update the representation of the history to match the new fbx.
-                var newFbxRep = new FbxRepresentation(m_fbxPrefab.FbxModel.transform);
+                var newFbxRep = new FbxRepresentation(m_fbxPrefab.FbxModel.transform, m_fbxPrefabUtility.getFBXObjectName);
                 var newFbxRepString = newFbxRep.ToJson();
                 fbxPrefabInstance.FbxHistory = newFbxRepString;
 
@@ -1136,7 +1226,7 @@ namespace FbxExporters
             /// </summary>
             public FbxRepresentation GetFbxHistory()
             {
-                return new FbxRepresentation(m_fbxPrefab.FbxHistory);
+                return new FbxRepresentation(m_fbxPrefab.FbxHistory, getFBXObjectName);
             }
 
             /// <summary>
@@ -1169,6 +1259,7 @@ namespace FbxExporters
                 }
 
                 m_fbxPrefab.FbxModel = fbxModel;
+                FbxPrefabUtility m_fbxPrefabUtility = new FbxPrefabUtility(m_fbxPrefab);
 
                 // Case 0: fbxModel is null and we have no history
                 //          => not normal data flow, but doing nothing is
@@ -1193,7 +1284,7 @@ namespace FbxExporters
                     // This is the first time we've seen the FBX file. Assume that
                     // it's the original FBX. Further assume that the user is happy
                     // with the prefab as it is now, so don't update it to match the FBX.
-                    m_fbxPrefab.FbxHistory = new FbxRepresentation(m_fbxPrefab.FbxModel.transform).ToJson();
+                    m_fbxPrefab.FbxHistory = new FbxRepresentation(m_fbxPrefab.FbxModel.transform, m_fbxPrefabUtility.getFBXObjectName).ToJson();
                 } else {
                     // Case 3.
                     // User wants to reconnect or change the connection.

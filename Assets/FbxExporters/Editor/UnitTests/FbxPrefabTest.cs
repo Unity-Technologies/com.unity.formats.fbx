@@ -19,6 +19,8 @@ namespace FbxExporters.UnitTests
         GameObject m_autoPrefab; // prefab that auto-updates
         GameObject m_manualPrefab; // prefab that doesn't auto-update
 
+        FbxPrefabAutoUpdater.FbxPrefabUtility m_fbxPrefabUtility;
+
         class UpdateListener : System.IDisposable
         {
             public List<string> Updated { get ; private set; }
@@ -163,9 +165,11 @@ namespace FbxExporters.UnitTests
             {
                 var prefabInstance = GameObject.Instantiate(m_original);
                 var fbxPrefab = prefabInstance.AddComponent<FbxPrefab>();
-                var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
-                fbxPrefabUtility.SetSourceModel(m_source);
-                fbxPrefabUtility.SetAutoUpdate(true);
+                //var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
+                m_fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility(fbxPrefab);
+
+                m_fbxPrefabUtility.SetSourceModel(m_source);
+                m_fbxPrefabUtility.SetAutoUpdate(true);
                 m_autoPrefab = PrefabUtility.CreatePrefab(
                         GetRandomPrefabAssetPath(),
                         prefabInstance);
@@ -185,7 +189,7 @@ namespace FbxExporters.UnitTests
         }
 
         FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation Rep(GameObject go) {
-            return new FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation(go.transform);
+            return new FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation(go.transform, m_fbxPrefabUtility.getFBXObjectName);
         }
 
         FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation History(GameObject go) {
@@ -685,12 +689,17 @@ namespace FbxExporters.UnitTests
             b.transform.localPosition = new Vector3(1,2,3);
             b.AddComponent<BoxCollider>();
 
-            var repA = new FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation(a.transform);
+            // Empty Prefab but we only want to give the function
+            var c = new GameObject("c");
+            var fbxPrefab = c.AddComponent<FbxPrefab>();
+            var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility(fbxPrefab);
+
+            var repA = new FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation(a.transform, fbxPrefabUtility.getFBXObjectName);
             TestFbxRepresentationMatches(repA);
 
             // Test that we can round-trip through a string.
             var json = repA.ToJson();
-            var repAstring = new FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation(json);
+            var repAstring = new FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation(json, fbxPrefabUtility.getFBXObjectName);
             TestFbxRepresentationMatches(repAstring);
         }
     }
