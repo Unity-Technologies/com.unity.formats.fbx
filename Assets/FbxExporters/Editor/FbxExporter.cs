@@ -984,6 +984,7 @@ namespace FbxExporters
                 {
                     var key = unityAnimCurve[keyIndex];
 
+                    //Distance based attributes will need to be adjusted for scale
                     if (fbxProperty.GetName() == "Intensity")
                     {
                             key.value *= 100.0f;
