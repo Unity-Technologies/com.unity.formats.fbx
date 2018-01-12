@@ -800,12 +800,7 @@ namespace FbxExporters
                             // its corresponding parent, or to the scene if there is none.
                             FbxNode fbxBoneNode;
                             if (!MapUnityObjectToFbxNode.TryGetValue (t.gameObject, out fbxBoneNode)) {
-                                if (ExportSettings.mayaCompatibleNames) {
-                                    t.name = ConvertToMayaCompatibleName (t.name);
-                                }
-                                fbxBoneNode = FbxNode.Create (fbxScene, t.name);
-                                fbxBoneNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
-                                MapUnityObjectToFbxNode.Add (t.gameObject, fbxBoneNode);
+                                Debug.LogError ("node should already be created");
                             }
 
                             // Set it up as a skeleton node if we haven't already.
@@ -828,18 +823,11 @@ namespace FbxExporters
                     }
                 }
 
-                // Step 2: connect up the hierarchy.
                 var boneList = boneSet.ToArray();
-                foreach (var unityBone in boneList) {
-                    if (unityBone.parent != null && MapUnityObjectToFbxNode.ContainsKey(unityBone.parent.gameObject)) {
-                        var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
-                        var fbxParent = MapUnityObjectToFbxNode [unityBone.parent.gameObject];
-                        fbxParent.AddChild (fbxBone);
-                    }
-                }
 
-                // Get bindposes
                 SkinnedMeshToBonesMap.Add (skinnedMesh, boneList);
+
+                // Step 2: Get bindposes
                 var boneToBindPose = new Dictionary<Transform, Matrix4x4>();
                 for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
                     var unityBone = boneList [boneIndex];
@@ -1206,9 +1194,17 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Unconditionally export components on this game object
+            /// Creates an FbxNode for each GameObject.
             /// </summary>
-            protected int ExportComponents (
+            /// <returns>The nodes.</returns>
+            /// <param name="unityGo">Unity go.</param>
+            /// <param name="fbxScene">Fbx scene.</param>
+            /// <param name="fbxNodeParent">Fbx node parent.</param>
+            /// <param name="exportProgress">Export progress.</param>
+            /// <param name="objectCount">Object count.</param>
+            /// <param name="newCenter">New center.</param>
+            /// <param name="exportType">Export type.</param>
+            protected int ExportNodes(
                 GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
                 int exportProgress, int objectCount, Vector3 newCenter,
                 TransformExportType exportType = TransformExportType.Local)
@@ -1220,18 +1216,14 @@ namespace FbxExporters
                 }
 
                 // create an FbxNode and add it as a child of parent
-                FbxNode fbxNode;
-                bool alreadyExported = MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode);
-                if (!alreadyExported) {
-                    fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
-                }
+                FbxNode fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
                 NumNodes++;
 
                 numObjectsExported++;
                 if (EditorUtility.DisplayCancelableProgressBar (
-                        ProgressBarTitle,
-                        string.Format ("Creating FbxNode {0}/{1}", numObjectsExported, objectCount),
-                        (numObjectsExported / (float)objectCount) * 0.5f)) {
+                    ProgressBarTitle,
+                    string.Format ("Creating FbxNode {0}/{1}", numObjectsExported, objectCount),
+                    (numObjectsExported / (float)objectCount) * 0.25f)) {
                     // cancel silently
                     return -1;
                 }
@@ -1243,8 +1235,41 @@ namespace FbxExporters
                 // Use RSrs as the scaling inhertiance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
-                if (!alreadyExported) {
-                    ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
+                ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
+
+                MapUnityObjectToFbxNode.Add (unityGo, fbxNode);
+
+                if (Verbose)
+                    Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
+
+                fbxNodeParent.AddChild (fbxNode);
+
+                // now  unityGo  through our children and recurse
+                foreach (Transform childT in  unityGo.transform) {
+                    numObjectsExported = ExportNodes (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter);
+                }
+                return numObjectsExported;
+            }
+
+            /// <summary>
+            /// Unconditionally export components on this game object
+            /// </summary>
+            protected bool ExportComponents(FbxScene fbxScene)
+            {
+                int numObjectsExported = 0;
+                int objectCount = MapUnityObjectToFbxNode.Count;
+                foreach (KeyValuePair<GameObject, FbxNode> entry in MapUnityObjectToFbxNode) {
+                    numObjectsExported++;
+                    if (EditorUtility.DisplayCancelableProgressBar (
+                        ProgressBarTitle,
+                        string.Format ("Exporting Components for GameObject {0}/{1}", numObjectsExported, objectCount),
+                        ((numObjectsExported / (float)objectCount) * 0.25f) + 0.25f)) {
+                        // cancel silently
+                        return false;
+                    }
+
+                    var unityGo = entry.Key;
+                    var fbxNode = entry.Value;
 
                     // try export mesh
                     bool exportedMesh = ExportInstance (unityGo, fbxNode, fbxScene);
@@ -1257,20 +1282,8 @@ namespace FbxExporters
                     if (!exportedMesh) {
                         ExportCamera (unityGo, fbxScene, fbxNode);
                     }
-
-                    MapUnityObjectToFbxNode.Add (unityGo, fbxNode);
                 }
-
-                if (Verbose)
-                    Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
-
-                fbxNodeParent.AddChild (fbxNode);
-
-                // now  unityGo  through our children and recurse
-                foreach (Transform childT in  unityGo.transform) {
-                    numObjectsExported = ExportComponents (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter);
-                }
-                return numObjectsExported;
+                return true;
             }
 
             /// <summary>
@@ -1502,7 +1515,7 @@ namespace FbxExporters
 
                         if(revisedExportSet.Count == 1){
                             foreach(var unityGo in revisedExportSet){
-                                exportProgress = this.ExportComponents (
+                                exportProgress = this.ExportNodes (
                                     unityGo, fbxScene, fbxRootNode, exportProgress,
                                     count, Vector3.zero, TransformExportType.Reset);
                                 if (exportCancelled || exportProgress < 0) {
@@ -1516,13 +1529,18 @@ namespace FbxExporters
                             Vector3 center = ExportSettings.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
 
                             foreach (var unityGo in revisedExportSet) {
-                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode,
+                                exportProgress = this.ExportNodes (unityGo, fbxScene, fbxRootNode,
                                     exportProgress, count, center, TransformExportType.Global);
                                 if (exportCancelled || exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
                                     return 0;
                                 }
                             }
+                        }
+
+                        if(!ExportComponents(fbxScene)){
+                            Debug.LogWarning ("Export Cancelled");
+                            return 0;
                         }
 
                         // Set the scene's default camera.
