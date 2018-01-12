@@ -862,10 +862,7 @@ namespace FbxExporters
 
                     if (fbxBone.GetSkeleton ().GetSkeletonType () == FbxSkeleton.EType.eRoot) {
                         // bind pose is local -> root. We want root -> local, so invert.
-                        var parentTransform = skinnedMesh.transform;
-                        var parentMatrix = Matrix4x4.TRS (parentTransform.localPosition, parentTransform.localRotation, parentTransform.localScale);
-
-                        pose = parentMatrix * bindPose.inverse;
+                        pose = (unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix * bindPose.inverse);
                     } else {
                         // Bind pose is local -> parent -> ... -> root.
                         // We want parent -> local.
