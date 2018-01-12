@@ -1,4 +1,41 @@
-RELEASE NOTES
+﻿RELEASE NOTES
+
+**Version**: 1.2.0b1
+
+NEW FEATURES
+
+* Updated User Guide documentation
+* Updated meta files to match original asset store release (1.0.0b1)
+
+FIXES
+
+* Revert to shipping DLLs not source
+* Export Settings: Moved browse ("...") buttons for 3D Application/Export Path next to dropdown/path fields
+* Export Settings: Made "Keep Open" and "Hide Native Menu" labels camel case
+* Exporter: Fix so normals/binormals/tangents/vertex colors are exported if they exist
+
+Weren't being exported for primitives or meshes that had less vertices than triangles.
+
+* Added script to fix FbxPrefab component links when updating from forum release (1.1.0b1)
+
+A "Run Component Updater" button will appear in the FBX export settings inspector. 
+Clicking the button will repair all prefabs and scene files serialized as text.
+To repair binary files, first convert asset serialization mode to "Force Text" in Editor Settings (Edit->Project Settings->Editor).
+
+**Version**: sprint36
+
+NEW FEATURES
+*FbxExporter: Don't export visibility
+
+FIXES
+*FbxPrefabAutoUpdater: Now accepts updates to RectTransforms
+*FbxExporter: Fix so camera exports with correct rotation
+*MayaIntegration: Fix so the "SendToUnity" button in Maya is hidden on startup
+*FbxPrefabAutoUpdater: Fix updating gameObjects with missing components
+*UnityIntegration: Catch and print installation errors from 3D applications
+*FbxExporter: Fix incorrect scaling when importing into Maya
+*FbxExportSettings: Fix vendor location environmnet variable pointing to empty folder
+*MaxIntegration: Reset export path on new scene
 
 **Version**: sprint35
 

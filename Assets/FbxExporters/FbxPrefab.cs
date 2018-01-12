@@ -24,6 +24,12 @@ namespace FbxExporters
         [SerializeField] // [HideInInspector]
         string m_fbxHistory;
 
+        [System.Serializable]
+        public struct StringPair { public string FBXObjectName; public string UnityObjectName; }
+
+        [SerializeField]
+        StringPair[] m_nameMapping;
+
         /// <summary>
         /// Which FBX file does this refer to?
         /// </summary>
@@ -44,6 +50,14 @@ namespace FbxExporters
             }
             set{
                 m_fbxHistory = value;
+            }
+        }
+
+        public StringPair[] NameMapping
+        {
+            get
+            {
+                return m_nameMapping;
             }
         }
 
