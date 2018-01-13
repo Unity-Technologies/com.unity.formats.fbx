@@ -32,12 +32,12 @@ namespace FbxExporters.UnitTests
             var b = new Vector3(0,0,1);
             var crossLeft = Vector3.Cross(a,b);
 
-            var afbx = ModelExporter.ConvertNormalToRightHanded(a);
-            var bfbx = ModelExporter.ConvertNormalToRightHanded(b);
-            Assert.AreEqual(ModelExporter.ConvertNormalToRightHanded(crossLeft), bfbx.CrossProduct(afbx));
+            var afbx = ModelExporter.ConvertToRightHanded(a);
+            var bfbx = ModelExporter.ConvertToRightHanded(b);
+            Assert.AreEqual(ModelExporter.ConvertToRightHanded(crossLeft), bfbx.CrossProduct(afbx));
 
             // Test scale conversion. Nothing complicated here...
-            var afbxPosition = ModelExporter.ConvertPositionToRightHanded(a);
+            var afbxPosition = ModelExporter.ConvertToRightHanded(a, ModelExporter.UnitScaleFactor);
             Assert.AreEqual(100, afbxPosition.Length());
 
             // Test rotation conversion.

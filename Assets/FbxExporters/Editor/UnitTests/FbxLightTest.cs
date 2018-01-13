@@ -78,7 +78,7 @@ namespace FbxExporters.UnitTests
             string filename = GetRandomFbxFilePath();
             GameObject go = new GameObject();
             go.name = "original";
-            Light light = go.AddComponent(typeof(Light)) as Light;
+            go.AddComponent(typeof(Light));
             Animation anim = go.AddComponent(typeof(Animation)) as Animation;
 
             Keyframe[] keys = new Keyframe[3];
@@ -132,8 +132,8 @@ namespace FbxExporters.UnitTests
 
             for (int i = 0; i < exportedCurve.keys.Length; i++)
             {
-                Assert.That(exportedCurve.keys[i].time == keys[i].time);
-                Assert.That(exportedCurve.keys[i].value == keys[i].value);
+                Assert.That(exportedCurve.keys[i].time, Is.EqualTo(keys[i].time));
+                Assert.That(exportedCurve.keys[i].value, Is.EqualTo(keys[i].value).Within(Mathf.Epsilon));
             }
         }
 
@@ -143,7 +143,7 @@ namespace FbxExporters.UnitTests
             string filename = GetRandomFbxFilePath();
             GameObject go = new GameObject();
             go.name = "original";
-            Light light = go.AddComponent(typeof(Light)) as Light;
+            go.AddComponent(typeof(Light));
             Animation anim = go.AddComponent(typeof(Animation)) as Animation;
 
             Keyframe[] keys = new Keyframe[3];
