@@ -1721,6 +1721,9 @@ namespace FbxExporters
                 FbxNode fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
                 MapUnityObjectToFbxNode [unityGo] = fbxNode;
 
+                if (Verbose)
+                    Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
+
                 numObjectsExported++;
                 if (EditorUtility.DisplayCancelableProgressBar (
                     ProgressBarTitle,
@@ -1739,20 +1742,12 @@ namespace FbxExporters
 
                 ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
 
-                MapUnityObjectToFbxNode.Add (unityGo, fbxNode);
-
-                if (Verbose)
-                    Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
-
                 fbxNodeParent.AddChild (fbxNode);
 
                 // now  unityGo  through our children and recurse
                 foreach (Transform childT in  unityGo.transform) {
                     numObjectsExported = ExportNodes (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter);
                 }
-
-                // now export animation (after hierarchy has been exported)
-                ExportAnimation (unityGo, fbxScene);
 
                 return numObjectsExported;
             }
@@ -1794,6 +1789,9 @@ namespace FbxExporters
                     if (!exportedMesh && !exportedCamera) {
                         ExportLight (unityGo, fbxScene, fbxNode);
                     }
+
+                    // now (try) export animation
+    				ExportAnimation (unityGo, fbxScene);
 
                 }
                 return true;
@@ -2579,12 +2577,6 @@ namespace FbxExporters
 
                 return false;
             }
-
-            /// <summary>
-            /// keep a map between GameObject and FbxNode for quick lookup when we export
-            /// animation.
-            /// </summary>
-            Dictionary<GameObject, FbxNode> MapUnityObjectToFbxNode = new Dictionary<GameObject, FbxNode> ();
 
             /// <summary>
             /// Number of nodes exported including siblings and decendents

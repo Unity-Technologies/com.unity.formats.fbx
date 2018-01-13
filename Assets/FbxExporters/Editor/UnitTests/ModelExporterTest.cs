@@ -507,6 +507,7 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual (mesh.tangents, fbxMesh.tangents);
         }
 
+        [Test]
         public void TestSkinnedMeshExport(){
             // for now use this cowboy taken from the asset store as the test file
             // TODO: find a better/simpler test file
@@ -574,7 +575,7 @@ namespace FbxExporters.UnitTests
 
                 for (int j = 0; j < 4; j++) {
                     for (int k = 0; k < 4; k++) {
-                        Assert.AreEqual (origBp.GetColumn (j)[k], expBp.GetColumn (j)[k], 0.001);
+                        Assert.That (origBp.GetColumn (j)[k], Is.EqualTo(expBp.GetColumn (j)[k]).Within(0.001f), string.Format("bind pose doesn't match {0},{1}", j, k));
                     }
                 }
             }
