@@ -6,6 +6,9 @@ namespace FbxExporters.EditorTools {
     [CustomEditor(typeof(FbxPrefab))]
     public class FbxPrefabInspector : UnityEditor.Editor {
         public override void OnInspectorGUI() {
+
+            SerializedProperty m_GameObjectProp = serializedObject.FindProperty("m_nameMapping");
+
             FbxPrefab fbxPrefab = (FbxPrefab)target;
 
             // We can only change these settings when applied to a prefab.
@@ -28,17 +31,18 @@ namespace FbxExporters.EditorTools {
 
             EditorGUI.EndDisabledGroup();
 
+            EditorGUILayout.PropertyField(m_GameObjectProp, true);
+
 #if FBXEXPORTER_DEBUG
-            GUILayout.BeginHorizontal();
-            GUILayout.Label ("Debug info:");
+            EditorGUILayout.LabelField ("Debug info:");
             try {
-                fbxPrefab.GetFbxHistory().ToJson();
+                fbxPrefabUtility.GetFbxHistory().ToJson();
             } catch(System.Exception xcp) {
                 Debug.LogException(xcp);
             }
-            EditorGUILayout.SelectableLabel(fbxPrefab.GetFbxHistoryString());
-            GUILayout.EndHorizontal();
+            EditorGUILayout.SelectableLabel(fbxPrefabUtility.GetFbxHistoryString());
 #endif
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }

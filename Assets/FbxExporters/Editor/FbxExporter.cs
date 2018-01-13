@@ -147,35 +147,6 @@ namespace FbxExporters
             };
 
             /// <summary>
-            /// Return True is Unity component is animatable
-            ///
-            public static bool IsAnimatable (System.Type componentType) { return GetAnimatableProperties (componentType).Any (); }
-
-            private static HashSet<System.Type> m_animatableTypes = new HashSet<System.Type> () { typeof (System.Single) };
-
-            public static IEnumerable<System.Reflection.PropertyInfo> GetAnimatableProperties (System.Type componentType)
-            {
-            	return from p in componentType.GetProperties ()
-            		   where IsAnimatableProperty (p)
-            		   select p;
-            }
-
-            private static bool IsAnimatableProperty (System.Reflection.PropertyInfo p)
-            {
-            	// assume any custom attribute is System.ObsoleteAttribute
-            	return m_animatableTypes.Contains (p.PropertyType) &&
-            							!p.GetCustomAttributes (true).Any ();
-            }
-
-            /// <summary>
-            /// Which components map to FbxProperty
-            /// </summary>
-            public static HashSet<System.Type> MapsToFbxProperty = new HashSet<System.Type> ()
-            {
-                typeof(Transform),
-            };
-
-            /// <summary>
             /// Map Unity material name to FBX material object
             /// </summary>
             Dictionary<string, FbxSurfaceMaterial> MaterialMap = new Dictionary<string, FbxSurfaceMaterial> ();
@@ -1037,22 +1008,31 @@ namespace FbxExporters
                 }
 
                 FbxNode fbxNode;
-                if (!MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
-                    Debug.LogError ( string.Format("no fbx node for {0}", unityGo.ToString()));
+                if (!MapUnityObjectToFbxNode.TryGetValue(unityGo, out fbxNode))
+                {
+                    Debug.LogError(string.Format("no fbx node for {0}", unityGo.ToString()));
                     return;
                 }
-
                 // map unity property name to fbx property
-                var fbxProperty = fbxNode.FindProperty (fbxPropertyChannelPair.Property, false);
-                if (!fbxProperty.IsValid ()) {
-                    Debug.LogError (string.Format ("no fbx property {0} found on {1} ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
+                var fbxProperty = fbxNode.FindProperty(fbxPropertyChannelPair.Property, false);
+                if (!fbxProperty.IsValid())
+                {
+                    var fbxNodeAttribute = fbxNode.GetNodeAttribute();
+                    if (fbxNodeAttribute != null)
+                    {
+                        fbxProperty = fbxNodeAttribute.FindProperty(fbxPropertyChannelPair.Property, false);
+                    }
+                }
+                if (!fbxProperty.IsValid())
+                {
+                    Debug.LogError(string.Format("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName()));
                     return;
                 }
 
                 // Create the AnimCurve on the channel
                 FbxAnimCurve fbxAnimCurve = fbxProperty.GetCurve (fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
 
-                var transformBindings = new TransformBindings (uniPropertyName);
+                var transformBindings = new UnityToMayaConvertSceneHelper (uniPropertyName);
 
                 // copy Unity AnimCurve to FBX AnimCurve.
                 fbxAnimCurve.KeyModifyBegin ();
@@ -1060,32 +1040,34 @@ namespace FbxExporters
                 for (int keyIndex = 0, n = uniAnimCurve.length; keyIndex < n; ++keyIndex) {
                     var uniKeyFrame = uniAnimCurve [keyIndex];
                     var fbxTime = FbxTime.FromSecondDouble (uniKeyFrame.time);
-                    fbxAnimCurve.KeyAdd (fbxTime);
+
+                    keyIndex = fbxAnimCurve.KeyAdd (fbxTime);
                     fbxAnimCurve.KeySet (keyIndex, fbxTime, transformBindings.Convert(uniKeyFrame.value));
                 }
 
-                fbxAnimCurve.KeyModifyEnd ();
+                fbxAnimCurve.KeyModifyEnd();
             }
 
-            class TransformBindings
+            class UnityToMayaConvertSceneHelper
             {
-                bool requiresConversion = false;
+                bool convertDistance = false;
                 float unitScaleFactor = 1f;
 
-                public TransformBindings(string uniPropertyName)
+                public UnityToMayaConvertSceneHelper(string uniPropertyName)
                 {
                     System.StringComparison cc = System.StringComparison.CurrentCulture;
 
-                    requiresConversion |= uniPropertyName.StartsWith ("m_LocalPosition.", cc);
+                    convertDistance |= uniPropertyName.StartsWith ("m_LocalPosition.", cc);
+                    convertDistance |= uniPropertyName.StartsWith ("m_Intensity", cc);
 
-                    bool isTx = requiresConversion && uniPropertyName.EndsWith (".x", cc) || uniPropertyName.EndsWith ("T.x", cc);
-                    requiresConversion |= isTx;
-                    requiresConversion |= uniPropertyName.EndsWith ("T.y", cc);
-                    requiresConversion |= uniPropertyName.EndsWith ("T.z", cc);
+                    bool convertLHRH = convertDistance && uniPropertyName.EndsWith (".x", cc) || uniPropertyName.EndsWith ("T.x", cc);
+                    convertDistance |= convertLHRH;
+                    convertDistance |= uniPropertyName.EndsWith ("T.y", cc);
+                    convertDistance |= uniPropertyName.EndsWith ("T.z", cc);
 
-                    if (requiresConversion) {
+                    if (convertDistance) {
                         unitScaleFactor = ModelExporter.UnitScaleFactor;
-                        if (isTx)
+                        if (convertLHRH)
                             unitScaleFactor = -unitScaleFactor;
                     }
                 }
@@ -1094,7 +1076,7 @@ namespace FbxExporters
                 {
                     // left handed to right handed conversion
                     // meters to centimetres conversion
-                    return (requiresConversion) ? unitScaleFactor * value : value;
+                    return (convertDistance) ? unitScaleFactor * value : value;
                 }
             }
 
@@ -1143,7 +1125,37 @@ namespace FbxExporters
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("m_LocalPosition.z", ct) || uniPropertyName.EndsWith ("T.z", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                            prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                            return true;
+                    }
+
+                    if (uniPropertyName.StartsWith("m_Intensity", ct))
+                    {
+                        prop = new FbxPropertyChannelPair ("Intensity", null);
+                        return true;
+                    }
+
+                    if (uniPropertyName.StartsWith("m_SpotAngle", ct))
+                    {
+                        prop = new FbxPropertyChannelPair ("OuterAngle", null);
+                        return true;
+                    }
+
+                    if (uniPropertyName.StartsWith("m_Color.r", ct))
+                    {
+                        prop = new FbxPropertyChannelPair ("Color", Globals.FBXSDK_CURVENODE_COLOR_RED);
+                        return true;
+                    }
+
+                    if (uniPropertyName.StartsWith("m_Color.g", ct))
+                    {
+                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_GREEN);
+                        return true;
+                    }
+
+                    if (uniPropertyName.StartsWith("m_Color.b", ct))
+                    {
+                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_BLUE);
                         return true;
                     }
 
@@ -1313,7 +1325,7 @@ namespace FbxExporters
                 // Custom frame rate isn't really supported in FBX SDK (there's
                 // a bug), so try hard to find the nearest time mode.
                 FbxTime.EMode timeMode = FbxTime.EMode.eCustom;
-                double precision = Mathf.Epsilon;
+                double precision = 1e-6;
                 while (timeMode == FbxTime.EMode.eCustom && precision < 1000) {
                     timeMode = FbxTime.ConvertFrameRateToTimeMode (uniAnimClip.frameRate, precision);
                     precision *= 10;
@@ -1516,7 +1528,7 @@ namespace FbxExporters
                 }
 
                 if (Verbose)
-                    Debug.Log (string.Format ("Exporting node {0}", fbxNode.GetName ()));
+                    Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
 
                 fbxNodeParent.AddChild (fbxNode);
 
@@ -2094,9 +2106,9 @@ namespace FbxExporters
                     return xform.gameObject;
                 } else if (obj is UnityEngine.GameObject) {
                     return obj as UnityEngine.GameObject;
-                } else if (obj is MonoBehaviour) {
-                    var mono = obj as MonoBehaviour;
-                    return mono.gameObject;
+                } else if (obj is Behaviour) {
+                    var behaviour = obj as Behaviour;
+                    return behaviour.gameObject;
                 }
 
                 return null;
@@ -2323,7 +2335,7 @@ namespace FbxExporters
             {
             }
 
-            public bool Verbose { private set {;} get { return true; } }
+            public bool Verbose { private set {;} get { return false; } }
 
             /// <summary>
             /// manage the selection of a filename
