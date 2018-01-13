@@ -12,17 +12,12 @@ namespace FbxExporters.UnitTests
 
     public class AnimationTestDataClass
     {
-        public static IEnumerable<string> m_transformPropertyNames { get {
-                var goAnim = new GameObject ();
-                return (from b in AnimationUtility.GetAnimatableBindings (goAnim, goAnim) select b.propertyName);
-            }}
-
         // TODO: remove items that become supported by exporter
         public static IEnumerable<System.Type> m_exceptionTypes = new List<System.Type> ()
         {
             typeof(MeshFilter),
             typeof(SkinnedMeshRenderer),
-            typeof(Camera),
+            typeof(Camera), // TODO: uncomment this to add unit tests
             typeof(Transform),  // NOTE: has it's own special tests
         };
 
@@ -325,7 +320,7 @@ namespace FbxExporters.UnitTests
 
             string [] propertyNames = 
                 (from b in AnimationUtility.GetAnimatableBindings (targetObject, targetObject) 
-                 select b.propertyName).Except(AnimationTestDataClass.m_transformPropertyNames).ToArray();
+                 where b.type==componentType select b.propertyName).ToArray();
 
             if (propertyNames.Length == 0)
             {
