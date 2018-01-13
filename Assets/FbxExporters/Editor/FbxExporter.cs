@@ -8,8 +8,57 @@ using System.Linq;
 
 namespace FbxExporters
 {
+    namespace CustomExtensions
+    {
+        //Extension methods must be defined in a static class
+        public static class Vector3Extension
+        {
+            public static Vector3 RightHanded (this Vector3 leftHandedVector)
+            {
+            	// negating the x component of the vector converts it from left to right handed coordinates
+            	return new Vector3 (
+            		-leftHandedVector [0],
+            		leftHandedVector [1],
+            		leftHandedVector [2]);
+            }
+
+            public static FbxVector4 FbxVector4 (this Vector3 uniVector)
+            {
+            	return new FbxVector4 (
+            		uniVector [0],
+            		uniVector [1],
+            		uniVector [2]);
+            }
+        }
+
+        //Extension methods must be defined in a static class
+        public static class AnimationCurveExtension
+        {
+            // This is an extension method for the AnimationCurve class
+            // The first parameter takes the "this" modifier
+            // and specifies the type for which the method is defined.
+            public static void Dump (this AnimationCurve animCurve, string message, float [] keyTimesExpected = null, float [] keyValuesExpected = null)
+            {
+                int idx = 0;
+                foreach (var key in animCurve.keys) {
+                    if (keyTimesExpected != null && keyValuesExpected != null) {
+                        Debug.Log (string.Format ("{5} keys[{0}] {1}({3}) {2} ({4})",
+                                                  idx, key.time, key.value,
+                                                  keyTimesExpected [idx], keyValuesExpected [idx],
+                                                  message));
+                    } else {
+                        Debug.Log (string.Format ("{3} keys[{0}] {1} {2}", idx, key.time, key.value, message));
+                    }
+                    idx++;
+                }
+            }
+        }
+    }
+
     namespace Editor
     {
+        using CustomExtensions;
+
         public class ModelExporter : System.IDisposable
         {
             const string Title =
@@ -43,7 +92,7 @@ namespace FbxExporters
             const string RegexCharStart = "[";
             const string RegexCharEnd = "]";
 
-            const int UnitScaleFactor = 100;
+            public const float UnitScaleFactor = 100f;
 
             public const string PACKAGE_UI_NAME = "FBX Exporter";
 
@@ -75,6 +124,27 @@ namespace FbxExporters
             {
                 return new ModelExporter ();
             }
+
+            /// <summary>
+            /// Which components map from Unity Object to Fbx Object
+            /// </summary>
+            ///
+            public enum FbxNodeRelationType
+            {
+                NodeAttribute,
+                Property,
+                Material
+            }
+
+            public static Dictionary<System.Type, KeyValuePair<System.Type,FbxNodeRelationType>> MapsToFbxObject = new Dictionary<System.Type, KeyValuePair<System.Type,FbxNodeRelationType>> ()
+            {
+                { typeof(Transform),            new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxProperty), FbxNodeRelationType.Property) },
+                { typeof(MeshFilter),           new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxMesh), FbxNodeRelationType.NodeAttribute) },
+                { typeof(SkinnedMeshRenderer),  new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxMesh), FbxNodeRelationType.NodeAttribute) },
+                { typeof(Light),                new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxLight), FbxNodeRelationType.NodeAttribute) },
+                { typeof(Camera),               new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxCamera), FbxNodeRelationType.NodeAttribute) },
+                { typeof(Material),             new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxSurfaceMaterial), FbxNodeRelationType.Material) },
+            };
 
             /// <summary>
             /// keep a map between GameObject and FbxNode for quick lookup when we export
@@ -215,7 +285,7 @@ namespace FbxExporters
 
                         for (int n = 0; n < unmergedTriangles.Length; n++) {
                             int unityTriangle = unmergedTriangles [n];
-                            fbxElementArray.Add (ConvertNormalToRightHanded (mesh.Normals [unityTriangle]));
+                            fbxElementArray.Add (ConvertToRightHanded (mesh.Normals [unityTriangle]));
                         }
 
                         fbxLayer.SetNormals (fbxLayerElement);
@@ -234,7 +304,7 @@ namespace FbxExporters
 
                         for (int n = 0; n < unmergedTriangles.Length; n++) {
                             int unityTriangle = unmergedTriangles [n];
-                            fbxElementArray.Add (ConvertNormalToRightHanded (mesh.Binormals [unityTriangle]));
+                            fbxElementArray.Add (ConvertToRightHanded (mesh.Binormals [unityTriangle]));
                         }
                         fbxLayer.SetBinormals (fbxLayerElement);
                     }
@@ -252,7 +322,7 @@ namespace FbxExporters
 
                         for (int n = 0; n < unmergedTriangles.Length; n++) {
                             int unityTriangle = unmergedTriangles [n];
-                            fbxElementArray.Add (ConvertNormalToRightHanded (
+                            fbxElementArray.Add (ConvertToRightHanded (
                                 new Vector3 (
                                     mesh.Tangents [unityTriangle] [0],
                                     mesh.Tangents [unityTriangle] [1],
@@ -361,27 +431,13 @@ namespace FbxExporters
             ///
             /// Remember you also need to flip the winding order on your polygons.
             /// </summary>
-            public static FbxVector4 ConvertNormalToRightHanded(Vector3 leftHandedVector)
+            public static FbxVector4 ConvertToRightHanded(Vector3 leftHandedVector, float unitScale = 1f)
             {
                 // negating the x component of the vector converts it from left to right handed coordinates
-                return new FbxVector4 (
+                return unitScale * new FbxVector4 (
                     -leftHandedVector[0],
                     leftHandedVector[1],
                     leftHandedVector[2]);
-            }
-
-            /// <summary>
-            /// Takes in a left-handed UnityEngine.Vector3 denoting a position,
-            /// returns a right-handed FbxVector4.
-            ///
-            /// Unity is left-handed, Maya and Max are right-handed.
-            /// The FbxSdk conversion routines can't handle changing handedness.
-            ///
-            /// Remember you also need to flip the winding order on your polygons.
-            /// </summary>
-            public static FbxVector4 ConvertPositionToRightHanded(Vector3 leftHandedVector)
-            {
-                return UnitScaleFactor * ConvertNormalToRightHanded(leftHandedVector);
             }
 
             /// <summary>
@@ -633,7 +689,7 @@ namespace FbxExporters
                     foreach (var kvp in ControlPointToIndex) {
                         var controlPoint = kvp.Key;
                         var index = kvp.Value;
-                        fbxMesh.SetControlPointAt (ConvertPositionToRightHanded(controlPoint), index);
+                        fbxMesh.SetControlPointAt (ConvertToRightHanded(controlPoint, UnitScaleFactor), index);
                     }
                 }
 
@@ -1032,9 +1088,18 @@ namespace FbxExporters
 
                 // Negate the y and z values of the rotation to convert 
                 // from Unity to Maya coordinates (left to righthanded).
-                var result = new FbxDouble3 (vector4.X, -vector4.Y, -vector4.Z);
+                return new FbxDouble3 (vector4.X, -vector4.Y, -vector4.Z);
+            }
 
-                return result;
+            public static FbxVector4 ConvertQuaternionToXYZEuler (FbxQuaternion quat)
+            {
+            	FbxAMatrix m = new FbxAMatrix ();
+            	m.SetQ (quat);
+            	var vector4 = m.GetR ();
+
+            	// Negate the y and z values of the rotation to convert 
+            	// from Unity to Maya coordinates (left to righthanded).
+            	return new FbxVector4 (vector4.X, -vector4.Y, -vector4.Z, vector4.W);
             }
 
             // get a fbxNode's global default position.
@@ -1069,7 +1134,7 @@ namespace FbxExporters
                 }
 
                 // Transfer transform data from Unity to Fbx
-                var fbxTranslate = ConvertPositionToRightHanded(unityTranslate);
+                var fbxTranslate = ConvertToRightHanded(unityTranslate, UnitScaleFactor);
                 var fbxScale = new FbxDouble3 (unityScale.x, unityScale.y, unityScale.z);
 
                 // set the local position of fbxNode
@@ -1245,23 +1310,25 @@ namespace FbxExporters
             /// NOTE: This is not used for rotations, because we need to convert from
             /// quaternion to euler and various other stuff.
             /// </summary>
-            protected void ExportAnimCurve(UnityEngine.Object unityObj,
-                AnimationCurve unityAnimCurve,
-                string unityPropertyName,
-                FbxScene fbxScene,
-                FbxAnimLayer fbxAnimLayer)
+            protected void ExportAnimationCurve (UnityEngine.Object uniObj,
+                                                 AnimationCurve uniAnimCurve,
+                                                 string uniPropertyName,
+                                                 FbxScene fbxScene,
+                                                 FbxAnimLayer fbxAnimLayer)
             {
+                if (Verbose) {
+                    Debug.Log ("Exporting animation for " + uniObj.ToString() + " (" + uniPropertyName + ")");
+                }
+
                 FbxPropertyChannelPair fbxPropertyChannelPair;
-                if (!FbxPropertyChannelPair.TryGetValue(unityPropertyName, out fbxPropertyChannelPair))
-                {
-                    Debug.LogWarning(string.Format("no mapping from Unity '{0}' to fbx property", unityPropertyName));
+                if (!FbxPropertyChannelPair.TryGetValue (uniPropertyName, out fbxPropertyChannelPair)) {
+                    Debug.LogWarning (string.Format ("no mapping from Unity '{0}' to fbx property", uniPropertyName));
                     return;
                 }
 
-                GameObject unityGo = GetGameObject(unityObj);
-                if (unityGo == null && !unityObj)
-                {
-                    Debug.LogError(string.Format("cannot find gameobject for {0}", unityObj.ToString()));
+                GameObject unityGo = GetGameObject (uniObj);
+                if (unityGo == null) {
+                    Debug.LogError (string.Format ("cannot find gameobject for {0}", uniObj.ToString()));
                     return;
                 }
 
@@ -1287,39 +1354,55 @@ namespace FbxExporters
                     return;
                 }
 
-                if (Verbose)
-                {
-                    Debug.Log("Exporting animation for " + unityObj.ToString() + " (" + unityPropertyName + ")");
-                }
-
-                FbxAnimCurve fbxAnimCurve;
                 // Create the AnimCurve on the channel
-                if (fbxPropertyChannelPair.Channel != null)
-                {
-                    fbxAnimCurve = fbxProperty.GetCurve(fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
-                }
-                else
-                {
-                    fbxAnimCurve = fbxProperty.GetCurve(fbxAnimLayer, true);
-                }
+                FbxAnimCurve fbxAnimCurve = fbxProperty.GetCurve (fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
+
+                var transformBindings = new UnityToMayaConvertSceneHelper (uniPropertyName);
+
                 // copy Unity AnimCurve to FBX AnimCurve.
-                fbxAnimCurve.KeyModifyBegin();
+                fbxAnimCurve.KeyModifyBegin ();
 
-                for (int keyIndex = 0, n = unityAnimCurve.length; keyIndex < n; ++keyIndex)
-                {
-                    var key = unityAnimCurve[keyIndex];
+                for (int keyIndex = 0, n = uniAnimCurve.length; keyIndex < n; ++keyIndex) {
+                    var uniKeyFrame = uniAnimCurve [keyIndex];
+                    var fbxTime = FbxTime.FromSecondDouble (uniKeyFrame.time);
 
-                    //Distance based attributes will need to be adjusted for scale
-                    if (fbxProperty.GetName() == "Intensity")
-                    {
-                            key.value *= 100.0f;
-                    }
-                    var fbxTime = FbxTime.FromSecondDouble(key.time);
-                    fbxAnimCurve.KeyAdd(fbxTime);
-                    fbxAnimCurve.KeySet(keyIndex, fbxTime, key.value);
+                    keyIndex = fbxAnimCurve.KeyAdd (fbxTime);
+                    fbxAnimCurve.KeySet (keyIndex, fbxTime, transformBindings.Convert(uniKeyFrame.value));
                 }
 
                 fbxAnimCurve.KeyModifyEnd();
+            }
+
+            class UnityToMayaConvertSceneHelper
+            {
+                bool convertDistance = false;
+                float unitScaleFactor = 1f;
+
+                public UnityToMayaConvertSceneHelper(string uniPropertyName)
+                {
+                    System.StringComparison cc = System.StringComparison.CurrentCulture;
+
+                    convertDistance |= uniPropertyName.StartsWith ("m_LocalPosition.", cc);
+                    convertDistance |= uniPropertyName.StartsWith ("m_Intensity", cc);
+
+                    bool convertLHRH = convertDistance && uniPropertyName.EndsWith (".x", cc) || uniPropertyName.EndsWith ("T.x", cc);
+                    convertDistance |= convertLHRH;
+                    convertDistance |= uniPropertyName.EndsWith ("T.y", cc);
+                    convertDistance |= uniPropertyName.EndsWith ("T.z", cc);
+
+                    if (convertDistance) {
+                        unitScaleFactor = ModelExporter.UnitScaleFactor;
+                        if (convertLHRH)
+                            unitScaleFactor = -unitScaleFactor;
+                    }
+                }
+
+                public float Convert(float value)
+                {
+                    // left handed to right handed conversion
+                    // meters to centimetres conversion
+                    return (convertDistance) ? unitScaleFactor * value : value;
+                }
             }
 
             /// <summary>
@@ -1337,50 +1420,65 @@ namespace FbxExporters
                 /// Map a Unity property name to the corresponding FBX property and
                 /// channel names.
                 /// </summary>
-                public static bool TryGetValue(string unityPropertyName, out FbxPropertyChannelPair prop)
+                public static bool TryGetValue(string uniPropertyName, out FbxPropertyChannelPair prop)
                 {
                     System.StringComparison ct = System.StringComparison.CurrentCulture;
 
-                    if (unityPropertyName.StartsWith ("m_LocalPosition.x", ct) || unityPropertyName.EndsWith ("T.x", ct)) {
+                    // Transform Scaling
+                    if (uniPropertyName.StartsWith ("m_LocalScale.x", ct) || uniPropertyName.EndsWith ("S.x", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_X);
+                        return true;
+                    }
+                    if (uniPropertyName.StartsWith ("m_LocalScale.y", ct) || uniPropertyName.EndsWith ("S.y", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
+                        return true;
+                    }
+                    if (uniPropertyName.StartsWith ("m_LocalScale.z", ct) || uniPropertyName.EndsWith ("S.z", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                        return true;
+                    }
+
+                    // NOTE: Transform Rotation handled by QuaternionCurve
+    
+                    // Transform Translation
+                    if (uniPropertyName.StartsWith ("m_LocalPosition.x", ct) || uniPropertyName.EndsWith ("T.x", ct)) {
                         prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_X);
                         return true;
                     }
-
-                    if (unityPropertyName.StartsWith ("m_LocalPosition.y", ct) || unityPropertyName.EndsWith ("T.y", ct)) {
+                    if (uniPropertyName.StartsWith ("m_LocalPosition.y", ct) || uniPropertyName.EndsWith ("T.y", ct)) {
                         prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
                         return true;
                     }
-
-                    if (unityPropertyName.StartsWith ("m_LocalPosition.z", ct) || unityPropertyName.EndsWith ("T.z", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
-                        return true;
+                    if (uniPropertyName.StartsWith ("m_LocalPosition.z", ct) || uniPropertyName.EndsWith ("T.z", ct)) {
+                            prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                            return true;
                     }
 
-                    if (unityPropertyName.StartsWith("m_Intensity", ct))
+                    if (uniPropertyName.StartsWith("m_Intensity", ct))
                     {
-                        prop = new FbxPropertyChannelPair("Intensity", null);
+                        prop = new FbxPropertyChannelPair ("Intensity", null);
                         return true;
                     }
 
-                    if (unityPropertyName.StartsWith("m_SpotAngle", ct))
+                    if (uniPropertyName.StartsWith("m_SpotAngle", ct))
                     {
-                        prop = new FbxPropertyChannelPair("OuterAngle", null);
+                        prop = new FbxPropertyChannelPair ("OuterAngle", null);
                         return true;
                     }
 
-                    if (unityPropertyName.StartsWith("m_Color.r", ct))
+                    if (uniPropertyName.StartsWith("m_Color.r", ct))
                     {
-                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_RED);
+                        prop = new FbxPropertyChannelPair ("Color", Globals.FBXSDK_CURVENODE_COLOR_RED);
                         return true;
                     }
 
-                    if (unityPropertyName.StartsWith("m_Color.g", ct))
+                    if (uniPropertyName.StartsWith("m_Color.g", ct))
                     {
                         prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_GREEN);
                         return true;
                     }
 
-                    if (unityPropertyName.StartsWith("m_Color.b", ct))
+                    if (uniPropertyName.StartsWith("m_Color.b", ct))
                     {
                         prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_BLUE);
                         return true;
@@ -1408,19 +1506,19 @@ namespace FbxExporters
 
                 public QuaternionCurve() { }
 
-                public static int GetQuaternionIndex(string unityPropertyName) {
+                public static int GetQuaternionIndex(string uniPropertyName) {
                     System.StringComparison ct = System.StringComparison.CurrentCulture;
                     bool isQuaternionComponent = false;
 
-                    isQuaternionComponent |= unityPropertyName.StartsWith ("m_LocalRotation.", ct);
-                    isQuaternionComponent |= unityPropertyName.EndsWith ("Q.x", ct);
-                    isQuaternionComponent |= unityPropertyName.EndsWith ("Q.y", ct);
-                    isQuaternionComponent |= unityPropertyName.EndsWith ("Q.z", ct);
-                    isQuaternionComponent |= unityPropertyName.EndsWith ("Q.w", ct);
+                    isQuaternionComponent |= uniPropertyName.StartsWith ("m_LocalRotation.", ct);
+                    isQuaternionComponent |= uniPropertyName.EndsWith ("Q.x", ct);
+                    isQuaternionComponent |= uniPropertyName.EndsWith ("Q.y", ct);
+                    isQuaternionComponent |= uniPropertyName.EndsWith ("Q.z", ct);
+                    isQuaternionComponent |= uniPropertyName.EndsWith ("Q.w", ct);
 
                     if (!isQuaternionComponent) { return -1; }
 
-                    switch(unityPropertyName[unityPropertyName.Length - 1]) {
+                    switch(uniPropertyName[uniPropertyName.Length - 1]) {
                     case 'x': return 0;
                     case 'y': return 1;
                     case 'z': return 2;
@@ -1442,8 +1540,9 @@ namespace FbxExporters
                 Key [] ComputeKeys(UnityEngine.Quaternion restRotation, FbxNode node) {
                     // Get the source pivot pre-rotation if any, so we can
                     // remove it from the animation we get from Unity.
-                    var fbxPreRotationEuler = node.GetRotationActive() ? node.GetPreRotation(FbxNode.EPivotSet.eSourcePivot)
-                        : new FbxVector4();
+                    var fbxPreRotationEuler = node.GetRotationActive() 
+                                                  ? node.GetPreRotation(FbxNode.EPivotSet.eSourcePivot)
+                                                  : new FbxVector4();
                     var fbxPreRotationInverse = new FbxQuaternion();
                     fbxPreRotationInverse.ComposeSphericalXYZ(fbxPreRotationEuler);
                     fbxPreRotationInverse.Inverse();
@@ -1479,12 +1578,12 @@ namespace FbxExporters
                         //      pre-rotation
                         //      then pre-rotation inverse
                         //      then animation.
-                        var fbxAnimation = fbxPreRotationInverse * fbxFinalAnimation;
+                        var fbxQuat = fbxPreRotationInverse * fbxFinalAnimation;
 
                         // Store the key so we can sort them later.
                         Key key;
                         key.time = FbxTime.FromSecondDouble(seconds);
-                        key.euler = fbxAnimation.DecomposeSphericalXYZ();
+                        key.euler = ModelExporter.ConvertQuaternionToXYZEuler(fbxQuat);
                         keys[i++] = key;
                     }
 
@@ -1495,32 +1594,33 @@ namespace FbxExporters
                 }
 
                 public void Animate(Transform unityTransform, FbxNode fbxNode, FbxAnimLayer fbxAnimLayer, bool Verbose) {
+
                     /* Find or create the three curves. */
-                    var x = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_X, true);
-                    var y = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Y, true);
-                    var z = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Z, true);
+                    var fbxAnimCurveX = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_X, true);
+                    var fbxAnimCurveY = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Y, true);
+                    var fbxAnimCurveZ = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Z, true);
 
                     /* set the keys */
-                    x.KeyModifyBegin();
-                    y.KeyModifyBegin();
-                    z.KeyModifyBegin();
+                    fbxAnimCurveX.KeyModifyBegin();
+                    fbxAnimCurveY.KeyModifyBegin();
+                    fbxAnimCurveZ.KeyModifyBegin();
 
                     var keys = ComputeKeys(unityTransform.localRotation, fbxNode);
                     for(int i = 0, n = keys.Length; i < n; ++i) {
                         var key = keys[i];
-                        x.KeyAdd(key.time);
-                        x.KeySet(i, key.time, (float)key.euler.X);
+                        fbxAnimCurveX.KeyAdd(key.time);
+                        fbxAnimCurveX.KeySet(i, key.time, (float)key.euler.X);
 
-                        y.KeyAdd(key.time);
-                        y.KeySet(i, key.time, (float)key.euler.Y);
+                        fbxAnimCurveY.KeyAdd(key.time);
+                        fbxAnimCurveY.KeySet(i, key.time, (float)key.euler.Y);
 
-                        z.KeyAdd(key.time);
-                        z.KeySet(i, key.time, (float)key.euler.Z);
+                        fbxAnimCurveZ.KeyAdd(key.time);
+                        fbxAnimCurveZ.KeySet(i, key.time, (float)key.euler.Z);
                     }
 
-                    z.KeyModifyEnd();
-                    y.KeyModifyEnd();
-                    x.KeyModifyEnd();
+                    fbxAnimCurveZ.KeyModifyEnd();
+                    fbxAnimCurveY.KeyModifyEnd();
+                    fbxAnimCurveX.KeyModifyEnd();
 
                     if (Verbose) {
                         Debug.Log("Exported rotation animation for " + fbxNode.GetName());
@@ -1531,16 +1631,16 @@ namespace FbxExporters
             /// <summary>
             /// Export an AnimationClip as a single take
             /// </summary>
-            protected void ExportAnimationClip (AnimationClip unityAnimClip, GameObject unityRoot, FbxScene fbxScene)
+            protected void ExportAnimationClip (AnimationClip uniAnimClip, GameObject uniRoot, FbxScene fbxScene)
             {
-                if (!unityAnimClip) return;
+                if (!uniAnimClip) return;
 
                 if (Verbose)
-                    Debug.Log (string.Format ("exporting clip {1} for {0}", unityRoot.name, unityAnimClip.name));
+                    Debug.Log (string.Format ("Exporting animation clip ({1}) for {0}", uniRoot.name, uniAnimClip.name));
 
                 // setup anim stack
-                FbxAnimStack fbxAnimStack = FbxAnimStack.Create (fbxScene, unityAnimClip.name);
-                fbxAnimStack.Description.Set ("Animation Take: " + unityAnimClip.name);
+                FbxAnimStack fbxAnimStack = FbxAnimStack.Create (fbxScene, uniAnimClip.name);
+                fbxAnimStack.Description.Set ("Animation Take: " + uniAnimClip.name);
 
                 // add one mandatory animation layer
                 FbxAnimLayer fbxAnimLayer = FbxAnimLayer.Create (fbxScene, "Animation Base Layer");
@@ -1552,7 +1652,7 @@ namespace FbxExporters
                 FbxTime.EMode timeMode = FbxTime.EMode.eCustom;
                 double precision = 1e-6;
                 while (timeMode == FbxTime.EMode.eCustom && precision < 1000) {
-                    timeMode = FbxTime.ConvertFrameRateToTimeMode (unityAnimClip.frameRate, precision);
+                    timeMode = FbxTime.ConvertFrameRateToTimeMode (uniAnimClip.frameRate, precision);
                     precision *= 10;
                 }
                 if (timeMode == FbxTime.EMode.eCustom) {
@@ -1562,42 +1662,46 @@ namespace FbxExporters
 
                 // set time correctly
                 var fbxStartTime = FbxTime.FromSecondDouble (0);
-                var fbxStopTime = FbxTime.FromSecondDouble (unityAnimClip.length);
+                var fbxStopTime = FbxTime.FromSecondDouble (uniAnimClip.length);
 
                 fbxAnimStack.SetLocalTimeSpan (new FbxTimeSpan (fbxStartTime, fbxStopTime));
 
                 /* The major difficulty: Unity uses quaternions for rotation
-                 * (which is how it should be) but FBX uses euler angles. So we
+                 * (which is how it should be) but FBX uses Euler angles. So we
                  * need to gather up the list of transform curves per object. */
                 var quaternions = new Dictionary<UnityEngine.GameObject, QuaternionCurve> ();
 
-                foreach (EditorCurveBinding unityCurveBinding in AnimationUtility.GetCurveBindings (unityAnimClip)) {
-                    Object unityObj = AnimationUtility.GetAnimatedObject (unityRoot, unityCurveBinding);
-                    if (!unityObj) { continue; }
+                foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (uniAnimClip)) {
+                    Object uniObj = AnimationUtility.GetAnimatedObject (uniRoot, uniCurveBinding);
+                    if (!uniObj) { continue; }
 
-                    AnimationCurve unityAnimCurve = AnimationUtility.GetEditorCurve (unityAnimClip, unityCurveBinding);
-                    if (unityAnimCurve == null) { continue; }
+                    AnimationCurve uniAnimCurve = AnimationUtility.GetEditorCurve (uniAnimClip, uniCurveBinding);
+                    if (uniAnimCurve == null) { continue; }
 
-                    int index = QuaternionCurve.GetQuaternionIndex (unityCurveBinding.propertyName);
-                    if (index == -1) {
-                        if (Verbose)
-                            Debug.Log (string.Format ("export binding {1} for {0}", unityCurveBinding.propertyName, unityObj.ToString ()));
+                    if (Verbose)
+                    {
+                        Debug.Log (string.Format ("Exporting animation curve bound to {0} {1}", 
+                                                  uniCurveBinding.propertyName, uniCurveBinding.path));
+                    }
 
-                        /* Some normal property (e.g. translation), export right away */
-                        ExportAnimCurve (unityObj, unityAnimCurve, unityCurveBinding.propertyName,
+                    int index = QuaternionCurve.GetQuaternionIndex (uniCurveBinding.propertyName);
+                    if (index == -1) 
+                    {
+                        /* simple property (e.g. intensity), export right away */
+                        ExportAnimationCurve (uniObj, uniAnimCurve, uniCurveBinding.propertyName,
                             fbxScene, fbxAnimLayer);
                     } else {
                         /* Rotation property; save it to convert quaternion -> euler later. */
 
-                        var unityGo = GetGameObject (unityObj);
-                        if (!unityGo) { continue; }
+                        var uniGO = GetGameObject (uniObj);
+                        if (!uniGO) { continue; }
 
                         QuaternionCurve quat;
-                        if (!quaternions.TryGetValue (unityGo, out quat)) {
+                        if (!quaternions.TryGetValue (uniGO, out quat)) {
                             quat = new QuaternionCurve ();
-                            quaternions.Add (unityGo, quat);
+                            quaternions.Add (uniGO, quat);
                         }
-                        quat.SetCurve (index, unityAnimCurve);
+                        quat.SetCurve (index, uniAnimCurve);
                     }
                 }
 
@@ -1608,7 +1712,7 @@ namespace FbxExporters
 
                     FbxNode fbxNode;
                     if (!MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
-                        Debug.LogError (string.Format ("no fbxnode found for '0'", unityGo.name));
+                        Debug.LogError (string.Format ("no FbxNode found for {0}", unityGo.name));
                         continue;
                     }
                     quat.Animate (unityGo.transform, fbxNode, fbxAnimLayer, Verbose);
@@ -1618,47 +1722,47 @@ namespace FbxExporters
             /// <summary>
             /// Export the Animator component on this game object
             /// </summary>
-            protected void ExportAnimation (GameObject unityRoot, FbxScene fbxScene)
+            protected void ExportAnimation (GameObject uniRoot, FbxScene fbxScene)
             {
-                var exported = new HashSet<AnimationClip> ();
+                var exportedClips = new HashSet<AnimationClip> ();
 
-                var animator = unityRoot.GetComponent<Animator> ();
-                if (animator)
+                var uniAnimator = uniRoot.GetComponent<Animator> ();
+                if (uniAnimator)
                 { 
                     // Try the animator controller (mecanim)
-                    var controller = animator.runtimeAnimatorController;
+                    var controller = uniAnimator.runtimeAnimatorController;
 
                     if (controller) 
                     { 
                         // Only export each clip once per game object.
                         foreach (var clip in controller.animationClips) {
-                            if (exported.Add (clip)) {
-                                ExportAnimationClip (clip, unityRoot, fbxScene);
+                            if (exportedClips.Add (clip)) {
+                                ExportAnimationClip (clip, uniRoot, fbxScene);
                             }
                         }
                     }
                 }
 
                 // Try the playable director
-                var director = unityRoot.GetComponent<UnityEngine.Playables.PlayableDirector> ();
+                var director = uniRoot.GetComponent<UnityEngine.Playables.PlayableDirector> ();
                 if (director)
                 {
-                    Debug.Log(string.Format("exporting animationclips from playabledirector on {0} not supported", unityRoot.name));
+                    Debug.LogWarning(string.Format("Exporting animation from PlayableDirector on {0} not supported", uniRoot.name));
                     // TODO: export animationclips from playabledirector
                 }
 
                 // Try the animation (legacy)
-                var animation = unityRoot.GetComponent<Animation> ();
-                if (animation) 
+                var uniAnimation = uniRoot.GetComponent<Animation> ();
+                if (uniAnimation) 
                 { 
                     // Only export each clip once per game object.
-                    foreach (var animObj in animation) {
-                        AnimationState animState = animObj as AnimationState;
-                        if (animState)
+                    foreach (var uniAnimObj in uniAnimation) {
+                        AnimationState uniAnimState = uniAnimObj as AnimationState;
+                        if (uniAnimState)
                         {
-                            AnimationClip clip = animState.clip;
-                            if (exported.Add (clip)) {
-                                ExportAnimationClip (clip, unityRoot, fbxScene);
+                            AnimationClip uniAnimClip = uniAnimState.clip;
+                            if (exportedClips.Add (uniAnimClip)) {
+                                ExportAnimationClip (uniAnimClip, uniRoot, fbxScene);
                             }
                         }
                     }
@@ -2600,7 +2704,7 @@ namespace FbxExporters
             {
             }
 
-            public bool Verbose { private set {;} get { return Debug.unityLogger.logEnabled; } }
+            public bool Verbose { private set {;} get { return false; } }
 
             /// <summary>
             /// manage the selection of a filename
