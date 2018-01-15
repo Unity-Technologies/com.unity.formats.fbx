@@ -109,6 +109,8 @@ namespace FbxExporters
 
             private const string SkeletonPrefix = "_Skel";
 
+            private const string FbxSkinPrefix = "_Skin";
+
             /// <summary>
             /// name prefix for custom properties
             /// </summary>
@@ -981,7 +983,7 @@ namespace FbxExporters
                                      MeshInfo meshInfo, FbxScene fbxScene, FbxMesh fbxMesh,
                                      FbxNode fbxRootNode)
             {
-                FbxSkin fbxSkin = FbxSkin.Create (fbxScene, (skinnedMesh.name + "_Skin"));
+                FbxSkin fbxSkin = FbxSkin.Create (fbxScene, (skinnedMesh.name + FbxSkinPrefix));
 
                 FbxAMatrix fbxMeshMatrix = fbxRootNode.EvaluateGlobalTransform ();
 
@@ -1019,7 +1021,7 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// set weight vertices to cluster
+            /// set vertex weights in cluster
             /// </summary>
             private void SetVertexWeights (MeshInfo meshInfo, Dictionary<int, FbxCluster> boneCluster)
             {
@@ -1825,14 +1827,7 @@ namespace FbxExporters
             /// <summary>
             /// Creates an FbxNode for each GameObject.
             /// </summary>
-            /// <returns>The nodes.</returns>
-            /// <param name="unityGo">Unity go.</param>
-            /// <param name="fbxScene">Fbx scene.</param>
-            /// <param name="fbxNodeParent">Fbx node parent.</param>
-            /// <param name="exportProgress">Export progress.</param>
-            /// <param name="objectCount">Object count.</param>
-            /// <param name="newCenter">New center.</param>
-            /// <param name="exportType">Export type.</param>
+            /// <returns>The number of nodes exported.</returns>
             protected int ExportNodes(
                 GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
                 int exportProgress, int objectCount, Vector3 newCenter,
@@ -1880,7 +1875,9 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Unconditionally export components on this game object
+            /// Export components on this game object.
+            /// Transform components and animation have already been exported.
+            /// This function exports the other components.
             /// </summary>
             protected bool ExportComponents(FbxScene fbxScene)
             {
