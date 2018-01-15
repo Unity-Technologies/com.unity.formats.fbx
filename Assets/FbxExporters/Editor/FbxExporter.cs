@@ -107,6 +107,8 @@ namespace FbxExporters
             /// </summary>
             private static string DefaultCamera = "";
 
+            private const string SkeletonPrefix = "_Skel";
+
             /// <summary>
             /// name prefix for custom properties
             /// </summary>
@@ -864,7 +866,7 @@ namespace FbxExporters
 
                 // Step 0: map transform to index so we can look up index by bone.
                 Dictionary<Transform, int> index = new Dictionary<Transform, int>();
-                for (int boneIndex = 0, n = bones.Length; boneIndex < n; boneIndex++) {
+                for (int boneIndex = 0; boneIndex < bones.Length; boneIndex++) {
                     Transform unityBoneTransform = bones [boneIndex];
                     index[unityBoneTransform] = boneIndex;
                 }
@@ -882,12 +884,12 @@ namespace FbxExporters
                             // its corresponding parent, or to the scene if there is none.
                             FbxNode fbxBoneNode;
                             if (!MapUnityObjectToFbxNode.TryGetValue (t.gameObject, out fbxBoneNode)) {
-                                Debug.LogError ("node should already be created");
+                                Debug.LogErrorFormat("Node {0} should already be created", t.name);
                             }
 
                             // Set it up as a skeleton node if we haven't already.
                             if (fbxBoneNode.GetSkeleton () == null) {
-                                FbxSkeleton fbxSkeleton = FbxSkeleton.Create (fbxScene, t.name + "_Skel");
+                                FbxSkeleton fbxSkeleton = FbxSkeleton.Create (fbxScene, t.name + SkeletonPrefix);
 
                                 var fbxSkeletonType = skinnedMesh.rootBone != t
                                 ? FbxSkeleton.EType.eLimbNode : FbxSkeleton.EType.eRoot;
@@ -957,7 +959,8 @@ namespace FbxExporters
                     double sign;
                     matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
 
-                    // Bones should have zero rotation, and use a pivot instead.
+                    // Export bones with zero rotation, using a pivot instead to set the rotation
+                    // so that the bones are easier to animate and the rotation shows up as the "joint orientation" in Maya.
                     fbxBone.LclTranslation.Set (new FbxDouble3(-translation.X*UnitScaleFactor, translation.Y*UnitScaleFactor, translation.Z*UnitScaleFactor));
                     fbxBone.LclRotation.Set (new FbxDouble3(0,0,0));
                     fbxBone.LclScaling.Set (new FbxDouble3 (scale.X, scale.Y, scale.Z));
