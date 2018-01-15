@@ -1828,7 +1828,7 @@ namespace FbxExporters
             /// Creates an FbxNode for each GameObject.
             /// </summary>
             /// <returns>The number of nodes exported.</returns>
-            protected int ExportNodes(
+            protected int ExportTransformHierarchy(
                 GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
                 int exportProgress, int objectCount, Vector3 newCenter,
                 TransformExportType exportType = TransformExportType.Local)
@@ -1868,7 +1868,7 @@ namespace FbxExporters
 
                 // now  unityGo  through our children and recurse
                 foreach (Transform childT in  unityGo.transform) {
-                    numObjectsExported = ExportNodes (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter);
+                    numObjectsExported = ExportTransformHierarchy (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter);
                 }
 
                 return numObjectsExported;
@@ -1876,8 +1876,8 @@ namespace FbxExporters
 
             /// <summary>
             /// Export components on this game object.
-            /// Transform components and animation have already been exported.
-            /// This function exports the other components.
+            /// Transform components have already been exported.
+            /// This function exports the other components and animation.
             /// </summary>
             protected bool ExportComponents(FbxScene fbxScene)
             {
@@ -2150,7 +2150,7 @@ namespace FbxExporters
 
                         if(revisedExportSet.Count == 1){
                             foreach(var unityGo in revisedExportSet){
-                                exportProgress = this.ExportNodes (
+                                exportProgress = this.ExportTransformHierarchy (
                                     unityGo, fbxScene, fbxRootNode, exportProgress,
                                     count, Vector3.zero, TransformExportType.Reset);
                                 if (exportCancelled || exportProgress < 0) {
@@ -2164,7 +2164,7 @@ namespace FbxExporters
                             Vector3 center = ExportSettings.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
 
                             foreach (var unityGo in revisedExportSet) {
-                                exportProgress = this.ExportNodes (unityGo, fbxScene, fbxRootNode,
+                                exportProgress = this.ExportTransformHierarchy (unityGo, fbxScene, fbxRootNode,
                                     exportProgress, count, center, TransformExportType.Global);
                                 if (exportCancelled || exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
