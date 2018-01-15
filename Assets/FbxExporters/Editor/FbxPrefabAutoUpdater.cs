@@ -320,8 +320,9 @@ namespace FbxExporters
                 /// <summary>
                 /// Children of this node.
                 /// The key is the name, which is assumed to be unique.
-                /// Old fbx data, new fbx data should have FBX Object Name
-                /// Prefab data should have FBX Object Name
+                /// Old fbx data should have Unity Object Name
+                /// new fbx data should have FBX Object Name
+                /// Prefab data should have Unity Object Name
                 /// The value is, recursively, the representation of that subtree.
                 /// </summary>
                 Dictionary<string, FbxRepresentation> m_children = new Dictionary<string, FbxRepresentation>();
@@ -796,9 +797,9 @@ namespace FbxExporters
 
                         var prefabParent = m_prefabData.GetParent(prefabNodeName);
                         var oldParent = m_oldFbxData.GetParent(prefabNodeName);
-                        var newParent = m_newFbxData.GetParent(prefabNodeName);
+                        var newParent = m_newFbxData.GetParent(m_fbxPrefabUtility.getFBXObjectName(prefabNodeName));
 
-                        // If it's a nameMapping, don't add a reparenting, we'll rename it later
+                        // If it's a name mapping, don't add a reparenting, we'll rename it later
                         if (oldParent == m_fbxPrefabUtility.getUnityObjectName(newParent)) {
                             continue;
                         }
@@ -861,18 +862,21 @@ namespace FbxExporters
                     // about what components might be on it.
                     foreach (var nodeNameInUpdatedPrefab in m_nodesInUpdatedPrefab)
                     {
-                        if (!m_newFbxData.HasNode(nodeNameInUpdatedPrefab)) {
+                        if (!m_newFbxData.HasNode(m_fbxPrefabUtility.getFBXObjectName(nodeNameInUpdatedPrefab))) {
                             // It's not in the FBX, so clearly we're not updating any components.
                             // We don't need to check if it's in m_prefab because
                             // we're only iterating over those.
                             continue;
                         }
+                        // Get the matching name for the node in the m_newFbxData
+                        string nodeNameInFBX = m_fbxPrefabUtility.getFBXObjectName(nodeNameInUpdatedPrefab);
+
                         var allTypes = m_oldFbxData.GetComponentTypes(nodeNameInUpdatedPrefab).Union(
-                            m_newFbxData.GetComponentTypes(nodeNameInUpdatedPrefab));
+                            m_newFbxData.GetComponentTypes(nodeNameInFBX));
 
                         foreach(var typename in allTypes) {
                             var oldValues = m_oldFbxData.GetComponentValues(nodeNameInUpdatedPrefab, typename);
-                            var newValues = m_newFbxData.GetComponentValues(nodeNameInUpdatedPrefab, typename);
+                            var newValues = m_newFbxData.GetComponentValues(nodeNameInFBX, typename);
                             List<string> prefabValues = null; // get them only if we need them.
 
                             // If we have multiple identical-type components, match them up by index.
