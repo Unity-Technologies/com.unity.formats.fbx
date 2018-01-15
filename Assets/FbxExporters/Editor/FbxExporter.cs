@@ -147,6 +147,12 @@ namespace FbxExporters
             };
 
             /// <summary>
+            /// keep a map between GameObject and FbxNode for quick lookup when we export
+            /// animation.
+            /// </summary>
+            Dictionary<GameObject, FbxNode> MapUnityObjectToFbxNode = new Dictionary<GameObject, FbxNode> ();
+
+            /// <summary>
             /// Map Unity material name to FBX material object
             /// </summary>
             Dictionary<string, FbxSurfaceMaterial> MaterialMap = new Dictionary<string, FbxSurfaceMaterial> ();
@@ -648,6 +654,11 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Keeps track of the index of each point in the exported vertex array.
+            /// </summary>
+            private Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
+
+            /// <summary>
             /// Exports a unity mesh and attaches it to the node as an FbxMesh.
             /// </summary>
             bool ExportMesh (MeshInfo meshInfo, FbxNode fbxNode)
@@ -664,7 +675,7 @@ namespace FbxExporters
                 FbxMesh fbxMesh = FbxMesh.Create (fbxScene, "Scene");
 
                 // Create control points.
-                Dictionary<Vector3, int> ControlPointToIndex = new Dictionary<Vector3, int> ();
+                ControlPointToIndex.Clear();
                 {
                     var vertices = meshInfo.Vertices;
                     for (int v = 0, n = meshInfo.VertexCount; v < n; v++) {
@@ -742,6 +753,320 @@ namespace FbxExporters
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
                 fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
+                return true;
+            }
+
+            /// <summary>
+            /// Export GameObject as a skinned mesh with material, bones, a skin and, a bind pose.
+            /// </summary>
+            protected bool ExportSkinnedMesh (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                SkinnedMeshRenderer unitySkin
+                = unityGo.GetComponent<SkinnedMeshRenderer> ();
+
+                if (unitySkin == null) {
+                    return false;
+                }
+
+                var mesh = unitySkin.sharedMesh;
+                if (!mesh) {
+                    return false;
+                }
+
+                // export skeleton
+                if (!ExportSkeleton (unitySkin, fbxScene)) {
+                    Debug.LogWarning("failed to export skeleton");
+                    return false;
+                }
+
+                var meshInfo = new MeshInfo (unitySkin.sharedMesh, unitySkin.sharedMaterials);
+
+                // export skin mesh
+                FbxMesh fbxMesh = null;
+                if (ExportMesh (meshInfo, fbxNode)) {
+                    fbxMesh = fbxNode.GetMesh ();
+                }
+
+                if (fbxMesh == null) {
+                    Debug.LogError ("Could not find mesh");
+                    return false;
+                }
+
+                // bind mesh to skeleton
+                ExportSkin (unitySkin, meshInfo, fbxScene, fbxMesh, fbxNode);
+
+                // add bind pose
+                ExportBindPose (unitySkin, fbxNode, fbxScene);
+
+                if (Verbose)
+                    Debug.Log (string.Format ("exporting {0} {1}", "Skin", fbxNode.GetName ()));
+                
+                return true;
+            }
+
+            private bool IsBone(Transform t, Dictionary<Transform, int> bones){
+                if (bones.ContainsKey (t)) {
+                    return true;
+                }
+
+                foreach (Transform child in t) {
+                    if (IsBone (child, bones)) {
+                        //Debug.LogError ("our child is a bone: " + t.name);
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            private Dictionary<SkinnedMeshRenderer, Transform[]> SkinnedMeshToBonesMap = new Dictionary<SkinnedMeshRenderer, Transform[]> ();
+
+            /// <summary>
+            /// Export bones of skinned mesh, if this is a skinned mesh with
+            /// bones and bind poses.
+            /// </summary>
+            private bool ExportSkeleton (SkinnedMeshRenderer skinnedMesh, FbxScene fbxScene)
+            {
+                if (!skinnedMesh) { return false; }
+                var bones = skinnedMesh.bones;
+                if (bones == null || bones.Length == 0) { return false; }
+                var mesh = skinnedMesh.sharedMesh;
+                if (!mesh) { return false; }
+
+                var bindPoses = mesh.bindposes;
+                if (bindPoses == null || bindPoses.Length != bones.Length) { return false; }
+
+                // Three steps:
+                // 0. Set up the map from bone to index.
+                // 1. Create the bones, in arbitrary order.
+                // 2. Connect up the hierarchy.
+                // 3. Set the transforms.
+                // Step 0 supports step 1 (finding which is the root bone) and step 3
+                // (setting up transforms; the complication is the use of pivots).
+
+                // Step 0: map transform to index so we can look up index by bone.
+                Dictionary<Transform, int> index = new Dictionary<Transform, int>();
+                for (int boneIndex = 0, n = bones.Length; boneIndex < n; boneIndex++) {
+                    Transform unityBoneTransform = bones [boneIndex];
+                    index[unityBoneTransform] = boneIndex;
+                }
+
+                // Step 1: create the bones.
+                HashSet<Transform> boneSet = new HashSet<Transform> ();
+                var s = new Stack<Transform> ();
+                s.Push(skinnedMesh.rootBone);
+                while (s.Count > 0) {
+                    var t = s.Pop();
+
+                    if (IsBone(t, index)) {
+                        if (!boneSet.Contains (t)) {
+                            // Create the bone node if we haven't already. Parent it to
+                            // its corresponding parent, or to the scene if there is none.
+                            FbxNode fbxBoneNode;
+                            if (!MapUnityObjectToFbxNode.TryGetValue (t.gameObject, out fbxBoneNode)) {
+                                Debug.LogError ("node should already be created");
+                            }
+
+                            // Set it up as a skeleton node if we haven't already.
+                            if (fbxBoneNode.GetSkeleton () == null) {
+                                FbxSkeleton fbxSkeleton = FbxSkeleton.Create (fbxScene, t.name + "_Skel");
+
+                                var fbxSkeletonType = skinnedMesh.rootBone != t
+                                ? FbxSkeleton.EType.eLimbNode : FbxSkeleton.EType.eRoot;
+                                fbxSkeleton.SetSkeletonType (fbxSkeletonType);
+                                fbxSkeleton.Size.Set (1.0f * UnitScaleFactor);
+                                fbxBoneNode.SetNodeAttribute (fbxSkeleton);
+                            }
+
+                            boneSet.Add (t);
+                        }
+
+                        foreach (Transform child in t) {
+                            s.Push (child);
+                        }
+                    }
+                }
+
+                var boneList = boneSet.ToArray();
+
+                SkinnedMeshToBonesMap.Add (skinnedMesh, boneList);
+
+                // Step 2: Get bindposes
+                var boneToBindPose = new Dictionary<Transform, Matrix4x4>();
+                for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
+                    var unityBone = boneList [boneIndex];
+
+                    Matrix4x4 pose;
+                    if (index.ContainsKey (unityBone)) {
+                        int i = index [unityBone];
+                        pose = bindPoses [i];
+                    } else {
+                        pose = unityBone.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
+                    }
+                    boneToBindPose.Add (unityBone, pose);
+                }
+
+                // Step 3: set up the transforms.
+                for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
+                    var unityBone = boneList [boneIndex];
+                    var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
+
+                    Matrix4x4 pose;
+
+                    var bindPose = boneToBindPose [unityBone];
+
+                    if (fbxBone.GetSkeleton ().GetSkeletonType () == FbxSkeleton.EType.eRoot) {
+                        // bind pose is local -> root. We want root -> local, so invert.
+                        pose = (unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix * bindPose.inverse);
+                    } else {
+                        // Bind pose is local -> parent -> ... -> root.
+                        // We want parent -> local.
+                        // Invert our bind pose to get root -> local.
+                        // The apply parent -> root to leave just parent -> local.
+                        pose = boneToBindPose [unityBone.parent] * bindPose.inverse;
+                    }
+
+                    // FBX is transposed relative to Unity: transpose as we convert.
+                    FbxMatrix matrix = new FbxMatrix ();
+                    matrix.SetColumn (0, new FbxVector4 (pose.GetRow (0).x, pose.GetRow (0).y, pose.GetRow (0).z, pose.GetRow (0).w));
+                    matrix.SetColumn (1, new FbxVector4 (pose.GetRow (1).x, pose.GetRow (1).y, pose.GetRow (1).z, pose.GetRow (1).w));
+                    matrix.SetColumn (2, new FbxVector4 (pose.GetRow (2).x, pose.GetRow (2).y, pose.GetRow (2).z, pose.GetRow (2).w));
+                    matrix.SetColumn (3, new FbxVector4 (pose.GetRow (3).x, pose.GetRow (3).y, pose.GetRow (3).z, pose.GetRow (3).w));
+
+                    // FBX wants translation, rotation (in euler angles) and scale.
+                    // We assume there's no real shear, just rounding error.
+                    FbxVector4 translation, rotation, shear, scale;
+                    double sign;
+                    matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
+
+                    // Bones should have zero rotation, and use a pivot instead.
+                    fbxBone.LclTranslation.Set (new FbxDouble3(-translation.X*UnitScaleFactor, translation.Y*UnitScaleFactor, translation.Z*UnitScaleFactor));
+                    fbxBone.LclRotation.Set (new FbxDouble3(0,0,0));
+                    fbxBone.LclScaling.Set (new FbxDouble3 (scale.X, scale.Y, scale.Z));
+
+                    // TODO (UNI-34294): add detailed comment about why we export rotation as pre-rotation
+                    fbxBone.SetRotationActive (true);
+                    fbxBone.SetPivotState (FbxNode.EPivotSet.eSourcePivot, FbxNode.EPivotState.ePivotReference);
+                    fbxBone.SetPreRotation (FbxNode.EPivotSet.eSourcePivot, new FbxVector4 (rotation.X, -rotation.Y, -rotation.Z));
+                }
+
+                return true;
+            }
+
+            /// <summary>
+            /// Export binding of mesh to skeleton
+            /// </summary>
+            private bool ExportSkin (SkinnedMeshRenderer skinnedMesh, 
+                MeshInfo meshInfo, FbxScene fbxScene, FbxMesh fbxMesh,
+                FbxNode fbxRootNode)
+            {
+                FbxSkin fbxSkin = FbxSkin.Create (fbxScene, (skinnedMesh.name + "_Skin"));
+
+                FbxAMatrix fbxMeshMatrix = fbxRootNode.EvaluateGlobalTransform ();
+
+                // keep track of the bone index -> fbx cluster mapping, so that we can add the bone weights afterwards
+                Dictionary<int, FbxCluster> boneCluster = new Dictionary<int, FbxCluster> ();
+
+                for(int i = 0; i < skinnedMesh.bones.Length; i++) {
+                    FbxNode fbxBoneNode = MapUnityObjectToFbxNode [skinnedMesh.bones[i].gameObject];
+
+                    // Create the deforming cluster
+                    FbxCluster fbxCluster = FbxCluster.Create (fbxScene, "BoneWeightCluster");
+
+                    fbxCluster.SetLink (fbxBoneNode);
+                    fbxCluster.SetLinkMode (FbxCluster.ELinkMode.eNormalize);
+
+                    boneCluster.Add (i, fbxCluster);
+
+                    // set the Transform and TransformLink matrix
+                    fbxCluster.SetTransformMatrix (fbxMeshMatrix);
+
+                    FbxAMatrix fbxLinkMatrix = fbxBoneNode.EvaluateGlobalTransform ();
+                    fbxCluster.SetTransformLinkMatrix (fbxLinkMatrix);
+
+                    // add the cluster to the skin
+                    fbxSkin.AddCluster (fbxCluster);
+                }
+
+                // set the vertex weights for each bone
+                SetVertexWeights(meshInfo, boneCluster);
+
+                // Add the skin to the mesh after the clusters have been added
+                fbxMesh.AddDeformer (fbxSkin);
+
+                return true;
+            }
+
+            /// <summary>
+            /// set weight vertices to cluster
+            /// </summary>
+            private void SetVertexWeights (MeshInfo meshInfo, Dictionary<int, FbxCluster> boneCluster)
+            {
+                // set the vertex weights for each bone
+                for (int i = 0; i < meshInfo.BoneWeights.Length; i++) {
+                    var boneWeights = meshInfo.BoneWeights;
+                    int[] indices = {
+                        boneWeights [i].boneIndex0,
+                        boneWeights [i].boneIndex1,
+                        boneWeights [i].boneIndex2,
+                        boneWeights [i].boneIndex3
+                    };
+                    float[] weights = {
+                        boneWeights [i].weight0,
+                        boneWeights [i].weight1,
+                        boneWeights [i].weight2,
+                        boneWeights [i].weight3
+                    };
+
+                    for (int j = 0; j < indices.Length; j++) {
+                        if (weights [j] <= 0) {
+                            continue;
+                        }
+                        if (!boneCluster.ContainsKey (indices [j])) {
+                            continue;
+                        }
+                        boneCluster [indices [j]].AddControlPointIndex (ControlPointToIndex[meshInfo.Vertices[i]], weights [j]);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Export bind pose of mesh to skeleton
+            /// </summary>
+            protected bool ExportBindPose (SkinnedMeshRenderer skinnedMesh, FbxNode fbxMeshNode, FbxScene fbxScene)
+            {
+                FbxPose fbxPose = FbxPose.Create (fbxScene, fbxMeshNode.GetName());
+
+                // set as bind pose
+                fbxPose.SetIsBindPose (true);
+
+                // assume each bone node has one weighted vertex cluster
+                Transform[] bones;
+                if (!SkinnedMeshToBonesMap.TryGetValue (skinnedMesh, out bones)) {
+                    return false;
+                }
+                for (int i = 0; i < bones.Length; i++) {
+                    FbxNode fbxBoneNode = MapUnityObjectToFbxNode [bones[i].gameObject];
+
+                    // EvaluateGlobalTransform returns an FbxAMatrix (affine matrix)
+                    // which has to be converted to an FbxMatrix so that it can be passed to fbxPose.Add().
+                    // The hierarchy for FbxMatrix and FbxAMatrix is as follows:
+                    //
+                    //      FbxDouble4x4
+                    //      /           \
+                    // FbxMatrix     FbxAMatrix
+                    //
+                    // Therefore we can't convert directly from FbxAMatrix to FbxMatrix,
+                    // however FbxMatrix has a constructor that takes an FbxAMatrix.
+                    FbxMatrix fbxBindMatrix = new FbxMatrix(fbxBoneNode.EvaluateGlobalTransform ());
+
+                    fbxPose.Add (fbxBoneNode, fbxBindMatrix);
+                }
+
+                fbxPose.Add (fbxMeshNode, new FbxMatrix (fbxMeshNode.EvaluateGlobalTransform ()));
+
+                // add the pose to the scene
+                fbxScene.AddPose (fbxPose);
+
                 return true;
             }
 
@@ -1475,9 +1800,17 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Unconditionally export components on this game object
+            /// Creates an FbxNode for each GameObject.
             /// </summary>
-            protected int ExportComponents (
+            /// <returns>The nodes.</returns>
+            /// <param name="unityGo">Unity go.</param>
+            /// <param name="fbxScene">Fbx scene.</param>
+            /// <param name="fbxNodeParent">Fbx node parent.</param>
+            /// <param name="exportProgress">Export progress.</param>
+            /// <param name="objectCount">Object count.</param>
+            /// <param name="newCenter">New center.</param>
+            /// <param name="exportType">Export type.</param>
+            protected int ExportNodes(
                 GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
                 int exportProgress, int objectCount, Vector3 newCenter,
                 TransformExportType exportType = TransformExportType.Local)
@@ -1492,11 +1825,14 @@ namespace FbxExporters
                 FbxNode fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
                 MapUnityObjectToFbxNode [unityGo] = fbxNode;
 
+                if (Verbose)
+                    Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
+
                 numObjectsExported++;
                 if (EditorUtility.DisplayCancelableProgressBar (
-                        ProgressBarTitle,
-                        string.Format ("Creating FbxNode {0}/{1}", numObjectsExported, objectCount),
-                        (numObjectsExported / (float)objectCount) * 0.5f)) {
+                    ProgressBarTitle,
+                    string.Format ("Creating FbxNode {0}/{1}", numObjectsExported, objectCount),
+                    (numObjectsExported / (float)objectCount) * 0.25f)) {
                     // cancel silently
                     return -1;
                 }
@@ -1508,39 +1844,61 @@ namespace FbxExporters
                 // Use RSrs as the scaling inhertiance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
-                ExportTransform ( unityGo.transform, fbxNode, newCenter, exportType);
-
-                // try export mesh
-                bool exportedMesh = ExportInstance (unityGo, fbxNode, fbxScene);
-                if (!exportedMesh) {
-                    exportedMesh = ExportMesh (unityGo, fbxNode);
-                }
-
-                // export camera, but only if no mesh was exported
-                bool exportedCamera = false;
-                if (!exportedMesh) {
-                    exportedCamera = ExportCamera (unityGo, fbxScene, fbxNode);
-                }
-
-                // export light, but only if no mesh or camera was exported
-                if (!exportedMesh && !exportedCamera) {
-                    ExportLight (unityGo, fbxScene, fbxNode);
-                }
-
-                if (Verbose)
-                    Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
+                ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
 
                 fbxNodeParent.AddChild (fbxNode);
 
                 // now  unityGo  through our children and recurse
                 foreach (Transform childT in  unityGo.transform) {
-                    numObjectsExported = ExportComponents (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter);
+                    numObjectsExported = ExportNodes (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter);
                 }
 
-                // now export animation (after hierarchy has been exported)
-                ExportAnimation (unityGo, fbxScene);
-
                 return numObjectsExported;
+            }
+
+            /// <summary>
+            /// Unconditionally export components on this game object
+            /// </summary>
+            protected bool ExportComponents(FbxScene fbxScene)
+            {
+                int numObjectsExported = 0;
+                int objectCount = MapUnityObjectToFbxNode.Count;
+                foreach (KeyValuePair<GameObject, FbxNode> entry in MapUnityObjectToFbxNode) {
+                    numObjectsExported++;
+                    if (EditorUtility.DisplayCancelableProgressBar (
+                        ProgressBarTitle,
+                        string.Format ("Exporting Components for GameObject {0}/{1}", numObjectsExported, objectCount),
+                        ((numObjectsExported / (float)objectCount) * 0.25f) + 0.25f)) {
+                        // cancel silently
+                        return false;
+                    }
+
+                    var unityGo = entry.Key;
+                    var fbxNode = entry.Value;
+
+                    // try export mesh
+                    bool exportedMesh = ExportInstance (unityGo, fbxNode, fbxScene);
+
+                    if (!exportedMesh) {
+                        exportedMesh = ExportMesh (unityGo, fbxNode);
+                    }
+
+                    // export camera, but only if no mesh was exported
+                    bool exportedCamera = false;
+                    if (!exportedMesh) {
+                        exportedCamera = ExportCamera (unityGo, fbxScene, fbxNode);
+                    }
+
+                    // export light, but only if no mesh or camera was exported
+                    if (!exportedMesh && !exportedCamera) {
+                        ExportLight (unityGo, fbxScene, fbxNode);
+                    }
+
+                    // now (try) export animation
+    				ExportAnimation (unityGo, fbxScene);
+
+                }
+                return true;
             }
 
             /// <summary>
@@ -1772,7 +2130,7 @@ namespace FbxExporters
 
                         if(revisedExportSet.Count == 1){
                             foreach(var unityGo in revisedExportSet){
-                                exportProgress = this.ExportComponents (
+                                exportProgress = this.ExportNodes (
                                     unityGo, fbxScene, fbxRootNode, exportProgress,
                                     count, Vector3.zero, TransformExportType.Reset);
                                 if (exportCancelled || exportProgress < 0) {
@@ -1786,13 +2144,18 @@ namespace FbxExporters
                             Vector3 center = ExportSettings.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
 
                             foreach (var unityGo in revisedExportSet) {
-                                exportProgress = this.ExportComponents (unityGo, fbxScene, fbxRootNode,
+                                exportProgress = this.ExportNodes (unityGo, fbxScene, fbxRootNode,
                                     exportProgress, count, center, TransformExportType.Global);
                                 if (exportCancelled || exportProgress < 0) {
                                     Debug.LogWarning ("Export Cancelled");
                                     return 0;
                                 }
                             }
+                        }
+
+                        if(!ExportComponents(fbxScene)){
+                            Debug.LogWarning ("Export Cancelled");
+                            return 0;
                         }
 
                         // Set the scene's default camera.
@@ -2052,6 +2415,14 @@ namespace FbxExporters
                 /// </summary>
                 public Material[] Materials { get ; private set; }
 
+                private BoneWeight[] m_boneWeights;
+                public BoneWeight[] BoneWeights { get {
+                        if (m_boneWeights == null) {
+                            m_boneWeights = mesh.boneWeights;
+                        }
+                        return m_boneWeights; 
+                    } }
+
                 /// <summary>
                 /// Set up the MeshInfo with the given mesh and materials.
                 /// </summary>
@@ -2295,23 +2666,21 @@ namespace FbxExporters
                 } else {
                     var smr = defaultComponent as SkinnedMeshRenderer;
                     if (smr) {
-                        var mesh = new Mesh();
-                        smr.BakeMesh(mesh);
-                        var materials = smr.sharedMaterials;
-                        bool result = ExportMesh(new MeshInfo(mesh, materials), fbxNode);
-                        Object.DestroyImmediate(mesh);
+                        var result = ExportSkinnedMesh (gameObject, fbxNode.GetScene (), fbxNode);
+                        if(!result){
+                            // fall back to exporting as a static mesh
+                            var mesh = new Mesh();
+                            smr.BakeMesh(mesh);
+                            var materials = smr.sharedMaterials;
+                            result = ExportMesh(new MeshInfo(mesh, materials), fbxNode);
+                            Object.DestroyImmediate(mesh);
+                        }
                         return result;
                     }
                 }
 
                 return false;
             }
-
-            /// <summary>
-            /// keep a map between GameObject and FbxNode for quick lookup when we export
-            /// animation.
-            /// </summary>
-            Dictionary<GameObject, FbxNode> MapUnityObjectToFbxNode = new Dictionary<GameObject, FbxNode> ();
 
             /// <summary>
             /// Number of nodes exported including siblings and decendents

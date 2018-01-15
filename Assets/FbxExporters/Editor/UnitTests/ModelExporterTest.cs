@@ -506,5 +506,93 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual (mesh.colors, fbxMesh.colors);
             Assert.AreEqual (mesh.tangents, fbxMesh.tangents);
         }
+
+        [Test]
+        public void TestSkinnedMeshExport(){
+            // for now use this cowboy taken from the asset store as the test file
+            // TODO: find a better/simpler test file
+            var fbxPath = "FbxExporters/Editor/UnitTests/Models/Cowboy/cowboyMidPoly(riged).fbx";
+
+            // add fbx to scene
+            GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
+            Assert.IsNotNull (originalFbxObj);
+            GameObject originalGO = GameObject.Instantiate (originalFbxObj);
+            Assert.IsTrue (originalGO);
+
+            // export fbx
+            // get GameObject
+            string filename = GetRandomFbxFilePath();
+            ModelExporter.ExportObject (filename, originalGO);
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.IsTrue (fbxObj);
+
+            var originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
+            Assert.IsNotNull (originalSkinnedMesh);
+
+            var exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
+            Assert.IsNotNull (exportedSkinnedMesh);
+
+            Assert.IsTrue (originalSkinnedMesh.name == exportedSkinnedMesh.name ||
+                (originalSkinnedMesh.transform.parent == null && exportedSkinnedMesh.transform.parent == null));
+
+            // check if skeletons match
+            // compare bones
+            var originalBones = originalSkinnedMesh.bones;
+            var exportedBones = exportedSkinnedMesh.bones;
+
+            Assert.IsNotNull (originalBones);
+            Assert.IsNotNull (exportedBones);
+
+            Assert.AreEqual (originalBones.Length, exportedBones.Length);
+
+            for(int i = 0; i < originalBones.Length; i++){
+                var originalBone = originalBones [i];
+                var exportedBone = exportedBones [i];
+
+                Assert.AreEqual (originalBone.name, exportedBone.name);
+                Assert.AreEqual (originalBone.parent, exportedBone.parent);
+
+                // NOTE: not comparing transforms as the exported transforms are taken from
+                //       the bind pose whereas the originals are not necessarily.
+            }
+
+            // compare bind poses
+            var origMesh = originalSkinnedMesh.sharedMesh;
+            Assert.IsNotNull (origMesh);
+            var exportedMesh = exportedSkinnedMesh.sharedMesh;
+            Assert.IsNotNull (exportedMesh);
+
+            var origBindposes = origMesh.bindposes;
+            Assert.IsNotNull (origBindposes);
+            var exportedBindposes = exportedMesh.bindposes;
+            Assert.IsNotNull (exportedBindposes);
+
+            Assert.AreEqual(origBindposes.Length, exportedBindposes.Length);
+
+            for (int i = 0; i < origBindposes.Length; i++) {
+                var origBp = origBindposes [i];
+                var expBp = exportedBindposes [i];
+
+				// TODO: (UNI-34293) fix so bones with negative scale export with correct bind pose
+				if (originalBones [i].name == "EyeL") {
+					continue;
+				}
+
+                for (int j = 0; j < 4; j++) {
+                    for (int k = 0; k < 4; k++) {
+                        Assert.That (origBp.GetColumn (j)[k], Is.EqualTo(expBp.GetColumn (j)[k]).Within(0.001f), string.Format("bind pose doesn't match {0},{1}", j, k));
+                    }
+                }
+            }
+
+            // TODO: find a way to compare bone weights.
+            //       The boneweights are by vertex, and duplicate vertices
+            //       are removed on export so the lists are not necessarily
+            //       the same length or order.
+            var origWeights = origMesh.boneWeights;
+            Assert.IsNotNull (origWeights);
+            var expWeights = exportedMesh.boneWeights;
+            Assert.IsNotNull (expWeights);
+        }
     }
 }
