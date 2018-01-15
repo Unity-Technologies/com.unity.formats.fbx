@@ -2753,7 +2753,6 @@ namespace FbxExporters
                                       : System.IO.Path.GetDirectoryName (LastFilePath);
 
                 GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
-                GameObject[] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
                 string filename = null;
                 if (selectedGOs.Length == 1) {
                     filename = ConvertToValidFilename (selectedGOs [0].name + ".fbx");
