@@ -1,5 +1,22 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint41
+
+NEW FEATURES
+* Added support for exporting lights
+* FbxExporter: added ability to export animation on transforms
+* FbxExporter: added ability to export animation on lights
+
+Supports exporting animation of a light component's Intensity, SpotAngle, and Color
+
+* FbxExporter: Added support for exporting Skinned Meshes
+
+FIXES
+* Export Settings: Added back support for MAYA_LOCATION
+* Export Settings: fixed dropdown preference for Mayalt
+* FbxPrefabAutoUpdater: fixed so RectTransforms update correctly in Unity 2017.3
+* ConvertToPrefab: fixed null reference exception when converting missing components
+
 **Version**: 1.2.0b1
 
 NEW FEATURES
