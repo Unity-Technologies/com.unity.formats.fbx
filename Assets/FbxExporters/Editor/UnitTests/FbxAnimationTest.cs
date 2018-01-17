@@ -26,11 +26,18 @@ namespace FbxExporters.UnitTests
             Where (t => typeof (Component).IsAssignableFrom (t) && 
                    ModelExporter.MapsToFbxObject.ContainsKey(t)).Except(m_exceptionTypes);
 
+        public static string [] m_localRotationNames = new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" };
+        public static string [] m_localTranslationNames = new string [3] { "m_LocalPosition.x", "m_LocalPosition.y", "m_LocalPosition.z"};
+
         public static float [] m_keytimes1 = new float [3] { 1f, 2f, 3f };
         public static float [] m_keyFloatValues1 = new float [3] { 0f, 100f, 0f };
         public static float [] m_keyvalues2 = new float [3] { 1f, 100f, 1f };
         public static Vector3 [] m_keyEulerValues3 = new Vector3 [3] { new Vector3 (0f, 80f, 0f), new Vector3 (80f, 0f, 0f), new Vector3 (0f, 0f, 80f) };
         public static Vector3 [] m_keyEulerValues4 = new Vector3 [3] { new Vector3 (0f, 270f, 0f), new Vector3 (270f, 0f, 0f), new Vector3 (0f, 0f, 270f) };
+
+        public static float [] m_keytimes5 = new float [5] { 0f, 30f, 60f, 90f, 120f };
+        public static Vector3 [] m_keyPosValues5 = new Vector3 [5] { new Vector3 (5.078195f, 0.000915527f, 4.29761f), new Vector3 (0.81f, 0.000915527f, 10.59f), new Vector3 (-3.65f, 0.000915527f, 4.29761f), new Vector3 (0.81f, 0.000915527f, -3.37f), new Vector3 (5.078195f, 0.000915527f, 4.29761f) };
+        public static Vector3 [] m_keyRotValues5 = new Vector3 [5] { new Vector3 (0f, 0f, 0f), new Vector3 (0f, -90f, 0f), new Vector3 (0f, -180f, 0f), new Vector3 (0f, -270f, 0f), new Vector3 (0f, -360f, 0f) };
 
         public static IEnumerable TestCases1 {
             get {
@@ -44,13 +51,13 @@ namespace FbxExporters.UnitTests
         }
         public static IEnumerable TestCases2 {
             get {
-                yield return new TestCaseData (m_keytimes1, m_keyEulerValues3, typeof (Transform), new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" } ).Returns (3);
+                yield return new TestCaseData (m_keytimes1, m_keyEulerValues3, typeof (Transform), m_localRotationNames ).Returns (3);
             }
         }
         // specify gimbal conditions for rotation
         public static IEnumerable TestCases3 {
             get {
-                yield return new TestCaseData (m_keytimes1, m_keyEulerValues4, typeof (Transform), new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" } ).Returns (3);
+                yield return new TestCaseData (m_keytimes1, m_keyEulerValues4, typeof (Transform), m_localRotationNames ).Returns (3);
             }
         }
         // specify one of each component type
@@ -58,6 +65,12 @@ namespace FbxExporters.UnitTests
             get {
                 foreach (var cType in m_componentTypes)
                     yield return new TestCaseData (cType).Returns(1);
+            }
+        }
+        // specify continuous rotations
+        public static IEnumerable TestCases5 {
+            get {
+                yield return new TestCaseData (m_keytimes5, m_keyRotValues5.Concat(m_keyPosValues5).ToArray(), typeof (Transform), m_localRotationNames.Concat(m_localTranslationNames).ToArray() ).Returns (3);
             }
         }
     }
@@ -162,6 +175,46 @@ namespace FbxExporters.UnitTests
             public override float [] GetAltKeyValues (int id)
             {
                 return (from e in keyEulerValues select e[id]).ToArray ();
+            }
+
+            public override string GetComponentName (int id) { return propertyNames[id]; }
+            public override int FindComponent (string name)
+            {
+                return System.Array.IndexOf (propertyNames, name);
+            }
+        }
+
+        public class TransformKeyData : KeyData
+        {
+            public string[] propertyNames;
+            public Vector3 [] keyValues; // NOTE: first half is Quaternions and second half is Translation
+            public bool IsRotation(int id) { return id < 4 ; }
+
+            public override int NumKeys { get { return Mathf.Min (keyTimesInSeconds.Length, keyValues.Length / 2); } }
+            public override int NumComponents { get { return propertyNames.Length; } }
+            public override float [] GetKeyValues (int id)
+            {
+                float[] result = new float[NumKeys];
+                bool isRot = IsRotation(id);
+
+                for (int idx=0;  idx < NumKeys; idx++)
+                {
+                    result[idx] = (isRot) ? Quaternion.Euler(keyValues[idx])[id] : keyValues[NumKeys+idx][id-4];
+                }
+
+                return result;
+            }
+            public override float [] GetAltKeyValues (int id)
+            {
+                float[] result = new float[NumKeys];
+                bool isRot = IsRotation(id);
+
+                for (int idx=0;  idx < NumKeys; idx++)
+                {
+                    result[idx] = (isRot) ? keyValues[idx][id] : keyValues[NumKeys+idx][id-4];
+                }
+
+                return result;
             }
 
             public override string GetComponentName (int id) { return propertyNames[id]; }
@@ -301,7 +354,16 @@ namespace FbxExporters.UnitTests
         {
             KeyData keyData = new QuaternionKeyData { propertyNames = componentNames, componentType = componentType, keyTimesInSeconds = keyTimesInSeconds, keyEulerValues = keyValues };
 
-            return AnimTest (keyData, componentType.ToString () + "_Quaternion");
+            return AnimTest (keyData, componentType.ToString () + "_Gimbal");
+        }
+
+        [Description("Uni-35616 continuous rotations")]
+        [Test, TestCaseSource (typeof (AnimationTestDataClass), "TestCases5")]
+        public int ContinuousRotationAnimTest (float [] keyTimesInSeconds, Vector3 [] keyValues, System.Type componentType, string [] propertyNames)
+        {
+            KeyData keyData = new TransformKeyData { propertyNames = propertyNames, componentType = componentType, keyTimesInSeconds = keyTimesInSeconds, keyValues = keyValues };
+
+            return AnimTest (keyData, componentType.ToString () + "_ContinuousRotations");
         }
 
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "TestCases4")]
