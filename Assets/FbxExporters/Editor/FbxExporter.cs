@@ -1899,6 +1899,8 @@ namespace FbxExporters
             /// </summary>
             protected bool ExportComponents(FbxScene fbxScene)
             {
+                var animationNodes = new HashSet<GameObject> ();
+
                 int numObjectsExported = 0;
                 int objectCount = MapUnityObjectToFbxNode.Count;
                 foreach (KeyValuePair<GameObject, FbxNode> entry in MapUnityObjectToFbxNode) {
@@ -1932,11 +1934,33 @@ namespace FbxExporters
                         ExportLight (unityGo, fbxScene, fbxNode);
                     }
 
-                    // now (try) export animation
-                    ExportAnimation (unityGo, fbxScene);
-
+                    // check if this object contains animation, keep track of it
+                    // if it does
+                    if (GameObjectHasAnimation (unityGo)) {
+                        animationNodes.Add (unityGo);
+                    }
                 }
+
+                // export all GameObjects that have animation
+                if (animationNodes.Count > 0) {
+                    foreach (var go in animationNodes) {
+                        ExportAnimation (go, fbxScene);
+                    }
+                }
+
                 return true;
+            }
+
+            /// <summary>
+            /// Checks if the GameObject has animation.
+            /// </summary>
+            /// <returns><c>true</c>, if object has animation, <c>false</c> otherwise.</returns>
+            /// <param name="go">Go.</param>
+            protected bool GameObjectHasAnimation(GameObject go){
+                return go != null &&
+                    go.GetComponent<Animator> () ||
+                    go.GetComponent<Animation> () ||
+                    go.GetComponent<UnityEngine.Playables.PlayableDirector> ();
             }
 
             /// <summary>
