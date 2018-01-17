@@ -1471,14 +1471,17 @@ namespace FbxExporters
                     // Transform Rotation (EULER)
                     // NOTE: Quaternion Rotation handled by QuaternionCurve
                     if (uniPropertyName.StartsWith ("localEulerAnglesRaw.x", ct)) {
+                        Debug.Log ("euler export");
                         prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_X);
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("localEulerAnglesRaw.y", ct)) {
+                        Debug.Log ("euler export");
                         prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("localEulerAnglesRaw.z", ct)) {
+                        Debug.Log ("euler export");
                         prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
                         return true;
                     }
@@ -1586,8 +1589,16 @@ namespace FbxExporters
                     var fbxPreRotationEuler = node.GetRotationActive() 
                                                   ? node.GetPreRotation(FbxNode.EPivotSet.eSourcePivot)
                                                   : new FbxVector4();
-                    var fbxPreRotationInverse = new FbxQuaternion();
-                    fbxPreRotationInverse.ComposeSphericalXYZ(fbxPreRotationEuler);
+                    //Debug.LogWarning ("rotation active: " + node.GetRotationActive () + ", pre rotation: " + node.GetPreRotation(FbxNode.EPivotSet.eSourcePivot));
+                    Debug.LogWarning("node name: " + node.GetName());
+
+                    FbxQuaternion fbxPreRotationInverse;// = new FbxQuaternion();
+
+                    FbxAMatrix m = new FbxAMatrix ();
+                    m.SetR (fbxPreRotationEuler);
+                    fbxPreRotationInverse = m.GetQ();
+
+                    //fbxPreRotationInverse.ComposeSphericalXYZ(fbxPreRotationEuler);
                     fbxPreRotationInverse.Inverse();
 
                     // If we're only animating along certain coords for some
@@ -1628,6 +1639,8 @@ namespace FbxExporters
                         key.time = FbxTime.FromSecondDouble(seconds);
                         key.euler = ModelExporter.ConvertQuaternionToXYZEuler(fbxQuat);
                         keys[i++] = key;
+
+                        Debug.Log ("pre rotation: " + fbxPreRotationEuler + ", complete rotation: " + key.euler);
                     }
 
                     // Sort the keys by time
@@ -1752,7 +1765,7 @@ namespace FbxExporters
                 foreach (var kvp in quaternions) {
                     var unityGo = kvp.Key;
                     var quat = kvp.Value;
-
+                    //Debug.LogWarning ("unity object: " + unityGo.name);
                     FbxNode fbxNode;
                     if (!MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
                         Debug.LogError (string.Format ("no FbxNode found for {0}", unityGo.name));
