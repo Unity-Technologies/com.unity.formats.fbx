@@ -20,10 +20,9 @@
 **/.idea/
 
 ## Unity ##
-[Aa]ssets/**/*.meta
-![Aa]ssets/FbxExporters/**/*.meta
 [Pp]rojectSettings/*.asset
 [Pp]rojectSettings/*.txt
+Assets/Integrations/**/*.meta
 
 # below taken from: https://github.com/github/gitignore/blob/master/Unity.gitignore
 
