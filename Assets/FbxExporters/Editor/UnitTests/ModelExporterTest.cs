@@ -634,22 +634,26 @@ namespace FbxExporters.UnitTests
                         var origBw = origBoneWeights[i];
                         var expBw = expBoneWeights [j];
 
-                        Assert.That (expBw.boneIndex0, Is.EqualTo (origBw.boneIndex0));
-                        Assert.That (expBones[expBw.boneIndex0].name, Is.EqualTo (origBones[origBw.boneIndex0].name));
+                        var indexMsg = "Bone index {0} doesn't match";
+                        var nameMsg = "bone names don't match";
 
-                        Assert.That (expBw.boneIndex1, Is.EqualTo (origBw.boneIndex1));
-                        Assert.That (expBones[expBw.boneIndex1].name, Is.EqualTo (origBones[origBw.boneIndex1].name));
+                        Assert.That (expBw.boneIndex0, Is.EqualTo (origBw.boneIndex0), string.Format(indexMsg, 0));
+                        Assert.That (expBones[expBw.boneIndex0].name, Is.EqualTo (origBones[origBw.boneIndex0].name), nameMsg);
 
-                        Assert.That (expBw.boneIndex2, Is.EqualTo (origBw.boneIndex2));
-                        Assert.That (expBones[expBw.boneIndex2].name, Is.EqualTo (origBones[origBw.boneIndex2].name));
+                        Assert.That (expBw.boneIndex1, Is.EqualTo (origBw.boneIndex1), string.Format(indexMsg, 1));
+                        Assert.That (expBones[expBw.boneIndex1].name, Is.EqualTo (origBones[origBw.boneIndex1].name), nameMsg);
 
-                        Assert.That (expBw.boneIndex3, Is.EqualTo (origBw.boneIndex3));
-                        Assert.That (expBones[expBw.boneIndex3].name, Is.EqualTo (origBones[origBw.boneIndex3].name));
+                        Assert.That (expBw.boneIndex2, Is.EqualTo (origBw.boneIndex2), string.Format(indexMsg, 2));
+                        Assert.That (expBones[expBw.boneIndex2].name, Is.EqualTo (origBones[origBw.boneIndex2].name), nameMsg);
 
-                        Assert.That (expBw.weight0, Is.EqualTo (origBw.weight0).Within(0.001f));
-                        Assert.That (expBw.weight1, Is.EqualTo (origBw.weight1).Within(0.001f));
-                        Assert.That (expBw.weight2, Is.EqualTo (origBw.weight2).Within(0.001f));
-                        Assert.That (expBw.weight3, Is.EqualTo (origBw.weight3).Within(0.001f));
+                        Assert.That (expBw.boneIndex3, Is.EqualTo (origBw.boneIndex3), string.Format(indexMsg, 3));
+                        Assert.That (expBones[expBw.boneIndex3].name, Is.EqualTo (origBones[origBw.boneIndex3].name), nameMsg);
+
+                        var message = "Bone weight {0} doesn't match";
+                        Assert.That (expBw.weight0, Is.EqualTo (origBw.weight0).Within(0.001f), string.Format(message, 0));
+                        Assert.That (expBw.weight1, Is.EqualTo (origBw.weight1).Within(0.001f), string.Format(message, 1));
+                        Assert.That (expBw.weight2, Is.EqualTo (origBw.weight2).Within(0.001f), string.Format(message, 2));
+                        Assert.That (expBw.weight3, Is.EqualTo (origBw.weight3).Within(0.001f), string.Format(message, 3));
 
                         comparisonCount++;
                         break;
