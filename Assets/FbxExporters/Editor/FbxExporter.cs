@@ -1905,7 +1905,9 @@ namespace FbxExporters
 
                 // export all GameObjects that have animation
                 if (animationNodes.Count > 0) {
-                    ExportComponentAnimation (animationNodes, fbxScene);
+                    foreach (var go in animationNodes) {
+                        ExportAnimation (go, fbxScene);
+                    }
                 }
 
                 return true;
@@ -1921,20 +1923,6 @@ namespace FbxExporters
                     go.GetComponent<Animator> () ||
                     go.GetComponent<Animation> () ||
                     go.GetComponent<UnityEngine.Playables.PlayableDirector> ();
-            }
-
-            /// <summary>
-            /// Exports the animation on the given objects.
-            /// </summary>
-            /// <returns><c>true</c>, if animation was exported, <c>false</c> otherwise.</returns>
-            /// <param name="objects">Objects.</param>
-            /// <param name="fbxScene">Fbx scene.</param>
-            protected bool ExportComponentAnimation(IEnumerable<GameObject> objects, FbxScene fbxScene)
-            {
-                foreach (var go in objects) {
-                    ExportAnimation (go, fbxScene);
-                }
-                return true;
             }
 
             /// <summary>
