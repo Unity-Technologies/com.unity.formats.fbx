@@ -567,7 +567,7 @@ namespace FbxExporters.UnitTests
             var exportedBindposes = exportedMesh.bindposes;
             Assert.IsNotNull (exportedBindposes);
 
-            Assert.AreEqual(origBindposes.Length, exportedBindposes.Length);
+            Assert.That(origBindposes.Length == exportedBindposes.Length);
 
             for (int i = 0; i < origBindposes.Length; i++) {
                 var origBp = origBindposes [i];
