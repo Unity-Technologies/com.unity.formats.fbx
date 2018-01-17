@@ -71,7 +71,9 @@ namespace FbxExporters.UnitTests
         // specify continuous rotations
         public static IEnumerable TestCases5 {
             get {
-                yield return new TestCaseData (m_keytimes5, m_keyRotValues5.Concat(m_keyPosValues5).ToArray(), typeof (Transform), m_eulerRotationNames.Concat(m_translationNames).ToArray() ).Returns (3);
+                yield return new TestCaseData (false /*use quaternion values*/, m_keytimes5, m_keyRotValues5.Concat(m_keyPosValues5).ToArray()).Returns (3);
+                // Uni-35616 continuous rotations doesn't work with quaternions
+                // yield return new TestCaseData (true /*use quaternion values*/, m_keytimes5, m_keyRotValues5.Concat(m_keyPosValues5).ToArray()).Returns (3);
             }
         }
     }
@@ -90,7 +92,7 @@ namespace FbxExporters.UnitTests
         public override void Term ()
         {
             // NOTE: comment out the next line to leave temporary FBX files on disk
-            //base.Term ();
+            base.Term ();
         }
 
         protected void AnimClipTest (AnimationClip animClipExpected, AnimationClip animClipActual)
@@ -117,8 +119,10 @@ namespace FbxExporters.UnitTests
             Assert.That (animCurveActual.length, Is.EqualTo(numKeysExpected), "animcurve number of keys doesn't match");
 
             //check imported animation against original
-            Assert.That(List.Map(animCurveActual.keys).Property ("time"), Is.EqualTo(keyTimesExpected), string.Format("{0} key time doesn't match",message));
-            Assert.That(List.Map(animCurveActual.keys).Property ("value"), Is.EqualTo(keyValuesExpected).Within(0.000005f), string.Format("{0} key value doesn't match", message));
+            // NOTE: if I check the key values explicitly they match but when I compare using this ListMapper the float values
+            // are off by 0.000005f; not sure why that happens.
+            Assert.That(new ListMapper(animCurveActual.keys).Property ("time"), Is.EqualTo(keyTimesExpected), string.Format("{0} key time doesn't match",message));
+            Assert.That(new ListMapper(animCurveActual.keys).Property ("value"), Is.EqualTo(keyValuesExpected).Within(0.000005f), string.Format("{0} key value doesn't match", message));
 
             return ;
         }
@@ -189,9 +193,9 @@ namespace FbxExporters.UnitTests
         {
             public const int kNumQuatRotFields = 4;
             public const int kNumEulerRotFields = 3;
-            public bool useQuaternion = false;
+            public bool useQuaternionValues = false;
 
-            public int NumRotationFields { get { return ((useQuaternion) ?  kNumQuatRotFields : kNumEulerRotFields); } }
+            public int NumRotationFields { get { return ((useQuaternionValues) ?  kNumQuatRotFields : kNumEulerRotFields); } }
 
             public string[] propertyNames;
             public Vector3 [] keyValues; // NOTE: first half is Euler Rotation and second half is Translation
@@ -203,7 +207,7 @@ namespace FbxExporters.UnitTests
             public override int NumComponents { get { return propertyNames.Length; } }
             public override float [] GetKeyValues (int id)
             {
-                if (!useQuaternion) return GetAltKeyValues(id);
+                if (!useQuaternionValues) return GetAltKeyValues(id);
 
                 // compute continous rotations
                 if (keyQuatValues==null)
@@ -224,10 +228,6 @@ namespace FbxExporters.UnitTests
                             currQuat *= Quaternion.Euler(deltaRot);
                             keyQuatValues[idx] = currQuat;
                         }
-                        Debug.Log(string.Format("{0} rot[{1},{2},{3}] quat[{4},{5},{6},{7}]", idx, 
-                            keyValues[idx][0], keyValues[idx][1], keyValues[idx][2],
-                            keyQuatValues[idx][0], keyQuatValues[idx][1], keyQuatValues[idx][2], keyQuatValues[idx][3]
-                        ));
                     }
                 }
 
@@ -394,9 +394,15 @@ namespace FbxExporters.UnitTests
 
         [Description("Uni-35616 continuous rotations")]
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "TestCases5")]
-        public int ContinuousRotationAnimTest (float [] keyTimesInSeconds, Vector3 [] keyValues, System.Type componentType, string [] propertyNames)
+        public int ContinuousRotationAnimTest (bool useQuaternionValues, float [] keyTimesInSeconds, Vector3 [] keyValues)
         {
-            KeyData keyData = new TransformKeyData { propertyNames = propertyNames, componentType = componentType, keyTimesInSeconds = keyTimesInSeconds, keyValues = keyValues };
+            System.Type componentType = typeof(Transform);
+
+            string[] propertyNames = useQuaternionValues ?
+                AnimationTestDataClass.m_quaternionRotationNames.Concat(AnimationTestDataClass.m_translationNames).ToArray() :
+                AnimationTestDataClass.m_eulerRotationNames.Concat(AnimationTestDataClass.m_translationNames).ToArray();
+
+            KeyData keyData = new TransformKeyData { useQuaternionValues = useQuaternionValues, propertyNames = propertyNames, componentType = componentType, keyTimesInSeconds = keyTimesInSeconds, keyValues = keyValues };
 
             return AnimTest (keyData, componentType.ToString () + "_ContinuousRotations");
         }
