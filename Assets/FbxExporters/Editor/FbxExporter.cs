@@ -109,7 +109,7 @@ namespace FbxExporters
 
             private const string SkeletonPrefix = "_Skel";
 
-            private const string FbxSkinPrefix = "_Skin";
+            private const string SkinPrefix = "_Skin";
 
             /// <summary>
             /// name prefix for custom properties
@@ -983,7 +983,7 @@ namespace FbxExporters
                                      MeshInfo meshInfo, FbxScene fbxScene, FbxMesh fbxMesh,
                                      FbxNode fbxRootNode)
             {
-                FbxSkin fbxSkin = FbxSkin.Create (fbxScene, (skinnedMesh.name + FbxSkinPrefix));
+                FbxSkin fbxSkin = FbxSkin.Create (fbxScene, (skinnedMesh.name + SkinPrefix));
 
                 FbxAMatrix fbxMeshMatrix = fbxRootNode.EvaluateGlobalTransform ();
 
