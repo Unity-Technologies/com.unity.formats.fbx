@@ -507,14 +507,9 @@ namespace FbxExporters.UnitTests
             Assert.AreEqual (mesh.tangents, fbxMesh.tangents);
         }
 
-        [Test]
-        public void TestSkinnedMeshExport(){
-            // for now use this cowboy taken from the asset store as the test file
-            // TODO: find a better/simpler test file
-            var fbxPath = "FbxExporters/Editor/UnitTests/Models/Cowboy/cowboyMidPoly(riged).fbx";
-
+        private void ExportSkinnedMesh(string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh){
             // add fbx to scene
-            GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
+            GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fileToExport) as GameObject;
             Assert.IsNotNull (originalFbxObj);
             GameObject originalGO = GameObject.Instantiate (originalFbxObj);
             Assert.IsTrue (originalGO);
@@ -526,11 +521,21 @@ namespace FbxExporters.UnitTests
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             Assert.IsTrue (fbxObj);
 
-            var originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
+            originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
             Assert.IsNotNull (originalSkinnedMesh);
 
-            var exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
+            exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
             Assert.IsNotNull (exportedSkinnedMesh);
+        }
+
+        [Test]
+        public void TestSkinnedMeshExport(){
+            // for now use this cowboy taken from the asset store as the test file
+            // TODO: find a better/simpler test file
+            var fbxPath = "FbxExporters/Editor/UnitTests/Models/Cowboy/cowboyMidPoly(riged).fbx";
+
+            SkinnedMeshRenderer originalSkinnedMesh, exportedSkinnedMesh;
+            ExportSkinnedMesh (fbxPath, out originalSkinnedMesh, out exportedSkinnedMesh);
 
             Assert.IsTrue (originalSkinnedMesh.name == exportedSkinnedMesh.name ||
                 (originalSkinnedMesh.transform.parent == null && exportedSkinnedMesh.transform.parent == null));
@@ -593,6 +598,65 @@ namespace FbxExporters.UnitTests
             Assert.IsNotNull (origWeights);
             var expWeights = exportedMesh.boneWeights;
             Assert.IsNotNull (expWeights);
+        }
+
+        [Test]
+        public void TestBoneWeightExport()
+        {
+            var fbxPath = "FbxExporters/Editor/UnitTests/Models/SimpleMan/SimpleMan.fbx";
+
+            SkinnedMeshRenderer originalSkinnedMesh, exportedSkinnedMesh;
+            ExportSkinnedMesh (fbxPath, out originalSkinnedMesh, out exportedSkinnedMesh);
+
+            var origVerts = originalSkinnedMesh.sharedMesh.vertices;
+            Assert.That (origVerts, Is.Not.Null);
+
+            var expVerts = exportedSkinnedMesh.sharedMesh.vertices;
+            Assert.That (expVerts, Is.Not.Null);
+
+            var origBoneWeights = originalSkinnedMesh.sharedMesh.boneWeights;
+            Assert.That (origBoneWeights, Is.Not.Null);
+            Assert.That (origBoneWeights.Length, Is.GreaterThan (0));
+
+            var expBoneWeights = exportedSkinnedMesh.sharedMesh.boneWeights;
+            Assert.That (expBoneWeights, Is.Not.Null);
+            Assert.That (expBoneWeights.Length, Is.GreaterThan (0));
+
+            var origBones = originalSkinnedMesh.bones;
+            var expBones = exportedSkinnedMesh.bones;
+
+            for(int i = 0, n = Mathf.Min(origVerts.Length, expVerts.Length); i < n; i++){
+                bool compared = false;
+                for (int j = 0; j < n; j++) {
+                    if (origVerts [i] == expVerts [j]) {
+                        // compare bone weights
+                        var origBw = origBoneWeights[i];
+                        var expBw = expBoneWeights [j];
+
+                        Assert.That (expBw.boneIndex0, Is.EqualTo (origBw.boneIndex0));
+                        Assert.That (expBones[expBw.boneIndex0].name, Is.EqualTo (origBones[origBw.boneIndex0].name));
+
+                        Assert.That (expBw.boneIndex1, Is.EqualTo (origBw.boneIndex1));
+                        Assert.That (expBones[expBw.boneIndex1].name, Is.EqualTo (origBones[origBw.boneIndex1].name));
+
+                        Assert.That (expBw.boneIndex2, Is.EqualTo (origBw.boneIndex2));
+                        Assert.That (expBones[expBw.boneIndex2].name, Is.EqualTo (origBones[origBw.boneIndex2].name));
+
+                        Assert.That (expBw.boneIndex3, Is.EqualTo (origBw.boneIndex3));
+                        Assert.That (expBones[expBw.boneIndex3].name, Is.EqualTo (origBones[origBw.boneIndex3].name));
+
+                        Assert.That (expBw.weight0, Is.EqualTo (origBw.weight0).Within(0.001f));
+                        Assert.That (expBw.weight1, Is.EqualTo (origBw.weight1).Within(0.001f));
+                        Assert.That (expBw.weight2, Is.EqualTo (origBw.weight2).Within(0.001f));
+                        Assert.That (expBw.weight3, Is.EqualTo (origBw.weight3).Within(0.001f));
+
+                        compared = true;
+                        break;
+                    }
+                }
+                // make sure that each vertex is compared
+                Assert.That (compared, Is.True, string.Format("Couldn't find matching vertex for: {0}", origVerts[i]));
+            }
         }
     }
 }
