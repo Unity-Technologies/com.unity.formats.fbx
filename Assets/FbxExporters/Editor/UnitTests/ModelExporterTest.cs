@@ -594,5 +594,85 @@ namespace FbxExporters.UnitTests
             var expWeights = exportedMesh.boneWeights;
             Assert.IsNotNull (expWeights);
         }
+
+
+        public static void AreNearEqual(Vector3 a, Vector3 b)
+        {
+            Assert.That(a.x, Is.EqualTo(b.x).Within(0.0001f));
+            Assert.That(a.y, Is.EqualTo(b.y).Within(0.0001f));
+            Assert.That(a.z, Is.EqualTo(b.z).Within(0.0001f));
+        }
+        public static void AreNearEqual(Vector3[] a, Vector3[] b)
+        {
+            Assert.AreEqual(a.Length, b.Length);
+            for (int i = 0; i < a.Length; ++i)
+                AreNearEqual(a[i], b[i]);
+        }
+
+        [Test]
+        public void TestBlendShapeExport()
+        {
+            // TODO: find more practical test data
+            var fbxPaths = new string[]{
+                "FbxExporters/Editor/UnitTests/Models/blendshape.fbx",
+                "FbxExporters/Editor/UnitTests/Models/blendshape_with_skinning.fbx"
+            };
+            foreach(var fbxPath in fbxPaths)
+            {
+                // add fbx to scene
+                GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
+                Assert.IsNotNull(originalFbxObj);
+                GameObject originalGO = GameObject.Instantiate(originalFbxObj);
+                Assert.IsTrue(originalGO);
+
+                // export fbx
+                // get GameObject
+                string filename = GetRandomFbxFilePath();
+                ModelExporter.ExportObject(filename, originalGO);
+                GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+                Assert.IsTrue(fbxObj);
+
+                var originalSMR = originalGO.GetComponentInChildren<SkinnedMeshRenderer>();
+                var exportedSMR = fbxObj.GetComponentInChildren<SkinnedMeshRenderer>();
+                Assert.IsNotNull(originalSMR);
+                Assert.IsNotNull(exportedSMR);
+
+                var originalMesh = originalSMR.sharedMesh;
+                var exportedMesh = exportedSMR.sharedMesh;
+                Assert.IsNotNull(originalMesh);
+                Assert.IsNotNull(exportedMesh);
+
+                // compare blend shape data
+                Assert.AreEqual(originalMesh.blendShapeCount, exportedMesh.blendShapeCount);
+                if (originalMesh.blendShapeCount > 0)
+                {
+                    var deltaVertices = new Vector3[originalMesh.vertexCount];
+                    var deltaNormals = new Vector3[originalMesh.vertexCount];
+                    var deltaTangents = new Vector3[originalMesh.vertexCount];
+                    var fbxDeltaVertices = new Vector3[originalMesh.vertexCount];
+                    var fbxDeltaNormals = new Vector3[originalMesh.vertexCount];
+                    var fbxDeltaTangents = new Vector3[originalMesh.vertexCount];
+
+                    for (int bi = 0; bi < originalMesh.blendShapeCount; ++bi)
+                    {
+                        Assert.AreEqual(originalMesh.GetBlendShapeName(bi), exportedMesh.GetBlendShapeName(bi));
+                        Assert.AreEqual(originalMesh.GetBlendShapeFrameCount(bi), exportedMesh.GetBlendShapeFrameCount(bi));
+
+                        int frameCount = originalMesh.GetBlendShapeFrameCount(bi);
+                        for (int fi = 0; fi < frameCount; ++fi)
+                        {
+                            Assert.AreEqual(originalMesh.GetBlendShapeFrameWeight(bi, fi), exportedMesh.GetBlendShapeFrameWeight(bi, fi));
+
+                            originalMesh.GetBlendShapeFrameVertices(bi, fi, deltaVertices, deltaNormals, deltaTangents);
+                            exportedMesh.GetBlendShapeFrameVertices(bi, fi, fbxDeltaVertices, fbxDeltaNormals, fbxDeltaTangents);
+                            AreNearEqual(deltaVertices, fbxDeltaVertices);
+                            AreNearEqual(deltaNormals, fbxDeltaNormals);
+                            AreNearEqual(deltaTangents, fbxDeltaTangents);
+
+                        }
+                    }
+                }
+            }
+        }
     }
 }
