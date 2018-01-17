@@ -864,31 +864,41 @@ namespace FbxExporters
                     Debug.Log (string.Format ("exporting {0} {1}", "Skin", fbxNode.GetName ()));
 
 
+                var meshInfo = new MeshInfo(unitySkin.sharedMesh, unitySkin.sharedMaterials);
+                FbxMesh fbxMesh = null;
+
                 Dictionary<SkinnedMeshRenderer, Transform[]> skinnedMeshToBonesMap;
                 // export skeleton
-                if (!ExportSkeleton (unitySkin, fbxScene, out skinnedMeshToBonesMap)) {
-                    Debug.LogWarning ("failed to export skeleton");
-                    return false;
+                if (ExportSkeleton (unitySkin, fbxScene, out skinnedMeshToBonesMap)) {
+
+                    // export skin mesh
+                    if (ExportMesh (meshInfo, fbxNode)) {
+                        fbxMesh = fbxNode.GetMesh ();
+                    }
+
+                    if (fbxMesh == null) {
+                        Debug.LogError ("Could not find mesh");
+                        return false;
+                    }
+
+                    // bind mesh to skeleton
+                    ExportSkin (unitySkin, meshInfo, fbxScene, fbxMesh, fbxNode);
+
+                    // add bind pose
+                    ExportBindPose (unitySkin, fbxNode, fbxScene, skinnedMeshToBonesMap);
                 }
-
-                var meshInfo = new MeshInfo (unitySkin.sharedMesh, unitySkin.sharedMaterials);
-
-                // export skin mesh
-                FbxMesh fbxMesh = null;
-                if (ExportMesh (meshInfo, fbxNode)) {
-                    fbxMesh = fbxNode.GetMesh ();
+                else
+                {
+                    // SkinnedMeshRenderer has no bones. this is expected situation.
+                    // (e.g. mesh has blend shapes but no skeleton)
+                    if (ExportMesh(meshInfo, fbxNode)) {
+                        fbxMesh = fbxNode.GetMesh();
+                    }
+                    if (fbxMesh == null) {
+                        Debug.LogError("Could not find mesh");
+                        return false;
+                    }
                 }
-
-                if (fbxMesh == null) {
-                    Debug.LogError ("Could not find mesh");
-                    return false;
-                }
-
-                // bind mesh to skeleton
-                ExportSkin (unitySkin, meshInfo, fbxScene, fbxMesh, fbxNode);
-
-                // add bind pose
-                ExportBindPose (unitySkin, fbxNode, fbxScene, skinnedMeshToBonesMap);
 
                 return true;
             }
