@@ -1401,33 +1401,38 @@ namespace FbxExporters
             class UnityToMayaConvertSceneHelper
             {
                 bool convertDistance = false;
+                bool convertLtoR = false;
+
                 float unitScaleFactor = 1f;
 
                 public UnityToMayaConvertSceneHelper(string uniPropertyName)
                 {
                     System.StringComparison cc = System.StringComparison.CurrentCulture;
 
-                    convertDistance |= uniPropertyName.StartsWith ("m_LocalPosition.", cc);
+                    bool partT = uniPropertyName.StartsWith ("m_LocalPosition.", cc);
+                    bool partTx = uniPropertyName.EndsWith ("Position.x", cc) || uniPropertyName.EndsWith ("T.x", cc);
+                    bool partRy = uniPropertyName.Equals("localEulerAnglesRaw.y", cc);
+                    bool partRz = uniPropertyName.Equals("localEulerAnglesRaw.z", cc);
+
+                    convertLtoR |= partTx || partRy || partRz;
+
+                    convertDistance |= partT;
                     convertDistance |= uniPropertyName.StartsWith ("m_Intensity", cc);
 
-                    bool convertLHRH = convertDistance && uniPropertyName.EndsWith (".x", cc) || uniPropertyName.EndsWith ("T.x", cc);
-                    convertDistance |= convertLHRH;
-                    convertDistance |= uniPropertyName.EndsWith ("T.y", cc);
-                    convertDistance |= uniPropertyName.EndsWith ("T.z", cc);
-
-                    if (convertDistance) {
+                    if (convertDistance) 
                         unitScaleFactor = ModelExporter.UnitScaleFactor;
-                        if (convertLHRH)
-                            unitScaleFactor = -unitScaleFactor;
-                    }
+
+                    if (convertLtoR)
+                        unitScaleFactor = -unitScaleFactor;
                 }
 
                 public float Convert(float value)
                 {
                     // left handed to right handed conversion
                     // meters to centimetres conversion
-                    return (convertDistance) ? unitScaleFactor * value : value;
+                    return unitScaleFactor * value;
                 }
+
             }
 
             /// <summary>
@@ -1463,7 +1468,20 @@ namespace FbxExporters
                         return true;
                     }
 
-                    // NOTE: Transform Rotation handled by QuaternionCurve
+                    // Transform Rotation (EULER)
+                    // NOTE: Quaternion Rotation handled by QuaternionCurve
+                    if (uniPropertyName.StartsWith ("localEulerAnglesRaw.x", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_X);
+                        return true;
+                    }
+                    if (uniPropertyName.StartsWith ("localEulerAnglesRaw.y", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
+                        return true;
+                    }
+                    if (uniPropertyName.StartsWith ("localEulerAnglesRaw.z", ct)) {
+                        prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                        return true;
+                    }
     
                     // Transform Translation
                     if (uniPropertyName.StartsWith ("m_LocalPosition.x", ct) || uniPropertyName.EndsWith ("T.x", ct)) {
