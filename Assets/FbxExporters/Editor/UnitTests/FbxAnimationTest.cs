@@ -77,9 +77,9 @@ namespace FbxExporters.UnitTests
         // specify continuous rotations
         public static IEnumerable TestCases5 {
             get {
-                yield return new TestCaseData (RotationInterpolation.kEuler /*use quaternion values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (3);
+                yield return new TestCaseData (RotationInterpolation.kEuler /*use euler values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (3);
                 // Uni-35616 can't programmatically define a Euler (Quaternion) mix.
-                // yield return new TestCaseData (RotationInterpolation.kMixed /*use euler&quaternion values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (3);
+                // yield return new TestCaseData (RotationInterpolation.kMixed /*use euler+quaternion values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (3);
                 // Uni-35616 doesn't work with quaternions; rotations don't exceed 180
                 // yield return new TestCaseData (RotationInterpolation.kQuaternion /*use quaternion values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (3);
             }
