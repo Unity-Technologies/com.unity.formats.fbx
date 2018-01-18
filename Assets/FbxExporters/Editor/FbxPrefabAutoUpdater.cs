@@ -24,9 +24,6 @@ namespace FbxExporters
     /// </summary>
     public /*static*/ class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
     {
-        public delegate string getFBXNameFn(string nodeName);
-
-
         #if UNITY_EDITOR
         public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
         #else
@@ -162,14 +159,14 @@ namespace FbxExporters
                 m_fbxPrefab = fbxPrefab;
             }
 
-            // Check if the user has specified a new name in the inspector
+            /// <summary>
+            /// Utility function: check if the user has specified a matching Unity name in the inspector
+            /// </summary>
             public string getUnityObjectName(string fbxObjectName)
             {
                 string newNameInUnity = fbxObjectName;
-               // UnityEngine.Assertions.Assert.IsTrue(m_fbxPrefab != null);
-                //UnityEngine.Assertions.Assert.IsTrue(m_fbxPrefab.NameMapping != null);
                 if (fbxObjectName != "" && m_fbxPrefab.NameMapping != null) {
-                    for (int i = 0; i < m_fbxPrefab.NameMapping.Length; i++)
+                    for (int i = 0; i < m_fbxPrefab.NameMapping.Count; i++)
                     {
                         if (fbxObjectName == m_fbxPrefab.NameMapping[i].FBXObjectName) {
                             newNameInUnity = m_fbxPrefab.NameMapping[i].UnityObjectName;
@@ -179,13 +176,14 @@ namespace FbxExporters
                 }
                 return newNameInUnity;
             }
-
-            // Check if the user has specified an old name in the inspector
+            /// <summary>
+            /// Utility function: check if the user has specified a matching FBX name in the inspector
+            /// </summary> 
             public string getFBXObjectName(string unityObjectName)
             {
                 string oldNameInFBX = unityObjectName;
                 if (unityObjectName != "" && m_fbxPrefab.NameMapping != null) {
-                    for (int i = 0; i < m_fbxPrefab.NameMapping.Length; i++)
+                    for (int i = 0; i < m_fbxPrefab.NameMapping.Count; i++)
                     {
                         if (unityObjectName == m_fbxPrefab.NameMapping[i].UnityObjectName) {
                             oldNameInFBX = m_fbxPrefab.NameMapping[i].FBXObjectName;
@@ -340,12 +338,12 @@ namespace FbxExporters
                 /// <summary>
                 /// Build a hierarchical representation based on a transform.
                 /// </summary>
-                public FbxRepresentation(Transform xfo, getFBXNameFn getFBXName, bool isRoot = true)
+                public FbxRepresentation(Transform xfo, bool isRoot = true)
                 {
                     m_children = new Dictionary<string, FbxRepresentation>();
                     
                     foreach (Transform child in xfo) {
-                        m_children.Add(child.name, new FbxRepresentation(child, getFBXName, isRoot: false));
+                        m_children.Add(child.name, new FbxRepresentation(child, isRoot: false));
                     }
                     foreach(var component in xfo.GetComponents<Component>()) {
                         // ignore missing components
@@ -447,7 +445,7 @@ namespace FbxExporters
                     return builder.ToString();
                 }
 
-                void InitFromJson(string json, getFBXNameFn getFBXName, ref int index)
+                void InitFromJson(string json, ref int index)
                 {
                     Consume('{', json, ref index);
                     if (Consume('}', json, ref index, required: false)) {
@@ -464,7 +462,7 @@ namespace FbxExporters
                             // it's the name of a component, and we store its value as a string.
                             bool isChild = (name.Length > 0) && (name[0] == '-');
                             if (isChild) {
-                                var subrep = new FbxRepresentation(json, getFBXName, ref index);
+                                var subrep = new FbxRepresentation(json, ref index);
                                 Add(ref m_children, name.Substring(1), subrep);
                                 //Add(ref m_children, getFBXName(name.Substring(1)), subrep);
                             } else {
@@ -476,14 +474,14 @@ namespace FbxExporters
                     }
                 }
 
-                public FbxRepresentation(string json, getFBXNameFn fn, ref int index) {
-                    InitFromJson(json, fn, ref index);
+                public FbxRepresentation(string json, ref int index) {
+                    InitFromJson(json, ref index);
                 }
 
-                public FbxRepresentation(string json, getFBXNameFn fn) {
+                public FbxRepresentation(string json) {
                     if (string.IsNullOrEmpty(json)) { return; }
                     int index = 0;
-                    InitFromJson(json, fn, ref index);
+                    InitFromJson(json, ref index);
                 }
 
                 void ToJsonHelper(System.Text.StringBuilder builder) {
@@ -589,7 +587,7 @@ namespace FbxExporters
                         InitHelper(fbxrep, "");
                     }
 
-                    public Data(Transform xfo, getFBXNameFn fn) : this(new FbxRepresentation(xfo, getFBXName: fn)) {
+                    public Data(Transform xfo) : this(new FbxRepresentation(xfo)) {
                     }
 
                     /// <summary>
@@ -797,14 +795,11 @@ namespace FbxExporters
 
                         var prefabParent = m_prefabData.GetParent(prefabNodeName);
                         var oldParent = m_oldFbxData.GetParent(prefabNodeName);
+                        // The newFbxData contains the fbx name, so we get the parent from the matching prefabNodeName equivalent
                         var newParent = m_newFbxData.GetParent(m_fbxPrefabUtility.getFBXObjectName(prefabNodeName));
 
-                        // If it's a name mapping, don't add a reparenting, we'll rename it later
-                        if (oldParent == m_fbxPrefabUtility.getUnityObjectName(newParent)) {
-                            continue;
-                        }
-
-                        if (oldParent != newParent && prefabParent != newParent) {
+                        // If it's a name mapping, don't add a reparenting, we'll rename it later in ImplementUpdates()
+                        if (oldParent != newParent && prefabParent != newParent && oldParent != m_fbxPrefabUtility.getUnityObjectName(newParent)) {
                             // Conflict in this case:
                             // if (oldParent != prefabParent && !ShouldDestroy(prefabParent))
 
@@ -862,18 +857,21 @@ namespace FbxExporters
                     // about what components might be on it.
                     foreach (var nodeNameInUpdatedPrefab in m_nodesInUpdatedPrefab)
                     {
-                        if (!m_newFbxData.HasNode(m_fbxPrefabUtility.getFBXObjectName(nodeNameInUpdatedPrefab))) {
+                        // Get the matching name for the node in the m_newFbxData
+                        string nodeNameInFBX = m_fbxPrefabUtility.getFBXObjectName(nodeNameInUpdatedPrefab);
+
+                        // The newFbxData contains the fbx name, so we check if the node is in it with the matching equivalent
+                        if (!m_newFbxData.HasNode(nodeNameInFBX)) {
                             // It's not in the FBX, so clearly we're not updating any components.
                             // We don't need to check if it's in m_prefab because
                             // we're only iterating over those.
                             continue;
                         }
-                        // Get the matching name for the node in the m_newFbxData
-                        string nodeNameInFBX = m_fbxPrefabUtility.getFBXObjectName(nodeNameInUpdatedPrefab);
 
                         var allTypes = m_oldFbxData.GetComponentTypes(nodeNameInUpdatedPrefab).Union(
                             m_newFbxData.GetComponentTypes(nodeNameInFBX));
-
+                        
+                        //Compare oldValues that have prefab unity names with new values that have fbx names.
                         foreach(var typename in allTypes) {
                             var oldValues = m_oldFbxData.GetComponentValues(nodeNameInUpdatedPrefab, typename);
                             var newValues = m_newFbxData.GetComponentValues(nodeNameInFBX, typename);
@@ -881,8 +879,6 @@ namespace FbxExporters
 
                             // If we have multiple identical-type components, match them up by index.
                             for(int i = 0, n = System.Math.Max(oldValues.Count, newValues.Count); i < n; ++i) {
-                                Log(oldValues[i]);
-                                Log(newValues[i]);
                                 if (/* isNew */ i < newValues.Count) {
                                     var newValue = newValues[i];
                                     
@@ -936,8 +932,8 @@ namespace FbxExporters
                     m_fbxPrefabUtility = new FbxPrefabUtility(m_fbxPrefab);
 
                     m_oldFbxData = new Data(oldFbx);
-                    m_newFbxData = new Data(newFbx, m_fbxPrefabUtility.getFBXObjectName);
-                    m_prefabData = new Data(prefab.transform, a => a);                    
+                    m_newFbxData = new Data(newFbx);
+                    m_prefabData = new Data(prefab.transform);                    
 
                     ClassifyDestroyCreateNodes();
                     ClassifyReparenting();
@@ -1055,7 +1051,6 @@ namespace FbxExporters
                     // Rename old nodes (unity names) into new nodes (FBX names).
                     foreach (var FBXNodeNameToRename in m_nodesToRename)
                     {
-                        string test = prefabNodes[m_fbxPrefabUtility.getUnityObjectName(FBXNodeNameToRename)].name;
                         prefabNodes[m_fbxPrefabUtility.getUnityObjectName(FBXNodeNameToRename)].name = FBXNodeNameToRename;
                         Log("Renamed {0} into {1}", m_fbxPrefabUtility.getUnityObjectName(FBXNodeNameToRename), FBXNodeNameToRename);
                     }
@@ -1166,7 +1161,6 @@ namespace FbxExporters
                 if (!m_fbxPrefab.FbxModel) {
                     return;
                 }
-                FbxPrefabUtility m_fbxPrefabUtility = new FbxPrefabUtility(m_fbxPrefab);
 
                 // First write down what we want to do.
                 var updates = new UpdateList(GetFbxHistory(), m_fbxPrefab.FbxModel.transform, m_fbxPrefab);
@@ -1197,7 +1191,7 @@ namespace FbxExporters
                 FbxPrefab.CallOnUpdate (fbxPrefabInstance, updatedObjects);
 
                 // Update the representation of the history to match the new fbx.
-                var newFbxRep = new FbxRepresentation(m_fbxPrefab.FbxModel.transform, m_fbxPrefabUtility.getFBXObjectName);
+                var newFbxRep = new FbxRepresentation(m_fbxPrefab.FbxModel.transform);
                 var newFbxRepString = newFbxRep.ToJson();
                 fbxPrefabInstance.FbxHistory = newFbxRepString;
 
@@ -1230,7 +1224,7 @@ namespace FbxExporters
             /// </summary>
             public FbxRepresentation GetFbxHistory()
             {
-                return new FbxRepresentation(m_fbxPrefab.FbxHistory, getFBXObjectName);
+                return new FbxRepresentation(m_fbxPrefab.FbxHistory);
             }
 
             /// <summary>
@@ -1263,7 +1257,6 @@ namespace FbxExporters
                 }
 
                 m_fbxPrefab.FbxModel = fbxModel;
-                FbxPrefabUtility m_fbxPrefabUtility = new FbxPrefabUtility(m_fbxPrefab);
 
                 // Case 0: fbxModel is null and we have no history
                 //          => not normal data flow, but doing nothing is
@@ -1288,7 +1281,7 @@ namespace FbxExporters
                     // This is the first time we've seen the FBX file. Assume that
                     // it's the original FBX. Further assume that the user is happy
                     // with the prefab as it is now, so don't update it to match the FBX.
-                    m_fbxPrefab.FbxHistory = new FbxRepresentation(m_fbxPrefab.FbxModel.transform, m_fbxPrefabUtility.getFBXObjectName).ToJson();
+                    m_fbxPrefab.FbxHistory = new FbxRepresentation(m_fbxPrefab.FbxModel.transform).ToJson();
                 } else {
                     // Case 3.
                     // User wants to reconnect or change the connection.
