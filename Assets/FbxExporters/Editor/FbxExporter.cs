@@ -1127,6 +1127,30 @@ namespace FbxExporters
                 return new FbxVector4 (vector4.X, -vector4.Y, -vector4.Z, vector4.W);
             }
 
+            /// <summary>
+            /// Euler to quaternion without axis conversion.
+            /// </summary>
+            /// <returns>a quaternion.</returns>
+            /// <param name="euler">Euler.</param>
+            public static FbxQuaternion EulerToQuaternion(FbxVector4 euler)
+            {
+                FbxAMatrix m = new FbxAMatrix ();
+                m.SetR (euler);
+                return m.GetQ ();
+            }
+
+            /// <summary>
+            /// Quaternion to euler without axis conversion.
+            /// </summary>
+            /// <returns>a euler.</returns>
+            /// <param name="quat">Quaternion.</param>
+            public static FbxVector4 QuaternionToEuler(FbxQuaternion quat)
+            {
+                FbxAMatrix m = new FbxAMatrix ();
+                m.SetQ (quat);
+                return m.GetR ();
+            }
+
             // get a fbxNode's global default position.
             protected bool ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, Vector3 newCenter, TransformExportType exportType)
             {
@@ -1589,24 +1613,15 @@ namespace FbxExporters
                     var fbxPreRotationEuler = node.GetRotationActive() 
                                                   ? node.GetPreRotation(FbxNode.EPivotSet.eSourcePivot)
                                                   : new FbxVector4();
-                    //Debug.LogWarning ("rotation active: " + node.GetRotationActive () + ", pre rotation: " + node.GetPreRotation(FbxNode.EPivotSet.eSourcePivot));
-                    Debug.LogWarning("node name: " + node.GetName());
 
-                    FbxQuaternion fbxPreRotationInverse;// = new FbxQuaternion();
-
-                    FbxAMatrix m = new FbxAMatrix ();
-                    m.SetR (fbxPreRotationEuler);
-                    fbxPreRotationInverse = m.GetQ();
-
-                    var tempRestRotation = fbxPreRotationInverse;
-
-                    //fbxPreRotationInverse.ComposeSphericalXYZ(fbxPreRotationEuler);
+                    // Get the inverse of the prerotation
+                    var fbxPreRotationInverse = ModelExporter.EulerToQuaternion (fbxPreRotationEuler);
                     fbxPreRotationInverse.Inverse();
 
                     // If we're only animating along certain coords for some
                     // reason, we'll need to fill in the other coords with the
                     // rest-pose value.
-                    var lclQuaternion = tempRestRotation;//new FbxQuaternion(restRotation.x, restRotation.y, restRotation.z, restRotation.w);
+                    var lclQuaternion = new FbxQuaternion(restRotation.x, restRotation.y, restRotation.z, restRotation.w);
 
                     // Find when we have keys set.
                     var keyTimes = new HashSet<float>();
@@ -1629,33 +1644,24 @@ namespace FbxExporters
                             (z == null) ? lclQuaternion[2] : z.Evaluate(seconds),
                             (w == null) ? lclQuaternion[3] : w.Evaluate(seconds));
 
+                        // convert the final animation to righthanded coords
+                        var finalEuler = ModelExporter.ConvertQuaternionToXYZEuler(fbxFinalAnimation);
+
+                        // convert it back to a quaternion for multiplication
+                        fbxFinalAnimation = ModelExporter.EulerToQuaternion (finalEuler);
+
                         // Cancel out the pre-rotation. Order matters. FBX reads left-to-right.
                         // When we run animation we will apply:
                         //      pre-rotation
                         //      then pre-rotation inverse
                         //      then animation.
-
-                        var result = ModelExporter.ConvertQuaternionToXYZEuler(fbxFinalAnimation);
-
-                        m = new FbxAMatrix ();
-                        m.SetR (result);
-                        fbxFinalAnimation = m.GetQ();
-
-                        var fbxQuat = fbxPreRotationInverse * fbxFinalAnimation;
-                        //var unityQuat = new Quaternion ((float)fbxQuat.X, (float)fbxQuat.Y, (float)fbxQuat.Z, (float)fbxQuat.W);
-                        //var unityEul = unityQuat.eulerAngles;
-
-                        m = new FbxAMatrix ();
-                        m.SetQ (fbxQuat);
-                        var unityEul = m.GetR ();
+                        var fbxFinalQuat = fbxPreRotationInverse * fbxFinalAnimation;
 
                         // Store the key so we can sort them later.
                         Key key;
                         key.time = FbxTime.FromSecondDouble(seconds);
-                        key.euler = unityEul;//new FbxVector4(unityEul.x, unityEul.y, unityEul.z); //ModelExporter.ConvertQuaternionToXYZEuler(fbxQuat);
+                        key.euler = ModelExporter.QuaternionToEuler (fbxFinalQuat);;
                         keys[i++] = key;
-
-                        Debug.Log ("pre rotation: " + fbxPreRotationEuler + ", complete rotation: " + key.euler + ", unity rot: " + unityEul);
                     }
 
                     // Sort the keys by time
