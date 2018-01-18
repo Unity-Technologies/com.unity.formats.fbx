@@ -1783,7 +1783,7 @@ namespace FbxExporters
                 foreach (var kvp in quaternions) {
                     var unityGo = kvp.Key;
                     var quat = kvp.Value;
-                    //Debug.LogWarning ("unity object: " + unityGo.name);
+
                     FbxNode fbxNode;
                     if (!MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
                         Debug.LogError (string.Format ("no FbxNode found for {0}", unityGo.name));
