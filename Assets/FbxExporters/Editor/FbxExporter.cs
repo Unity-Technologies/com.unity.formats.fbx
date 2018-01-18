@@ -1495,17 +1495,14 @@ namespace FbxExporters
                     // Transform Rotation (EULER)
                     // NOTE: Quaternion Rotation handled by QuaternionCurve
                     if (uniPropertyName.StartsWith ("localEulerAnglesRaw.x", ct)) {
-                        Debug.Log ("euler export");
                         prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_X);
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("localEulerAnglesRaw.y", ct)) {
-                        Debug.Log ("euler export");
                         prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("localEulerAnglesRaw.z", ct)) {
-                        Debug.Log ("euler export");
                         prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
                         return true;
                     }
