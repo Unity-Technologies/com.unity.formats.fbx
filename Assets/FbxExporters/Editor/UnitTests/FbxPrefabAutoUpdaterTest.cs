@@ -172,7 +172,6 @@ namespace FbxExporters.UnitTests
             stringpair.UnityObjectName = "Sphere";
             fbxPrefabScript.NameMapping.Add(stringpair);
             PrefabUtility.ReplacePrefab(cubePrefabInstance, cubePrefabParent);
-            string cubePrefabInstancePath = AssetDatabase.GetAssetPath(cubePrefabInstance);
 
             //Create second FBX
             GameObject cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -186,7 +185,7 @@ namespace FbxExporters.UnitTests
             //export our updated hierarchy to the same file path as the original
             SleepForFileTimestamp();
             // "Import" model to Unity (Exporting modified FBX to Unity to see if the remapping works)
-            string fbxFileName = ExportSelectedObjects(filePath, cube2);
+            ExportSelectedObjects(filePath, cube2);
             AssetDatabase.Refresh();
 
             // Assert Check Sphere = SphereFBX
