@@ -1025,8 +1025,17 @@ namespace FbxExporters
             /// </summary>
             private void SetVertexWeights (MeshInfo meshInfo, Dictionary<int, FbxCluster> boneCluster)
             {
+                HashSet<int> visitedVertices = new HashSet<int> ();
+
                 // set the vertex weights for each bone
                 for (int i = 0; i < meshInfo.BoneWeights.Length; i++) {
+                    var actualIndex = ControlPointToIndex [meshInfo.Vertices [i]];
+
+                    if (visitedVertices.Contains (actualIndex)) {
+                        continue;
+                    }
+                    visitedVertices.Add (actualIndex);
+
                     var boneWeights = meshInfo.BoneWeights;
                     int[] indices = {
                         boneWeights [i].boneIndex0,
@@ -1048,7 +1057,8 @@ namespace FbxExporters
                         if (!boneCluster.ContainsKey (indices [j])) {
                             continue;
                         }
-                        boneCluster [indices [j]].AddControlPointIndex (ControlPointToIndex[meshInfo.Vertices[i]], weights [j]);
+                        // add vertex and weighting on vertex to this bone's cluster
+                        boneCluster [indices [j]].AddControlPointIndex (actualIndex, weights [j]);
                     }
                 }
             }
@@ -1548,6 +1558,12 @@ namespace FbxExporters
                     if (uniPropertyName.StartsWith("m_Color.b", ct))
                     {
                         prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_BLUE);
+                        return true;
+                    }
+
+                    if (uniPropertyName.StartsWith("field of view", ct))
+                    {
+                        prop = new FbxPropertyChannelPair("FieldOfView", null);
                         return true;
                     }
 

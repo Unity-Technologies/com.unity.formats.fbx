@@ -28,7 +28,7 @@ namespace FbxExporters
         public struct StringPair { public string FBXObjectName; public string UnityObjectName; }
 
         [SerializeField]
-        StringPair[] m_nameMapping;
+        List<StringPair> m_nameMapping;
 
         /// <summary>
         /// Which FBX file does this refer to?
@@ -53,7 +53,7 @@ namespace FbxExporters
             }
         }
 
-        public StringPair[] NameMapping
+        public List<StringPair> NameMapping
         {
             get
             {
