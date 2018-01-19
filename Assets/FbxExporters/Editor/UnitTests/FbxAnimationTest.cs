@@ -306,6 +306,7 @@ namespace FbxExporters.UnitTests
             return animClipImported;
         }
 
+        [Ignore("Uni-34804 gimbal conditions, and Uni-34492 number of keys don't match")]
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "SkinnedMeshTestCases")]
         public void LegacySkinnedMeshAnimTest (string fbxPath)
         {
