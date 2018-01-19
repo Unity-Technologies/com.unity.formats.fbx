@@ -23,7 +23,7 @@ endif()
 message(STATUS "Building for ${CMAKE_BUILD_TYPE}")
 
 if (NOT DEFINED PACKAGE_VERSION OR "${PACKAGE_VERSION}" STREQUAL "")
-    set(PACKAGE_VERSION "sprint41")
+    set(PACKAGE_VERSION "sprint42")
 endif()
 message(STATUS "Using Package Version: ${PACKAGE_VERSION}")
 
