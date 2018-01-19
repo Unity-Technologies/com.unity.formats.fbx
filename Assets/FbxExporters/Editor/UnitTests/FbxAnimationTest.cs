@@ -60,6 +60,12 @@ namespace FbxExporters.UnitTests
                     yield return new TestCaseData (cType).Returns(1);
             }
         }
+
+        public static IEnumerable SkinnedMeshTestCases {
+            get {
+                yield return "FbxExporters/Editor/UnitTests/Models/DefaultMale/Male_DyingHitFromBack_Blend_T3_Cut01_James.fbx";
+            }
+        }
     }
 
     [TestFixture]
@@ -300,11 +306,9 @@ namespace FbxExporters.UnitTests
             return animClipImported;
         }
 
-        [Test]
-        public void SkinnedMeshAnimTest ()
+        [Test, TestCaseSource (typeof (AnimationTestDataClass), "SkinnedMeshTestCases")]
+        public void LegacySkinnedMeshAnimTest (string fbxPath)
         {
-            var fbxPath = "FbxExporters/Editor/UnitTests/Models/DefaultMale/Male_DyingHitFromBack_Blend_T3_Cut01_James.fbx";
-
             // add fbx to scene
             GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
             Assert.IsNotNull (originalFbxObj);
@@ -336,7 +340,6 @@ namespace FbxExporters.UnitTests
             // check clip properties match
             AnimClipPropertyTest (animClipOriginal, animClipImported);
 
-            var result = 0;
             foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (animClipOriginal)) {
                 foreach(EditorCurveBinding impCurveBinding in AnimationUtility.GetCurveBindings (animClipImported)) {
 
