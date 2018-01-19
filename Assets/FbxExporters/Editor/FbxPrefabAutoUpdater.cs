@@ -81,6 +81,12 @@ namespace FbxExporters
 
         static void OnPostprocessAllAssets(string [] imported, string [] deleted, string [] moved, string [] movedFrom)
         {
+            // Do not start if Auto Updater is disabled in FBX Exporter Settings
+            if (!FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled)
+            {
+                return;
+            }
+
             //Debug.Log("Postprocessing...");
 
             // Did we import an fbx file at all?
@@ -182,7 +188,7 @@ namespace FbxExporters
             public string GetFBXObjectName(string unityObjectName)
             {
                 string oldNameInFBX = unityObjectName;
-                if (unityObjectName != "" && m_fbxPrefab.NameMapping != null) {
+                if (String.IsNullOrEmpty(unityObjectName) && m_fbxPrefab.NameMapping != null) {
                     foreach (var nameMapping in m_fbxPrefab.NameMapping) {
                         if (unityObjectName == nameMapping.UnityObjectName) {
                             oldNameInFBX = nameMapping.FBXObjectName;
@@ -454,7 +460,6 @@ namespace FbxExporters
                         do {
                             string name = ReadString(json, ref index);
                             Consume(':', json, ref index);
-
 
                             // hack: If the name starts with a '-' it's the name
                             // of a gameobject, and we parse it recursively. Otherwise
@@ -1036,7 +1041,7 @@ namespace FbxExporters
                         foreach(var componentType in typesToDestroy) {
                             var component = prefabXfo.GetComponent(componentType);
                             if (component != null) {
-                                Object.DestroyImmediate(component);
+                                GameObject.DestroyImmediate(component);
                                 Log("destroyed component {0}:{1}", nodeName, componentType);
                             }
                         }

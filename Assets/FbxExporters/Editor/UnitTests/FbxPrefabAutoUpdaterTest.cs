@@ -159,8 +159,10 @@ namespace FbxExporters.UnitTests
             GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             cylinder.transform.SetParent(sphere.transform);
 
+            string filePath = GetRandomFbxFilePath();
+
             // Convert to linked prefab instance (auto-updating prefab)
-            GameObject cubePrefabInstance = ConvertToModel.Convert(cube);
+            GameObject cubePrefabInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath);
             Object cubePrefabParent = PrefabUtility.GetPrefabParent(cubePrefabInstance);
 
             // In FbxPrefab Component of Cube, add SphereFBX/Sphere name mapping
@@ -184,7 +186,7 @@ namespace FbxExporters.UnitTests
             //export our updated hierarchy to the same file path as the original
             SleepForFileTimestamp();
             // "Import" model to Unity (Exporting modified FBX to Unity to see if the remapping works)
-            string fbxFileName = ExportSelectedObjects(Application.dataPath + "/Cube.fbx", cube2);
+            string fbxFileName = ExportSelectedObjects(filePath, cube2);
             AssetDatabase.Refresh();
 
             // Assert Check Sphere = SphereFBX
@@ -192,10 +194,6 @@ namespace FbxExporters.UnitTests
             Assert.IsTrue(cubePrefabInstance.GetComponent<MeshFilter>().sharedMesh != null);
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).name == "SphereFBX");
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh != null);
-
-            // Destroy the objects 
-            GameObject.DestroyImmediate(cubePrefabInstance);
-            //GameObject.DestroyImmediate(cube2);
         }
     }
 }

@@ -235,18 +235,16 @@ namespace FbxExporters.UnitTests
 
         protected virtual string ExportSelectedObjects(string filename, params Object[] selected)
         {
-            var fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects(filename, selected) as string;
+            string fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects(filename, selected);
 
             return fbxFileName;
         }
 
-
-
-            /// <summary>
-            /// Compares two hierarchies, asserts that they match precisely.
-            /// The root can be allowed to mismatch. That's normal with
-            /// GameObject.Instantiate.
-            /// </summary>
+        /// <summary>
+        /// Compares two hierarchies, asserts that they match precisely.
+        /// The root can be allowed to mismatch. That's normal with
+        /// GameObject.Instantiate.
+        /// </summary>
         public static void AssertSameHierarchy (
             GameObject expectedHierarchy, GameObject actualHierarchy,
             bool ignoreRootName = false, bool ignoreRootTransform = false)
