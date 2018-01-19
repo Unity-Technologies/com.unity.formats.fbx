@@ -81,12 +81,6 @@ namespace FbxExporters
 
         static void OnPostprocessAllAssets(string [] imported, string [] deleted, string [] moved, string [] movedFrom)
         {
-            // Do not start if Auto Updater is disabled in FBX Exporter Settings
-            if (!FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled)
-            {
-                return;
-            }
-
             //Debug.Log("Postprocessing...");
 
             // Did we import an fbx file at all?
