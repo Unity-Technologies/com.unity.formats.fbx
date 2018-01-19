@@ -1537,6 +1537,12 @@ namespace FbxExporters
                         return true;
                     }
 
+                    if (uniPropertyName.StartsWith("field of view", ct))
+                    {
+                        prop = new FbxPropertyChannelPair("FieldOfView", null);
+                        return true;
+                    }
+
                     prop = new FbxPropertyChannelPair ();
                     return false;
                 }
