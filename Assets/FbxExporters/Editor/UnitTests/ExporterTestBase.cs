@@ -233,6 +233,13 @@ namespace FbxExporters.UnitTests
             return fbxRoot;
         }
 
+        protected virtual string ExportSelectedObjects(string filename, params Object[] selected)
+        {
+            string fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects(filename, selected);
+
+            return fbxFileName;
+        }
+
         /// <summary>
         /// Compares two hierarchies, asserts that they match precisely.
         /// The root can be allowed to mismatch. That's normal with
