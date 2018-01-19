@@ -164,7 +164,6 @@ namespace FbxExporters.UnitTests
                 var prefabInstance = GameObject.Instantiate(m_original);
                 var fbxPrefab = prefabInstance.AddComponent<FbxPrefab>();
                 var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
-
                 fbxPrefabUtility.SetSourceModel(m_source);
                 fbxPrefabUtility.SetAutoUpdate(true);
                 m_autoPrefab = PrefabUtility.CreatePrefab(

@@ -247,7 +247,7 @@ namespace FbxExporters.UnitTests
             /// The root can be allowed to mismatch. That's normal with
             /// GameObject.Instantiate.
             /// </summary>
-            public static void AssertSameHierarchy (
+        public static void AssertSameHierarchy (
             GameObject expectedHierarchy, GameObject actualHierarchy,
             bool ignoreRootName = false, bool ignoreRootTransform = false)
         {
