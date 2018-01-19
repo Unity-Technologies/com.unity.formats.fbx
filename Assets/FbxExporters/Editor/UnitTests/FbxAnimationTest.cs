@@ -63,7 +63,7 @@ namespace FbxExporters.UnitTests
 
         public static IEnumerable SkinnedMeshTestCases {
             get {
-                yield return "FbxExporters/Editor/UnitTests/Models/DefaultMale/Male_DyingHitFromBack_Blend_T3_Cut01_James.fbx";
+                yield return "Models/DefaultMale/Male_DyingHitFromBack_Blend_T3_Cut01_James.fbx";
             }
         }
     }
@@ -309,6 +309,9 @@ namespace FbxExporters.UnitTests
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "SkinnedMeshTestCases")]
         public void LegacySkinnedMeshAnimTest (string fbxPath)
         {
+            fbxPath = FindPathInUnitTests (fbxPath);
+            Assert.That (fbxPath, Is.Not.Null);
+
             // add fbx to scene
             GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
             Assert.IsNotNull (originalFbxObj);
