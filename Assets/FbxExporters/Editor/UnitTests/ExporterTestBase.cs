@@ -261,5 +261,21 @@ namespace FbxExporters.UnitTests
                 AssertSameHierarchy (expectedChild.gameObject, actualChild.gameObject);
             }
         }
+
+        /// <summary>
+        /// Given the path to a file, find the file relative to
+        /// the UnitTests folder.
+        /// </summary>
+        /// <returns>The path in unit tests.</returns>
+        /// <param name="partialPath">Partial path.</param>
+        protected static string FindPathInUnitTests(string partialPath){
+            foreach (var dir in Directory.GetDirectories(Application.dataPath, "UnitTests", SearchOption.AllDirectories)) {
+                var fullPath = Path.Combine (dir, partialPath);
+                if (File.Exists (fullPath)) {
+                    return FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath (fullPath);
+                }
+            }
+            return null;
+        }
     }
 }

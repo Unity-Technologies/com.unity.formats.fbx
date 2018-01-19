@@ -528,11 +528,26 @@ namespace FbxExporters.UnitTests
             Assert.IsNotNull (exportedSkinnedMesh);
         }
 
-        [Test]
-        public void TestSkinnedMeshExport(){
-            // for now use this cowboy taken from the asset store as the test file
-            // TODO: find a better/simpler test file
-            var fbxPath = "FbxExporters/Editor/UnitTests/Models/Cowboy/cowboyMidPoly(riged).fbx";
+        public class SkinnedMeshTestDataClass
+        {
+            public static System.Collections.IEnumerable TestCases1 {
+                get {
+                    // for now use this cowboy taken from the asset store as the test file
+                    // TODO: find a better/simpler test file
+                    yield return "Models/Cowboy/cowboyMidPoly(riged).fbx";
+                }
+            }
+            public static System.Collections.IEnumerable TestCases2 {
+                get {
+                    yield return "Models/SimpleMan/SimpleMan.fbx";
+                }
+            }
+        }
+
+        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases1")]
+        public void TestSkinnedMeshExport(string fbxPath){
+            fbxPath = FindPathInUnitTests (fbxPath);
+            Assert.That (fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSkinnedMesh, exportedSkinnedMesh;
             ExportSkinnedMesh (fbxPath, out originalSkinnedMesh, out exportedSkinnedMesh);
@@ -600,10 +615,10 @@ namespace FbxExporters.UnitTests
             Assert.IsNotNull (expWeights);
         }
 
-        [Test]
-        public void TestBoneWeightExport()
-        {
-            var fbxPath = "FbxExporters/Editor/UnitTests/Models/SimpleMan/SimpleMan.fbx";
+        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases2")]
+        public void TestBoneWeightExport(string fbxPath){
+            fbxPath = FindPathInUnitTests (fbxPath);
+            Assert.That (fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSkinnedMesh, exportedSkinnedMesh;
             ExportSkinnedMesh (fbxPath, out originalSkinnedMesh, out exportedSkinnedMesh);
