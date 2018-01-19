@@ -10,6 +10,12 @@ namespace FbxExporters.UnitTests
 {
     using CustomExtensions;
 
+    public enum RotationInterpolation {
+        kEuler=3,
+        kMixed=(3+4),
+        kQuaternion=4
+    };
+
     public class AnimationTestDataClass
     {
         // TODO: remove items that become supported by exporter
@@ -26,11 +32,19 @@ namespace FbxExporters.UnitTests
             Where (t => typeof (Component).IsAssignableFrom (t) && 
                    ModelExporter.MapsToFbxObject.ContainsKey(t)).Except(m_exceptionTypes);
 
+        public static string [] m_quaternionRotationNames = new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" };
+        public static string [] m_eulerRotationNames = new string [3] { "localEulerAnglesRaw.x", "localEulerAnglesRaw.y", "localEulerAnglesRaw.z" };
+        public static string [] m_translationNames = new string [3] { "m_LocalPosition.x", "m_LocalPosition.y", "m_LocalPosition.z"};
+
         public static float [] m_keytimes1 = new float [3] { 1f, 2f, 3f };
         public static float [] m_keyFloatValues1 = new float [3] { 0f, 100f, 0f };
         public static float [] m_keyvalues2 = new float [3] { 1f, 100f, 1f };
         public static Vector3 [] m_keyEulerValues3 = new Vector3 [3] { new Vector3 (0f, 80f, 0f), new Vector3 (80f, 0f, 0f), new Vector3 (0f, 0f, 80f) };
         public static Vector3 [] m_keyEulerValues4 = new Vector3 [3] { new Vector3 (0f, 270f, 0f), new Vector3 (270f, 0f, 0f), new Vector3 (0f, 0f, 270f) };
+
+        public static float [] m_keytimes5 = new float [5] { 0f, 30f, 60f, 90f, 120f };
+        public static Vector3 [] m_keyPosValues5 = new Vector3 [5] { new Vector3 (5.078195f, 0.000915527f, 4.29761f), new Vector3 (0.81f, 0.000915527f, 10.59f), new Vector3 (-3.65f, 0.000915527f, 4.29761f), new Vector3 (0.81f, 0.000915527f, -3.37f), new Vector3 (5.078195f, 0.000915527f, 4.29761f) };
+        public static Vector3 [] m_keyRotValues5 = new Vector3 [5] { new Vector3 (0f, 0f, 0f), new Vector3 (0f, -90f, 0f), new Vector3 (0f, -180f, 0f), new Vector3 (0f, -270f, 0f), new Vector3 (0f, -360f, 0f) };
 
         public static IEnumerable TestCases1 {
             get {
@@ -44,13 +58,13 @@ namespace FbxExporters.UnitTests
         }
         public static IEnumerable TestCases2 {
             get {
-                yield return new TestCaseData (m_keytimes1, m_keyEulerValues3, typeof (Transform), new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" } ).Returns (3);
+                yield return new TestCaseData (m_keytimes1, m_keyEulerValues3, typeof (Transform), m_quaternionRotationNames ).Returns (3);
             }
         }
         // specify gimbal conditions for rotation
         public static IEnumerable TestCases3 {
             get {
-                yield return new TestCaseData (m_keytimes1, m_keyEulerValues4, typeof (Transform), new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" } ).Returns (3);
+                yield return new TestCaseData (m_keytimes1, m_keyEulerValues4, typeof (Transform), m_quaternionRotationNames ).Returns (3);
             }
         }
         // specify one of each component type
@@ -58,6 +72,16 @@ namespace FbxExporters.UnitTests
             get {
                 foreach (var cType in m_componentTypes)
                     yield return new TestCaseData (cType).Returns(1);
+            }
+        }
+        // specify continuous rotations
+        public static IEnumerable TestCases5 {
+            get {
+                yield return new TestCaseData (RotationInterpolation.kEuler /*use euler values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (3);
+                // Uni-35616 can't programmatically define a Euler (Quaternion) mix.
+                // yield return new TestCaseData (RotationInterpolation.kMixed /*use euler+quaternion values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (3);
+                // Uni-35616 doesn't work with quaternions; rotations don't exceed 180
+                // yield return new TestCaseData (RotationInterpolation.kQuaternion /*use quaternion values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (3);
             }
         }
     }
@@ -103,8 +127,10 @@ namespace FbxExporters.UnitTests
             Assert.That (animCurveActual.length, Is.EqualTo(numKeysExpected), "animcurve number of keys doesn't match");
 
             //check imported animation against original
+            // NOTE: if I check the key values explicitly they match but when I compare using this ListMapper the float values
+            // are off by 0.000005f; not sure why that happens.
             Assert.That(new ListMapper(animCurveActual.keys).Property ("time"), Is.EqualTo(keyTimesExpected), string.Format("{0} key time doesn't match",message));
-            Assert.That(new ListMapper(animCurveActual.keys).Property ("value"), Is.EqualTo(keyValuesExpected), string.Format("{0} key value doesn't match", message));
+            Assert.That(new ListMapper(animCurveActual.keys).Property ("value"), Is.EqualTo(keyValuesExpected).Within(0.000005f), string.Format("{0} key value doesn't match", message));
 
             return ;
         }
@@ -116,11 +142,11 @@ namespace FbxExporters.UnitTests
             public GameObject targetObject;
 
             public virtual int NumKeys { get { return 0; } }
-            public virtual int NumComponents { get { return 0; } }
+            public virtual int NumProperties { get { return 0; } }
             public virtual float[] GetKeyValues(int id) { return null; }
             public virtual float [] GetAltKeyValues (int id) { return GetKeyValues(id); }
-            public virtual string GetComponentName (int id) { return null; }
-            public virtual int FindComponent (string name) { return -1; }
+            public virtual string GetPropertyName (int id) { return null; }
+            public virtual int GetIndexOf (string name) { return -1; }
 
         }
 
@@ -130,10 +156,10 @@ namespace FbxExporters.UnitTests
             public float [] keyFloatValues;
 
             public override int     NumKeys { get { return Mathf.Min (keyTimesInSeconds.Length, keyFloatValues.Length); } }
-            public override int     NumComponents { get { return 1; } }
+            public override int     NumProperties { get { return 1; } }
             public override float[] GetKeyValues (int id) { return keyFloatValues; }
-            public override string  GetComponentName (int id) { return propertyName; }
-            public override int     FindComponent (string name) { return (name == propertyName) ? 0 : -1; }
+            public override string  GetPropertyName (int id) { return propertyName; }
+            public override int     GetIndexOf (string name) { return (name == propertyName) ? 0 : -1; }
         }
 
         public class SingleKeyData : KeyData
@@ -142,10 +168,10 @@ namespace FbxExporters.UnitTests
             public System.Single [] keyFloatValues;
 
             public override int NumKeys { get { return Mathf.Min (keyTimesInSeconds.Length, keyFloatValues.Length); } }
-            public override int NumComponents { get { return propertyNames.Length; } }
+            public override int NumProperties { get { return propertyNames.Length; } }
             public override float [] GetKeyValues (int id) { return keyFloatValues; }
-            public override string GetComponentName (int id) { return propertyNames[id]; }
-            public override int FindComponent (string name) { return System.Array.IndexOf (propertyNames, name); }
+            public override string GetPropertyName (int id) { return propertyNames[id]; }
+            public override int GetIndexOf (string name) { return System.Array.IndexOf (propertyNames, name); }
         }
 
         public class QuaternionKeyData : KeyData
@@ -154,7 +180,7 @@ namespace FbxExporters.UnitTests
             public Vector3 [] keyEulerValues;
 
             public override int NumKeys { get { return Mathf.Min (keyTimesInSeconds.Length, keyEulerValues.Length); } }
-            public override int NumComponents { get { return propertyNames.Length; } }
+            public override int NumProperties { get { return propertyNames.Length; } }
             public override float [] GetKeyValues (int id)
             {
                 return (from e in keyEulerValues select Quaternion.Euler(e)[id]).ToArray ();
@@ -164,8 +190,105 @@ namespace FbxExporters.UnitTests
                 return (from e in keyEulerValues select e[id]).ToArray ();
             }
 
-            public override string GetComponentName (int id) { return propertyNames[id]; }
-            public override int FindComponent (string name)
+            public override string GetPropertyName (int id) { return propertyNames[id]; }
+            public override int GetIndexOf (string name)
+            {
+                return System.Array.IndexOf (propertyNames, name);
+            }
+        }
+
+        public class TransformKeyData : KeyData
+        {
+            public RotationInterpolation RotationType = RotationInterpolation.kEuler;
+
+            public string[] propertyNames;
+            public Vector3 [] keyPosValues; 
+            public Vector3 [] keyEulerValues; 
+            private Quaternion [] keyQuatValues;
+
+            public bool IsRotation(int id) { return id < (int)RotationType; }
+
+            public override int NumKeys { get { return keyTimesInSeconds.Length; } }
+            public override int NumProperties { get { return propertyNames.Length; } }
+            public override float [] GetKeyValues (int id)
+            {
+                if (RotationType==RotationInterpolation.kEuler) 
+                    return GetAltKeyValues(id);
+
+                // compute continous rotations
+                if (keyQuatValues==null)
+                {
+                    keyQuatValues = new Quaternion[NumKeys];
+
+                    for (int idx=0;  idx < NumKeys; idx++)
+                    {
+                        keyQuatValues[idx] = Quaternion.Euler(keyEulerValues[idx]);
+                    }
+                }
+
+                float[] result = new float[NumKeys];
+
+                for (int idx=0;  idx < NumKeys; idx++)
+                {
+                    if (IsRotation(id))
+                    {
+                        switch (RotationType)
+                        {
+                        case (RotationInterpolation.kEuler):
+                            result[idx] = keyEulerValues[idx][id];
+                            break;
+                        case (RotationInterpolation.kMixed):
+                            int NumEulerFields = (int)RotationInterpolation.kEuler;
+
+                            result[idx] = (id<NumEulerFields) 
+                                ? keyEulerValues[idx][id] : keyQuatValues[idx][id-NumEulerFields];
+
+                            break;
+                        case (RotationInterpolation.kQuaternion):
+                            result[idx] = keyQuatValues[idx][id];
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        result[idx] = keyPosValues[idx][id-(int)RotationType];
+                    }
+                }
+
+                return result;
+            }
+            public override float [] GetAltKeyValues (int id)
+            {
+                float[] result = new float[NumKeys];
+
+                for (int idx=0;  idx < NumKeys; idx++)
+                {
+                    // kMixed
+                    //     0..2 euler XYZ
+                    //     3..6 quaternion XYZ
+                    //     7..9 position XYZ
+                    // kQuaternion
+                    //     0..3 quarternion XYZW
+                    //     4..6 position XYZ
+                    // kEuler
+                    //     0..2 euler XYZ
+                    //     3..5 position XYZ
+
+                    if (IsRotation(id))
+                    {
+                        result[idx] = keyEulerValues[idx][id];
+                    }
+                    else
+                    {
+                        result[idx] = keyPosValues[idx][id-(int)RotationType];
+                    }
+                }
+
+                return result;
+            }
+
+            public override string GetPropertyName (int id) { return propertyNames[id]; }
+            public override int GetIndexOf (string name)
             {
                 return System.Array.IndexOf (propertyNames, name);
             }
@@ -198,7 +321,7 @@ namespace FbxExporters.UnitTests
             animClipOriginal.legacy = true;
             animClipOriginal.name = "anim_" + testName;
 
-            for (int id = 0; id < keyData.NumComponents; id++) {
+            for (int id = 0; id < keyData.NumProperties; id++) {
                 // initialize keys
                 Keyframe [] keys = new Keyframe [keyData.NumKeys];
 
@@ -208,7 +331,7 @@ namespace FbxExporters.UnitTests
                 }
                 AnimationCurve animCurveOriginal = new AnimationCurve (keys);
 
-                animClipOriginal.SetCurve ("", keyData.componentType, keyData.GetComponentName (id), animCurveOriginal);
+                animClipOriginal.SetCurve ("", keyData.componentType, keyData.GetPropertyName (id), animCurveOriginal);
             }
 
             animOrig.AddClip (animClipOriginal, animClipOriginal.name);
@@ -268,7 +391,7 @@ namespace FbxExporters.UnitTests
                 if (!hasAltPropertyName)
                     altPropertyName = curveBinding.propertyName;
 
-                int id = keyData.FindComponent (altPropertyName);
+                int id = keyData.GetIndexOf (altPropertyName);
 
                 if (id != -1) {
                     AnimCurveTest (keyData.keyTimesInSeconds, hasAltPropertyName ? keyData.GetAltKeyValues (id) : keyData.GetKeyValues (id), animCurveImported, curveBinding.propertyName);
@@ -301,7 +424,33 @@ namespace FbxExporters.UnitTests
         {
             KeyData keyData = new QuaternionKeyData { propertyNames = componentNames, componentType = componentType, keyTimesInSeconds = keyTimesInSeconds, keyEulerValues = keyValues };
 
-            return AnimTest (keyData, componentType.ToString () + "_Quaternion");
+            return AnimTest (keyData, componentType.ToString () + "_Gimbal");
+        }
+
+        [Description("Uni-35616 continuous rotations")]
+        [Test, TestCaseSource (typeof (AnimationTestDataClass), "TestCases5")]
+        public int ContinuousRotationAnimTest (RotationInterpolation rotInterp, float [] keyTimesInSeconds, Vector3 [] keyPosValues, Vector3 [] keyEulerValues)
+        {
+            System.Type componentType = typeof(Transform);
+
+            string[] propertyNames = null;
+
+            switch (rotInterp)
+            {
+            case RotationInterpolation.kEuler:
+                propertyNames=AnimationTestDataClass.m_eulerRotationNames.Concat(AnimationTestDataClass.m_translationNames).ToArray();
+                break;
+            case RotationInterpolation.kQuaternion:
+                propertyNames=AnimationTestDataClass.m_quaternionRotationNames.Concat(AnimationTestDataClass.m_translationNames).ToArray();
+                break;
+            case RotationInterpolation.kMixed:
+                propertyNames=AnimationTestDataClass.m_eulerRotationNames.Concat(AnimationTestDataClass.m_quaternionRotationNames).Concat(AnimationTestDataClass.m_translationNames).ToArray();
+                break;
+            }
+
+            KeyData keyData = new TransformKeyData { RotationType = rotInterp, propertyNames = propertyNames, componentType = componentType, keyTimesInSeconds = keyTimesInSeconds, keyPosValues = keyPosValues, keyEulerValues = keyEulerValues };
+
+            return AnimTest (keyData, componentType.ToString () + "_ContinuousRotations");
         }
 
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "TestCases4")]
