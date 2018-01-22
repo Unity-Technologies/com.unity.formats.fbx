@@ -3,14 +3,15 @@
 **Version**: sprint42
 
 NEW FEATURES
-* FbxExporter: Added support for exporting Lights with animated properties (Known issue: when exporting with an animated property AND an animated transform, the resulting object will have a rotation that is off by 90 degrees.)
+* FbxExporter: Added support for exporting Lights with animated properties
+* FbxExporter: Added support for exporting SkinnedMeshes with legacy animation
 
 Currently supported light properties for animation are:
 	-Intensity
 	-Spot Angle
 	-Color
 	
-* FbxExporter: Added support for exporting Cameras with animated properties (Known issue: when exporting with an animated property AND an animated transform, the resulting object will have a rotation that is off by 90 degrees.)
+* FbxExporter: Added support for exporting Cameras with animated properties
 
 Currently Supported camera properties for animation are:
 	-Field of View
@@ -18,6 +19,9 @@ Currently Supported camera properties for animation are:
 FIXES
 * FbxExporter: fixed issue where animations would sometimes be exported before their components, causing errors'
 * FbxExporter: fixed bug where skinning weights were incorrect on export
+
+KNOWN ISSUES
+* When exporting with an animated property AND an animated transform on a Camera or a Light, the resulting object will have a rotation that is off by 90 degrees
 
 **Version**: sprint41
 
