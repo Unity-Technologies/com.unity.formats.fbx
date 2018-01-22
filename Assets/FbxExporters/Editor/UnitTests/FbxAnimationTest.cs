@@ -90,6 +90,13 @@ namespace FbxExporters.UnitTests
                 yield return "Models/DefaultMale/Male_DyingHitFromBack_Blend_T3_Cut01_James.fbx";
             }
         }
+
+        public static IEnumerable BlendShapeTestCases {
+            get {
+                yield return "FbxExporters/Editor/UnitTests/Models/blendshape.fbx";
+                yield return "FbxExporters/Editor/UnitTests/Models/blendshape_with_skinning.fbx";
+            }
+        }
     }
 
     [TestFixture]
