@@ -678,17 +678,16 @@ namespace FbxExporters.UnitTests
             Debug.LogWarningFormat ("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
         }
 
-        public static void AreNearEqual(Vector3 a, Vector3 b)
+
+        public class Vector3Comparer : IComparer<Vector3>
         {
-            Assert.That(a.x, Is.EqualTo(b.x).Within(0.0001f));
-            Assert.That(a.y, Is.EqualTo(b.y).Within(0.0001f));
-            Assert.That(a.z, Is.EqualTo(b.z).Within(0.0001f));
-        }
-        public static void AreNearEqual(Vector3[] a, Vector3[] b)
-        {
-            Assert.AreEqual(a.Length, b.Length);
-            for (int i = 0; i < a.Length; ++i)
-                AreNearEqual(a[i], b[i]);
+            public int Compare(Vector3 a, Vector3 b)
+            {
+                Assert.That(a.x, Is.EqualTo(b.x).Within(0.00001f));
+                Assert.That(a.y, Is.EqualTo(b.y).Within(0.00001f));
+                Assert.That(a.z, Is.EqualTo(b.z).Within(0.00001f));
+                return 0;  // we're almost equal
+            }
         }
 
         [Test]
@@ -725,8 +724,8 @@ namespace FbxExporters.UnitTests
                 Assert.IsNotNull(exportedMesh);
 
                 // compare blend shape data
+                Assert.AreNotEqual(originalMesh.blendShapeCount, 0);
                 Assert.AreEqual(originalMesh.blendShapeCount, exportedMesh.blendShapeCount);
-                if (originalMesh.blendShapeCount > 0)
                 {
                     var deltaVertices = new Vector3[originalMesh.vertexCount];
                     var deltaNormals = new Vector3[originalMesh.vertexCount];
@@ -747,9 +746,11 @@ namespace FbxExporters.UnitTests
 
                             originalMesh.GetBlendShapeFrameVertices(bi, fi, deltaVertices, deltaNormals, deltaTangents);
                             exportedMesh.GetBlendShapeFrameVertices(bi, fi, fbxDeltaVertices, fbxDeltaNormals, fbxDeltaTangents);
-                            AreNearEqual(deltaVertices, fbxDeltaVertices);
-                            AreNearEqual(deltaNormals, fbxDeltaNormals);
-                            AreNearEqual(deltaTangents, fbxDeltaTangents);
+
+                            var v3comparer = new Vector3Comparer();
+                            Assert.That(deltaVertices, Is.EqualTo(fbxDeltaVertices).Using<Vector3>(v3comparer), string.Format("delta vertices don't match"));
+                            Assert.That(deltaNormals, Is.EqualTo(fbxDeltaNormals).Using<Vector3>(v3comparer), string.Format("delta normals don't match"));
+                            Assert.That(deltaTangents, Is.EqualTo(fbxDeltaTangents).Using<Vector3>(v3comparer), string.Format("delta tangents don't match"));
 
                         }
                     }
