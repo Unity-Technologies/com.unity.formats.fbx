@@ -3,7 +3,6 @@
 **Version**: sprint42
 
 FIXES
-* FbxExporter: fixed support for continuous Euler rotations in animations
 * FbxExporter: fixed issue where animations would sometimes be exported before their components, causing errors'
 * FbxExporter: fixed bug where skinning weights were incorrect on export
 

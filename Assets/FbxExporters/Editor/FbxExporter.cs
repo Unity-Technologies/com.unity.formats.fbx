@@ -1475,7 +1475,7 @@ namespace FbxExporters
             struct FbxPropertyChannelPair {
                 public string Property { get ; private set; }
                 public string Channel { get ; private set; }
-                public FbxPropertyChannelPair(string p, string c) {
+                public FbxPropertyChannelPair(string p, string c):this() {
                     Property = p;
                     Channel = c;
                 }
