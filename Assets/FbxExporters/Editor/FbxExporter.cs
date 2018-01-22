@@ -1118,8 +1118,17 @@ namespace FbxExporters
             /// </summary>
             private void SetVertexWeights (MeshInfo meshInfo, Dictionary<int, FbxCluster> boneCluster)
             {
+                HashSet<int> visitedVertices = new HashSet<int> ();
+
                 // set the vertex weights for each bone
                 for (int i = 0; i < meshInfo.BoneWeights.Length; i++) {
+                    var actualIndex = ControlPointToIndex [meshInfo.Vertices [i]];
+
+                    if (visitedVertices.Contains (actualIndex)) {
+                        continue;
+                    }
+                    visitedVertices.Add (actualIndex);
+
                     var boneWeights = meshInfo.BoneWeights;
                     int[] indices = {
                         boneWeights [i].boneIndex0,
@@ -1141,7 +1150,8 @@ namespace FbxExporters
                         if (!boneCluster.ContainsKey (indices [j])) {
                             continue;
                         }
-                        boneCluster [indices [j]].AddControlPointIndex (ControlPointToIndex[meshInfo.Vertices[i]], weights [j]);
+                        // add vertex and weighting on vertex to this bone's cluster
+                        boneCluster [indices [j]].AddControlPointIndex (actualIndex, weights [j]);
                     }
                 }
             }
@@ -1218,6 +1228,30 @@ namespace FbxExporters
                 // Negate the y and z values of the rotation to convert 
                 // from Unity to Maya coordinates (left to righthanded).
                 return new FbxVector4 (vector4.X, -vector4.Y, -vector4.Z, vector4.W);
+            }
+
+            /// <summary>
+            /// Euler to quaternion without axis conversion.
+            /// </summary>
+            /// <returns>a quaternion.</returns>
+            /// <param name="euler">Euler.</param>
+            public static FbxQuaternion EulerToQuaternion(FbxVector4 euler)
+            {
+                FbxAMatrix m = new FbxAMatrix ();
+                m.SetR (euler);
+                return m.GetQ ();
+            }
+
+            /// <summary>
+            /// Quaternion to euler without axis conversion.
+            /// </summary>
+            /// <returns>a euler.</returns>
+            /// <param name="quat">Quaternion.</param>
+            public static FbxVector4 QuaternionToEuler(FbxQuaternion quat)
+            {
+                FbxAMatrix m = new FbxAMatrix ();
+                m.SetQ (quat);
+                return m.GetR ();
             }
 
             // get a fbxNode's global default position.
@@ -1620,6 +1654,12 @@ namespace FbxExporters
                         return true;
                     }
 
+                    if (uniPropertyName.StartsWith("field of view", ct))
+                    {
+                        prop = new FbxPropertyChannelPair("FieldOfView", null);
+                        return true;
+                    }
+
                     prop = new FbxPropertyChannelPair ();
                     return false;
                 }
@@ -1679,8 +1719,9 @@ namespace FbxExporters
                     var fbxPreRotationEuler = node.GetRotationActive() 
                                                   ? node.GetPreRotation(FbxNode.EPivotSet.eSourcePivot)
                                                   : new FbxVector4();
-                    var fbxPreRotationInverse = new FbxQuaternion();
-                    fbxPreRotationInverse.ComposeSphericalXYZ(fbxPreRotationEuler);
+
+                    // Get the inverse of the prerotation
+                    var fbxPreRotationInverse = ModelExporter.EulerToQuaternion (fbxPreRotationEuler);
                     fbxPreRotationInverse.Inverse();
 
                     // If we're only animating along certain coords for some
@@ -1709,17 +1750,23 @@ namespace FbxExporters
                             (z == null) ? lclQuaternion[2] : z.Evaluate(seconds),
                             (w == null) ? lclQuaternion[3] : w.Evaluate(seconds));
 
+                        // convert the final animation to righthanded coords
+                        var finalEuler = ModelExporter.ConvertQuaternionToXYZEuler(fbxFinalAnimation);
+
+                        // convert it back to a quaternion for multiplication
+                        fbxFinalAnimation = ModelExporter.EulerToQuaternion (finalEuler);
+
                         // Cancel out the pre-rotation. Order matters. FBX reads left-to-right.
                         // When we run animation we will apply:
                         //      pre-rotation
                         //      then pre-rotation inverse
                         //      then animation.
-                        var fbxQuat = fbxPreRotationInverse * fbxFinalAnimation;
+                        var fbxFinalQuat = fbxPreRotationInverse * fbxFinalAnimation;
 
                         // Store the key so we can sort them later.
                         Key key;
                         key.time = FbxTime.FromSecondDouble(seconds);
-                        key.euler = ModelExporter.ConvertQuaternionToXYZEuler(fbxQuat);
+                        key.euler = ModelExporter.QuaternionToEuler (fbxFinalQuat);;
                         keys[i++] = key;
                     }
 
