@@ -865,39 +865,26 @@ namespace FbxExporters
 
 
                 var meshInfo = new MeshInfo(unitySkin.sharedMesh, unitySkin.sharedMaterials);
+
                 FbxMesh fbxMesh = null;
+                if (ExportMesh(meshInfo, fbxNode))
+                {
+                    fbxMesh = fbxNode.GetMesh();
+                }
+                if (fbxMesh == null)
+                {
+                    Debug.LogError("Could not find mesh");
+                    return false;
+                }
 
                 Dictionary<SkinnedMeshRenderer, Transform[]> skinnedMeshToBonesMap;
                 // export skeleton
                 if (ExportSkeleton (unitySkin, fbxScene, out skinnedMeshToBonesMap)) {
-
-                    // export skin mesh
-                    if (ExportMesh (meshInfo, fbxNode)) {
-                        fbxMesh = fbxNode.GetMesh ();
-                    }
-
-                    if (fbxMesh == null) {
-                        Debug.LogError ("Could not find mesh");
-                        return false;
-                    }
-
                     // bind mesh to skeleton
                     ExportSkin (unitySkin, meshInfo, fbxScene, fbxMesh, fbxNode);
 
                     // add bind pose
                     ExportBindPose (unitySkin, fbxNode, fbxScene, skinnedMeshToBonesMap);
-                }
-                else
-                {
-                    // SkinnedMeshRenderer has no bones. this is expected situation.
-                    // (e.g. mesh has blend shapes but no skeleton)
-                    if (ExportMesh(meshInfo, fbxNode)) {
-                        fbxMesh = fbxNode.GetMesh();
-                    }
-                    if (fbxMesh == null) {
-                        Debug.LogError("Could not find mesh");
-                        return false;
-                    }
                 }
 
                 return true;
