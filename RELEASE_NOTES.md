@@ -3,8 +3,8 @@
 **Version**: sprint42
 
 NEW FEATURES
-* FbxExporter: Added support for exporting Lights with animated properties
 * FbxExporter: Added support for exporting SkinnedMeshes with legacy animation
+* FbxExporter: Added support for exporting Lights with animated properties
 
 Currently supported light properties for animation are:
 	-Intensity
