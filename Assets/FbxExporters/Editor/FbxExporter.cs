@@ -427,6 +427,86 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Export the mesh's blend shapes.
+            /// </summary>
+            private bool ExportBlendShapes(MeshInfo mesh, FbxMesh fbxMesh, FbxScene fbxScene, int[] unmergedTriangles)
+            {
+                var umesh = mesh.mesh;
+                if (umesh.blendShapeCount == 0)
+                    return false;
+
+                var fbxBlendShape = FbxBlendShape.Create(fbxScene, umesh.name + "_BlendShape");
+                fbxMesh.AddDeformer(fbxBlendShape);
+
+                var numVertices = umesh.vertexCount;
+                var basePoints = umesh.vertices;
+                var baseNormals = umesh.normals;
+                var baseTangents = umesh.tangents;
+                var deltaPoints = new Vector3[numVertices];
+                var deltaNormals = new Vector3[numVertices];
+                var deltaTangents = new Vector3[numVertices];
+
+                for (int bi = 0; bi < umesh.blendShapeCount; ++bi)
+                {
+                    var bsName = umesh.GetBlendShapeName(bi);
+                    var numFrames = umesh.GetBlendShapeFrameCount(bi);
+                    var fbxChannel = FbxBlendShapeChannel.Create(fbxScene, bsName);
+                    fbxBlendShape.AddBlendShapeChannel(fbxChannel);
+
+                    for (int fi = 0; fi < numFrames; ++fi)
+                    {
+                        var weight = umesh.GetBlendShapeFrameWeight(bi, fi);
+                        umesh.GetBlendShapeFrameVertices(bi, fi, deltaPoints, deltaNormals, deltaTangents);
+
+                        var fbxShape = FbxShape.Create(fbxScene, "");
+                        fbxChannel.AddTargetShape(fbxShape, weight);
+
+                        // control points
+                        fbxShape.InitControlPoints(ControlPointToIndex.Count());
+                        for (int vi = 0; vi < numVertices; ++vi)
+                        {
+                            int ni = ControlPointToIndex[basePoints[vi]];
+                            var v = basePoints[vi] + deltaPoints[vi];
+                            fbxShape.SetControlPointAt(ConvertToRightHanded(v, UnitScaleFactor), ni);
+                        }
+
+                        // normals
+                        if (mesh.HasValidNormals())
+                        {
+                            var elemNormals = fbxShape.CreateElementNormal();
+                            elemNormals.SetMappingMode(FbxLayerElement.EMappingMode.eByPolygonVertex);
+                            elemNormals.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
+                            var dstNormals = elemNormals.GetDirectArray();
+                            dstNormals.SetCount(unmergedTriangles.Length);
+                            for (int ii = 0; ii < unmergedTriangles.Length; ++ii)
+                            {
+                                int vi = unmergedTriangles[ii];
+                                var n = baseNormals[vi] + deltaNormals[vi];
+                                dstNormals.SetAt(ii, ConvertToRightHanded(n));
+                            }
+                        }
+
+                        // tangents
+                        if (mesh.HasValidTangents())
+                        {
+                            var elemTangents = fbxShape.CreateElementTangent();
+                            elemTangents.SetMappingMode(FbxLayerElement.EMappingMode.eByPolygonVertex);
+                            elemTangents.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
+                            var dstTangents = elemTangents.GetDirectArray();
+                            dstTangents.SetCount(unmergedTriangles.Length);
+                            for (int ii = 0; ii < unmergedTriangles.Length; ++ii)
+                            {
+                                int vi = unmergedTriangles[ii];
+                                var t = (Vector3)baseTangents[vi] + deltaTangents[vi];
+                                dstTangents.SetAt(ii, ConvertToRightHanded(t));
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+
+            /// <summary>
             /// Takes in a left-handed UnityEngine.Vector3 denoting a normal,
             /// returns a right-handed FbxVector4.
             ///
@@ -754,6 +834,9 @@ namespace FbxExporters
                 // Set up normals, etc.
                 ExportComponentAttributes (meshInfo, fbxMesh, unmergedPolygons.ToArray());
 
+                // Set up blend shapes.
+                ExportBlendShapes(meshInfo, fbxMesh, fbxScene, unmergedPolygons.ToArray());
+
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
                 fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
@@ -781,31 +864,28 @@ namespace FbxExporters
                     Debug.Log (string.Format ("exporting {0} {1}", "Skin", fbxNode.GetName ()));
 
 
+                var meshInfo = new MeshInfo(unitySkin.sharedMesh, unitySkin.sharedMaterials);
+
+                FbxMesh fbxMesh = null;
+                if (ExportMesh(meshInfo, fbxNode))
+                {
+                    fbxMesh = fbxNode.GetMesh();
+                }
+                if (fbxMesh == null)
+                {
+                    Debug.LogError("Could not find mesh");
+                    return false;
+                }
+
                 Dictionary<SkinnedMeshRenderer, Transform[]> skinnedMeshToBonesMap;
                 // export skeleton
-                if (!ExportSkeleton (unitySkin, fbxScene, out skinnedMeshToBonesMap)) {
-                    Debug.LogWarning ("failed to export skeleton");
-                    return false;
+                if (ExportSkeleton (unitySkin, fbxScene, out skinnedMeshToBonesMap)) {
+                    // bind mesh to skeleton
+                    ExportSkin (unitySkin, meshInfo, fbxScene, fbxMesh, fbxNode);
+
+                    // add bind pose
+                    ExportBindPose (unitySkin, fbxNode, fbxScene, skinnedMeshToBonesMap);
                 }
-
-                var meshInfo = new MeshInfo (unitySkin.sharedMesh, unitySkin.sharedMaterials);
-
-                // export skin mesh
-                FbxMesh fbxMesh = null;
-                if (ExportMesh (meshInfo, fbxNode)) {
-                    fbxMesh = fbxNode.GetMesh ();
-                }
-
-                if (fbxMesh == null) {
-                    Debug.LogError ("Could not find mesh");
-                    return false;
-                }
-
-                // bind mesh to skeleton
-                ExportSkin (unitySkin, meshInfo, fbxScene, fbxMesh, fbxNode);
-
-                // add bind pose
-                ExportBindPose (unitySkin, fbxNode, fbxScene, skinnedMeshToBonesMap);
 
                 return true;
             }

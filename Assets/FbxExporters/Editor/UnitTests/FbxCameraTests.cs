@@ -23,7 +23,7 @@ namespace FbxExporters.UnitTests
             string filename = GetRandomFbxFilePath();
             GameObject go = new GameObject();
             go.name = "originalCamera";
-            Camera camera = go.AddComponent(typeof(Camera)) as Camera;
+            go.AddComponent(typeof(Camera));
             Animation anim = go.AddComponent(typeof(Animation)) as Animation;
 
             Keyframe[] keys = new Keyframe[3];

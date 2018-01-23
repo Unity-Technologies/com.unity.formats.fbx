@@ -40,7 +40,7 @@ namespace FbxExporters.UnitTests
         public static float [] m_keyFloatValues1 = new float [3] { 0f, 100f, 0f };
         public static float [] m_keyvalues2 = new float [3] { 1f, 100f, 1f };
         public static Vector3 [] m_keyEulerValues3 = new Vector3 [3] { new Vector3 (0f, 80f, 0f), new Vector3 (80f, 0f, 0f), new Vector3 (0f, 0f, 80f) };
-        public static Vector3 [] m_keyEulerValues4 = new Vector3 [3] { new Vector3 (0f, 270f, 0f), new Vector3 (270f, 0f, 0f), new Vector3 (0f, 0f, 270f) };
+        public static Vector3 [] m_keyEulerValues4 = new Vector3 [3] { new Vector3 (90f, 0f, 0f), new Vector3 (90f, 30f, 0f), new Vector3 (90f, 0f, 30f) };
 
         public static float [] m_keytimes5 = new float [5] { 0f, 30f, 60f, 90f, 120f };
         public static Vector3 [] m_keyPosValues5 = new Vector3 [5] { new Vector3 (5.078195f, 0.000915527f, 4.29761f), new Vector3 (0.81f, 0.000915527f, 10.59f), new Vector3 (-3.65f, 0.000915527f, 4.29761f), new Vector3 (0.81f, 0.000915527f, -3.37f), new Vector3 (5.078195f, 0.000915527f, 4.29761f) };
@@ -88,6 +88,13 @@ namespace FbxExporters.UnitTests
         public static IEnumerable SkinnedMeshTestCases {
             get {
                 yield return "Models/DefaultMale/Male_DyingHitFromBack_Blend_T3_Cut01_James.fbx";
+            }
+        }
+
+        public static IEnumerable BlendShapeTestCases {
+            get {
+                yield return "FbxExporters/Editor/UnitTests/Models/blendshape.fbx";
+                yield return "FbxExporters/Editor/UnitTests/Models/blendshape_with_skinning.fbx";
             }
         }
     }
