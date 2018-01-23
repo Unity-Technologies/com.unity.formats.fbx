@@ -149,6 +149,14 @@ namespace FbxExporters.UnitTests
 
     public class FbxPrefabAutoUpdaterRemappingTest : ExporterTestBase
     {
+        bool isAutoUpdaterOn;
+        [SetUp]
+        public void Init()
+        {
+            isAutoUpdaterOn = FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled;
+            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = true;
+        }
+
         [Test]
         public void RemappingTest()
         {
@@ -193,6 +201,77 @@ namespace FbxExporters.UnitTests
             Assert.IsTrue(cubePrefabInstance.GetComponent<MeshFilter>().sharedMesh != null);
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).name == "SphereFBX");
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh != null);
+        }
+        [TearDown]
+        public void stopTest()
+        {
+            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
+        }
+    }
+
+    public class FbxPrefabAutoUpdaterToggleTest : ExporterTestBase
+    {
+        bool isAutoUpdaterOn;
+        [SetUp]
+        public void Init()
+        {
+            isAutoUpdaterOn = FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled;
+            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = false;
+        }
+
+        [Test]
+        public void RemappingTest()
+        {
+            //Create a hierarchy of objects
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere.transform.SetParent(cube.transform);
+            GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            cylinder.transform.SetParent(sphere.transform);
+
+            string filePath = GetRandomFbxFilePath();
+
+            // Convert to linked prefab instance (auto-updating prefab)
+            GameObject cubePrefabInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath);
+            Object cubePrefabParent = PrefabUtility.GetPrefabParent(cubePrefabInstance);
+
+            // In FbxPrefab Component of Cube, add SphereFBX/Sphere name mapping
+            FbxPrefab fbxPrefabScript = cubePrefabInstance.transform.GetComponent<FbxPrefab>();
+            FbxPrefab.StringPair stringpair = new FbxPrefab.StringPair();
+            stringpair.FBXObjectName = "SphereFBX";
+            stringpair.UnityObjectName = "Sphere";
+            fbxPrefabScript.NameMapping.Add(stringpair);
+            PrefabUtility.ReplacePrefab(cubePrefabInstance, cubePrefabParent);
+
+
+            //Create second FBX
+            GameObject cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject sphere2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            // Change name of Sphere to SphereFBX
+            sphere2.transform.name = "SphereFBX";
+            sphere2.transform.SetParent(cube2.transform);
+            GameObject cylinder2 = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            cylinder2.transform.SetParent(sphere2.transform);
+
+
+            //export our updated hierarchy to the same file path as the original
+            SleepForFileTimestamp();
+            // "Import" model to Unity (Exporting modified FBX to Unity to see if the remapping works)
+            ExportSelectedObjects(filePath, cube2);
+            AssetDatabase.Refresh();
+
+            // Assert Check Sphere = Sphere and has been changed by the Auto-Updater.
+            Assert.IsTrue(cubePrefabInstance != null);
+            Assert.IsTrue(cubePrefabInstance.GetComponent<MeshFilter>().sharedMesh != null);
+            Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).name == "Sphere");
+            Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh != null);
+        }
+
+
+        [TearDown]
+        public void stopTest()
+        {
+            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
         }
     }
 }
