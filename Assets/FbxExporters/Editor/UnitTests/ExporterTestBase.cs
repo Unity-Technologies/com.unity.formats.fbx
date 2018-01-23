@@ -233,6 +233,13 @@ namespace FbxExporters.UnitTests
             return fbxRoot;
         }
 
+        protected virtual string ExportSelectedObjects(string filename, params Object[] selected)
+        {
+            string fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects(filename, selected);
+
+            return fbxFileName;
+        }
+
         /// <summary>
         /// Compares two hierarchies, asserts that they match precisely.
         /// The root can be allowed to mismatch. That's normal with
@@ -260,6 +267,22 @@ namespace FbxExporters.UnitTests
                 Assert.IsNotNull (actualChild);
                 AssertSameHierarchy (expectedChild.gameObject, actualChild.gameObject);
             }
+        }
+
+        /// <summary>
+        /// Given the path to a file, find the file relative to
+        /// the UnitTests folder.
+        /// </summary>
+        /// <returns>The path in unit tests.</returns>
+        /// <param name="partialPath">Partial path.</param>
+        protected static string FindPathInUnitTests(string partialPath){
+            foreach (var dir in Directory.GetDirectories(Application.dataPath, "UnitTests", SearchOption.AllDirectories)) {
+                var fullPath = Path.Combine (dir, partialPath);
+                if (File.Exists (fullPath)) {
+                    return FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath (fullPath);
+                }
+            }
+            return null;
         }
     }
 }
