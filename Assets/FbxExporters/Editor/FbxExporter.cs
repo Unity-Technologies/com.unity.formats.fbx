@@ -1788,13 +1788,15 @@ namespace FbxExporters
                         fbxAnimCurveZ.KeySet(i, key.time, (float)key.euler.Z);
                     }
 
-                    // Uni-35616 unroll curves to preserve continuous rotations
-                    FbxAnimCurveFilterUnroll fbxAnimUnrollFilter = new FbxAnimCurveFilterUnroll();
-                    fbxAnimUnrollFilter.Apply(new []{fbxAnimCurveX,fbxAnimCurveY,fbxAnimCurveZ});
-
                     fbxAnimCurveZ.KeyModifyEnd();
                     fbxAnimCurveY.KeyModifyEnd();
                     fbxAnimCurveX.KeyModifyEnd();
+
+                    // Uni-35616 unroll curves to preserve continuous rotations
+                    var fbxCurveNode = fbxNode.LclRotation.GetCurveNode(fbxAnimLayer, false /*should already exist*/);
+
+                    FbxAnimCurveFilterUnroll fbxAnimUnrollFilter = new FbxAnimCurveFilterUnroll();
+                    fbxAnimUnrollFilter.Apply(fbxCurveNode);
 
                     if (Verbose) {
                         Debug.Log("Exported rotation animation for " + fbxNode.GetName());
