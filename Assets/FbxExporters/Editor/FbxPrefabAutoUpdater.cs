@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 using System;
+using FbxExporters.Editor;
 
 namespace FbxExporters
 {
@@ -25,19 +26,22 @@ namespace FbxExporters
     /// </summary>
     public /*static*/ class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
     {
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
-        #else
+#else
         public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
-        #endif
+#endif
+
+        static string[] importedAssets;
+
         public static string FindFbxPrefabAssetPath()
         {
             // Find guids that are scripts that look like FbxPrefab.
             // That catches FbxPrefabTest too, so we have to make sure.
             var allGuids = AssetDatabase.FindAssets("FbxPrefab t:MonoScript");
-            foreach(var guid in allGuids) {
+            foreach (var guid in allGuids) {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.EndsWith (FBX_PREFAB_FILE)) {
+                if (path.EndsWith(FBX_PREFAB_FILE)) {
                     return path;
                 }
             }
@@ -53,6 +57,8 @@ namespace FbxExporters
             return assetPath.EndsWith(".prefab");
         }
 
+        const string MenuItemName = "GameObject/Update from Fbx";
+
         /// <summary>
         /// Return false if the prefab definitely does not have an
         /// FbxPrefab component that points to one of the Fbx assets
@@ -65,7 +71,7 @@ namespace FbxExporters
             var depPaths = AssetDatabase.GetDependencies(prefabPath, recursive: false);
             bool dependsOnFbxPrefab = false;
             bool dependsOnImportedFbx = false;
-            foreach(var dep in depPaths) {
+            foreach (var dep in depPaths) {
                 if (dep == fbxPrefabScriptPath) {
                     if (dependsOnImportedFbx) { return true; }
                     dependsOnFbxPrefab = true;
@@ -79,11 +85,13 @@ namespace FbxExporters
             return false;
         }
 
-        static void OnPostprocessAllAssets(string [] imported, string [] deleted, string [] moved, string [] movedFrom)
+        static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
         {
             // Do not start if Auto Updater is disabled in FBX Exporter Settings
             if (!FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled)
             {
+                // Store imported assets to reuse them later
+                importedAssets = imported;
                 return;
             }
 
@@ -92,7 +100,7 @@ namespace FbxExporters
             // Did we import an fbx file at all?
             // Optimize to not allocate in the common case of 'no'
             HashSet<string> fbxImported = null;
-            foreach(var fbxModel in imported) {
+            foreach (var fbxModel in imported) {
                 if (IsFbxAsset(fbxModel)) {
                     if (fbxImported == null) { fbxImported = new HashSet<string>(); }
                     fbxImported.Add(fbxModel);
@@ -116,7 +124,7 @@ namespace FbxExporters
             //
             var fbxPrefabScriptPath = FindFbxPrefabAssetPath();
             var allObjectGuids = AssetDatabase.FindAssets("t:GameObject");
-            foreach(var guid in allObjectGuids) {
+            foreach (var guid in allObjectGuids) {
                 var prefabPath = AssetDatabase.GUIDToAssetPath(guid);
                 if (!IsPrefabAsset(prefabPath)) {
                     //Debug.Log("Not a prefab: " + prefabPath);
@@ -140,8 +148,8 @@ namespace FbxExporters
                     //Debug.LogWarning("FbxPrefab reimport: failed to update prefab " + prefabPath);
                     continue;
                 }
-                foreach(var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>()) {
-                    var fbxPrefabUtility = new FbxPrefabUtility (fbxPrefabComponent);
+                foreach (var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>()) {
+                    var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
                     if (!fbxPrefabUtility.WantsAutoUpdate()) {
                         //Debug.Log("Not auto-updating " + prefabPath);
                         continue;
@@ -157,6 +165,129 @@ namespace FbxExporters
             }
         }
 
+        [MenuItem(MenuItemName, false, 30)]
+        public static void OnContextItem(MenuCommand command)
+        {
+            GameObject[] selection = null;
+
+            if (command == null || command.context == null)
+            {
+                // We were actually invoked from the top GameObject menu, so use the selection.
+                //selection = Selection.GetFiltered<GameObject>(SelectionMode.Unfiltered);
+                selection = Selection.gameObjects;
+            }
+            else
+            {
+                // We were invoked from the right-click menu, so use the context of the context menu.
+                var selected = command.context as GameObject;
+                if (selected)
+                {
+                    selection = new GameObject[] { selected };
+                }
+            }
+
+            if (selection == null || selection.Length == 0)
+            {
+                ModelExporter.DisplayNoSelectionDialog();
+                return;
+            }
+
+
+            // Did we import an fbx file at all?
+            // Optimize to not allocate in the common case of 'no'
+            HashSet<string> fbxImported = null;
+            if (importedAssets != null)
+            {
+                foreach (var fbxModel in importedAssets)
+                {
+                    if (IsFbxAsset(fbxModel))
+                    {
+                        if (fbxImported == null) { fbxImported = new HashSet<string>(); }
+                        fbxImported.Add(fbxModel);
+                        //Debug.Log("Tracking fbx asset " + fbxModel);
+                    }
+                    else
+                    {
+                        //Debug.Log("Not an fbx asset " + fbxModel);
+                    }
+                }
+            }
+
+            if (fbxImported != null)
+            { 
+                //Selection.objects = UpdateLinkedPrefab(selection);
+                UpdateLinkedPrefab(selection, fbxImported);
+            }
+        }
+
+        /// <summary>
+        // Validate the menu item defined by the function above.
+        /// </summary>
+        [MenuItem(MenuItemName, true, 30)]
+        public static bool OnValidateMenuItem()
+        {
+            //GameObject[] selection = Selection.GetFiltered<GameObject>(SelectionMode.Unfiltered);
+            GameObject[] selection = Selection.gameObjects;
+
+            if (selection == null || selection.Length == 0)
+            {
+                ModelExporter.DisplayNoSelectionDialog();
+                return false;
+            }
+
+            bool allObjectsPrefab = true;
+            // Check if it's a prefab
+            foreach (GameObject selectedObject in selection)
+            {
+                if (selectedObject.GetComponent<FbxPrefab>() != null || PrefabUtility.FindPrefabRoot(selectedObject).GetComponent<FbxPrefab>() != null)
+                {
+                    allObjectsPrefab = true;
+                }
+                else
+                {
+                    allObjectsPrefab = false;
+                    break;
+                }
+            }
+
+            return allObjectsPrefab;
+        }
+
+        static void UpdateLinkedPrefab(GameObject[] selection, HashSet<string> fbxImported)
+        {
+            // Iterate over all the prefabs that have an FbxPrefab component that
+            // points to an FBX file that got (re)-imported.
+            //
+            // There's no one-line query to get those, so we search for a much
+            // larger set and whittle it down, hopefully without needing to
+            // load the asset into memory if it's not necessary.
+            //
+            foreach (GameObject prefab in selection)
+            {
+                if (!prefab)
+                {
+                    //Debug.LogWarning("FbxPrefab reimport: failed to update prefab " + prefabPath);
+                    continue;
+                }
+                foreach (var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>())
+                {
+                    var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
+                    if (!fbxPrefabUtility.WantsAutoUpdate())
+                    {
+                        //Debug.Log("Not auto-updating " + prefabPath);
+                        continue;
+                    }
+                    var fbxAssetPath = fbxPrefabUtility.GetFbxAssetPath();
+                    if (!fbxImported.Contains(fbxAssetPath))
+                    {
+                        //Debug.Log("False-positive dependence: " + prefabPath + " via " + fbxAssetPath);
+                        continue;
+                    }
+                    //Debug.Log("Updating " + prefabPath + "...");
+                    fbxPrefabUtility.SyncPrefab();
+                }
+            }
+        }
 
         public class FbxPrefabUtility{
 
