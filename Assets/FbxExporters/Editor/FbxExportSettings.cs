@@ -50,6 +50,12 @@ namespace FbxExporters.EditorTools {
                 exportSettings.centerObjects
             );
 
+            exportSettings.autoUpdaterEnabled = EditorGUILayout.Toggle(
+                new GUIContent("Auto-Updater:",
+                    "Automatically updates prefabs with new fbx data that was imported."),
+                exportSettings.autoUpdaterEnabled
+            );
+
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
@@ -424,6 +430,7 @@ namespace FbxExporters.EditorTools {
         // Note: default values are set in LoadDefaults().
         public bool mayaCompatibleNames = true;
         public bool centerObjects = true;
+        public bool autoUpdaterEnabled = true;
         public bool launchAfterInstallation = true;
         public bool HideSendToUnityMenu = true;
         public int ExportFormatSelection;
@@ -456,6 +463,7 @@ namespace FbxExporters.EditorTools {
         {
             mayaCompatibleNames = true;
             centerObjects = true;
+            autoUpdaterEnabled = true;
             launchAfterInstallation = true;
             HideSendToUnityMenu = true;
             ExportFormatSelection = 0;
