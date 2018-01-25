@@ -90,8 +90,6 @@ namespace FbxExporters
             // Do not start if Auto Updater is disabled in FBX Exporter Settings
             if (!FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled)
             {
-                // Store imported assets to reuse them later
-                importedAssets = imported;
                 return;
             }
 
@@ -102,7 +100,10 @@ namespace FbxExporters
             HashSet<string> fbxImported = null;
             foreach (var fbxModel in imported) {
                 if (IsFbxAsset(fbxModel)) {
-                    if (fbxImported == null) { fbxImported = new HashSet<string>(); }
+                    if (fbxImported == null)
+                    {
+                        fbxImported = new HashSet<string>();
+                    }
                     fbxImported.Add(fbxModel);
                     //Debug.Log("Tracking fbx asset " + fbxModel);
                 } else {
@@ -165,16 +166,15 @@ namespace FbxExporters
             }
         }
 
-        [MenuItem(MenuItemName, false, 30)]
-        public static void OnContextItem(MenuCommand command)
+        [MenuItem(MenuItemName, false,31)]
+        static void OnContextItem(MenuCommand command)
         {
             GameObject[] selection = null;
 
             if (command == null || command.context == null)
             {
                 // We were actually invoked from the top GameObject menu, so use the selection.
-                //selection = Selection.GetFiltered<GameObject>(SelectionMode.Unfiltered);
-                selection = Selection.gameObjects;
+                selection = Selection.GetFiltered<GameObject>(SelectionMode.Editable | SelectionMode.TopLevel);
             }
             else
             {
@@ -192,98 +192,43 @@ namespace FbxExporters
                 return;
             }
 
-
-            // Did we import an fbx file at all?
-            // Optimize to not allocate in the common case of 'no'
-            HashSet<string> fbxImported = null;
-            if (importedAssets != null)
-            {
-                foreach (var fbxModel in importedAssets)
-                {
-                    if (IsFbxAsset(fbxModel))
-                    {
-                        if (fbxImported == null) { fbxImported = new HashSet<string>(); }
-                        fbxImported.Add(fbxModel);
-                        //Debug.Log("Tracking fbx asset " + fbxModel);
-                    }
-                    else
-                    {
-                        //Debug.Log("Not an fbx asset " + fbxModel);
-                    }
-                }
-            }
-
-            if (fbxImported != null)
-            { 
-                //Selection.objects = UpdateLinkedPrefab(selection);
-                UpdateLinkedPrefab(selection, fbxImported);
-            }
+            //Selection.objects = UpdateLinkedPrefab(selection);
+            UpdateLinkedPrefab(selection);
         }
 
         /// <summary>
         // Validate the menu item defined by the function above.
         /// </summary>
-        [MenuItem(MenuItemName, true, 30)]
-        public static bool OnValidateMenuItem()
+        [MenuItem(MenuItemName, true,31)]
+        static bool OnValidateMenuItem()
         {
-            //GameObject[] selection = Selection.GetFiltered<GameObject>(SelectionMode.Unfiltered);
-            GameObject[] selection = Selection.gameObjects;
-
-            if (selection == null || selection.Length == 0)
-            {
-                ModelExporter.DisplayNoSelectionDialog();
-                return false;
-            }
-
-            bool allObjectsPrefab = true;
-            // Check if it's a prefab
+            GameObject[] selection = Selection.GetFiltered<GameObject>(SelectionMode.Editable | SelectionMode.TopLevel);
+            bool allObjectsPrefab = false;
             foreach (GameObject selectedObject in selection)
             {
-                if (selectedObject.GetComponent<FbxPrefab>() != null || PrefabUtility.FindPrefabRoot(selectedObject).GetComponent<FbxPrefab>() != null)
+                if (selectedObject.GetComponentInChildren<FbxPrefab>())
                 {
                     allObjectsPrefab = true;
-                }
-                else
-                {
-                    allObjectsPrefab = false;
                     break;
                 }
             }
 
-            return allObjectsPrefab;
+            var isPrefab = PrefabUtility.GetPrefabParent(Selection.activeGameObject) != null;
+            return isPrefab && allObjectsPrefab;
         }
 
-        static void UpdateLinkedPrefab(GameObject[] selection, HashSet<string> fbxImported)
+        public static void UpdateLinkedPrefab(GameObject[] selection)
         {
-            // Iterate over all the prefabs that have an FbxPrefab component that
-            // points to an FBX file that got (re)-imported.
-            //
-            // There's no one-line query to get those, so we search for a much
-            // larger set and whittle it down, hopefully without needing to
-            // load the asset into memory if it's not necessary.
-            //
-            foreach (GameObject prefab in selection)
+            var fbxPrefabScriptPath = FindFbxPrefabAssetPath();
+            foreach (GameObject selectedObject in selection)
             {
-                if (!prefab)
-                {
-                    //Debug.LogWarning("FbxPrefab reimport: failed to update prefab " + prefabPath);
-                    continue;
-                }
+                GameObject prefabInstance = selectedObject;
+
+                GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(prefabInstance) as GameObject;
+
                 foreach (var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>())
                 {
                     var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
-                    if (!fbxPrefabUtility.WantsAutoUpdate())
-                    {
-                        //Debug.Log("Not auto-updating " + prefabPath);
-                        continue;
-                    }
-                    var fbxAssetPath = fbxPrefabUtility.GetFbxAssetPath();
-                    if (!fbxImported.Contains(fbxAssetPath))
-                    {
-                        //Debug.Log("False-positive dependence: " + prefabPath + " via " + fbxAssetPath);
-                        continue;
-                    }
-                    //Debug.Log("Updating " + prefabPath + "...");
                     fbxPrefabUtility.SyncPrefab();
                 }
             }

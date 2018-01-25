@@ -265,6 +265,16 @@ namespace FbxExporters.UnitTests
             Assert.IsTrue(cubePrefabInstance.GetComponent<MeshFilter>().sharedMesh != null);
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).name == "Sphere");
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh != null);
+
+            // Testing Manual update
+            GameObject[] selection = new GameObject[] { cubePrefabInstance };
+            FbxPrefabAutoUpdater.UpdateLinkedPrefab(selection);
+
+            Assert.IsTrue(cubePrefabInstance != null);
+            Assert.IsTrue(cubePrefabInstance.GetComponent<MeshFilter>().sharedMesh != null);
+            Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).name == "SphereFBX");
+            Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh != null);
+
         }
 
 
