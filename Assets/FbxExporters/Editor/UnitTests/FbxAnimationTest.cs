@@ -93,8 +93,8 @@ namespace FbxExporters.UnitTests
 
         public static IEnumerable BlendShapeTestCases {
             get {
-                yield return "FbxExporters/Editor/UnitTests/Models/blendshape.fbx";
-                yield return "FbxExporters/Editor/UnitTests/Models/blendshape_with_skinning.fbx";
+                yield return "Models/blendshape.fbx";
+                yield return "Models/blendshape_with_skinning.fbx";
             }
         }
     }

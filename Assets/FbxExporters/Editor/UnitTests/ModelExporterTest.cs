@@ -693,23 +693,11 @@ namespace FbxExporters.UnitTests
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "BlendShapeTestCases")]
         public void TestBlendShapeExport(string fbxPath)
         {
-            // add fbx to scene
-            GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
-            Assert.IsNotNull(originalFbxObj);
-            GameObject originalGO = GameObject.Instantiate(originalFbxObj);
-            Assert.IsTrue(originalGO);
+            fbxPath = FindPathInUnitTests (fbxPath);
+            Assert.That (fbxPath, Is.Not.Null);
 
-            // export fbx
-            // get GameObject
-            string filename = GetRandomFbxFilePath();
-            ModelExporter.ExportObject(filename, originalGO);
-            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
-            Assert.IsTrue(fbxObj);
-
-            var originalSMR = originalGO.GetComponentInChildren<SkinnedMeshRenderer>();
-            var exportedSMR = fbxObj.GetComponentInChildren<SkinnedMeshRenderer>();
-            Assert.IsNotNull(originalSMR);
-            Assert.IsNotNull(exportedSMR);
+            SkinnedMeshRenderer originalSMR, exportedSMR;
+            ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
 
             var originalMesh = originalSMR.sharedMesh;
             var exportedMesh = exportedSMR.sharedMesh;
