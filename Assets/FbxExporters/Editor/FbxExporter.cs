@@ -1498,6 +1498,24 @@ namespace FbxExporters
 
                 var transformBindings = new UnityToMayaConvertSceneHelper (uniPropertyName);
 
+                // TODO: read the curve interpolation
+                FbxAnimCurveDef.EInterpolationType fbxInterpolation = 
+                    FbxAnimCurveDef.EInterpolationType.eInterpolationCubic;
+
+                Dictionary<AnimationUtility.TangentMode, List<FbxAnimCurveDef.ETangentMode>> MapUnityKeyTangentModeToFBX =
+                    new Dictionary<AnimationUtility.TangentMode, List<FbxAnimCurveDef.ETangentMode>>
+                {
+                    //TangeantAuto|GenericTimeIndependent|GenericClampProgressive
+                    {AnimationUtility.TangentMode.Free, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericClampProgressive}},
+
+                    //TangeantAuto|GenericTimeIndependent
+                    {AnimationUtility.TangentMode.Auto, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericTimeIndependent}},
+
+                    //TangeantAuto|GenericTimeIndependent|GenericClampProgressive
+                    {AnimationUtility.TangentMode.ClampedAuto, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericClampProgressive}},
+                };
+
+
                 // copy Unity AnimCurve to FBX AnimCurve.
                 fbxAnimCurve.KeyModifyBegin ();
 
@@ -1506,7 +1524,36 @@ namespace FbxExporters
                     var fbxTime = FbxTime.FromSecondDouble (uniKeyFrame.time);
 
                     keyIndex = fbxAnimCurve.KeyAdd (fbxTime);
-                    fbxAnimCurve.KeySet (keyIndex, fbxTime, transformBindings.Convert(uniKeyFrame.value));
+
+                    fbxAnimCurve.KeySet (keyIndex, 
+                        fbxTime, 
+                        transformBindings.Convert(uniKeyFrame.value),
+                        fbxInterpolation
+                    );
+
+                    if (fbxInterpolation==FbxAnimCurveDef.EInterpolationType.eInterpolationCubic)
+                    {
+                        var lTangent = AnimationUtility.GetKeyLeftTangentMode(uniAnimCurve, keyIndex);
+                        var rTangent = AnimationUtility.GetKeyRightTangentMode(uniAnimCurve, keyIndex);
+
+                        if (!MapUnityKeyTangentModeToFBX.ContainsKey(lTangent))
+                        {
+                            Debug.LogWarning(string.Format("key[{0}] missing tangent mapping ({1})", keyIndex, lTangent.ToString()));
+                            continue;
+                        }
+
+                        // TODO : handle broken tangents
+                        if (lTangent!=rTangent)
+                        {
+                            Debug.LogWarning(string.Format("key[{0}] broken tangents ({1},{2}) not supported", keyIndex, lTangent.ToString(), rTangent.ToString()));
+                        }
+
+                        foreach (FbxAnimCurveDef.ETangentMode fbxKeyTangentMode in MapUnityKeyTangentModeToFBX[lTangent])
+                        {
+                            fbxAnimCurve.KeySetTangentMode(keyIndex, fbxKeyTangentMode);
+                        }
+
+                    }
                 }
 
                 fbxAnimCurve.KeyModifyEnd();
