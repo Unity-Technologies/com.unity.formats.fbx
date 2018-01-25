@@ -1730,7 +1730,7 @@ namespace FbxExporters
 
                 // setup anim stack
                 FbxAnimStack fbxAnimStack = FbxAnimStack.Create (fbxScene, uniAnimClip.name);
-                fbxAnimStack.Description.Set ("Animation Take: " + uniAnimClip.name);
+                fbxAnimStack.Description.Set (uniRoot.GetType() == typeof(Animator) ? "Animation Take: " + uniAnimClip.name : "Animation Take: " + "TypeLegacy");
 
                 // add one mandatory animation layer
                 FbxAnimLayer fbxAnimLayer = FbxAnimLayer.Create (fbxScene, "Animation Base Layer");
@@ -1844,7 +1844,10 @@ namespace FbxExporters
                 // Try the animation (legacy)
                 var uniAnimation = uniRoot.GetComponent<Animation> ();
                 if (uniAnimation) 
-                { 
+                {
+                    FbxAnimStack fbxAnimStack = FbxAnimStack.Create(fbxScene, "Animation Variables");
+                    fbxAnimStack.Description.Set("AnimationType: " + "Legacy");
+
                     // Only export each clip once per game object.
                     foreach (var uniAnimObj in uniAnimation) {
                         AnimationState uniAnimState = uniAnimObj as AnimationState;
