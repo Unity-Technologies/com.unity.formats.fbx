@@ -11,7 +11,7 @@ class ImportSettings : AssetPostprocessor
         {
             foreach (string line in File.ReadAllLines(assetPath))
             {
-                if (line.Contains("TypeLegacy"))
+                if (line.Contains("AnimationTypeLegacy"))
                 {
                     ModelImporter modelImporter = assetImporter as ModelImporter;
                     modelImporter.animationType = ModelImporterAnimationType.Legacy;
