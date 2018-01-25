@@ -1471,6 +1471,7 @@ namespace FbxExporters
 
             /// <summary>
             /// Store FBX property name and channel name 
+            /// Default constructor added because it needs to be called before autoimplemented properties can be assigned. Otherwise we get build errors
             /// </summary>
             struct FbxPropertyChannelPair {
                 public string Property { get ; private set; }
