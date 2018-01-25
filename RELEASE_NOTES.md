@@ -4,24 +4,18 @@
 
 NEW FEATURES
 * FbxExporter: Added support for exporting SkinnedMeshes with legacy animation
-* FbxExporter: Added support for exporting Lights with animated properties
-
-Currently supported light properties for animation are:
-	-Intensity
-	-Spot Angle
-	-Color
-	
-* FbxExporter: Added support for exporting Cameras with animated properties
-
-Currently Supported camera properties for animation are:
-	-Field of View
+* FbxExporter: Added support for exporting Lights with animated properties (Intensity, Spot Angle, Color)
+* FbxExporter: Added support for exporting Cameras with animated properties (Field of View)
 
 FIXES
-* FbxExporter: fixed issue where animations would sometimes be exported before their components, causing errors'
+* FbxExporter: fixed issue where animations would sometimes be exported before their components, causing errors
 * FbxExporter: fixed bug where skinning weights were incorrect on export
 
 KNOWN ISSUES
-* When exporting with an animated property AND an animated transform on a Camera or a Light, the resulting object will have a rotation that is off by 90 degrees
+* When exporting with an animated transform for a Camera or a Light, the resulting rotation does not take the forward direction into account and is off by 90 degrees
+* Key tangents are not exported and the default key tangent setting is different between Unity, FBXSDK and Maya. This cause the curve shape to change between Unity and Maya.
+* Animated continuous rotations are not maintained
+* Animated rotations with Euler Angles (Quaternion) or Quaternion interpolation are not converted to the correct Euler equivalent.
 
 **Version**: sprint41
 
