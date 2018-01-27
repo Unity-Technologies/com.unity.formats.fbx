@@ -427,6 +427,7 @@ namespace FbxExporters.EditorTools {
         public bool launchAfterInstallation = true;
         public bool HideSendToUnityMenu = true;
         public int ExportFormatSelection;
+        public bool BakeAnimation = true;
 
         public string IntegrationSavePath;
 
@@ -463,6 +464,7 @@ namespace FbxExporters.EditorTools {
             IntegrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
+            BakeAnimation = true;
         }
 
         /// <summary>
