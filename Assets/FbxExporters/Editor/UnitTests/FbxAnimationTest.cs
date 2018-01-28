@@ -273,10 +273,14 @@ namespace FbxExporters.UnitTests
                 bool result = true;
 
                 result &= a.time.Equals(b.time);
+                #if DEBUG_UNITTEST
                 Debug.Log(string.Format("{2} a.time: {0}, b.time: {1}", a.time, b.time,result));
+                #endif
 
                 result &= (Mathf.Abs(a.value - b.value) <= Epsilon);
+                #if DEBUG_UNITTEST
                 Debug.Log(string.Format("{2} a.value: {0}, b.value: {1}", a.value, b.value,result));
+                #endif
 
                 return  result ? 0 : 1;
             }
@@ -294,15 +298,17 @@ namespace FbxExporters.UnitTests
                 bool result = true;
 
                 result &= a.time.Equals(b.time);
+                #if DEBUG_UNITTEST
                 Debug.Log(string.Format("{2} a.time: {0}, b.time: {1}", a.time, b.time,result));
-
+                #endif
                 // TODO : use AnimationUtility.GetLeftTangentMode 
                 // requires reference to AnimationCurve and keyindex
                 result &= (a.tangentMode == b.tangentMode);
+                #if DEBUG_UNITTEST
                 Debug.Log(string.Format("{2} a.tangentMode={0} b.tangentMode={1}", 
                     ((AnimationUtility.TangentMode)a.tangentMode).ToString(),
                     ((AnimationUtility.TangentMode)b.tangentMode).ToString(),result));
-
+                #endif
                 return result ? 0 : 1;
             }
 
@@ -712,11 +718,15 @@ namespace FbxExporters.UnitTests
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "ComponentTestCases")]
         public int ComponentAnimTest (System.Type componentType)
         {
+            #if DEBUG_UNITTEST
             Debug.Log (string.Format ("ComponentAnimTest {0}", componentType.ToString()));
+            #endif 
 
             if (!ModelExporter.MapsToFbxObject.ContainsKey(componentType))
             {
+                #if DEBUG_UNITTEST
                 Debug.Log (string.Format ("skipping {0}; fbx export not supported", componentType.ToString()));
+                #endif 
                 return 1;                
             }
 
@@ -729,7 +739,9 @@ namespace FbxExporters.UnitTests
 
             if (propertyNames.Length == 0)
             {
+                #if DEBUG_UNITTEST
                 Debug.Log (string.Format ("skipping {0}; no animatable Single properties found", componentType.ToString()));
+                #endif 
                 return 1;                
             }
 

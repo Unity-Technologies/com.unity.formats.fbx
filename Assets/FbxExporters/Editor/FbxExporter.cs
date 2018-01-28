@@ -1445,12 +1445,55 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Export animation curve key frames with key tangents
+            /// Return set of sample times to cover all keys on animation curves
             /// </summary>
-            protected void ExportAnimationKeyFrames (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve, 
+            public static HashSet<float> GetSampleTimes(AnimationCurve[] animCurves, double sampleRate)
+            {
+                var keyTimes = new HashSet<float>();
+                double fs = 1.0/sampleRate;
+
+                double currSample = double.MaxValue, firstTime = double.MaxValue, lastTime = double.MinValue;
+
+                foreach (var ac in animCurves)
+                {
+                    if (ac==null || ac.length<=0) continue;
+
+                    firstTime = System.Math.Min(firstTime, ac[0].time);
+                    lastTime = System.Math.Max(lastTime, ac[ac.length-1].time);
+                }
+
+                for (currSample = firstTime; currSample < lastTime; currSample += fs) 
+                {
+                    keyTimes.Add((float)currSample);
+                }
+
+                return keyTimes;
+            }
+
+            /// <summary>
+            /// Return set of all keys times on animation curves
+            /// </summary>
+            public static HashSet<float> GetKeyTimes(AnimationCurve[] animCurves)
+            {
+                var keyTimes = new HashSet<float>();
+
+                foreach (var ac in animCurves)
+                {
+                    if (ac!=null) foreach(var key in ac.keys) { keyTimes.Add(key.time); }
+                }
+
+                return keyTimes;
+            }
+
+            /// <summary>
+            /// Export animation curve key frames with key tangents 
+            /// NOTE : This is a work in progress (WIP). We only export the key time and value on
+            /// a Cubic curve using the default tangents.
+            /// </summary>
+            protected void ExportAnimationKeys (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve, 
                 UnityToMayaConvertSceneHelper convertSceneHelper)
             {
-                // TODO: map key tangents mode between Unity and FBX
+                // TODO: complete the mapping between key tangents modes Unity and FBX
                 Dictionary<AnimationUtility.TangentMode, List<FbxAnimCurveDef.ETangentMode>> MapUnityKeyTangentModeToFBX =
                     new Dictionary<AnimationUtility.TangentMode, List<FbxAnimCurveDef.ETangentMode>>
                 {
@@ -1504,32 +1547,14 @@ namespace FbxExporters
                 double sampleRate,
                 UnityToMayaConvertSceneHelper convertSceneHelper)
             {
+                
                 using (new FbxAnimCurveModifyHelper(new List<FbxAnimCurve>{fbxAnimCurve}))
                 {
-                    double fs = 1.0/sampleRate;
-                    int numKeys = uniAnimCurve.length;
-
-                    int numSamples = 0;
-                    int sampleIndex = 0;
-                    double currSample = double.MaxValue, firstTime = double.MaxValue, lastTime = double.MaxValue;
-
-                    if (numKeys>0)
+                    foreach (var currSampleTime in GetSampleTimes(new AnimationCurve[]{uniAnimCurve}, sampleRate)) 
                     {
-                        firstTime = uniAnimCurve[0].time;
-                        lastTime = uniAnimCurve[uniAnimCurve.length-1].time;
+                        float currSampleValue = uniAnimCurve.Evaluate((float)currSampleTime);
 
-                        numSamples = (int)((float)((lastTime-firstTime) * sampleRate));
-                        Debug.Log(string.Format("Exporting Animation Samples : firstTime={0}, lastTime={1} frameRate={2} numSamples={3}", 
-                            firstTime, lastTime, sampleRate, numSamples));
-
-                        currSample = firstTime;
-                    }
-
-                    for (sampleIndex = 0, currSample = firstTime; currSample < lastTime; ++sampleIndex, currSample += fs) 
-                    {
-                        float currSampleValue = uniAnimCurve.Evaluate((float)currSample);
-
-                        var fbxTime = FbxTime.FromSecondDouble (currSample);
+                        var fbxTime = FbxTime.FromSecondDouble (currSampleTime);
 
                         int fbxKeyIndex = fbxAnimCurve.KeyAdd (fbxTime);
 
@@ -1608,7 +1633,7 @@ namespace FbxExporters
                 }
                 else 
                 {
-                    ExportAnimationKeyFrames(uniAnimCurve, fbxAnimCurve, convertSceneHelper);
+                    ExportAnimationKeys(uniAnimCurve, fbxAnimCurve, convertSceneHelper);
                 }
             }
 
@@ -1784,6 +1809,7 @@ namespace FbxExporters
             /// from quaternion to euler. We use this class to help.
             /// </summary>
             class QuaternionCurve {
+                public double sampleRate;
                 public AnimationCurve x;
                 public AnimationCurve y;
                 public AnimationCurve z;
@@ -1844,11 +1870,11 @@ namespace FbxExporters
                     var lclQuaternion = new FbxQuaternion(restRotation.x, restRotation.y, restRotation.z, restRotation.w);
 
                     // Find when we have keys set.
-                    var keyTimes = new HashSet<float>();
-                    if (x != null) { foreach(var key in x.keys) { keyTimes.Add(key.time); } }
-                    if (y != null) { foreach(var key in y.keys) { keyTimes.Add(key.time); } }
-                    if (z != null) { foreach(var key in z.keys) { keyTimes.Add(key.time); } }
-                    if (w != null) { foreach(var key in w.keys) { keyTimes.Add(key.time); } }
+                    var animCurves = new AnimationCurve[]{x,y,z,w};
+                    var keyTimes = 
+                        (FbxExporters.Editor.ModelExporter.ExportSettings.BakeAnimation) 
+                        ? ModelExporter.GetSampleTimes(animCurves, sampleRate) 
+                        : ModelExporter.GetKeyTimes(animCurves);
 
                     // Convert to the Key type.
                     var keys = new Key[keyTimes.Count];
@@ -1997,7 +2023,7 @@ namespace FbxExporters
 
                         QuaternionCurve quat;
                         if (!quaternions.TryGetValue (uniGO, out quat)) {
-                            quat = new QuaternionCurve ();
+                            quat = new QuaternionCurve {sampleRate = uniAnimClip.frameRate};
                             quaternions.Add (uniGO, quat);
                         }
                         quat.SetCurve (index, uniAnimCurve);
@@ -3027,7 +3053,7 @@ namespace FbxExporters
             {
             }
 
-            public bool Verbose { private set {;} get { return true; } }
+            public bool Verbose { private set {;} get { return false; } }
 
             /// <summary>
             /// manage the selection of a filename
