@@ -431,47 +431,41 @@ namespace FbxExporters.UnitTests
                     AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, curveBinding);
                     Assert.That (animCurveImported, Is.Not.Null);
 
-                    string propertyBinding;
+                    string propertyBinding = curveBinding.propertyName;
+                    int id = keyData.GetIndexOf (propertyBinding);
 
-                    MapEulerToQuaternionPropertyName.TryGetValue (curveBinding.propertyName, out propertyBinding);
+                    bool hasQuatBinding = 
+                        MapEulerToQuaternionPropertyName.TryGetValue (propertyBinding, out propertyBinding);
 
-                    bool hasQuatBinding = !string.IsNullOrEmpty (propertyBinding);
-
-                    if (!hasQuatBinding)
-                        propertyBinding = curveBinding.propertyName;
-
-                    int id = keyData.GetIndexOf (curveBinding.propertyName);
-
-                    if (id == -1)
+                    if (id==-1)
                         id = keyData.GetIndexOf (propertyBinding);
 
                     #if DEBUG_UNITTEST
-                    Debug.Log(string.Format("animtest binding={0} quatBinding={1} id={2}", curveBinding.propertyName, propertyBinding, id));
+                    Debug.Log(string.Format("propertyBinding={0} mappedBinding={1} id={2}", curveBinding.propertyName, propertyBinding, id));
                     #endif
 
                     if (id != -1) 
                     {
                         if (keyData.compareOriginalKeys)
                         {
-                            // NOTE: we cannot test the keys on curves that go out as quaternion
-                            // return as euler.
+                            // NOTE: we cannot compare the keys that exported quaternion but are imported as euler.
                             if (!hasQuatBinding)
                             {
-                                // test against original data
+                                // compare against original keydata
                                 KeysTest (keyData.keyTimes, keyData.GetKeyValues (id), animCurveImported, curveBinding.propertyName);
 
-                                // test against origin curve keys
+                                // compare against original animCurve
                                 KeysTest (animCurvesOriginal[id], animCurveImported, curveBinding.propertyName, keyComparer);
                             }
                             else
                             {
-                                // test against original data
-                                KeysTest (keyData.keyTimes, keyData.GetAltKeyValues (id), animCurveImported, curveBinding.propertyName);
+                                // compare by sampled keyvalues against original keydata
+                                KeyValuesTest (keyData.keyTimes, keyData.GetAltKeyValues (id), animCurveImported, curveBinding.propertyName);
                             }
                         }
                         else
                         {
-                            // test against original data
+                            // compare by sampled keyvalues against original animCurve
                             KeyValuesTest (animCurvesOriginal[id], animCurveImported, curveBinding.propertyName);
                         }
                         result++;
@@ -503,6 +497,48 @@ namespace FbxExporters.UnitTests
                 Assert.That(actualAnimCurve.keys, Is.EqualTo(expectedAnimCurve.keys).Using<Keyframe>(keyComparer), string.Format("{0} key doesn't match", message));
             }
 
+            public static void KeysTest (float [] expectedKeyTimes, float [] expectedKeyValues, AnimationCurve actualAnimCurve, string message, IComparer<Keyframe> keyComparer=null)
+            {
+                if (keyComparer==null)
+                    keyComparer = new BasicKeyComparer();
+                
+                int numKeysExpected = expectedKeyTimes.Length;
+
+                // NOTE : Uni-34492 number of keys don't match
+                Assert.That (actualAnimCurve.length, Is.EqualTo(numKeysExpected), string.Format("{0} number of keys doesn't match",message));
+
+                // check actual animation against expected
+                // NOTE: if I check the key values explicitly they match but when I compare using this ListMapper the float values
+                // are off by 0.000005f; not sure why that happens.
+                var keysExpected = new Keyframe[numKeysExpected];
+
+                for (int idx = 0; idx < numKeysExpected; idx++)
+                {
+                    keysExpected[idx].time = expectedKeyTimes[idx];
+                    keysExpected[idx].value = expectedKeyValues[idx];
+                }
+
+                Assert.That(actualAnimCurve.keys, Is.EqualTo(keysExpected).Using<Keyframe>(keyComparer), string.Format("{0} key doesn't match", message));
+
+                return ;
+            }
+
+            public static void KeyValuesTest (float [] expectedKeyTimes, float [] expectedKeyValues, AnimationCurve actualAnimCurve, string message)
+            {
+                for (var i=0; i < expectedKeyTimes.Length; ++i)
+                {
+                    float expectedKeyTime = expectedKeyTimes[i];
+                    float expectedKeyValue = expectedKeyValues[i];
+
+                    float actualKeyValue = actualAnimCurve.Evaluate(expectedKeyTime);
+
+                    #if DEBUG_UNITTEST
+                    Debug.Log(string.Format("key time={0} expected={1} actual={2} delta={3}", expectedKeyTime.ToString(), expectedKeyValue.ToString(), actualKeyValue.ToString(), Mathf.Abs(expectedKeyValue-actualKeyValue).ToString()));
+                    #endif
+                    Assert.That(expectedKeyValue, Is.EqualTo(actualKeyValue).Within(0.000001), string.Format("{0} key ({1}) doesn't match", message, expectedKeyTime));
+                }
+            }
+
             public static void KeyValuesTest (AnimationCurve expectedAnimCurve, AnimationCurve actualAnimCurve, string message)
             {
                 foreach (var key in expectedAnimCurve.keys)
@@ -514,32 +550,6 @@ namespace FbxExporters.UnitTests
                     #endif
                     Assert.That(key.value, Is.EqualTo(actualKeyValue).Within(0.000001), string.Format("{0} key ({1}) doesn't match", message, key.time));
                 }
-            }
-
-            public static void KeysTest (float [] keyTimesExpected, float [] keyValuesExpected, AnimationCurve actualAnimCurve, string message, IComparer<Keyframe> keyComparer=null)
-            {
-                if (keyComparer==null)
-                    keyComparer = new BasicKeyComparer();
-                
-                int numKeysExpected = keyTimesExpected.Length;
-
-                // NOTE : Uni-34492 number of keys don't match
-                Assert.That (actualAnimCurve.length, Is.EqualTo(numKeysExpected), string.Format("{0} number of keys doesn't match",message));
-
-                //check imported animation against original
-                // NOTE: if I check the key values explicitly they match but when I compare using this ListMapper the float values
-                // are off by 0.000005f; not sure why that happens.
-                var keysExpected = new Keyframe[numKeysExpected];
-
-                for (int idx = 0; idx < numKeysExpected; idx++)
-                {
-                    keysExpected[idx].time = keyTimesExpected[idx];
-                    keysExpected[idx].value = keyValuesExpected[idx];
-                }
-
-                Assert.That(actualAnimCurve.keys, Is.EqualTo(keysExpected).Using<Keyframe>(keyComparer), string.Format("{0} key doesn't match", message));
-
-                return ;
             }
 
             public static void CurveTest(AnimationCurve animCurveImported, AnimationCurve animCurveActual, string message)
