@@ -632,7 +632,7 @@ namespace FbxExporters
             {
                 // We build up a flat list of names for the nodes of the old fbx,
                 // the new fbx, and the prefab. We also figure out the parents.
-                class Data {
+                public class Data {
                     // Parent of each node, by name.
                     // The empty-string name is the root of the prefab/fbx.
                     // Never null.
@@ -738,7 +738,15 @@ namespace FbxExporters
                 /// <summary>
                 /// Data for the hierarchy of the old fbx file, the new fbx file, and the prefab.
                 /// </summary>
-                Data m_oldFbxData, m_newFbxData, m_prefabData;
+                static Data m_oldFbxData, m_newFbxData, m_prefabData;
+
+                public static Data OldFbxData
+                {
+                    get
+                    {
+                        return m_oldFbxData;
+                    }
+                }
 
                 /// <summary>
                 /// Names of the new nodes to create in step 1.
