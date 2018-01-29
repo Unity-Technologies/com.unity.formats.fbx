@@ -1,5 +1,14 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint43
+
+NEW FEATURES
+* FbxExporter: Added support for exporting Blendshapes
+* Export Settings: Option to turn off auto-updating for linked prefabs
+
+FIXES
+* FbxExporter: fixed issues with continuous rotations which was causing gimbal lock
+
 **Version**: sprint42
 
 NEW FEATURES
