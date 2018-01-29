@@ -677,5 +677,65 @@ namespace FbxExporters.UnitTests
             }
             Debug.LogWarningFormat ("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
         }
+
+
+        public class Vector3Comparer : IComparer<Vector3>
+        {
+            public int Compare(Vector3 a, Vector3 b)
+            {
+                Assert.That(a.x, Is.EqualTo(b.x).Within(0.00001f));
+                Assert.That(a.y, Is.EqualTo(b.y).Within(0.00001f));
+                Assert.That(a.z, Is.EqualTo(b.z).Within(0.00001f));
+                return 0;  // we're almost equal
+            }
+        }
+
+        [Test, TestCaseSource(typeof(AnimationTestDataClass), "BlendShapeTestCases")]
+        public void TestBlendShapeExport(string fbxPath)
+        {
+            fbxPath = FindPathInUnitTests (fbxPath);
+            Assert.That (fbxPath, Is.Not.Null);
+
+            SkinnedMeshRenderer originalSMR, exportedSMR;
+            ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
+
+            var originalMesh = originalSMR.sharedMesh;
+            var exportedMesh = exportedSMR.sharedMesh;
+            Assert.IsNotNull(originalMesh);
+            Assert.IsNotNull(exportedMesh);
+
+            // compare blend shape data
+            Assert.AreNotEqual(originalMesh.blendShapeCount, 0);
+            Assert.AreEqual(originalMesh.blendShapeCount, exportedMesh.blendShapeCount);
+            {
+                var deltaVertices = new Vector3[originalMesh.vertexCount];
+                var deltaNormals = new Vector3[originalMesh.vertexCount];
+                var deltaTangents = new Vector3[originalMesh.vertexCount];
+                var fbxDeltaVertices = new Vector3[originalMesh.vertexCount];
+                var fbxDeltaNormals = new Vector3[originalMesh.vertexCount];
+                var fbxDeltaTangents = new Vector3[originalMesh.vertexCount];
+
+                for (int bi = 0; bi < originalMesh.blendShapeCount; ++bi)
+                {
+                    Assert.AreEqual(originalMesh.GetBlendShapeName(bi), exportedMesh.GetBlendShapeName(bi));
+                    Assert.AreEqual(originalMesh.GetBlendShapeFrameCount(bi), exportedMesh.GetBlendShapeFrameCount(bi));
+
+                    int frameCount = originalMesh.GetBlendShapeFrameCount(bi);
+                    for (int fi = 0; fi < frameCount; ++fi)
+                    {
+                        Assert.AreEqual(originalMesh.GetBlendShapeFrameWeight(bi, fi), exportedMesh.GetBlendShapeFrameWeight(bi, fi));
+
+                        originalMesh.GetBlendShapeFrameVertices(bi, fi, deltaVertices, deltaNormals, deltaTangents);
+                        exportedMesh.GetBlendShapeFrameVertices(bi, fi, fbxDeltaVertices, fbxDeltaNormals, fbxDeltaTangents);
+
+                        var v3comparer = new Vector3Comparer();
+                        Assert.That(deltaVertices, Is.EqualTo(fbxDeltaVertices).Using<Vector3>(v3comparer), string.Format("delta vertices don't match"));
+                        Assert.That(deltaNormals, Is.EqualTo(fbxDeltaNormals).Using<Vector3>(v3comparer), string.Format("delta normals don't match"));
+                        Assert.That(deltaTangents, Is.EqualTo(fbxDeltaTangents).Using<Vector3>(v3comparer), string.Format("delta tangents don't match"));
+
+                    }
+                }
+            }
+        }
     }
 }

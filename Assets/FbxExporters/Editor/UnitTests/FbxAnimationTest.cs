@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+// NOTE: uncomment the next line to leave temporary FBX files on disk
+// and create a imported object in the scene.
+// #define DEBUG_UNITTEST
+
+using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
 using System.Collections;
@@ -40,7 +44,7 @@ namespace FbxExporters.UnitTests
         public static float [] m_keyFloatValues1 = new float [3] { 0f, 100f, 0f };
         public static float [] m_keyvalues2 = new float [3] { 1f, 100f, 1f };
         public static Vector3 [] m_keyEulerValues3 = new Vector3 [3] { new Vector3 (0f, 80f, 0f), new Vector3 (80f, 0f, 0f), new Vector3 (0f, 0f, 80f) };
-        public static Vector3 [] m_keyEulerValues4 = new Vector3 [3] { new Vector3 (0f, 270f, 0f), new Vector3 (270f, 0f, 0f), new Vector3 (0f, 0f, 270f) };
+        public static Vector3 [] m_keyEulerValues4 = new Vector3 [3] { new Vector3 (90f, 0f, 0f), new Vector3 (90f, 30f, 0f), new Vector3 (90f, 0f, 30f) };
 
         public static float [] m_keytimes5 = new float [5] { 0f, 30f, 60f, 90f, 120f };
         public static Vector3 [] m_keyPosValues5 = new Vector3 [5] { new Vector3 (5.078195f, 0.000915527f, 4.29761f), new Vector3 (0.81f, 0.000915527f, 10.59f), new Vector3 (-3.65f, 0.000915527f, 4.29761f), new Vector3 (0.81f, 0.000915527f, -3.37f), new Vector3 (5.078195f, 0.000915527f, 4.29761f) };
@@ -77,11 +81,24 @@ namespace FbxExporters.UnitTests
         // specify continuous rotations
         public static IEnumerable TestCases5 {
             get {
-                yield return new TestCaseData (RotationInterpolation.kEuler /*use euler values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (3);
+                yield return new TestCaseData (RotationInterpolation.kEuler /*use euler values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (6);
                 // Uni-35616 can't programmatically define a Euler (Quaternion) mix.
                 // yield return new TestCaseData (RotationInterpolation.kMixed /*use euler+quaternion values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (3);
                 // Uni-35616 doesn't work with quaternions; rotations don't exceed 180
-                // yield return new TestCaseData (RotationInterpolation.kQuaternion /*use quaternion values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (3);
+                yield return new TestCaseData (RotationInterpolation.kQuaternion /*use quaternion values*/, m_keytimes5, m_keyPosValues5, m_keyRotValues5).Returns (6);
+            }
+        }
+
+        public static IEnumerable SkinnedMeshTestCases {
+            get {
+                yield return "Models/DefaultMale/Male_DyingHitFromBack_Blend_T3_Cut01_James.fbx";
+            }
+        }
+
+        public static IEnumerable BlendShapeTestCases {
+            get {
+                yield return "Models/blendshape.fbx";
+                yield return "Models/blendshape_with_skinning.fbx";
             }
         }
     }
@@ -99,11 +116,12 @@ namespace FbxExporters.UnitTests
         [TearDown]
         public override void Term ()
         {
-            // NOTE: comment out the next line to leave temporary FBX files on disk
+            #if (!DEBUG_UNITTEST)
             base.Term ();
+            #endif
         }
 
-        protected void AnimClipTest (AnimationClip animClipExpected, AnimationClip animClipActual)
+        protected void AnimClipPropertyTest (AnimationClip animClipExpected, AnimationClip animClipActual)
         {
 #if UNITY_EDITOR_WIN
             // TODO: figure out why we get __preview__ on Windows
@@ -133,6 +151,21 @@ namespace FbxExporters.UnitTests
             Assert.That(new ListMapper(animCurveActual.keys).Property ("value"), Is.EqualTo(keyValuesExpected).Within(0.000005f), string.Format("{0} key value doesn't match", message));
 
             return ;
+        }
+
+        private void AnimCurveTest(AnimationCurve animCurveImported, AnimationCurve animCurveActual, string message){
+            // TODO : Uni-34492 number of keys don't match
+            //Assert.That (animCurveActual.length, Is.EqualTo (animCurveImported.length), "animcurve number of keys doesn't match");
+
+            var actualTimeKeys = new ListMapper (animCurveActual.keys).Property ("time");
+            var actualValueKeys = new ListMapper (animCurveActual.keys).Property ("value");
+
+            var importedTimeKeys = new ListMapper (animCurveImported.keys).Property ("time");
+            var importedValueKeys = new ListMapper (animCurveImported.keys).Property ("value");
+
+            //check imported animation against original
+            Assert.That(actualTimeKeys, Is.EqualTo(importedTimeKeys), string.Format("{0} key time doesn't match",message));
+            Assert.That(actualValueKeys, Is.EqualTo(importedValueKeys), string.Format("{0} key value doesn't match", message));
         }
 
         public class KeyData
@@ -356,6 +389,54 @@ namespace FbxExporters.UnitTests
                 AssetDatabase.ImportAsset (path);
             }
 
+            // create a scene GO so we can compare.
+            #if DEBUG_UNITTEST
+            GameObject prefabGO = AssetDatabase.LoadMainAssetAtPath (path) as GameObject;
+            GameObject sceneGO = Object.Instantiate(prefabGO, keyData.targetObject.transform.localPosition, keyData.targetObject.transform.localRotation);
+            sceneGO.name = "Imported_" + testName;
+            #endif 
+
+            //acquire imported object from exported file
+            AnimationClip animClipImported = GetClipFromFbx (path);
+
+            AnimClipPropertyTest (animClipOriginal, animClipImported);
+
+            // check animCurve & keys
+            int result = 0;
+
+            // keyed localEulerAnglesRaw.z m_LocalRotation.z -1
+            foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (animClipImported)) {
+                AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, curveBinding);
+                Assert.That (animCurveImported, Is.Not.Null);
+
+                string altBinding;
+
+                MapAltPropertyName.TryGetValue (curveBinding.propertyName, out altBinding);
+
+                bool hasAltBinding = !string.IsNullOrEmpty (altBinding);
+
+                if (!hasAltBinding)
+                    altBinding = curveBinding.propertyName;
+
+                int id = keyData.GetIndexOf (curveBinding.propertyName);
+
+                if (id == -1)
+                    id = keyData.GetIndexOf (altBinding);
+                
+                #if DEBUG_UNITTEST
+                Debug.Log(string.Format("animtest binding={0} altBinding={1} id={2}", curveBinding.propertyName, altBinding, id));
+                #endif
+
+                if (id != -1) {
+                    AnimCurveTest (keyData.keyTimesInSeconds, hasAltBinding ? keyData.GetAltKeyValues (id) : keyData.GetKeyValues (id), animCurveImported, curveBinding.propertyName);
+                    result++;
+                }
+            }
+
+            return result;
+        }
+
+        private AnimationClip GetClipFromFbx(string path){
             //acquire imported object from exported file
             Object [] goAssetImported = AssetDatabase.LoadAllAssetsAtPath (path);
             Assert.That (goAssetImported, Is.Not.Null);
@@ -372,34 +453,66 @@ namespace FbxExporters.UnitTests
             // TODO : configure import settings so we don't need to force legacy
             animClipImported.legacy = true;
 
+            return animClipImported;
+        }
+
+        [Ignore("Uni-34804 gimbal conditions, and Uni-34492 number of keys don't match")]
+        [Test, TestCaseSource (typeof (AnimationTestDataClass), "SkinnedMeshTestCases")]
+        public void LegacySkinnedMeshAnimTest (string fbxPath)
+        {
+            fbxPath = FindPathInUnitTests (fbxPath);
+            Assert.That (fbxPath, Is.Not.Null);
+
+            // add fbx to scene
+            GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
+            Assert.IsNotNull (originalFbxObj);
+            GameObject originalGO = GameObject.Instantiate (originalFbxObj);
+            Assert.IsTrue (originalGO);
+
+            // get clip
+            AnimationClip animClipOriginal = originalGO.GetComponentInChildren<Animation>().clip;
+            Assert.That (animClipOriginal, Is.Not.Null);
+
+            // export fbx
+            // get GameObject
+            string filename = GetRandomFbxFilePath();
+            var exportedFilePath = ModelExporter.ExportObject (filename, originalGO);
+            Assert.That (exportedFilePath, Is.EqualTo (filename));
+
+            // TODO: Uni-34492 change importer settings of (newly exported model) 
+            // so that it's not resampled and it is legacy animation
+            {
+                ModelImporter modelImporter = AssetImporter.GetAtPath (filename) as ModelImporter;
+                modelImporter.resampleCurves = false;
+                AssetDatabase.ImportAsset (filename);
+                modelImporter.animationType = ModelImporterAnimationType.Legacy;
+                AssetDatabase.ImportAsset (filename);
+            }
+
+            var animClipImported = GetClipFromFbx (filename);
+
             // check clip properties match
-            AnimClipTest (animClipOriginal, animClipImported);
+            AnimClipPropertyTest (animClipOriginal, animClipImported);
 
-            // check animCurve & keys
-            int result = 0;
+            foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (animClipOriginal)) {
+                foreach(EditorCurveBinding impCurveBinding in AnimationUtility.GetCurveBindings (animClipImported)) {
 
-            foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (animClipImported)) {
-                AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, curveBinding);
-                Assert.That (animCurveImported, Is.Not.Null);
+                    // only compare if the path and property names match
+                    if (curveBinding.path != impCurveBinding.path || curveBinding.propertyName != impCurveBinding.propertyName) {
+                        continue;
+                    }
 
-                string altPropertyName;
+                    AnimationCurve animCurveOrig = AnimationUtility.GetEditorCurve (animClipOriginal, curveBinding);
+                    Assert.That (animCurveOrig, Is.Not.Null);
 
-                MapAltPropertyName.TryGetValue (curveBinding.propertyName, out altPropertyName);
+                    AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, impCurveBinding);
+                    Assert.That (animCurveImported, Is.Not.Null);
 
-                bool hasAltPropertyName = !string.IsNullOrEmpty (altPropertyName);
-
-                if (!hasAltPropertyName)
-                    altPropertyName = curveBinding.propertyName;
-
-                int id = keyData.GetIndexOf (altPropertyName);
-
-                if (id != -1) {
-                    AnimCurveTest (keyData.keyTimesInSeconds, hasAltPropertyName ? keyData.GetAltKeyValues (id) : keyData.GetKeyValues (id), animCurveImported, curveBinding.propertyName);
-                    result++;
+                    AnimCurveTest(animCurveImported, animCurveOrig, curveBinding.propertyName);
                 }
             }
 
-            return result;
+
         }
 
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "TestCases1")]
