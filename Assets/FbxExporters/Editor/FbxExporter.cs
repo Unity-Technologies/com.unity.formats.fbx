@@ -2486,6 +2486,7 @@ namespace FbxExporters
                     "No GameObjects selected for export.", 
                     "Ok");
             }
+
             //
             // export mesh info from Unity
             //

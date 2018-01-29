@@ -32,7 +32,7 @@ namespace FbxExporters
         public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
         #endif
 
-        const string MenuItemName = "GameObject/Update from Fbx";
+        const string MenuItemName = "GameObject/Update from FBX";
 
         public static string FindFbxPrefabAssetPath()
         {
@@ -184,12 +184,6 @@ namespace FbxExporters
                 }
             }
 
-            if (selection == null || selection.Length == 0)
-            {
-                ModelExporter.DisplayNoSelectionDialog();
-                return;
-            }
-
             foreach (GameObject selectedObject in selection)
             {
                 UpdateLinkedPrefab(selectedObject);
@@ -203,11 +197,25 @@ namespace FbxExporters
         public static bool OnValidateMenuItem()
         {
             GameObject[] selection = Selection.GetFiltered<GameObject>(SelectionMode.Editable | SelectionMode.TopLevel);
+
+            if (selection == null || selection.Length == 0)
+            {
+                UnityEditor.EditorUtility.DisplayDialog(
+                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME),
+                    "No GameObjects selected for update.",
+                    "Ok");
+                return false;
+            }
+
             foreach (GameObject selectedObject in selection)
             {
                 GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(selectedObject) as GameObject;
                 if (!prefab)
                 {
+                    UnityEditor.EditorUtility.DisplayDialog(
+                        string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME),
+                        "These GameObjects aren't prefab.",
+                        "Ok");
                     return false;
                 }
                 if (prefab.GetComponentInChildren<FbxPrefab>())
