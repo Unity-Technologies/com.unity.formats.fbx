@@ -26,13 +26,13 @@ namespace FbxExporters
     /// </summary>
     public /*static*/ class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
     {
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
-#else
+        #else
         public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
-#endif
+        #endif
 
-        static string[] importedAssets;
+        const string MenuItemName = "GameObject/Update from Fbx";
 
         public static string FindFbxPrefabAssetPath()
         {
@@ -56,8 +56,6 @@ namespace FbxExporters
         public static bool IsPrefabAsset(string assetPath) {
             return assetPath.EndsWith(".prefab");
         }
-
-        const string MenuItemName = "GameObject/Update from Fbx";
 
         /// <summary>
         /// Return false if the prefab definitely does not have an
@@ -192,45 +190,47 @@ namespace FbxExporters
                 return;
             }
 
-            //Selection.objects = UpdateLinkedPrefab(selection);
-            UpdateLinkedPrefab(selection);
+            foreach (GameObject selectedObject in selection)
+            {
+                UpdateLinkedPrefab(selectedObject);
+            }
         }
 
         /// <summary>
         // Validate the menu item defined by the function above.
         /// </summary>
         [MenuItem(MenuItemName, true,31)]
-        static bool OnValidateMenuItem()
+        public static bool OnValidateMenuItem()
         {
             GameObject[] selection = Selection.GetFiltered<GameObject>(SelectionMode.Editable | SelectionMode.TopLevel);
-            bool allObjectsPrefab = false;
             foreach (GameObject selectedObject in selection)
             {
-                if (selectedObject.GetComponentInChildren<FbxPrefab>())
+                GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(selectedObject) as GameObject;
+                if (!prefab)
                 {
-                    allObjectsPrefab = true;
-                    break;
+                    return false;
+                }
+                if (prefab.GetComponentInChildren<FbxPrefab>())
+                {
+                    return true;
                 }
             }
 
-            var isPrefab = PrefabUtility.GetPrefabParent(Selection.activeGameObject) != null;
-            return isPrefab && allObjectsPrefab;
+            return false;
         }
 
-        public static void UpdateLinkedPrefab(GameObject[] selection)
+        public static void UpdateLinkedPrefab(GameObject prefabInstance)
         {
-            var fbxPrefabScriptPath = FindFbxPrefabAssetPath();
-            foreach (GameObject selectedObject in selection)
+            GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(prefabInstance) as GameObject;
+            if (!prefab)
             {
-                GameObject prefabInstance = selectedObject;
+                return;
+            }
 
-                GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(prefabInstance) as GameObject;
-
-                foreach (var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>())
-                {
-                    var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
-                    fbxPrefabUtility.SyncPrefab();
-                }
+            foreach (var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>())
+            {
+                var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
+                fbxPrefabUtility.SyncPrefab();
             }
         }
 

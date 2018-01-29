@@ -266,15 +266,43 @@ namespace FbxExporters.UnitTests
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).name == "Sphere");
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh != null);
 
-            // Testing Manual update
+            // Testing Manual update on true prefab
             GameObject[] selection = new GameObject[] { cubePrefabInstance };
-            FbxPrefabAutoUpdater.UpdateLinkedPrefab(selection);
-
+            FbxPrefabAutoUpdater.UpdateLinkedPrefab(selection[0]);
             Assert.IsTrue(cubePrefabInstance != null);
             Assert.IsTrue(cubePrefabInstance.GetComponent<MeshFilter>().sharedMesh != null);
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).name == "SphereFBX");
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh != null);
 
+            // Testing Manual update on some random object that isn't a prefab at all
+            GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            FbxPrefabAutoUpdater.UpdateLinkedPrefab(quad);
+            Assert.IsTrue(quad != null);
+            Assert.IsTrue(quad.GetComponent<MeshFilter>().sharedMesh != null);
+
+            // Testing Manual update on some random prefab that doesn't have an FbxPrefab in it.
+            GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            // Convert to linked prefab instance (auto-updating prefab)
+            string prefabPath = GetRandomPrefabAssetPath();
+            GameObject capsuleInstance = PrefabUtility.CreatePrefab(prefabPath, capsule);
+            FbxPrefabAutoUpdater.UpdateLinkedPrefab(capsuleInstance);
+            Assert.IsTrue(capsuleInstance != null);
+            Assert.IsTrue(capsuleInstance.GetComponent<MeshFilter>().sharedMesh != null);
+
+            // Check the menu returns true because sphere3 is a linked prefab
+            GameObject cylinder3 = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            GameObject sphere3 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere3.transform.SetParent(cylinder3.transform);
+            GameObject sphere3Instance = ConvertToModel.Convert(sphere3, fbxFullPath: filePath);
+            Selection.objects = new GameObject[] { sphere3Instance };
+            Assert.IsTrue(FbxPrefabAutoUpdater.OnValidateMenuItem());
+
+            // Check the contextual menu returns false because there is no linked prefab
+            GameObject cylinder4 = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            GameObject sphere4 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere4.transform.SetParent(cylinder4.transform);
+            Selection.objects = new GameObject[] { cylinder4, sphere4 };
+            Assert.IsFalse(FbxPrefabAutoUpdater.OnValidateMenuItem());
         }
 
 
