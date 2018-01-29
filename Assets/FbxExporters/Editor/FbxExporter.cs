@@ -1732,7 +1732,18 @@ namespace FbxExporters
                 fbxAnimStack.Description.Set ("Animation Take: " + uniAnimClip.name);
 
                 var mecanim = uniRoot.GetComponent<Animator>();
-                fbxScene.GetSceneInfo().mComment = mecanim ? "AnimationTypeMecanim" : "AnimationTypeLegacy";
+                if (!mecanim)
+                {
+                    fbxScene.GetSceneInfo().mKeywords += " AnimationTypeLegacy ";
+                }
+                else if (mecanim.avatar)
+                {
+                    fbxScene.GetSceneInfo().mKeywords += " AnimationTypeHumanoid ";
+                }
+                else
+                {
+                    fbxScene.GetSceneInfo().mKeywords += " AnimationTypeGeneric ";
+                }
 
                 // add one mandatory animation layer
                 FbxAnimLayer fbxAnimLayer = FbxAnimLayer.Create (fbxScene, "Animation Base Layer");
