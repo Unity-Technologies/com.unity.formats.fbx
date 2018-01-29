@@ -1445,12 +1445,135 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Return set of sample times to cover all keys on animation curves
+            /// </summary>
+            public static HashSet<float> GetSampleTimes(AnimationCurve[] animCurves, double sampleRate)
+            {
+                var keyTimes = new HashSet<float>();
+                double fs = 1.0/sampleRate;
+
+                double currSample = double.MaxValue, firstTime = double.MaxValue, lastTime = double.MinValue;
+
+                foreach (var ac in animCurves)
+                {
+                    if (ac==null || ac.length<=0) continue;
+
+                    firstTime = System.Math.Min(firstTime, ac[0].time);
+                    lastTime = System.Math.Max(lastTime, ac[ac.length-1].time);
+                }
+
+                for (currSample = firstTime; currSample < lastTime; currSample += fs) 
+                {
+                    keyTimes.Add((float)currSample);
+                }
+
+                return keyTimes;
+            }
+
+            /// <summary>
+            /// Return set of all keys times on animation curves
+            /// </summary>
+            public static HashSet<float> GetKeyTimes(AnimationCurve[] animCurves)
+            {
+                var keyTimes = new HashSet<float>();
+
+                foreach (var ac in animCurves)
+                {
+                    if (ac!=null) foreach(var key in ac.keys) { keyTimes.Add(key.time); }
+                }
+
+                return keyTimes;
+            }
+
+            /// <summary>
+            /// Export animation curve key frames with key tangents 
+            /// NOTE : This is a work in progress (WIP). We only export the key time and value on
+            /// a Cubic curve using the default tangents.
+            /// </summary>
+            protected void ExportAnimationKeys (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve, 
+                UnityToMayaConvertSceneHelper convertSceneHelper)
+            {
+                // TODO: complete the mapping between key tangents modes Unity and FBX
+                Dictionary<AnimationUtility.TangentMode, List<FbxAnimCurveDef.ETangentMode>> MapUnityKeyTangentModeToFBX =
+                    new Dictionary<AnimationUtility.TangentMode, List<FbxAnimCurveDef.ETangentMode>>
+                {
+                    //TangeantAuto|GenericTimeIndependent|GenericClampProgressive
+                    {AnimationUtility.TangentMode.Free, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericClampProgressive}},
+
+                    //TangeantAuto|GenericTimeIndependent
+                    {AnimationUtility.TangentMode.Auto, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericTimeIndependent}},
+
+                    //TangeantAuto|GenericTimeIndependent|GenericClampProgressive
+                    {AnimationUtility.TangentMode.ClampedAuto, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericClampProgressive}},
+                };
+
+                // Copy Unity AnimCurve to FBX AnimCurve.
+                // NOTE: only cubic keys are supported by the FbxImporter
+                using (new FbxAnimCurveModifyHelper(new List<FbxAnimCurve>{fbxAnimCurve}))
+                {
+                    for (int keyIndex = 0; keyIndex < uniAnimCurve.length; ++keyIndex) 
+                    {
+                        var uniKeyFrame = uniAnimCurve [keyIndex];
+                        var fbxTime = FbxTime.FromSecondDouble (uniKeyFrame.time);
+
+                        int fbxKeyIndex = fbxAnimCurve.KeyAdd (fbxTime);
+
+                        fbxAnimCurve.KeySet (fbxKeyIndex, 
+                            fbxTime, 
+                            convertSceneHelper.Convert(uniKeyFrame.value)
+                        );
+
+                        // configure tangents
+                        var lTangent = AnimationUtility.GetKeyLeftTangentMode(uniAnimCurve, keyIndex);
+                        var rTangent = AnimationUtility.GetKeyRightTangentMode(uniAnimCurve, keyIndex);
+
+                        if (!(MapUnityKeyTangentModeToFBX.ContainsKey(lTangent) && MapUnityKeyTangentModeToFBX.ContainsKey(rTangent)))
+                        {
+                            Debug.LogWarning(string.Format("key[{0}] missing tangent mapping ({1},{2})", keyIndex, lTangent.ToString(), rTangent.ToString()));
+                            continue;
+                        }
+
+                        // TODO : handle broken tangents
+
+                        // TODO : set key tangents
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Export animation curve key samples
+            /// </summary>
+            protected void ExportAnimationSamples (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve,
+                double sampleRate,
+                UnityToMayaConvertSceneHelper convertSceneHelper)
+            {
+                
+                using (new FbxAnimCurveModifyHelper(new List<FbxAnimCurve>{fbxAnimCurve}))
+                {
+                    foreach (var currSampleTime in GetSampleTimes(new AnimationCurve[]{uniAnimCurve}, sampleRate)) 
+                    {
+                        float currSampleValue = uniAnimCurve.Evaluate((float)currSampleTime);
+
+                        var fbxTime = FbxTime.FromSecondDouble (currSampleTime);
+
+                        int fbxKeyIndex = fbxAnimCurve.KeyAdd (fbxTime);
+
+                        fbxAnimCurve.KeySet (fbxKeyIndex, 
+                            fbxTime, 
+                            convertSceneHelper.Convert(currSampleValue)
+                        );
+                    }
+                }
+            }
+
+            /// <summary>
             /// Export an AnimationCurve.
             /// NOTE: This is not used for rotations, because we need to convert from
             /// quaternion to euler and various other stuff.
             /// </summary>
             protected void ExportAnimationCurve (UnityEngine.Object uniObj,
                                                  AnimationCurve uniAnimCurve,
+                                                 float frameRate,
                                                  string uniPropertyName,
                                                  FbxScene fbxScene,
                                                  FbxAnimLayer fbxAnimLayer)
@@ -1477,6 +1600,7 @@ namespace FbxExporters
                     Debug.LogError(string.Format("no fbx node for {0}", unityGo.ToString()));
                     return;
                 }
+
                 // map unity property name to fbx property
                 var fbxProperty = fbxNode.FindProperty(fbxPropertyChannelPair.Property, false);
                 if (!fbxProperty.IsValid())
@@ -1496,23 +1620,24 @@ namespace FbxExporters
                 // Create the AnimCurve on the channel
                 FbxAnimCurve fbxAnimCurve = fbxProperty.GetCurve (fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
 
-                var transformBindings = new UnityToMayaConvertSceneHelper (uniPropertyName);
+                // create a convert scene helper so that we can convert from Unity to Maya
+                // AxisSystem (LeftHanded to RightHanded) and FBX's default units 
+                // (Meters to Centimetres)
+                var convertSceneHelper = new UnityToMayaConvertSceneHelper (uniPropertyName);
 
-                // copy Unity AnimCurve to FBX AnimCurve.
-                fbxAnimCurve.KeyModifyBegin ();
-
-                for (int keyIndex = 0, n = uniAnimCurve.length; keyIndex < n; ++keyIndex) {
-                    var uniKeyFrame = uniAnimCurve [keyIndex];
-                    var fbxTime = FbxTime.FromSecondDouble (uniKeyFrame.time);
-
-                    keyIndex = fbxAnimCurve.KeyAdd (fbxTime);
-                    fbxAnimCurve.KeySet (keyIndex, fbxTime, transformBindings.Convert(uniKeyFrame.value));
+                // TODO: we'll resample the curve so we don't have to 
+                // configure tangents
+                if (ModelExporter.ExportSettings.BakeAnimation) 
+                {
+                    ExportAnimationSamples(uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
                 }
-
-                fbxAnimCurve.KeyModifyEnd();
+                else 
+                {
+                    ExportAnimationKeys(uniAnimCurve, fbxAnimCurve, convertSceneHelper);
+                }
             }
 
-            class UnityToMayaConvertSceneHelper
+            public class UnityToMayaConvertSceneHelper
             {
                 bool convertDistance = false;
                 bool convertLtoR = false;
@@ -1657,7 +1782,35 @@ namespace FbxExporters
             /// Exporting rotations is more complicated. We need to convert
             /// from quaternion to euler. We use this class to help.
             /// </summary>
+            class FbxAnimCurveModifyHelper : System.IDisposable 
+            {
+                public List<FbxAnimCurve> Curves { get ; private set; }
+
+                public FbxAnimCurveModifyHelper(List<FbxAnimCurve> list)
+                {
+                    Curves = list;
+
+                    foreach (var curve in Curves)
+                        curve.KeyModifyBegin();
+                }
+
+                ~FbxAnimCurveModifyHelper() {
+                    Dispose();
+                }
+
+                public void Dispose() 
+                {
+                    foreach (var curve in Curves)
+                        curve.KeyModifyEnd();
+                }
+            }
+
+            /// <summary>
+            /// Exporting rotations is more complicated. We need to convert
+            /// from quaternion to euler. We use this class to help.
+            /// </summary>
             class QuaternionCurve {
+                public double sampleRate;
                 public AnimationCurve x;
                 public AnimationCurve y;
                 public AnimationCurve z;
@@ -1718,11 +1871,11 @@ namespace FbxExporters
                     var lclQuaternion = new FbxQuaternion(restRotation.x, restRotation.y, restRotation.z, restRotation.w);
 
                     // Find when we have keys set.
-                    var keyTimes = new HashSet<float>();
-                    if (x != null) { foreach(var key in x.keys) { keyTimes.Add(key.time); } }
-                    if (y != null) { foreach(var key in y.keys) { keyTimes.Add(key.time); } }
-                    if (z != null) { foreach(var key in z.keys) { keyTimes.Add(key.time); } }
-                    if (w != null) { foreach(var key in w.keys) { keyTimes.Add(key.time); } }
+                    var animCurves = new AnimationCurve[]{x,y,z,w};
+                    var keyTimes = 
+                        (FbxExporters.Editor.ModelExporter.ExportSettings.BakeAnimation) 
+                        ? ModelExporter.GetSampleTimes(animCurves, sampleRate) 
+                        : ModelExporter.GetKeyTimes(animCurves);
 
                     // Convert to the Key type.
                     var keys = new Key[keyTimes.Count];
@@ -1772,26 +1925,20 @@ namespace FbxExporters
                     var fbxAnimCurveZ = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Z, true);
 
                     /* set the keys */
-                    fbxAnimCurveX.KeyModifyBegin();
-                    fbxAnimCurveY.KeyModifyBegin();
-                    fbxAnimCurveZ.KeyModifyBegin();
+                    using (new FbxAnimCurveModifyHelper(new List<FbxAnimCurve>{fbxAnimCurveX,fbxAnimCurveY,fbxAnimCurveZ}))
+                    {
+                        foreach (var key in ComputeKeys(unityTransform.localRotation, fbxNode)) {
 
-                    var keys = ComputeKeys(unityTransform.localRotation, fbxNode);
-                    for(int i = 0, n = keys.Length; i < n; ++i) {
-                        var key = keys[i];
-                        fbxAnimCurveX.KeyAdd(key.time);
-                        fbxAnimCurveX.KeySet(i, key.time, (float)key.euler.X);
+                            int i = fbxAnimCurveX.KeyAdd(key.time);
+                            fbxAnimCurveX.KeySet(i, key.time, (float)key.euler.X);
 
-                        fbxAnimCurveY.KeyAdd(key.time);
-                        fbxAnimCurveY.KeySet(i, key.time, (float)key.euler.Y);
+                            i = fbxAnimCurveY.KeyAdd(key.time);
+                            fbxAnimCurveY.KeySet(i, key.time, (float)key.euler.Y);
 
-                        fbxAnimCurveZ.KeyAdd(key.time);
-                        fbxAnimCurveZ.KeySet(i, key.time, (float)key.euler.Z);
+                            i = fbxAnimCurveZ.KeyAdd(key.time);
+                            fbxAnimCurveZ.KeySet(i, key.time, (float)key.euler.Z);
+                        }
                     }
-
-                    fbxAnimCurveZ.KeyModifyEnd();
-                    fbxAnimCurveY.KeyModifyEnd();
-                    fbxAnimCurveX.KeyModifyEnd();
 
                     // Uni-35616 unroll curves to preserve continuous rotations
                     var fbxCurveNode = fbxNode.LclRotation.GetCurveNode(fbxAnimLayer, false /*should already exist*/);
@@ -1835,7 +1982,8 @@ namespace FbxExporters
                 if (timeMode == FbxTime.EMode.eCustom) {
                     timeMode = FbxTime.EMode.eFrames30;
                 }
-                FbxTime.SetGlobalTimeMode (timeMode);
+
+                fbxScene.GetGlobalSettings ().SetTimeMode (timeMode);
 
                 // set time correctly
                 var fbxStartTime = FbxTime.FromSecondDouble (0);
@@ -1865,8 +2013,10 @@ namespace FbxExporters
                     if (index == -1) 
                     {
                         /* simple property (e.g. intensity), export right away */
-                        ExportAnimationCurve (uniObj, uniAnimCurve, uniCurveBinding.propertyName,
-                            fbxScene, fbxAnimLayer);
+                        ExportAnimationCurve (uniObj, uniAnimCurve, uniAnimClip.frameRate, 
+                            uniCurveBinding.propertyName,
+                            fbxScene, 
+                            fbxAnimLayer);
                     } else {
                         /* Rotation property; save it to convert quaternion -> euler later. */
 
@@ -1875,7 +2025,7 @@ namespace FbxExporters
 
                         QuaternionCurve quat;
                         if (!quaternions.TryGetValue (uniGO, out quat)) {
-                            quat = new QuaternionCurve ();
+                            quat = new QuaternionCurve {sampleRate = uniAnimClip.frameRate};
                             quaternions.Add (uniGO, quat);
                         }
                         quat.SetCurve (index, uniAnimCurve);
