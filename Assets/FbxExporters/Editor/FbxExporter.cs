@@ -1829,7 +1829,8 @@ namespace FbxExporters
                 if (timeMode == FbxTime.EMode.eCustom) {
                     timeMode = FbxTime.EMode.eFrames30;
                 }
-                FbxTime.SetGlobalTimeMode (timeMode);
+
+                fbxScene.GetGlobalSettings ().SetTimeMode (timeMode);
 
                 // set time correctly
                 var fbxStartTime = FbxTime.FromSecondDouble (0);
