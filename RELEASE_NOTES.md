@@ -7,7 +7,7 @@ NEW FEATURES
 * Export Settings: Option to turn off auto-updating for linked prefabs
 
 FIXES
-* FbxExporter: fixed issues with continuous rotations which was causing gimbal lock
+* FbxExporter: fixed issues with continuous rotations which were causing gimbal lock
 
 **Version**: sprint42
 
