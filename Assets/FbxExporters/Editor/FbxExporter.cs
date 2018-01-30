@@ -1731,20 +1731,6 @@ namespace FbxExporters
                 FbxAnimStack fbxAnimStack = FbxAnimStack.Create (fbxScene, uniAnimClip.name);                
                 fbxAnimStack.Description.Set ("Animation Take: " + uniAnimClip.name);
 
-                var mecanim = uniRoot.GetComponent<Animator>();
-                if (!mecanim)
-                {
-                    fbxScene.GetSceneInfo().mKeywords += " AnimationTypeLegacy ";
-                }
-                else if (mecanim.avatar)
-                {
-                    fbxScene.GetSceneInfo().mKeywords += " AnimationTypeHumanoid ";
-                }
-                else
-                {
-                    fbxScene.GetSceneInfo().mKeywords += " AnimationTypeGeneric ";
-                }
-
                 // add one mandatory animation layer
                 FbxAnimLayer fbxAnimLayer = FbxAnimLayer.Create (fbxScene, "Animation Base Layer");
                 fbxAnimStack.AddMember (fbxAnimLayer);
@@ -1831,12 +1817,21 @@ namespace FbxExporters
 
                 var uniAnimator = uniRoot.GetComponent<Animator> ();
                 if (uniAnimator)
-                { 
+                {
+                    if (uniAnimator.avatar.isHuman)
+                    {
+                        fbxScene.GetSceneInfo().mKeywords += " AnimationTypeHumanoid ";
+                    }
+                    else
+                    {
+                        fbxScene.GetSceneInfo().mKeywords += " AnimationTypeGeneric ";
+                    }
+
                     // Try the animator controller (mecanim)
                     var controller = uniAnimator.runtimeAnimatorController;
 
                     if (controller) 
-                    { 
+                    {                        
                         // Only export each clip once per game object.
                         foreach (var clip in controller.animationClips) {
                             if (exportedClips.Add (clip)) {
@@ -1858,6 +1853,8 @@ namespace FbxExporters
                 var uniAnimation = uniRoot.GetComponent<Animation> ();
                 if (uniAnimation) 
                 {
+                    fbxScene.GetSceneInfo().mKeywords += " AnimationTypeHumanoid ";
+
                     // Only export each clip once per game object.
                     foreach (var uniAnimObj in uniAnimation) {
                         AnimationState uniAnimState = uniAnimObj as AnimationState;
