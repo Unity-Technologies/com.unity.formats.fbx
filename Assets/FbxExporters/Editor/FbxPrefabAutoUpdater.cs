@@ -6,6 +6,7 @@ using UnityEditor;
 using System.Linq;
 using System;
 using FbxExporters.Editor;
+using UnityEngine.TestTools;
 
 namespace FbxExporters
 {
@@ -33,6 +34,7 @@ namespace FbxExporters
         #endif
 
         const string MenuItemName = "GameObject/Update from FBX";
+        public static bool runningUnitTest = false;
 
         public static string FindFbxPrefabAssetPath()
         {
@@ -163,7 +165,9 @@ namespace FbxExporters
                 }
             }
         }
-
+        /// <summary>
+        /// Add an option "Update from FBX" in the contextual GameObject menu.
+        /// </summary>
         [MenuItem(MenuItemName, false,31)]
         static void OnContextItem(MenuCommand command)
         {
@@ -191,42 +195,69 @@ namespace FbxExporters
         }
 
         /// <summary>
-        // Validate the menu item defined by the function above.
+        /// Validate the menu item defined by the function above.
         /// </summary>
         [MenuItem(MenuItemName, true,31)]
         public static bool OnValidateMenuItem()
         {
-            GameObject[] selection = Selection.GetFiltered<GameObject>(SelectionMode.Editable | SelectionMode.TopLevel);
+            GameObject[] selection = Selection.gameObjects;
 
             if (selection == null || selection.Length == 0)
             {
-                UnityEditor.EditorUtility.DisplayDialog(
-                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME),
-                    "No GameObjects selected for update.",
-                    "Ok");
+                string errorMessage = "No GameObjects selected for update.";
+                if (runningUnitTest)
+                { 
+                    Debug.LogError(errorMessage);
+                    LogAssert.Expect(LogType.Error, errorMessage);
+                }
+                else
+                {
+                    DisplayNoSelectionDialog(errorMessage);
+                }
                 return false;
             }
 
+            bool containsLinkedPrefab = false;
             foreach (GameObject selectedObject in selection)
             {
                 GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(selectedObject) as GameObject;
-                if (!prefab)
+                if (prefab && prefab.GetComponentInChildren<FbxPrefab>())
                 {
-                    UnityEditor.EditorUtility.DisplayDialog(
-                        string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME),
-                        "These GameObjects aren't prefab.",
-                        "Ok");
-                    return false;
-                }
-                if (prefab.GetComponentInChildren<FbxPrefab>())
-                {
-                    return true;
+                    containsLinkedPrefab = true;
+                    break;
                 }
             }
 
-            return false;
+            if (!containsLinkedPrefab)
+            { 
+                string errorMessage = "No linked prefabs selected.";
+                if (runningUnitTest)
+                {
+                    Debug.LogError(errorMessage);
+                    LogAssert.Expect(LogType.Error, errorMessage);
+                }
+                else
+                {
+                    DisplayNoSelectionDialog(errorMessage);
+                }
+            }
+
+
+            return containsLinkedPrefab;
         }
 
+
+        static void DisplayNoSelectionDialog(string message)
+        {
+            UnityEditor.EditorUtility.DisplayDialog(
+                string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME),
+                message,
+                "Ok");
+        }
+
+        /// <summary>
+        /// Launch the manual update of the linked prefab specified
+        /// </summary>
         public static void UpdateLinkedPrefab(GameObject prefabInstance)
         {
             GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(prefabInstance) as GameObject;

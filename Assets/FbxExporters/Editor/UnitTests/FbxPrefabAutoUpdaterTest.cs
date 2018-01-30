@@ -215,8 +215,10 @@ namespace FbxExporters.UnitTests
         [SetUp]
         public void Init()
         {
+            // Save the initial setting for the auto updater toggle and disable it for the unit test
             isAutoUpdaterOn = FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled;
             FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = false;
+            FbxPrefabAutoUpdater.runningUnitTest = true;
         }
 
         [Test]
@@ -274,13 +276,13 @@ namespace FbxExporters.UnitTests
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).name == "SphereFBX");
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh != null);
 
-            // Testing Manual update on some random object that isn't a prefab at all
+            // Testing Manual update on some random object that isn't a prefab at all, the gameobject shouldn't be modified. No error is returned
             GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
             FbxPrefabAutoUpdater.UpdateLinkedPrefab(quad);
             Assert.IsTrue(quad != null);
             Assert.IsTrue(quad.GetComponent<MeshFilter>().sharedMesh != null);
 
-            // Testing Manual update on some random prefab that doesn't have an FbxPrefab in it.
+            // Testing Manual update on some random prefab that doesn't have an FbxPrefab in it, the prefab shouldn't be modified. No error is returned
             GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             // Convert to linked prefab instance (auto-updating prefab)
             string prefabPath = GetRandomPrefabAssetPath();
@@ -297,19 +299,26 @@ namespace FbxExporters.UnitTests
             Selection.objects = new GameObject[] { sphere3Instance };
             Assert.IsTrue(FbxPrefabAutoUpdater.OnValidateMenuItem());
 
-            // Check the contextual menu returns false because there is no linked prefab
+            // Check the contextual menu returns false because there is no linked prefab in the selection, an error is returned
             GameObject cylinder4 = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             GameObject sphere4 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sphere4.transform.SetParent(cylinder4.transform);
             Selection.objects = new GameObject[] { cylinder4, sphere4 };
             Assert.IsFalse(FbxPrefabAutoUpdater.OnValidateMenuItem());
+
+            // Assert is true because sphere 3 instance is a linked prefab and all the selection is taken into account
+            sphere3Instance.transform.SetParent(quad.transform);
+            Selection.objects = new GameObject[] { quad, sphere3Instance };
+            Assert.IsTrue(FbxPrefabAutoUpdater.OnValidateMenuItem());
         }
 
 
         [TearDown]
         public void stopTest()
         {
+            // Put back the initial setting for the auto-updater toggle
             FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
+            FbxPrefabAutoUpdater.runningUnitTest = false;
         }
     }
 }

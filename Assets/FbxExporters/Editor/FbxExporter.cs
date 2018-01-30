@@ -2471,7 +2471,7 @@ namespace FbxExporters
             }
 
             /// <summary>
-            // Validate the menu item defined by the function above.
+            /// Validate the menu item defined by the function above.
             /// </summary>
             [MenuItem (MenuItemName, true, 30)]
             public static bool OnValidateMenuItem ()
