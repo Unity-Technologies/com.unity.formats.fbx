@@ -2176,6 +2176,25 @@ namespace FbxExporters
                 return numObjectsExported;
             }
 
+            protected bool ExportAnimationOnly(GameObject unityGo, FbxScene fbxScene, FbxNode fbxNodeParent){
+                // gather all animation clips
+                var legacyAnim = unityGo.GetComponentsInChildren<Animation>();
+                var genericAnim = unityGo.GetComponentsInChildren<Animator> ();
+
+                foreach (var anim in legacyAnim) {
+                    var animClip = anim.clip;
+                    foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (animClip)) {
+                        Object uniObj = AnimationUtility.GetAnimatedObject (anim.gameObject, uniCurveBinding);
+                        if (!uniObj) {
+                            continue;
+                        }
+                        Debug.LogWarning (uniObj.name + ": " + uniCurveBinding.propertyName);
+                    }
+                }
+
+                return false;
+            }
+
             /// <summary>
             /// Export components on this game object.
             /// Transform components have already been exported.
