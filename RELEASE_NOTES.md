@@ -4,10 +4,10 @@
 
 NEW FEATURES
 * FbxExporter: Added support for exporting Blendshapes
-* Export Settings: Option to turn off auto-updating for linked prefabs
 
 FIXES
-* FbxExporter: fixed issues with continuous rotations which were causing gimbal lock
+* FbxExporter: Added unroll filter to support continuous rotations
+* FbxExporter: Fixed issue where exported animations always operated at 30 FPS, regardless of what they were originally
 
 **Version**: sprint42
 
