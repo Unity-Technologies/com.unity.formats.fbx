@@ -7,7 +7,7 @@ using Unity.FbxSdk;
 
 class ImportSettings : AssetPostprocessor
 {
-    public void OnPreprocessModel () {
+    public void OnPostprocessModel (GameObject g) {
         if (assetPath.EndsWith("fbx"))
         {
             FbxManager manager = FbxManager.Create();
