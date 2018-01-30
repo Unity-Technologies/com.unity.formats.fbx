@@ -1853,7 +1853,7 @@ namespace FbxExporters
                 var uniAnimation = uniRoot.GetComponent<Animation> ();
                 if (uniAnimation) 
                 {
-                    fbxScene.GetSceneInfo().mKeywords += " AnimationTypeHumanoid ";
+                    fbxScene.GetSceneInfo().mKeywords += " AnimationTypeLegacy ";
 
                     // Only export each clip once per game object.
                     foreach (var uniAnimObj in uniAnimation) {
