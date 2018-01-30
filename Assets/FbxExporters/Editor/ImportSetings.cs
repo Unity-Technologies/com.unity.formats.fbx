@@ -30,17 +30,6 @@ class ImportSettings : AssetPostprocessor
                     modelImporter.animationType = ModelImporterAnimationType.Legacy;
                     return;
                 }
-                if (keywords.Contains("AnimationTypeHumanoid"))
-                {
-                    ModelImporter modelImporter = assetImporter as ModelImporter;
-                    modelImporter.animationType = ModelImporterAnimationType.Human;
-                    return;
-                }
-                if (keywords.Contains("AnimationTypeGeneric"))
-                {
-                    ModelImporter modelImporter = assetImporter as ModelImporter;
-                    modelImporter.animationType = ModelImporterAnimationType.Generic;
-                }
             }
             
         }

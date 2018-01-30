@@ -1818,15 +1818,6 @@ namespace FbxExporters
                 var uniAnimator = uniRoot.GetComponent<Animator> ();
                 if (uniAnimator)
                 {
-                    if (uniAnimator.avatar.isHuman)
-                    {
-                        fbxScene.GetSceneInfo().mKeywords += " AnimationTypeHumanoid ";
-                    }
-                    else
-                    {
-                        fbxScene.GetSceneInfo().mKeywords += " AnimationTypeGeneric ";
-                    }
-
                     // Try the animator controller (mecanim)
                     var controller = uniAnimator.runtimeAnimatorController;
 
