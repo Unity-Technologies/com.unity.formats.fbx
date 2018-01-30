@@ -1,5 +1,14 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint43
+
+NEW FEATURES
+* FbxExporter: Added support for exporting Blendshapes
+
+FIXES
+* FbxExporter: Added unroll filter to support continuous rotations
+* FbxExporter: Fixed issue where exported animations always operated at 30 FPS, regardless of what they were originally
+
 **Version**: sprint42
 
 NEW FEATURES
