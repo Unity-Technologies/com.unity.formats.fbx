@@ -1728,7 +1728,7 @@ namespace FbxExporters
                 if (Verbose)
                     Debug.Log (string.Format ("Exporting animation clip ({1}) for {0}", uniRoot.name, uniAnimClip.name));
                 // setup anim stack
-                FbxAnimStack fbxAnimStack = FbxAnimStack.Create (fbxScene, uniAnimClip.name);                
+                FbxAnimStack fbxAnimStack = FbxAnimStack.Create (fbxScene, uniAnimClip.name);
                 fbxAnimStack.Description.Set ("Animation Take: " + uniAnimClip.name);
 
                 // add one mandatory animation layer
@@ -1831,7 +1831,7 @@ namespace FbxExporters
                     var controller = uniAnimator.runtimeAnimatorController;
 
                     if (controller) 
-                    {                        
+                    {
                         // Only export each clip once per game object.
                         foreach (var clip in controller.animationClips) {
                             if (exportedClips.Add (clip)) {
