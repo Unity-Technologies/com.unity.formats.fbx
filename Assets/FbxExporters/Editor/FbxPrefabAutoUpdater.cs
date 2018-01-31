@@ -6,6 +6,7 @@ using UnityEditor;
 using System.Linq;
 using System;
 using FbxExporters.Editor;
+using UnityEngine.TestTools;
 
 namespace FbxExporters
 {
@@ -26,13 +27,14 @@ namespace FbxExporters
     /// </summary>
     public /*static*/ class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
     {
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
-#else
+        #else
         public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
-#endif
+        #endif
 
-        static string[] importedAssets;
+        const string MenuItemName = "GameObject/Update from FBX";
+        public static bool runningUnitTest = false;
 
         public static string FindFbxPrefabAssetPath()
         {
@@ -56,8 +58,6 @@ namespace FbxExporters
         public static bool IsPrefabAsset(string assetPath) {
             return assetPath.EndsWith(".prefab");
         }
-
-        const string MenuItemName = "GameObject/Update from Fbx";
 
         /// <summary>
         /// Return false if the prefab definitely does not have an
@@ -165,7 +165,9 @@ namespace FbxExporters
                 }
             }
         }
-
+        /// <summary>
+        /// Add an option "Update from FBX" in the contextual GameObject menu.
+        /// </summary>
         [MenuItem(MenuItemName, false,31)]
         static void OnContextItem(MenuCommand command)
         {
@@ -186,51 +188,55 @@ namespace FbxExporters
                 }
             }
 
-            if (selection == null || selection.Length == 0)
+            foreach (GameObject selectedObject in selection)
             {
-                ModelExporter.DisplayNoSelectionDialog();
-                return;
+                UpdateLinkedPrefab(selectedObject);
             }
-
-            //Selection.objects = UpdateLinkedPrefab(selection);
-            UpdateLinkedPrefab(selection);
         }
 
         /// <summary>
-        // Validate the menu item defined by the function above.
+        /// Validate the menu item defined by the function above.
         /// </summary>
         [MenuItem(MenuItemName, true,31)]
-        static bool OnValidateMenuItem()
+        public static bool OnValidateMenuItem()
         {
-            GameObject[] selection = Selection.GetFiltered<GameObject>(SelectionMode.Editable | SelectionMode.TopLevel);
-            bool allObjectsPrefab = false;
+            GameObject[] selection = Selection.gameObjects;
+
+            if (selection == null || selection.Length == 0)
+            {
+                return false;
+            }
+
+            bool containsLinkedPrefab = false;
             foreach (GameObject selectedObject in selection)
             {
-                if (selectedObject.GetComponentInChildren<FbxPrefab>())
+                GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(selectedObject) as GameObject;
+                if (prefab && prefab.GetComponentInChildren<FbxPrefab>())
                 {
-                    allObjectsPrefab = true;
+                    containsLinkedPrefab = true;
                     break;
                 }
             }
 
-            var isPrefab = PrefabUtility.GetPrefabParent(Selection.activeGameObject) != null;
-            return isPrefab && allObjectsPrefab;
+            return containsLinkedPrefab;
         }
 
-        public static void UpdateLinkedPrefab(GameObject[] selection)
+
+        /// <summary>
+        /// Launch the manual update of the linked prefab specified
+        /// </summary>
+        public static void UpdateLinkedPrefab(GameObject prefabInstance)
         {
-            var fbxPrefabScriptPath = FindFbxPrefabAssetPath();
-            foreach (GameObject selectedObject in selection)
+            GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(prefabInstance) as GameObject;
+            if (!prefab)
             {
-                GameObject prefabInstance = selectedObject;
+                return;
+            }
 
-                GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(prefabInstance) as GameObject;
-
-                foreach (var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>())
-                {
-                    var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
-                    fbxPrefabUtility.SyncPrefab();
-                }
+            foreach (var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>())
+            {
+                var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
+                fbxPrefabUtility.SyncPrefab();
             }
         }
 
@@ -248,7 +254,7 @@ namespace FbxExporters
             public string GetUnityObjectName(string fbxObjectName)
             {
                 string newNameInUnity = fbxObjectName;
-                if (String.IsNullOrEmpty(fbxObjectName) && m_fbxPrefab.NameMapping != null) {
+                if (!String.IsNullOrEmpty(fbxObjectName) && m_fbxPrefab.NameMapping != null) {
                     foreach (var nameMapping in m_fbxPrefab.NameMapping) {
                         if (fbxObjectName == nameMapping.FBXObjectName) {
                             newNameInUnity = nameMapping.UnityObjectName;
@@ -264,7 +270,7 @@ namespace FbxExporters
             public string GetFBXObjectName(string unityObjectName)
             {
                 string oldNameInFBX = unityObjectName;
-                if (String.IsNullOrEmpty(unityObjectName) && m_fbxPrefab.NameMapping != null) {
+                if (!String.IsNullOrEmpty(unityObjectName) && m_fbxPrefab.NameMapping != null) {
                     foreach (var nameMapping in m_fbxPrefab.NameMapping) {
                         if (unityObjectName == nameMapping.UnityObjectName) {
                             oldNameInFBX = nameMapping.FBXObjectName;
@@ -738,15 +744,7 @@ namespace FbxExporters
                 /// <summary>
                 /// Data for the hierarchy of the old fbx file, the new fbx file, and the prefab.
                 /// </summary>
-                static Data m_oldFbxData, m_newFbxData, m_prefabData;
-
-                public static Data OldFbxData
-                {
-                    get
-                    {
-                        return m_oldFbxData;
-                    }
-                }
+                public static Data m_oldFbxData, m_newFbxData, m_prefabData;
 
                 /// <summary>
                 /// Names of the new nodes to create in step 1.
@@ -1031,6 +1029,27 @@ namespace FbxExporters
                         || m_componentsToDestroy.Count > 0
                         || m_componentsToUpdate.Count > 0
                         ;
+                }
+
+                public Data GetOldFbxData()
+                {
+                    return m_oldFbxData;
+                }
+
+                public Data GetNewFbxData()
+                {
+                    return m_newFbxData;
+                }
+
+
+                public HashSet<String> GetNodesToDestroy()
+                {
+                    return m_nodesToDestroy;
+                }
+
+                public HashSet<String> GetNodesToRename()
+                {
+                    return m_nodesToRename;
                 }
 
                 /// <summary>
