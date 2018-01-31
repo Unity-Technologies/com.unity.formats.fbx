@@ -204,16 +204,6 @@ namespace FbxExporters
 
             if (selection == null || selection.Length == 0)
             {
-                string errorMessage = "No GameObjects selected for update.";
-                if (runningUnitTest)
-                { 
-                    Debug.LogError(errorMessage);
-                    LogAssert.Expect(LogType.Error, errorMessage);
-                }
-                else
-                {
-                    DisplayNoSelectionDialog(errorMessage);
-                }
                 return false;
             }
 
@@ -227,21 +217,6 @@ namespace FbxExporters
                     break;
                 }
             }
-
-            if (!containsLinkedPrefab)
-            { 
-                string errorMessage = "No linked prefabs selected.";
-                if (runningUnitTest)
-                {
-                    Debug.LogError(errorMessage);
-                    LogAssert.Expect(LogType.Error, errorMessage);
-                }
-                else
-                {
-                    DisplayNoSelectionDialog(errorMessage);
-                }
-            }
-
 
             return containsLinkedPrefab;
         }
