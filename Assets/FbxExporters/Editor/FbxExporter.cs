@@ -2176,23 +2176,108 @@ namespace FbxExporters
                 return numObjectsExported;
             }
 
-            protected bool ExportAnimationOnly(GameObject unityGo, FbxScene fbxScene, FbxNode fbxNodeParent){
+            protected bool ExportAnimationOnly(GameObject unityGo, FbxScene fbxScene){
                 // gather all animation clips
                 var legacyAnim = unityGo.GetComponentsInChildren<Animation>();
                 var genericAnim = unityGo.GetComponentsInChildren<Animator> ();
 
+                // from clips determine what needs to be exported
+
+                // export nodes and their parent hierarchies
+
+                    // export objects as we go, create parent hierarchies after
+                    // store objects in a set, along with parents that need to be exported..
+
+                // also need to know if a gameobject is a bone and export accordingly
+
+                // export components
+                    // only light and camera components, and only if that component is animated
+
+                // export animation
+
+                var animationClips = new HashSet<AnimationClip> ();
+
                 foreach (var anim in legacyAnim) {
-                    var animClip = anim.clip;
-                    foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (animClip)) {
-                        Object uniObj = AnimationUtility.GetAnimatedObject (anim.gameObject, uniCurveBinding);
-                        if (!uniObj) {
-                            continue;
-                        }
-                        Debug.LogWarning (uniObj.name + ": " + uniCurveBinding.propertyName);
+                    var animClips = AnimationUtility.GetAnimationClips (anim.gameObject);
+                    ExportAnimatedGameObjects(animClips, anim.gameObject, unityGo, fbxScene, ref animationClips);
+                }
+
+                foreach (var anim in genericAnim) {
+                    // Try the animator controller (mecanim)
+                    var controller = anim.runtimeAnimatorController;
+                    if (controller)
+                    { 
+                        ExportAnimatedGameObjects(controller.animationClips, anim.gameObject, unityGo, fbxScene, ref animationClips);
                     }
                 }
 
                 return false;
+            }
+
+            private bool ExportAnimatedGameObjects(AnimationClip[] animClips, GameObject animationRootObject, GameObject exportRoot, FbxScene fbxScene, ref HashSet<AnimationClip> clipSet){
+                foreach (var animClip in animClips) {
+                    if (!clipSet.Add (animClip)) {
+                        // we have already exported gameobjects for this clip
+                        continue;
+                    }
+
+                    foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (animClip)) {
+                        Object uniObj = AnimationUtility.GetAnimatedObject (animationRootObject, uniCurveBinding);
+                        if (!uniObj) {
+                            continue;
+                        }
+                        //Debug.LogWarning (uniObj.name + ": " + uniCurveBinding.propertyName);
+
+                        GameObject unityGo = GetGameObject (uniObj);
+                        if (!unityGo) {
+                            continue;
+                        }
+                        FbxNode fbxNode;
+                        ExportGameObjectAndParents (unityGo, exportRoot, fbxScene, out fbxNode);
+                    }
+                }
+
+                return false;
+            }
+
+            private bool ExportGameObjectAndParents(GameObject unityGo, GameObject rootObject, FbxScene fbxScene, out FbxNode fbxNode){
+                // node already exists
+                if (MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
+                    return true;
+                }
+
+                if (ExportSettings.mayaCompatibleNames) {
+                    unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
+                }
+
+                // create an FbxNode and add it as a child of parent
+                fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
+                MapUnityObjectToFbxNode [unityGo] = fbxNode;
+
+                // Default inheritance type in FBX is RrSs, which causes scaling issues in Maya as
+                // both Maya and Unity use RSrs inheritance by default.
+                // Note: MotionBuilder uses RrSs inheritance by default as well, though it is possible
+                //       to select a different inheritance type in the UI.
+                // Use RSrs as the scaling inhertiance instead.
+                fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
+
+                ExportTransform (unityGo.transform, fbxNode, Vector3.zero, TransformExportType.Local);//newCenter, exportType);
+
+                if (unityGo.transform.parent != null || unityGo.transform.parent != rootObject.transform.parent) {
+                    FbxNode fbxNodeParent;
+                    if (!ExportGameObjectAndParents (unityGo.transform.parent.gameObject, rootObject, fbxScene, out fbxNodeParent)) {
+                        Debug.LogWarningFormat ("Failed to export GameObject {0}", unityGo.transform.parent.name);
+                        return false;
+                    }
+                    fbxNodeParent.AddChild (fbxNode);
+                }
+
+                if (unityGo == rootObject) {
+                    Debug.Log ("over here");
+                    fbxScene.GetRootNode ().AddChild (fbxNode);
+                }
+
+                return true;
             }
 
             /// <summary>
