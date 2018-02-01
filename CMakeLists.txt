@@ -259,3 +259,4 @@ endif()
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/meta/FbxExporters
         DESTINATION .)
 install(FILES "${CMAKE_SOURCE_DIR}/meta/FbxExporters.meta" DESTINATION .)
+install(FILES "${CMAKE_SOURCE_DIR}/RELEASE_NOTES.md" DESTINATION FbxExporters RENAME "RELEASE_NOTES.txt")
