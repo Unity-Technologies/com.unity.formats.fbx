@@ -5,9 +5,8 @@ RELEASE NOTES
 NEW FEATURES
 * FbxExporter: Added support for exporting Blendshapes
 * FbxExporter: Added support for exporting SkinnedMeshes with legacy and generic animation
-* FbxExporter: Added support for exporting Lights with animated properties (Intensity, Spot Angle, Color)
-* FbxExporter: Added support for exporting Cameras with animated properties (Field of View)
-* FbxExporter: Added support for exporting lights
+* FbxExporter: Added support for exporting Lights with animatable properties (Intensity, Spot Angle, Color)
+* FbxExporter: Added support for exporting Cameras with animatable properties (Field of View)
 * FbxExporter: added ability to export animation on transforms
 
 FIXES
