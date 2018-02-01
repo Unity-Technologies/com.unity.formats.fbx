@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 using System;
+using FbxExporters.Editor;
+using UnityEngine.TestTools;
 
 namespace FbxExporters
 {
@@ -30,14 +32,18 @@ namespace FbxExporters
         #else
         public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
         #endif
+
+        const string MenuItemName = "GameObject/Update from FBX";
+        public static bool runningUnitTest = false;
+
         public static string FindFbxPrefabAssetPath()
         {
             // Find guids that are scripts that look like FbxPrefab.
             // That catches FbxPrefabTest too, so we have to make sure.
             var allGuids = AssetDatabase.FindAssets("FbxPrefab t:MonoScript");
-            foreach(var guid in allGuids) {
+            foreach (var guid in allGuids) {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.EndsWith (FBX_PREFAB_FILE)) {
+                if (path.EndsWith(FBX_PREFAB_FILE)) {
                     return path;
                 }
             }
@@ -65,7 +71,7 @@ namespace FbxExporters
             var depPaths = AssetDatabase.GetDependencies(prefabPath, recursive: false);
             bool dependsOnFbxPrefab = false;
             bool dependsOnImportedFbx = false;
-            foreach(var dep in depPaths) {
+            foreach (var dep in depPaths) {
                 if (dep == fbxPrefabScriptPath) {
                     if (dependsOnImportedFbx) { return true; }
                     dependsOnFbxPrefab = true;
@@ -79,7 +85,7 @@ namespace FbxExporters
             return false;
         }
 
-        static void OnPostprocessAllAssets(string [] imported, string [] deleted, string [] moved, string [] movedFrom)
+        static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
         {
             // Do not start if Auto Updater is disabled in FBX Exporter Settings
             if (!FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled)
@@ -92,9 +98,12 @@ namespace FbxExporters
             // Did we import an fbx file at all?
             // Optimize to not allocate in the common case of 'no'
             HashSet<string> fbxImported = null;
-            foreach(var fbxModel in imported) {
+            foreach (var fbxModel in imported) {
                 if (IsFbxAsset(fbxModel)) {
-                    if (fbxImported == null) { fbxImported = new HashSet<string>(); }
+                    if (fbxImported == null)
+                    {
+                        fbxImported = new HashSet<string>();
+                    }
                     fbxImported.Add(fbxModel);
                     //Debug.Log("Tracking fbx asset " + fbxModel);
                 } else {
@@ -116,7 +125,7 @@ namespace FbxExporters
             //
             var fbxPrefabScriptPath = FindFbxPrefabAssetPath();
             var allObjectGuids = AssetDatabase.FindAssets("t:GameObject");
-            foreach(var guid in allObjectGuids) {
+            foreach (var guid in allObjectGuids) {
                 var prefabPath = AssetDatabase.GUIDToAssetPath(guid);
                 if (!IsPrefabAsset(prefabPath)) {
                     //Debug.Log("Not a prefab: " + prefabPath);
@@ -140,8 +149,8 @@ namespace FbxExporters
                     //Debug.LogWarning("FbxPrefab reimport: failed to update prefab " + prefabPath);
                     continue;
                 }
-                foreach(var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>()) {
-                    var fbxPrefabUtility = new FbxPrefabUtility (fbxPrefabComponent);
+                foreach (var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>()) {
+                    var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
                     if (!fbxPrefabUtility.WantsAutoUpdate()) {
                         //Debug.Log("Not auto-updating " + prefabPath);
                         continue;
@@ -156,7 +165,88 @@ namespace FbxExporters
                 }
             }
         }
+        /// <summary>
+        /// Add an option "Update from FBX" in the contextual GameObject menu.
+        /// </summary>
+        [MenuItem(MenuItemName, false,31)]
+        static void OnContextItem(MenuCommand command)
+        {
+            GameObject[] selection = null;
 
+            if (command == null || command.context == null)
+            {
+                // We were actually invoked from the top GameObject menu, so use the selection.
+                selection = Selection.GetFiltered<GameObject>(SelectionMode.Editable | SelectionMode.TopLevel);
+            }
+            else
+            {
+                // We were invoked from the right-click menu, so use the context of the context menu.
+                var selected = command.context as GameObject;
+                if (selected)
+                {
+                    selection = new GameObject[] { selected };
+                }
+            }
+
+            foreach (GameObject selectedObject in selection)
+            {
+                UpdateLinkedPrefab(selectedObject);
+            }
+        }
+
+        /// <summary>
+        /// Validate the menu item defined by the function above.
+        /// </summary>
+        [MenuItem(MenuItemName, true,31)]
+        public static bool OnValidateMenuItem()
+        {
+            GameObject[] selection = Selection.gameObjects;
+
+            if (selection == null || selection.Length == 0)
+            {
+                return false;
+            }
+
+            bool containsLinkedPrefab = false;
+            foreach (GameObject selectedObject in selection)
+            {
+                GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(selectedObject) as GameObject;
+                if (prefab && prefab.GetComponentInChildren<FbxPrefab>())
+                {
+                    containsLinkedPrefab = true;
+                    break;
+                }
+            }
+
+            return containsLinkedPrefab;
+        }
+
+
+        static void DisplayNoSelectionDialog(string message)
+        {
+            UnityEditor.EditorUtility.DisplayDialog(
+                string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME),
+                message,
+                "Ok");
+        }
+
+        /// <summary>
+        /// Launch the manual update of the linked prefab specified
+        /// </summary>
+        public static void UpdateLinkedPrefab(GameObject prefabInstance)
+        {
+            GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(prefabInstance) as GameObject;
+            if (!prefab)
+            {
+                return;
+            }
+
+            foreach (var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>())
+            {
+                var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
+                fbxPrefabUtility.SyncPrefab();
+            }
+        }
 
         public class FbxPrefabUtility{
 

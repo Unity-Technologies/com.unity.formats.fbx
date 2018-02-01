@@ -2620,7 +2620,7 @@ namespace FbxExporters
             }
 
             /// <summary>
-            // Validate the menu item defined by the function above.
+            /// Validate the menu item defined by the function above.
             /// </summary>
             [MenuItem (MenuItemName, true, 30)]
             public static bool OnValidateMenuItem ()
@@ -2635,6 +2635,7 @@ namespace FbxExporters
                     "No GameObjects selected for export.", 
                     "Ok");
             }
+
             //
             // export mesh info from Unity
             //
