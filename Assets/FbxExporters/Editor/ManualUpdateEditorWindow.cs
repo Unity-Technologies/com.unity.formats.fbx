@@ -86,6 +86,7 @@ public class ManualUpdateEditorWindow : EditorWindow
             GUILayout.EndHorizontal();
         }
 
+        // List of nodes that will be renamed on the Unity object, unless the user wants to map them or delete them
         for (int i = 0; i < m_nodesToRename.Count; i++)
         {
             GUILayout.BeginHorizontal();
