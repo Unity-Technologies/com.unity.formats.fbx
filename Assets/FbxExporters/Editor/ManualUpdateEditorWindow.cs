@@ -53,6 +53,7 @@ public class ManualUpdateEditorWindow : EditorWindow
 
     void OnGUI()
     {
+        // If there is nothing to map, sync prefab automatically and close the window
         if (m_nodesToDestroy.Count == 0 && m_nodesToRename.Count == 0)
         {
             m_fbxPrefabUtility.SyncPrefab();
