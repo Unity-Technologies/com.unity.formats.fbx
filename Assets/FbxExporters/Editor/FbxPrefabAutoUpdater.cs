@@ -1142,6 +1142,7 @@ namespace FbxExporters
 
 
                     // Rename old nodes (unity names) into new nodes (FBX names).
+                    // We do it before the reparenting because m_reparentings contains the fbx name and won't find the parent without the renaming
                     foreach (var FBXNodeNameToRename in m_nodesToRename)
                     {
                         if (prefabNodes[m_fbxPrefabUtility.GetUnityObjectName(FBXNodeNameToRename)] != null)
