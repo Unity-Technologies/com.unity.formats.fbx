@@ -265,7 +265,9 @@ namespace FbxExporters
                 return newNameInUnity;
             }
 
-
+            /// <summary>
+            /// Utility function: remove the name mapping matching the unity name specified
+            /// </summary>
             public void RemoveMappingFBXObjectName(string fbxObjectName)
             {
                 FbxPrefab.StringPair stockNameMapping = new FbxPrefab.StringPair();
@@ -283,13 +285,14 @@ namespace FbxExporters
                     }
                     if (foundMapping)
                     {
-                        Debug.Log("Successfully removed: " + stockNameMapping.UnityObjectName + " /FBX: " + stockNameMapping.FBXObjectName);
                         m_fbxPrefab.NameMapping.Remove(stockNameMapping);
                     }
                 }
             }
 
-
+            /// <summary>
+            /// Utility function: remove the name mapping matching the FBX name specified
+            /// </summary>
             public void RemoveMappingUnityObjectName(string unityObjectName)
             {
                 FbxPrefab.StringPair stockNameMapping = new FbxPrefab.StringPair();
@@ -307,7 +310,6 @@ namespace FbxExporters
                     }
                     if (foundMapping)
                     {
-                        Debug.Log("Successfully removed: " + stockNameMapping.UnityObjectName + " /FBX: " + stockNameMapping.FBXObjectName);
                         m_fbxPrefab.NameMapping.Remove(stockNameMapping);
                     }
                 }
@@ -1207,17 +1209,11 @@ namespace FbxExporters
                             }
                         }
                     }
-                    
-                    // Rename old nodes (unity names) into new nodes (FBX names).
-                    /*foreach (var FBXNodeNameToRename in m_nodesToRename)
-                    {
-                        prefabNodes[m_fbxPrefabUtility.GetUnityObjectName(FBXNodeNameToRename)].name = FBXNodeNameToRename;
-                        Log("Renamed {0} into {1}", m_fbxPrefabUtility.GetUnityObjectName(FBXNodeNameToRename), FBXNodeNameToRename);
-                    }*/
 
                     // Create or update the new components.
                     foreach (var kvp in m_componentsToUpdate) {
                         var componentName = kvp.Key;
+                        // We rename the node before the loop, so the component name now has the FBX object name, instead of the unity one that was saved
                         componentName = m_fbxPrefabUtility.GetFBXObjectName(componentName);
                         Debug.Log("Component: " + componentName);
                         var fbxComponents = kvp.Value;

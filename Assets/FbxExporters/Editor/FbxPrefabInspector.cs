@@ -32,6 +32,7 @@ namespace FbxExporters.EditorTools {
 
             EditorGUILayout.PropertyField(m_GameObjectProp, true);
 
+#if FBXEXPORTER_DEBUG
             if (GUILayout.Button("Update prefab manually..."))
             {
                 // Get existing open window or if none, make a new one:
@@ -40,7 +41,6 @@ namespace FbxExporters.EditorTools {
                 window.Show();
             }
 
-#if FBXEXPORTER_DEBUG
             EditorGUILayout.LabelField ("Debug info:");
             try {
                 fbxPrefabUtility.GetFbxHistory().ToJson();
