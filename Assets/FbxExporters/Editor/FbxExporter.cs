@@ -2217,8 +2217,6 @@ namespace FbxExporters
                         boneDict.Add (boneArray [i], i);
                     }
 
-                    var rootBone = skinnedMesh.rootBone;
-
                     // get the bones that are also in the export set
                     bones.IntersectWith (exportData.goExportSet);
 
@@ -2230,7 +2228,7 @@ namespace FbxExporters
                         if (!ExportGameObjectAndParents (
                             bone.gameObject, unityGO, fbxScene, out node, newCenter, 
                             exportType, ref numObjectsExported, objectCount,
-                            new SkinnedMeshBoneInfo(rootBone, skinnedMesh, boneDict)
+                            new SkinnedMeshBoneInfo(skinnedMesh, boneDict)
                            )) {
                             // export cancelled
                             return -1;
@@ -2267,12 +2265,10 @@ namespace FbxExporters
             }
 
             class SkinnedMeshBoneInfo {
-                public Transform rootBone;
                 public SkinnedMeshRenderer skinnedMesh;
                 public Dictionary<Transform, int> boneDict;
 
-                public SkinnedMeshBoneInfo(Transform root, SkinnedMeshRenderer skinnedMesh, Dictionary<Transform, int> boneDict){
-                    this.rootBone = root;
+                public SkinnedMeshBoneInfo(SkinnedMeshRenderer skinnedMesh, Dictionary<Transform, int> boneDict){
                     this.skinnedMesh = skinnedMesh;
                     this.boneDict = boneDict;
                 }
@@ -2329,7 +2325,7 @@ namespace FbxExporters
 
                 if (unityGo.transform.parent != null || unityGo.transform.parent != rootObject.transform.parent) {
                     SkinnedMeshBoneInfo parentBoneInfo = null;
-                    if (boneInfo != null && boneInfo.rootBone != null && unityGo.transform != boneInfo.rootBone) {
+                    if (boneInfo != null && boneInfo.skinnedMesh.rootBone != null && unityGo.transform != boneInfo.skinnedMesh.rootBone) {
                         parentBoneInfo = boneInfo;
                     }
 
@@ -2365,13 +2361,9 @@ namespace FbxExporters
                     return false;
                 }
 
-                var rootBone = boneInfo.rootBone;
                 var skinnedMesh = boneInfo.skinnedMesh;
                 var boneDict = boneInfo.boneDict;
-
-                if (rootBone == null) {
-                    boneInfo.rootBone = skinnedMesh.rootBone;
-                }
+                var rootBone = skinnedMesh.rootBone;
 
                 var fbxSkeleton = fbxNode.GetSkeleton ();
                 if (fbxSkeleton == null) {
