@@ -2821,6 +2821,12 @@ namespace FbxExporters
                             exportData = new Dictionary<GameObject, AnimationOnlyExportData>();
                         }
 
+                        if(count <= 0){
+                            // nothing to export
+                            Debug.LogWarning("Nothing to Export");
+                            return 0;
+                        }
+
                         Vector3 center = Vector3.zero;
                         var exportType = TransformExportType.Reset;
                         if(revisedExportSet.Count != 1){
