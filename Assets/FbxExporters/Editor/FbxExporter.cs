@@ -80,6 +80,8 @@ namespace FbxExporters
             //       being called only once regardless of what is selected.
             const string MenuItemName = "GameObject/Export Model...";
 
+            const string AnimOnlyMenuItemName = "GameObject/Export Animation Only";
+
             const string FileBaseName = "Untitled";
 
             const string ProgressBarTitle = "Fbx Export";
@@ -2722,7 +2724,7 @@ namespace FbxExporters
             ///
             /// This refreshes the asset database.
             /// </summary>
-            public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet)
+            public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet, bool animOnly = false)
             {
                 exportCancelled = false;
 
@@ -2809,7 +2811,15 @@ namespace FbxExporters
                         // stores how many objects we have exported, -1 if export was cancelled
                         int exportProgress = 0;
                         var revisedExportSet = RemoveRedundantObjects(unityExportSet);
-                        int count = GetHierarchyCount (revisedExportSet);
+
+                        Dictionary<GameObject, AnimationOnlyExportData> exportData;
+                        int count = 0;
+                        if(animOnly){
+                            count = GetAnimOnlyHierarchyCount(revisedExportSet, out exportData);
+                        } else {
+                            count = GetHierarchyCount (revisedExportSet);
+                            exportData = new Dictionary<GameObject, AnimationOnlyExportData>();
+                        }
 
                         Vector3 center = Vector3.zero;
                         var exportType = TransformExportType.Reset;
@@ -2819,42 +2829,25 @@ namespace FbxExporters
                         }
 
                         foreach (var unityGo in revisedExportSet) {
-                            exportProgress = this.ExportTransformHierarchy (unityGo, fbxScene, fbxRootNode,
-                                exportProgress, count, center, exportType);
+                            AnimationOnlyExportData data;
+                            if(animOnly && exportData.TryGetValue(unityGo, out data)){
+                                exportProgress = this.ExportAnimationOnly(unityGo, fbxScene, exportProgress, count, center, data, exportType);
+                            }
+                            else {
+                                exportProgress = this.ExportTransformHierarchy (unityGo, fbxScene, fbxRootNode,
+                                    exportProgress, count, center, exportType);
+                            }
                             if (exportCancelled || exportProgress < 0) {
                                 Debug.LogWarning ("Export Cancelled");
                                 return 0;
                             }
                         }
 
-                        /*if(revisedExportSet.Count == 1){
-                            foreach(var unityGo in revisedExportSet){
-                                exportProgress = this.ExportTransformHierarchy (
-                                    unityGo, fbxScene, fbxRootNode, exportProgress,
-                                    count, Vector3.zero, TransformExportType.Reset);
-                                if (exportCancelled || exportProgress < 0) {
-                                    Debug.LogWarning ("Export Cancelled");
-                                    return 0;
-                                }
+                        if(!animOnly){
+                            if(!ExportComponents(fbxScene)){
+                                Debug.LogWarning ("Export Cancelled");
+                                return 0;
                             }
-                        }
-                        else{
-                            // find the center of the export set
-                            Vector3 center = ExportSettings.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
-
-                            foreach (var unityGo in revisedExportSet) {
-                                exportProgress = this.ExportTransformHierarchy (unityGo, fbxScene, fbxRootNode,
-                                    exportProgress, count, center, TransformExportType.Global);
-                                if (exportCancelled || exportProgress < 0) {
-                                    Debug.LogWarning ("Export Cancelled");
-                                    return 0;
-                                }
-                            }
-                        }*/
-
-                        if(!ExportComponents(fbxScene)){
-                            Debug.LogWarning ("Export Cancelled");
-                            return 0;
                         }
 
                         // Set the scene's default camera.
@@ -2977,6 +2970,29 @@ namespace FbxExporters
             /// </summary>
             [MenuItem (MenuItemName, true, 30)]
             public static bool OnValidateMenuItem ()
+            {
+                return true;
+            }
+
+            /// <summary>
+            /// Add a menu item to a GameObject's context menu.
+            /// </summary>
+            /// <param name="command">Command.</param>
+            [MenuItem (AnimOnlyMenuItemName, false, 30)]
+            static void OnAnimOnlyContextItem (MenuCommand command)
+            {
+                if (Selection.objects.Length <= 0) {
+                    DisplayNoSelectionDialog ();
+                    return;
+                }
+                OnExport (animOnly:true);
+            }
+
+            /// <summary>
+            // Validate the menu item defined by the function above.
+            /// </summary>
+            [MenuItem (AnimOnlyMenuItemName, true, 30)]
+            public static bool OnValidateAnimOnlyMenuItem ()
             {
                 return true;
             }
@@ -3424,7 +3440,7 @@ namespace FbxExporters
                 return basename + "." + extension;
             }
 
-            private static void OnExport ()
+            private static void OnExport (bool animOnly = false)
             {
                 // Now that we know we have stuff to export, get the user-desired path.
                 var directory = string.IsNullOrEmpty (LastFilePath)
@@ -3449,7 +3465,7 @@ namespace FbxExporters
                     return;
                 }
 
-                if (ExportObjects (filePath) != null) {
+                if (ExportObjects (filePath, animOnly:animOnly) != null) {
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
                     AssetDatabase.Refresh ();
@@ -3460,7 +3476,7 @@ namespace FbxExporters
             /// Export a list of (Game) objects to FBX file. 
             /// Use the SaveFile panel to allow user to enter a file name.
             /// <summary>
-            public static string ExportObjects (string filePath, UnityEngine.Object[] objects = null)
+            public static string ExportObjects (string filePath, UnityEngine.Object[] objects = null, bool animOnly = false)
             {
                 LastFilePath = filePath;
 
@@ -3472,7 +3488,7 @@ namespace FbxExporters
                         objects = Selection.objects;
                     }
 
-                    if (fbxExporter.ExportAll (objects) > 0) {
+                    if (fbxExporter.ExportAll (objects, animOnly) > 0) {
                         string message = string.Format ("Successfully exported: {0}", filePath);
                         UnityEngine.Debug.Log (message);
 
