@@ -916,6 +916,28 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Gets the bind pose for the Unity bone.
+            /// </summary>
+            /// <returns>The bind pose.</returns>
+            /// <param name="unityBone">Unity bone.</param>
+            /// <param name="bindPoses">Bind poses.</param>
+            /// <param name="boneDict">Dictionary of bone to index.</param>
+            /// <param name="skinnedMesh">Skinned mesh.</param>
+            private Matrix4x4 GetBindPose(
+                Transform unityBone, Matrix4x4[] bindPoses,
+                Dictionary<Transform, int> boneDict, SkinnedMeshRenderer skinnedMesh
+            ){
+                Matrix4x4 bindPose;
+                int index;
+                if (boneDict.TryGetValue (unityBone, out index)) {
+                    bindPose = bindPoses [index];
+                } else {
+                    bindPose = unityBone.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
+                }
+                return bindPose;
+            }
+
+            /// <summary>
             /// Export bones of skinned mesh, if this is a skinned mesh with
             /// bones and bind poses.
             /// </summary>
@@ -971,17 +993,6 @@ namespace FbxExporters
                                 Debug.LogErrorFormat("Node {0} should already be created", t.name);
                             }
 
-                            // Set it up as a skeleton node if we haven't already.
-                            if (fbxBoneNode.GetSkeleton () == null) {
-                                FbxSkeleton fbxSkeleton = FbxSkeleton.Create (fbxScene, t.name + SkeletonPrefix);
-
-                                var fbxSkeletonType = skinnedMesh.rootBone != t
-                                ? FbxSkeleton.EType.eLimbNode : FbxSkeleton.EType.eRoot;
-                                fbxSkeleton.SetSkeletonType (fbxSkeletonType);
-                                fbxSkeleton.Size.Set (1.0f * UnitScaleFactor);
-                                fbxBoneNode.SetNodeAttribute (fbxSkeleton);
-                            }
-
                             boneSet.Add (t);
                         }
 
@@ -992,69 +1003,13 @@ namespace FbxExporters
                 }
 
                 var boneList = boneSet.ToArray();
-
                 skinnedMeshToBonesMap.Add (skinnedMesh, boneList);
 
-                // Step 2: Get bindposes
-                var boneToBindPose = new Dictionary<Transform, Matrix4x4>();
-                for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
-                    var unityBone = boneList [boneIndex];
-
-                    Matrix4x4 pose;
-                    if (index.ContainsKey (unityBone)) {
-                        int i = index [unityBone];
-                        pose = bindPoses [i];
-                    } else {
-                        pose = unityBone.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
-                    }
-                    boneToBindPose.Add (unityBone, pose);
+                var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, index);
+                foreach (var bone in boneList) {
+                    var fbxBone = MapUnityObjectToFbxNode [bone.gameObject];
+                    ExportBoneTransform (fbxBone, fbxScene, bone, boneInfo);
                 }
-
-                // Step 3: set up the transforms.
-                for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
-                    var unityBone = boneList [boneIndex];
-                    var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
-
-                    Matrix4x4 pose;
-
-                    var bindPose = boneToBindPose [unityBone];
-
-                    if (fbxBone.GetSkeleton ().GetSkeletonType () == FbxSkeleton.EType.eRoot) {
-                        // bind pose is local -> root. We want root -> local, so invert.
-                        pose = (unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix * bindPose.inverse);
-                    } else {
-                        // Bind pose is local -> parent -> ... -> root.
-                        // We want parent -> local.
-                        // Invert our bind pose to get root -> local.
-                        // The apply parent -> root to leave just parent -> local.
-                        pose = boneToBindPose [unityBone.parent] * bindPose.inverse;
-                    }
-
-                    // FBX is transposed relative to Unity: transpose as we convert.
-                    FbxMatrix matrix = new FbxMatrix ();
-                    matrix.SetColumn (0, new FbxVector4 (pose.GetRow (0).x, pose.GetRow (0).y, pose.GetRow (0).z, pose.GetRow (0).w));
-                    matrix.SetColumn (1, new FbxVector4 (pose.GetRow (1).x, pose.GetRow (1).y, pose.GetRow (1).z, pose.GetRow (1).w));
-                    matrix.SetColumn (2, new FbxVector4 (pose.GetRow (2).x, pose.GetRow (2).y, pose.GetRow (2).z, pose.GetRow (2).w));
-                    matrix.SetColumn (3, new FbxVector4 (pose.GetRow (3).x, pose.GetRow (3).y, pose.GetRow (3).z, pose.GetRow (3).w));
-
-                    // FBX wants translation, rotation (in euler angles) and scale.
-                    // We assume there's no real shear, just rounding error.
-                    FbxVector4 translation, rotation, shear, scale;
-                    double sign;
-                    matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
-
-                    // Export bones with zero rotation, using a pivot instead to set the rotation
-                    // so that the bones are easier to animate and the rotation shows up as the "joint orientation" in Maya.
-                    fbxBone.LclTranslation.Set (new FbxDouble3(-translation.X*UnitScaleFactor, translation.Y*UnitScaleFactor, translation.Z*UnitScaleFactor));
-                    fbxBone.LclRotation.Set (new FbxDouble3(0,0,0));
-                    fbxBone.LclScaling.Set (new FbxDouble3 (scale.X, scale.Y, scale.Z));
-
-                    // TODO (UNI-34294): add detailed comment about why we export rotation as pre-rotation
-                    fbxBone.SetRotationActive (true);
-                    fbxBone.SetPivotState (FbxNode.EPivotSet.eSourcePivot, FbxNode.EPivotState.ePivotReference);
-                    fbxBone.SetPreRotation (FbxNode.EPivotSet.eSourcePivot, new FbxVector4 (rotation.X, -rotation.Y, -rotation.Z));
-                }
-
                 return true;
             }
 
@@ -2223,12 +2178,13 @@ namespace FbxExporters
                     // remove the exported bones from the export set
                     exportData.goExportSet.ExceptWith (bones);
 
+                    var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, boneDict);
                     foreach (var bone in bones) {
                         FbxNode node;
                         if (!ExportGameObjectAndParents (
                             bone.gameObject, unityGO, fbxScene, out node, newCenter, 
                             exportType, ref numObjectsExported, objectCount,
-                            new SkinnedMeshBoneInfo(skinnedMesh, boneDict)
+                            boneInfo
                            )) {
                             // export cancelled
                             return -1;
@@ -2267,10 +2223,12 @@ namespace FbxExporters
             class SkinnedMeshBoneInfo {
                 public SkinnedMeshRenderer skinnedMesh;
                 public Dictionary<Transform, int> boneDict;
+                public Dictionary<Transform, Matrix4x4> boneToBindPose;
 
                 public SkinnedMeshBoneInfo(SkinnedMeshRenderer skinnedMesh, Dictionary<Transform, int> boneDict){
                     this.skinnedMesh = skinnedMesh;
                     this.boneDict = boneDict;
+                    this.boneToBindPose = new Dictionary<Transform, Matrix4x4>();
                 }
             }
 
@@ -2323,33 +2281,32 @@ namespace FbxExporters
                     ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
                 }
 
-                if (unityGo.transform.parent != null || unityGo.transform.parent != rootObject.transform.parent) {
-                    SkinnedMeshBoneInfo parentBoneInfo = null;
-                    if (boneInfo != null && boneInfo.skinnedMesh.rootBone != null && unityGo.transform != boneInfo.skinnedMesh.rootBone) {
-                        parentBoneInfo = boneInfo;
-                    }
-
-                    FbxNode fbxNodeParent;
-                    if (!ExportGameObjectAndParents (
-                        unityGo.transform.parent.gameObject,
-                        rootObject,
-                        fbxScene,
-                        out fbxNodeParent,
-                        newCenter,
-                        TransformExportType.Local,
-                        ref exportProgress,
-                        objectCount,
-                        parentBoneInfo
-                    )) {
-                        // export cancelled
-                        return false;
-                    }
-                    fbxNodeParent.AddChild (fbxNode);
-                }
-
                 if (unityGo == rootObject || unityGo.transform.parent == null) {
                     fbxScene.GetRootNode ().AddChild (fbxNode);
+                    return true;
                 }
+
+                SkinnedMeshBoneInfo parentBoneInfo = null;
+                if (boneInfo != null && boneInfo.skinnedMesh.rootBone != null && unityGo.transform != boneInfo.skinnedMesh.rootBone) {
+                    parentBoneInfo = boneInfo;
+                }
+
+                FbxNode fbxNodeParent;
+                if (!ExportGameObjectAndParents (
+                    unityGo.transform.parent.gameObject,
+                    rootObject,
+                    fbxScene,
+                    out fbxNodeParent,
+                    newCenter,
+                    TransformExportType.Local,
+                    ref exportProgress,
+                    objectCount,
+                    parentBoneInfo
+                )) {
+                    // export cancelled
+                    return false;
+                }
+                fbxNodeParent.AddChild (fbxNode);
 
                 return true;
             }
@@ -2357,7 +2314,7 @@ namespace FbxExporters
             private bool ExportBoneTransform(
                 FbxNode fbxNode, FbxScene fbxScene, Transform unityBone, SkinnedMeshBoneInfo boneInfo
             ){
-                if (boneInfo != null || boneInfo.skinnedMesh == null || boneInfo.boneDict == null || unityBone == null) {
+                if (boneInfo == null || boneInfo.skinnedMesh == null || boneInfo.boneDict == null || unityBone == null) {
                     return false;
                 }
 
@@ -2365,6 +2322,7 @@ namespace FbxExporters
                 var boneDict = boneInfo.boneDict;
                 var rootBone = skinnedMesh.rootBone;
 
+                // setup the skeleton
                 var fbxSkeleton = fbxNode.GetSkeleton ();
                 if (fbxSkeleton == null) {
                     fbxSkeleton = FbxSkeleton.Create (fbxScene, unityBone.name + SkeletonPrefix);
@@ -2380,11 +2338,9 @@ namespace FbxExporters
 
                 // get bind pose
                 Matrix4x4 bindPose;
-                int index;
-                if (boneDict.TryGetValue (unityBone, out index)) {
-                    bindPose = bindPoses [index];
-                } else {
-                    bindPose = unityBone.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
+                if (!boneInfo.boneToBindPose.TryGetValue (unityBone, out bindPose)) {
+                    bindPose = GetBindPose (unityBone, bindPoses, boneDict, skinnedMesh);
+                    boneInfo.boneToBindPose.Add (unityBone, bindPose);
                 }
 
                 Matrix4x4 pose;
@@ -2392,14 +2348,11 @@ namespace FbxExporters
                     pose = (unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix * bindPose.inverse);
                 } else {
                     // get parent's bind pose
-                    int pIndex;
                     Matrix4x4 parentBindPose;
-                    if (boneDict.TryGetValue (unityBone.parent, out pIndex)) {
-                        parentBindPose = bindPoses [pIndex];
-                    } else {
-                        parentBindPose = unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
+                    if (!boneInfo.boneToBindPose.TryGetValue (unityBone.parent, out parentBindPose)) {
+                        parentBindPose = GetBindPose (unityBone.parent, bindPoses, boneDict, skinnedMesh);
+                        boneInfo.boneToBindPose.Add (unityBone.parent, parentBindPose);
                     }
-
                     pose = parentBindPose * bindPose.inverse;
                 }
 
