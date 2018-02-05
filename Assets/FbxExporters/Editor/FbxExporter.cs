@@ -2203,6 +2203,7 @@ namespace FbxExporters
             ){
                 // export any bones
                 var skinnedMeshRenderers = unityGO.GetComponentsInChildren<SkinnedMeshRenderer> ();
+                int numObjectsExported = exportProgress;
 
                 foreach (var skinnedMesh in skinnedMeshRenderers) {
                     var boneArray = skinnedMesh.bones;
@@ -2224,18 +2225,24 @@ namespace FbxExporters
 
                     foreach (var bone in bones) {
                         FbxNode node;
-                        ExportGameObjectAndParents (
-                            bone.gameObject, unityGO, fbxScene, out node, newCenter, exportType, exportProgress, objectCount, skinnedMesh, boneDict, rootBone, true
-                        );
+                        if (!ExportGameObjectAndParents (
+                            bone.gameObject, unityGO, fbxScene, out node, newCenter, exportType, ref numObjectsExported, objectCount, skinnedMesh, boneDict, rootBone, true
+                           )) {
+                            // export cancelled
+                            return -1;
+                        }
                     }
                 }
 
                 // export everything else
                 foreach (var go in exportData.goExportSet) {
                     FbxNode node;
-                    ExportGameObjectAndParents (
-                        go, unityGO, fbxScene, out node, newCenter, exportType, exportProgress, objectCount
-                    );
+                    if (!ExportGameObjectAndParents (
+                        go, unityGO, fbxScene, out node, newCenter, exportType, ref numObjectsExported, objectCount
+                       )) {
+                        // export cancelled
+                        return -1;
+                    }
 
                     System.Type compType;
                     if (exportData.exportComponent.TryGetValue (go, out compType)) {
@@ -2252,7 +2259,7 @@ namespace FbxExporters
                     ExportAnimationClip (animClip.Key, animClip.Value, fbxScene);
                 }
 
-                return 0;
+                return numObjectsExported;
             }
 
             private bool ExportGameObjectAndParents(
@@ -2262,7 +2269,7 @@ namespace FbxExporters
                 out FbxNode fbxNode,
                 Vector3 newCenter,
                 TransformExportType exportType,
-                int exportProgress,
+                ref int exportProgress,
                 int objectCount,
                 SkinnedMeshRenderer skinnedMesh = null,
                 Dictionary<Transform, int> boneDict = null,
@@ -2281,6 +2288,15 @@ namespace FbxExporters
                 // create an FbxNode and add it as a child of parent
                 fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
                 MapUnityObjectToFbxNode [unityGo] = fbxNode;
+
+                exportProgress++;
+                if (EditorUtility.DisplayCancelableProgressBar (
+                        ProgressBarTitle,
+                    string.Format ("Creating FbxNode {0}/{1}", exportProgress, objectCount),
+                    (exportProgress / (float)objectCount) * 0.5f)) {
+                    // cancel silently
+                    return false;
+                }
 
                 // Default inheritance type in FBX is RrSs, which causes scaling issues in Maya as
                 // both Maya and Unity use RSrs inheritance by default.
@@ -2312,14 +2328,14 @@ namespace FbxExporters
                         out fbxNodeParent,
                         newCenter,
                         TransformExportType.Local,
-                        exportProgress,
+                        ref exportProgress,
                         objectCount,
                         skinnedMesh,
                         boneDict,
                         rootBone,
                         parentIsBone
                     )) {
-                        Debug.LogWarningFormat ("Failed to export GameObject {0}", unityGo.transform.parent.name);
+                        // export cancelled
                         return false;
                     }
                     fbxNodeParent.AddChild (fbxNode);
