@@ -2176,15 +2176,29 @@ namespace FbxExporters
                 return numObjectsExported;
             }
 
-            protected void ExportAnimationOnly(
+            public struct AnimationOnlyExportData {
+                public Dictionary<AnimationClip, GameObject> animationClips;
+                public HashSet<GameObject> goExportSet;
+                public Dictionary<GameObject, System.Type> exportComponent;
+
+                public AnimationOnlyExportData(
+                    Dictionary<AnimationClip, GameObject> animClips,
+                    HashSet<GameObject> exportSet,
+                    Dictionary<GameObject, System.Type> exportComponent
+                ){
+                    this.animationClips = animClips;
+                    this.goExportSet = exportSet;
+                    this.exportComponent = exportComponent;
+                }
+            }
+
+            protected int ExportAnimationOnly(
                 GameObject unityGO,
                 FbxScene fbxScene,
                 int exportProgress,
                 int objectCount,
                 Vector3 newCenter,
-                Dictionary<AnimationClip, GameObject> animationClips,
-                HashSet<GameObject> goExportSet,
-                Dictionary<GameObject, System.Type> exportComponent,
+                AnimationOnlyExportData exportData,
                 TransformExportType exportType = TransformExportType.Local
             ){
                 // export any bones
@@ -2203,10 +2217,10 @@ namespace FbxExporters
                     var rootBone = skinnedMesh.rootBone;
 
                     // get the bones that are also in the export set
-                    bones.IntersectWith (goExportSet);
+                    bones.IntersectWith (exportData.goExportSet);
 
                     // remove the exported bones from the export set
-                    goExportSet.ExceptWith (bones);
+                    exportData.goExportSet.ExceptWith (bones);
 
                     foreach (var bone in bones) {
                         FbxNode node;
@@ -2217,14 +2231,14 @@ namespace FbxExporters
                 }
 
                 // export everything else
-                foreach (var go in goExportSet) {
+                foreach (var go in exportData.goExportSet) {
                     FbxNode node;
                     ExportGameObjectAndParents (
                         go, unityGO, fbxScene, out node, newCenter, exportType, exportProgress, objectCount
                     );
 
                     System.Type compType;
-                    if (exportComponent.TryGetValue (go, out compType)) {
+                    if (exportData.exportComponent.TryGetValue (go, out compType)) {
                         if (compType == typeof(Light)) {
                             ExportLight (go, fbxScene, node);
                         } else if (compType == typeof(Camera)) {
@@ -2234,9 +2248,11 @@ namespace FbxExporters
                 }
 
                 // export animation
-                foreach (var animClip in animationClips) {
+                foreach (var animClip in exportData.animationClips) {
                     ExportAnimationClip (animClip.Key, animClip.Value, fbxScene);
                 }
+
+                return 0;
             }
 
             private bool ExportGameObjectAndParents(
@@ -2392,15 +2408,11 @@ namespace FbxExporters
                 return true;
             }
 
-            protected int AnimOnlyHierarchyCount(
+            protected int GetAnimOnlyHierarchyCount(
                 HashSet<GameObject> exportSet,
-                out Dictionary<AnimationClip, GameObject> animationClips, 
-                out Dictionary<GameObject, HashSet<GameObject>> mapGameObjectToExportSet,
-                out Dictionary<GameObject, System.Type> exportComponent
+                out Dictionary<GameObject, AnimationOnlyExportData> hierarchyToExportData
             ){
-                animationClips = new Dictionary<AnimationClip, GameObject> ();
-                mapGameObjectToExportSet = new Dictionary<GameObject, HashSet<GameObject>> ();
-                exportComponent = new Dictionary<GameObject, System.Type> ();
+                hierarchyToExportData = new Dictionary<GameObject, AnimationOnlyExportData>();
 
                 foreach (var go in exportSet) {
                     // gather all animation clips
@@ -2408,11 +2420,16 @@ namespace FbxExporters
                     var genericAnim = go.GetComponentsInChildren<Animator> ();
 
                     var goToExport = new HashSet<GameObject> ();
-                    mapGameObjectToExportSet.Add (go, goToExport);
+                    var animationClips = new Dictionary<AnimationClip, GameObject> ();
+                    var exportComponent = new Dictionary<GameObject, System.Type> ();
+
+                    var exportData = new AnimationOnlyExportData (animationClips, goToExport, exportComponent);
+
+                    hierarchyToExportData.Add (go, exportData);
 
                     foreach (var anim in legacyAnim) {
                         var animClips = AnimationUtility.GetAnimationClips (anim.gameObject);
-                        GetObjectsInAnimationClips (animClips, anim.gameObject, ref animationClips, ref goToExport, ref exportComponent);
+                        GetObjectsInAnimationClips (animClips, anim.gameObject, ref exportData);
                     }
 
                     foreach (var anim in genericAnim) {
@@ -2420,14 +2437,14 @@ namespace FbxExporters
                         var controller = anim.runtimeAnimatorController;
                         if (controller)
                         { 
-                            GetObjectsInAnimationClips (controller.animationClips, anim.gameObject, ref animationClips, ref goToExport, ref exportComponent);
+                            GetObjectsInAnimationClips (controller.animationClips, anim.gameObject, ref exportData);
                         }
                     }
                 }
 
                 int count = 0;
-                foreach (var es in mapGameObjectToExportSet.Values) {
-                    count += es.Count;
+                foreach (var data in hierarchyToExportData.Values) {
+                    count += data.goExportSet.Count;
                 }
 
                 return count;
@@ -2436,20 +2453,18 @@ namespace FbxExporters
             protected void GetObjectsInAnimationClips(
                 AnimationClip[] animClips, 
                 GameObject animationRootObject, 
-                ref Dictionary<AnimationClip, GameObject> clipSet, 
-                ref HashSet<GameObject> goToExport,
-                ref Dictionary<GameObject, System.Type> exportComponent
+                ref AnimationOnlyExportData exportData
             ){
                 var cameraProps = new List<string>{"field of view"};
                 var lightProps = new List<string>{"m_Intensity", "m_SpotAngle", "m_Color.r", "m_Color.g", "m_Color.b"};
 
                 foreach (var animClip in animClips) {
-                    if (clipSet.ContainsKey(animClip)) {
+                    if (exportData.animationClips.ContainsKey(animClip)) {
                         // we have already exported gameobjects for this clip
                         continue;
                     }
 
-                    clipSet.Add (animClip, animationRootObject);
+                    exportData.animationClips.Add (animClip, animationRootObject);
 
                     foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (animClip)) {
                         Object uniObj = AnimationUtility.GetAnimatedObject (animationRootObject, uniCurveBinding);
@@ -2464,12 +2479,12 @@ namespace FbxExporters
                         }
 
                         if (lightProps.Contains (uniCurveBinding.propertyName)) {
-                            exportComponent.Add (unityGo, typeof(Light));
+                            exportData.exportComponent.Add (unityGo, typeof(Light));
                         } else if (cameraProps.Contains (uniCurveBinding.propertyName)) {
-                            exportComponent.Add (unityGo, typeof(Camera));
+                            exportData.exportComponent.Add (unityGo, typeof(Camera));
                         }
 
-                        goToExport.Add (unityGo);
+                        exportData.goExportSet.Add (unityGo);
                     }
                 }
             }
