@@ -2182,7 +2182,7 @@ namespace FbxExporters
                 int exportProgress,
                 int objectCount,
                 Vector3 newCenter,
-                HashSet<AnimationClip> animationClips,
+                Dictionary<AnimationClip, GameObject> animationClips,
                 HashSet<GameObject> goExportSet,
                 Dictionary<GameObject, System.Type> exportComponent,
                 TransformExportType exportType = TransformExportType.Local
@@ -2235,7 +2235,7 @@ namespace FbxExporters
 
                 // export animation
                 foreach (var animClip in animationClips) {
-                    //ExportAnimationClip (animClip, animationRootObject, fbxScene);
+                    ExportAnimationClip (animClip.Key, animClip.Value, fbxScene);
                 }
             }
 
@@ -2394,11 +2394,11 @@ namespace FbxExporters
 
             protected int AnimOnlyHierarchyCount(
                 HashSet<GameObject> exportSet,
-                out HashSet<AnimationClip> animationClips, 
+                out Dictionary<AnimationClip, GameObject> animationClips, 
                 out Dictionary<GameObject, HashSet<GameObject>> mapGameObjectToExportSet,
                 out Dictionary<GameObject, System.Type> exportComponent
             ){
-                animationClips = new HashSet<AnimationClip> ();
+                animationClips = new Dictionary<AnimationClip, GameObject> ();
                 mapGameObjectToExportSet = new Dictionary<GameObject, HashSet<GameObject>> ();
                 exportComponent = new Dictionary<GameObject, System.Type> ();
 
@@ -2436,7 +2436,7 @@ namespace FbxExporters
             protected void GetObjectsInAnimationClips(
                 AnimationClip[] animClips, 
                 GameObject animationRootObject, 
-                ref HashSet<AnimationClip> clipSet, 
+                ref Dictionary<AnimationClip, GameObject> clipSet, 
                 ref HashSet<GameObject> goToExport,
                 ref Dictionary<GameObject, System.Type> exportComponent
             ){
@@ -2444,10 +2444,12 @@ namespace FbxExporters
                 var lightProps = new List<string>{"m_Intensity", "m_SpotAngle", "m_Color.r", "m_Color.g", "m_Color.b"};
 
                 foreach (var animClip in animClips) {
-                    if (!clipSet.Add (animClip)) {
+                    if (clipSet.ContainsKey(animClip)) {
                         // we have already exported gameobjects for this clip
                         continue;
                     }
+
+                    clipSet.Add (animClip, animationRootObject);
 
                     foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (animClip)) {
                         Object uniObj = AnimationUtility.GetAnimatedObject (animationRootObject, uniCurveBinding);
