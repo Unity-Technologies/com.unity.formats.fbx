@@ -2458,12 +2458,20 @@ namespace FbxExporters
                     }
                 }
 
-                int count = 0;
+                // including any parents of animated objects that are exported
+                var completeExpSet = new HashSet<GameObject>();
                 foreach (var data in hierarchyToExportData.Values) {
-                    count += data.goExportSet.Count;
+                    foreach (var go in data.goExportSet) {
+                        completeExpSet.Add (go);
+
+                        var parent = go.transform.parent;
+                        while (parent != null && completeExpSet.Add (parent.gameObject)) {
+                            parent = parent.parent;
+                        }
+                    }
                 }
 
-                return count;
+                return completeExpSet.Count;
             }
 
             protected void GetObjectsInAnimationClips(
