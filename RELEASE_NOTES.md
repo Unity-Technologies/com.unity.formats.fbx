@@ -1,5 +1,13 @@
 ﻿RELEASE NOTES
 
+**Version**: 1.3.0a1
+
+FIXES
+* FbxExporter: fixed so last keyframe is exported
+* fix Universal Windows Platform build errors
+
+Error caused by UnityFbxSdk.dll being set as compatible with any platform instead of editor only.
+
 **Version**: sprint43
 
 NEW FEATURES

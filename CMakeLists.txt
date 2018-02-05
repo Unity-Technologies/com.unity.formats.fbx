@@ -23,7 +23,7 @@ endif()
 message(STATUS "Building for ${CMAKE_BUILD_TYPE}")
 
 if (NOT DEFINED PACKAGE_VERSION OR "${PACKAGE_VERSION}" STREQUAL "")
-    set(PACKAGE_VERSION "sprint43")
+    set(PACKAGE_VERSION "1.3.0a1")
 endif()
 message(STATUS "Using Package Version: ${PACKAGE_VERSION}")
 
@@ -259,3 +259,4 @@ endif()
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/meta/FbxExporters
         DESTINATION .)
 install(FILES "${CMAKE_SOURCE_DIR}/meta/FbxExporters.meta" DESTINATION .)
+install(FILES "${CMAKE_SOURCE_DIR}/RELEASE_NOTES_EXTERNAL.md" DESTINATION FbxExporters RENAME "RELEASE_NOTES.txt")
