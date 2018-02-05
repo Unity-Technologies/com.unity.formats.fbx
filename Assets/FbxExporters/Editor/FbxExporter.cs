@@ -2228,7 +2228,9 @@ namespace FbxExporters
                     foreach (var bone in bones) {
                         FbxNode node;
                         if (!ExportGameObjectAndParents (
-                            bone.gameObject, unityGO, fbxScene, out node, newCenter, exportType, ref numObjectsExported, objectCount, skinnedMesh, boneDict, rootBone, true
+                            bone.gameObject, unityGO, fbxScene, out node, newCenter, 
+                            exportType, ref numObjectsExported, objectCount,
+                            new SkinnedMeshBoneInfo(rootBone, skinnedMesh, boneDict)
                            )) {
                             // export cancelled
                             return -1;
@@ -2264,6 +2266,18 @@ namespace FbxExporters
                 return numObjectsExported;
             }
 
+            class SkinnedMeshBoneInfo {
+                public Transform rootBone;
+                public SkinnedMeshRenderer skinnedMesh;
+                public Dictionary<Transform, int> boneDict;
+
+                public SkinnedMeshBoneInfo(Transform root, SkinnedMeshRenderer skinnedMesh, Dictionary<Transform, int> boneDict){
+                    this.rootBone = root;
+                    this.skinnedMesh = skinnedMesh;
+                    this.boneDict = boneDict;
+                }
+            }
+
             private bool ExportGameObjectAndParents(
                 GameObject unityGo,
                 GameObject rootObject,
@@ -2273,10 +2287,7 @@ namespace FbxExporters
                 TransformExportType exportType,
                 ref int exportProgress,
                 int objectCount,
-                SkinnedMeshRenderer skinnedMesh = null,
-                Dictionary<Transform, int> boneDict = null,
-                Transform rootBone = null,
-                bool isBone = false)
+                SkinnedMeshBoneInfo boneInfo = null)
             {
                 // node already exists
                 if (MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
@@ -2308,8 +2319,8 @@ namespace FbxExporters
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
                 // TODO: check if GO is a bone and export accordingly
-                var exportedBoneTransform = isBone? 
-                    ExportBoneTransform (fbxNode, fbxScene, unityGo.transform, rootBone, skinnedMesh, boneDict) : false;
+                var exportedBoneTransform = boneInfo != null? 
+                    ExportBoneTransform (fbxNode, fbxScene, unityGo.transform, boneInfo) : false;
 
                 // export regular transform if we are not a bone or failed to export as a bone
                 if(!exportedBoneTransform){
@@ -2317,9 +2328,9 @@ namespace FbxExporters
                 }
 
                 if (unityGo.transform.parent != null || unityGo.transform.parent != rootObject.transform.parent) {
-                    var parentIsBone = false;
-                    if (isBone && rootBone != null && unityGo.transform != rootBone) {
-                        parentIsBone = true;
+                    SkinnedMeshBoneInfo parentBoneInfo = null;
+                    if (boneInfo != null && boneInfo.rootBone != null && unityGo.transform != boneInfo.rootBone) {
+                        parentBoneInfo = boneInfo;
                     }
 
                     FbxNode fbxNodeParent;
@@ -2332,10 +2343,7 @@ namespace FbxExporters
                         TransformExportType.Local,
                         ref exportProgress,
                         objectCount,
-                        skinnedMesh,
-                        boneDict,
-                        rootBone,
-                        parentIsBone
+                        parentBoneInfo
                     )) {
                         // export cancelled
                         return false;
@@ -2343,7 +2351,7 @@ namespace FbxExporters
                     fbxNodeParent.AddChild (fbxNode);
                 }
 
-                if (unityGo == rootObject) {
+                if (unityGo == rootObject || unityGo.transform.parent == null) {
                     fbxScene.GetRootNode ().AddChild (fbxNode);
                 }
 
@@ -2351,14 +2359,18 @@ namespace FbxExporters
             }
 
             private bool ExportBoneTransform(
-                FbxNode fbxNode, FbxScene fbxScene, Transform unityBone, Transform rootBone,
-                SkinnedMeshRenderer skinnedMesh, Dictionary<Transform, int> boneDict
+                FbxNode fbxNode, FbxScene fbxScene, Transform unityBone, SkinnedMeshBoneInfo boneInfo
             ){
-                if (skinnedMesh == null || boneDict == null || unityBone == null) {
+                if (boneInfo != null || boneInfo.skinnedMesh == null || boneInfo.boneDict == null || unityBone == null) {
                     return false;
                 }
+
+                var rootBone = boneInfo.rootBone;
+                var skinnedMesh = boneInfo.skinnedMesh;
+                var boneDict = boneInfo.boneDict;
+
                 if (rootBone == null) {
-                    rootBone = skinnedMesh.rootBone;
+                    boneInfo.rootBone = skinnedMesh.rootBone;
                 }
 
                 var fbxSkeleton = fbxNode.GetSkeleton ();
@@ -2481,6 +2493,7 @@ namespace FbxExporters
                 GameObject animationRootObject, 
                 ref AnimationOnlyExportData exportData
             ){
+                // TODO: find a better way to keep track of which components + properties we support
                 var cameraProps = new List<string>{"field of view"};
                 var lightProps = new List<string>{"m_Intensity", "m_SpotAngle", "m_Color.r", "m_Color.g", "m_Color.b"};
 
@@ -2497,7 +2510,6 @@ namespace FbxExporters
                         if (!uniObj) {
                             continue;
                         }
-                        //Debug.LogWarning (uniObj.name + ": " + uniCurveBinding.propertyName);
 
                         GameObject unityGo = GetGameObject (uniObj);
                         if (!unityGo) {
