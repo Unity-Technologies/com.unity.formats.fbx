@@ -2213,6 +2213,14 @@ namespace FbxExporters
                 }
 
                 // export animation
+
+                // export default clip first
+                if (exportData.defaultClip != null) {
+                    var defaultClip = exportData.defaultClip;
+                    ExportAnimationClip (defaultClip, exportData.animationClips[defaultClip], fbxScene);
+                    exportData.animationClips.Remove (defaultClip);
+                }
+
                 foreach (var animClip in exportData.animationClips) {
                     ExportAnimationClip (animClip.Key, animClip.Value, fbxScene);
                 }
@@ -2402,17 +2410,66 @@ namespace FbxExporters
 
                     hierarchyToExportData.Add (go, exportData);
 
+                    int fromRoot = int.MaxValue;
+                    Animation rootAnimation = null;
                     foreach (var anim in legacyAnim) {
+                        int count = 0;
+                        var parent = anim.transform.parent;
+                        while (parent != null && parent != go.transform) {
+                            count++;
+                            parent = parent.parent;
+                        }
+
+                        if (count < fromRoot) {
+                            fromRoot = count;
+                            rootAnimation = anim;
+                        }
+
                         var animClips = AnimationUtility.GetAnimationClips (anim.gameObject);
                         GetObjectsInAnimationClips (animClips, anim.gameObject, ref exportData);
                     }
 
+                    int aFromRoot = int.MaxValue;
+                    Animator rootAnimator = null;
                     foreach (var anim in genericAnim) {
+                        int count = 0;
+                        var parent = anim.transform.parent;
+                        while (parent != null && parent != go.transform) {
+                            count++;
+                            parent = parent.parent;
+                        }
+
+                        if (count < aFromRoot) {
+                            aFromRoot = count;
+                            rootAnimator = anim;
+                        }
+
                         // Try the animator controller (mecanim)
                         var controller = anim.runtimeAnimatorController;
                         if (controller)
                         { 
                             GetObjectsInAnimationClips (controller.animationClips, anim.gameObject, ref exportData);
+                        }
+                    }
+
+                    // set the first clip to export
+                    if (fromRoot < aFromRoot) {
+                        exportData.defaultClip = rootAnimation.clip;
+                    } else {
+                        // Try the animator controller (mecanim)
+                        var controller = rootAnimator.runtimeAnimatorController;
+                        if (controller) {
+                            var dController = controller as UnityEditor.Animations.AnimatorController;
+                            if (dController && dController.layers.Count () > 0) {
+                                var motion = dController.layers [0].stateMachine.defaultState.motion;
+                                var defaultClip = motion as AnimationClip;
+                                if (defaultClip) {
+                                    Debug.LogWarning ("default clip: " + defaultClip.name);
+                                    exportData.defaultClip = defaultClip;
+                                } else {
+                                    Debug.LogWarningFormat ("Couldn't export motion {0}", motion.name);
+                                }
+                            }
                         }
                     }
                 }
