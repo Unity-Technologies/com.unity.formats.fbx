@@ -941,11 +941,8 @@ namespace FbxExporters
 
                 // Three steps:
                 // 0. Set up the map from bone to index.
-                // 1. Create the bones, in arbitrary order.
-                // 2. Connect up the hierarchy.
-                // 3. Set the transforms.
-                // Step 0 supports step 1 (finding which is the root bone) and step 3
-                // (setting up transforms; the complication is the use of pivots).
+                // 1. Gather complete list of bones
+                // 2. Set the transforms.
 
                 // Step 0: map transform to index so we can look up index by bone.
                 Dictionary<Transform, int> index = new Dictionary<Transform, int>();
@@ -971,6 +968,7 @@ namespace FbxExporters
                 var boneList = boneSet.ToArray();
                 skinnedMeshToBonesMap.Add (skinnedMesh, boneList);
 
+                // Step 2: Set transforms
                 var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, index);
                 foreach (var bone in boneList) {
                     var fbxBone = MapUnityObjectToFbxNode [bone.gameObject];
@@ -2103,6 +2101,7 @@ namespace FbxExporters
                 public Dictionary<AnimationClip, GameObject> animationClips;
                 public HashSet<GameObject> goExportSet;
                 public Dictionary<GameObject, System.Type> exportComponent;
+                public AnimationClip defaultClip; // first clip to export
 
                 public AnimationOnlyExportData(
                     Dictionary<AnimationClip, GameObject> animClips,
@@ -2112,6 +2111,7 @@ namespace FbxExporters
                     this.animationClips = animClips;
                     this.goExportSet = exportSet;
                     this.exportComponent = exportComponent;
+                    this.defaultClip = null;
                 }
             }
 
@@ -3176,7 +3176,7 @@ namespace FbxExporters
             /// <summary>
             /// Get the GameObject
             /// </summary>
-            private static GameObject GetGameObject (Object obj)
+            public static GameObject GetGameObject (Object obj)
             {
                 if (obj is UnityEngine.Transform) {
                     var xform = obj as UnityEngine.Transform;
@@ -3484,9 +3484,9 @@ namespace FbxExporters
                 return null;
             }
 
-            public static string ExportObject (string filePath, UnityEngine.Object root)
+            public static string ExportObject (string filePath, UnityEngine.Object root, bool animOnly = false)
             {
-                return ExportObjects(filePath, new Object[] { root } );
+                return ExportObjects(filePath, new Object[] { root }, animOnly);
             }
 
             private static void EnsureDirectory (string path)
