@@ -893,29 +893,6 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Determines whether this Transform is a bone.
-            /// A transform is a bone if it is in the skinned meshes bone list (represented here as a bones dict),
-            /// or if it has both an ancestor or descendant that are bones (i.e. if it is sandwiched between two bones,
-            /// it should be a bone as well).
-            /// </summary>
-            /// <returns><c>true</c> if this transform is a bone; otherwise, <c>false</c>.</returns>
-            /// <param name="t">Transform.</param>
-            /// <param name="bones">Skinned meshes bones.</param>
-            private bool IsBone (Transform t, Dictionary<Transform, int> bones)
-            {
-                if (bones.ContainsKey (t)) {
-                    return true;
-                }
-
-                foreach (Transform child in t) {
-                    if (IsBone (child, bones)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            /// <summary>
             /// Gets the bind pose for the Unity bone.
             /// </summary>
             /// <returns>The bind pose.</returns>
@@ -977,28 +954,17 @@ namespace FbxExporters
                     index[unityBoneTransform] = boneIndex;
                 }
 
-                // Step 1: create the bones.
+                // Step 1: gather all the bones
                 HashSet<Transform> boneSet = new HashSet<Transform> ();
-                var s = new Stack<Transform> ();
-                s.Push(skinnedMesh.rootBone);
+                var s = new Stack<Transform> (bones);
+                var root = skinnedMesh.rootBone;
                 while (s.Count > 0) {
-                    var t = s.Pop();
+                    var t = s.Pop ();
 
-                    if (IsBone(t, index)) {
-                        if (!boneSet.Contains (t)) {
-                            // Create the bone node if we haven't already. Parent it to
-                            // its corresponding parent, or to the scene if there is none.
-                            FbxNode fbxBoneNode;
-                            if (!MapUnityObjectToFbxNode.TryGetValue (t.gameObject, out fbxBoneNode)) {
-                                Debug.LogErrorFormat("Node {0} should already be created", t.name);
-                            }
+                    boneSet.Add (t);
 
-                            boneSet.Add (t);
-                        }
-
-                        foreach (Transform child in t) {
-                            s.Push (child);
-                        }
+                    if (t != root && t.parent != null && !boneSet.Contains(t.parent)) {
+                        s.Push (t.parent);
                     }
                 }
 
