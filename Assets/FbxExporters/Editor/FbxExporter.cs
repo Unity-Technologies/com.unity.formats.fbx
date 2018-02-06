@@ -1373,7 +1373,7 @@ namespace FbxExporters
                 var keyTimes = new HashSet<float>();
                 double fs = 1.0/sampleRate;
 
-                double currSample = double.MaxValue, firstTime = double.MaxValue, lastTime = double.MinValue;
+                double firstTime = double.MaxValue, lastTime = double.MinValue;
 
                 foreach (var ac in animCurves)
                 {
@@ -1383,9 +1383,10 @@ namespace FbxExporters
                     lastTime = System.Math.Max(lastTime, ac[ac.length-1].time);
                 }
 
-                for (currSample = firstTime; currSample < lastTime; currSample += fs) 
-                {
-                    keyTimes.Add((float)currSample);
+                int firstframe = (int)(firstTime * sampleRate);
+                int lastframe = (int)(lastTime * sampleRate);
+                for (int i = firstframe; i <= lastframe; i++) {
+                    keyTimes.Add ((float)(i * fs));
                 }
 
                 return keyTimes;
@@ -2952,7 +2953,7 @@ namespace FbxExporters
             }
 
             /// <summary>
-            // Validate the menu item defined by the function above.
+            /// Validate the menu item defined by the function above.
             /// </summary>
             [MenuItem (MenuItemName, true, 30)]
             public static bool OnValidateMenuItem ()
@@ -2990,6 +2991,7 @@ namespace FbxExporters
                     "No GameObjects selected for export.", 
                     "Ok");
             }
+
             //
             // export mesh info from Unity
             //
