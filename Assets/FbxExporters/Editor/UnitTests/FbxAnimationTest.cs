@@ -489,7 +489,36 @@ namespace FbxExporters.UnitTests
                 Assert.That (animClipActual.wrapMode, Is.EqualTo (animClipExpected.wrapMode));
 
                 // TODO: Uni-34489
-                Assert.That (animClipActual.length, Is.EqualTo (animClipExpected.length).Within (Mathf.Epsilon), "animClip length doesn't match");
+                Assert.That (animClipActual.length, Is.EqualTo (animClipExpected.length).Within (0.0001f), "animClip length doesn't match");
+            }
+
+            /// <summary>
+            /// Compares the properties and curves of two animation clips.
+            /// </summary>
+            /// <param name="animClipOriginal">Animation clip original.</param>
+            /// <param name="animClipImported">Animation clip imported.</param>
+            public static void ClipTest(AnimationClip animClipOriginal, AnimationClip animClipImported){
+                // check clip properties match
+                AnimTester.ClipPropertyTest (animClipOriginal, animClipImported);
+
+                foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (animClipOriginal)) {
+                    foreach(EditorCurveBinding impCurveBinding in AnimationUtility.GetCurveBindings (animClipImported)) {
+
+                        // only compare if the path and property names match
+                        if (curveBinding.path != impCurveBinding.path || curveBinding.propertyName != impCurveBinding.propertyName) {
+                            continue;
+                        }
+
+                        AnimationCurve animCurveOrig = AnimationUtility.GetEditorCurve (animClipOriginal, curveBinding);
+                        Assert.That (animCurveOrig, Is.Not.Null);
+
+                        AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, impCurveBinding);
+                        Assert.That (animCurveImported, Is.Not.Null);
+
+                        AnimTester.KeyValuesTest(animCurveImported, animCurveOrig,
+                            string.Format("path: {0}, property: {1}", curveBinding.path, curveBinding.propertyName));
+                    }
+                }
             }
 
             public static void KeysTest (AnimationCurve expectedAnimCurve, AnimationCurve actualAnimCurve, string message, IComparer<Keyframe> keyComparer = null)
@@ -645,26 +674,7 @@ namespace FbxExporters.UnitTests
 
             var animClipImported = AnimTester.GetClipFromFbx (filename);
 
-            // check clip properties match
-            AnimTester.ClipPropertyTest (animClipOriginal, animClipImported);
-
-            foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (animClipOriginal)) {
-                foreach(EditorCurveBinding impCurveBinding in AnimationUtility.GetCurveBindings (animClipImported)) {
-
-                    // only compare if the path and property names match
-                    if (curveBinding.path != impCurveBinding.path || curveBinding.propertyName != impCurveBinding.propertyName) {
-                        continue;
-                    }
-
-                    AnimationCurve animCurveOrig = AnimationUtility.GetEditorCurve (animClipOriginal, curveBinding);
-                    Assert.That (animCurveOrig, Is.Not.Null);
-
-                    AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, impCurveBinding);
-                    Assert.That (animCurveImported, Is.Not.Null);
-
-                    AnimTester.CurveTest(animCurveImported, animCurveOrig, curveBinding.propertyName);
-                }
-            }
+            AnimTester.ClipTest (animClipOriginal, animClipImported);
         }
 
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "TransformIndependantComponentTestCases")]
@@ -848,28 +858,8 @@ namespace FbxExporters.UnitTests
 
             foreach (var clip in animClips) {
                 Assert.That (fbxAnimClips.ContainsKey (clip.name));
-
                 var fbxClip = fbxAnimClips [clip.name];
-
-                AnimTester.ClipPropertyTest (clip, fbxClip);
-
-                foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (clip)) {
-                    foreach(EditorCurveBinding impCurveBinding in AnimationUtility.GetCurveBindings (fbxClip)) {
-
-                        // only compare if the path and property names match
-                        if (curveBinding.path != impCurveBinding.path || curveBinding.propertyName != impCurveBinding.propertyName) {
-                            continue;
-                        }
-
-                        AnimationCurve animCurveOrig = AnimationUtility.GetEditorCurve (clip, curveBinding);
-                        Assert.That (animCurveOrig, Is.Not.Null);
-
-                        AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (fbxClip, impCurveBinding);
-                        Assert.That (animCurveImported, Is.Not.Null);
-
-                        AnimTester.CurveTest(animCurveImported, animCurveOrig, curveBinding.propertyName);
-                    }
-                }
+                AnimTester.ClipTest (clip, fbxClip);
             }
         }
 
