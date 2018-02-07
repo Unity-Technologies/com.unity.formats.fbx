@@ -244,7 +244,9 @@ global proc unityExport(){
             continue;
         }
         
-        if(`sets -isIntersecting $exportSet $selectedSetList`){
+        if(`sets -isIntersecting $exportSet $selectedSetList` ||
+            stringArrayContains($exportSet, $origSelection)){
+            
             $setsToExport[$i] = $exportSet;
             $i++;
         }
@@ -252,6 +254,12 @@ global proc unityExport(){
     
     // delete temporary selection set
     delete $selectedSet;
+    
+    // if selection doesn't belong to a set, export to a new file
+    if(size($setsToExport) <= 0){
+        eval "SendToUnitySelection";
+        return;
+    }
     
     for($unitySet in $setsToExport){
         print ("exporting set: " + $unitySet);
