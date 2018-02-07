@@ -222,14 +222,6 @@ namespace FbxExporters
         }
 
 
-        static void DisplayNoSelectionDialog(string message)
-        {
-            UnityEditor.EditorUtility.DisplayDialog(
-                string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME),
-                message,
-                "Ok");
-        }
-
         /// <summary>
         /// Launch the manual update of the linked prefab specified
         /// </summary>
@@ -262,7 +254,7 @@ namespace FbxExporters
             public string GetUnityObjectName(string fbxObjectName)
             {
                 string newNameInUnity = fbxObjectName;
-                if (String.IsNullOrEmpty(fbxObjectName) && m_fbxPrefab.NameMapping != null) {
+                if (!String.IsNullOrEmpty(fbxObjectName) && m_fbxPrefab.NameMapping != null) {
                     foreach (var nameMapping in m_fbxPrefab.NameMapping) {
                         if (fbxObjectName == nameMapping.FBXObjectName) {
                             newNameInUnity = nameMapping.UnityObjectName;
@@ -272,13 +264,64 @@ namespace FbxExporters
                 }
                 return newNameInUnity;
             }
+
+            /// <summary>
+            /// Utility function: remove the name mapping matching the unity name specified
+            /// </summary>
+            public void RemoveMappingFBXObjectName(string fbxObjectName)
+            {
+                FbxPrefab.StringPair stockNameMapping = new FbxPrefab.StringPair();
+                if (!String.IsNullOrEmpty(fbxObjectName) && m_fbxPrefab.NameMapping != null)
+                {
+                    bool foundMapping = false;
+                    foreach (FbxPrefab.StringPair nameMapping in m_fbxPrefab.NameMapping)
+                    {
+                        if (fbxObjectName == nameMapping.FBXObjectName)
+                        {
+                            stockNameMapping = nameMapping;
+                            foundMapping = true;
+                            break;
+                        }
+                    }
+                    if (foundMapping)
+                    {
+                        m_fbxPrefab.NameMapping.Remove(stockNameMapping);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Utility function: remove the name mapping matching the FBX name specified
+            /// </summary>
+            public void RemoveMappingUnityObjectName(string unityObjectName)
+            {
+                FbxPrefab.StringPair stockNameMapping = new FbxPrefab.StringPair();
+                if (!String.IsNullOrEmpty(unityObjectName) && m_fbxPrefab.NameMapping != null)
+                {
+                    bool foundMapping = false;
+                    foreach (FbxPrefab.StringPair nameMapping in m_fbxPrefab.NameMapping)
+                    {
+                        if (unityObjectName == nameMapping.UnityObjectName)
+                        {
+                            stockNameMapping = nameMapping;
+                            foundMapping = true;
+                            break;
+                        }
+                    }
+                    if (foundMapping)
+                    {
+                        m_fbxPrefab.NameMapping.Remove(stockNameMapping);
+                    }
+                }
+            }
+
             /// <summary>
             /// Utility function: check if the user has specified a matching FBX name in the inspector
             /// </summary> 
             public string GetFBXObjectName(string unityObjectName)
             {
                 string oldNameInFBX = unityObjectName;
-                if (String.IsNullOrEmpty(unityObjectName) && m_fbxPrefab.NameMapping != null) {
+                if (!String.IsNullOrEmpty(unityObjectName) && m_fbxPrefab.NameMapping != null) {
                     foreach (var nameMapping in m_fbxPrefab.NameMapping) {
                         if (unityObjectName == nameMapping.UnityObjectName) {
                             oldNameInFBX = nameMapping.FBXObjectName;
@@ -1039,6 +1082,21 @@ namespace FbxExporters
                         ;
                 }
 
+                public HashSet<String> GetNodesToCreate()
+                {
+                    return m_nodesToCreate;
+                }
+
+                public HashSet<String> GetNodesToDestroy()
+                {
+                    return m_nodesToDestroy;
+                }
+
+                public HashSet<String> GetNodesToRename()
+                {
+                    return m_nodesToRename;
+                }
+
                 /// <summary>
                 /// Then we act -- in a slightly different order:
                 /// 1. Create all the new nodes we need to create.
@@ -1082,12 +1140,28 @@ namespace FbxExporters
                         updatedNodes.Add(newNode);
                     }
 
+
+                    // Rename old nodes (unity names) into new nodes (FBX names).
+                    // We do it before the reparenting because m_reparentings contains the fbx name and won't find the parent without the renaming
+                    foreach (var FBXNodeNameToRename in m_nodesToRename)
+                    {
+                        if (prefabNodes[m_fbxPrefabUtility.GetUnityObjectName(FBXNodeNameToRename)] != null)
+                        { 
+                            prefabNodes[m_fbxPrefabUtility.GetUnityObjectName(FBXNodeNameToRename)].name = FBXNodeNameToRename;
+
+                            Transform stockTransform = prefabNodes[m_fbxPrefabUtility.GetUnityObjectName(FBXNodeNameToRename)];
+                            prefabNodes.Remove(m_fbxPrefabUtility.GetUnityObjectName(FBXNodeNameToRename));
+                            prefabNodes.Add(FBXNodeNameToRename, stockTransform);
+                            Log("Renamed {0} into {1}", m_fbxPrefabUtility.GetUnityObjectName(FBXNodeNameToRename), FBXNodeNameToRename);
+                        }
+                    }
+
                     // Implement the reparenting in two phases to avoid making loops, e.g.
                     // if we're flipping from a -> b to b -> a, we don't want to
                     // have a->b->a in the intermediate stage.
 
                     // First set the parents to null.
-                    foreach(var kvp in m_reparentings) {
+                    foreach (var kvp in m_reparentings) {
                         var name = kvp.Key;
                         prefabNodes[name].parent = null;
                     }
@@ -1136,17 +1210,12 @@ namespace FbxExporters
                             }
                         }
                     }
-                    
-                    // Rename old nodes (unity names) into new nodes (FBX names).
-                    foreach (var FBXNodeNameToRename in m_nodesToRename)
-                    {
-                        prefabNodes[m_fbxPrefabUtility.GetUnityObjectName(FBXNodeNameToRename)].name = FBXNodeNameToRename;
-                        Log("Renamed {0} into {1}", m_fbxPrefabUtility.GetUnityObjectName(FBXNodeNameToRename), FBXNodeNameToRename);
-                    }
 
                     // Create or update the new components.
                     foreach (var kvp in m_componentsToUpdate) {
                         var componentName = kvp.Key;
+                        // We rename the node before the loop, so the component name now has the FBX object name, instead of the unity one that was saved
+                        componentName = m_fbxPrefabUtility.GetFBXObjectName(componentName);
                         Debug.Log("Component: " + componentName);
                         var fbxComponents = kvp.Value;
                         var prefabXfo = prefabNodes[componentName];

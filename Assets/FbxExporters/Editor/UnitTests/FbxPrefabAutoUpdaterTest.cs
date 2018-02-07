@@ -145,6 +145,32 @@ namespace FbxExporters.UnitTests
             AssertSameHierarchy(newHierarchy, oldInstance, ignoreRootName: true, ignoreRootTransform: true);
         }
 
+        [Test]
+        public void TestNameMapping()
+        {
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+            string filePath = GetRandomFbxFilePath();
+
+            // Convert to linked prefab instance (auto-updating prefab)
+            GameObject cubePrefabInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath);
+
+            // In FbxPrefab Component of Cube, add SphereFBX/Sphere name mapping
+            FbxPrefab fbxPrefabScript = cubePrefabInstance.transform.GetComponent<FbxPrefab>();
+
+
+            FbxPrefab.StringPair stringpair = new FbxPrefab.StringPair();
+            stringpair.FBXObjectName = "SphereFBX";
+            stringpair.UnityObjectName = "Sphere";
+            fbxPrefabScript.NameMapping.Add(stringpair);
+
+
+            FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility(fbxPrefabScript);
+
+            Assert.IsTrue(fbxPrefabUtility.GetUnityObjectName("SphereFBX") == stringpair.UnityObjectName);
+            Assert.IsTrue(fbxPrefabUtility.GetFBXObjectName("Sphere") == stringpair.FBXObjectName);
+
+        }
     }
 
     public class FbxPrefabAutoUpdaterRemappingTest : ExporterTestBase

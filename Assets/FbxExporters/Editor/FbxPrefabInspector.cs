@@ -17,9 +17,9 @@ namespace FbxExporters.EditorTools {
                 EditorGUILayout.HelpBox("Please select a prefab. You can't edit an instance in the scene.",
                         MessageType.Info);
             }
-            EditorGUI.BeginDisabledGroup(isDisabled);
 
-            var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
+            EditorGUI.BeginDisabledGroup(isDisabled);
+            FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
             var oldFbxAsset = fbxPrefabUtility.GetFbxAsset();
             var newFbxAsset = EditorGUILayout.ObjectField(new GUIContent("Source Fbx Asset", "The FBX file that is linked to this Prefab"), oldFbxAsset,
                     typeof(GameObject), allowSceneObjects: false) as GameObject;
@@ -28,12 +28,19 @@ namespace FbxExporters.EditorTools {
             } else if (newFbxAsset != oldFbxAsset) {
                 fbxPrefabUtility.SetSourceModel(newFbxAsset);
             }
-
             EditorGUI.EndDisabledGroup();
 
             EditorGUILayout.PropertyField(m_GameObjectProp, true);
 
 #if FBXEXPORTER_DEBUG
+            if (GUILayout.Button("Update prefab manually..."))
+            {
+                // Get existing open window or if none, make a new one:
+                ManualUpdateEditorWindow window = (ManualUpdateEditorWindow)EditorWindow.GetWindow(typeof(ManualUpdateEditorWindow));
+                window.Init(fbxPrefabUtility, fbxPrefab);
+                window.Show();
+            }
+
             EditorGUILayout.LabelField ("Debug info:");
             try {
                 fbxPrefabUtility.GetFbxHistory().ToJson();
