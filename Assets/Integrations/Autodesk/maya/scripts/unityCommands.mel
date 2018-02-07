@@ -1,6 +1,8 @@
-global string $UnityExportSets[];// = "UnityFbxExportSet";
-global string $UnityFbxFilePathAttr = "unityFbxFilePath";
-global string $UnityFbxFileNameAttr = "unityFbxFileName";
+global string $UnityExportSets[];
+global string $UnityFbxFilePathAttr = "unityFbxModelFilePath";
+global string $UnityFbxFileNameAttr = "unityFbxModelFileName";
+global string $UnityFbxAnimFilePathAttr = "unityFbxAnimFilePath";
+global string $UnityFbxAnimFileNameAttr = "unityFbxAnimFileName";
 
 global proc unityRemoveNativeMenuOnLoad(){
     $removeSendToUnityMenu = `optionVar -q "UnityFbxForMaya_removeSendToUnityMenu"`;
@@ -94,6 +96,8 @@ global proc unityImport(){
     global string $UnityExportSets[];
     global string $UnityFbxFilePathAttr;
     global string $UnityFbxFileNameAttr;
+    global string $UnityFbxAnimFilePathAttr;
+    global string $UnityFbxAnimFileNameAttr;
 
     if(!loadUnityDependencies()){
         error("Failed to load Unity dependencies");
@@ -112,29 +116,48 @@ global proc unityImport(){
     if(size($filePaths) <= 0){
         return;
     }
-    for( $i=0; $i<size($filePaths); ++$i ){
+    for($i=0; $i<size($filePaths); ++$i){
         $filePathStr = $filePaths[$i];
         $tempPath = dirname($filePathStr);
         $tempName = basename($filePathStr, "");
-        $unityExportSet = basename($filePathStr, ".fbx") + "_UnityExportSet";
+        $tempAnimPath = "";
+        $tempAnimName = "";
+        $nameWithoutExt = basename($filePathStr, ".fbx");
+        
+        $isAnimFile = false;
+        if(match("@", basename($filePathStr, ".fbx")) != ""){
+            // import as animation
+            $isAnimFile = true;
+            $tempAnimPath = $tempPath;
+            $tempAnimName = $tempName;
+            
+            $nameWithoutExt = match("[^@]+", $nameWithoutExt);
+        }
+        $unityExportSet = $nameWithoutExt + "_UnityExportSet";
 
         // Gather everything that is in the scene
         $origItemsInScene = `ls -tr -o -r true`;
             
         // Get or create the Unity Fbx Export Set
+        $setCreated = false;
         if (!setExists($unityExportSet)){
             // couldn't find export set so create it
             sets -name $unityExportSet;
-            // unlock set so we can add attributes to it
-            lockNode -lock false $unityExportSet;
+            $setCreated = true;
         }
-        // reset attribute values, in case import fails
-        storeAttribute($unityExportSet, $UnityFbxFilePathAttr, "");
-        storeAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
+        
+        // unlock set so we can add attributes to it
+        lockNode -lock false $unityExportSet;
+        
+        if(!$isAnimFile){
+            // reset attribute values, in case import fails
+            storeAttribute($unityExportSet, $UnityFbxFilePathAttr, "");
+            storeAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
+        }
         
         FBXImport -f $filePathStr;
         
-        if ($tempPath != ""){
+        if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $tempPath != ""){
             storeAttribute($unityExportSet, $UnityFbxFilePathAttr, $tempPath);
             
             // Change Unity project if fbx is from a different Unity project.
@@ -155,8 +178,16 @@ global proc unityImport(){
             }
         }
         
-        if ($tempName != ""){
+        if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $tempName != ""){
             storeAttribute($unityExportSet,$UnityFbxFileNameAttr,$tempName);
+        }
+        
+        if($tempAnimPath != ""){
+            storeAttribute($unityExportSet,$UnityFbxAnimFilePathAttr,$tempAnimPath);
+        }
+        
+        if($tempAnimName != ""){
+            storeAttribute($unityExportSet,$UnityFbxAnimFileNameAttr,$tempAnimName);
         }
         
         if (setExists($unityExportSet) == true){
