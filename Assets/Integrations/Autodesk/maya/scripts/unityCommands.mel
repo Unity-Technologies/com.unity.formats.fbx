@@ -3,6 +3,7 @@ global string $UnityFbxFilePathAttr = "unityFbxModelFilePath";
 global string $UnityFbxFileNameAttr = "unityFbxModelFileName";
 global string $UnityFbxAnimFilePathAttr = "unityFbxAnimFilePath";
 global string $UnityFbxAnimFileNameAttr = "unityFbxAnimFileName";
+global string $UnityExportSetNameFormat = "^1s_UnityExportSet";
 
 global proc unityRemoveNativeMenuOnLoad(){
     $removeSendToUnityMenu = `optionVar -q "UnityFbxForMaya_removeSendToUnityMenu"`;
@@ -98,6 +99,7 @@ global proc unityImport(){
     global string $UnityFbxFileNameAttr;
     global string $UnityFbxAnimFilePathAttr;
     global string $UnityFbxAnimFileNameAttr;
+    global string $UnityExportSetNameFormat;
 
     if(!loadUnityDependencies()){
         error("Failed to load Unity dependencies");
@@ -133,7 +135,7 @@ global proc unityImport(){
             
             $nameWithoutExt = match("[^@]+", $nameWithoutExt);
         }
-        $unityExportSet = $nameWithoutExt + "_UnityExportSet";
+        $unityExportSet = `format -stringArg $nameWithoutExt $UnityExportSetNameFormat`;
 
         // Gather everything that is in the scene
         $origItemsInScene = `ls -tr -o -r true`;
