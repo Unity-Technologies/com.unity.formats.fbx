@@ -6,7 +6,6 @@ using UnityEditor;
 using System.Linq;
 using System;
 using FbxExporters.Editor;
-using UnityEngine.TestTools;
 
 namespace FbxExporters
 {
