@@ -271,6 +271,12 @@ proc unityExport(int $exportAnim){
     
         select -r -ne $unitySet;
         
+        if($exportAnim){
+            string $animCurveSelect[] = `ls -typ animCurve`;
+            string $animatedTransforms[] = `listConnections -t transform $animCurveSelect`;
+            select -r $animatedTransforms;
+        }
+        
         $pathAttr = $UnityFbxFilePathAttr;
         $nameAttr = $UnityFbxFileNameAttr;
         
