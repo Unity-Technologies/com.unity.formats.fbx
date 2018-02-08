@@ -2144,6 +2144,44 @@ namespace FbxExporters
                     this.exportComponent = exportComponent;
                     this.defaultClip = null;
                 }
+
+                public void ComputeObjectsInAnimationClips(
+                    AnimationClip[] animClips, 
+                    GameObject animationRootObject
+                ){
+                    // TODO: find a better way to keep track of which components + properties we support
+                    var cameraProps = new List<string>{"field of view"};
+                    var lightProps = new List<string>{"m_Intensity", "m_SpotAngle", "m_Color.r", "m_Color.g", "m_Color.b"};
+
+                    foreach (var animClip in animClips) {
+                        if (this.animationClips.ContainsKey(animClip)) {
+                            // we have already exported gameobjects for this clip
+                            continue;
+                        }
+
+                        this.animationClips.Add (animClip, animationRootObject);
+
+                        foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (animClip)) {
+                            Object uniObj = AnimationUtility.GetAnimatedObject (animationRootObject, uniCurveBinding);
+                            if (!uniObj) {
+                                continue;
+                            }
+
+                            GameObject unityGo = GetGameObject (uniObj);
+                            if (!unityGo) {
+                                continue;
+                            }
+
+                            if (lightProps.Contains (uniCurveBinding.propertyName)) {
+                                this.exportComponent.Add (unityGo, typeof(Light));
+                            } else if (cameraProps.Contains (uniCurveBinding.propertyName)) {
+                                this.exportComponent.Add (unityGo, typeof(Camera));
+                            }
+
+                            this.goExportSet.Add (unityGo);
+                        }
+                    }
+                }
             }
 
             /// <summary>
@@ -2468,7 +2506,7 @@ namespace FbxExporters
                         }
 
                         var animClips = AnimationUtility.GetAnimationClips (anim.gameObject);
-                        GetObjectsInAnimationClips (animClips, anim.gameObject, ref exportData);
+                        exportData.ComputeObjectsInAnimationClips (animClips, anim.gameObject);
                     }
 
                     int aFromRoot = int.MaxValue;
@@ -2485,7 +2523,7 @@ namespace FbxExporters
                         var controller = anim.runtimeAnimatorController;
                         if (controller)
                         { 
-                            GetObjectsInAnimationClips (controller.animationClips, anim.gameObject, ref exportData);
+                            exportData.ComputeObjectsInAnimationClips (controller.animationClips, anim.gameObject);
                         }
                     }
 
@@ -2524,45 +2562,6 @@ namespace FbxExporters
                 }
 
                 return completeExpSet.Count;
-            }
-
-            protected void GetObjectsInAnimationClips(
-                AnimationClip[] animClips, 
-                GameObject animationRootObject, 
-                ref AnimationOnlyExportData exportData
-            ){
-                // TODO: find a better way to keep track of which components + properties we support
-                var cameraProps = new List<string>{"field of view"};
-                var lightProps = new List<string>{"m_Intensity", "m_SpotAngle", "m_Color.r", "m_Color.g", "m_Color.b"};
-
-                foreach (var animClip in animClips) {
-                    if (exportData.animationClips.ContainsKey(animClip)) {
-                        // we have already exported gameobjects for this clip
-                        continue;
-                    }
-
-                    exportData.animationClips.Add (animClip, animationRootObject);
-
-                    foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (animClip)) {
-                        Object uniObj = AnimationUtility.GetAnimatedObject (animationRootObject, uniCurveBinding);
-                        if (!uniObj) {
-                            continue;
-                        }
-
-                        GameObject unityGo = GetGameObject (uniObj);
-                        if (!unityGo) {
-                            continue;
-                        }
-
-                        if (lightProps.Contains (uniCurveBinding.propertyName)) {
-                            exportData.exportComponent.Add (unityGo, typeof(Light));
-                        } else if (cameraProps.Contains (uniCurveBinding.propertyName)) {
-                            exportData.exportComponent.Add (unityGo, typeof(Camera));
-                        }
-
-                        exportData.goExportSet.Add (unityGo);
-                    }
-                }
             }
 
             /// <summary>
