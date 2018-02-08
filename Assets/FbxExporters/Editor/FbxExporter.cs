@@ -958,9 +958,27 @@ namespace FbxExporters
                 while (s.Count > 0) {
                     var t = s.Pop ();
 
-                    boneSet.Add (t);
+                    if (!boneSet.Add (t)) {
+                        continue;
+                    }
 
-                    if (t != root && t.parent != null && !boneSet.Contains(t.parent)) {
+                    if (t.parent == null) {
+                        Debug.LogWarningFormat (
+                            "FbxExporter: {0} is a bone but not a descendant of {1}'s mesh's root bone.",
+                            t.name, skinnedMesh.name
+                        );
+                        continue;
+                    }
+
+                    // Each skinned mesh in Unity has one root bone, but may have objects
+                    // between the root bone and leaf bones that are not in the bone list.
+                    // However all objects between two bones in a hierarchy should be bones
+                    // as well. 
+                    // e.g. in rootBone -> bone1 -> obj1 -> bone2, obj1 should be a bone
+                    //
+                    // Traverse from all leaf bones to the root bone adding everything in between
+                    // to the boneSet regardless of whether it is in the skinned mesh's bone list.
+                    if (t != root && !boneSet.Contains(t.parent)) {
                         s.Push (t.parent);
                     }
                 }
@@ -2083,7 +2101,7 @@ namespace FbxExporters
                 // both Maya and Unity use RSrs inheritance by default.
                 // Note: MotionBuilder uses RrSs inheritance by default as well, though it is possible
                 //       to select a different inheritance type in the UI.
-                // Use RSrs as the scaling inhertiance instead.
+                // Use RSrs as the scaling inheritance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
                 ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
@@ -2098,11 +2116,23 @@ namespace FbxExporters
                 return numObjectsExported;
             }
 
+            /// <summary>
+            /// Export data containing what to export when
+            /// exporting animation only.
+            /// </summary>
             public struct AnimationOnlyExportData {
+                // map from animation clip to GameObject that has Animation/Animator
+                // component containing clip
                 public Dictionary<AnimationClip, GameObject> animationClips;
+
+                // set of all GameObjects to export
                 public HashSet<GameObject> goExportSet;
+
+                // map from GameObject to component type to export
                 public Dictionary<GameObject, System.Type> exportComponent;
-                public AnimationClip defaultClip; // first clip to export
+
+                // first clip to export
+                public AnimationClip defaultClip;
 
                 public AnimationOnlyExportData(
                     Dictionary<AnimationClip, GameObject> animClips,
@@ -2116,6 +2146,13 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Exports all animation clips in the hierarchy along with
+            /// the minimum required GameObject information.
+            /// i.e. Animated GameObjects, their ancestors, and their transforms are exported, 
+            ///     but components are only exported if explicitly animated. Meshes are not exported.
+            /// </summary>
+            /// <returns>The number of nodes exported.</returns>
             protected int ExportAnimationOnly(
                 GameObject unityGO,
                 FbxScene fbxScene,
@@ -2180,7 +2217,6 @@ namespace FbxExporters
                 }
 
                 // export animation
-
                 // export default clip first
                 if (exportData.defaultClip != null) {
                     var defaultClip = exportData.defaultClip;
@@ -2207,6 +2243,11 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Exports the Gameobject and it's ancestors.
+            /// </summary>
+            /// <returns><c>true</c>, if game object and parents were exported,
+            ///  <c>false</c> if export cancelled.</returns>
             private bool ExportGameObjectAndParents(
                 GameObject unityGo,
                 GameObject rootObject,
@@ -2286,6 +2327,14 @@ namespace FbxExporters
                 return true;
             }
 
+            /// <summary>
+            /// Exports the bone transform.
+            /// </summary>
+            /// <returns><c>true</c>, if bone transform was exported, <c>false</c> otherwise.</returns>
+            /// <param name="fbxNode">Fbx node.</param>
+            /// <param name="fbxScene">Fbx scene.</param>
+            /// <param name="unityBone">Unity bone.</param>
+            /// <param name="boneInfo">Bone info.</param>
             private bool ExportBoneTransform(
                 FbxNode fbxNode, FbxScene fbxScene, Transform unityBone, SkinnedMeshBoneInfo boneInfo
             ){
@@ -2358,6 +2407,37 @@ namespace FbxExporters
                 return true;
             }
 
+            /// <summary>
+            /// Counts how many objects are between this object and the root (exclusive).
+            /// </summary>
+            /// <returns>The object to root count.</returns>
+            /// <param name="startObject">Start object.</param>
+            /// <param name="root">Root object.</param>
+            private int GetObjectToRootCount(Transform startObject, Transform root){
+                if (startObject == null) {
+                    return 0;
+                }
+
+                int count = 0;
+                var parent = startObject.parent;
+                while (parent != null && parent != root) {
+                    count++;
+                    parent = parent.parent;
+                }
+                return count;
+            }
+
+
+            /// <summary>
+            /// Gets the count of animated objects to be exported.
+            /// 
+            /// In addition, collects the minimum set of what needs to be exported for each GameObject hierarchy.
+            /// This contains all the animated GameObjects, their ancestors, their transforms, as well as any animated
+            /// components and the animation clips. Also, the first animation to export, if any.
+            /// </summary>
+            /// <returns>The animation only hierarchy count.</returns>
+            /// <param name="exportSet">GameObject hierarchies selected for export.</param>
+            /// <param name="hierarchyToExportData">Map from GameObject hierarchy to animation export data.</param>
             protected int GetAnimOnlyHierarchyCount(
                 HashSet<GameObject> exportSet,
                 out Dictionary<GameObject, AnimationOnlyExportData> hierarchyToExportData
@@ -2380,12 +2460,7 @@ namespace FbxExporters
                     int fromRoot = int.MaxValue;
                     Animation rootAnimation = null;
                     foreach (var anim in legacyAnim) {
-                        int count = 0;
-                        var parent = anim.transform.parent;
-                        while (parent != null && parent != go.transform) {
-                            count++;
-                            parent = parent.parent;
-                        }
+                        int count = GetObjectToRootCount(anim.transform, go.transform);
 
                         if (count < fromRoot) {
                             fromRoot = count;
@@ -2399,12 +2474,7 @@ namespace FbxExporters
                     int aFromRoot = int.MaxValue;
                     Animator rootAnimator = null;
                     foreach (var anim in genericAnim) {
-                        int count = 0;
-                        var parent = anim.transform.parent;
-                        while (parent != null && parent != go.transform) {
-                            count++;
-                            parent = parent.parent;
-                        }
+                        int count = GetObjectToRootCount(anim.transform, go.transform);
 
                         if (count < aFromRoot) {
                             aFromRoot = count;
@@ -2431,7 +2501,6 @@ namespace FbxExporters
                                 var motion = dController.layers [0].stateMachine.defaultState.motion;
                                 var defaultClip = motion as AnimationClip;
                                 if (defaultClip) {
-                                    Debug.LogWarning ("default clip: " + defaultClip.name);
                                     exportData.defaultClip = defaultClip;
                                 } else {
                                     Debug.LogWarningFormat ("Couldn't export motion {0}", motion.name);
