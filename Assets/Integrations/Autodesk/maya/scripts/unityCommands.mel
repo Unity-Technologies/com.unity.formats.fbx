@@ -213,11 +213,13 @@ global proc unityImport(){
 }
 
 
-global proc unityExport(){
+proc unityExport(int $exportAnim){
     // get the global variables
     global string $UnityExportSets[];
     global string $UnityFbxFilePathAttr;
     global string $UnityFbxFileNameAttr;
+    global string $UnityFbxAnimFilePathAttr;
+    global string $UnityFbxAnimFileNameAttr;
     
     if(!loadUnityDependencies()){
         return;
@@ -226,6 +228,9 @@ global proc unityExport(){
     if(!loadUnityFbxExportSettings()){
         return;
     }
+    
+    FBXProperty "Export|IncludeGrp|Animation" -v $exportAnim;
+    FBXExportAnimationOnly -v $exportAnim;
     
     $origSelection = `ls -sl`;
     if(size($origSelection) <= 0){
@@ -266,21 +271,34 @@ global proc unityExport(){
     
         select -r -ne $unitySet;
         
-        $unity_fbx_file_path = getAttribute($unitySet, $UnityFbxFilePathAttr);
-        $unity_fbx_file_name = getAttribute($unitySet, $UnityFbxFileNameAttr);
+        $pathAttr = $UnityFbxFilePathAttr;
+        $nameAttr = $UnityFbxFileNameAttr;
+        
+        if($exportAnim){
+            $pathAttr = $UnityFbxAnimFilePathAttr;
+            $nameAttr = $UnityFbxAnimFileNameAttr;
+        }
+        
+        $unity_fbx_file_path = getAttribute($unitySet, $pathAttr);
+        $unity_fbx_file_name = getAttribute($unitySet, $nameAttr);
         
         $strCmd = "";
         if ($unity_fbx_file_path != "" && $unity_fbx_file_name != ""){
             $strCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $unity_fbx_file_path + "/" + $unity_fbx_file_name + "\"";
+            eval $strCmd;
         }
-        else {
-            $strCmd = "SendToUnitySelection";
-        }
-        eval $strCmd;
     }
     
     select -cl;
     if (size($origSelection) > 0){    
         select -add -ne $origSelection;
     }
+}
+
+global proc unityExportAnim(){
+    unityExport(true);
+}
+
+global proc unityExportModel(){
+    unityExport(false);
 }

@@ -9,13 +9,19 @@ global string $unityIconPath = "unity.png";
 
 global string $unityFamilyLabel = "The UnityFbxForMaya plugin (v.{Version}) allows you to reliably exchange and review your work between Maya and Unity.";
 global string $unityImportLabel = "Import an FBX file from a Unity project and auto-configure for exporting";
-global string $unityExportLabel = "Export Model to Unity";
+global string $unityExportLabel = "Export Model or Animation to Unity";
+global string $unityExportModelLabel = "Export Model to Unity";
+global string $unityExportAnimLabel = "Export Animation to Unity";
 
 global string $unityCommandsFile = "unityCommands.mel";
 global string $unityImportMenuName = "Import";
-global string $unityExportMenuName = "Export";
+global string $unityExportMenuLabel = "Export";
+global string $unityExportMenuName = "UnityFbxForMayaExport";
+global string $unityExportModelMenuName = "Model Only";
+global string $unityExportAnimMenuName = "Animation Only";
 global string $unityImportCommand = "unityImport";
-global string $unityExportCommand = "unityExport";
+global string $unityExportModelCommand = "unityExportModel";
+global string $unityExportAnimCommand = "unityExportAnim";
 
 global proc string unityWhatsNewVersion(){
     return `about -q -version`;
@@ -50,11 +56,18 @@ global proc unityInstallUI(){
     global string $unityFamilyLabel;
     global string $unityImportLabel;
     global string $unityExportLabel;
+    global string $unityExportMenuLabel;
+    global string $unityExportModelLabel;
+    global string $unityExportAnimLabel;
     global string $unityCommandsFile;
     global string $unityImportMenuName;
     global string $unityExportMenuName;
+    global string $unityExportModelMenuName;
+    global string $unityExportAnimMenuName;
     global string $unityImportCommand;
     global string $unityExportCommand;
+    global string $unityExportModelCommand;
+    global string $unityExportAnimCommand;
     
     global string $gMainFileMenu;
     
@@ -65,8 +78,11 @@ global proc unityInstallUI(){
     menuItem -parent $parentMenu -insertAfter $unityMenuInsertAfter -divider true -longDivider false -version $pluginVersion $unityMenuDivider;
     menuItem -parent $parentMenu -insertAfter $unityMenuDivider -subMenu true -label $unityMenuLabel -tearOff true -version $pluginVersion -image $unityIconPath -annotation $unityFamilyLabel $unityMenuName;
     menuItem -parent $unityMenuName -label $unityImportMenuName -version $pluginVersion -image $unityImportIconPath -annotation $unityImportLabel -command $unityImportCommand;
-    menuItem -parent $unityMenuName -label $unityExportMenuName -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -command $unityExportCommand;
-
+    menuItem -parent $unityMenuName -label $unityExportMenuLabel -version $pluginVersion -image $unityExportIconPath -annotation $unityExportLabel -subMenu true -tearOff true $unityExportMenuName;
+    
+    menuItem -parent $unityExportMenuName -label $unityExportModelMenuName -version $pluginVersion -annotation $unityExportModelLabel -command $unityExportModelCommand;
+    menuItem -parent $unityExportMenuName -label $unityExportAnimMenuName -version $pluginVersion -annotation $unityExportAnimLabel -command $unityExportAnimCommand;
+    
     unityRemoveNativeMenuOnLoad(); 
 
 }
