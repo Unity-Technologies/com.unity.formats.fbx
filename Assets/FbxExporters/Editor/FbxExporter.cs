@@ -1,7 +1,6 @@
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEditor;
 using Unity.FbxSdk;
 using System.Linq;
@@ -58,6 +57,8 @@ namespace FbxExporters
     namespace Editor
     {
         using CustomExtensions;
+        using UnityEngine.Playables;
+        using UnityEngine.Timeline;
 
         public class ModelExporter : System.IDisposable
         {
@@ -79,6 +80,8 @@ namespace FbxExporters
             //       from being passed to command, thus resulting in OnContextItem()
             //       being called only once regardless of what is selected.
             const string MenuItemName = "GameObject/Export Model...";
+            
+            const string ClipMenuItemName = "GameObject/Export All Recorded Animation Clips...";
 
             const string FileBaseName = "Untitled";
 
@@ -2604,6 +2607,119 @@ namespace FbxExporters
                 } catch(IOException){
                     Debug.LogWarning (string.Format("Failed to move file {0} to {1}", m_tempFilePath, m_lastFilePath));
                 }
+            }
+
+            /// <summary>
+            /// Add an option "Update from FBX" in the contextual GameObject menu.
+            /// </summary>
+            [MenuItem(ClipMenuItemName, false, 31)]
+            static void OnClipContextClick(MenuCommand command)
+            {
+                /*var obs = Selection.objects;
+                foreach (var obj in obs)
+                {
+                    if (obj.GetType().Name.Contains("EditorClip"))
+                    {
+                        Debug.Log("clip selected");
+                        var selClip = obj.GetType().GetProperty("clip").GetValue(obj, null);
+                        var timeLineClip = selClip as UnityEngine.Timeline.TimelineClip;
+                        Debug.Log("clip name: " + timeLineClip.displayName);
+                    }
+                }*/
+
+                // Now that we know we have stuff to export, get the user-desired path.
+                string directory = string.IsNullOrEmpty(LastFilePath)
+                                      ? Application.dataPath
+                                      : System.IO.Path.GetDirectoryName(LastFilePath);
+
+
+                string title = string.Format("Export Model FBX ({0})", FileBaseName);
+
+                string folderPath = EditorUtility.SaveFolderPanel(title, directory, "");
+
+                if (string.IsNullOrEmpty(folderPath))
+                {
+                    return;
+                }
+                Debug.Log(folderPath);
+
+                Object[] selection = null;
+
+                if (command == null || command.context == null)
+                {
+                    // We were actually invoked from the top GameObject menu, so use the selection.
+                    selection = Selection.GetFiltered<Object>(SelectionMode.Editable | SelectionMode.TopLevel);
+                }
+                else
+                {
+                    // We were invoked from the right-click menu, so use the context of the context menu.
+                    var selected = command.context as GameObject;
+                    if (selected)
+                    {
+                        selection = new GameObject[] { selected };
+                    }
+                }
+                foreach (GameObject obj in selection)
+                {
+                    Debug.Log(obj.GetType().BaseType.ToString() + ":" + obj.name);
+
+                    PlayableDirector pd = obj.GetComponent<PlayableDirector>();
+                    if (pd != null)
+                    {
+                        foreach (PlayableBinding output in pd.playableAsset.outputs)
+                        {
+                            AnimationTrack at = output.sourceObject as AnimationTrack;
+
+                            GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
+
+                            //Debug.Log(pd.GetGenericBinding(output.sourceObject).name);
+
+                            //  var at = pd.GetGenericBinding(output.sourceObject) as GameObject;
+                            foreach (TimelineClip myclip in at.GetClips())
+                            {
+
+                                AnimationClip animationClip = myclip.animationClip;
+
+                                Debug.Log("output.streamName: " + output.streamName + " /Animation Track name: " + at.name + " : " + animationClip.name + " /myclip.displayName: " + myclip.displayName + " atObject.name " + atObject.name);
+
+                                Dictionary<GameObject, List<AnimationClip>> dict = new Dictionary<GameObject, List<AnimationClip>>();
+                                // Detect if it's a recorded anim clip
+                                //ExportAnimationClip(animationClip, obj, null);
+
+
+                                // Export it to FBX in the path specified by the user.
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            
+            /// <summary>
+            /// Validate the menu item defined by the function above.
+            /// </summary>
+            [MenuItem(ClipMenuItemName, true, 31)]
+            public static bool ValidateClipContextClick()
+            {
+                //return true;
+
+                Object[] selection = Selection.objects;
+
+                if (selection == null || selection.Length == 0)
+                {
+                    return false;
+                }
+
+                foreach (GameObject obj in selection)
+                {
+                    if (obj.GetComponent<PlayableDirector>() != null)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
 
             /// <summary>
