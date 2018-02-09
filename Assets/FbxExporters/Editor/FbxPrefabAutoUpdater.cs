@@ -234,8 +234,12 @@ namespace FbxExporters
 
             foreach (var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>())
             {
+                // Launch the manual update UI to allow the user to fix
+                // renamed nodes (or auto-update if there's nothing to rename).
                 var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
-                fbxPrefabUtility.SyncPrefab();
+                ManualUpdateEditorWindow window = (ManualUpdateEditorWindow)EditorWindow.GetWindow(typeof(ManualUpdateEditorWindow));
+                window.Init(fbxPrefabUtility, fbxPrefabComponent);
+                window.Show();
             }
         }
 
