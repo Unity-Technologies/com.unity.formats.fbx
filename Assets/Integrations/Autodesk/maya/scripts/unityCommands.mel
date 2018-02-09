@@ -238,9 +238,7 @@ proc unityExport(int $exportAnim){
         return;
     }
     
-    // create temporary set containing selection
-    string $selectedSet = `sets`;
-    $selectedSetList = {$selectedSet};
+    string $myIntersector = `stringArrayIntersector`;
     
     $i = 0;
     string $setsToExport[];
@@ -249,16 +247,22 @@ proc unityExport(int $exportAnim){
             continue;
         }
         
-        if(`sets -isIntersecting $exportSet $selectedSetList` ||
+        stringArrayIntersector -edit -reset $myIntersector;
+        stringArrayIntersector -edit -intersect $origSelection $myIntersector;
+        
+        string $exportSetContents[] = `listConnections $exportSet`; 
+        
+        stringArrayIntersector -edit -intersect $exportSetContents $myIntersector;
+        
+        string $intersection[] = `stringArrayIntersector -query $myIntersector`;
+        
+        if(size($intersection) > 0 ||
             stringArrayContains($exportSet, $origSelection)){
             
             $setsToExport[$i] = $exportSet;
             $i++;
         }
     }
-    
-    // delete temporary selection set
-    delete $selectedSet;
     
     // if selection doesn't belong to a set, export to a new file
     if(size($setsToExport) <= 0){
@@ -269,12 +273,19 @@ proc unityExport(int $exportAnim){
     for($unitySet in $setsToExport){
         print ("exporting set: " + $unitySet);
     
-        select -r -ne $unitySet;
+        string $unitySetContents[] = `listConnections $unitySet`;
         
         if($exportAnim){
             string $animCurveSelect[] = `ls -typ animCurve`;
             string $animatedTransforms[] = `listConnections -t transform $animCurveSelect`;
-            select -r $animatedTransforms;
+            
+            stringArrayIntersector -edit -reset $myIntersector;
+            stringArrayIntersector -edit -intersect $animatedTransforms $myIntersector;
+            stringArrayIntersector -edit -intersect $unitySetContents $myIntersector;
+            
+            string $setAnimatedTransforms[] = `stringArrayIntersector -query $myIntersector`;
+            
+            select -r $setAnimatedTransforms;
         }
         
         $pathAttr = $UnityFbxFilePathAttr;
@@ -294,6 +305,9 @@ proc unityExport(int $exportAnim){
             eval $strCmd;
         }
     }
+    
+    // Delete the intersector
+    deleteUI $myIntersector;
     
     select -cl;
     if (size($origSelection) > 0){    
