@@ -2134,6 +2134,10 @@ namespace FbxExporters
                 // first clip to export
                 public AnimationClip defaultClip;
 
+                // TODO: find a better way to keep track of which components + properties we support
+                private static List<string> cameraProps = new List<string>{"field of view"};
+                private static List<string> lightProps = new List<string>{"m_Intensity", "m_SpotAngle", "m_Color.r", "m_Color.g", "m_Color.b"};
+
                 public AnimationOnlyExportData(
                     Dictionary<AnimationClip, GameObject> animClips,
                     HashSet<GameObject> exportSet,
@@ -2149,10 +2153,6 @@ namespace FbxExporters
                     AnimationClip[] animClips, 
                     GameObject animationRootObject
                 ){
-                    // TODO: find a better way to keep track of which components + properties we support
-                    var cameraProps = new List<string>{"field of view"};
-                    var lightProps = new List<string>{"m_Intensity", "m_SpotAngle", "m_Color.r", "m_Color.g", "m_Color.b"};
-
                     foreach (var animClip in animClips) {
                         if (this.animationClips.ContainsKey(animClip)) {
                             // we have already exported gameobjects for this clip
@@ -2282,7 +2282,7 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Exports the Gameobject and it's ancestors.
+            /// Exports the Gameobject and its ancestors.
             /// </summary>
             /// <returns><c>true</c>, if game object and parents were exported,
             ///  <c>false</c> if export cancelled.</returns>
@@ -2451,7 +2451,7 @@ namespace FbxExporters
             /// <returns>The object to root count.</returns>
             /// <param name="startObject">Start object.</param>
             /// <param name="root">Root object.</param>
-            private int GetObjectToRootCount(Transform startObject, Transform root){
+            private int GetObjectToRootDepth(Transform startObject, Transform root){
                 if (startObject == null) {
                     return 0;
                 }
@@ -2495,13 +2495,13 @@ namespace FbxExporters
 
                     hierarchyToExportData.Add (go, exportData);
 
-                    int fromRoot = int.MaxValue;
+                    int depthFromRootAnimation = int.MaxValue;
                     Animation rootAnimation = null;
                     foreach (var anim in legacyAnim) {
-                        int count = GetObjectToRootCount(anim.transform, go.transform);
+                        int count = GetObjectToRootDepth(anim.transform, go.transform);
 
-                        if (count < fromRoot) {
-                            fromRoot = count;
+                        if (count < depthFromRootAnimation) {
+                            depthFromRootAnimation = count;
                             rootAnimation = anim;
                         }
 
@@ -2509,13 +2509,13 @@ namespace FbxExporters
                         exportData.ComputeObjectsInAnimationClips (animClips, anim.gameObject);
                     }
 
-                    int aFromRoot = int.MaxValue;
+                    int depthFromRootAnimator = int.MaxValue;
                     Animator rootAnimator = null;
                     foreach (var anim in genericAnim) {
-                        int count = GetObjectToRootCount(anim.transform, go.transform);
+                        int count = GetObjectToRootDepth(anim.transform, go.transform);
 
-                        if (count < aFromRoot) {
-                            aFromRoot = count;
+                        if (count < depthFromRootAnimator) {
+                            depthFromRootAnimator = count;
                             rootAnimator = anim;
                         }
 
@@ -2528,7 +2528,7 @@ namespace FbxExporters
                     }
 
                     // set the first clip to export
-                    if (fromRoot < aFromRoot) {
+                    if (depthFromRootAnimation < depthFromRootAnimator) {
                         exportData.defaultClip = rootAnimation.clip;
                     } else {
                         // Try the animator controller (mecanim)
