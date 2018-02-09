@@ -188,6 +188,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxPrefabInspector.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ConvertToModel.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExporterRepairMissingScripts.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ManualUpdateEditorWindow.cs"
             REFERENCES
                 "${CSHARP_MSCORLIB_LIBRARY}"
                 "${CSHARP_SYSTEM_CORE_LIBRARY}"
@@ -244,6 +245,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             PATTERN "Editor/EditorRotate.cs" EXCLUDE
             PATTERN "Editor/FbxPrefabAutoUpdater.cs" EXCLUDE
             PATTERN "Editor/ConvertToModel.cs" EXCLUDE
+            PATTERN "Editor/ManualUpdateEditorWindow.cs" EXCLUDE
             PATTERN "Editor/FbxPrefabInspector.cs" EXCLUDE
             PATTERN "Editor/FbxExporterRepairMissingScripts.cs" EXCLUDE)
     install(FILES ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME} DESTINATION FbxExporters/Editor)
