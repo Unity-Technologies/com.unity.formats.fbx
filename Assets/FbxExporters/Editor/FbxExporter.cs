@@ -80,6 +80,8 @@ namespace FbxExporters
             //       being called only once regardless of what is selected.
             const string MenuItemName = "GameObject/Export Model...";
 
+            const string AnimOnlyMenuItemName = "GameObject/Export Animation Only";
+
             const string FileBaseName = "Untitled";
 
             const string ProgressBarTitle = "Fbx Export";
@@ -891,26 +893,25 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Determines whether this Transform is a bone.
-            /// A transform is a bone if it is in the skinned meshes bone list (represented here as a bones dict),
-            /// or if it has both an ancestor or descendant that are bones (i.e. if it is sandwiched between two bones,
-            /// it should be a bone as well).
+            /// Gets the bind pose for the Unity bone.
             /// </summary>
-            /// <returns><c>true</c> if this transform is a bone; otherwise, <c>false</c>.</returns>
-            /// <param name="t">Transform.</param>
-            /// <param name="bones">Skinned meshes bones.</param>
-            private bool IsBone (Transform t, Dictionary<Transform, int> bones)
-            {
-                if (bones.ContainsKey (t)) {
-                    return true;
+            /// <returns>The bind pose.</returns>
+            /// <param name="unityBone">Unity bone.</param>
+            /// <param name="bindPoses">Bind poses.</param>
+            /// <param name="boneDict">Dictionary of bone to index.</param>
+            /// <param name="skinnedMesh">Skinned mesh.</param>
+            private Matrix4x4 GetBindPose(
+                Transform unityBone, Matrix4x4[] bindPoses,
+                Dictionary<Transform, int> boneDict, SkinnedMeshRenderer skinnedMesh
+            ){
+                Matrix4x4 bindPose;
+                int index;
+                if (boneDict.TryGetValue (unityBone, out index)) {
+                    bindPose = bindPoses [index];
+                } else {
+                    bindPose = unityBone.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
                 }
-
-                foreach (Transform child in t) {
-                    if (IsBone (child, bones)) {
-                        return true;
-                    }
-                }
-                return false;
+                return bindPose;
             }
 
             /// <summary>
@@ -940,11 +941,8 @@ namespace FbxExporters
 
                 // Three steps:
                 // 0. Set up the map from bone to index.
-                // 1. Create the bones, in arbitrary order.
-                // 2. Connect up the hierarchy.
-                // 3. Set the transforms.
-                // Step 0 supports step 1 (finding which is the root bone) and step 3
-                // (setting up transforms; the complication is the use of pivots).
+                // 1. Gather complete list of bones
+                // 2. Set the transforms.
 
                 // Step 0: map transform to index so we can look up index by bone.
                 Dictionary<Transform, int> index = new Dictionary<Transform, int>();
@@ -953,106 +951,47 @@ namespace FbxExporters
                     index[unityBoneTransform] = boneIndex;
                 }
 
-                // Step 1: create the bones.
+                // Step 1: gather all the bones
                 HashSet<Transform> boneSet = new HashSet<Transform> ();
-                var s = new Stack<Transform> ();
-                s.Push(skinnedMesh.rootBone);
+                var s = new Stack<Transform> (bones);
+                var root = skinnedMesh.rootBone;
                 while (s.Count > 0) {
-                    var t = s.Pop();
+                    var t = s.Pop ();
 
-                    if (IsBone(t, index)) {
-                        if (!boneSet.Contains (t)) {
-                            // Create the bone node if we haven't already. Parent it to
-                            // its corresponding parent, or to the scene if there is none.
-                            FbxNode fbxBoneNode;
-                            if (!MapUnityObjectToFbxNode.TryGetValue (t.gameObject, out fbxBoneNode)) {
-                                Debug.LogErrorFormat("Node {0} should already be created", t.name);
-                            }
+                    if (!boneSet.Add (t)) {
+                        continue;
+                    }
 
-                            // Set it up as a skeleton node if we haven't already.
-                            if (fbxBoneNode.GetSkeleton () == null) {
-                                FbxSkeleton fbxSkeleton = FbxSkeleton.Create (fbxScene, t.name + SkeletonPrefix);
+                    if (t.parent == null) {
+                        Debug.LogWarningFormat (
+                            "FbxExporter: {0} is a bone but not a descendant of {1}'s mesh's root bone.",
+                            t.name, skinnedMesh.name
+                        );
+                        continue;
+                    }
 
-                                var fbxSkeletonType = skinnedMesh.rootBone != t
-                                ? FbxSkeleton.EType.eLimbNode : FbxSkeleton.EType.eRoot;
-                                fbxSkeleton.SetSkeletonType (fbxSkeletonType);
-                                fbxSkeleton.Size.Set (1.0f * UnitScaleFactor);
-                                fbxBoneNode.SetNodeAttribute (fbxSkeleton);
-                            }
-
-                            boneSet.Add (t);
-                        }
-
-                        foreach (Transform child in t) {
-                            s.Push (child);
-                        }
+                    // Each skinned mesh in Unity has one root bone, but may have objects
+                    // between the root bone and leaf bones that are not in the bone list.
+                    // However all objects between two bones in a hierarchy should be bones
+                    // as well. 
+                    // e.g. in rootBone -> bone1 -> obj1 -> bone2, obj1 should be a bone
+                    //
+                    // Traverse from all leaf bones to the root bone adding everything in between
+                    // to the boneSet regardless of whether it is in the skinned mesh's bone list.
+                    if (t != root && !boneSet.Contains(t.parent)) {
+                        s.Push (t.parent);
                     }
                 }
 
                 var boneList = boneSet.ToArray();
-
                 skinnedMeshToBonesMap.Add (skinnedMesh, boneList);
 
-                // Step 2: Get bindposes
-                var boneToBindPose = new Dictionary<Transform, Matrix4x4>();
-                for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
-                    var unityBone = boneList [boneIndex];
-
-                    Matrix4x4 pose;
-                    if (index.ContainsKey (unityBone)) {
-                        int i = index [unityBone];
-                        pose = bindPoses [i];
-                    } else {
-                        pose = unityBone.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
-                    }
-                    boneToBindPose.Add (unityBone, pose);
+                // Step 2: Set transforms
+                var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, index);
+                foreach (var bone in boneList) {
+                    var fbxBone = MapUnityObjectToFbxNode [bone.gameObject];
+                    ExportBoneTransform (fbxBone, fbxScene, bone, boneInfo);
                 }
-
-                // Step 3: set up the transforms.
-                for (int boneIndex = 0, n = boneList.Length; boneIndex < n; boneIndex++) {
-                    var unityBone = boneList [boneIndex];
-                    var fbxBone = MapUnityObjectToFbxNode [unityBone.gameObject];
-
-                    Matrix4x4 pose;
-
-                    var bindPose = boneToBindPose [unityBone];
-
-                    if (fbxBone.GetSkeleton ().GetSkeletonType () == FbxSkeleton.EType.eRoot) {
-                        // bind pose is local -> root. We want root -> local, so invert.
-                        pose = (unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix * bindPose.inverse);
-                    } else {
-                        // Bind pose is local -> parent -> ... -> root.
-                        // We want parent -> local.
-                        // Invert our bind pose to get root -> local.
-                        // The apply parent -> root to leave just parent -> local.
-                        pose = boneToBindPose [unityBone.parent] * bindPose.inverse;
-                    }
-
-                    // FBX is transposed relative to Unity: transpose as we convert.
-                    FbxMatrix matrix = new FbxMatrix ();
-                    matrix.SetColumn (0, new FbxVector4 (pose.GetRow (0).x, pose.GetRow (0).y, pose.GetRow (0).z, pose.GetRow (0).w));
-                    matrix.SetColumn (1, new FbxVector4 (pose.GetRow (1).x, pose.GetRow (1).y, pose.GetRow (1).z, pose.GetRow (1).w));
-                    matrix.SetColumn (2, new FbxVector4 (pose.GetRow (2).x, pose.GetRow (2).y, pose.GetRow (2).z, pose.GetRow (2).w));
-                    matrix.SetColumn (3, new FbxVector4 (pose.GetRow (3).x, pose.GetRow (3).y, pose.GetRow (3).z, pose.GetRow (3).w));
-
-                    // FBX wants translation, rotation (in euler angles) and scale.
-                    // We assume there's no real shear, just rounding error.
-                    FbxVector4 translation, rotation, shear, scale;
-                    double sign;
-                    matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
-
-                    // Export bones with zero rotation, using a pivot instead to set the rotation
-                    // so that the bones are easier to animate and the rotation shows up as the "joint orientation" in Maya.
-                    fbxBone.LclTranslation.Set (new FbxDouble3(-translation.X*UnitScaleFactor, translation.Y*UnitScaleFactor, translation.Z*UnitScaleFactor));
-                    fbxBone.LclRotation.Set (new FbxDouble3(0,0,0));
-                    fbxBone.LclScaling.Set (new FbxDouble3 (scale.X, scale.Y, scale.Z));
-
-                    // TODO (UNI-34294): add detailed comment about why we export rotation as pre-rotation
-                    fbxBone.SetRotationActive (true);
-                    fbxBone.SetPivotState (FbxNode.EPivotSet.eSourcePivot, FbxNode.EPivotState.ePivotReference);
-                    fbxBone.SetPreRotation (FbxNode.EPivotSet.eSourcePivot, new FbxVector4 (rotation.X, -rotation.Y, -rotation.Z));
-                }
-
                 return true;
             }
 
@@ -2162,7 +2101,7 @@ namespace FbxExporters
                 // both Maya and Unity use RSrs inheritance by default.
                 // Note: MotionBuilder uses RrSs inheritance by default as well, though it is possible
                 //       to select a different inheritance type in the UI.
-                // Use RSrs as the scaling inhertiance instead.
+                // Use RSrs as the scaling inheritance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
                 ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
@@ -2175,6 +2114,454 @@ namespace FbxExporters
                 }
 
                 return numObjectsExported;
+            }
+
+            /// <summary>
+            /// Export data containing what to export when
+            /// exporting animation only.
+            /// </summary>
+            public struct AnimationOnlyExportData {
+                // map from animation clip to GameObject that has Animation/Animator
+                // component containing clip
+                public Dictionary<AnimationClip, GameObject> animationClips;
+
+                // set of all GameObjects to export
+                public HashSet<GameObject> goExportSet;
+
+                // map from GameObject to component type to export
+                public Dictionary<GameObject, System.Type> exportComponent;
+
+                // first clip to export
+                public AnimationClip defaultClip;
+
+                // TODO: find a better way to keep track of which components + properties we support
+                private static List<string> cameraProps = new List<string>{"field of view"};
+                private static List<string> lightProps = new List<string>{"m_Intensity", "m_SpotAngle", "m_Color.r", "m_Color.g", "m_Color.b"};
+
+                public AnimationOnlyExportData(
+                    Dictionary<AnimationClip, GameObject> animClips,
+                    HashSet<GameObject> exportSet,
+                    Dictionary<GameObject, System.Type> exportComponent
+                ){
+                    this.animationClips = animClips;
+                    this.goExportSet = exportSet;
+                    this.exportComponent = exportComponent;
+                    this.defaultClip = null;
+                }
+
+                public void ComputeObjectsInAnimationClips(
+                    AnimationClip[] animClips, 
+                    GameObject animationRootObject
+                ){
+                    foreach (var animClip in animClips) {
+                        if (this.animationClips.ContainsKey(animClip)) {
+                            // we have already exported gameobjects for this clip
+                            continue;
+                        }
+
+                        this.animationClips.Add (animClip, animationRootObject);
+
+                        foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (animClip)) {
+                            Object uniObj = AnimationUtility.GetAnimatedObject (animationRootObject, uniCurveBinding);
+                            if (!uniObj) {
+                                continue;
+                            }
+
+                            GameObject unityGo = GetGameObject (uniObj);
+                            if (!unityGo) {
+                                continue;
+                            }
+
+                            if (lightProps.Contains (uniCurveBinding.propertyName)) {
+                                this.exportComponent.Add (unityGo, typeof(Light));
+                            } else if (cameraProps.Contains (uniCurveBinding.propertyName)) {
+                                this.exportComponent.Add (unityGo, typeof(Camera));
+                            }
+
+                            this.goExportSet.Add (unityGo);
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Exports all animation clips in the hierarchy along with
+            /// the minimum required GameObject information.
+            /// i.e. Animated GameObjects, their ancestors, and their transforms are exported, 
+            ///     but components are only exported if explicitly animated. Meshes are not exported.
+            /// </summary>
+            /// <returns>The number of nodes exported.</returns>
+            protected int ExportAnimationOnly(
+                GameObject unityGO,
+                FbxScene fbxScene,
+                int exportProgress,
+                int objectCount,
+                Vector3 newCenter,
+                AnimationOnlyExportData exportData,
+                TransformExportType exportType = TransformExportType.Local
+            ){
+                // export any bones
+                var skinnedMeshRenderers = unityGO.GetComponentsInChildren<SkinnedMeshRenderer> ();
+                int numObjectsExported = exportProgress;
+
+                foreach (var skinnedMesh in skinnedMeshRenderers) {
+                    var boneArray = skinnedMesh.bones;
+                    var bones = new HashSet<GameObject>();
+                    var boneDict = new Dictionary<Transform, int> ();
+
+                    for (int i = 0; i < boneArray.Length; i++) {
+                        bones.Add (boneArray [i].gameObject);
+                        boneDict.Add (boneArray [i], i);
+                    }
+
+                    // get the bones that are also in the export set
+                    bones.IntersectWith (exportData.goExportSet);
+
+                    // remove the exported bones from the export set
+                    exportData.goExportSet.ExceptWith (bones);
+
+                    var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, boneDict);
+                    foreach (var bone in bones) {
+                        FbxNode node;
+                        if (!ExportGameObjectAndParents (
+                            bone.gameObject, unityGO, fbxScene, out node, newCenter, 
+                            exportType, ref numObjectsExported, objectCount,
+                            boneInfo
+                           )) {
+                            // export cancelled
+                            return -1;
+                        }
+                    }
+                }
+
+                // export everything else
+                foreach (var go in exportData.goExportSet) {
+                    FbxNode node;
+                    if (!ExportGameObjectAndParents (
+                        go, unityGO, fbxScene, out node, newCenter, exportType, ref numObjectsExported, objectCount
+                       )) {
+                        // export cancelled
+                        return -1;
+                    }
+
+                    System.Type compType;
+                    if (exportData.exportComponent.TryGetValue (go, out compType)) {
+                        if (compType == typeof(Light)) {
+                            ExportLight (go, fbxScene, node);
+                        } else if (compType == typeof(Camera)) {
+                            ExportCamera (go, fbxScene, node);
+                        }
+                    }
+                }
+
+                // export animation
+                // export default clip first
+                if (exportData.defaultClip != null) {
+                    var defaultClip = exportData.defaultClip;
+                    ExportAnimationClip (defaultClip, exportData.animationClips[defaultClip], fbxScene);
+                    exportData.animationClips.Remove (defaultClip);
+                }
+
+                foreach (var animClip in exportData.animationClips) {
+                    ExportAnimationClip (animClip.Key, animClip.Value, fbxScene);
+                }
+
+                return numObjectsExported;
+            }
+
+            class SkinnedMeshBoneInfo {
+                public SkinnedMeshRenderer skinnedMesh;
+                public Dictionary<Transform, int> boneDict;
+                public Dictionary<Transform, Matrix4x4> boneToBindPose;
+
+                public SkinnedMeshBoneInfo(SkinnedMeshRenderer skinnedMesh, Dictionary<Transform, int> boneDict){
+                    this.skinnedMesh = skinnedMesh;
+                    this.boneDict = boneDict;
+                    this.boneToBindPose = new Dictionary<Transform, Matrix4x4>();
+                }
+            }
+
+            /// <summary>
+            /// Exports the Gameobject and its ancestors.
+            /// </summary>
+            /// <returns><c>true</c>, if game object and parents were exported,
+            ///  <c>false</c> if export cancelled.</returns>
+            private bool ExportGameObjectAndParents(
+                GameObject unityGo,
+                GameObject rootObject,
+                FbxScene fbxScene, 
+                out FbxNode fbxNode,
+                Vector3 newCenter,
+                TransformExportType exportType,
+                ref int exportProgress,
+                int objectCount,
+                SkinnedMeshBoneInfo boneInfo = null)
+            {
+                // node already exists
+                if (MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
+                    return true;
+                }
+
+                if (ExportSettings.mayaCompatibleNames) {
+                    unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
+                }
+
+                // create an FbxNode and add it as a child of parent
+                fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
+                MapUnityObjectToFbxNode [unityGo] = fbxNode;
+
+                exportProgress++;
+                if (EditorUtility.DisplayCancelableProgressBar (
+                        ProgressBarTitle,
+                    string.Format ("Creating FbxNode {0}/{1}", exportProgress, objectCount),
+                    (exportProgress / (float)objectCount) * 0.5f)) {
+                    // cancel silently
+                    return false;
+                }
+
+                // Default inheritance type in FBX is RrSs, which causes scaling issues in Maya as
+                // both Maya and Unity use RSrs inheritance by default.
+                // Note: MotionBuilder uses RrSs inheritance by default as well, though it is possible
+                //       to select a different inheritance type in the UI.
+                // Use RSrs as the scaling inhertiance instead.
+                fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
+
+                // TODO: check if GO is a bone and export accordingly
+                var exportedBoneTransform = boneInfo != null? 
+                    ExportBoneTransform (fbxNode, fbxScene, unityGo.transform, boneInfo) : false;
+
+                // export regular transform if we are not a bone or failed to export as a bone
+                if(!exportedBoneTransform){
+                    ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
+                }
+
+                if (unityGo == rootObject || unityGo.transform.parent == null) {
+                    fbxScene.GetRootNode ().AddChild (fbxNode);
+                    return true;
+                }
+
+                SkinnedMeshBoneInfo parentBoneInfo = null;
+                if (boneInfo != null && boneInfo.skinnedMesh.rootBone != null && unityGo.transform != boneInfo.skinnedMesh.rootBone) {
+                    parentBoneInfo = boneInfo;
+                }
+
+                FbxNode fbxNodeParent;
+                if (!ExportGameObjectAndParents (
+                    unityGo.transform.parent.gameObject,
+                    rootObject,
+                    fbxScene,
+                    out fbxNodeParent,
+                    newCenter,
+                    TransformExportType.Local,
+                    ref exportProgress,
+                    objectCount,
+                    parentBoneInfo
+                )) {
+                    // export cancelled
+                    return false;
+                }
+                fbxNodeParent.AddChild (fbxNode);
+
+                return true;
+            }
+
+            /// <summary>
+            /// Exports the bone transform.
+            /// </summary>
+            /// <returns><c>true</c>, if bone transform was exported, <c>false</c> otherwise.</returns>
+            /// <param name="fbxNode">Fbx node.</param>
+            /// <param name="fbxScene">Fbx scene.</param>
+            /// <param name="unityBone">Unity bone.</param>
+            /// <param name="boneInfo">Bone info.</param>
+            private bool ExportBoneTransform(
+                FbxNode fbxNode, FbxScene fbxScene, Transform unityBone, SkinnedMeshBoneInfo boneInfo
+            ){
+                if (boneInfo == null || boneInfo.skinnedMesh == null || boneInfo.boneDict == null || unityBone == null) {
+                    return false;
+                }
+
+                var skinnedMesh = boneInfo.skinnedMesh;
+                var boneDict = boneInfo.boneDict;
+                var rootBone = skinnedMesh.rootBone;
+
+                // setup the skeleton
+                var fbxSkeleton = fbxNode.GetSkeleton ();
+                if (fbxSkeleton == null) {
+                    fbxSkeleton = FbxSkeleton.Create (fbxScene, unityBone.name + SkeletonPrefix);
+
+                    fbxSkeleton.Size.Set (1.0f * UnitScaleFactor);
+                    fbxNode.SetNodeAttribute (fbxSkeleton);
+                }
+                var fbxSkeletonType = rootBone != unityBone
+                    ? FbxSkeleton.EType.eLimbNode : FbxSkeleton.EType.eRoot;
+                fbxSkeleton.SetSkeletonType (fbxSkeletonType);
+
+                var bindPoses = skinnedMesh.sharedMesh.bindposes;
+
+                // get bind pose
+                Matrix4x4 bindPose;
+                if (!boneInfo.boneToBindPose.TryGetValue (unityBone, out bindPose)) {
+                    bindPose = GetBindPose (unityBone, bindPoses, boneDict, skinnedMesh);
+                    boneInfo.boneToBindPose.Add (unityBone, bindPose);
+                }
+
+                Matrix4x4 pose;
+                if (unityBone == rootBone) {
+                    pose = (unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix * bindPose.inverse);
+                } else {
+                    // get parent's bind pose
+                    Matrix4x4 parentBindPose;
+                    if (!boneInfo.boneToBindPose.TryGetValue (unityBone.parent, out parentBindPose)) {
+                        parentBindPose = GetBindPose (unityBone.parent, bindPoses, boneDict, skinnedMesh);
+                        boneInfo.boneToBindPose.Add (unityBone.parent, parentBindPose);
+                    }
+                    pose = parentBindPose * bindPose.inverse;
+                }
+
+                // FBX is transposed relative to Unity: transpose as we convert.
+                FbxMatrix matrix = new FbxMatrix ();
+                matrix.SetColumn (0, new FbxVector4 (pose.GetRow (0).x, pose.GetRow (0).y, pose.GetRow (0).z, pose.GetRow (0).w));
+                matrix.SetColumn (1, new FbxVector4 (pose.GetRow (1).x, pose.GetRow (1).y, pose.GetRow (1).z, pose.GetRow (1).w));
+                matrix.SetColumn (2, new FbxVector4 (pose.GetRow (2).x, pose.GetRow (2).y, pose.GetRow (2).z, pose.GetRow (2).w));
+                matrix.SetColumn (3, new FbxVector4 (pose.GetRow (3).x, pose.GetRow (3).y, pose.GetRow (3).z, pose.GetRow (3).w));
+
+                // FBX wants translation, rotation (in euler angles) and scale.
+                // We assume there's no real shear, just rounding error.
+                FbxVector4 translation, rotation, shear, scale;
+                double sign;
+                matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
+
+                // Export bones with zero rotation, using a pivot instead to set the rotation
+                // so that the bones are easier to animate and the rotation shows up as the "joint orientation" in Maya.
+                fbxNode.LclTranslation.Set (new FbxDouble3(-translation.X*UnitScaleFactor, translation.Y*UnitScaleFactor, translation.Z*UnitScaleFactor));
+                fbxNode.LclRotation.Set (new FbxDouble3(0,0,0));
+                fbxNode.LclScaling.Set (new FbxDouble3 (scale.X, scale.Y, scale.Z));
+
+                // TODO (UNI-34294): add detailed comment about why we export rotation as pre-rotation
+                fbxNode.SetRotationActive (true);
+                fbxNode.SetPivotState (FbxNode.EPivotSet.eSourcePivot, FbxNode.EPivotState.ePivotReference);
+                fbxNode.SetPreRotation (FbxNode.EPivotSet.eSourcePivot, new FbxVector4 (rotation.X, -rotation.Y, -rotation.Z));
+
+                return true;
+            }
+
+            /// <summary>
+            /// Counts how many objects are between this object and the root (exclusive).
+            /// </summary>
+            /// <returns>The object to root count.</returns>
+            /// <param name="startObject">Start object.</param>
+            /// <param name="root">Root object.</param>
+            private int GetObjectToRootDepth(Transform startObject, Transform root){
+                if (startObject == null) {
+                    return 0;
+                }
+
+                int count = 0;
+                var parent = startObject.parent;
+                while (parent != null && parent != root) {
+                    count++;
+                    parent = parent.parent;
+                }
+                return count;
+            }
+
+
+            /// <summary>
+            /// Gets the count of animated objects to be exported.
+            /// 
+            /// In addition, collects the minimum set of what needs to be exported for each GameObject hierarchy.
+            /// This contains all the animated GameObjects, their ancestors, their transforms, as well as any animated
+            /// components and the animation clips. Also, the first animation to export, if any.
+            /// </summary>
+            /// <returns>The animation only hierarchy count.</returns>
+            /// <param name="exportSet">GameObject hierarchies selected for export.</param>
+            /// <param name="hierarchyToExportData">Map from GameObject hierarchy to animation export data.</param>
+            protected int GetAnimOnlyHierarchyCount(
+                HashSet<GameObject> exportSet,
+                out Dictionary<GameObject, AnimationOnlyExportData> hierarchyToExportData
+            ){
+                hierarchyToExportData = new Dictionary<GameObject, AnimationOnlyExportData>();
+
+                foreach (var go in exportSet) {
+                    // gather all animation clips
+                    var legacyAnim = go.GetComponentsInChildren<Animation>();
+                    var genericAnim = go.GetComponentsInChildren<Animator> ();
+
+                    var goToExport = new HashSet<GameObject> ();
+                    var animationClips = new Dictionary<AnimationClip, GameObject> ();
+                    var exportComponent = new Dictionary<GameObject, System.Type> ();
+
+                    var exportData = new AnimationOnlyExportData (animationClips, goToExport, exportComponent);
+
+                    hierarchyToExportData.Add (go, exportData);
+
+                    int depthFromRootAnimation = int.MaxValue;
+                    Animation rootAnimation = null;
+                    foreach (var anim in legacyAnim) {
+                        int count = GetObjectToRootDepth(anim.transform, go.transform);
+
+                        if (count < depthFromRootAnimation) {
+                            depthFromRootAnimation = count;
+                            rootAnimation = anim;
+                        }
+
+                        var animClips = AnimationUtility.GetAnimationClips (anim.gameObject);
+                        exportData.ComputeObjectsInAnimationClips (animClips, anim.gameObject);
+                    }
+
+                    int depthFromRootAnimator = int.MaxValue;
+                    Animator rootAnimator = null;
+                    foreach (var anim in genericAnim) {
+                        int count = GetObjectToRootDepth(anim.transform, go.transform);
+
+                        if (count < depthFromRootAnimator) {
+                            depthFromRootAnimator = count;
+                            rootAnimator = anim;
+                        }
+
+                        // Try the animator controller (mecanim)
+                        var controller = anim.runtimeAnimatorController;
+                        if (controller)
+                        { 
+                            exportData.ComputeObjectsInAnimationClips (controller.animationClips, anim.gameObject);
+                        }
+                    }
+
+                    // set the first clip to export
+                    if (depthFromRootAnimation < depthFromRootAnimator) {
+                        exportData.defaultClip = rootAnimation.clip;
+                    } else {
+                        // Try the animator controller (mecanim)
+                        var controller = rootAnimator.runtimeAnimatorController;
+                        if (controller) {
+                            var dController = controller as UnityEditor.Animations.AnimatorController;
+                            if (dController && dController.layers.Count () > 0) {
+                                var motion = dController.layers [0].stateMachine.defaultState.motion;
+                                var defaultClip = motion as AnimationClip;
+                                if (defaultClip) {
+                                    exportData.defaultClip = defaultClip;
+                                } else {
+                                    Debug.LogWarningFormat ("Couldn't export motion {0}", motion.name);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // including any parents of animated objects that are exported
+                var completeExpSet = new HashSet<GameObject>();
+                foreach (var data in hierarchyToExportData.Values) {
+                    foreach (var go in data.goExportSet) {
+                        completeExpSet.Add (go);
+
+                        var parent = go.transform.parent;
+                        while (parent != null && completeExpSet.Add (parent.gameObject)) {
+                            parent = parent.parent;
+                        }
+                    }
+                }
+
+                return completeExpSet.Count;
             }
 
             /// <summary>
@@ -2386,7 +2773,7 @@ namespace FbxExporters
             ///
             /// This refreshes the asset database.
             /// </summary>
-            public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet)
+            public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet, bool animOnly = false)
             {
                 exportCancelled = false;
 
@@ -2473,36 +2860,49 @@ namespace FbxExporters
                         // stores how many objects we have exported, -1 if export was cancelled
                         int exportProgress = 0;
                         var revisedExportSet = RemoveRedundantObjects(unityExportSet);
-                        int count = GetHierarchyCount (revisedExportSet);
 
-                        if(revisedExportSet.Count == 1){
-                            foreach(var unityGo in revisedExportSet){
-                                exportProgress = this.ExportTransformHierarchy (
-                                    unityGo, fbxScene, fbxRootNode, exportProgress,
-                                    count, Vector3.zero, TransformExportType.Reset);
-                                if (exportCancelled || exportProgress < 0) {
-                                    Debug.LogWarning ("Export Cancelled");
-                                    return 0;
-                                }
-                            }
-                        }
-                        else{
-                            // find the center of the export set
-                            Vector3 center = ExportSettings.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
-
-                            foreach (var unityGo in revisedExportSet) {
-                                exportProgress = this.ExportTransformHierarchy (unityGo, fbxScene, fbxRootNode,
-                                    exportProgress, count, center, TransformExportType.Global);
-                                if (exportCancelled || exportProgress < 0) {
-                                    Debug.LogWarning ("Export Cancelled");
-                                    return 0;
-                                }
-                            }
+                        Dictionary<GameObject, AnimationOnlyExportData> exportData;
+                        int count = 0;
+                        if(animOnly){
+                            count = GetAnimOnlyHierarchyCount(revisedExportSet, out exportData);
+                        } else {
+                            count = GetHierarchyCount (revisedExportSet);
+                            exportData = new Dictionary<GameObject, AnimationOnlyExportData>();
                         }
 
-                        if(!ExportComponents(fbxScene)){
-                            Debug.LogWarning ("Export Cancelled");
+                        if(count <= 0){
+                            // nothing to export
+                            Debug.LogWarning("Nothing to Export");
                             return 0;
+                        }
+
+                        Vector3 center = Vector3.zero;
+                        var exportType = TransformExportType.Reset;
+                        if(revisedExportSet.Count != 1){
+                            center = ExportSettings.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
+                            exportType = TransformExportType.Global;
+                        }
+
+                        foreach (var unityGo in revisedExportSet) {
+                            AnimationOnlyExportData data;
+                            if(animOnly && exportData.TryGetValue(unityGo, out data)){
+                                exportProgress = this.ExportAnimationOnly(unityGo, fbxScene, exportProgress, count, center, data, exportType);
+                            }
+                            else {
+                                exportProgress = this.ExportTransformHierarchy (unityGo, fbxScene, fbxRootNode,
+                                    exportProgress, count, center, exportType);
+                            }
+                            if (exportCancelled || exportProgress < 0) {
+                                Debug.LogWarning ("Export Cancelled");
+                                return 0;
+                            }
+                        }
+
+                        if(!animOnly){
+                            if(!ExportComponents(fbxScene)){
+                                Debug.LogWarning ("Export Cancelled");
+                                return 0;
+                            }
                         }
 
                         // Set the scene's default camera.
@@ -2625,6 +3025,29 @@ namespace FbxExporters
             /// </summary>
             [MenuItem (MenuItemName, true, 30)]
             public static bool OnValidateMenuItem ()
+            {
+                return true;
+            }
+
+            /// <summary>
+            /// Add a menu item to a GameObject's context menu.
+            /// </summary>
+            /// <param name="command">Command.</param>
+            [MenuItem (AnimOnlyMenuItemName, false, 30)]
+            static void OnAnimOnlyContextItem (MenuCommand command)
+            {
+                if (Selection.objects.Length <= 0) {
+                    DisplayNoSelectionDialog ();
+                    return;
+                }
+                OnExport (animOnly:true);
+            }
+
+            /// <summary>
+            // Validate the menu item defined by the function above.
+            /// </summary>
+            [MenuItem (AnimOnlyMenuItemName, true, 30)]
+            public static bool OnValidateAnimOnlyMenuItem ()
             {
                 return true;
             }
@@ -2823,7 +3246,7 @@ namespace FbxExporters
             /// <summary>
             /// Get the GameObject
             /// </summary>
-            private static GameObject GetGameObject (Object obj)
+            public static GameObject GetGameObject (Object obj)
             {
                 if (obj is UnityEngine.Transform) {
                     var xform = obj as UnityEngine.Transform;
@@ -3073,7 +3496,7 @@ namespace FbxExporters
                 return basename + "." + extension;
             }
 
-            private static void OnExport ()
+            private static void OnExport (bool animOnly = false)
             {
                 // Now that we know we have stuff to export, get the user-desired path.
                 var directory = string.IsNullOrEmpty (LastFilePath)
@@ -3098,7 +3521,7 @@ namespace FbxExporters
                     return;
                 }
 
-                if (ExportObjects (filePath) != null) {
+                if (ExportObjects (filePath, animOnly:animOnly) != null) {
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
                     AssetDatabase.Refresh ();
@@ -3109,7 +3532,7 @@ namespace FbxExporters
             /// Export a list of (Game) objects to FBX file. 
             /// Use the SaveFile panel to allow user to enter a file name.
             /// <summary>
-            public static string ExportObjects (string filePath, UnityEngine.Object[] objects = null)
+            public static string ExportObjects (string filePath, UnityEngine.Object[] objects = null, bool animOnly = false)
             {
                 LastFilePath = filePath;
 
@@ -3121,7 +3544,7 @@ namespace FbxExporters
                         objects = Selection.objects;
                     }
 
-                    if (fbxExporter.ExportAll (objects) > 0) {
+                    if (fbxExporter.ExportAll (objects, animOnly) > 0) {
                         string message = string.Format ("Successfully exported: {0}", filePath);
                         UnityEngine.Debug.Log (message);
 
@@ -3131,9 +3554,9 @@ namespace FbxExporters
                 return null;
             }
 
-            public static string ExportObject (string filePath, UnityEngine.Object root)
+            public static string ExportObject (string filePath, UnityEngine.Object root, bool animOnly = false)
             {
-                return ExportObjects(filePath, new Object[] { root } );
+                return ExportObjects(filePath, new Object[] { root }, animOnly);
             }
 
             private static void EnsureDirectory (string path)
