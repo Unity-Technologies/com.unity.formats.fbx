@@ -3054,26 +3054,12 @@ namespace FbxExporters
             [MenuItem(ClipMenuItemName, false, 31)]
             static void OnClipContextClick(MenuCommand command)
             {
-                /*var obs = Selection.objects;
-                foreach (var obj in obs)
-                {
-                    if (obj.GetType().Name.Contains("EditorClip"))
-                    {
-                        Debug.Log("clip selected");
-                        var selClip = obj.GetType().GetProperty("clip").GetValue(obj, null);
-                        var timeLineClip = selClip as UnityEngine.Timeline.TimelineClip;
-                        Debug.Log("clip name: " + timeLineClip.displayName);
-                    }
-                }*/
-
                 // Now that we know we have stuff to export, get the user-desired path.
                 string directory = string.IsNullOrEmpty(LastFilePath)
                                       ? Application.dataPath
                                       : System.IO.Path.GetDirectoryName(LastFilePath);
 
-
-                string title = string.Format("Export Model FBX ({0})", FileBaseName);
-
+                string title = "Select the folder in which the animation files from the timeline will be exported";
                 string folderPath = EditorUtility.SaveFolderPanel(title, directory, "");
 
                 if (string.IsNullOrEmpty(folderPath))
@@ -3098,7 +3084,6 @@ namespace FbxExporters
                         selection = new GameObject[] { selected };
                     }
                 }
-
 
                 foreach (GameObject obj in selection)
                 {
