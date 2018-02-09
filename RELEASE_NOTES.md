@@ -4,11 +4,8 @@
 
 NEW FEATURES
 
-FbxPrefabAutoUpdater: new UI to help manage name changes. 
+* FbxPrefabAutoUpdater: new UI to help manage name changes. 
 To use the UI, disable auto-update in the FbxExporter settings, then right-click on a linked prefab in the project view and select "Update from FBX"
-
-* FbxPrefabAutoUpdater: Added option to export settings to disable auto update of prefabs
-NOTE: meshes will still update even if the FbxPrefabAutoUpdater is disabled
 
 * FbxExporter: Added animation only export
 
