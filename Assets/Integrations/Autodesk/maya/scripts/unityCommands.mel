@@ -275,6 +275,7 @@ proc unityExport(int $exportAnim){
     
         string $unitySetContents[] = `listConnections $unitySet`;
         
+        string $animatedObjectSet = "";
         if($exportAnim){
             string $animCurveSelect[] = `ls -typ animCurve`;
             string $animatedTransforms[] = `listConnections -t transform $animCurveSelect`;
@@ -286,6 +287,8 @@ proc unityExport(int $exportAnim){
             string $setAnimatedTransforms[] = `stringArrayIntersector -query $myIntersector`;
             
             select -r $setAnimatedTransforms;
+            $animatedObjectSet = `sets`;
+            select -r -ne $animatedObjectSet;
         }
         
         $pathAttr = $UnityFbxFilePathAttr;
@@ -303,6 +306,10 @@ proc unityExport(int $exportAnim){
         if ($unity_fbx_file_path != "" && $unity_fbx_file_name != ""){
             $strCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $unity_fbx_file_path + "/" + $unity_fbx_file_name + "\"";
             eval $strCmd;
+        }
+        
+        if(setExists($animatedObjectSet)){
+           delete $animatedObjectSet; 
         }
     }
     
