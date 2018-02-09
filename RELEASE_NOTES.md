@@ -1,5 +1,18 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint45
+
+NEW FEATURES
+
+* (Alpha) FbxPrefabAutoUpdater: new UI to help manage name changes. 
+To use the UI, disable auto-update in the FbxExporter settings, then right-click on a linked prefab in the project view and select "Update from FBX"
+
+* FbxExporter: Added animation only export
+
+Use GameObject menu or context menu to select "Export Animation Only". Animation will be taken from
+Animation and Animator components. All animation clips will be saved to the same fbx.
+The first clip exported will be the default clip from the root Animator or Animation component.
+
 **Version**: 1.3.0a1
 
 FIXES
