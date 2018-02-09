@@ -1,5 +1,18 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint45
+
+NEW FEATURES
+
+* FbxPrefabAutoUpdater: Added option to export settings to disable auto update of prefabs
+NOTE: meshes will still update even if the FbxPrefabAutoUpdater is disabled
+
+* FbxExporter: Added animation only export
+
+Use GameObject menu or context menu to select "Export Animation Only". Animation will be taken from
+Animation and Animator components. All animation clips will be saved to the same fbx.
+The first clip exported will be the default clip from the root Animator or Animation component.
+
 **Version**: 1.3.0a1
 
 FIXES
