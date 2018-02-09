@@ -93,6 +93,12 @@ namespace FbxExporters.UnitTests
                 yield return "Models/blendshape_with_skinning.fbx";
             }
         }
+
+        public static IEnumerable AnimOnlyTestCaases {
+            get {
+                yield return new TestCaseData ("Models/DefaultMale/DefaultMale.prefab");
+            }
+        }
     }
 
     [TestFixture]
@@ -477,14 +483,42 @@ namespace FbxExporters.UnitTests
 
             public static void ClipPropertyTest (AnimationClip animClipExpected, AnimationClip animClipActual)
             {
-                // TODO: figure out why we get __preview__ on Windows
-                Assert.That (animClipActual.name, Is.EqualTo (animClipExpected.name).Or.EqualTo("__preview__" + animClipExpected.name));
+                Assert.That (animClipActual.name, Is.EqualTo (animClipExpected.name).Or.EqualTo(animClipExpected.name));
                 Assert.That (animClipActual.legacy, Is.EqualTo (animClipExpected.legacy));
                 Assert.That (animClipActual.isLooping, Is.EqualTo (animClipExpected.isLooping));
                 Assert.That (animClipActual.wrapMode, Is.EqualTo (animClipExpected.wrapMode));
 
                 // TODO: Uni-34489
-                Assert.That (animClipActual.length, Is.EqualTo (animClipExpected.length).Within (Mathf.Epsilon), "animClip length doesn't match");
+                Assert.That (animClipActual.length, Is.EqualTo (animClipExpected.length).Within (0.0001f), "animClip length doesn't match");
+            }
+
+            /// <summary>
+            /// Compares the properties and curves of two animation clips.
+            /// </summary>
+            /// <param name="animClipOriginal">Animation clip original.</param>
+            /// <param name="animClipImported">Animation clip imported.</param>
+            public static void ClipTest(AnimationClip animClipOriginal, AnimationClip animClipImported){
+                // check clip properties match
+                AnimTester.ClipPropertyTest (animClipOriginal, animClipImported);
+
+                foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (animClipOriginal)) {
+                    foreach(EditorCurveBinding impCurveBinding in AnimationUtility.GetCurveBindings (animClipImported)) {
+
+                        // only compare if the path and property names match
+                        if (curveBinding.path != impCurveBinding.path || curveBinding.propertyName != impCurveBinding.propertyName) {
+                            continue;
+                        }
+
+                        AnimationCurve animCurveOrig = AnimationUtility.GetEditorCurve (animClipOriginal, curveBinding);
+                        Assert.That (animCurveOrig, Is.Not.Null);
+
+                        AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, impCurveBinding);
+                        Assert.That (animCurveImported, Is.Not.Null);
+
+                        AnimTester.KeyValuesTest(animCurveImported, animCurveOrig,
+                            string.Format("path: {0}, property: {1}", curveBinding.path, curveBinding.propertyName));
+                    }
+                }
             }
 
             public static void KeysTest (AnimationCurve expectedAnimCurve, AnimationCurve actualAnimCurve, string message, IComparer<Keyframe> keyComparer = null)
@@ -568,6 +602,28 @@ namespace FbxExporters.UnitTests
                 Assert.That(actualValueKeys, Is.EqualTo(importedValueKeys), string.Format("{0} key value doesn't match", message));
             }
 
+
+            public static Dictionary<string, AnimationClip> GetClipsFromFbx(string path, bool setLegacy = false){
+                //acquire imported object from exported file
+                Object [] goAssetImported = AssetDatabase.LoadAllAssetsAtPath (path);
+                Assert.That (goAssetImported, Is.Not.Null);
+
+                // TODO : configure object so that it imports w Legacy Animation
+
+                var animClips = new Dictionary<string, AnimationClip> ();
+                foreach (Object o in goAssetImported) {
+                    var animClipImported = o as AnimationClip;
+                    if (animClipImported && !animClipImported.name.StartsWith("__preview__")) {
+                        // TODO : configure import settings so we don't need to force legacy
+                        animClipImported.legacy = setLegacy;
+                        animClips.Add (animClipImported.name, animClipImported);
+                    }
+                }
+                Assert.That (animClips, Is.Not.Empty, "expected imported clips");
+
+                return animClips;
+            }
+
             public static AnimationClip GetClipFromFbx(string path){
                 //acquire imported object from exported file
                 Object [] goAssetImported = AssetDatabase.LoadAllAssetsAtPath (path);
@@ -578,7 +634,7 @@ namespace FbxExporters.UnitTests
                 AnimationClip animClipImported = null;
                 foreach (Object o in goAssetImported) {
                     animClipImported = o as AnimationClip;
-                    if (animClipImported) break;
+                    if (animClipImported && !animClipImported.name.StartsWith("__preview__")) break;
                 }
                 Assert.That (animClipImported, Is.Not.Null, "expected imported clip");
 
@@ -618,28 +674,7 @@ namespace FbxExporters.UnitTests
 
             var animClipImported = AnimTester.GetClipFromFbx (filename);
 
-            // check clip properties match
-            AnimTester.ClipPropertyTest (animClipOriginal, animClipImported);
-
-            foreach (EditorCurveBinding curveBinding in AnimationUtility.GetCurveBindings (animClipOriginal)) {
-                foreach(EditorCurveBinding impCurveBinding in AnimationUtility.GetCurveBindings (animClipImported)) {
-
-                    // only compare if the path and property names match
-                    if (curveBinding.path != impCurveBinding.path || curveBinding.propertyName != impCurveBinding.propertyName) {
-                        continue;
-                    }
-
-                    AnimationCurve animCurveOrig = AnimationUtility.GetEditorCurve (animClipOriginal, curveBinding);
-                    Assert.That (animCurveOrig, Is.Not.Null);
-
-                    AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, impCurveBinding);
-                    Assert.That (animCurveImported, Is.Not.Null);
-
-                    AnimTester.CurveTest(animCurveImported, animCurveOrig, curveBinding.propertyName);
-                }
-            }
-
-
+            AnimTester.ClipTest (animClipOriginal, animClipImported);
         }
 
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "TransformIndependantComponentTestCases")]
@@ -763,6 +798,95 @@ namespace FbxExporters.UnitTests
 
             var tester = new AnimTester {keyData=keyData, testName=testName, path=GetRandomFbxFilePath ()};
             return tester.DoIt() <= propertyNames.Length ? 1 : 0;
+        }
+
+        [Test, TestCaseSource (typeof (AnimationTestDataClass), "AnimOnlyTestCaases")]
+        public void AnimOnlyExportTest(string prefabPath)
+        {
+            prefabPath = FindPathInUnitTests (prefabPath);
+            Assert.That (prefabPath, Is.Not.Null);
+
+            // add prefab to scene
+            GameObject originalObj = AssetDatabase.LoadMainAssetAtPath ("Assets/" + prefabPath) as GameObject;
+            Assert.IsNotNull (originalObj);
+            GameObject originalGO = GameObject.Instantiate (originalObj);
+            Assert.IsTrue (originalGO);
+
+            // get clips
+            var animator = originalGO.GetComponentInChildren<Animator> ();
+            Assert.That (animator, Is.Not.Null);
+
+            var controller = animator.runtimeAnimatorController;
+            Assert.That (controller, Is.Not.Null);
+
+            var animClips = controller.animationClips;
+            Assert.That (animClips, Is.Not.Null);
+
+            // get the set of GameObject transforms to be exported with the clip
+            var animatedObjects = GetAnimatedGameObjects (animClips, animator.gameObject);
+
+            // export fbx
+            // get GameObject
+            string filename = GetRandomFbxFilePath ();
+            var exportedFilePath = ModelExporter.ExportObject (filename, originalGO, animOnly: true);
+            Assert.That (exportedFilePath, Is.EqualTo (filename));
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+            Assert.IsTrue (fbxObj);
+
+            // compare hierarchy matches animated objects
+            var s = new Stack<Transform> ();
+
+            // don't check the root since it probably won't have the same name anyway
+            foreach (Transform child in fbxObj.transform) {
+                s.Push (child);
+            }
+            while (s.Count > 0) {
+                var transform = s.Pop ();
+
+                Assert.That (animatedObjects.Contains(transform.name));
+                animatedObjects.Remove (transform.name);
+
+                foreach (Transform child in transform) {
+                    s.Push (child);
+                }
+            }
+
+            // compare clips
+            var fbxAnimClips = AnimTester.GetClipsFromFbx (filename);
+            Assert.That (fbxAnimClips.Count, Is.EqualTo (animClips.Count()));
+
+            foreach (var clip in animClips) {
+                Assert.That (fbxAnimClips.ContainsKey (clip.name));
+                var fbxClip = fbxAnimClips [clip.name];
+                AnimTester.ClipTest (clip, fbxClip);
+            }
+        }
+
+        private HashSet<string> GetAnimatedGameObjects(AnimationClip[] animClips, GameObject animatorObject){
+            var animatedObjects = new HashSet<string>();
+            foreach (var clip in animClips) {
+                foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (clip)) {
+                    Object uniObj = AnimationUtility.GetAnimatedObject (animatorObject, uniCurveBinding);
+                    if (!uniObj) {
+                        continue;
+                    }
+
+                    GameObject unityGo = ModelExporter.GetGameObject (uniObj);
+                    if (!unityGo) {
+                        continue;
+                    }
+
+                    // also it's parents up until but excluding the root (the root will have a different name)
+                    var parent = unityGo.transform;
+                    while (parent != null && parent.parent != null) {
+                        animatedObjects.Add (parent.name);
+                        parent = parent.parent;
+                    }
+
+                }
+            }
+            return animatedObjects;
         }
     }
 }
