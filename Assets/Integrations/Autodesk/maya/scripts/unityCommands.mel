@@ -120,23 +120,6 @@ proc importFile(string $filePathStr){
     
     if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $tempPath != ""){
         storeAttribute($unityExportSet, $UnityFbxFilePathAttr, $tempPath);
-        
-        // Change Unity project if fbx is from a different Unity project.
-        // Get the project based on the folder structure (i.e. folder above Assets)
-        $head = dirname($tempPath);
-        $tail = basename($tempPath, "");
-        // Check that we are not at the root directory.
-        // dirname($head) returns the last directory name in the path, 
-        // or head if head is the root directory.
-        while ($head != "" && dirname($head) != $head){
-            if (`strcmp $tail "Assets"` == 0){
-                // this is a valid Unity project, so set it
-                optionVar -sv "UnityProject" $head;
-                break;
-            }
-            $head = dirname($head);
-            $tail = basename($head, "");
-        }
     }
     
     if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $tempName != ""){
@@ -213,6 +196,24 @@ global proc unityImport(){
     for($i=0; $i<size($filePaths); ++$i){
         $filePathStr = $filePaths[$i];
         importFile($filePathStr);
+    }
+    
+    $tempPath = dirname($filePaths[0]);
+    // Change Unity project if fbx is from a different Unity project.
+    // Get the project based on the folder structure (i.e. folder above Assets)
+    $head = dirname($tempPath);
+    $tail = basename($tempPath, "");
+    // Check that we are not at the root directory.
+    // dirname($head) returns the last directory name in the path, 
+    // or head if head is the root directory.
+    while ($head != "" && dirname($head) != $head){
+        if (`strcmp $tail "Assets"` == 0){
+            // this is a valid Unity project, so set it
+            optionVar -sv "UnityProject" $head;
+            break;
+        }
+        $head = dirname($head);
+        $tail = basename($head, "");
     }
 }
 
