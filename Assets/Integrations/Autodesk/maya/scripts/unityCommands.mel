@@ -212,14 +212,67 @@ global proc unityImport(){
     }
 }
 
+// returns the intersection of two string arrays
+proc string[] getIntersection(string $set1[], string $set2[]){
+    string $myIntersector = `stringArrayIntersector`;
+    
+    stringArrayIntersector -edit -reset $myIntersector;
+    stringArrayIntersector -edit -intersect $set1 $myIntersector;
+    stringArrayIntersector -edit -intersect $set2 $myIntersector;
+    
+    string $intersection[] = `stringArrayIntersector -query $myIntersector`;
+    
+    // Delete the intersector
+    deleteUI $myIntersector;
+    
+    return $intersection;
+}
 
-proc unityExport(int $exportAnim){
-    // get the global variables
-    global string $UnityExportSets[];
+proc exportSet(string $unitySet, int $exportAnim){
     global string $UnityFbxFilePathAttr;
     global string $UnityFbxFileNameAttr;
     global string $UnityFbxAnimFilePathAttr;
     global string $UnityFbxAnimFileNameAttr;
+
+    string $unitySetContents[] = `listConnections $unitySet`;
+        
+    string $animatedObjectSet = "";
+    if($exportAnim){
+        string $animCurveSelect[] = `ls -typ animCurve`;
+        string $animatedTransforms[] = `listConnections -t transform $animCurveSelect`;
+        
+        string $setAnimatedTransforms[] = getIntersection($animatedTransforms, $unitySetContents);
+        
+        select -r $setAnimatedTransforms;
+        $animatedObjectSet = `sets`;
+        select -r -ne $animatedObjectSet;
+    }
+    
+    $pathAttr = $UnityFbxFilePathAttr;
+    $nameAttr = $UnityFbxFileNameAttr;
+    
+    if($exportAnim){
+        $pathAttr = $UnityFbxAnimFilePathAttr;
+        $nameAttr = $UnityFbxAnimFileNameAttr;
+    }
+    
+    $unity_fbx_file_path = getAttribute($unitySet, $pathAttr);
+    $unity_fbx_file_name = getAttribute($unitySet, $nameAttr);
+    
+    $strCmd = "";
+    if ($unity_fbx_file_path != "" && $unity_fbx_file_name != ""){
+        $strCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $unity_fbx_file_path + "/" + $unity_fbx_file_name + "\"";
+        eval $strCmd;
+    }
+    
+    if(setExists($animatedObjectSet)){
+       delete $animatedObjectSet; 
+    }
+}
+
+proc unityExport(int $exportAnim){
+    // get the global variables
+    global string $UnityExportSets[];
     
     if(!loadUnityDependencies()){
         return;
@@ -238,8 +291,6 @@ proc unityExport(int $exportAnim){
         return;
     }
     
-    string $myIntersector = `stringArrayIntersector`;
-    
     $i = 0;
     string $setsToExport[];
     for($exportSet in $UnityExportSets){
@@ -247,17 +298,12 @@ proc unityExport(int $exportAnim){
             continue;
         }
         
-        stringArrayIntersector -edit -reset $myIntersector;
-        stringArrayIntersector -edit -intersect $origSelection $myIntersector;
-        
+        // check if the selection intersects with this export set
         string $exportSetContents[] = `listConnections $exportSet`; 
-        
-        stringArrayIntersector -edit -intersect $exportSetContents $myIntersector;
-        
-        string $intersection[] = `stringArrayIntersector -query $myIntersector`;
+        string $intersection[] = getIntersection($origSelection, $exportSetContents);
         
         if(size($intersection) > 0 ||
-            stringArrayContains($exportSet, $origSelection)){
+           stringArrayContains($exportSet, $origSelection)){
             
             $setsToExport[$i] = $exportSet;
             $i++;
@@ -272,49 +318,8 @@ proc unityExport(int $exportAnim){
     
     for($unitySet in $setsToExport){
         print ("exporting set: " + $unitySet);
-    
-        string $unitySetContents[] = `listConnections $unitySet`;
-        
-        string $animatedObjectSet = "";
-        if($exportAnim){
-            string $animCurveSelect[] = `ls -typ animCurve`;
-            string $animatedTransforms[] = `listConnections -t transform $animCurveSelect`;
-            
-            stringArrayIntersector -edit -reset $myIntersector;
-            stringArrayIntersector -edit -intersect $animatedTransforms $myIntersector;
-            stringArrayIntersector -edit -intersect $unitySetContents $myIntersector;
-            
-            string $setAnimatedTransforms[] = `stringArrayIntersector -query $myIntersector`;
-            
-            select -r $setAnimatedTransforms;
-            $animatedObjectSet = `sets`;
-            select -r -ne $animatedObjectSet;
-        }
-        
-        $pathAttr = $UnityFbxFilePathAttr;
-        $nameAttr = $UnityFbxFileNameAttr;
-        
-        if($exportAnim){
-            $pathAttr = $UnityFbxAnimFilePathAttr;
-            $nameAttr = $UnityFbxAnimFileNameAttr;
-        }
-        
-        $unity_fbx_file_path = getAttribute($unitySet, $pathAttr);
-        $unity_fbx_file_name = getAttribute($unitySet, $nameAttr);
-        
-        $strCmd = "";
-        if ($unity_fbx_file_path != "" && $unity_fbx_file_name != ""){
-            $strCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $unity_fbx_file_path + "/" + $unity_fbx_file_name + "\"";
-            eval $strCmd;
-        }
-        
-        if(setExists($animatedObjectSet)){
-           delete $animatedObjectSet; 
-        }
+        exportSet($unitySet, $exportAnim);
     }
-    
-    // Delete the intersector
-    deleteUI $myIntersector;
     
     select -cl;
     if (size($origSelection) > 0){    
