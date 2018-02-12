@@ -70,6 +70,106 @@ proc int loadUnityPlugin(string $plugin){
     return true;
 };
 
+proc importFile(string $filePathStr){
+    // get the global variables
+    global string $UnityExportSets[];
+    global string $UnityFbxFilePathAttr;
+    global string $UnityFbxFileNameAttr;
+    global string $UnityFbxAnimFilePathAttr;
+    global string $UnityFbxAnimFileNameAttr;
+    global string $UnityExportSetNameFormat;
+
+    $tempPath = dirname($filePathStr);
+    $tempName = basename($filePathStr, "");
+    $tempAnimPath = "";
+    $tempAnimName = "";
+    $nameWithoutExt = basename($filePathStr, ".fbx");
+    
+    $isAnimFile = false;
+    if(match("@", basename($filePathStr, ".fbx")) != ""){
+        // import as animation
+        $isAnimFile = true;
+        $tempAnimPath = $tempPath;
+        $tempAnimName = $tempName;
+        
+        $nameWithoutExt = match("[^@]+", $nameWithoutExt);
+    }
+    $unityExportSet = `format -stringArg $nameWithoutExt $UnityExportSetNameFormat`;
+
+    // Gather everything that is in the scene
+    $origItemsInScene = `ls -tr -o -r true`;
+        
+    // Get or create the Unity Fbx Export Set
+    $setCreated = false;
+    if (!setExists($unityExportSet)){
+        // couldn't find export set so create it
+        sets -name $unityExportSet;
+        $setCreated = true;
+    }
+    
+    // unlock set so we can add attributes to it
+    lockNode -lock false $unityExportSet;
+    
+    if(!$isAnimFile){
+        // reset attribute values, in case import fails
+        storeAttribute($unityExportSet, $UnityFbxFilePathAttr, "");
+        storeAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
+    }
+    
+    FBXImport -f $filePathStr;
+    
+    if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $tempPath != ""){
+        storeAttribute($unityExportSet, $UnityFbxFilePathAttr, $tempPath);
+        
+        // Change Unity project if fbx is from a different Unity project.
+        // Get the project based on the folder structure (i.e. folder above Assets)
+        $head = dirname($tempPath);
+        $tail = basename($tempPath, "");
+        // Check that we are not at the root directory.
+        // dirname($head) returns the last directory name in the path, 
+        // or head if head is the root directory.
+        while ($head != "" && dirname($head) != $head){
+            if (`strcmp $tail "Assets"` == 0){
+                // this is a valid Unity project, so set it
+                optionVar -sv "UnityProject" $head;
+                break;
+            }
+            $head = dirname($head);
+            $tail = basename($head, "");
+        }
+    }
+    
+    if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $tempName != ""){
+        storeAttribute($unityExportSet,$UnityFbxFileNameAttr,$tempName);
+    }
+    
+    if($tempAnimPath != ""){
+        storeAttribute($unityExportSet,$UnityFbxAnimFilePathAttr,$tempAnimPath);
+    }
+    
+    if($tempAnimName != ""){
+        storeAttribute($unityExportSet,$UnityFbxAnimFileNameAttr,$tempAnimName);
+    }
+    
+    if (setExists($unityExportSet) == true){
+        // figure out what has been added after import
+        $itemsInScene = `ls -tr -o -r true`;
+        
+        $newItems = stringArrayRemove($origItemsInScene, $itemsInScene);
+        
+        // add newly imported items to set
+        if (size($newItems) > 0){
+            sets -include $unityExportSet $newItems;
+        }
+        // lock set so it doesn't get deleted when empty
+        lockNode -lock true $unityExportSet;
+        
+        if(!stringArrayContains($unityExportSet, $UnityExportSets)){
+            $UnityExportSets[size($UnityExportSets)] = $unityExportSet;
+        }
+    }
+}
+
 
 global proc int loadUnityDependencies(){
     // GamePipeline plugin 'SendToUnitySelection' command used in export
@@ -93,14 +193,6 @@ global proc int loadUnityDependencies(){
 }
 
 global proc unityImport(){
-    // get the global variables
-    global string $UnityExportSets[];
-    global string $UnityFbxFilePathAttr;
-    global string $UnityFbxFileNameAttr;
-    global string $UnityFbxAnimFilePathAttr;
-    global string $UnityFbxAnimFileNameAttr;
-    global string $UnityExportSetNameFormat;
-
     if(!loadUnityDependencies()){
         error("Failed to load Unity dependencies");
         return;
@@ -120,95 +212,7 @@ global proc unityImport(){
     }
     for($i=0; $i<size($filePaths); ++$i){
         $filePathStr = $filePaths[$i];
-        $tempPath = dirname($filePathStr);
-        $tempName = basename($filePathStr, "");
-        $tempAnimPath = "";
-        $tempAnimName = "";
-        $nameWithoutExt = basename($filePathStr, ".fbx");
-        
-        $isAnimFile = false;
-        if(match("@", basename($filePathStr, ".fbx")) != ""){
-            // import as animation
-            $isAnimFile = true;
-            $tempAnimPath = $tempPath;
-            $tempAnimName = $tempName;
-            
-            $nameWithoutExt = match("[^@]+", $nameWithoutExt);
-        }
-        $unityExportSet = `format -stringArg $nameWithoutExt $UnityExportSetNameFormat`;
-
-        // Gather everything that is in the scene
-        $origItemsInScene = `ls -tr -o -r true`;
-            
-        // Get or create the Unity Fbx Export Set
-        $setCreated = false;
-        if (!setExists($unityExportSet)){
-            // couldn't find export set so create it
-            sets -name $unityExportSet;
-            $setCreated = true;
-        }
-        
-        // unlock set so we can add attributes to it
-        lockNode -lock false $unityExportSet;
-        
-        if(!$isAnimFile){
-            // reset attribute values, in case import fails
-            storeAttribute($unityExportSet, $UnityFbxFilePathAttr, "");
-            storeAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
-        }
-        
-        FBXImport -f $filePathStr;
-        
-        if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $tempPath != ""){
-            storeAttribute($unityExportSet, $UnityFbxFilePathAttr, $tempPath);
-            
-            // Change Unity project if fbx is from a different Unity project.
-            // Get the project based on the folder structure (i.e. folder above Assets)
-            $head = dirname($tempPath);
-            $tail = basename($tempPath, "");
-            // Check that we are not at the root directory.
-            // dirname($head) returns the last directory name in the path, 
-            // or head if head is the root directory.
-            while ($head != "" && dirname($head) != $head){
-                if (`strcmp $tail "Assets"` == 0){
-                    // this is a valid Unity project, so set it
-                    optionVar -sv "UnityProject" $head;
-                    break;
-                }
-                $head = dirname($head);
-                $tail = basename($head, "");
-            }
-        }
-        
-        if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $tempName != ""){
-            storeAttribute($unityExportSet,$UnityFbxFileNameAttr,$tempName);
-        }
-        
-        if($tempAnimPath != ""){
-            storeAttribute($unityExportSet,$UnityFbxAnimFilePathAttr,$tempAnimPath);
-        }
-        
-        if($tempAnimName != ""){
-            storeAttribute($unityExportSet,$UnityFbxAnimFileNameAttr,$tempAnimName);
-        }
-        
-        if (setExists($unityExportSet) == true){
-            // figure out what has been added after import
-            $itemsInScene = `ls -tr -o -r true`;
-            
-            $newItems = stringArrayRemove($origItemsInScene, $itemsInScene);
-            
-            // add newly imported items to set
-            if (size($newItems) > 0){
-                sets -include $unityExportSet $newItems;
-            }
-            // lock set so it doesn't get deleted when empty
-            lockNode -lock true $unityExportSet;
-            
-            if(!stringArrayContains($unityExportSet, $UnityExportSets)){
-                $UnityExportSets[size($UnityExportSets)] = $unityExportSet;
-            }
-        }
+        importFile($filePathStr);
     }
 }
 
