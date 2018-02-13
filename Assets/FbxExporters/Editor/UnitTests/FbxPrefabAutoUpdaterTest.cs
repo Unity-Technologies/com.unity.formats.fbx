@@ -175,14 +175,6 @@ namespace FbxExporters.UnitTests
 
     public class FbxPrefabAutoUpdaterRemappingTest : ExporterTestBase
     {
-        bool isAutoUpdaterOn;
-        [SetUp]
-        public void Init()
-        {
-            isAutoUpdaterOn = FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled;
-            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = true;
-        }
-
         [Test]
         public void RemappingTest()
         {
@@ -227,11 +219,6 @@ namespace FbxExporters.UnitTests
             Assert.IsTrue(cubePrefabInstance.GetComponent<MeshFilter>().sharedMesh != null);
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).name == "SphereFBX");
             Assert.IsTrue(cubePrefabInstance.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh != null);
-        }
-        [TearDown]
-        public void stopTest()
-        {
-            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
         }
     }
 
