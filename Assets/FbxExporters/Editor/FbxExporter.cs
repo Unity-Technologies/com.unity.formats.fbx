@@ -1757,7 +1757,7 @@ namespace FbxExporters
                     }
                 }
 
-                protected abstract FbxVector4 GetFinalEulerRotation (float seconds, UnityEngine.Quaternion restRotation, FbxQuaternion preRotationInverse);
+                protected abstract FbxQuaternion GetConvertedQuaternionRotation (float seconds, UnityEngine.Quaternion restRotation);
 
                 private Key [] ComputeKeys(UnityEngine.Quaternion restRotation, FbxNode node) {
                     // Get the source pivot pre-rotation if any, so we can
@@ -1781,10 +1781,19 @@ namespace FbxExporters
                     var keys = new Key[keyTimes.Count];
                     int i = 0;
                     foreach(var seconds in keyTimes) {
+                        var fbxFinalAnimation = GetConvertedQuaternionRotation (seconds, restRotation);
+
+                        // Cancel out the pre-rotation. Order matters. FBX reads left-to-right.
+                        // When we run animation we will apply:
+                        //      pre-rotation
+                        //      then pre-rotation inverse
+                        //      then animation.
+                        var fbxFinalQuat = fbxPreRotationInverse * fbxFinalAnimation;
+
                         // Store the key so we can sort them later.
                         Key key;
                         key.time = FbxTime.FromSecondDouble(seconds);
-                        key.euler = GetFinalEulerRotation (seconds, restRotation, fbxPreRotationInverse);
+                        key.euler = ModelExporter.QuaternionToEuler (fbxFinalQuat);
                         keys[i++] = key;
                     }
 
@@ -1850,7 +1859,7 @@ namespace FbxExporters
                     }
                 }
 
-                protected override FbxVector4 GetFinalEulerRotation (float seconds, Quaternion restRotation, FbxQuaternion preRotationInverse)
+                protected override FbxQuaternion GetConvertedQuaternionRotation (float seconds, Quaternion restRotation)
                 {
                     var eulerRest = restRotation.eulerAngles;
                     // The final animation, including the effect of pre-rotation.
@@ -1865,17 +1874,7 @@ namespace FbxExporters
                     // convert the final animation to righthanded coords
                     var finalEuler = ModelExporter.ConvertQuaternionToXYZEuler(fbxFinalAnimation);
 
-                    // convert it back to a quaternion for multiplication
-                    var quat = ModelExporter.EulerToQuaternion (new FbxVector4(finalEuler));
-
-                    // Cancel out the pre-rotation. Order matters. FBX reads left-to-right.
-                    // When we run animation we will apply:
-                    //      pre-rotation
-                    //      then pre-rotation inverse
-                    //      then animation.
-                    var fbxFinalQuat = preRotationInverse * quat;
-
-                    return ModelExporter.QuaternionToEuler (fbxFinalQuat);
+                    return ModelExporter.EulerToQuaternion (new FbxVector4(finalEuler));
                 }
             }
 
@@ -1919,7 +1918,7 @@ namespace FbxExporters
                     }
                 }
 
-                protected override FbxVector4 GetFinalEulerRotation (float seconds, Quaternion restRotation, FbxQuaternion preRotationInverse)
+                protected override FbxQuaternion GetConvertedQuaternionRotation (float seconds, Quaternion restRotation)
                 {
                     // The final animation, including the effect of pre-rotation.
                     // If we have no curve, assume the node has the correct rotation right now.
@@ -1933,17 +1932,7 @@ namespace FbxExporters
                     // convert the final animation to righthanded coords
                     var finalEuler = ModelExporter.ConvertQuaternionToXYZEuler(fbxFinalAnimation);
 
-                    // convert it back to a quaternion for multiplication
-                    fbxFinalAnimation = ModelExporter.EulerToQuaternion (finalEuler);
-
-                    // Cancel out the pre-rotation. Order matters. FBX reads left-to-right.
-                    // When we run animation we will apply:
-                    //      pre-rotation
-                    //      then pre-rotation inverse
-                    //      then animation.
-                    var fbxFinalQuat = preRotationInverse * fbxFinalAnimation;
-
-                    return ModelExporter.QuaternionToEuler (fbxFinalQuat);
+                    return ModelExporter.EulerToQuaternion (finalEuler);
                 }
             }
 
