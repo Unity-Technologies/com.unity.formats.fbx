@@ -1187,6 +1187,8 @@ namespace FbxExporters
                 // This causes issues when converting euler to quaternion, causing the final
                 // rotation to be slighlty off.
                 // Fixed by exporting the rotations as eulers with XYZ rotation order.
+                // Can't just set the rotation order to ZXY on export as Maya incorrectly imports the
+                // rotation. Appears to first convert to XYZ rotation then set rotation order to ZXY.
                 fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderXYZ);
 
                 UnityEngine.Vector3 unityTranslate;
@@ -1590,10 +1592,8 @@ namespace FbxExporters
 
                     bool partT = uniPropertyName.StartsWith ("m_LocalPosition.", cc);
                     bool partTx = uniPropertyName.EndsWith ("Position.x", cc) || uniPropertyName.EndsWith ("T.x", cc);
-                    bool partRy = uniPropertyName.Equals("localEulerAnglesRaw.y", cc);
-                    bool partRz = uniPropertyName.Equals("localEulerAnglesRaw.z", cc);
 
-                    convertLtoR |= partTx || partRy || partRz;
+                    convertLtoR |= partTx;
 
                     convertDistance |= partT;
                     convertDistance |= uniPropertyName.StartsWith ("m_Intensity", cc);
@@ -1648,21 +1648,6 @@ namespace FbxExporters
                         return true;
                     }
 
-                    // Transform Rotation (EULER)
-                    // NOTE: Quaternion Rotation handled by QuaternionCurve
-                    if (uniPropertyName.StartsWith ("localEulerAnglesRaw.x", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_X);
-                        return true;
-                    }
-                    if (uniPropertyName.StartsWith ("localEulerAnglesRaw.y", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
-                        return true;
-                    }
-                    if (uniPropertyName.StartsWith ("localEulerAnglesRaw.z", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Rotation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
-                        return true;
-                    }
-    
                     // Transform Translation
                     if (uniPropertyName.StartsWith ("m_LocalPosition.x", ct) || uniPropertyName.EndsWith ("T.x", ct)) {
                         prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_X);
@@ -1742,6 +1727,135 @@ namespace FbxExporters
                 {
                     foreach (var curve in Curves)
                         curve.KeyModifyEnd();
+                }
+            }
+
+            class EulerCurve {
+                public double sampleRate;
+                public AnimationCurve x;
+                public AnimationCurve y;
+                public AnimationCurve z;
+
+                public struct Key {
+                    public FbxTime time;
+                    public FbxVector4 euler;
+                }
+
+                public EulerCurve() { }
+
+                public static int GetEulerIndex(string uniPropertyName) {
+                    System.StringComparison ct = System.StringComparison.CurrentCulture;
+                    bool isEulerComponent = uniPropertyName.StartsWith ("localEulerAnglesRaw.", ct);
+
+                    if (!isEulerComponent) { return -1; }
+
+                    switch(uniPropertyName[uniPropertyName.Length - 1]) {
+                    case 'x': return 0;
+                    case 'y': return 1;
+                    case 'z': return 2;
+                    default: return -1;
+                    }
+                }
+
+                public void SetCurve(int i, AnimationCurve curve) {
+                    switch(i) {
+                    case 0: x = curve; break;
+                    case 1: y = curve; break;
+                    case 2: z = curve; break;
+                    default: throw new System.IndexOutOfRangeException();
+                    }
+                }
+
+                Key [] ComputeKeys(UnityEngine.Vector3 restRotation, FbxNode node) {
+                    // Get the source pivot pre-rotation if any, so we can
+                    // remove it from the animation we get from Unity.
+                    var fbxPreRotationEuler = node.GetRotationActive() 
+                        ? node.GetPreRotation(FbxNode.EPivotSet.eSourcePivot)
+                        : new FbxVector4();
+
+                    // Get the inverse of the prerotation
+                    var fbxPreRotationInverse = ModelExporter.EulerToQuaternion (fbxPreRotationEuler);
+                    fbxPreRotationInverse.Inverse();
+
+                    // Find when we have keys set.
+                    var animCurves = new AnimationCurve[]{x,y,z};
+                    var keyTimes = 
+                        (FbxExporters.Editor.ModelExporter.ExportSettings.BakeAnimation) 
+                        ? ModelExporter.GetSampleTimes(animCurves, sampleRate) 
+                        : ModelExporter.GetKeyTimes(animCurves);
+
+                    // Convert to the Key type.
+                    var keys = new Key[keyTimes.Count];
+                    int i = 0;
+                    foreach(var seconds in keyTimes) {
+
+                        // The final animation, including the effect of pre-rotation.
+                        // If we have no curve, assume the node has the correct rotation right now.
+                        // We need to evaluate since we might only have keys in one of the axes.
+                        var fbxFinalAnimation = Quaternion.Euler (
+                            (x == null) ? restRotation [0] : x.Evaluate (seconds),
+                            (y == null) ? restRotation [1] : y.Evaluate (seconds),
+                            (z == null) ? restRotation [2] : z.Evaluate (seconds)
+                        );
+
+                        // convert the final animation to righthanded coords
+                        var finalEuler = ModelExporter.ConvertQuaternionToXYZEuler(fbxFinalAnimation);
+
+                        // convert it back to a quaternion for multiplication
+                        var quat = ModelExporter.EulerToQuaternion (new FbxVector4(finalEuler));
+
+                        // Cancel out the pre-rotation. Order matters. FBX reads left-to-right.
+                        // When we run animation we will apply:
+                        //      pre-rotation
+                        //      then pre-rotation inverse
+                        //      then animation.
+                        var fbxFinalQuat = fbxPreRotationInverse * quat;
+
+                        // Store the key so we can sort them later.
+                        Key key;
+                        key.time = FbxTime.FromSecondDouble(seconds);
+                        key.euler = ModelExporter.QuaternionToEuler (fbxFinalQuat);
+                        keys[i++] = key;
+                    }
+
+                    // Sort the keys by time
+                    System.Array.Sort(keys, (Key a, Key b) => a.time.CompareTo(b.time));
+
+                    return keys;
+                }
+
+                public void Animate(Transform unityTransform, FbxNode fbxNode, FbxAnimLayer fbxAnimLayer, bool Verbose) {
+
+                    /* Find or create the three curves. */
+                    var fbxAnimCurveX = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_X, true);
+                    var fbxAnimCurveY = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Y, true);
+                    var fbxAnimCurveZ = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Z, true);
+
+                    /* set the keys */
+                    using (new FbxAnimCurveModifyHelper(new List<FbxAnimCurve>{fbxAnimCurveX,fbxAnimCurveY,fbxAnimCurveZ}))
+                    {
+                        foreach (var key in ComputeKeys(unityTransform.localRotation.eulerAngles, fbxNode)) {
+
+                            int i = fbxAnimCurveX.KeyAdd(key.time);
+                            fbxAnimCurveX.KeySet(i, key.time, (float)key.euler.X);
+
+                            i = fbxAnimCurveY.KeyAdd(key.time);
+                            fbxAnimCurveY.KeySet(i, key.time, (float)key.euler.Y);
+
+                            i = fbxAnimCurveZ.KeyAdd(key.time);
+                            fbxAnimCurveZ.KeySet(i, key.time, (float)key.euler.Z);
+                        }
+                    }
+
+                    // Uni-35616 unroll curves to preserve continuous rotations
+                    var fbxCurveNode = fbxNode.LclRotation.GetCurveNode(fbxAnimLayer, false /*should already exist*/);
+
+                    FbxAnimCurveFilterUnroll fbxAnimUnrollFilter = new FbxAnimCurveFilterUnroll();
+                    fbxAnimUnrollFilter.Apply(fbxCurveNode);
+
+                    if (Verbose) {
+                        Debug.Log("Exported rotation animation for " + fbxNode.GetName());
+                    }
                 }
             }
 
@@ -1935,6 +2049,7 @@ namespace FbxExporters
                  * (which is how it should be) but FBX uses Euler angles. So we
                  * need to gather up the list of transform curves per object. */
                 var quaternions = new Dictionary<UnityEngine.GameObject, QuaternionCurve> ();
+                var eulers = new Dictionary<GameObject, EulerCurve> ();
 
                 foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (uniAnimClip)) {
                     Object uniObj = AnimationUtility.GetAnimatedObject (uniRoot, uniCurveBinding);
@@ -1950,26 +2065,46 @@ namespace FbxExporters
                     }
 
                     int index = QuaternionCurve.GetQuaternionIndex (uniCurveBinding.propertyName);
-                    if (index == -1) 
-                    {
-                        /* simple property (e.g. intensity), export right away */
-                        ExportAnimationCurve (uniObj, uniAnimCurve, uniAnimClip.frameRate, 
-                            uniCurveBinding.propertyName,
-                            fbxScene, 
-                            fbxAnimLayer);
-                    } else {
+                    if (index >= 0) {
                         /* Rotation property; save it to convert quaternion -> euler later. */
 
                         var uniGO = GetGameObject (uniObj);
-                        if (!uniGO) { continue; }
+                        if (!uniGO) {
+                            continue;
+                        }
 
                         QuaternionCurve quat;
                         if (!quaternions.TryGetValue (uniGO, out quat)) {
-                            quat = new QuaternionCurve {sampleRate = uniAnimClip.frameRate};
+                            quat = new QuaternionCurve { sampleRate = uniAnimClip.frameRate };
                             quaternions.Add (uniGO, quat);
                         }
                         quat.SetCurve (index, uniAnimCurve);
+
+                        continue;
+                    } 
+
+                    index = EulerCurve.GetEulerIndex (uniCurveBinding.propertyName);
+                    if (index >= 0) {
+                        var uniGO = GetGameObject (uniObj);
+                        if (!uniGO) {
+                            continue;
+                        }
+
+                        EulerCurve euler;
+                        if (!eulers.TryGetValue (uniGO, out euler)) {
+                            euler = new EulerCurve { sampleRate = uniAnimClip.frameRate };
+                            eulers.Add (uniGO, euler);
+                        }
+                        euler.SetCurve (index, uniAnimCurve);
+
+                        continue;
                     }
+
+                    /* simple property (e.g. intensity), export right away */
+                    ExportAnimationCurve (uniObj, uniAnimCurve, uniAnimClip.frameRate, 
+                        uniCurveBinding.propertyName,
+                        fbxScene, 
+                        fbxAnimLayer);
                 }
 
                 /* now export all the quaternion curves */
@@ -1983,6 +2118,18 @@ namespace FbxExporters
                         continue;
                     }
                     quat.Animate (unityGo.transform, fbxNode, fbxAnimLayer, Verbose);
+                }
+
+                foreach (var kvp in eulers) {
+                    var unityGo = kvp.Key;
+                    var euler = kvp.Value;
+
+                    FbxNode fbxNode;
+                    if (!MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
+                        Debug.LogError (string.Format ("no FbxNode found for {0}", unityGo.name));
+                        continue;
+                    }
+                    euler.Animate (unityGo.transform, fbxNode, fbxAnimLayer, Verbose);
                 }
             }
 
