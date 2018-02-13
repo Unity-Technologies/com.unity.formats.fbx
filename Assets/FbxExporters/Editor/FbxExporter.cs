@@ -1730,6 +1730,11 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Base class for QuaternionCurve and EulerCurve.
+            /// Provides implementation for computing keys and generating FbxAnimCurves
+            /// for euler rotation.
+            /// </summary>
             abstract class RotationCurve {
                 public double sampleRate;
                 public AnimationCurve x;
@@ -1824,6 +1829,10 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Convert from ZXY to XYZ euler, and remove
+            /// prerotation from animated rotation.
+            /// </summary>
             class EulerCurve : RotationCurve {
                 public EulerCurve() { }
 
@@ -1979,7 +1988,15 @@ namespace FbxExporters
 
                 /* The major difficulty: Unity uses quaternions for rotation
                  * (which is how it should be) but FBX uses Euler angles. So we
-                 * need to gather up the list of transform curves per object. */
+                 * need to gather up the list of transform curves per object.
+                 * 
+                 * For euler angles, Unity uses ZXY rotation order while Maya uses XYZ.
+                 * Maya doesn't import files with ZXY rotation correctly, so have to convert to XYZ.
+                 * Need all 3 curves in order to convert.
+                 * 
+                 * Also, in both cases, prerotation has to be removed from the animated rotation if
+                 * there are bones being exported.
+                 */
                 var rotations = new Dictionary<GameObject, RotationCurve> ();
 
                 foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (uniAnimClip)) {
@@ -2036,6 +2053,14 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Gets or creates the rotation curve for GameObject uniGO.
+            /// </summary>
+            /// <returns>The rotation curve.</returns>
+            /// <param name="uniGO">Unity GameObject.</param>
+            /// <param name="frameRate">Frame rate.</param>
+            /// <param name="rotations">Rotations.</param>
+            /// <typeparam name="T"> RotationCurve is abstract so specify type of RotationCurve to create.</typeparam>
             private RotationCurve GetRotationCurve<T>(
                 GameObject uniGO, float frameRate,
                 ref Dictionary<GameObject, RotationCurve> rotations
