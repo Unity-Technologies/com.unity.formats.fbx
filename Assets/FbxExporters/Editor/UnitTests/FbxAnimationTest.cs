@@ -682,8 +682,7 @@ namespace FbxExporters.UnitTests
 
             // export fbx
             // get GameObject
-            string filename = GetRandomFbxFilePath ();
-            ExportToFbx(filename, originalGO);
+            string filename = ExportToFbx(originalGO);
 
             // TODO: Uni-34492 change importer settings of (newly exported model) 
             // so that it's not resampled and it is legacy animation
@@ -835,8 +834,7 @@ namespace FbxExporters.UnitTests
 
             // export fbx
             // get GameObject
-            string filename = GetRandomFbxFilePath ();
-            ExportToFbx(filename, originalGO, true);
+            string filename = ExportToFbx(originalGO, true);
 
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
             Assert.IsTrue (fbxObj);
@@ -864,11 +862,6 @@ namespace FbxExporters.UnitTests
             AnimTester.MultiClipTest (animClips, fbxAnimClips);
         }
 
-        public static void ExportToFbx (string filename, GameObject hierarchy, bool animOnly = false){
-            var exportedFilePath = ModelExporter.ExportObject (filename, hierarchy, animOnly);
-            Assert.That (exportedFilePath, Is.EqualTo (filename));
-        }
-
         public static AnimationClip[] GetClipsFromAnimator(Animator animator){
             Assert.That (animator, Is.Not.Null);
 
@@ -879,15 +872,6 @@ namespace FbxExporters.UnitTests
             Assert.That (animClips, Is.Not.Null);
 
             return animClips;
-        }
-
-        public static GameObject AddAssetToScene(string assetPath){
-            GameObject originalObj = AssetDatabase.LoadMainAssetAtPath ("Assets/" + assetPath) as GameObject;
-            Assert.IsNotNull (originalObj);
-            GameObject originalGO = GameObject.Instantiate (originalObj);
-            Assert.IsTrue (originalGO);
-
-            return originalGO;
         }
 
         private HashSet<string> GetAnimatedGameObjects(AnimationClip[] animClips, GameObject animatorObject){

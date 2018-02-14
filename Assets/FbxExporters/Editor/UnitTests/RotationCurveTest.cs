@@ -40,20 +40,19 @@ namespace FbxExporters.UnitTests
     	}
 
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "RotationCurveTestCases")]
-        public void TestCurveExport (string prefabPath) {
+        public void TestEulerCurveExport (string prefabPath) {
             prefabPath = FindPathInUnitTests (prefabPath);
             Assert.That (prefabPath, Is.Not.Null);
 
             // add fbx to scene
-            GameObject originalGO = FbxAnimationTest.AddAssetToScene(prefabPath);
+            GameObject originalGO = AddAssetToScene(prefabPath);
 
             // get clips
             var animator = originalGO.GetComponentInChildren<Animator> ();
             var animClips = FbxAnimationTest.GetClipsFromAnimator (animator);
 
             // export fbx
-            string filename = GetRandomFbxFilePath ();
-            FbxAnimationTest.ExportToFbx(filename, originalGO);
+            string filename = ExportToFbx(originalGO);
 
             var fbxAnimClips = FbxAnimationTest.AnimTester.GetClipsFromFbx (filename);
 
