@@ -146,7 +146,8 @@ namespace FbxExporters.UnitTests
         }
 
         [SetUp]
-        public void Init() {
+        public override void Init() {
+            base.Init();
             // Create a test hierarchy. It has unique names.
             m_original = CreateHierarchy("FbxPrefabTestRoot");
             m_originalRep = Rep(m_original);

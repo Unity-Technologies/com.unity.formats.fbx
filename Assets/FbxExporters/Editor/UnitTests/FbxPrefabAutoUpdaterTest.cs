@@ -19,8 +19,9 @@ namespace FbxExporters.UnitTests
         string m_prefabPath;
 
         [SetUp]
-        public void Init ()
+        public override void Init ()
         {
+            base.Init();
             var capsule = GameObject.CreatePrimitive (PrimitiveType.Capsule);
             m_fbx = ExportSelection (capsule);
             m_fbxPath = AssetDatabase.GetAssetPath (m_fbx);
@@ -226,8 +227,9 @@ namespace FbxExporters.UnitTests
     {
         bool isAutoUpdaterOn;
         [SetUp]
-        public void Init()
+        public override void Init()
         {
+            base.Init();
             // Save the initial setting for the auto updater toggle and disable it for the unit test
             isAutoUpdaterOn = FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled;
             FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = false;
