@@ -217,12 +217,70 @@ global proc unityImport(){
     }
 }
 
+// returns the intersection of two string arrays
+proc string[] getIntersection(string $set1[], string $set2[]){
+    string $myIntersector = `stringArrayIntersector`;
+    
+    stringArrayIntersector -edit -reset $myIntersector;
+    stringArrayIntersector -edit -intersect $set1 $myIntersector;
+    stringArrayIntersector -edit -intersect $set2 $myIntersector;
+    
+    string $intersection[] = `stringArrayIntersector -query $myIntersector`;
+    
+    // Delete the intersector
+    deleteUI $myIntersector;
+    
+    return $intersection;
+}
 
-global proc unityExport(){
-    // get the global variables
-    global string $UnityExportSet;
+proc exportSet(string $unitySet, int $exportAnim){
     global string $UnityFbxFilePathAttr;
     global string $UnityFbxFileNameAttr;
+    global string $UnityFbxAnimFilePathAttr;
+    global string $UnityFbxAnimFileNameAttr;
+
+    string $unitySetContents[] = `listConnections $unitySet`;
+        
+    string $animatedObjectSet = "";
+    if($exportAnim){
+        string $animCurveSelect[] = `ls -typ animCurve`;
+        string $animatedTransforms[] = `listConnections -t transform $animCurveSelect`;
+        
+        string $setAnimatedTransforms[] = getIntersection($animatedTransforms, $unitySetContents);
+        
+        select -r $setAnimatedTransforms;
+        $animatedObjectSet = `sets`;
+        select -r -ne $animatedObjectSet;
+    }
+    else{
+        select -r -ne $unitySet;
+    }
+    
+    $pathAttr = $UnityFbxFilePathAttr;
+    $nameAttr = $UnityFbxFileNameAttr;
+    
+    if($exportAnim){
+        $pathAttr = $UnityFbxAnimFilePathAttr;
+        $nameAttr = $UnityFbxAnimFileNameAttr;
+    }
+    
+    $unity_fbx_file_path = getAttribute($unitySet, $pathAttr);
+    $unity_fbx_file_name = getAttribute($unitySet, $nameAttr);
+    
+    $strCmd = "";
+    if ($unity_fbx_file_path != "" && $unity_fbx_file_name != ""){
+        $strCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $unity_fbx_file_path + "/" + $unity_fbx_file_name + "\"";
+        eval $strCmd;
+    }
+    
+    if(setExists($animatedObjectSet)){
+       delete $animatedObjectSet; 
+    }
+}
+
+proc unityExport(int $exportAnim){
+    // get the global variables
+    global string $UnityExportSets[];
     
     if(!loadUnityDependencies()){
         return;
@@ -232,27 +290,56 @@ global proc unityExport(){
         return;
     }
     
-    // select the export set for export, if it exists,
-    // otherwise take what is currently selected
+    FBXProperty "Export|IncludeGrp|Animation" -v $exportAnim;
+    FBXExportAnimationOnly -v $exportAnim;
+    
     $origSelection = `ls -sl`;
-    if (setExists($UnityExportSet)){
-        select -r -ne $UnityExportSet;
+    if(size($origSelection) <= 0){
+        // nothing selected
+        return;
     }
     
-    $unity_fbx_file_path = getAttribute($UnityExportSet, $UnityFbxFilePathAttr);
-    $unity_fbx_file_name = getAttribute($UnityExportSet, $UnityFbxFileNameAttr);
+    $i = 0;
+    string $setsToExport[];
+    for($exportSet in $UnityExportSets){
+        if(!setExists($exportSet)){
+            continue;
+        }
+        
+        // TODO (UNI-39197) move functionality to separate mel file
+        // check if the selection intersects with this export set
+        string $exportSetContents[] = `listConnections $exportSet`; 
+        string $intersection[] = getIntersection($origSelection, $exportSetContents);
+        
+        if(size($intersection) > 0 ||
+           stringArrayContains($exportSet, $origSelection)){
+            
+            $setsToExport[$i] = $exportSet;
+            $i++;
+        }
+    }
     
-    $strCmd = "";
-    if ($unity_fbx_file_path != "" && $unity_fbx_file_name != ""){
-        $strCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $unity_fbx_file_path + "/" + $unity_fbx_file_name + "\"";
+    // if selection doesn't belong to a set, export to a new file
+    if(size($setsToExport) <= 0){
+        eval "SendToUnitySelection";
+        return;
     }
-    else {
-        $strCmd = "SendToUnitySelection";
+    
+    for($unitySet in $setsToExport){
+        print ("exporting set: " + $unitySet);
+        exportSet($unitySet, $exportAnim);
     }
-    eval $strCmd;
     
     select -cl;
     if (size($origSelection) > 0){    
         select -add -ne $origSelection;
     }
+}
+
+global proc unityExportAnim(){
+    unityExport(true);
+}
+
+global proc unityExportModel(){
+    unityExport(false);
 }
