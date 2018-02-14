@@ -33,9 +33,9 @@ public class ManualUpdateEditorWindow : EditorWindow
         m_nodeNameToSuggest.AddRange(m_nodesToCreate);
         m_nodeNameToSuggest.AddRange(m_nodesToRename);
 
-        // Add extra 1 for the [Delete] option
-        selectedNodesToDestroy = new int[m_nodeNameToSuggest.Count + 1];
-        selectedNodesToRename = new int[m_nodeNameToSuggest.Count + 1];
+        // Keep track of the selected combo option in each type
+        selectedNodesToDestroy = new int[m_nodesToDestroy.Count];
+        selectedNodesToRename = new int[m_nodesToRename.Count];
 
         // Default option for nodes to rename. Shows the current name mapping
         for (int i = 0; i < m_nodesToRename.Count; i++)
