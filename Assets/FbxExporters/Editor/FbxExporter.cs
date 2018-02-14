@@ -1737,9 +1737,7 @@ namespace FbxExporters
             /// </summary>
             abstract class RotationCurve {
                 public double sampleRate;
-                public AnimationCurve x;
-                public AnimationCurve y;
-                public AnimationCurve z;
+                public AnimationCurve[] m_curves;
 
                 public struct Key {
                     public FbxTime time;
@@ -1748,13 +1746,11 @@ namespace FbxExporters
 
                 public RotationCurve() { }
 
-                public virtual void SetCurve(int i, AnimationCurve curve) {
-                    switch(i) {
-                    case 0: x = curve; break;
-                    case 1: y = curve; break;
-                    case 2: z = curve; break;
-                    default: throw new System.IndexOutOfRangeException();
+                public void SetCurve(int i, AnimationCurve curve) {
+                    if (i < 0 || i >= m_curves.Length) {
+                        throw new System.IndexOutOfRangeException();
                     }
+                    m_curves [i] = curve;
                 }
 
                 protected abstract FbxQuaternion GetConvertedQuaternionRotation (float seconds, UnityEngine.Quaternion restRotation);
@@ -1771,11 +1767,10 @@ namespace FbxExporters
                     fbxPreRotationInverse.Inverse();
 
                     // Find when we have keys set.
-                    var animCurves = new AnimationCurve[]{x,y,z};
                     var keyTimes = 
                         (FbxExporters.Editor.ModelExporter.ExportSettings.BakeAnimation) 
-                        ? ModelExporter.GetSampleTimes(animCurves, sampleRate) 
-                        : ModelExporter.GetKeyTimes(animCurves);
+                        ? ModelExporter.GetSampleTimes(m_curves, sampleRate) 
+                        : ModelExporter.GetKeyTimes(m_curves);
 
                     // Convert to the Key type.
                     var keys = new Key[keyTimes.Count];
@@ -1843,8 +1838,14 @@ namespace FbxExporters
             /// prerotation from animated rotation.
             /// </summary>
             class EulerCurve : RotationCurve {
-                public EulerCurve() { }
+                public EulerCurve() { m_curves = new AnimationCurve[3]; }
 
+                /// <summary>
+                /// Gets the index of the euler curve by property name.
+                /// x = 0, y = 1, z = 2
+                /// </summary>
+                /// <returns>The index of the curve, or -1 if property doesn't map to Euler curve.</returns>
+                /// <param name="uniPropertyName">Unity property name.</param>
                 public static int GetEulerIndex(string uniPropertyName) {
                     System.StringComparison ct = System.StringComparison.CurrentCulture;
                     bool isEulerComponent = uniPropertyName.StartsWith ("localEulerAnglesRaw.", ct);
@@ -1862,17 +1863,19 @@ namespace FbxExporters
                 protected override FbxQuaternion GetConvertedQuaternionRotation (float seconds, Quaternion restRotation)
                 {
                     var eulerRest = restRotation.eulerAngles;
+                    AnimationCurve x = m_curves [0], y = m_curves [1], z = m_curves [2];
+
                     // The final animation, including the effect of pre-rotation.
                     // If we have no curve, assume the node has the correct rotation right now.
                     // We need to evaluate since we might only have keys in one of the axes.
-                    var fbxFinalAnimation = Quaternion.Euler (
+                    var unityFinalAnimation = Quaternion.Euler (
                         (x == null) ? eulerRest [0] : x.Evaluate (seconds),
                         (y == null) ? eulerRest [1] : y.Evaluate (seconds),
                         (z == null) ? eulerRest [2] : z.Evaluate (seconds)
                     );
 
                     // convert the final animation to righthanded coords
-                    var finalEuler = ModelExporter.ConvertQuaternionToXYZEuler(fbxFinalAnimation);
+                    var finalEuler = ModelExporter.ConvertQuaternionToXYZEuler(unityFinalAnimation);
 
                     return ModelExporter.EulerToQuaternion (new FbxVector4(finalEuler));
                 }
@@ -1883,10 +1886,15 @@ namespace FbxExporters
             /// from quaternion to euler. We use this class to help.
             /// </summary>
             class QuaternionCurve : RotationCurve {
-                public AnimationCurve w;
 
-                public QuaternionCurve() { }
+                public QuaternionCurve() { m_curves = new AnimationCurve[4]; }
 
+                /// <summary>
+                /// Gets the index of the curve by property name.
+                /// x = 0, y = 1, z = 2, w = 3
+                /// </summary>
+                /// <returns>The index of the curve, or -1 if property doesn't map to Quaternion curve.</returns>
+                /// <param name="uniPropertyName">Unity property name.</param>
                 public static int GetQuaternionIndex(string uniPropertyName) {
                     System.StringComparison ct = System.StringComparison.CurrentCulture;
                     bool isQuaternionComponent = false;
@@ -1908,18 +1916,10 @@ namespace FbxExporters
                     }
                 }
 
-                public override void SetCurve(int i, AnimationCurve curve) {
-                    switch(i) {
-                    case 0: x = curve; break;
-                    case 1: y = curve; break;
-                    case 2: z = curve; break;
-                    case 3: w = curve; break;
-                    default: throw new System.IndexOutOfRangeException();
-                    }
-                }
-
                 protected override FbxQuaternion GetConvertedQuaternionRotation (float seconds, Quaternion restRotation)
                 {
+                    AnimationCurve x = m_curves [0], y = m_curves [1], z = m_curves [2], w = m_curves[3];
+
                     // The final animation, including the effect of pre-rotation.
                     // If we have no curve, assume the node has the correct rotation right now.
                     // We need to evaluate since we might only have keys in one of the axes.
