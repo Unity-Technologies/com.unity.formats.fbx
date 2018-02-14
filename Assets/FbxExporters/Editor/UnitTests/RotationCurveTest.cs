@@ -38,5 +38,27 @@ namespace FbxExporters.UnitTests
             Assert.That(() => quaternionCurve.SetCurve (-5, animCurve), Throws.Exception.TypeOf<System.IndexOutOfRangeException>());
             Assert.That(() => quaternionCurve.SetCurve (4, animCurve), Throws.Exception.TypeOf<System.IndexOutOfRangeException>());
     	}
+
+        [Test, TestCaseSource (typeof (AnimationTestDataClass), "RotationCurveTestCases")]
+        public void TestCurveExport (string prefabPath) {
+            prefabPath = FindPathInUnitTests (prefabPath);
+            Assert.That (prefabPath, Is.Not.Null);
+
+            // add fbx to scene
+            GameObject originalGO = FbxAnimationTest.AddAssetToScene(prefabPath);
+
+            // get clips
+            var animator = originalGO.GetComponentInChildren<Animator> ();
+            var animClips = FbxAnimationTest.GetClipsFromAnimator (animator);
+
+            // export fbx
+            string filename = GetRandomFbxFilePath ();
+            FbxAnimationTest.ExportToFbx(filename, originalGO);
+
+            var fbxAnimClips = FbxAnimationTest.AnimTester.GetClipsFromFbx (filename);
+
+            Assert.That (fbxAnimClips.Count, Is.EqualTo (animClips.Length));
+            FbxAnimationTest.AnimTester.MultiClipTest (animClips, fbxAnimClips);
+        }
     }
 }
