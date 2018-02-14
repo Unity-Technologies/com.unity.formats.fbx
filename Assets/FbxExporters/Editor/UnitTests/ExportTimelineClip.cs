@@ -3,6 +3,8 @@ using UnityEditor;
 using NUnit.Framework;
 using FbxExporters.Editor;
 using UnityEngine.Timeline;
+using UnityEngine.Playables;
+using System;
 
 namespace FbxExporters.UnitTests
 {
@@ -15,8 +17,38 @@ namespace FbxExporters.UnitTests
         }
 
         [Test]
-        public void RemappingTest()
+        public void ExportClip()
         {
+            GameObject timelineGO = new GameObject();
+            PlayableDirector playableDirector = timelineGO.AddComponent<PlayableDirector>();
+            Animator animator = timelineGO.AddComponent<Animator>();
+            TimelineAsset timelineAsset = (TimelineAsset)playableDirector.playableAsset;
+            AnimationTrack newTrack = timelineAsset.CreateTrack<AnimationTrack>(null, "Animation Track " + timelineGO.name);
+
+            //bind object to which the animation shell be assigned to the created animationTrack
+            playableDirector.SetGenericBinding(newTrack, timelineGO);
+
+            AnimationClip animationClip = new AnimationClip();
+            //create a timelineClip for the animationClip on the AnimationTrack
+            TimelineClip timelineClip = newTrack.CreateClip(animationClip);
+
+
+            /*Type timelineWindowType = Type.GetType("UnityEditor.Timeline.TimelineWindow,UnityEditor.Timeline");
+            var timelineWindow = EditorWindow.GetWindow(timelineWindowType);
+            timelineWindow.Repaint();​*/
+
+
+            //New GameObject
+            //New Playable Director
+            //New Timeline
+            //New Animation Track
+            //New Animation Clip
+            //Create clip (timeline) with Animation Clip
+            //UnityEngine.Timeline.TimelineClip timeLineClip = new UnityEngine.Timeline.TimelineClip();
+
+
+
+
             /*var selectedObjects = Selection.objects;
             foreach (var obj in selectedObjects)
             {
@@ -46,9 +78,29 @@ namespace FbxExporters.UnitTests
             Assert.IsTrue(FbxPrefabAutoUpdater.OnValidateMenuItem());
         }
 
+        [Test]
+        public void ExportAllTimelineClip()
+        {
+            GameObject myCube = GameObject.Find("Cube");
+            Selection.objects = new UnityEngine.GameObject[] { myCube };
+            string folderPath = Application.dataPath + "/Assets/UnitTest";
+            Debug.Log(folderPath);
+            foreach(GameObject obj in Selection.objects)
+            {
+                ModelExporter.ExportAllTimelineClips(obj, Application.dataPath + "/Assets/UnitTest/");
+                FileAssert.Exists(folderPath + obj.name + "@Recorded.fbx");
+
+            }
+
+            
+
+        }
+
+
+
 
         [TearDown]
-        public void stopTest()
+        public void StopTest()
         {
 
         }

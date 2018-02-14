@@ -327,7 +327,7 @@ namespace FbxExporters.UnitTests
 
 
         [TearDown]
-        public void stopTest()
+        public void StopTest()
         {
             // Put back the initial setting for the auto-updater toggle
             FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
