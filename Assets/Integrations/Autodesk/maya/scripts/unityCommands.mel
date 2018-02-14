@@ -247,6 +247,9 @@ proc exportSet(string $unitySet, int $exportAnim){
         $animatedObjectSet = `sets`;
         select -r -ne $animatedObjectSet;
     }
+    else{
+        select -r -ne $unitySet;
+    }
     
     $pathAttr = $UnityFbxFilePathAttr;
     $nameAttr = $UnityFbxFileNameAttr;
@@ -298,6 +301,7 @@ proc unityExport(int $exportAnim){
             continue;
         }
         
+        // TODO (UNI-39197) move functionality to separate mel file
         // check if the selection intersects with this export set
         string $exportSetContents[] = `listConnections $exportSet`; 
         string $intersection[] = getIntersection($origSelection, $exportSetContents);
