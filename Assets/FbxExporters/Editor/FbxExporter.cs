@@ -1712,7 +1712,6 @@ namespace FbxExporters
 
                 if (Verbose)
                     Debug.Log (string.Format ("Exporting animation clip ({1}) for {0}", uniRoot.name, uniAnimClip.name));
-
                 // setup anim stack
                 FbxAnimStack fbxAnimStack = FbxAnimStack.Create (fbxScene, uniAnimClip.name);
                 fbxAnimStack.Description.Set ("Animation Take: " + uniAnimClip.name);
@@ -1839,12 +1838,12 @@ namespace FbxExporters
 
                 var uniAnimator = uniRoot.GetComponent<Animator> ();
                 if (uniAnimator)
-                { 
+                {
                     // Try the animator controller (mecanim)
                     var controller = uniAnimator.runtimeAnimatorController;
 
                     if (controller) 
-                    { 
+                    {
                         // Only export each clip once per game object.
                         foreach (var clip in controller.animationClips) {
                             if (exportedClips.Add (clip)) {
@@ -1865,7 +1864,9 @@ namespace FbxExporters
                 // Try the animation (legacy)
                 var uniAnimation = uniRoot.GetComponent<Animation> ();
                 if (uniAnimation) 
-                { 
+                {
+                    fbxScene.GetSceneInfo().mKeywords += " AnimationTypeLegacy ";
+
                     // Only export each clip once per game object.
                     foreach (var uniAnimObj in uniAnimation) {
                         AnimationState uniAnimState = uniAnimObj as AnimationState;

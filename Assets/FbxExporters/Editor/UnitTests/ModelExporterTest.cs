@@ -418,6 +418,39 @@ namespace FbxExporters.UnitTests
             CompareLightValues (light, fbxLight);
         }
 
+        [Test]
+        public void TestRetainLegacyAnimationType()
+        {
+            string filename = GetRandomFbxFilePath();
+            GameObject go = new GameObject();
+            go.name = "original";
+            Light light = go.AddComponent(typeof(Light)) as Light;
+            light.type = LightType.Spot;
+            Animation anim = go.AddComponent(typeof(Animation)) as Animation;
+
+            Keyframe[] keys = new Keyframe[3];
+            keys[0] = new Keyframe(0.0f, 1f);
+            keys[1] = new Keyframe(1.0f, 2f);
+            keys[2] = new Keyframe(2.0f, 3f);
+
+            AnimationCurve curve = new AnimationCurve(keys);
+
+            AnimationClip clip = new AnimationClip();
+
+            clip.legacy = true;
+
+            clip.SetCurve("", typeof(Light), "m_SpotAngle", curve);
+
+            anim.AddClip(clip, "test");
+
+            //export the object
+            var exported = ModelExporter.ExportObject(filename, go);
+            GameObject asset = AssetDatabase.LoadMainAssetAtPath(exported) as GameObject;
+
+            Assert.That(asset.GetComponent<Animation>());
+
+        }
+
         private void CompareLightValues(Light light, Light fbxLight, float delta=0.001f){
             Assert.AreEqual (light.type, fbxLight.type);
             if (light.type == LightType.Spot) {
