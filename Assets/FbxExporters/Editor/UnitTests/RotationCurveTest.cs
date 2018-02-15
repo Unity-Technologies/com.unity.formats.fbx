@@ -18,7 +18,7 @@ namespace FbxExporters.UnitTests
             Assert.That(EulerCurve.GetEulerIndex ("m_LocalRotation.x"), Is.EqualTo(-1));
 
             // Test get quaternion index
-			var quaternionCurve = new QuaternionCurve();
+            var quaternionCurve = new QuaternionCurve();
             Assert.That(QuaternionCurve.GetQuaternionIndex ("m_LocalRotation.w"), Is.EqualTo(3));
             Assert.That(QuaternionCurve.GetQuaternionIndex ("m_LocalRotation"), Is.EqualTo(-1));
             Assert.That(QuaternionCurve.GetQuaternionIndex ("localEulerAnglesRaw.y"), Is.EqualTo(-1));

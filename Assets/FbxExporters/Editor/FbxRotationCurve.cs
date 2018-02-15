@@ -23,9 +23,6 @@ namespace FbxExporters
             public RotationCurve() { }
 
             public void SetCurve(int i, AnimationCurve curve) {
-                if (i < 0 || i >= m_curves.Length) {
-                    throw new System.IndexOutOfRangeException();
-                }
                 m_curves [i] = curve;
             }
 
