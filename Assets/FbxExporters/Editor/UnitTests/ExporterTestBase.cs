@@ -241,6 +241,33 @@ namespace FbxExporters.UnitTests
         }
 
         /// <summary>
+        /// Exports a single hierarchy to a random fbx file.
+        /// </summary>
+        /// <returns>The exported fbx file path.</returns>
+        /// <param name="hierarchy">Hierarchy.</param>
+        /// <param name="animOnly">If set to <c>true</c> export animation only.</param>
+        protected string ExportToFbx (GameObject hierarchy, bool animOnly = false){
+            string filename = GetRandomFbxFilePath ();
+            var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (filename, hierarchy, animOnly);
+            Assert.That (exportedFilePath, Is.EqualTo (filename));
+            return filename;
+        }
+
+        /// <summary>
+        /// Adds the asset at asset path to the scene.
+        /// </summary>
+        /// <returns>The new GameObject in the scene.</returns>
+        /// <param name="assetPath">Asset path.</param>
+        protected GameObject AddAssetToScene(string assetPath){
+            GameObject originalObj = AssetDatabase.LoadMainAssetAtPath ("Assets/" + assetPath) as GameObject;
+            Assert.IsNotNull (originalObj);
+            GameObject originalGO = GameObject.Instantiate (originalObj);
+            Assert.IsTrue (originalGO);
+
+            return originalGO;
+        }
+
+        /// <summary>
         /// Compares two hierarchies, asserts that they match precisely.
         /// The root can be allowed to mismatch. That's normal with
         /// GameObject.Instantiate.
