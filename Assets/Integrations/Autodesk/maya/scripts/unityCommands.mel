@@ -70,6 +70,20 @@ proc int loadUnityPlugin(string $plugin){
     return true;
 };
 
+// show a yes/no style dialog, return true if user clicked confirm, false if user canceled
+proc int showConfirmDialog(string $title, string $message, string $confirmButtonName, string $cancelButtonName){
+    // create a confirm dialog with a yes and no button. Specif
+    $response = `confirmDialog -title $title
+                      -message $message
+                      -button $confirmButtonName
+                      -button $cancelButtonName
+                      -defaultButton $confirmButtonName
+                      -cancelButton $cancelButtonName
+                      -dismissString $cancelButtonName`;
+                      
+    return ( $response == $confirmButtonName );
+}
+
 proc importFile(string $filePathStr){
     // get the global variables
     global string $UnityExportSets[];
@@ -96,6 +110,22 @@ proc importFile(string $filePathStr){
     }
     $unityExportSet = `format -stringArg $nameWithoutExt $UnityExportSetNameFormat`;
 
+    string $origNamespace = `namespaceInfo -cur`;
+    
+    // warn if namespace already exists
+    if(`namespace -exists $nameWithoutExt`){
+        if(!showConfirmDialog("Warning",
+            "Namespace already exists, the imported objects will be added to the existing namespace and export set.",
+            "Continue", "Cancel"
+           )){
+            // cancelled, don't import this fbx
+            return;
+        }
+    }
+    else{
+        namespace -add $nameWithoutExt;
+    }
+    
     // Gather everything that is in the scene
     $origItemsInScene = `ls -tr -o -r true`;
         
@@ -116,9 +146,6 @@ proc importFile(string $filePathStr){
         storeAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
     }
     
-    string $origNamespace = `namespaceInfo -cur`;
-        
-    namespace -add $nameWithoutExt;
     namespace -set $nameWithoutExt;
     file -import -type "fbx" -namespace $nameWithoutExt $filePathStr;
     
