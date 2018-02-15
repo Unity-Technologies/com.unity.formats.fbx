@@ -8,7 +8,7 @@ using System;
 
 namespace FbxExporters.UnitTests
 {
-    public class ExportTimelineClip : ExporterTestBase
+    public class ExportTimelineClipTest : ExporterTestBase
     {
         [SetUp]
         public void Init()
@@ -46,9 +46,6 @@ namespace FbxExporters.UnitTests
             //Create clip (timeline) with Animation Clip
             //UnityEngine.Timeline.TimelineClip timeLineClip = new UnityEngine.Timeline.TimelineClip();
 
-
-
-
             /*var selectedObjects = Selection.objects;
             foreach (var obj in selectedObjects)
             {
@@ -73,31 +70,22 @@ namespace FbxExporters.UnitTests
                 } 
             }*/
 
-
-
-            Assert.IsTrue(FbxPrefabAutoUpdater.OnValidateMenuItem());
+           // Assert.IsTrue(FbxPrefabAutoUpdater.OnValidateMenuItem());
         }
 
         [Test]
         public void ExportAllTimelineClip()
         {
-            GameObject myCube = GameObject.Find("Cube");
+            GameObject myCube = GameObject.Find("CubeSpecial");
             Selection.objects = new UnityEngine.GameObject[] { myCube };
-            string folderPath = Application.dataPath + "/Assets/UnitTest";
+            string folderPath = Application.dataPath + "/UnitTest/";
             Debug.Log(folderPath);
             foreach(GameObject obj in Selection.objects)
             {
-                ModelExporter.ExportAllTimelineClips(obj, Application.dataPath + "/Assets/UnitTest/");
-                FileAssert.Exists(folderPath + obj.name + "@Recorded.fbx");
-
+                ModelExporter.ExportAllTimelineClips(obj, folderPath);
+                FileAssert.Exists(folderPath + obj.name + "@Animation Track.fbx");
             }
-
-            
-
         }
-
-
-
 
         [TearDown]
         public void StopTest()
