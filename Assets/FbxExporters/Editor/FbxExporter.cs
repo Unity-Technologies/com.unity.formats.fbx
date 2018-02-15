@@ -85,7 +85,6 @@ namespace FbxExporters
             const string ClipMenuItemName = "GameObject/Export All Timeline Clips...";
             const string TimelineClipMenuItemName = "GameObject/Export Selected Timeline Clip...";																				
 
-
             const string AnimOnlyMenuItemName = "GameObject/Export Animation Only";
 
             const string FileBaseName = "Untitled";
@@ -1337,7 +1336,7 @@ namespace FbxExporters
                 if (!MapLightType.TryGetValue (unityLight.type, out fbxLightType))
                     return false;
                 
-                FbxLight fbxLight = FbxLight.Create (fbxScene.GetFbxManager (), unityLight.name);																   
+                FbxLight fbxLight = FbxLight.Create (fbxScene.GetFbxManager (), unityLight.name);
 
                 // Set the type of the light.      
                 fbxLight.LightType.Set(fbxLightType);
@@ -2528,7 +2527,7 @@ namespace FbxExporters
                 return data;
             }
 
-			protected Dictionary<GameObject, AnimationOnlyExportData> GetAnimationExportData(HashSet<GameObject> exportSet)
+            protected Dictionary<GameObject, AnimationOnlyExportData> GetAnimationExportData(HashSet<GameObject> exportSet)
             {
                 Dictionary<GameObject, AnimationOnlyExportData>  hierarchyToExportData = new Dictionary<GameObject, AnimationOnlyExportData>();
 
@@ -2613,8 +2612,6 @@ namespace FbxExporters
                 return hierarchyToExportData;
             }
 
-
-			
             /// <summary>
             /// Export components on this game object.
             /// Transform components have already been exported.
@@ -2824,7 +2821,7 @@ namespace FbxExporters
             ///
             /// This refreshes the asset database.
             /// </summary>
-            public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet, Dictionary<GameObject, AnimationOnlyExportData> animationExportData /*, bool animOnly = false*/)
+            public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet, Dictionary<GameObject, AnimationOnlyExportData> animationExportData)
             {
                 exportCancelled = false;
 
@@ -3057,7 +3054,10 @@ namespace FbxExporters
                 }
             }
 
-			[MenuItem(TimelineClipMenuItemName, false, 31)]
+            /// <summary>
+            /// Add an option "Export selected Timeline clip" in the contextual GameObject menu.
+            /// </summary>
+            [MenuItem(TimelineClipMenuItemName, false, 31)]
             static void OnClipContextClick(MenuCommand command)
             {
                 // Now that we know we have stuff to export, get the user-desired path.
@@ -3072,8 +3072,6 @@ namespace FbxExporters
                 {
                     return;
                 }
-                Debug.Log(folderPath);
-
 
                 var selectedObjects = Selection.objects;
                 foreach (var obj in selectedObjects)
@@ -3081,7 +3079,7 @@ namespace FbxExporters
                     if (obj.GetType().Name.Contains("EditorClip"))
                     {
                         var selClip = obj.GetType().GetProperty("clip").GetValue(obj, null);
-						UnityEngine.Timeline.TimelineClip timeLineClip = selClip as UnityEngine.Timeline.TimelineClip;
+                        UnityEngine.Timeline.TimelineClip timeLineClip = selClip as UnityEngine.Timeline.TimelineClip;
 
 						var selClipItem = obj.GetType().GetProperty("item").GetValue(obj, null);
 						var selClipItemParentTrack = selClipItem.GetType().GetProperty("parentTrack").GetValue(selClipItem, null);
@@ -3089,10 +3087,7 @@ namespace FbxExporters
 
                         GameObject animationTrackGObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (editorClipAnimationTrack) as GameObject;
 
-						Debug.Log("obj name: " + obj.name + " /clip name: " + editorClipAnimationTrack.name + " /timelineAssetName: " + animationTrackGObject.name);
-
 						string filePath = folderPath + "/" + animationTrackGObject.name + "@" + timeLineClip.animationClip.name + ".fbx";
-						Debug.Log("filepath: " + filePath);
 						UnityEngine.Object[] myArray = new UnityEngine.Object[] { animationTrackGObject, timeLineClip.animationClip };
 
 						ExportObjects(filePath, myArray, AnimationExportType.timelineAnimationClip);
@@ -3103,7 +3098,7 @@ namespace FbxExporters
 
 
             /// <summary>
-            /// Add an option "Update from FBX" in the contextual GameObject menu.
+            /// Add an option "Export all Timeline clips" in the contextual GameObject menu.
             /// </summary>
             [MenuItem(ClipMenuItemName, false, 31)]
             static void OnGameObjectWithTimelineContextClick(MenuCommand command)
@@ -3151,12 +3146,15 @@ namespace FbxExporters
                             AnimationTrack at = output.sourceObject as AnimationTrack;
 
                             GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
+                            // One file by animation clip
+                            foreach(TimelineClip timeLineClip in at.GetClips())
+                            {
+						        string filePath = folderPath + "/" + atObject.name + "@" + timeLineClip.animationClip.name + ".fbx";
+						        UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timeLineClip.animationClip };
+                                Debug.Log("filepath: " + filePath);
+						        ExportObjects(filePath, myArray, AnimationExportType.timelineAnimationClip);
 
-                            string filePath = folderPath + "/" + atObject.name + "@" + at.name + ".fbx";
-                            Debug.Log("filepath: " + filePath);
-                            UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, at};
-
-                            ExportObjects(filePath, myArray, AnimationExportType.timelineAnimationTrack);
+                            }
                         }
                     }
                 }
@@ -3187,8 +3185,8 @@ namespace FbxExporters
                 return false;
             }
 
-			/// <summary>
-            /// Add a menu item to a GameObject's context menu.
+            /// <summary>
+            /// Add a menu item "Export Model..." to a GameObject's context menu.
             /// </summary>
             /// <param name="command">Command.</param>
             [MenuItem (MenuItemName, false, 30)]
@@ -3211,7 +3209,7 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Add a menu item to a GameObject's context menu.
+            /// Add a menu item "Export Animation Only" to a GameObject's context menu.
             /// </summary>
             /// <param name="command">Command.</param>
             [MenuItem (AnimOnlyMenuItemName, false, 30)]
