@@ -92,9 +92,7 @@ endif()
 
 
 # Look for a dll on all platforms.
-message("Looking for Unity*.dll in ${UNITY_EDITOR_DLL_PATH}
-
-${UNITY_EXTENSION_PATHS}")
+message("Looking for Unity*.dll in ${UNITY_EDITOR_DLL_PATH} ${UNITY_EXTENSION_PATHS}")
 set(_platformLibrarySuffix ${CMAKE_FIND_LIBRARY_SUFFIXES})
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll")
 find_library(CSHARP_UNITYEDITOR_LIBRARY UnityEditor.dll PATH ${UNITY_EDITOR_DLL_PATH})
