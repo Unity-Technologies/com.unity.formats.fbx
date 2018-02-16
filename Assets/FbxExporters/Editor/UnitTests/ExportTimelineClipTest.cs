@@ -11,32 +11,34 @@ namespace FbxExporters.UnitTests
 {
     public class ExportTimelineClipTest : ExporterTestBase
     {
+        private static string m_testScenePath = "Scene/TestScene.unity";
+
         [SetUp]
-        public void Init()
+        public override void Init()
         {
-            EditorSceneManager.OpenScene("Assets/FBXExporters/Editor/UnitTests/Scene/TestScene.unity");
+            base.Init ();
+            string testScenePath = FindPathInUnitTests (m_testScenePath);
+            Assert.That (testScenePath, Is.Not.Null);
+            EditorSceneManager.OpenScene("Assets/" + testScenePath);
         }
 
         [Test]
         public void ExportSingleTimelineClipTest()
         {
             GameObject myCube = GameObject.Find("CubeSpecial");
-            string folderPath = Application.dataPath + "/UnitTest/";
+            string folderPath = GetRandomFileNamePath(extName: "");
 
-            PlayableDirector pd = myCube.GetComponent<PlayableDirector>();
-            if (pd != null)
-            {
-                foreach (PlayableBinding output in pd.playableAsset.outputs)
-                {
+            PlayableDirector pd = myCube.GetComponent<PlayableDirector> ();
+            if (pd != null) {
+                foreach (PlayableBinding output in pd.playableAsset.outputs) {
                     AnimationTrack at = output.sourceObject as AnimationTrack;
 
-                    GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
-			        // One file by animation clip
-			        foreach(TimelineClip timeLineClip in at.GetClips())
-			        {
-                        ModelExporter.ExportSingleTimelineClip(timeLineClip, folderPath, atObject);
-                        FileAssert.Exists(folderPath + atObject.name + "@Recorded.fbx");
-			        }
+                    GameObject atObject = pd.GetGenericBinding (output.sourceObject) as GameObject;
+                    // One file by animation clip
+                    foreach (TimelineClip timeLineClip in at.GetClips()) {
+                        ModelExporter.ExportSingleTimelineClip (timeLineClip, folderPath, atObject);
+                        FileAssert.Exists (string.Format("{0}/{1}@{2}.fbx", folderPath, atObject.name, "Recorded.fbx"));
+                    }
                 }
             }
         }
@@ -46,19 +48,13 @@ namespace FbxExporters.UnitTests
         {
             GameObject myCube = GameObject.Find("CubeSpecial");
             Selection.objects = new UnityEngine.GameObject[] { myCube };
-            string folderPath = Application.dataPath + "/UnitTest/";
-            Debug.Log(folderPath);
+            string folderPath = GetRandomFileNamePath(extName: "");
+
             foreach(GameObject obj in Selection.objects)
             {
                 ModelExporter.ExportAllTimelineClips(obj, folderPath);
-                FileAssert.Exists(folderPath + obj.name + "@Recorded.fbx");
+                FileAssert.Exists(string.Format("{0}/{1}@{2}.fbx", folderPath, obj.name, "Recorded.fbx"));
             }
-        }
-
-        [TearDown]
-        public void StopTest()
-        {
-
         }
     }
 }

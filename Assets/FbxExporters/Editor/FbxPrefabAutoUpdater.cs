@@ -5,7 +5,6 @@ using System.Linq;
 using System;
 using FbxExporters.Editor;
 
-
 namespace FbxExporters
 {
     /// <summary>

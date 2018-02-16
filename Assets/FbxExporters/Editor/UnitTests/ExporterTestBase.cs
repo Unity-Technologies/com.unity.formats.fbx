@@ -194,6 +194,9 @@ namespace FbxExporters.UnitTests
         [TearDown]
         public virtual void Term ()
         {
+            // Put back the initial setting for the auto-updater toggle
+            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
+
             if (string.IsNullOrEmpty(_testDirectory)) {
                 return;
             }
@@ -204,17 +207,10 @@ namespace FbxExporters.UnitTests
         }
 
         [SetUp]
-        public virtual void InitializeAutoUpdater()
+        public virtual void Init()
         {
             isAutoUpdaterOn = FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled;
             FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = true;
-        }
-
-        [TearDown]
-        public virtual void ResetAutoUpdater()
-        {
-            // Put back the initial setting for the auto-updater toggle
-            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
         }
 
         /// <summary>
