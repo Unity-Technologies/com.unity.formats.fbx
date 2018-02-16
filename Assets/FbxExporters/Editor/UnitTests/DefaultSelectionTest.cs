@@ -19,8 +19,9 @@ namespace FbxExporters.UnitTests
         protected bool m_centerObjectsSetting;
 
         [SetUp]
-        public void Init ()
+        public override void Init ()
         {
+            base.Init();
             m_centerObjectsSetting = FbxExporters.EditorTools.ExportSettings.instance.centerObjects;
         }
 

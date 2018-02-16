@@ -9,6 +9,7 @@ namespace FbxExporters.UnitTests
 {
     public abstract class ExporterTestBase
     {
+        bool isAutoUpdaterOn;
         /// <summary>
         /// Sleep an amount of time (in ms) so we can safely assume that the
         /// timestamp on an fbx will change.
@@ -200,7 +201,18 @@ namespace FbxExporters.UnitTests
             // Delete the directory on the next editor update.  Otherwise,
             // prefabs don't get deleted and the directory delete fails.
             EditorApplication.update += DeleteOnNextUpdate;
+
+            // Put back the initial setting for the auto-updater toggle
+            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
         }
+
+        [SetUp]
+        public virtual void Init()
+        {
+            isAutoUpdaterOn = FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled;
+            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = true;
+        }
+
 
         /// <summary>
         /// Exports the Objects in selected.
