@@ -63,12 +63,44 @@ else()
     endif()
 endif()
 
+if (DEFINED UNITY_EXTENSION_PATHS)
+    message("Using ${UNITY_EXTENSION_PATHS}")
+else()
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+        # The editor is   Unity.app/Contents/MacOS/Unity
+        # The dlls are in Unity.app/Contents/UnityExtensions/.../*.dll
+        get_filename_component(UNITY_EXTENSION_ROOT "${UNITY_EDITOR_PATH}" PATH)
+        get_filename_component(UNITY_EXTENSION_ROOT "${UNITY_EXTENSION_ROOT}" DIRECTORY)
+		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/Editor")
+		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/RuntimeEditor")
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        # The editor is   .../Unity.exe
+        # The dlls are in .../Editor/Data/.../*.dll
+        get_filename_component(UNITY_EXTENSION_ROOT "${UNITY_EDITOR_PATH}" PATH)
+        set(UNITY_EXTENSION_ROOT "${UNITY_EXTENSION_ROOT}/Editor/Data")
+		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/Editor")
+		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/RuntimeEditor")
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        # The editor is   .../Unity
+        # The dlls are in .../Editor/Data/.../*.dll
+        get_filename_component(UNITY_EXTENSION_ROOT "${UNITY_EDITOR_PATH}" PATH)
+        set(UNITY_EXTENSION_ROOT "${UNITY_EXTENSION_ROOT}/Editor/Data")
+		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/Editor")
+		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/RuntimeEditor")
+    endif()
+endif()
+
+
 # Look for a dll on all platforms.
-message("Looking for UnityEditor.dll in ${UNITY_EDITOR_DLL_PATH}")
+message("Looking for Unity*.dll in ${UNITY_EDITOR_DLL_PATH}
+
+${UNITY_EXTENSION_PATHS}")
 set(_platformLibrarySuffix ${CMAKE_FIND_LIBRARY_SUFFIXES})
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll")
 find_library(CSHARP_UNITYEDITOR_LIBRARY UnityEditor.dll PATH ${UNITY_EDITOR_DLL_PATH})
 find_library(CSHARP_UNITYENGINE_LIBRARY UnityEngine.dll PATH ${UNITY_EDITOR_DLL_PATH})
+find_library(CSHARP_UNITYEDITOR_TIMELINE_LIBRARY UnityEditor.Timeline.dll  ${UNITY_EXTENSION_PATHS})
+find_library(CSHARP_UNITYENGINE_TIMELINE_LIBRARY UnityEngine.Timeline.dll  ${UNITY_EXTENSION_PATHS})
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_platformLibrarySuffix})
 
 # Check whether we found everything we needed.

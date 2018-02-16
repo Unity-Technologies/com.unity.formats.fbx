@@ -171,6 +171,8 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CSHARP_SYSTEM_LIBRARY}"
                 "${CSHARP_UNITYEDITOR_LIBRARY}"
                 "${CSHARP_UNITYENGINE_LIBRARY}"
+                "${CSHARP_UNITYENGINE_TIMELINE_LIBRARY}"
+                "${CSHARP_UNITYEDITOR_TIMELINE_LIBRARY}"
             DEPENDS
                 "${CLASS_LIBRARY_DEST}"
     )
