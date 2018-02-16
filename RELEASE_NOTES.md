@@ -1,5 +1,39 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint46
+
+NEW FEATURES
+
+* Unity Maya Integration: Allow multi file import
+
+Added ability to select multiple files to import. A different export set is created for each file imported.
+If a file "model.fbx" is imported, and an animation file with the following naming format: "model@anim.fbx"
+is imported, the animation file will be added into the model's export set and additional custom attributes will
+be added showing which animation file is applied to the model. Currently there has to be a 1-1 mapping of
+animation file to model file.
+
+* Unity Maya Integration: Allow multi file export by scene selection
+
+In order to choose which sets to export, select desired objects in scene, then click Unity->Export Model Only order
+Unity->Export Animation Only. All sets containing at least one object in the selection set will be exported.
+
+If "Export Model Only" button is hit, then animation is not exported, and if "Export Animation Only" is clicked,
+then only animation and required nodes (i.e. animated transforms) will be exported to the animation file of format "model@anim.fbx".
+
+* Fbx Exporter: Export animation clips from Timeline
+
+Select GameObject in hierarchy containing PlayableDirector component and right click -> "Export All Timeline Clips" to export
+all tracks and animation clips on the timeline. Each track will be exported to a separate fbx file.
+Select clips on timeline then go to GameObject->Export Selected Timeline Clips to export each selected timeline clip to a separate
+fbx file.
+
+FIXES
+* README: remove line from README about not supporting Maya LT
+* Exporter: export correct rotation order (xyz) for euler rotation animations (previously would export as zxy)
+* Exporter: remove pre-rotation from euler rotation animation on skinned mesh export
+* NameRemapping: fix IndexOutOfRangeException when imported object count doesn't match original object count
+* PrefabAutoUpdater: fix so unit tests don't fail if auto update is turned off
+
 **Version**: sprint45
 
 NEW FEATURES
