@@ -24,7 +24,7 @@ then only animation and required nodes (i.e. animated transforms) will be export
 
 Select GameObject in hierarchy containing PlayableDirector component and right click -> "Export All Timeline Clips" to export
 all tracks and animation clips on the timeline. Each track will be exported to a separate fbx file.
-Select clips on timeline then go to GameObject->Export Selected Timeline Clips to export each selected timeline clip to a separate
+Select clips on timeline then go to GameObject->Export Selected Timeline Clip to export each selected timeline clip to a separate
 fbx file.
 
 FIXES
