@@ -3095,8 +3095,6 @@ namespace FbxExporters
                 }
             }
 
-
-
             /// <summary>
             /// Add an option "Export all Timeline clips" in the contextual GameObject menu.
             /// </summary>
