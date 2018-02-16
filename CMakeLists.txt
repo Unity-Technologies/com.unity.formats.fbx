@@ -195,6 +195,8 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CSHARP_SYSTEM_LIBRARY}"
                 "${CSHARP_UNITYEDITOR_LIBRARY}"
                 "${CSHARP_UNITYENGINE_LIBRARY}"
+                "${CSHARP_UNITYEDITOR_TIMELINE_LIBRARY}"
+                "${CSHARP_UNITYENGINE_TIMELINE_LIBRARY}"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxSdk/Plugins/UnityFbxSdk.dll"
                 ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME}
             DEPENDS

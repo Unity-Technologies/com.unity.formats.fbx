@@ -260,7 +260,9 @@ namespace FbxExporters.UnitTests
         /// <param name="animOnly">If set to <c>true</c> export animation only.</param>
         protected string ExportToFbx (GameObject hierarchy, bool animOnly = false){
             string filename = GetRandomFbxFilePath ();
-            var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (filename, hierarchy, animOnly);
+            var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (
+                filename, hierarchy, animOnly? FbxExporters.Editor.ModelExporter.AnimationExportType.componentAnimation : FbxExporters.Editor.ModelExporter.AnimationExportType.all
+            );
             Assert.That (exportedFilePath, Is.EqualTo (filename));
             return filename;
         }
