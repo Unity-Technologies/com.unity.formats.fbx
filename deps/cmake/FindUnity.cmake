@@ -77,6 +77,7 @@ else()
         # The editor is   .../Unity.exe
         # The dlls are in .../Editor/Data/.../*.dll
         get_filename_component(UNITY_EXTENSION_ROOT "${UNITY_EDITOR_PATH}" PATH)
+        get_filename_component(UNITY_EXTENSION_ROOT "${UNITY_EXTENSION_ROOT}" DIRECTORY)
         set(UNITY_EXTENSION_ROOT "${UNITY_EXTENSION_ROOT}/Editor/Data")
 		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/Editor")
 		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/RuntimeEditor")
