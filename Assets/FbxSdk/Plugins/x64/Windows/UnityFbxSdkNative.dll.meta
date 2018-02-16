@@ -11,18 +11,34 @@ PluginImporter:
   platformData:
     data:
       first:
+        '': Any
+      second:
+        enabled: 0
+        settings:
+          Exclude Editor: 0
+          Exclude Linux: 1
+          Exclude Linux64: 1
+          Exclude LinuxUniversal: 1
+          Exclude OSXIntel: 1
+          Exclude OSXIntel64: 1
+          Exclude OSXUniversal: 1
+          Exclude Win: 1
+          Exclude Win64: 1
+    data:
+      first:
         Any: 
       second:
-        enabled: 1
+        enabled: 0
         settings: {}
     data:
       first:
         Editor: Editor
       second:
-        enabled: 0
+        enabled: 1
         settings:
           CPU: x86_64
           DefaultValueInitialized: true
+          OS: AnyOS
     data:
       first:
         Facebook: Win
@@ -36,7 +52,7 @@ PluginImporter:
       second:
         enabled: 1
         settings:
-          CPU: AnyCPU
+          CPU: None
     data:
       first:
         Standalone: Linux
@@ -48,16 +64,16 @@ PluginImporter:
       first:
         Standalone: Linux64
       second:
-        enabled: 1
+        enabled: 0
         settings:
-          CPU: x86_64
+          CPU: None
     data:
       first:
         Standalone: LinuxUniversal
       second:
-        enabled: 1
+        enabled: 0
         settings:
-          CPU: x86_64
+          CPU: None
     data:
       first:
         Standalone: OSXIntel
@@ -69,16 +85,16 @@ PluginImporter:
       first:
         Standalone: OSXIntel64
       second:
-        enabled: 1
+        enabled: 0
         settings:
-          CPU: AnyCPU
+          CPU: None
     data:
       first:
         Standalone: OSXUniversal
       second:
         enabled: 0
         settings:
-          CPU: x86_64
+          CPU: None
     data:
       first:
         Standalone: Win
@@ -90,9 +106,9 @@ PluginImporter:
       first:
         Standalone: Win64
       second:
-        enabled: 1
+        enabled: 0
         settings:
-          CPU: AnyCPU
+          CPU: None
   userData: 
   assetBundleName: 
   assetBundleVariant: 

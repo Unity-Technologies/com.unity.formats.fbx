@@ -18,8 +18,9 @@ namespace FbxExporters.UnitTests
         private GameObject m_toExport;
 
         [SetUp]
-        public void Init()
+        public override void Init()
         {
+            base.Init();
             m_stopwatch = new Stopwatch ();
             m_toExport = CreateGameObjectToExport ();
         }

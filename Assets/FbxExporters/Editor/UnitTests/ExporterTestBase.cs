@@ -9,6 +9,7 @@ namespace FbxExporters.UnitTests
 {
     public abstract class ExporterTestBase
     {
+        bool isAutoUpdaterOn;
         /// <summary>
         /// Sleep an amount of time (in ms) so we can safely assume that the
         /// timestamp on an fbx will change.
@@ -200,7 +201,18 @@ namespace FbxExporters.UnitTests
             // Delete the directory on the next editor update.  Otherwise,
             // prefabs don't get deleted and the directory delete fails.
             EditorApplication.update += DeleteOnNextUpdate;
+
+            // Put back the initial setting for the auto-updater toggle
+            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
         }
+
+        [SetUp]
+        public virtual void Init()
+        {
+            isAutoUpdaterOn = FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled;
+            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = true;
+        }
+
 
         /// <summary>
         /// Exports the Objects in selected.
@@ -238,6 +250,33 @@ namespace FbxExporters.UnitTests
             string fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects(filename, selected);
 
             return fbxFileName;
+        }
+
+        /// <summary>
+        /// Exports a single hierarchy to a random fbx file.
+        /// </summary>
+        /// <returns>The exported fbx file path.</returns>
+        /// <param name="hierarchy">Hierarchy.</param>
+        /// <param name="animOnly">If set to <c>true</c> export animation only.</param>
+        protected string ExportToFbx (GameObject hierarchy, bool animOnly = false){
+            string filename = GetRandomFbxFilePath ();
+            var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (filename, hierarchy, animOnly);
+            Assert.That (exportedFilePath, Is.EqualTo (filename));
+            return filename;
+        }
+
+        /// <summary>
+        /// Adds the asset at asset path to the scene.
+        /// </summary>
+        /// <returns>The new GameObject in the scene.</returns>
+        /// <param name="assetPath">Asset path.</param>
+        protected GameObject AddAssetToScene(string assetPath){
+            GameObject originalObj = AssetDatabase.LoadMainAssetAtPath ("Assets/" + assetPath) as GameObject;
+            Assert.IsNotNull (originalObj);
+            GameObject originalGO = GameObject.Instantiate (originalObj);
+            Assert.IsTrue (originalGO);
+
+            return originalGO;
         }
 
         /// <summary>

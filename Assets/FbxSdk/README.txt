@@ -5,7 +5,7 @@ Autodesk FBX SDK. Copyright (c) 2016 Autodesk, Inc. All rights reserved.<br/>
 Use of the FBX SDK requires agreeing to and complying with the FBX SDK License and Service Agreement terms 
 accessed at https://damassets.autodesk.net/content/dam/autodesk/www/Company/docs/pdf/legal-notices-&-trademarks/Autodesk_FBX_SDK_2015_License_and_Services_Agreement.pdf"
 
-**Version**: sprint42
+**Version**: 1.3.0a1
 
 This package contains only a subset of the FbxSdk, and is designed to work in the Unity Editor only.
 

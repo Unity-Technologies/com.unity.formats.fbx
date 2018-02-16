@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 using System;
+using FbxExporters.Editor;
 
 namespace FbxExporters
 {
@@ -231,8 +232,21 @@ namespace FbxExporters
 
             foreach (var fbxPrefabComponent in prefab.GetComponentsInChildren<FbxPrefab>())
             {
+                // Launch the manual update UI to allow the user to fix
+                // renamed nodes (or auto-update if there's nothing to rename).
                 var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
-                fbxPrefabUtility.SyncPrefab();
+
+                if (FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled || runningUnitTest)
+                {
+                    fbxPrefabUtility.SyncPrefab();
+                }
+                else
+                {
+                    ManualUpdateEditorWindow window = (ManualUpdateEditorWindow)EditorWindow.GetWindow(typeof(ManualUpdateEditorWindow));
+                    window.Init(fbxPrefabUtility, fbxPrefabComponent);
+                    window.Show();
+                }
+
             }
         }
 

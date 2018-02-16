@@ -289,6 +289,8 @@ namespace FbxExporters.EditorTools {
         public const string kMayaOptionName = "Maya ";
         public const string kMayaLtOptionName = "Maya LT";
 
+        public bool Verbose = false;
+
         private static string DefaultIntegrationSavePath {
             get{
                 return Path.GetDirectoryName(Application.dataPath);
