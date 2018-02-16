@@ -59,7 +59,7 @@ namespace FbxExporters
 
     namespace Editor
     {
-        using CustomExtensions;   
+        using CustomExtensions;
 
         public class ModelExporter : System.IDisposable
         {
