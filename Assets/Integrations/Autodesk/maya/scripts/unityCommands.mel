@@ -113,7 +113,7 @@ proc importFile(string $filePathStr){
     string $origNamespace = `namespaceInfo -cur`;
     
     // warn if namespace already exists
-    if(`namespace -exists $nameWithoutExt`){
+    if(`namespace -exists $nameWithoutExt` || $origNamespace == $nameWithoutExt){
         if(!showConfirmDialog("Warning",
             "Namespace already exists, the imported objects will be added to the existing namespace and export set.",
             "Continue", "Cancel"
@@ -146,10 +146,14 @@ proc importFile(string $filePathStr){
         storeAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
     }
     
-    namespace -set $nameWithoutExt;
+    if($origNamespace != $nameWithoutExt){
+        namespace -set $nameWithoutExt;
+    }
     file -import -type "FBX" -ignoreVersion -ra true -mergeNamespacesOnClash true -pr -importFrameRate true -importTimeRange "override" $filePathStr;
     
-    namespace -set $origNamespace;
+    if($origNamespace != $nameWithoutExt){
+        namespace -set $origNamespace;
+    }
     
     if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $tempPath != ""){
         storeAttribute($unityExportSet, $UnityFbxFilePathAttr, $tempPath);

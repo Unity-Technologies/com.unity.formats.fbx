@@ -3,7 +3,6 @@ FBXResetImport;
 FBXImportAxisConversionEnable -v true;
 FBXImportCameras -v true;
 FBXImportLights -v true;
-FBXImportSetMayaFrameRate -v true;
 
 FBXImportSetTake -takeIndex -1;
 
