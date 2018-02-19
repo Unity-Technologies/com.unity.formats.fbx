@@ -175,7 +175,7 @@ proc importFile(string $filePathStr){
     }
     
     if($nameWithoutExt != ""){
-        storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, $nameWithoutExt);
+        storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, `namespaceInfo -an $nameWithoutExt`);
     }
     
     if (setExists($unityExportSet) == true){
@@ -282,6 +282,7 @@ proc exportSet(string $unitySet, int $exportAnim){
     global string $UnityFbxFileNameAttr;
     global string $UnityFbxAnimFilePathAttr;
     global string $UnityFbxAnimFileNameAttr;
+    global string $UnityFbxNamespaceAttr;
 
     string $unitySetContents[] = `listConnections $unitySet`;
         
@@ -308,12 +309,13 @@ proc exportSet(string $unitySet, int $exportAnim){
         $nameAttr = $UnityFbxAnimFileNameAttr;
     }
     
-    $unity_fbx_file_path = getAttribute($unitySet, $pathAttr);
-    $unity_fbx_file_name = getAttribute($unitySet, $nameAttr);
+    string $unity_fbx_file_path = getAttribute($unitySet, $pathAttr);
+    string $unity_fbx_file_name = getAttribute($unitySet, $nameAttr);
+    string $unity_fbx_namespace = getAttribute($unitySet, $UnityFbxNamespaceAttr);
     
     $strCmd = "";
     if ($unity_fbx_file_path != "" && $unity_fbx_file_name != ""){
-        $strCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $unity_fbx_file_path + "/" + $unity_fbx_file_name + "\"";
+        $strCmd = `format -s $unity_fbx_namespace -s $unity_fbx_file_path -s $unity_fbx_file_name "file -force -options \"\" -typ \"FBX export\" -relativeNamespace \"^1s\" -es \"^2s/^3s\""`;
         eval $strCmd;
     }
     
