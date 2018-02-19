@@ -23,7 +23,7 @@ endif()
 message(STATUS "Building for ${CMAKE_BUILD_TYPE}")
 
 if (NOT DEFINED PACKAGE_VERSION OR "${PACKAGE_VERSION}" STREQUAL "")
-    set(PACKAGE_VERSION "sprint45")
+    set(PACKAGE_VERSION "sprint46")
 endif()
 message(STATUS "Using Package Version: ${PACKAGE_VERSION}")
 
@@ -189,6 +189,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ConvertToModel.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExporterRepairMissingScripts.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ManualUpdateEditorWindow.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxRotationCurve.cs"
             REFERENCES
                 "${CSHARP_MSCORLIB_LIBRARY}"
                 "${CSHARP_SYSTEM_CORE_LIBRARY}"
@@ -249,7 +250,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             PATTERN "Editor/ConvertToModel.cs" EXCLUDE
             PATTERN "Editor/ManualUpdateEditorWindow.cs" EXCLUDE
             PATTERN "Editor/FbxPrefabInspector.cs" EXCLUDE
-            PATTERN "Editor/FbxExporterRepairMissingScripts.cs" EXCLUDE)
+            PATTERN "Editor/FbxExporterRepairMissingScripts.cs" EXCLUDE
+            PATTERN "Editor/FbxRotationCurve.cs" EXCLUDE)
     install(FILES ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME} DESTINATION FbxExporters/Editor)
     install(FILES ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME} DESTINATION FbxExporters)
 else()
