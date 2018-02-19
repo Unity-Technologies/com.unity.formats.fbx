@@ -147,7 +147,7 @@ proc importFile(string $filePathStr){
     }
     
     namespace -set $nameWithoutExt;
-    file -import -type "fbx" -namespace $nameWithoutExt $filePathStr;
+    file -import -type "FBX" -ignoreVersion -ra true -mergeNamespacesOnClash true -pr -importFrameRate true -importTimeRange "override" $filePathStr;
     
     namespace -set $origNamespace;
     
