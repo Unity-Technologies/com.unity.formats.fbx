@@ -3,6 +3,7 @@ global string $UnityFbxFilePathAttr = "unityFbxModelFilePath";
 global string $UnityFbxFileNameAttr = "unityFbxModelFileName";
 global string $UnityFbxAnimFilePathAttr = "unityFbxAnimFilePath";
 global string $UnityFbxAnimFileNameAttr = "unityFbxAnimFileName";
+global string $UnityFbxNamespaceAttr = "unityFbxNamespace";
 global string $UnityExportSetNameFormat = "^1s_UnityExportSet";
 
 global proc unityRemoveNativeMenuOnLoad(){
@@ -91,6 +92,7 @@ proc importFile(string $filePathStr){
     global string $UnityFbxFileNameAttr;
     global string $UnityFbxAnimFilePathAttr;
     global string $UnityFbxAnimFileNameAttr;
+    global string $UnityFbxNamespaceAttr;
     global string $UnityExportSetNameFormat;
 
     $tempPath = dirname($filePathStr);
@@ -144,6 +146,7 @@ proc importFile(string $filePathStr){
         // reset attribute values, in case import fails
         storeAttribute($unityExportSet, $UnityFbxFilePathAttr, "");
         storeAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
+        storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, "");
     }
     
     if($origNamespace != $nameWithoutExt){
@@ -169,6 +172,10 @@ proc importFile(string $filePathStr){
     
     if($tempAnimName != ""){
         storeAttribute($unityExportSet,$UnityFbxAnimFileNameAttr,$tempAnimName);
+    }
+    
+    if($nameWithoutExt != ""){
+        storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, $nameWithoutExt);
     }
     
     if (setExists($unityExportSet) == true){
