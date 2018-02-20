@@ -319,7 +319,7 @@ proc exportSet(string $unitySet, int $exportAnim){
         eval $strCmd;
     }
     
-    if(setExists($animatedObjectSet)){
+    if(`objExists $animatedObjectSet`){
        delete $animatedObjectSet; 
     }
 }
