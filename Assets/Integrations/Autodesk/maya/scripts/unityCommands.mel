@@ -85,6 +85,32 @@ proc int showConfirmDialog(string $title, string $message, string $confirmButton
     return ( $response == $confirmButtonName );
 }
 
+// get the namespace of the given object
+proc string getObjectNamespace(string $objectName){
+    string $lsResult[] = `ls -showNamespace -an $objectName`;
+    return $lsResult[1];
+}
+
+proc string getNewNamespace(string $n1, string $n2){
+    string $n2Tokens[];
+    int $n2NumTokens = `tokenize $n2 ":" $n2Tokens`;
+    
+    string $newNamespace = ":";
+    string $n1BaseName = `namespaceInfo -baseName $n1`;
+    
+    for($i=$n2NumTokens-1; $i>=0; --$i){
+        if($n2Tokens[$i] == $n1BaseName){
+            break;
+        }
+        $n2Tokens[$i] = "";
+    }
+    $newNamespace = $newNamespace + stringArrayToString($n2Tokens, ":");
+    if($newNamespace == ":"){
+        return $n2;
+    }
+    return $newNamespace;
+}
+
 proc importFile(string $filePathStr){
     // get the global variables
     global string $UnityExportSets[];
@@ -302,6 +328,20 @@ proc exportSet(string $unitySet, int $exportAnim){
     global string $UnityFbxNamespaceAttr;
 
     string $unitySetContents[] = `listConnections $unitySet`;
+    string $unity_fbx_namespace = getAttribute($unitySet, $UnityFbxNamespaceAttr);    
+        
+    if(size($unitySetContents) > 0){
+        string $newNamespace = getNewNamespace($unity_fbx_namespace, getObjectNamespace($unitySetContents[0]));
+        if($unity_fbx_namespace != $newNamespace){
+            // popup asking to change namespace value to new namespace
+            if(showConfirmDialog($unitySet,
+                "Set namespace has been modified from "+$unity_fbx_namespace+" to "+$newNamespace+", update export set namespace attribute?",
+                "Yes", "No"
+               )){
+               storeAttribute($unitySet, $UnityFbxNamespaceAttr, $newNamespace);
+            }
+        }
+    }
         
     string $animatedObjectSet = "";
     if($exportAnim){
@@ -328,7 +368,7 @@ proc exportSet(string $unitySet, int $exportAnim){
     
     string $unity_fbx_file_path = getAttribute($unitySet, $pathAttr);
     string $unity_fbx_file_name = getAttribute($unitySet, $nameAttr);
-    string $unity_fbx_namespace = getAttribute($unitySet, $UnityFbxNamespaceAttr);
+    $unity_fbx_namespace = getAttribute($unitySet, $UnityFbxNamespaceAttr); 
     
     $strCmd = "";
     if ($unity_fbx_file_path != "" && $unity_fbx_file_name != ""){
