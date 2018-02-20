@@ -63,6 +63,11 @@ namespace FbxExporters.EditorTools {
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("LOD Export:", "Select which LOD to export."), GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.lodExportType = (ExportSettings.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodExportType, new string[]{"All", "Highest", "Lowest"});
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent(
                 "Export Path:",
                 "Relative path for saving Model Prefabs."), GUILayout.Width(LabelWidth - FieldOffset));
@@ -441,6 +446,15 @@ namespace FbxExporters.EditorTools {
         public string IntegrationSavePath;
 
         public int selectedDCCApp = 0;
+
+        [SerializeField]
+        public LODExportType lodExportType = LODExportType.All;
+
+        public enum LODExportType {
+            All = 0,
+            Highest = 1,
+            Lowest = 2
+        }
 
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
