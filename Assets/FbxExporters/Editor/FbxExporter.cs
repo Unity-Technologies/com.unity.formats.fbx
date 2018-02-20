@@ -2665,7 +2665,7 @@ namespace FbxExporters
             ///
             /// This refreshes the asset database.
             /// </summary>
-            public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet, Dictionary<GameObject, AnimationOnlyExportData> animationExportData)
+            public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet, Dictionary<GameObject, AnimationOnlyExportData> animationExportData, TransformExportType exportType = TransformExportType.Global)
             {
                 exportCancelled = false;
 
@@ -2769,10 +2769,8 @@ namespace FbxExporters
                         }
 
                         Vector3 center = Vector3.zero;
-                        var exportType = TransformExportType.Reset;
-                        if(revisedExportSet.Count != 1){
+                        if(exportType == TransformExportType.Global){
                             center = ExportSettings.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
-                            exportType = TransformExportType.Global;
                         }
 
                         foreach (var unityGo in revisedExportSet) {
@@ -3558,7 +3556,7 @@ namespace FbxExporters
             /// Export a list of (Game) objects to FBX file. 
             /// Use the SaveFile panel to allow user to enter a file name.
             /// <summary>
-            public static string ExportObjects (string filePath, UnityEngine.Object[] objects = null, AnimationExportType exportType = AnimationExportType.all)
+            public static string ExportObjects (string filePath, UnityEngine.Object[] objects = null, AnimationExportType exportType = AnimationExportType.all, TransformExportType transformExportType = TransformExportType.Global)
             {
                 LastFilePath = filePath;
 
@@ -3599,7 +3597,7 @@ namespace FbxExporters
                             break;
                     }
 
-                    if (fbxExporter.ExportAll (objects, animationExportData) > 0) {
+                    if (fbxExporter.ExportAll (objects, animationExportData, transformExportType) > 0) {
                         string message = string.Format ("Successfully exported: {0}", filePath);
                         UnityEngine.Debug.Log (message);
 
@@ -3609,9 +3607,9 @@ namespace FbxExporters
                 return null;
             }
 
-            public static string ExportObject (string filePath, UnityEngine.Object root, AnimationExportType exportType = AnimationExportType.all)
+            public static string ExportObject (string filePath, UnityEngine.Object root, AnimationExportType exportType = AnimationExportType.all, TransformExportType transformExportType = TransformExportType.Reset)
             {
-                return ExportObjects(filePath, new Object[] { root }, exportType);
+                return ExportObjects(filePath, new Object[] { root }, exportType, transformExportType);
             }
 
             private static void EnsureDirectory (string path)
