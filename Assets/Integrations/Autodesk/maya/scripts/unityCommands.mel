@@ -112,20 +112,33 @@ proc importFile(string $filePathStr){
     }
     $unityExportSet = `format -stringArg $nameWithoutExt $UnityExportSetNameFormat`;
 
-    string $origNamespace = `namespaceInfo -cur`;
+    string $origNamespace = `namespaceInfo -cur -an`;
+    string $targetNamespace = `format -s $origNamespace -s $nameWithoutExt "^1s:^2s"`;
     
-    // warn if namespace already exists
-    if(`namespace -exists $nameWithoutExt` || $origNamespace == $nameWithoutExt){
-        if(!showConfirmDialog("Warning",
-            "Namespace already exists, the imported objects will be added to the existing namespace and export set.",
-            "Continue", "Cancel"
-           )){
-            // cancelled, don't import this fbx
-            return;
+    $setNamespaceExists = false;
+    if (setExists($unityExportSet)){
+        // get namespace from set
+        $setNamespace = getAttribute($unityExportSet, $UnityFbxNamespaceAttr);
+        if($setNamespace != "" && `namespace -exists $setNamespace`){
+            $targetNamespace = $setNamespace;
+            $setNamespaceExists = true;
         }
     }
-    else{
-        namespace -add $nameWithoutExt;
+    
+    // warn if namespace already exists
+    if(!$setNamespaceExists){
+        if(`namespace -exists $targetNamespace`){
+            if(!showConfirmDialog("Warning",
+                "Namespace already exists, the imported objects will be added to the existing namespace and export set.",
+                "Continue", "Cancel"
+               )){
+                // cancelled, don't import this fbx
+                return;
+            }
+        }
+        else{
+            namespace -add $targetNamespace;
+        }
     }
     
     // Gather everything that is in the scene
@@ -134,6 +147,10 @@ proc importFile(string $filePathStr){
     // Get or create the Unity Fbx Export Set
     $setCreated = false;
     if (!setExists($unityExportSet)){
+        if(!`namespaceInfo -isRootNamespace $origNamespace`){
+            namespace -set ":";
+        }
+    
         // couldn't find export set so create it
         sets -name $unityExportSet;
         $setCreated = true;
@@ -149,12 +166,12 @@ proc importFile(string $filePathStr){
         storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, "");
     }
     
-    if($origNamespace != $nameWithoutExt){
-        namespace -set $nameWithoutExt;
+    if(`namespaceInfo -cur -an` != $targetNamespace){
+        namespace -set $targetNamespace;
     }
     file -import -type "FBX" -ignoreVersion -ra true -mergeNamespacesOnClash true -pr -importFrameRate true -importTimeRange "override" $filePathStr;
     
-    if($origNamespace != $nameWithoutExt){
+    if(`namespaceInfo -cur -an` != $origNamespace){
         namespace -set $origNamespace;
     }
     
@@ -175,7 +192,7 @@ proc importFile(string $filePathStr){
     }
     
     if($nameWithoutExt != ""){
-        storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, `namespaceInfo -an $nameWithoutExt`);
+        storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, $targetNamespace);
     }
     
     if (setExists($unityExportSet) == true){
