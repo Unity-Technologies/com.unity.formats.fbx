@@ -111,6 +111,22 @@ proc string getNewNamespace(string $n1, string $n2){
     return $newNamespace;
 }
 
+proc checkNamespaceNeedsUpdate(string $unitySet, string $objectNamespace){
+    global string $UnityFbxNamespaceAttr;
+
+    string $unity_fbx_namespace = getAttribute($unitySet, $UnityFbxNamespaceAttr);
+    string $newNamespace = getNewNamespace($unity_fbx_namespace, $objectNamespace);
+    if($unity_fbx_namespace != $newNamespace){
+        // popup asking to change namespace value to new namespace
+        if(showConfirmDialog($unitySet,
+            "Set namespace has been modified from "+$unity_fbx_namespace+" to "+$newNamespace+", update export set namespace attribute?",
+            "Yes", "No"
+           )){
+           storeAttribute($unitySet, $UnityFbxNamespaceAttr, $newNamespace);
+        }
+    }
+}
+
 proc importFile(string $filePathStr){
     // get the global variables
     global string $UnityExportSets[];
@@ -143,6 +159,11 @@ proc importFile(string $filePathStr){
     
     $setNamespaceExists = false;
     if (setExists($unityExportSet)){
+        string $unitySetContents[] = `listConnections $unityExportSet`;
+        if(size($unitySetContents) > 0){
+            checkNamespaceNeedsUpdate($unityExportSet, getObjectNamespace($unitySetContents[0]));
+        }
+        
         // get namespace from set
         $setNamespace = getAttribute($unityExportSet, $UnityFbxNamespaceAttr);
         if($setNamespace != "" && `namespace -exists $setNamespace`){
@@ -331,16 +352,7 @@ proc exportSet(string $unitySet, int $exportAnim){
     string $unity_fbx_namespace = getAttribute($unitySet, $UnityFbxNamespaceAttr);    
         
     if(size($unitySetContents) > 0){
-        string $newNamespace = getNewNamespace($unity_fbx_namespace, getObjectNamespace($unitySetContents[0]));
-        if($unity_fbx_namespace != $newNamespace){
-            // popup asking to change namespace value to new namespace
-            if(showConfirmDialog($unitySet,
-                "Set namespace has been modified from "+$unity_fbx_namespace+" to "+$newNamespace+", update export set namespace attribute?",
-                "Yes", "No"
-               )){
-               storeAttribute($unitySet, $UnityFbxNamespaceAttr, $newNamespace);
-            }
-        }
+        checkNamespaceNeedsUpdate($unitySet, getObjectNamespace($unitySetContents[0]));
     }
         
     string $animatedObjectSet = "";
