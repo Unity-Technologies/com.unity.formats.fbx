@@ -7,6 +7,7 @@ using Unity.FbxSdk;
 using System.Linq;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;	
+using FbxExporters.EditorTools;
 
 namespace FbxExporters
 {
@@ -1922,7 +1923,9 @@ namespace FbxExporters
             protected int ExportTransformHierarchy(
                 GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
                 int exportProgress, int objectCount, Vector3 newCenter,
-                TransformExportType exportType = TransformExportType.Local)
+                TransformExportType exportType = TransformExportType.Local,
+                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All
+            )
             {
                 int numObjectsExported = exportProgress;
 
@@ -1957,9 +1960,43 @@ namespace FbxExporters
 
                 fbxNodeParent.AddChild (fbxNode);
 
+                // if this object has an LOD group, then export according to the LOD preference setting
+                var lodGroup = unityGo.GetComponent<LODGroup>();
+                if (lodGroup && lodExportType != ExportSettings.LODExportType.All) {
+                    LOD[] lods = lodGroup.GetLODs ();
+
+                    // LODs are ordered from highest to lowest.
+                    // If exporting lowest LOD, reverse the array
+                    if (lodExportType == ExportSettings.LODExportType.Lowest) {
+                        // reverse the array
+                        LOD[] tempLods = new LOD[lods.Length];
+                        System.Array.Copy (lods, tempLods, lods.Length);
+                        System.Array.Reverse (tempLods);
+                        lods = tempLods;
+                    }
+
+                    for(int i = 0; i < lods.Length; i++){
+                        var lod = lods [i];
+                        bool exportedRenderer = false;
+                        foreach (var renderer in lod.renderers) {
+                            // only export if parented under LOD group
+                            if (renderer.transform.parent == unityGo.transform) {
+                                numObjectsExported = ExportTransformHierarchy (renderer.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter, lodExportType: lodExportType);
+                                exportedRenderer = true;
+                            }
+                        }
+
+                        // if at least one renderer for this LOD was exported, then we succeeded
+                        // so stop exporting.
+                        if (exportedRenderer) {
+                            return numObjectsExported;
+                        }
+                    }
+                }
+
                 // now  unityGo  through our children and recurse
                 foreach (Transform childT in  unityGo.transform) {
-                    numObjectsExported = ExportTransformHierarchy (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter);
+                    numObjectsExported = ExportTransformHierarchy (childT.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter, lodExportType: lodExportType);
                 }
 
                 return numObjectsExported;
@@ -2665,7 +2702,10 @@ namespace FbxExporters
             ///
             /// This refreshes the asset database.
             /// </summary>
-            public int ExportAll (IEnumerable<UnityEngine.Object> unityExportSet, Dictionary<GameObject, AnimationOnlyExportData> animationExportData)
+            public int ExportAll (
+                IEnumerable<UnityEngine.Object> unityExportSet, 
+                Dictionary<GameObject, AnimationOnlyExportData> animationExportData,
+                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All)
             {
                 exportCancelled = false;
 
@@ -2782,7 +2822,7 @@ namespace FbxExporters
                             }
                             else {
                                 exportProgress = this.ExportTransformHierarchy (unityGo, fbxScene, fbxRootNode,
-                                    exportProgress, count, center, exportType);
+                                    exportProgress, count, center, exportType, lodExportType);
                             }
                             if (exportCancelled || exportProgress < 0) {
                                 Debug.LogWarning ("Export Cancelled");
@@ -3547,7 +3587,7 @@ namespace FbxExporters
                     return;
                 }
 
-                if (ExportObjects (filePath, exportType: exportType) != null) {
+                if (ExportObjects (filePath, exportType: exportType, lodExportType: ExportSettings.instance.lodExportType) != null) {
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
                     AssetDatabase.Refresh ();
@@ -3558,7 +3598,11 @@ namespace FbxExporters
             /// Export a list of (Game) objects to FBX file. 
             /// Use the SaveFile panel to allow user to enter a file name.
             /// <summary>
-            public static string ExportObjects (string filePath, UnityEngine.Object[] objects = null, AnimationExportType exportType = AnimationExportType.all)
+            public static string ExportObjects (
+                string filePath,
+                UnityEngine.Object[] objects = null,
+                AnimationExportType exportType = AnimationExportType.all,
+                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All)
             {
                 LastFilePath = filePath;
 
@@ -3599,7 +3643,7 @@ namespace FbxExporters
                             break;
                     }
 
-                    if (fbxExporter.ExportAll (objects, animationExportData) > 0) {
+                    if (fbxExporter.ExportAll (objects, animationExportData, lodExportType) > 0) {
                         string message = string.Format ("Successfully exported: {0}", filePath);
                         UnityEngine.Debug.Log (message);
 
@@ -3609,9 +3653,12 @@ namespace FbxExporters
                 return null;
             }
 
-            public static string ExportObject (string filePath, UnityEngine.Object root, AnimationExportType exportType = AnimationExportType.all)
+            public static string ExportObject (
+                string filePath, UnityEngine.Object root,
+                AnimationExportType exportType = AnimationExportType.all,
+                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All)
             {
-                return ExportObjects(filePath, new Object[] { root }, exportType);
+                return ExportObjects(filePath, new Object[] { root }, exportType, lodExportType);
             }
 
             private static void EnsureDirectory (string path)
