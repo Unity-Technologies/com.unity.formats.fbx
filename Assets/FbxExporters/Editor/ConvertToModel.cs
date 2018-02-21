@@ -86,6 +86,17 @@ namespace FbxExporters
                 var wasExported = new List<GameObject>();
                 foreach(var go in toExport) {
                     try {
+                        if(go.transform.parent == null){
+                            PrefabType unityPrefabType = PrefabUtility.GetPrefabType(go);
+                            if (unityPrefabType == PrefabType.ModelPrefabInstance) {
+                                // don't re-export fbx
+                                // create prefab out of model instance in scene, link to existing fbx
+                                var mainAsset = PrefabUtility.GetPrefabParent(go) as GameObject;
+                                SetupFbxPrefab(go, mainAsset, AssetDatabase.GetAssetOrScenePath(mainAsset), AssetDatabase.GetAssetOrScenePath(mainAsset));
+                                continue;
+                            }
+                        }
+
                         wasExported.Add(Convert(go,
                             directoryFullPath: directoryFullPath));
                     } catch(System.Exception xcp) {
@@ -161,6 +172,14 @@ namespace FbxExporters
                 // Copy the mesh/materials from the FBX
                 UpdateFromSourceRecursive (toConvert, unityMainAsset);
 
+                SetupFbxPrefab (toConvert, unityMainAsset, projectRelativePath, fbxFullPath);
+
+                toConvert.name = Path.GetFileNameWithoutExtension (fbxFullPath);
+                return toConvert;
+            }
+
+
+            public static void SetupFbxPrefab(GameObject toConvert, GameObject unityMainAsset, string projectRelativePath, string fbxFullPath){
                 // Set up the FbxPrefab component so it will auto-update.
                 // Make sure to delete whatever FbxPrefab history we had.
                 var fbxPrefab = toConvert.GetComponent<FbxPrefab>();
@@ -179,9 +198,6 @@ namespace FbxExporters
                         string.Format("Failed to create prefab asset in [{0}] from fbx [{1}]",
                             prefabFileName, fbxFullPath));
                 }
-
-                toConvert.name = Path.GetFileNameWithoutExtension (fbxFullPath);
-                return toConvert;
             }
 
             /// <summary>
