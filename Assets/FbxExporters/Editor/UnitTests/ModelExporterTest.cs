@@ -822,6 +822,13 @@ namespace FbxExporters.UnitTests
             CompareGameObjectChildren (fbxObj, expectedChildren);
         }
 
+
+        /// <summary>
+        /// Compares obj's children to the expected children in the hashset.
+        /// Doesn't recurse through the children.
+        /// </summary>
+        /// <param name="obj">Object.</param>
+        /// <param name="expectedChildren">Expected children.</param>
         private void CompareGameObjectChildren(GameObject obj, HashSet<string> expectedChildren){
             Assert.That (obj.transform.childCount, Is.EqualTo (expectedChildren.Count));
 
