@@ -166,7 +166,7 @@ namespace FbxExporters
                 // relative to the project, not relative to the assets folder.
                 var unityMainAsset = AssetDatabase.LoadMainAssetAtPath (projectRelativePath) as GameObject;
                 if (!unityMainAsset) {
-                    throw new System.Exception ("Failed to convert " + toConvert.name);;
+                    throw new System.Exception ("Failed to convert " + toConvert.name);
                 }
 
                 // Copy the mesh/materials from the FBX
