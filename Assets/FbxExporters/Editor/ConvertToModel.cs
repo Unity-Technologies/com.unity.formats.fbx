@@ -92,7 +92,9 @@ namespace FbxExporters
                                 // don't re-export fbx
                                 // create prefab out of model instance in scene, link to existing fbx
                                 var mainAsset = PrefabUtility.GetPrefabParent(go) as GameObject;
-                                SetupFbxPrefab(go, mainAsset, AssetDatabase.GetAssetOrScenePath(mainAsset), AssetDatabase.GetAssetOrScenePath(mainAsset));
+                                var mainAssetRelPath = AssetDatabase.GetAssetOrScenePath(mainAsset);
+                                var mainAssetAbsPath = Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
+                                SetupFbxPrefab(go, mainAsset, mainAssetRelPath, mainAssetAbsPath);
                                 continue;
                             }
                         }
