@@ -256,5 +256,61 @@ namespace FbxExporters.UnitTests
 
             Assert.AreEqual (Path.GetFileNameWithoutExtension (path), cube.name);
         }
+
+        [Test]
+        public void TestConvertModelInstance()
+        {
+            // expected result: prefab is linked to originally exported
+            //                  fbx and no new fbx is created.
+
+            // create hierarchy (Cube->Sphere)
+            var cube = GameObject.CreatePrimitive (PrimitiveType.Cube);
+            var sphere = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+
+            sphere.transform.SetParent (cube.transform);
+
+            // export using regular model export
+            var filename = GetRandomFileNamePath();
+            GameObject fbxObj = ExportSelection (filename, cube);
+
+            // add back to scene
+            GameObject fbxInstance = PrefabUtility.InstantiatePrefab (fbxObj) as GameObject;
+            Assert.That (fbxInstance, Is.Not.Null);
+
+            // attach some components
+            var rigidBody = fbxInstance.AddComponent<Rigidbody> ();
+            Assert.That (rigidBody, Is.Not.Null);
+
+            var instanceSphere = fbxInstance.transform.GetChild (0);
+            Assert.That (instanceSphere, Is.Not.Null);
+
+            var boxCollider = instanceSphere.gameObject.AddComponent<BoxCollider> ();
+            Assert.That (boxCollider, Is.Not.Null);
+
+            // convert to prefab
+            GameObject[] converted = ConvertToModel.CreateInstantiatedModelPrefab (new GameObject[]{ fbxInstance }, Path.GetDirectoryName(filename));
+
+            Assert.That (converted.Length, Is.EqualTo(1));
+            Assert.That (converted [0], Is.EqualTo (fbxInstance));
+
+            // check meshes link to original fbx
+            var prefabCubeMesh = fbxInstance.GetComponent<MeshFilter>().sharedMesh;
+            Assert.That (prefabCubeMesh, Is.Not.Null);
+
+            var fbxObjAssetPath = AssetDatabase.GetAssetPath (fbxObj);
+
+            Assert.That (AssetDatabase.GetAssetPath (prefabCubeMesh), Is.EqualTo (fbxObjAssetPath));
+
+            var prefabSphere = fbxInstance.transform.GetChild (0);
+            Assert.That (prefabSphere, Is.Not.Null);
+            var prefabSphereMesh = prefabSphere.GetComponent<MeshFilter> ().sharedMesh;
+            Assert.That (prefabSphere, Is.Not.Null);
+
+            Assert.That (AssetDatabase.GetAssetPath (prefabSphereMesh), Is.EqualTo (fbxObjAssetPath));
+
+            // check that components are still there
+            Assert.That (fbxInstance.GetComponent<Rigidbody>(), Is.Not.Null);
+            Assert.That (prefabSphere.GetComponent<BoxCollider> (), Is.Not.Null);
+        }
     }
 }

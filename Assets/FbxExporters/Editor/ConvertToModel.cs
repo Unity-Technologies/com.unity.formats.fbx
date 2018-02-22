@@ -92,9 +92,11 @@ namespace FbxExporters
                                 // don't re-export fbx
                                 // create prefab out of model instance in scene, link to existing fbx
                                 var mainAsset = PrefabUtility.GetPrefabParent(go) as GameObject;
-                                var mainAssetRelPath = AssetDatabase.GetAssetOrScenePath(mainAsset);
+                                var mainAssetRelPath = AssetDatabase.GetAssetPath(mainAsset);
                                 var mainAssetAbsPath = Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
                                 SetupFbxPrefab(go, mainAsset, mainAssetRelPath, mainAssetAbsPath);
+
+                                wasExported.Add(go);
                                 continue;
                             }
                         }
@@ -181,6 +183,13 @@ namespace FbxExporters
             }
 
 
+            /// <summary>
+            /// Create the fbx prefab and connect it to the given fbx asset. 
+            /// </summary>
+            /// <param name="toConvert">Hierarchy to convert.</param>
+            /// <param name="unityMainAsset">Main asset in the FBX.</param>
+            /// <param name="projectRelativePath">Fbx project relative path.</param>
+            /// <param name="fbxFullPath">Fbx full path.</param>
             public static void SetupFbxPrefab(GameObject toConvert, GameObject unityMainAsset, string projectRelativePath, string fbxFullPath){
                 // Set up the FbxPrefab component so it will auto-update.
                 // Make sure to delete whatever FbxPrefab history we had.
