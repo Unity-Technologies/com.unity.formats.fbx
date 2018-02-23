@@ -85,7 +85,7 @@ namespace FbxExporters
             const string ClipMenuItemName = "GameObject/Export All Timeline Clips...";
             const string TimelineClipMenuItemName = "GameObject/Export Selected Timeline Clip...";																				
 
-            const string AnimOnlyMenuItemName = "GameObject/Export Animation Only";
+            const string AnimOnlyMenuItemName = "GameObject/Export Animation Only...";
 
             const string FileBaseName = "Untitled";
 
