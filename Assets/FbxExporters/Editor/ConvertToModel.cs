@@ -117,18 +117,27 @@ namespace FbxExporters
                 string directoryFullPath = null,
                 string fbxFullPath = null)
             {
-                if(toConvert.transform.parent == null){
-                    PrefabType unityPrefabType = PrefabUtility.GetPrefabType(toConvert);
-                    if (unityPrefabType == PrefabType.ModelPrefabInstance) {
-                        // don't re-export fbx
-                        // create prefab out of model instance in scene, link to existing fbx
-                        var mainAsset = PrefabUtility.GetPrefabParent(toConvert) as GameObject;
-                        var mainAssetRelPath = AssetDatabase.GetAssetPath(mainAsset);
-                        var mainAssetAbsPath = Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
-                        SetupFbxPrefab(toConvert, mainAsset, mainAssetRelPath, mainAssetAbsPath);
+                // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
+                // Children of model prefab instances will also have "model prefab instance"
+                // as their prefab type, so it is important that it is the root that is selected.
+                //
+                // e.g. If I have the following hierarchy: 
+                //      Cube
+                //      -- Sphere
+                //
+                // Both the Cube and Sphere will have ModelPrefabInstance as their prefab type.
+                // However, when selecting the Sphere to convert, we don't want to connect it to the
+                // existing FBX but create a new FBX containing just the sphere.
+                PrefabType unityPrefabType = PrefabUtility.GetPrefabType(toConvert);
+                if (unityPrefabType == PrefabType.ModelPrefabInstance && toConvert.Equals(PrefabUtility.FindPrefabRoot(toConvert))) {
+                    // don't re-export fbx
+                    // create prefab out of model instance in scene, link to existing fbx
+                    var mainAsset = PrefabUtility.GetPrefabParent(toConvert) as GameObject;
+                    var mainAssetRelPath = AssetDatabase.GetAssetPath(mainAsset);
+                    var mainAssetAbsPath = Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
+                    SetupFbxPrefab(toConvert, mainAsset, mainAssetRelPath, mainAssetAbsPath);
 
-                        return toConvert;
-                    }
+                    return toConvert;
                 }
 
                 if (string.IsNullOrEmpty(fbxFullPath)) {
