@@ -223,7 +223,10 @@ namespace FbxExporters.UnitTests
         {
             // export selected to a file, then return the root
             var filename = GetRandomFileNamePath();
+            return ExportSelection (filename, selected);
+        }
 
+        protected virtual GameObject ExportSelection(string filename, params Object[] selected){
             Debug.unityLogger.logEnabled = false;
             var fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects (filename, selected) as string;
             Debug.unityLogger.logEnabled = true;
