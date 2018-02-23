@@ -1983,6 +1983,8 @@ namespace FbxExporters
                             if (renderer.transform.parent == unityGo.transform) {
                                 numObjectsExported = ExportTransformHierarchy (renderer.gameObject, fbxScene, fbxNode, numObjectsExported, objectCount, newCenter, lodExportType: lodExportType);
                                 exportedRenderer = true;
+                            } else if(Verbose) {
+                                Debug.LogFormat ("FbxExporter: Not exporting LOD {0}: {1}", i, renderer.name);
                             }
                         }
 
