@@ -2707,6 +2707,7 @@ namespace FbxExporters
             public int ExportAll (
                 IEnumerable<UnityEngine.Object> unityExportSet, 
                 Dictionary<GameObject, AnimationOnlyExportData> animationExportData,
+                TransformExportType exportType = TransformExportType.Global,
                 ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All)
             {
                 exportCancelled = false;
@@ -2811,10 +2812,8 @@ namespace FbxExporters
                         }
 
                         Vector3 center = Vector3.zero;
-                        var exportType = TransformExportType.Reset;
-                        if(revisedExportSet.Count != 1){
+                        if(exportType == TransformExportType.Global){
                             center = ExportSettings.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
-                            exportType = TransformExportType.Global;
                         }
 
                         foreach (var unityGo in revisedExportSet) {
@@ -3604,6 +3603,7 @@ namespace FbxExporters
                 string filePath,
                 UnityEngine.Object[] objects = null,
                 AnimationExportType exportType = AnimationExportType.all,
+                TransformExportType transformExportType = TransformExportType.Global,
                 ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All)
             {
                 LastFilePath = filePath;
@@ -3645,7 +3645,7 @@ namespace FbxExporters
                             break;
                     }
 
-                    if (fbxExporter.ExportAll (objects, animationExportData, lodExportType) > 0) {
+                    if (fbxExporter.ExportAll (objects, animationExportData, transformExportType, lodExportType) > 0) {
                         string message = string.Format ("Successfully exported: {0}", filePath);
                         UnityEngine.Debug.Log (message);
 
@@ -3658,9 +3658,10 @@ namespace FbxExporters
             public static string ExportObject (
                 string filePath, UnityEngine.Object root,
                 AnimationExportType exportType = AnimationExportType.all,
+                TransformExportType transformExportType = TransformExportType.Reset,
                 ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All)
             {
-                return ExportObjects(filePath, new Object[] { root }, exportType, lodExportType);
+                return ExportObjects(filePath, new Object[] { root }, exportType, transformExportType, lodExportType);
             }
 
             private static void EnsureDirectory (string path)

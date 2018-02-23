@@ -61,29 +61,32 @@ namespace FbxExporters.UnitTests
             m_root = CreateHierarchy ();
             Assert.IsNotNull (m_root);
 
+            // test without centered objects
+            FbxExporters.EditorTools.ExportSettings.instance.centerObjects = false;
+
             // test Export Root
             // Expected result: everything gets exported
-            // Expected transform: root is zeroed out, all other transforms unchanged
+            // Expected transform: all transforms unchanged
             var exportedRoot = ExportSelection (new Object[]{ m_root });
             CompareHierarchies (m_root, exportedRoot, true, false);
-            CompareGlobalTransform (exportedRoot.transform);
+            CompareGlobalTransform (exportedRoot.transform, m_root.transform);
 
             // test Export Parent1, Child1
             // Expected result: Parent1, Child1, Child2
-            // Expected transform: Parent1 zeroed out, all other transforms unchanged
+            // Expected transform: all transforms unchanged
             var parent1 = m_root.transform.Find ("Parent1");
             var child1 = parent1.Find ("Child1");
             exportedRoot = ExportSelection (new Object[]{ parent1.gameObject, child1.gameObject });
             CompareHierarchies (parent1.gameObject, exportedRoot, true, false);
-            CompareGlobalTransform (exportedRoot.transform);
+            CompareGlobalTransform (exportedRoot.transform, parent1);
 
             // test Export Child2
             // Expected result: Child2
-            // Expected transform: Child2 zeroed out
+            // Expected transform: Child2 unchanged
             var child2 = parent1.Find ("Child2").gameObject;
             exportedRoot = ExportSelection (new Object[]{ child2 });
             CompareHierarchies (child2, exportedRoot, true, false);
-            CompareGlobalTransform (exportedRoot.transform);
+            CompareGlobalTransform (exportedRoot.transform, child2.transform);
 
             // test Export Child2, Parent2
             // Expected result: Parent2, Child3, Child2
@@ -127,7 +130,12 @@ namespace FbxExporters.UnitTests
         {
             var actualMatrix = ConstructTRSMatrix (actual);
             var expectedMatrix = expected == null ? new FbxAMatrix () : ConstructTRSMatrix (expected, false, center);
-            Assert.AreEqual (expectedMatrix, actualMatrix);
+
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    Assert.That (actualMatrix [i] [j], Is.EqualTo (expectedMatrix [i] [j]).Within(0.0001));
+                }
+            }
         }
 
         /// <summary>

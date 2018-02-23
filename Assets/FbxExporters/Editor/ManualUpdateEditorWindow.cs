@@ -18,6 +18,8 @@ public class ManualUpdateEditorWindow : EditorWindow
 
     List<string> m_nodeNameToSuggest;
 
+    public bool Verbose { private set {;} get { return FbxExporters.EditorTools.ExportSettings.instance.Verbose; } }
+
     public void Init(FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility, FbxPrefab fbxPrefab)
     {
         FbxPrefabAutoUpdater.FbxPrefabUtility.UpdateList updates = new FbxPrefabAutoUpdater.FbxPrefabUtility.UpdateList(new FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation(fbxPrefab.FbxHistory), fbxPrefab.FbxModel.transform, fbxPrefab);
@@ -137,7 +139,10 @@ public class ManualUpdateEditorWindow : EditorWindow
                 stringpair.UnityObjectName = m_nodesToDestroy[i];
 
                 m_fbxPrefab.NameMapping.Add(stringpair);
-                Debug.Log("Mapped Unity: " + stringpair.UnityObjectName + " to FBX: " + stringpair.FBXObjectName);
+
+                if (Verbose) {
+                    Debug.Log ("Mapped Unity: " + stringpair.UnityObjectName + " to FBX: " + stringpair.FBXObjectName);
+                }
             }
         }
 
@@ -161,11 +166,15 @@ public class ManualUpdateEditorWindow : EditorWindow
                     stringpair.UnityObjectName = currentUnityNodeName;
                     m_fbxPrefab.NameMapping.Add(stringpair);
 
-                    Debug.Log("Mapped Unity: " + stringpair.UnityObjectName + " to FBX: " + stringpair.FBXObjectName);
+                    if (Verbose) {
+                        Debug.Log ("Mapped Unity: " + stringpair.UnityObjectName + " to FBX: " + stringpair.FBXObjectName);
+                    }
                 }
                 else
                 {
-                    Debug.Log("ALREADY Mapped Unity: " + currentUnityNodeName + " to FBX: " + options[selectedNodesToRename[i]].text);
+                    if (Verbose) {
+                        Debug.Log ("ALREADY Mapped Unity: " + currentUnityNodeName + " to FBX: " + options [selectedNodesToRename [i]].text);
+                    }
                 }
             }
         }
