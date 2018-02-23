@@ -157,7 +157,11 @@ proc importFile(string $filePathStr){
     $unityExportSet = `format -stringArg $fileNameWithoutExt $UnityExportSetNameFormat`;
 
     string $origNamespace = `namespaceInfo -cur -an`;
-    string $targetNamespace = `format -s $origNamespace -s $fileNameWithoutExt "^1s:^2s"`;
+    string $targetNamespace = ":" + $fileNameWithoutExt;
+    // make sure there are no duplicate colons in namespace name
+    if($origNamespace != ":"){
+        $targetNamespace = `format -s $origNamespace -s $fileNameWithoutExt "^1s:^2s"`;
+    }
     
     $setNamespaceExists = false;
     if (setExists($unityExportSet)){
