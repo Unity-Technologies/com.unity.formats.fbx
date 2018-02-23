@@ -266,7 +266,7 @@ namespace FbxExporters.UnitTests
             var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (
                 filename, hierarchy,
                 animOnly? FbxExporters.Editor.ModelExporter.AnimationExportType.componentAnimation : FbxExporters.Editor.ModelExporter.AnimationExportType.all,
-                lodExportType
+                lodExportType: lodExportType
             );
             Assert.That (exportedFilePath, Is.EqualTo (filename));
             return filename;
