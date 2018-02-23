@@ -288,10 +288,8 @@ namespace FbxExporters.UnitTests
             Assert.That (boxCollider, Is.Not.Null);
 
             // convert to prefab
-            GameObject[] converted = ConvertToModel.CreateInstantiatedModelPrefab (new GameObject[]{ fbxInstance }, Path.GetDirectoryName(filename));
-
-            Assert.That (converted.Length, Is.EqualTo(1));
-            Assert.That (converted [0], Is.EqualTo (fbxInstance));
+            GameObject converted = ConvertToModel.Convert (fbxInstance, Path.GetDirectoryName(filename));
+            Assert.That (converted, Is.EqualTo (fbxInstance));
 
             // check meshes link to original fbx
             var prefabCubeMesh = fbxInstance.GetComponent<MeshFilter>().sharedMesh;

@@ -86,21 +86,6 @@ namespace FbxExporters
                 var wasExported = new List<GameObject>();
                 foreach(var go in toExport) {
                     try {
-                        if(go.transform.parent == null){
-                            PrefabType unityPrefabType = PrefabUtility.GetPrefabType(go);
-                            if (unityPrefabType == PrefabType.ModelPrefabInstance) {
-                                // don't re-export fbx
-                                // create prefab out of model instance in scene, link to existing fbx
-                                var mainAsset = PrefabUtility.GetPrefabParent(go) as GameObject;
-                                var mainAssetRelPath = AssetDatabase.GetAssetPath(mainAsset);
-                                var mainAssetAbsPath = Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
-                                SetupFbxPrefab(go, mainAsset, mainAssetRelPath, mainAssetAbsPath);
-
-                                wasExported.Add(go);
-                                continue;
-                            }
-                        }
-
                         wasExported.Add(Convert(go,
                             directoryFullPath: directoryFullPath));
                     } catch(System.Exception xcp) {
@@ -132,6 +117,20 @@ namespace FbxExporters
                 string directoryFullPath = null,
                 string fbxFullPath = null)
             {
+                if(toConvert.transform.parent == null){
+                    PrefabType unityPrefabType = PrefabUtility.GetPrefabType(toConvert);
+                    if (unityPrefabType == PrefabType.ModelPrefabInstance) {
+                        // don't re-export fbx
+                        // create prefab out of model instance in scene, link to existing fbx
+                        var mainAsset = PrefabUtility.GetPrefabParent(toConvert) as GameObject;
+                        var mainAssetRelPath = AssetDatabase.GetAssetPath(mainAsset);
+                        var mainAssetAbsPath = Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
+                        SetupFbxPrefab(toConvert, mainAsset, mainAssetRelPath, mainAssetAbsPath);
+
+                        return toConvert;
+                    }
+                }
+
                 if (string.IsNullOrEmpty(fbxFullPath)) {
                     // Generate a unique filename.
                     if (string.IsNullOrEmpty (directoryFullPath)) {
@@ -184,7 +183,7 @@ namespace FbxExporters
 
 
             /// <summary>
-            /// Create the fbx prefab and connect it to the given fbx asset. 
+            /// Create the prefab and connect it to the given fbx asset. 
             /// </summary>
             /// <param name="toConvert">Hierarchy to convert.</param>
             /// <param name="unityMainAsset">Main asset in the FBX.</param>
