@@ -112,6 +112,8 @@ proc string getNewNamespace(string $n1, string $n2){
 }
 
 proc string checkNamespaceNeedsUpdate(string $unitySet, string $unityFbxNamespace, string $objectNamespace){
+    global string $UnityFbxNamespaceAttr;
+
     string $newNamespace = getNewNamespace($unityFbxNamespace, $objectNamespace);
     if($unityFbxNamespace != $newNamespace){
         // popup asking to change namespace value to new namespace
@@ -120,6 +122,7 @@ proc string checkNamespaceNeedsUpdate(string $unitySet, string $unityFbxNamespac
             "Yes", "No"
            )){
            storeAttribute($unitySet, $UnityFbxNamespaceAttr, $newNamespace);
+           
            return $newNamespace;
         }
     }
@@ -197,10 +200,20 @@ proc importFile(string $filePathStr){
         if(!`namespaceInfo -isRootNamespace $origNamespace`){
             namespace -set ":";
         }
-    
+        
+        // if a set is selected when creating a new set, then
+        // the selected set will be added into the new set.
+        // avoid this by temporarily deselecting everything.
+        $origSelection = `ls -sl`;
+        select -clear;
+        
         // couldn't find export set so create it
         sets -name $unityExportSet;
         $setCreated = true;
+        
+        if(size($origSelection) > 0){
+            select -r $origSelection;
+        }
     }
     
     // unlock set so we can add attributes to it
