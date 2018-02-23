@@ -129,6 +129,25 @@ proc string checkNamespaceNeedsUpdate(string $unitySet, string $unityFbxNamespac
     return $unityFbxNamespace;
 }
 
+global proc string getMayaValidName(string $input)
+{
+    string $output = "";
+    for ($n = 1 ; $n < size($input)+1 ; $n++)
+    {
+        string $char = `substring $input $n $n`;
+        // if starting with a number, add underscore before number
+        if ($n == 1 && `match "[0-9]" $char` != "")
+            $output += ("_"+$char);
+        // if character is alphanumeric, or underscore, add character
+        else if (`match "[a-zA-Z0-9\_]" $char` != "")
+            $output += $char;
+        // otherwise replace with underscore
+        else
+            $output += "_";
+    }
+    return $output;
+}
+
 proc importFile(string $filePathStr){
     // get the global variables
     global string $UnityExportSets[];
@@ -154,6 +173,8 @@ proc importFile(string $filePathStr){
         
         $fileNameWithoutExt = match("[^@]+", $fileNameWithoutExt);
     }
+    $fileNameWithoutExt = getMayaValidName($fileNameWithoutExt);
+    
     $unityExportSet = `format -stringArg $fileNameWithoutExt $UnityExportSetNameFormat`;
 
     string $origNamespace = `namespaceInfo -cur -an`;
