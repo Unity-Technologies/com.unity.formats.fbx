@@ -1,5 +1,31 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint47
+
+NEW FEATURES
+
+* Unity Maya Integration: Add all imported objects to same namespace
+
+Namespace is created according to the filename and is stored as an attribute on the export set.
+
+* Fbx Exporter: "Export Model" option exports with global transform
+
+Center Objects option is disabled by default but still available in the export settings.
+
+* Fbx Export Settings: Add LOD export option
+
+Added 3 options for LOD export: Highest, Lowest, All.
+If "Highest" is selected, then only highest LOD is exported in the hierarchy for GameObjects with LOD groups, and
+vice versa for "Lowest". If All is selected, behaviour will be the same as before, exporting all LODs.
+NOTE: will ignore any LOD meshes not directly parented under the object containing the LOD group.
+
+FIXES
+
+* ConvertToPrefab: Don't re-export fbx model instances
+
+If the object being exported in the scene is an fbx model instance, then create the prefab with the FbxPrefab component,
+and attach it to the existing fbx without re-exporting the fbx.
+
 **Version**: sprint46
 
 NEW FEATURES
