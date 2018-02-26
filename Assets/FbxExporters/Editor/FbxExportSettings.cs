@@ -56,6 +56,12 @@ namespace FbxExporters.EditorTools {
                 exportSettings.autoUpdaterEnabled
             );
 
+            exportSettings.exportMeshColliders = EditorGUILayout.Toggle(
+                new GUIContent("Export Mesh Colliders:",
+                    "If unchecked, meshes that don't have renderers won't be exported."),
+                exportSettings.exportMeshColliders
+            );
+
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
@@ -442,6 +448,7 @@ namespace FbxExporters.EditorTools {
         public bool HideSendToUnityMenu = true;
         public int ExportFormatSelection;
         public bool BakeAnimation = true;
+        public bool exportMeshColliders = false;
 
         public string IntegrationSavePath;
 
