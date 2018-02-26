@@ -2813,7 +2813,7 @@ namespace FbxExporters
 
                         Vector3 center = Vector3.zero;
                         if(exportType == TransformExportType.Global){
-                            center = ExportSettings.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
+                            center = (ExportSettings.centerObjects && revisedExportSet.Count > 1)? FindCenter(revisedExportSet) : Vector3.zero;
                         }
 
                         foreach (var unityGo in revisedExportSet) {
