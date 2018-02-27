@@ -116,7 +116,18 @@ namespace FbxExporters
                     var filePath = ExportSettings.GetAbsoluteSavePath();
                     filePath = System.IO.Path.Combine (filePath, m_exportFileName);
 
-                    //TODO: check if file already exists, give a warning if it does
+                    // check if file already exists, give a warning if it does
+                    if (System.IO.File.Exists (filePath)) {
+                        bool overwrite = UnityEditor.EditorUtility.DisplayDialog (
+                                        string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), 
+                                        string.Format("File {0} already exists.", filePath), 
+                                        "Overwrite", "Cancel");
+                        if (!overwrite) {
+                            this.Close ();
+                            return;
+                        }
+                    }
+
                     if (ModelExporter.ExportObjects (filePath, exportType: m_animExportType, lodExportType: ExportSettings.instance.lodExportType) != null) {
                         // refresh the asset database so that the file appears in the
                         // asset folder view.
