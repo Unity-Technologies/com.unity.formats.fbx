@@ -3564,12 +3564,6 @@ namespace FbxExporters
 
             private static void OnExport (AnimationExportType exportType = AnimationExportType.all)
             {
-
-                // Now that we know we have stuff to export, get the user-desired path.
-                var directory = string.IsNullOrEmpty (LastFilePath)
-                                      ? Application.dataPath
-                                      : System.IO.Path.GetDirectoryName (LastFilePath);
-
                 GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
                 string filename = null;
                 if (selectedGOs.Length == 1) {
@@ -3580,19 +3574,7 @@ namespace FbxExporters
                         : System.IO.Path.GetFileName (LastFilePath);
                 }
 
-                var title = string.Format ("Export Model FBX ({0})", FileBaseName);
-
-                var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "fbx");
-
-                if (string.IsNullOrEmpty (filePath)) {
-                    return;
-                }
-
-                if (ExportObjects (filePath, exportType: exportType, lodExportType: ExportSettings.instance.lodExportType) != null) {
-                    // refresh the asset database so that the file appears in the
-                    // asset folder view.
-                    AssetDatabase.Refresh ();
-                }
+                ExportModelEditorWindow.Init (filename, exportType);
             }
 
             /// <summary>
