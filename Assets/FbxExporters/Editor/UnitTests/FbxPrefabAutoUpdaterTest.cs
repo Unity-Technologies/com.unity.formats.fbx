@@ -19,8 +19,9 @@ namespace FbxExporters.UnitTests
         string m_prefabPath;
 
         [SetUp]
-        public void Init ()
+        public override void Init ()
         {
+            base.Init();
             var capsule = GameObject.CreatePrimitive (PrimitiveType.Capsule);
             m_fbx = ExportSelection (capsule);
             m_fbxPath = AssetDatabase.GetAssetPath (m_fbx);

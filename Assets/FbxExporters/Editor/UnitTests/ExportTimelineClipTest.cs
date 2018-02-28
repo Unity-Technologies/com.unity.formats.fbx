@@ -5,7 +5,6 @@ using FbxExporters.Editor;
 using UnityEngine.Timeline;
 using UnityEngine.Playables;
 using UnityEditor.SceneManagement;
-using UnityEngine.SceneManagement;
 
 namespace FbxExporters.UnitTests
 {
@@ -37,7 +36,7 @@ namespace FbxExporters.UnitTests
                     // One file by animation clip
                     foreach (TimelineClip timeLineClip in at.GetClips()) {
                         ModelExporter.ExportSingleTimelineClip (timeLineClip, folderPath, atObject);
-                        FileAssert.Exists (string.Format("{0}/{1}@{2}.fbx", folderPath, atObject.name, "Recorded.fbx"));
+                        FileAssert.Exists (string.Format("{0}/{1}@{2}", folderPath, atObject.name, "Recorded.fbx"));
                     }
                 }
             }
@@ -53,7 +52,7 @@ namespace FbxExporters.UnitTests
             foreach(GameObject obj in Selection.objects)
             {
                 ModelExporter.ExportAllTimelineClips(obj, folderPath);
-                FileAssert.Exists(string.Format("{0}/{1}@{2}.fbx", folderPath, obj.name, "Recorded.fbx"));
+                FileAssert.Exists(string.Format("{0}/{1}@{2}", folderPath, obj.name, "Recorded.fbx"));
             }
         }
     }
