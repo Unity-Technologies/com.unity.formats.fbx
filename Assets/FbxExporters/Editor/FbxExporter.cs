@@ -3079,23 +3079,23 @@ namespace FbxExporters
                 }
                 Debug.Log(folderPath);
 
+                Object[] selectedObjects = Selection.objects;
 
-                var selectedObjects = Selection.objects;
-                foreach (GameObject editorClipSelected in selectedObjects)
+                foreach (Object editorClipSelected in selectedObjects)
                 {
                     ExportSingleEditorClip(editorClipSelected, folderPath);
                 }
             }
 
-            public static void ExportSingleEditorClip(GameObject editorClipSelected, string folderPath)
+            public static void ExportSingleEditorClip(Object editorClipSelected, string folderPath)
             {
                 if (editorClipSelected.GetType().Name.Contains("EditorClip"))
                 {
-                    var selClip = editorClipSelected.GetType().GetProperty("clip").GetValue(editorClipSelected, null);
+                    object selClip = editorClipSelected.GetType().GetProperty("clip").GetValue(editorClipSelected, null);
 					UnityEngine.Timeline.TimelineClip timeLineClip = selClip as UnityEngine.Timeline.TimelineClip;
 
-					var selClipItem = editorClipSelected.GetType().GetProperty("item").GetValue(editorClipSelected, null);
-					var selClipItemParentTrack = selClipItem.GetType().GetProperty("parentTrack").GetValue(selClipItem, null);
+					object selClipItem = editorClipSelected.GetType().GetProperty("item").GetValue(editorClipSelected, null);
+					object selClipItemParentTrack = selClipItem.GetType().GetProperty("parentTrack").GetValue(selClipItem, null);
 					AnimationTrack editorClipAnimationTrack = selClipItemParentTrack as AnimationTrack;
                     GameObject animationTrackGObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (editorClipAnimationTrack) as GameObject;
 
@@ -3106,7 +3106,6 @@ namespace FbxExporters
             public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, string folderPath, GameObject animationTrackGObject)
             {
 				string filePath = folderPath + "/" + animationTrackGObject.name + "@" + timelineClipSelected.animationClip.name + ".fbx";
-				//Debug.Log("filepath: " + filePath);
 				UnityEngine.Object[] myArray = new UnityEngine.Object[] { animationTrackGObject, timelineClipSelected.animationClip };
 				ExportObjects(filePath, myArray, AnimationExportType.timelineAnimationClip);
             }
@@ -3141,7 +3140,7 @@ namespace FbxExporters
                 else
                 {
                     // We were invoked from the right-click menu, so use the context of the context menu.
-                    var selected = command.context as GameObject;
+                    GameObject selected = command.context as GameObject;
                     if (selected)
                     {
                         selection = new GameObject[] { selected };
