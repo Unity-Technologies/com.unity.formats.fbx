@@ -190,6 +190,11 @@ namespace FbxExporters
             const string UniqueNameFormat = "{0}_{1}";
 
             /// <summary>
+            /// The animation fbx file format.
+            /// </summary>
+            const string AnimFbxFileFormat = "{0}/{1}@{2}.fbx";
+
+            /// <summary>
             /// Gets the export settings.
             /// </summary>
             public static EditorTools.ExportSettings ExportSettings {
@@ -2963,21 +2968,23 @@ namespace FbxExporters
                 {
                     if (obj.GetType().Name.Contains("EditorClip"))
                     {
-                        var selClip = obj.GetType ().GetProperty ("clip").GetValue (obj, null);
-                        UnityEngine.Timeline.TimelineClip timeLineClip = selClip as UnityEngine.Timeline.TimelineClip;
+                        var timeLineClip = GetPropertyFromObject<TimelineClip> (obj, "clip");
 
-                        var selClipItem = obj.GetType ().GetProperty ("item").GetValue (obj, null);
-                        var selClipItemParentTrack = selClipItem.GetType ().GetProperty ("parentTrack").GetValue (selClipItem, null);
-                        AnimationTrack editorClipAnimationTrack = selClipItemParentTrack as AnimationTrack;
+                        var selClipItem = GetPropertyFromObject<object>(obj, "item");
+                        var editorClipAnimationTrack = GetPropertyFromObject<AnimationTrack> (selClipItem, "parentTrack");
 
                         GameObject animationTrackGObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (editorClipAnimationTrack) as GameObject;
 
-                        string filePath = folderPath + "/" + animationTrackGObject.name + "@" + timeLineClip.animationClip.name + ".fbx";
+                        string filePath = string.Format(AnimFbxFileFormat, folderPath, animationTrackGObject.name, timeLineClip.displayName);
                         UnityEngine.Object[] myArray = new UnityEngine.Object[] { animationTrackGObject, timeLineClip.animationClip };
 
                         ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
                     } 
                 }
+            }
+
+            private static T GetPropertyFromObject<T>(object obj, string propertyName) where T : class {
+                return obj.GetType ().GetProperty (propertyName).GetValue (obj, null) as T;
             }
 
             /// <summary>
@@ -3028,7 +3035,7 @@ namespace FbxExporters
                             GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
                             // One file by animation clip
                             foreach (TimelineClip timeLineClip in at.GetClips()) {
-                                string filePath = folderPath + "/" + atObject.name + "@" + timeLineClip.animationClip.name + ".fbx";
+                                string filePath = string.Format(AnimFbxFileFormat, folderPath, atObject.name, timeLineClip.animationClip.name);
                                 UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timeLineClip.animationClip };
                                 ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
 
