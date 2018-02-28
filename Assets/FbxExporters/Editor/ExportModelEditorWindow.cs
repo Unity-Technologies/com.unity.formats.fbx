@@ -48,26 +48,22 @@ namespace FbxExporters
                     "Export Path:",
                     "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
 
-                var pathLabel = ExportSettings.GetRelativeSavePath();
-                if (pathLabel == ".") { pathLabel = "(Assets root)"; }
-                EditorGUILayout.SelectableLabel(pathLabel,
-                    EditorStyles.textField,
-                    GUILayout.MinWidth(SelectableLabelMinWidth),
-                    GUILayout.Height(EditorGUIUtility.singleLineHeight));            
+                var pathLabels = ExportSettings.GetRelativeSavePaths();
+                for(int i = 0; i < pathLabels.Length; i++){
+                    if (pathLabels[i] == ".") {
+                        pathLabels[i] = "(Assets root)";
+                        break; // no duplicate paths so safe to break
+                    }
+                }
+
+                ExportSettings.instance.selectedExportModelPath = EditorGUILayout.Popup (ExportSettings.instance.selectedExportModelPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
                 if (GUILayout.Button(new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
                 {
-                    string initialPath = ExportSettings.GetAbsoluteSavePath();
-
-                    // if the directory doesn't exist, set it to the default save path
-                    // so we don't open somewhere unexpected
-                    if (!System.IO.Directory.Exists(initialPath))
-                    {
-                        initialPath = Application.dataPath;
-                    }
+                    string initialPath = Application.dataPath;
 
                     string fullPath = EditorUtility.OpenFolderPanel(
-                        "Select Model Prefabs Path", initialPath, null
+                        "Select Export Model Path", initialPath, null
                     );
 
                     // Unless the user canceled, make sure they chose something in the Assets folder.
@@ -80,7 +76,7 @@ namespace FbxExporters
                         }
                         else
                         {
-                            ExportSettings.SetRelativeSavePath(relativePath);
+                            ExportSettings.AddExportModelSavePath(relativePath);
 
                             // Make sure focus is removed from the selectable label
                             // otherwise it won't update
@@ -113,7 +109,9 @@ namespace FbxExporters
                 }
 
                 if (GUILayout.Button ("Export")) {
-                    var filePath = ExportSettings.GetAbsoluteSavePath();
+                    var filePath = ExportSettings.GetExportModelAbsoluteSavePath ();
+                    ExportSettings.AddExportModelSavePath(filePath);
+
                     filePath = System.IO.Path.Combine (filePath, m_exportFileName);
 
                     // check if file already exists, give a warning if it does
@@ -124,6 +122,11 @@ namespace FbxExporters
                                         "Overwrite", "Cancel");
                         if (!overwrite) {
                             this.Close ();
+
+                            if (GUI.changed) {
+                                EditorUtility.SetDirty (ExportSettings.instance);
+                                ExportSettings.instance.Save ();
+                            }
                             return;
                         }
                     }
@@ -136,6 +139,11 @@ namespace FbxExporters
                     this.Close ();
                 }
                 GUILayout.EndHorizontal ();
+
+                if (GUI.changed) {
+                    EditorUtility.SetDirty (ExportSettings.instance);
+                    ExportSettings.instance.Save ();
+                }
             }
         }
     }

@@ -469,6 +469,12 @@ namespace FbxExporters.EditorTools {
         [SerializeField]
         string convertToModelSavePath;
 
+        [SerializeField]
+        private List<string> exportModelSavePaths = new List<string> ();
+
+        public int selectedExportModelPath = 0;
+        private int maxStoredSavePaths = 5;
+
         // List of names in order that they appear in option list
         [SerializeField]
         private List<string> dccOptionNames = new List<string>();
@@ -485,6 +491,7 @@ namespace FbxExporters.EditorTools {
             HideSendToUnityMenu = true;
             ExportFormatSelection = 0;
             convertToModelSavePath = kDefaultSavePath;
+            exportModelSavePaths = new List<string> (){ kDefaultSavePath };
             IntegrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
@@ -978,16 +985,56 @@ namespace FbxExporters.EditorTools {
             return NormalizePath(relativePath, isRelative: true);
         }
 
+        public static string[] GetRelativeSavePaths(){
+            var exportSavePaths = instance.exportModelSavePaths;
+            if (exportSavePaths.Count == 0) {
+                exportSavePaths.Add (kDefaultSavePath);
+            }
+            string[] relSavePaths = new string[exportSavePaths.Count];
+            for (int i = 0; i < relSavePaths.Length; i++) {
+                relSavePaths [i] = string.Format("Assets\\{0}", exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", "\\"));
+            }
+            return relSavePaths;
+        }
+
+        public static void AddExportModelSavePath(string savePath){
+            savePath = ConvertToAssetRelativePath (savePath);
+            var exportSavePaths = instance.exportModelSavePaths;
+            if (exportSavePaths.Contains (savePath)) {
+                // move to first place if it isn't already
+                if (exportSavePaths [0] == savePath) {
+                    return;
+                }
+                exportSavePaths.Remove (savePath);
+            }
+
+            if (exportSavePaths.Count >= instance.maxStoredSavePaths) {
+                // remove last used path
+                exportSavePaths.RemoveAt(exportSavePaths.Count-1);
+            }
+
+            exportSavePaths.Insert (0, savePath);
+            instance.selectedExportModelPath = 0;
+        }
+
+        public static string GetAbsoluteSavePath(string relativePath){
+            var absolutePath = Path.Combine(Application.dataPath, relativePath);
+            return NormalizePath(absolutePath, isRelative: false,
+                separator: Path.DirectorySeparatorChar);
+        }
+
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
         /// This is an absolute path, with platform separators.
         /// </summary>
         public static string GetAbsoluteSavePath() {
-            var relativePath = GetRelativeSavePath();
-            var absolutePath = Path.Combine(Application.dataPath, relativePath);
-            return NormalizePath(absolutePath, isRelative: false,
-                    separator: Path.DirectorySeparatorChar);
+            return GetAbsoluteSavePath (GetRelativeSavePath ());
         }
+
+        public static string GetExportModelAbsoluteSavePath(){
+            return GetAbsoluteSavePath (instance.exportModelSavePaths [instance.selectedExportModelPath]);
+        }
+
 
         /// <summary>
         /// Set the path where Convert To Model will save the new fbx and prefab.
