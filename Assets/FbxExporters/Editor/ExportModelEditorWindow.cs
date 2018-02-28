@@ -19,6 +19,8 @@ namespace FbxExporters
             private string m_exportFileName = "";
             private ModelExporter.AnimationExportType m_animExportType = ModelExporter.AnimationExportType.all;
 
+            private UnityEditor.Editor innerEditor;
+
             public static void Init (string filename = "", ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all)
             {
                 ExportModelEditorWindow window = (ExportModelEditorWindow)EditorWindow.GetWindow <ExportModelEditorWindow>(WindowTitle, focus:true);
@@ -99,6 +101,17 @@ namespace FbxExporters
                 }
                 m_exportFileName = ModelExporter.ConvertToValidFilename(m_exportFileName);
                 GUILayout.EndHorizontal ();
+
+                if (!innerEditor) {
+                    var ms = ExportSettings.instance.exportModelSettings;
+                    if (!ms) {
+                        ExportSettings.LoadSettings ();
+                        ms = ExportSettings.instance.exportModelSettings;
+                    }
+                    innerEditor = UnityEditor.Editor.CreateEditor (ms, editorType: typeof(ExportModelSettingsEditor));
+                }
+                innerEditor.DrawHeader ();
+                innerEditor.OnInspectorGUI ();
 
                 GUILayout.FlexibleSpace ();
 

@@ -482,6 +482,12 @@ namespace FbxExporters.EditorTools {
         [SerializeField]
         private List<string> dccOptionPaths;
 
+        [System.NonSerialized]
+        public ExportModelSettings exportModelSettings;
+
+        [SerializeField]
+        private ExportModelSettingsSerialize exportModelSettingsSerialize;
+
         protected override void LoadDefaults()
         {
             mayaCompatibleNames = true;
@@ -1224,11 +1230,20 @@ namespace FbxExporters.EditorTools {
         {
             instance.name = "Fbx Export Settings";
             Selection.activeObject = instance;
+            LoadSettings ();
+        }
+
+        public static void LoadSettings(){
             instance.Load();
+            if (!instance.exportModelSettings) {
+                instance.exportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
+            }
+            instance.exportModelSettings.info = instance.exportModelSettingsSerialize;
         }
 
         public void Save()
         {
+            exportModelSettingsSerialize = exportModelSettings.info;
             instance.Save (true);
         }
     }
