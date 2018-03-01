@@ -13,12 +13,25 @@ namespace FbxExporters.EditorTools
         {
             var exportSettings = ((ExportModelSettings)target).info;
 
-            //exportSettings.info.test = EditorGUILayout.TextField (exportSettings.info.test);
-
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
             exportSettings.exportFormat = (ExportModelSettingsSerialize.ExportFormat)EditorGUILayout.Popup((int)exportSettings.exportFormat, new string[]{ "ASCII", "Binary" });
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Include:", "Select whether to export models, animation or both."), GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.include = (ExportModelSettingsSerialize.Include)EditorGUILayout.Popup((int)exportSettings.include, new string[]{"Model(s) Only", "Animation Only", "Model(s) + Animation"});
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("LOD level:", "Select which LOD to export."), GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.lodLevel = (ExportSettings.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodLevel, new string[]{"All", "Highest", "Lowest"});
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Object(s) Position:", "Select an option for exporting object's transform."), GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.objectPosition = (ExportModelSettingsSerialize.ObjectPosition)EditorGUILayout.Popup((int)exportSettings.objectPosition, new string[]{"Local Centered", "World Absolute", "Local Pivot"});
             GUILayout.EndHorizontal();
         }
     }
