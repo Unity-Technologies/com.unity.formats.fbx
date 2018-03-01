@@ -1004,7 +1004,6 @@ namespace FbxExporters.EditorTools {
         }
 
         public static void AddExportModelSavePath(string savePath){
-            savePath = ConvertToAssetRelativePath (savePath);
             var exportSavePaths = instance.exportModelSavePaths;
             if (exportSavePaths.Contains (savePath)) {
                 // move to first place if it isn't already

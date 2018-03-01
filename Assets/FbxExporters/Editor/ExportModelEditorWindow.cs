@@ -21,8 +21,17 @@ namespace FbxExporters
             private ModelExporter.AnimationExportType m_animExportType = ModelExporter.AnimationExportType.all;
 
             private UnityEditor.Editor innerEditor;
-
             private static FbxExportPresetSelectorReceiver receiver;
+
+            private static GUIContent presetIcon { get { return EditorGUIUtility.IconContent ("Preset.Context"); }}
+            private static GUIStyle presetIconButton { get { return new GUIStyle("IconButton"); }}
+
+            private bool showOptions;
+
+            void OnEnable(){
+                InitializeReceiver ();
+                showOptions = true;
+            }
 
             public static void Init (string filename = "", ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all)
             {
@@ -30,9 +39,6 @@ namespace FbxExporters
                 window.SetFilename (filename);
                 window.SetAnimationExportType (exportType);
                 window.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, 100);
-
-                window.InitializeReceiver ();
-
                 window.Show ();
             }
 
@@ -71,24 +77,47 @@ namespace FbxExporters
                 // Increasing the label width so that none of the text gets cut off
                 EditorGUIUtility.labelWidth = LabelWidth;
 
-                EditorGUILayout.LabelField("Naming", EditorStyles.boldLabel);
+                GUILayout.BeginHorizontal ();
+                GUILayout.FlexibleSpace ();
+                if(EditorGUILayout.DropdownButton(presetIcon, FocusType.Keyboard, presetIconButton)){
+                    InitializeReceiver ();
+                    receiver.SetTarget(ExportSettings.instance.exportModelSettings);
+                    receiver.SetInitialValue (new Preset (ExportSettings.instance.exportModelSettings));
+                    UnityEditor.Presets.PresetSelector.ShowSelector(ExportSettings.instance.exportModelSettings, null, true, receiver);
+                }
+                GUILayout.EndHorizontal();
+
+                EditorGUILayout.LabelField("Naming");
                 EditorGUI.indentLevel++;
+
+                GUILayout.BeginHorizontal ();
+                EditorGUILayout.LabelField(new GUIContent(
+                    "Export Name:",
+                    "Filename to save model to."),GUILayout.Width(LabelWidth - FieldOffset));
+
+                m_exportFileName = EditorGUILayout.TextField (m_exportFileName);
+                if (!m_exportFileName.EndsWith (".fbx")) {
+                    m_exportFileName += ".fbx";
+                }
+                m_exportFileName = ModelExporter.ConvertToValidFilename(m_exportFileName);
+                GUILayout.EndHorizontal ();
+
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField(new GUIContent(
                     "Export Path:",
                     "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
 
                 var pathLabels = ExportSettings.GetRelativeSavePaths();
-                for(int i = 0; i < pathLabels.Length; i++){
+                /*for(int i = 0; i < pathLabels.Length; i++){
                     if (pathLabels[i] == ".") {
                         pathLabels[i] = "(Assets root)";
                         break; // no duplicate paths so safe to break
                     }
-                }
+                }*/
 
                 ExportSettings.instance.selectedExportModelPath = EditorGUILayout.Popup (ExportSettings.instance.selectedExportModelPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
-                if (GUILayout.Button(new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
+                if (GUILayout.Button(new GUIContent("...", "Browse to a new location to export to"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
                 {
                     string initialPath = Application.dataPath;
 
@@ -115,37 +144,22 @@ namespace FbxExporters
                         }
                     }
                 }
-
                 GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal ();
-                EditorGUILayout.LabelField(new GUIContent(
-                    "Export Name:",
-                    "Filename to save model to."),GUILayout.Width(LabelWidth - FieldOffset));
-
-                m_exportFileName = EditorGUILayout.TextField (m_exportFileName);
-                if (!m_exportFileName.EndsWith (".fbx")) {
-                    m_exportFileName += ".fbx";
-                }
-                m_exportFileName = ModelExporter.ConvertToValidFilename(m_exportFileName);
-                GUILayout.EndHorizontal ();
-
-                if (!innerEditor) {
-                    var ms = ExportSettings.instance.exportModelSettings;
-                    if (!ms) {
-                        ExportSettings.LoadSettings ();
-                        ms = ExportSettings.instance.exportModelSettings;
+                EditorGUILayout.Space ();
+                EditorGUI.indentLevel--;
+                showOptions = EditorGUILayout.Foldout (showOptions, "Options");
+                EditorGUI.indentLevel++;
+                if (showOptions) {
+                    if (!innerEditor) {
+                        var ms = ExportSettings.instance.exportModelSettings;
+                        if (!ms) {
+                            ExportSettings.LoadSettings ();
+                            ms = ExportSettings.instance.exportModelSettings;
+                        }
+                        innerEditor = UnityEditor.Editor.CreateEditor (ms, editorType: typeof(ExportModelSettingsEditor));
                     }
-                    innerEditor = UnityEditor.Editor.CreateEditor (ms, editorType: typeof(ExportModelSettingsEditor));
-                }
-                //innerEditor.DrawHeader ();
-                innerEditor.OnInspectorGUI ();
-
-                if (GUILayout.Button ("select preset")) {
-                    InitializeReceiver ();
-                    receiver.SetTarget(ExportSettings.instance.exportModelSettings);
-                    receiver.SetInitialValue (new Preset (ExportSettings.instance.exportModelSettings));
-                    UnityEditor.Presets.PresetSelector.ShowSelector(ExportSettings.instance.exportModelSettings, null, true, receiver);
+                    innerEditor.OnInspectorGUI ();
                 }
 
                 GUILayout.FlexibleSpace ();
@@ -158,7 +172,6 @@ namespace FbxExporters
 
                 if (GUILayout.Button ("Export")) {
                     var filePath = ExportSettings.GetExportModelAbsoluteSavePath ();
-                    ExportSettings.AddExportModelSavePath(filePath);
 
                     filePath = System.IO.Path.Combine (filePath, m_exportFileName);
 
