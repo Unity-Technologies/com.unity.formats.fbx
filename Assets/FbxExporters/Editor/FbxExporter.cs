@@ -2974,8 +2974,12 @@ namespace FbxExporters
                         var editorClipAnimationTrack = GetPropertyFromObject<AnimationTrack> (selClipItem, "parentTrack");
 
                         GameObject animationTrackGObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (editorClipAnimationTrack) as GameObject;
-
-                        string filePath = string.Format(AnimFbxFileFormat, folderPath, animationTrackGObject.name, timeLineClip.displayName);
+                        string AnimFbxFormat = AnimFbxFileFormat;
+                        if (timeLineClip.displayName.Contains("@"))
+                        {
+                            AnimFbxFormat = "{0}/{2}.fbx";
+                        }
+                        string filePath = string.Format(AnimFbxFormat, folderPath, animationTrackGObject.name, timeLineClip.displayName);
                         UnityEngine.Object[] myArray = new UnityEngine.Object[] { animationTrackGObject, timeLineClip.animationClip };
 
                         ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
@@ -3035,7 +3039,12 @@ namespace FbxExporters
                             GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
                             // One file by animation clip
                             foreach (TimelineClip timeLineClip in at.GetClips()) {
-                                string filePath = string.Format(AnimFbxFileFormat, folderPath, atObject.name, timeLineClip.animationClip.name);
+                                string AnimFbxFormat = AnimFbxFileFormat;
+                                if (timeLineClip.displayName.Contains("@"))
+                                {
+                                    AnimFbxFormat = "{0}/{2}.fbx";
+                                }
+                                string filePath = string.Format(AnimFbxFormat, folderPath, atObject.name, timeLineClip.displayName);
                                 UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timeLineClip.animationClip };
                                 ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
 
