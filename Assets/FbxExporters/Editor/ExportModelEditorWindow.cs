@@ -15,7 +15,7 @@ namespace FbxExporters
             private const string WindowTitle = "Export Options";
             private const float SelectableLabelMinWidth = 90;
             private const float BrowseButtonWidth = 25;
-            private const float LabelWidth = 144;
+            private const float LabelWidth = 175;
             private const float FieldOffset = 18;
             private string m_exportFileName = "";
             private ModelExporter.AnimationExportType m_animExportType = ModelExporter.AnimationExportType.all;
@@ -31,6 +31,7 @@ namespace FbxExporters
             void OnEnable(){
                 InitializeReceiver ();
                 showOptions = true;
+                this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, 220);
             }
 
             public static void Init (string filename = "", ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all)
@@ -38,7 +39,6 @@ namespace FbxExporters
                 ExportModelEditorWindow window = (ExportModelEditorWindow)EditorWindow.GetWindow <ExportModelEditorWindow>(WindowTitle, focus:true);
                 window.SetFilename (filename);
                 window.SetAnimationExportType (exportType);
-                window.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, 100);
                 window.Show ();
             }
 
@@ -166,11 +166,11 @@ namespace FbxExporters
 
                 GUILayout.BeginHorizontal ();
                 GUILayout.FlexibleSpace ();
-                if (GUILayout.Button ("Cancel")) {
+                if (GUILayout.Button ("Cancel", GUILayout.Width(100))) {
                     this.Close ();
                 }
 
-                if (GUILayout.Button ("Export")) {
+                if (GUILayout.Button ("Export", GUILayout.Width(100))) {
                     var filePath = ExportSettings.GetExportModelAbsoluteSavePath ();
 
                     filePath = System.IO.Path.Combine (filePath, m_exportFileName);
