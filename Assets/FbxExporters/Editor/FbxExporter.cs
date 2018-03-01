@@ -88,7 +88,7 @@ namespace FbxExporters
 
             const string AnimOnlyMenuItemName = "GameObject/Export Animation Only";
 
-            const string FileBaseName = "Untitled";
+            public const string FileBaseName = "Untitled";
 
             const string ProgressBarTitle = "Fbx Export";
 
@@ -3543,11 +3543,12 @@ namespace FbxExporters
             /// <summary>
             /// manage the selection of a filename
             /// </summary>
-            static string LastFilePath { get; set; }
+            public static string LastFilePath { get; set; }
             private string m_tempFilePath { get; set; }
             private string m_lastFilePath { get; set; }
 
-            const string Extension = "fbx";
+            public const string Extension = "fbx";
+            public const string PrefabExtension = "prefab";
 			
             public enum AnimationExportType{
                 timelineAnimationClip,
@@ -3557,7 +3558,7 @@ namespace FbxExporters
             }
 
 
-            private static string MakeFileName (string basename = "test", string extension = "fbx")
+            public static string MakeFileName (string basename = "test", string extension = "fbx")
             {
                 return basename + "." + extension;
             }

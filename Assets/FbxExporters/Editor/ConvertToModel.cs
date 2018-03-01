@@ -12,6 +12,7 @@ namespace FbxExporters
         public static class ConvertToModel
         {
             const string MenuItemName1 = "GameObject/Convert To Linked Prefab Instance";
+            const string MenuItemName2 = "Assets/Convert To Linked Prefab Instance";
 
             /// <summary>
             /// OnContextItem is called either:
@@ -25,25 +26,7 @@ namespace FbxExporters
             [MenuItem (MenuItemName1, false, 30)]
             static void OnContextItem (MenuCommand command)
             {
-                GameObject [] selection = null;
-
-                if (command == null || command.context == null) {
-                    // We were actually invoked from the top GameObject menu, so use the selection.
-                    selection = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
-                } else {
-                    // We were invoked from the right-click menu, so use the context of the context menu.
-                    var selected = command.context as GameObject;
-                    if (selected) {
-                        selection = new GameObject[] { selected };
-                    }
-                }
-
-                if (selection == null || selection.Length == 0) {
-                    ModelExporter.DisplayNoSelectionDialog ();
-                    return;
-                }
-
-                Selection.objects = CreateInstantiatedModelPrefab (selection);
+                ConvertToLinkedPrefab(false);
             }
 
             /// <summary>
@@ -51,6 +34,66 @@ namespace FbxExporters
             /// </summary>
             [MenuItem (MenuItemName1, true, 30)]
             public static bool OnValidateMenuItem ()
+            {
+                return true;
+            }
+
+
+            /// <summary>
+            /// OnContextItem is called either:
+            /// * when the user selects the menu item via the top menu (with a null MenuCommand), or
+            /// * when the user selects the menu item via the context menu (in which case there's a context)
+            ///
+            /// OnContextItem gets called once per selected object (if the
+            /// parent and child are selected, then OnContextItem will only be
+            /// called on the parent)
+            /// </summary>
+            [MenuItem (MenuItemName2, false, 30)]
+            static void AssetOnContextItem ()
+            {
+                ConvertToLinkedPrefab(true);
+            }
+
+            static void ConvertToLinkedPrefab(bool isProjectView = false)
+            {
+                // Now that we know we have stuff to export, get the user-desired path.
+                /*string directory = string.IsNullOrEmpty (ModelExporter.LastFilePath)
+                                      ? Application.dataPath
+                                      : System.IO.Path.GetDirectoryName (ModelExporter.LastFilePath);*/
+                string directory = Application.dataPath;
+                string filename = ModelExporter.MakeFileName (basename: ModelExporter.FileBaseName, extension: ModelExporter.PrefabExtension);
+
+                var title = string.Format ("Convert to Linked Prefab ({0})", ModelExporter.FileBaseName);
+
+                var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "prefab");
+
+                if (string.IsNullOrEmpty (filePath)) {
+                    return;
+                }
+
+                Object[] selection = Selection.objects;
+
+                if (selection == null || selection.Length == 0)
+                {
+                    return;
+                }
+
+                foreach (Object obj in selection)
+                {
+                    GameObject selected = obj as GameObject;
+                    if (selected)
+                    {
+                        GameObject[] selectedGameObject = new GameObject[] { selected };
+                        Selection.objects = CreateInstantiatedModelPrefab (selectedGameObject, isProjectView: isProjectView, destinationPath: filePath);
+                    }
+                }
+            }
+
+            /// <summary>
+            // Validate the menu item defined by the function above.
+            /// </summary>
+            [MenuItem (MenuItemName2, true, 30)]
+            public static bool OnValidateAssetMenuItem ()
             {
                 return true;
             }
@@ -71,10 +114,10 @@ namespace FbxExporters
             /// </summary>
             /// <returns>list of instanced Model Prefabs</returns>
             /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
-            /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
+            /// <param name="directoryFullPath">Path to save Model Prefab; use FbxExportSettings if null</param>
             public static GameObject[] CreateInstantiatedModelPrefab (
                 GameObject [] unityGameObjectsToConvert,
-                string directoryFullPath = null)
+                string directoryFullPath = null, bool isProjectView = false, string destinationPath = null)
             {
                 if (directoryFullPath == null) {
                     directoryFullPath = FbxExporters.EditorTools.ExportSettings.GetAbsoluteSavePath();
@@ -86,8 +129,7 @@ namespace FbxExporters
                 var wasExported = new List<GameObject>();
                 foreach(var go in toExport) {
                     try {
-                        wasExported.Add(Convert(go,
-                            directoryFullPath: directoryFullPath));
+                        wasExported.Add(Convert(go, directoryFullPath: directoryFullPath, isProjectView: isProjectView, destinationPath: destinationPath));
                     } catch(System.Exception xcp) {
                         Debug.LogException(xcp);
                     }
@@ -115,7 +157,7 @@ namespace FbxExporters
             public static GameObject Convert (
                 GameObject toConvert,
                 string directoryFullPath = null,
-                string fbxFullPath = null)
+                string fbxFullPath = null, bool isProjectView = false, string destinationPath = null)
             {
                 // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
                 // Children of model prefab instances will also have "model prefab instance"
@@ -132,9 +174,9 @@ namespace FbxExporters
                 if (unityPrefabType == PrefabType.ModelPrefabInstance && toConvert.Equals(PrefabUtility.FindPrefabRoot(toConvert))) {
                     // don't re-export fbx
                     // create prefab out of model instance in scene, link to existing fbx
-                    var mainAsset = PrefabUtility.GetPrefabParent(toConvert) as GameObject;
-                    var mainAssetRelPath = AssetDatabase.GetAssetPath(mainAsset);
-                    var mainAssetAbsPath = Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
+                    GameObject mainAsset = PrefabUtility.GetPrefabParent(toConvert) as GameObject;
+                    string mainAssetRelPath = AssetDatabase.GetAssetPath(mainAsset);
+                    string mainAssetAbsPath = Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
                     SetupFbxPrefab(toConvert, mainAsset, mainAssetRelPath, mainAssetAbsPath);
 
                     return toConvert;
@@ -147,15 +189,15 @@ namespace FbxExporters
                     } else {
                         directoryFullPath = Path.GetFullPath (directoryFullPath);
                     }
-                    var fbxBasename = ModelExporter.ConvertToValidFilename (toConvert.name + ".fbx");
+                    string fbxBasename = ModelExporter.ConvertToValidFilename (toConvert.name + ".fbx");
 
                     fbxFullPath = Path.Combine (directoryFullPath, fbxBasename);
-                    if (File.Exists (fbxFullPath)) {
+                    if (File.Exists (fbxFullPath) && !isProjectView) {
                         fbxFullPath = IncrementFileName (directoryFullPath, fbxFullPath);
                     }
                 }
-                var assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFullPath);
-                var projectRelativePath = "Assets/" + assetRelativePath;
+                string assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFullPath);
+                string projectRelativePath = "Assets/" + assetRelativePath;
                 if (string.IsNullOrEmpty(assetRelativePath)) {
                     throw new System.Exception("Path " + fbxFullPath + " must be in the Assets folder.");
                 }
@@ -164,11 +206,15 @@ namespace FbxExporters
                 // The import back in to Unity would do this automatically but
                 // we prefer to control it so that the Maya artist can see the
                 // same names as exist in Unity.
-                EnforceUniqueNames (new GameObject[] {toConvert});
+                if (!isProjectView)
+                {
+                    EnforceUniqueNames (new GameObject[] {toConvert});
+                }
 
                 // Export to FBX. It refreshes the database.
+                if (!isProjectView)
                 {
-                    var fbxActualPath = ModelExporter.ExportObject (fbxFullPath, toConvert, lodExportType: EditorTools.ExportSettings.LODExportType.All);
+                    string fbxActualPath = ModelExporter.ExportObject (fbxFullPath, toConvert, lodExportType: EditorTools.ExportSettings.LODExportType.All);
                     if (fbxActualPath != fbxFullPath) {
                         throw new System.Exception ("Failed to convert " + toConvert.name);
                     }
@@ -176,7 +222,7 @@ namespace FbxExporters
 
                 // Replace w Model asset. LoadMainAssetAtPath wants a path
                 // relative to the project, not relative to the assets folder.
-                var unityMainAsset = AssetDatabase.LoadMainAssetAtPath (projectRelativePath) as GameObject;
+                GameObject unityMainAsset = AssetDatabase.LoadMainAssetAtPath (projectRelativePath) as GameObject;
                 if (!unityMainAsset) {
                     throw new System.Exception ("Failed to convert " + toConvert.name);
                 }
@@ -184,7 +230,7 @@ namespace FbxExporters
                 // Copy the mesh/materials from the FBX
                 UpdateFromSourceRecursive (toConvert, unityMainAsset);
 
-                SetupFbxPrefab (toConvert, unityMainAsset, projectRelativePath, fbxFullPath);
+                SetupFbxPrefab (toConvert, unityMainAsset, projectRelativePath, fbxFullPath, isProjectView, destinationPath: destinationPath);
 
                 toConvert.name = Path.GetFileNameWithoutExtension (fbxFullPath);
                 return toConvert;
@@ -198,24 +244,43 @@ namespace FbxExporters
             /// <param name="unityMainAsset">Main asset in the FBX.</param>
             /// <param name="projectRelativePath">Fbx project relative path.</param>
             /// <param name="fbxFullPath">Fbx full path.</param>
-            public static void SetupFbxPrefab(GameObject toConvert, GameObject unityMainAsset, string projectRelativePath, string fbxFullPath){
+            public static void SetupFbxPrefab(GameObject toConvert, GameObject unityMainAsset, string projectRelativePath, string fbxFullPath, bool isProjectView = false, string destinationPath = null){
                 // Set up the FbxPrefab component so it will auto-update.
                 // Make sure to delete whatever FbxPrefab history we had.
-                var fbxPrefab = toConvert.GetComponent<FbxPrefab>();
-                if (fbxPrefab) {
-                    Object.DestroyImmediate(fbxPrefab);
+                if (!isProjectView)
+                {
+                    FbxPrefab fbxPrefab = toConvert.GetComponent<FbxPrefab>();
+                    if (fbxPrefab) {
+                        Object.DestroyImmediate(fbxPrefab);
+                    }
+                    fbxPrefab = toConvert.AddComponent<FbxPrefab>();
+                    FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
+                    fbxPrefabUtility.SetSourceModel(unityMainAsset);
                 }
-                fbxPrefab = toConvert.AddComponent<FbxPrefab>();
-                var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
-                fbxPrefabUtility.SetSourceModel(unityMainAsset);
-
                 // Create a prefab from the instantiated and componentized unityGO.
-                var prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");
-                var prefab = PrefabUtility.CreatePrefab(prefabFileName, toConvert, ReplacePrefabOptions.ConnectToPrefab);
+                string prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");
+                
+                if (destinationPath != null)
+                {
+                    string assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(destinationPath);
+                    prefabFileName = "Assets/" + assetRelativePath;
+                }
+                GameObject prefab = PrefabUtility.CreatePrefab(prefabFileName, toConvert, ReplacePrefabOptions.ConnectToPrefab);
                 if (!prefab) {
                     throw new System.Exception(
                         string.Format("Failed to create prefab asset in [{0}] from fbx [{1}]",
                             prefabFileName, fbxFullPath));
+                }
+
+                if (isProjectView)
+                {
+                    FbxPrefab fbxPrefab = prefab.GetComponent<FbxPrefab>();
+                    if (fbxPrefab) {
+                        Object.DestroyImmediate(fbxPrefab);
+                    }
+                    fbxPrefab = prefab.AddComponent<FbxPrefab>();
+                    FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
+                    fbxPrefabUtility.SetSourceModel(unityMainAsset);
                 }
             }
 
