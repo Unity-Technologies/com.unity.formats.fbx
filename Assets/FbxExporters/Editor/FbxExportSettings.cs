@@ -56,10 +56,10 @@ namespace FbxExporters.EditorTools {
                 exportSettings.autoUpdaterEnabled
             );
 
-            exportSettings.exportMeshColliders = EditorGUILayout.Toggle(
-                new GUIContent("Export Mesh Colliders:",
+            exportSettings.exportMeshNoRenderer = EditorGUILayout.Toggle(
+                new GUIContent("Export Meshes with no Renderers:",
                     "If unchecked, meshes that don't have renderers won't be exported."),
-                exportSettings.exportMeshColliders
+                exportSettings.exportMeshNoRenderer
             );
 
             GUILayout.BeginHorizontal();
@@ -448,7 +448,7 @@ namespace FbxExporters.EditorTools {
         public bool HideSendToUnityMenu = true;
         public int ExportFormatSelection;
         public bool BakeAnimation = true;
-        public bool exportMeshColliders = false;
+        public bool exportMeshNoRenderer = false;
 
         public string IntegrationSavePath;
 
