@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using FbxExporters.EditorTools;
+using UnityEditor.Presets;
 
 namespace FbxExporters
 {
@@ -21,13 +22,28 @@ namespace FbxExporters
 
             private UnityEditor.Editor innerEditor;
 
+            private static FbxExportPresetSelectorReceiver receiver;
+
             public static void Init (string filename = "", ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all)
             {
                 ExportModelEditorWindow window = (ExportModelEditorWindow)EditorWindow.GetWindow <ExportModelEditorWindow>(WindowTitle, focus:true);
                 window.SetFilename (filename);
                 window.SetAnimationExportType (exportType);
                 window.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, 100);
+
+                window.InitializeReceiver ();
+
                 window.Show ();
+            }
+
+            private void InitializeReceiver(){
+                if (!receiver) {
+                    receiver = ScriptableObject.CreateInstance<FbxExportPresetSelectorReceiver> () as FbxExportPresetSelectorReceiver;
+                    receiver.SelectionChanged -= OnPresetSelectionChanged;
+                    receiver.SelectionChanged += OnPresetSelectionChanged;
+                    receiver.DialogClosed -= OnPresetDialogClosed;
+                    receiver.DialogClosed += OnPresetDialogClosed;
+                }
             }
 
             public void SetFilename(string filename){
@@ -36,6 +52,18 @@ namespace FbxExporters
 
             public void SetAnimationExportType(ModelExporter.AnimationExportType exportType){
                 m_animExportType = exportType;
+            }
+
+            public void OnPresetDialogClosed()
+            {
+                // save once preset selection is finished
+                EditorUtility.SetDirty (ExportSettings.instance);
+                ExportSettings.instance.Save ();
+            }
+
+            public void OnPresetSelectionChanged()
+            {
+                this.Repaint ();
             }
 
             void OnGUI ()
@@ -110,8 +138,15 @@ namespace FbxExporters
                     }
                     innerEditor = UnityEditor.Editor.CreateEditor (ms, editorType: typeof(ExportModelSettingsEditor));
                 }
-                innerEditor.DrawHeader ();
+                //innerEditor.DrawHeader ();
                 innerEditor.OnInspectorGUI ();
+
+                if (GUILayout.Button ("select preset")) {
+                    InitializeReceiver ();
+                    receiver.SetTarget(ExportSettings.instance.exportModelSettings);
+                    receiver.SetInitialValue (new Preset (ExportSettings.instance.exportModelSettings));
+                    UnityEditor.Presets.PresetSelector.ShowSelector(ExportSettings.instance.exportModelSettings, null, true, receiver);
+                }
 
                 GUILayout.FlexibleSpace ();
 
