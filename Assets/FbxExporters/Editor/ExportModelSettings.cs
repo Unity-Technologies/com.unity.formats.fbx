@@ -26,6 +26,8 @@ namespace FbxExporters.EditorTools
             exportSettings.include = (ExportModelSettingsSerialize.Include)EditorGUILayout.Popup((int)exportSettings.include, new string[]{"Model(s) Only", "Animation Only", "Model(s) + Animation"});
             GUILayout.EndHorizontal();
 
+            // greyed out if animation only
+            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("LOD level", "Select which LOD to export."), GUILayout.Width(LabelWidth - FieldOffset));
             exportSettings.lodLevel = (ExportSettings.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodLevel, new string[]{"All", "Highest", "Lowest"});
@@ -35,6 +37,7 @@ namespace FbxExporters.EditorTools
             EditorGUILayout.LabelField(new GUIContent("Object(s) Position", "Select an option for exporting object's transform."), GUILayout.Width(LabelWidth - FieldOffset));
             exportSettings.objectPosition = (ExportModelSettingsSerialize.ObjectPosition)EditorGUILayout.Popup((int)exportSettings.objectPosition, new string[]{"Local Centered", "World Absolute", "Local Pivot"});
             GUILayout.EndHorizontal();
+            EditorGUI.EndDisabledGroup ();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Transfer Root Motion To", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
