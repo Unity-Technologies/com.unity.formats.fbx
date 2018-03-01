@@ -57,9 +57,6 @@ namespace FbxExporters
             static void ConvertToLinkedPrefab(bool isProjectView = false)
             {
                 // Now that we know we have stuff to export, get the user-desired path.
-                /*string directory = string.IsNullOrEmpty (ModelExporter.LastFilePath)
-                                      ? Application.dataPath
-                                      : System.IO.Path.GetDirectoryName (ModelExporter.LastFilePath);*/
                 string directory = Application.dataPath;
                 string filename = ModelExporter.MakeFileName (basename: ModelExporter.FileBaseName, extension: ModelExporter.PrefabExtension);
 
