@@ -3539,7 +3539,7 @@ namespace FbxExporters
             private string m_tempFilePath { get; set; }
             private string m_lastFilePath { get; set; }
 
-            const string Extension = "fbx";
+            const string kFBXFileExtension = "fbx";
 			
             public enum AnimationExportType{
                 timelineAnimationClip,
@@ -3549,7 +3549,7 @@ namespace FbxExporters
             }
 
 
-            private static string MakeFileName (string basename = "test", string extension = "fbx")
+            private static string MakeFileName (string basename = "test", string extension = kFBXFileExtension)
             {
                 return basename + "." + extension;
             }
@@ -3560,11 +3560,9 @@ namespace FbxExporters
                     ? Application.dataPath
                     : System.IO.Path.GetDirectoryName (LastFilePath);
 
-                var title = string.Format ("Export Model FBX ({0})", FileBaseName);
+                var title = string.Format ("Export To FBX ({0})", FileBaseName);
 
-                var filePath = EditorUtility.SaveFilePanel (title, directory, filenameSuggestion, "fbx");
-
-                return filePath;
+                return EditorUtility.SaveFilePanel (title, directory, filenameSuggestion, kFBXFileExtension);
             }
 
             private static void OnExport (AnimationExportType exportType = AnimationExportType.all)
@@ -3574,10 +3572,10 @@ namespace FbxExporters
                 GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
                 string filename = null;
                 if (selectedGOs.Length == 1) {
-                    filename = ConvertToValidFilename (selectedGOs [0].name + ".fbx");
+                    filename = ConvertToValidFilename (selectedGOs [0].name + "." + kFBXFileExtension);
                 } else {
                     filename = string.IsNullOrEmpty (LastFilePath)
-                        ? MakeFileName (basename: FileBaseName, extension: Extension)
+                        ? MakeFileName (basename: FileBaseName, extension: kFBXFileExtension)
                         : System.IO.Path.GetFileName (LastFilePath);
                 }
 
