@@ -32,6 +32,15 @@ namespace FbxExporters
                 InitializeReceiver ();
                 showOptions = true;
                 this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, 220);
+
+                if (!innerEditor) {
+                    var ms = ExportSettings.instance.exportModelSettings;
+                    if (!ms) {
+                        ExportSettings.LoadSettings ();
+                        ms = ExportSettings.instance.exportModelSettings;
+                    }
+                    innerEditor = UnityEditor.Editor.CreateEditor (ms, editorType: typeof(ExportModelSettingsEditor));
+                }
             }
 
             public static void Init (string filename = "", ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all)
@@ -108,12 +117,6 @@ namespace FbxExporters
                     "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
 
                 var pathLabels = ExportSettings.GetRelativeSavePaths();
-                /*for(int i = 0; i < pathLabels.Length; i++){
-                    if (pathLabels[i] == ".") {
-                        pathLabels[i] = "(Assets root)";
-                        break; // no duplicate paths so safe to break
-                    }
-                }*/
 
                 ExportSettings.instance.selectedExportModelPath = EditorGUILayout.Popup (ExportSettings.instance.selectedExportModelPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
@@ -151,14 +154,6 @@ namespace FbxExporters
                 showOptions = EditorGUILayout.Foldout (showOptions, "Options");
                 EditorGUI.indentLevel++;
                 if (showOptions) {
-                    if (!innerEditor) {
-                        var ms = ExportSettings.instance.exportModelSettings;
-                        if (!ms) {
-                            ExportSettings.LoadSettings ();
-                            ms = ExportSettings.instance.exportModelSettings;
-                        }
-                        innerEditor = UnityEditor.Editor.CreateEditor (ms, editorType: typeof(ExportModelSettingsEditor));
-                    }
                     innerEditor.OnInspectorGUI ();
                 }
 
@@ -192,7 +187,7 @@ namespace FbxExporters
                         }
                     }
 
-                    if (ModelExporter.ExportObjects (filePath, exportType: m_animExportType, lodExportType: ExportSettings.instance.lodExportType) != null) {
+                    if (ModelExporter.ExportObjects (filePath, exportType: m_animExportType, lodExportType: ExportSettings.GetLODExportType()) != null) {
                         // refresh the asset database so that the file appears in the
                         // asset folder view.
                         AssetDatabase.Refresh ();

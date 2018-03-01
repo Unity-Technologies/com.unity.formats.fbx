@@ -778,7 +778,7 @@ namespace FbxExporters.UnitTests
 
             // test export all
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
-            string filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.All);
+            string filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportModelSettingsSerialize.LODExportType.All);
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
             Assert.IsTrue (fbxObj);
 
@@ -787,7 +787,7 @@ namespace FbxExporters.UnitTests
 
             // test export highest
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0
-            filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.Highest);
+            filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportModelSettingsSerialize.LODExportType.Highest);
             fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
             Assert.IsTrue (fbxObj);
 
@@ -796,7 +796,7 @@ namespace FbxExporters.UnitTests
 
             // test export lowest
             // expected LODs exported: Cube_LOD2
-            filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.Lowest);
+            filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportModelSettingsSerialize.LODExportType.Lowest);
             fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
             Assert.IsTrue (fbxObj);
 

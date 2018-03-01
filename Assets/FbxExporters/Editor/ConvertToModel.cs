@@ -168,7 +168,7 @@ namespace FbxExporters
 
                 // Export to FBX. It refreshes the database.
                 {
-                    var fbxActualPath = ModelExporter.ExportObject (fbxFullPath, toConvert, lodExportType: EditorTools.ExportSettings.LODExportType.All);
+                    var fbxActualPath = ModelExporter.ExportObject (fbxFullPath, toConvert, lodExportType: EditorTools.ExportModelSettingsSerialize.LODExportType.All);
                     if (fbxActualPath != fbxFullPath) {
                         throw new System.Exception ("Failed to convert " + toConvert.name);
                     }

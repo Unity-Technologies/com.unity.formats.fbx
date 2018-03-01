@@ -261,7 +261,7 @@ namespace FbxExporters.UnitTests
         /// <returns>The exported fbx file path.</returns>
         /// <param name="hierarchy">Hierarchy.</param>
         /// <param name="animOnly">If set to <c>true</c> export animation only.</param>
-        protected string ExportToFbx (GameObject hierarchy, bool animOnly = false, EditorTools.ExportSettings.LODExportType lodExportType = EditorTools.ExportSettings.LODExportType.All){
+        protected string ExportToFbx (GameObject hierarchy, bool animOnly = false, EditorTools.ExportModelSettingsSerialize.LODExportType lodExportType = EditorTools.ExportModelSettingsSerialize.LODExportType.All){
             string filename = GetRandomFbxFilePath ();
             var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (
                 filename, hierarchy,

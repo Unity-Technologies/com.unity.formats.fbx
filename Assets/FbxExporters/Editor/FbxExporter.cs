@@ -104,12 +104,6 @@ namespace FbxExporters
 
             public const string PACKAGE_UI_NAME = "FBX Exporter";
 
-            public enum ExportFormat
-            {
-                Binary = 0,
-                ASCII = 1
-            }
-
             /// <summary>
             /// name of the scene's default camera
             /// </summary>
@@ -1924,7 +1918,7 @@ namespace FbxExporters
                 GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
                 int exportProgress, int objectCount, Vector3 newCenter,
                 TransformExportType exportType = TransformExportType.Local,
-                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All
+                ExportModelSettingsSerialize.LODExportType lodExportType = ExportModelSettingsSerialize.LODExportType.All
             )
             {
                 int numObjectsExported = exportProgress;
@@ -1962,12 +1956,12 @@ namespace FbxExporters
 
                 // if this object has an LOD group, then export according to the LOD preference setting
                 var lodGroup = unityGo.GetComponent<LODGroup>();
-                if (lodGroup && lodExportType != ExportSettings.LODExportType.All) {
+                if (lodGroup && lodExportType != ExportModelSettingsSerialize.LODExportType.All) {
                     LOD[] lods = lodGroup.GetLODs ();
 
                     // LODs are ordered from highest to lowest.
                     // If exporting lowest LOD, reverse the array
-                    if (lodExportType == ExportSettings.LODExportType.Lowest) {
+                    if (lodExportType == ExportModelSettingsSerialize.LODExportType.Lowest) {
                         // reverse the array
                         LOD[] tempLods = new LOD[lods.Length];
                         System.Array.Copy (lods, tempLods, lods.Length);
@@ -2708,7 +2702,7 @@ namespace FbxExporters
                 IEnumerable<UnityEngine.Object> unityExportSet, 
                 Dictionary<GameObject, AnimationOnlyExportData> animationExportData,
                 TransformExportType exportType = TransformExportType.Global,
-                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All)
+                ExportModelSettingsSerialize.LODExportType lodExportType = ExportModelSettingsSerialize.LODExportType.All)
             {
                 exportCancelled = false;
 
@@ -2741,7 +2735,7 @@ namespace FbxExporters
                         // Initialize the exporter.
                         // fileFormat must be binary if we are embedding textures
                         int fileFormat = -1;
-                        if (EditorTools.ExportSettings.instance.ExportFormatSelection == (int)ExportFormat.ASCII)
+                        if (EditorTools.ExportSettings.GetExportFormat() == ExportModelSettingsSerialize.ExportFormat.ASCII)
                         {
                             fileFormat = fbxManager.GetIOPluginRegistry().FindWriterIDByDescription("FBX ascii (*.fbx)");
                         }                        
@@ -2813,7 +2807,9 @@ namespace FbxExporters
 
                         Vector3 center = Vector3.zero;
                         if(exportType == TransformExportType.Global){
-                            center = (ExportSettings.centerObjects && revisedExportSet.Count > 1)? FindCenter(revisedExportSet) : Vector3.zero;
+                            center = (
+                                ExportSettings.GetObjectPosition() == ExportModelSettingsSerialize.ObjectPosition.LocalCentered && revisedExportSet.Count > 1
+                            )? FindCenter(revisedExportSet) : Vector3.zero;
                         }
 
                         foreach (var unityGo in revisedExportSet) {
@@ -3586,7 +3582,7 @@ namespace FbxExporters
                 UnityEngine.Object[] objects = null,
                 AnimationExportType exportType = AnimationExportType.all,
                 TransformExportType transformExportType = TransformExportType.Global,
-                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All)
+                ExportModelSettingsSerialize.LODExportType lodExportType = ExportModelSettingsSerialize.LODExportType.All)
             {
                 LastFilePath = filePath;
 
@@ -3641,7 +3637,7 @@ namespace FbxExporters
                 string filePath, UnityEngine.Object root,
                 AnimationExportType exportType = AnimationExportType.all,
                 TransformExportType transformExportType = TransformExportType.Reset,
-                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All)
+                ExportModelSettingsSerialize.LODExportType lodExportType = ExportModelSettingsSerialize.LODExportType.All)
             {
                 return ExportObjects(filePath, new Object[] { root }, exportType, transformExportType, lodExportType);
             }

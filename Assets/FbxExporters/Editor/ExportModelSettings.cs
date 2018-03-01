@@ -30,7 +30,7 @@ namespace FbxExporters.EditorTools
             EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("LOD level", "Select which LOD to export."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.lodLevel = (ExportSettings.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodLevel, new string[]{"All", "Highest", "Lowest"});
+            exportSettings.lodLevel = (ExportModelSettingsSerialize.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodLevel, new string[]{"All", "Highest", "Lowest"});
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -39,12 +39,15 @@ namespace FbxExporters.EditorTools
             GUILayout.EndHorizontal();
             EditorGUI.EndDisabledGroup ();
 
+            // TODO: add implementation for these options, grey out in the meantime
+            EditorGUI.BeginDisabledGroup (true);
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Transfer Root Motion To", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
             EditorGUILayout.Popup(0, new string[]{"<None>"});
             GUILayout.EndHorizontal();
 
             exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.animatedSkinnedMesh);
+            EditorGUI.EndDisabledGroup ();
         }
     }
 
@@ -67,9 +70,11 @@ namespace FbxExporters.EditorTools
 
         public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, LocalPivot = 2 }
 
+        public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
+
         public ExportFormat exportFormat = ExportFormat.ASCII;
         public Include include = Include.ModelAndAnim;
-        public ExportSettings.LODExportType lodLevel = ExportSettings.LODExportType.All;
+        public LODExportType lodLevel = LODExportType.All;
         public ObjectPosition objectPosition = ObjectPosition.LocalCentered;
         public string rootMotionTransfer = "";
         public bool animatedSkinnedMesh = true;

@@ -44,28 +44,11 @@ namespace FbxExporters.EditorTools {
                 ),
                 exportSettings.mayaCompatibleNames);
 
-            exportSettings.centerObjects = EditorGUILayout.Toggle (
-                new GUIContent("Center Objects:",
-                    "Center objects around a shared root and keep their relative placement unchanged."),
-                exportSettings.centerObjects
-            );
-
             exportSettings.autoUpdaterEnabled = EditorGUILayout.Toggle(
                 new GUIContent("Auto-Updater:",
                     "Automatically updates prefabs with new fbx data that was imported."),
                 exportSettings.autoUpdaterEnabled
             );
-
-            GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
-                " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.ExportFormatSelection = EditorGUILayout.Popup(exportSettings.ExportFormatSelection, new string[]{"Binary", "ASCII"});
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("LOD Export:", "Select which LOD to export."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.lodExportType = (ExportSettings.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodExportType, new string[]{"All", "Highest", "Lowest"});
-            GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent(
@@ -436,25 +419,14 @@ namespace FbxExporters.EditorTools {
 
         // Note: default values are set in LoadDefaults().
         public bool mayaCompatibleNames = true;
-        public bool centerObjects = false;
         public bool autoUpdaterEnabled = true;
         public bool launchAfterInstallation = true;
         public bool HideSendToUnityMenu = true;
-        public int ExportFormatSelection;
         public bool BakeAnimation = true;
 
         public string IntegrationSavePath;
 
         public int selectedDCCApp = 0;
-
-        [SerializeField]
-        public LODExportType lodExportType = LODExportType.All;
-
-        public enum LODExportType {
-            All = 0,
-            Highest = 1,
-            Lowest = 2
-        }
 
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
@@ -472,6 +444,7 @@ namespace FbxExporters.EditorTools {
         [SerializeField]
         private List<string> exportModelSavePaths = new List<string> ();
 
+        [SerializeField]
         public int selectedExportModelPath = 0;
         private int maxStoredSavePaths = 5;
 
@@ -482,26 +455,54 @@ namespace FbxExporters.EditorTools {
         [SerializeField]
         private List<string> dccOptionPaths;
 
+        // don't serialize as ScriptableObject does not get properly serialized on export
         [System.NonSerialized]
         public ExportModelSettings exportModelSettings;
 
+        // store contents of export model settings for serialization
         [SerializeField]
         private ExportModelSettingsSerialize exportModelSettingsSerialize;
+
+        // ---------------- get functions for options in ExportModelSettings ----------------
+        public static ExportModelSettingsSerialize.ExportFormat GetExportFormat(){
+            return instance.exportModelSettings.info.exportFormat;
+        }
+
+        public static ExportModelSettingsSerialize.Include GetModelAnimIncludeOption(){
+            return instance.exportModelSettings.info.include;
+        }
+
+        public static ExportModelSettingsSerialize.LODExportType GetLODExportType(){
+            return instance.exportModelSettings.info.lodLevel;
+        }
+
+        public static ExportModelSettingsSerialize.ObjectPosition GetObjectPosition(){
+            return instance.exportModelSettings.info.objectPosition;
+        }
+
+        public static string GetRootMotionTransferNode(){
+            return instance.exportModelSettings.info.rootMotionTransfer;
+        }
+
+        public static bool AnimateSkinnedMesh(){
+            return instance.exportModelSettings.info.animatedSkinnedMesh;
+        }
+        // ---------------------------------------------------------------------------------
 
         protected override void LoadDefaults()
         {
             mayaCompatibleNames = true;
-            centerObjects = true;
             autoUpdaterEnabled = true;
             launchAfterInstallation = true;
             HideSendToUnityMenu = true;
-            ExportFormatSelection = 0;
             convertToModelSavePath = kDefaultSavePath;
             exportModelSavePaths = new List<string> (){ kDefaultSavePath };
             IntegrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
             BakeAnimation = true;
+            exportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
+            exportModelSettingsSerialize = exportModelSettings.info;
         }
 
         /// <summary>
