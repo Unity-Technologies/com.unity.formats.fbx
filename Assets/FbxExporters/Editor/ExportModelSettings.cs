@@ -48,6 +48,17 @@ namespace FbxExporters.EditorTools
 
             exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.animatedSkinnedMesh);
             EditorGUI.EndDisabledGroup ();
+
+            exportSettings.mayaCompatibleNaming = EditorGUILayout.Toggle (
+                new GUIContent ("Compatible Naming:",
+                    "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
+                    "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
+                    "On export, convert the names of GameObjects so they are Maya compatible." +
+                    (exportSettings.mayaCompatibleNaming ? "" :
+                        "\n\nWARNING: Disabling this feature may result in lost material connections," +
+                        " and unexpected character replacements in Maya.")
+                ),
+                exportSettings.mayaCompatibleNaming);
         }
     }
 
@@ -78,5 +89,6 @@ namespace FbxExporters.EditorTools
         public ObjectPosition objectPosition = ObjectPosition.LocalCentered;
         public string rootMotionTransfer = "";
         public bool animatedSkinnedMesh = true;
+        public bool mayaCompatibleNaming = true;
     }
 }

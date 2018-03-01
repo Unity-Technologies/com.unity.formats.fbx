@@ -33,17 +33,6 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             GUILayout.BeginVertical();
-            exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
-                new GUIContent ("Compatible Naming:",
-                    "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
-                    "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
-                    "On export, convert the names of GameObjects so they are Maya compatible." +
-                    (exportSettings.mayaCompatibleNames ? "" :
-                        "\n\nWARNING: Disabling this feature may result in lost material connections," +
-                    " and unexpected character replacements in Maya.")
-                ),
-                exportSettings.mayaCompatibleNames);
-
             exportSettings.autoUpdaterEnabled = EditorGUILayout.Toggle(
                 new GUIContent("Auto-Updater:",
                     "Automatically updates prefabs with new fbx data that was imported."),
@@ -418,7 +407,6 @@ namespace FbxExporters.EditorTools {
         }
 
         // Note: default values are set in LoadDefaults().
-        public bool mayaCompatibleNames = true;
         public bool autoUpdaterEnabled = true;
         public bool launchAfterInstallation = true;
         public bool HideSendToUnityMenu = true;
@@ -480,6 +468,10 @@ namespace FbxExporters.EditorTools {
             return instance.exportModelSettings.info.objectPosition;
         }
 
+        public static void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos){
+            instance.exportModelSettings.info.objectPosition = objPos;
+        }
+
         public static string GetRootMotionTransferNode(){
             return instance.exportModelSettings.info.rootMotionTransfer;
         }
@@ -487,11 +479,14 @@ namespace FbxExporters.EditorTools {
         public static bool AnimateSkinnedMesh(){
             return instance.exportModelSettings.info.animatedSkinnedMesh;
         }
+
+        public static bool UseMayaCompatibleNames(){
+            return instance.exportModelSettings.info.mayaCompatibleNaming;
+        }
         // ---------------------------------------------------------------------------------
 
         protected override void LoadDefaults()
         {
-            mayaCompatibleNames = true;
             autoUpdaterEnabled = true;
             launchAfterInstallation = true;
             HideSendToUnityMenu = true;

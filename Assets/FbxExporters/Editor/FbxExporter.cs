@@ -616,7 +616,7 @@ namespace FbxExporters
                     return true;
                 }
 
-                var fbxName = ExportSettings.mayaCompatibleNames
+                var fbxName = ExportSettings.UseMayaCompatibleNames()
                     ? ConvertToMayaCompatibleName(unityName) : unityName;
 
                 if (Verbose) {
@@ -1923,7 +1923,7 @@ namespace FbxExporters
             {
                 int numObjectsExported = exportProgress;
 
-                if (ExportSettings.mayaCompatibleNames) {
+                if (ExportSettings.UseMayaCompatibleNames()) {
                     unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
                 }
 
@@ -2184,7 +2184,7 @@ namespace FbxExporters
                     return true;
                 }
 
-                if (ExportSettings.mayaCompatibleNames) {
+                if (ExportSettings.UseMayaCompatibleNames()) {
                     unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
                 }
 
