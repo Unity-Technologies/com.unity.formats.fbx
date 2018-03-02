@@ -2962,7 +2962,7 @@ namespace FbxExporters
 
                         GameObject animationTrackGObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (editorClipAnimationTrack) as GameObject;
 
-                        string filePath = GetExportFilePath (animationTrackGObject.name + "@" + timeLineClip.animationClip.name);
+                        string filePath = GetExportFilePath (animationTrackGObject.name + "@" + timeLineClip.displayName);
                         if (string.IsNullOrEmpty (filePath)) {
                             continue;
                         }
@@ -3027,7 +3027,7 @@ namespace FbxExporters
                             GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
                             // One file by animation clip
                             foreach (TimelineClip timeLineClip in at.GetClips()) {
-                                string filePath = string.Format(AnimFbxFileFormat, folderPath, atObject.name, timeLineClip.animationClip.name);
+                                string filePath = string.Format(AnimFbxFileFormat, folderPath, atObject.name, timeLineClip.displayName);
                                 UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timeLineClip.animationClip };
                                 ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
 
