@@ -2950,19 +2950,6 @@ namespace FbxExporters
             [MenuItem(TimelineClipMenuItemName, false, 31)]
             static void OnClipContextClick(MenuCommand command)
             {
-                // Now that we know we have stuff to export, get the user-desired path.
-                string directory = string.IsNullOrEmpty(LastFilePath)
-                                      ? Application.dataPath
-                                      : System.IO.Path.GetDirectoryName(LastFilePath);
-
-                string title = "Select the folder in which the animation files from the timeline will be exported";
-                string folderPath = EditorUtility.SaveFolderPanel(title, directory, "");
-
-                if (string.IsNullOrEmpty(folderPath))
-                {
-                    return;
-                }
-
                 var selectedObjects = Selection.objects;
                 foreach (var obj in selectedObjects)
                 {
@@ -2975,10 +2962,15 @@ namespace FbxExporters
 
                         GameObject animationTrackGObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (editorClipAnimationTrack) as GameObject;
 
-                        string filePath = string.Format(AnimFbxFileFormat, folderPath, animationTrackGObject.name, timeLineClip.displayName);
+                        string filePath = GetExportFilePath (animationTrackGObject.name + "@" + timeLineClip.animationClip.name);
+                        if (string.IsNullOrEmpty (filePath)) {
+                            continue;
+                        }
+
                         UnityEngine.Object[] myArray = new UnityEngine.Object[] { animationTrackGObject, timeLineClip.animationClip };
 
                         ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
+                        return;
                     } 
                 }
             }
@@ -3561,7 +3553,7 @@ namespace FbxExporters
             private string m_tempFilePath { get; set; }
             private string m_lastFilePath { get; set; }
 
-            const string Extension = "fbx";
+            const string kFBXFileExtension = "fbx";
 			
             public enum AnimationExportType{
                 timelineAnimationClip,
@@ -3571,32 +3563,37 @@ namespace FbxExporters
             }
 
 
-            private static string MakeFileName (string basename = "test", string extension = "fbx")
+            private static string MakeFileName (string basename = "test", string extension = kFBXFileExtension)
             {
                 return basename + "." + extension;
+            }
+
+
+            private static string GetExportFilePath(string filenameSuggestion = ""){
+                var directory = string.IsNullOrEmpty (LastFilePath)
+                    ? Application.dataPath
+                    : System.IO.Path.GetDirectoryName (LastFilePath);
+
+                var title = string.Format ("Export To FBX ({0})", FileBaseName);
+
+                return EditorUtility.SaveFilePanel (title, directory, filenameSuggestion, kFBXFileExtension);
             }
 
             private static void OnExport (AnimationExportType exportType = AnimationExportType.all)
             {
 
                 // Now that we know we have stuff to export, get the user-desired path.
-                var directory = string.IsNullOrEmpty (LastFilePath)
-                                      ? Application.dataPath
-                                      : System.IO.Path.GetDirectoryName (LastFilePath);
-
                 GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
                 string filename = null;
                 if (selectedGOs.Length == 1) {
-                    filename = ConvertToValidFilename (selectedGOs [0].name + ".fbx");
+                    filename = ConvertToValidFilename (selectedGOs [0].name + "." + kFBXFileExtension);
                 } else {
                     filename = string.IsNullOrEmpty (LastFilePath)
-                        ? MakeFileName (basename: FileBaseName, extension: Extension)
+                        ? MakeFileName (basename: FileBaseName, extension: kFBXFileExtension)
                         : System.IO.Path.GetFileName (LastFilePath);
                 }
 
-                var title = string.Format ("Export Model FBX ({0})", FileBaseName);
-
-                var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "fbx");
+                var filePath = GetExportFilePath (filename);
 
                 if (string.IsNullOrEmpty (filePath)) {
                     return;
