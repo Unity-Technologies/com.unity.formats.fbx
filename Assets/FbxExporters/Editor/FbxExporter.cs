@@ -3499,6 +3499,13 @@ namespace FbxExporters
 
                 // If we're here, custom handling didn't work.
                 // Revert to default handling.
+
+                // if user doesn't want to export mesh colliders, and this gameobject doesn't have a renderer
+                // then don't export it.
+                if (!ExportSettings.instance.exportMeshNoRenderer && !gameObject.GetComponent<Renderer>()) {
+                    return false;
+                }
+
                 var meshFilter = defaultComponent as MeshFilter;
                 if (meshFilter) {
                     var renderer = gameObject.GetComponent<Renderer>();
