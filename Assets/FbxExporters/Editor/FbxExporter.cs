@@ -3543,7 +3543,7 @@ namespace FbxExporters
             /// <summary>
             /// manage the selection of a filename
             /// </summary>
-            public static string LastFilePath { get; set; }
+            static string LastFilePath { get; set; }
             private string m_tempFilePath { get; set; }
             private string m_lastFilePath { get; set; }
 

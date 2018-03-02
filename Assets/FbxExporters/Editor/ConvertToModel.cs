@@ -1,9 +1,7 @@
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEditor;
-using Unity.FbxSdk;
 
 namespace FbxExporters
 {
@@ -11,8 +9,8 @@ namespace FbxExporters
     {
         public static class ConvertToModel
         {
-            const string MenuItemName1 = "GameObject/Convert To Linked Prefab Instance";
-            const string MenuItemName2 = "Assets/Convert To Linked Prefab Instance";
+            const string GameObjectMenuItemName = "GameObject/Convert To Linked Prefab Instance";
+            const string AssetMenuItemName = "Assets/Convert To Linked Prefab Instance";
 
             /// <summary>
             /// OnContextItem is called either:
@@ -23,7 +21,7 @@ namespace FbxExporters
             /// parent and child are selected, then OnContextItem will only be
             /// called on the parent)
             /// </summary>
-            [MenuItem (MenuItemName1, false, 30)]
+            [MenuItem (GameObjectMenuItemName, false, 30)]
             static void OnContextItem (MenuCommand command)
             {
                 ConvertToLinkedPrefab(false);
@@ -32,9 +30,15 @@ namespace FbxExporters
             /// <summary>
             // Validate the menu item defined by the function above.
             /// </summary>
-            [MenuItem (MenuItemName1, true, 30)]
+            [MenuItem (GameObjectMenuItemName, true, 30)]
             public static bool OnValidateMenuItem ()
             {
+                GameObject[] selection = Selection.gameObjects;
+
+                if (selection == null || selection.Length == 0)
+                {
+                    return false;
+                }
                 return true;
             }
 
@@ -48,26 +52,41 @@ namespace FbxExporters
             /// parent and child are selected, then OnContextItem will only be
             /// called on the parent)
             /// </summary>
-            [MenuItem (MenuItemName2, false, 30)]
+            [MenuItem (AssetMenuItemName, false, 30)]
             static void AssetOnContextItem ()
             {
                 ConvertToLinkedPrefab(true);
             }
 
-            static void ConvertToLinkedPrefab(bool isProjectView = false)
+            /// <summary>
+            // Validate the menu item defined by the function above.
+            /// </summary>
+            [MenuItem (AssetMenuItemName, true, 30)]
+            public static bool OnValidateAssetMenuItem ()
             {
-                // Now that we know we have stuff to export, get the user-desired path.
-                string directory = Application.dataPath;
-                string filename = ModelExporter.MakeFileName (basename: ModelExporter.FileBaseName, extension: ModelExporter.PrefabExtension);
+                GameObject[] selection = Selection.gameObjects;
 
-                var title = string.Format ("Convert to Linked Prefab ({0})", ModelExporter.FileBaseName);
-
-                var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "prefab");
-
-                if (string.IsNullOrEmpty (filePath)) {
-                    return;
+                if (selection == null || selection.Length == 0)
+                {
+                    return false;
                 }
 
+                bool isFBXFile = false;
+                foreach (GameObject selectedObject in selection)
+                {
+                     PrefabType unityPrefabType = PrefabUtility.GetPrefabType(selectedObject);
+                    if (unityPrefabType == PrefabType.ModelPrefab)
+                    {
+                        isFBXFile = true;
+                        break;
+                    }
+                }
+
+                return isFBXFile;
+            }
+
+            static void ConvertToLinkedPrefab(bool isProjectView = false)
+            {
                 Object[] selection = Selection.objects;
 
                 if (selection == null || selection.Length == 0)
@@ -80,19 +99,22 @@ namespace FbxExporters
                     GameObject selected = obj as GameObject;
                     if (selected)
                     {
+                        // Now that we know we have stuff to export, get the user-desired path.
+                        string directory = Application.dataPath;
+                        string filename = ModelExporter.MakeFileName (basename: selected.name, extension: ModelExporter.PrefabExtension);
+
+                        var title = string.Format ("Convert to Linked Prefab ({0})", ModelExporter.FileBaseName);
+
+                        var filePath = EditorUtility.SaveFilePanel (title, directory, filename, "prefab");
+
+                        if (string.IsNullOrEmpty (filePath)) {
+                            return;
+                        }
+
                         GameObject[] selectedGameObject = new GameObject[] { selected };
                         Selection.objects = CreateInstantiatedModelPrefab (selectedGameObject, isProjectView: isProjectView, destinationPath: filePath);
                     }
                 }
-            }
-
-            /// <summary>
-            // Validate the menu item defined by the function above.
-            /// </summary>
-            [MenuItem (MenuItemName2, true, 30)]
-            public static bool OnValidateAssetMenuItem ()
-            {
-                return true;
             }
 
             /// <summary>
@@ -203,10 +225,8 @@ namespace FbxExporters
                 // The import back in to Unity would do this automatically but
                 // we prefer to control it so that the Maya artist can see the
                 // same names as exist in Unity.
-                if (!isProjectView)
-                {
-                    EnforceUniqueNames (new GameObject[] {toConvert});
-                }
+
+                EnforceUniqueNames (new GameObject[] {toConvert});
 
                 // Export to FBX. It refreshes the database.
                 if (!isProjectView)
