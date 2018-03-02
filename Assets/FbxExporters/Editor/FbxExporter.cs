@@ -86,7 +86,7 @@ namespace FbxExporters
             const string ClipMenuItemName = "GameObject/Export All Timeline Clips...";
             const string TimelineClipMenuItemName = "GameObject/Export Selected Timeline Clip...";																				
 
-            const string AnimOnlyMenuItemName = "GameObject/Export Animation Only";
+            const string AnimOnlyMenuItemName = "GameObject/Export Animation Only...";
 
             const string FileBaseName = "Untitled";
 
@@ -188,6 +188,11 @@ namespace FbxExporters
             /// Format for creating unique names
             /// </summary>
             const string UniqueNameFormat = "{0}_{1}";
+
+            /// <summary>
+            /// The animation fbx file format.
+            /// </summary>
+            const string AnimFbxFileFormat = "{0}/{1}@{2}.fbx";
 
             /// <summary>
             /// Gets the export settings.
@@ -1238,7 +1243,8 @@ namespace FbxExporters
             {
                 PrefabType unityPrefabType = PrefabUtility.GetPrefabType(unityGo);
 
-                if (unityPrefabType != PrefabType.PrefabInstance) return false;
+                if (unityPrefabType != PrefabType.PrefabInstance &&
+                    unityPrefabType != PrefabType.ModelPrefabInstance) return false;
 
                 Object unityPrefabParent = PrefabUtility.GetPrefabParent (unityGo);
 
@@ -1530,8 +1536,8 @@ namespace FbxExporters
                     Debug.Log ("Exporting animation for " + uniObj.ToString() + " (" + uniPropertyName + ")");
                 }
 
-                FbxPropertyChannelPair fbxPropertyChannelPair;
-                if (!FbxPropertyChannelPair.TryGetValue (uniPropertyName, out fbxPropertyChannelPair)) {
+                FbxPropertyChannelPair[] fbxPropertyChannelPairs;
+                if (!FbxPropertyChannelPair.TryGetValue (uniPropertyName, out fbxPropertyChannelPairs)) {
                     Debug.LogWarning (string.Format ("no mapping from Unity '{0}' to fbx property", uniPropertyName));
                     return;
                 }
@@ -1549,39 +1555,35 @@ namespace FbxExporters
                     return;
                 }
 
-                // map unity property name to fbx property
-                var fbxProperty = fbxNode.FindProperty(fbxPropertyChannelPair.Property, false);
-                if (!fbxProperty.IsValid())
-                {
-                    var fbxNodeAttribute = fbxNode.GetNodeAttribute();
-                    if (fbxNodeAttribute != null)
-                    {
-                        fbxProperty = fbxNodeAttribute.FindProperty(fbxPropertyChannelPair.Property, false);
+                foreach (var fbxPropertyChannelPair in fbxPropertyChannelPairs) {
+                    // map unity property name to fbx property
+                    var fbxProperty = fbxNode.FindProperty (fbxPropertyChannelPair.Property, false);
+                    if (!fbxProperty.IsValid ()) {
+                        var fbxNodeAttribute = fbxNode.GetNodeAttribute ();
+                        if (fbxNodeAttribute != null) {
+                            fbxProperty = fbxNodeAttribute.FindProperty (fbxPropertyChannelPair.Property, false);
+                        }
                     }
-                }
-                if (!fbxProperty.IsValid())
-                {
-                    Debug.LogError(string.Format("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName()));
-                    return;
-                }
+                    if (!fbxProperty.IsValid ()) {
+                        Debug.LogError (string.Format ("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
+                        return;
+                    }
 
-                // Create the AnimCurve on the channel
-                FbxAnimCurve fbxAnimCurve = fbxProperty.GetCurve (fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
+                    // Create the AnimCurve on the channel
+                    FbxAnimCurve fbxAnimCurve = fbxProperty.GetCurve (fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
 
-                // create a convert scene helper so that we can convert from Unity to Maya
-                // AxisSystem (LeftHanded to RightHanded) and FBX's default units 
-                // (Meters to Centimetres)
-                var convertSceneHelper = new UnityToMayaConvertSceneHelper (uniPropertyName);
+                    // create a convert scene helper so that we can convert from Unity to Maya
+                    // AxisSystem (LeftHanded to RightHanded) and FBX's default units 
+                    // (Meters to Centimetres)
+                    var convertSceneHelper = new UnityToMayaConvertSceneHelper (uniPropertyName);
 
-                // TODO: we'll resample the curve so we don't have to 
-                // configure tangents
-                if (ModelExporter.ExportSettings.BakeAnimation) 
-                {
-                    ExportAnimationSamples(uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
-                }
-                else 
-                {
-                    ExportAnimationKeys(uniAnimCurve, fbxAnimCurve, convertSceneHelper);
+                    // TODO: we'll resample the curve so we don't have to 
+                    // configure tangents
+                    if (ModelExporter.ExportSettings.BakeAnimation) {
+                        ExportAnimationSamples (uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
+                    } else {
+                        ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper);
+                    }
                 }
             }
 
@@ -1636,75 +1638,78 @@ namespace FbxExporters
                 /// Map a Unity property name to the corresponding FBX property and
                 /// channel names.
                 /// </summary>
-                public static bool TryGetValue(string uniPropertyName, out FbxPropertyChannelPair prop)
+                public static bool TryGetValue(string uniPropertyName, out FbxPropertyChannelPair[] prop)
                 {
                     System.StringComparison ct = System.StringComparison.CurrentCulture;
 
                     // Transform Scaling
                     if (uniPropertyName.StartsWith ("m_LocalScale.x", ct) || uniPropertyName.EndsWith ("S.x", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_X);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_X) };
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("m_LocalScale.y", ct) || uniPropertyName.EndsWith ("S.y", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Y) };
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("m_LocalScale.z", ct) || uniPropertyName.EndsWith ("S.z", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Z) };
                         return true;
                     }
 
                     // Transform Translation
                     if (uniPropertyName.StartsWith ("m_LocalPosition.x", ct) || uniPropertyName.EndsWith ("T.x", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_X);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_X) };
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("m_LocalPosition.y", ct) || uniPropertyName.EndsWith ("T.y", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Y) };
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("m_LocalPosition.z", ct) || uniPropertyName.EndsWith ("T.z", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z) };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("m_Intensity", ct))
                     {
-                        prop = new FbxPropertyChannelPair ("Intensity", null);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Intensity", null) };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("m_SpotAngle", ct))
                     {
-                        prop = new FbxPropertyChannelPair ("OuterAngle", null);
+                        prop = new FbxPropertyChannelPair[]{ 
+                            new FbxPropertyChannelPair ("OuterAngle", null),
+                            new FbxPropertyChannelPair ("InnerAngle", null)
+                        };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("m_Color.r", ct))
                     {
-                        prop = new FbxPropertyChannelPair ("Color", Globals.FBXSDK_CURVENODE_COLOR_RED);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Color", Globals.FBXSDK_CURVENODE_COLOR_RED) };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("m_Color.g", ct))
                     {
-                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_GREEN);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_GREEN) };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("m_Color.b", ct))
                     {
-                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_BLUE);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_BLUE) };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("field of view", ct))
                     {
-                        prop = new FbxPropertyChannelPair("FieldOfView", null);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("FieldOfView", null) };
                         return true;
                     }
 
-                    prop = new FbxPropertyChannelPair ();
+                    prop = new FbxPropertyChannelPair[]{};
                     return false;
                 }
             }
@@ -2813,7 +2818,7 @@ namespace FbxExporters
 
                         Vector3 center = Vector3.zero;
                         if(exportType == TransformExportType.Global){
-                            center = ExportSettings.centerObjects? FindCenter(revisedExportSet) : Vector3.zero;
+                            center = (ExportSettings.centerObjects && revisedExportSet.Count > 1)? FindCenter(revisedExportSet) : Vector3.zero;
                         }
 
                         foreach (var unityGo in revisedExportSet) {
@@ -2950,12 +2955,10 @@ namespace FbxExporters
                 {
                     if (obj.GetType().Name.Contains("EditorClip"))
                     {
-                        var selClip = obj.GetType ().GetProperty ("clip").GetValue (obj, null);
-                        UnityEngine.Timeline.TimelineClip timeLineClip = selClip as UnityEngine.Timeline.TimelineClip;
+                        var timeLineClip = GetPropertyFromObject<TimelineClip> (obj, "clip");
 
-                        var selClipItem = obj.GetType ().GetProperty ("item").GetValue (obj, null);
-                        var selClipItemParentTrack = selClipItem.GetType ().GetProperty ("parentTrack").GetValue (selClipItem, null);
-                        AnimationTrack editorClipAnimationTrack = selClipItemParentTrack as AnimationTrack;
+                        var selClipItem = GetPropertyFromObject<object>(obj, "item");
+                        var editorClipAnimationTrack = GetPropertyFromObject<AnimationTrack> (selClipItem, "parentTrack");
 
                         GameObject animationTrackGObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (editorClipAnimationTrack) as GameObject;
 
@@ -2970,6 +2973,10 @@ namespace FbxExporters
                         return;
                     } 
                 }
+            }
+
+            private static T GetPropertyFromObject<T>(object obj, string propertyName) where T : class {
+                return obj.GetType ().GetProperty (propertyName).GetValue (obj, null) as T;
             }
 
             /// <summary>
@@ -3020,7 +3027,7 @@ namespace FbxExporters
                             GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
                             // One file by animation clip
                             foreach (TimelineClip timeLineClip in at.GetClips()) {
-                                string filePath = folderPath + "/" + atObject.name + "@" + timeLineClip.animationClip.name + ".fbx";
+                                string filePath = string.Format(AnimFbxFileFormat, folderPath, atObject.name, timeLineClip.animationClip.name);
                                 UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timeLineClip.animationClip };
                                 ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
 
@@ -3484,6 +3491,13 @@ namespace FbxExporters
 
                 // If we're here, custom handling didn't work.
                 // Revert to default handling.
+
+                // if user doesn't want to export mesh colliders, and this gameobject doesn't have a renderer
+                // then don't export it.
+                if (!ExportSettings.instance.exportMeshNoRenderer && !gameObject.GetComponent<Renderer>()) {
+                    return false;
+                }
+
                 var meshFilter = defaultComponent as MeshFilter;
                 if (meshFilter) {
                     var renderer = gameObject.GetComponent<Renderer>();
