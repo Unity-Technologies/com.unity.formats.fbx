@@ -9,6 +9,23 @@ namespace FbxExporters.EditorTools
         private const float LabelWidth = 175;
         private const float FieldOffset = 18;
 
+        private string[] exportFormatOptions = new string[]{ "ASCII", "Binary" };
+        private string[] includeOptions = new string[]{"Model(s) Only", "Animation Only", "Model(s) + Animation"};
+        private string[] lodOptions = new string[]{"All", "Highest", "Lowest"};
+
+        public const string singleHierarchyOption = "Local Pivot";
+        public const string multiHerarchyOption = "Local Centered";
+        private string hierarchyDepOption = "";
+        private string[] objPositionOptions { get { return new string[]{hierarchyDepOption, "World Absolute"}; }}
+
+        public void SetIsSingleHierarchy(bool singleHierarchy){
+            if (singleHierarchy) {
+                hierarchyDepOption = singleHierarchyOption;
+                return;
+            }
+            hierarchyDepOption = multiHerarchyOption;
+        }
+
         public override void OnInspectorGUI ()
         {
             var exportSettings = ((ExportModelSettings)target).info;
@@ -18,24 +35,24 @@ namespace FbxExporters.EditorTools
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.exportFormat = (ExportModelSettingsSerialize.ExportFormat)EditorGUILayout.Popup((int)exportSettings.exportFormat, new string[]{ "ASCII", "Binary" });
+            exportSettings.exportFormat = (ExportModelSettingsSerialize.ExportFormat)EditorGUILayout.Popup((int)exportSettings.exportFormat, exportFormatOptions);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Include", "Select whether to export models, animation or both."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.include = (ExportModelSettingsSerialize.Include)EditorGUILayout.Popup((int)exportSettings.include, new string[]{"Model(s) Only", "Animation Only", "Model(s) + Animation"});
+            exportSettings.include = (ExportModelSettingsSerialize.Include)EditorGUILayout.Popup((int)exportSettings.include, includeOptions);
             GUILayout.EndHorizontal();
 
             // greyed out if animation only
             EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("LOD level", "Select which LOD to export."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.lodLevel = (ExportModelSettingsSerialize.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodLevel, new string[]{"All", "Highest", "Lowest"});
+            exportSettings.lodLevel = (ExportModelSettingsSerialize.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodLevel, lodOptions);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Object(s) Position", "Select an option for exporting object's transform."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.objectPosition = (ExportModelSettingsSerialize.ObjectPosition)EditorGUILayout.Popup((int)exportSettings.objectPosition, new string[]{"Local Centered", "World Absolute", "Local Pivot"});
+            exportSettings.objectPosition = (ExportModelSettingsSerialize.ObjectPosition)EditorGUILayout.Popup((int)exportSettings.objectPosition, objPositionOptions);
             GUILayout.EndHorizontal();
             EditorGUI.EndDisabledGroup ();
 
@@ -79,7 +96,7 @@ namespace FbxExporters.EditorTools
 
         public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
 
-        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, LocalPivot = 2 }
+        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1 }
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 

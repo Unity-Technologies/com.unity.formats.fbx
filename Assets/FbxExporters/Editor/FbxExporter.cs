@@ -2807,9 +2807,22 @@ namespace FbxExporters
 
                         Vector3 center = Vector3.zero;
                         if(exportType == TransformExportType.Global){
-                            center = (
-                                ExportSettings.GetObjectPosition() == ExportModelSettingsSerialize.ObjectPosition.LocalCentered && revisedExportSet.Count > 1
-                            )? FindCenter(revisedExportSet) : Vector3.zero;
+                            switch(ExportSettings.GetObjectPosition()){
+                            case ExportModelSettingsSerialize.ObjectPosition.LocalCentered:
+                                // one object to export -> move to (0,0,0)
+                                if(revisedExportSet.Count == 1){
+                                    var tempList = new List<GameObject>(revisedExportSet);
+                                    center = tempList[0].transform.position;
+                                    break;
+                                }
+                                // more than one object to export -> get bounding center
+                                center = FindCenter(revisedExportSet);
+                                break;
+                            // absolute center -> don't do anything
+                            default:
+                                center = Vector3.zero;
+                                break;
+                            }
                         }
 
                         foreach (var unityGo in revisedExportSet) {
@@ -3570,7 +3583,9 @@ namespace FbxExporters
                         : System.IO.Path.GetFileName (LastFilePath);
                 }
 
-                ExportModelEditorWindow.Init (filename, exportType);
+                var hierarchyCount = ModelExporter.RemoveRedundantObjects(selectedGOs).Count;
+
+                ExportModelEditorWindow.Init (filename, singleHierarchyExport: hierarchyCount == 1, exportType: exportType);
             }
 
             /// <summary>

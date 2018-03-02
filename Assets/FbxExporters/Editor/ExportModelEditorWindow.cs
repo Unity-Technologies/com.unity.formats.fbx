@@ -19,8 +19,9 @@ namespace FbxExporters
             private const float FieldOffset = 18;
             private string m_exportFileName = "";
             private ModelExporter.AnimationExportType m_animExportType = ModelExporter.AnimationExportType.all;
+            private bool m_singleHierarchyExport = true;
 
-            private UnityEditor.Editor innerEditor;
+            private ExportModelSettingsEditor innerEditor;
             private static FbxExportPresetSelectorReceiver receiver;
 
             private static GUIContent presetIcon { get { return EditorGUIUtility.IconContent ("Preset.Context"); }}
@@ -39,15 +40,17 @@ namespace FbxExporters
                         ExportSettings.LoadSettings ();
                         ms = ExportSettings.instance.exportModelSettings;
                     }
-                    innerEditor = UnityEditor.Editor.CreateEditor (ms, editorType: typeof(ExportModelSettingsEditor));
+                    innerEditor = UnityEditor.Editor.CreateEditor (ms) as ExportModelSettingsEditor;
+                    innerEditor.SetIsSingleHierarchy (m_singleHierarchyExport);
                 }
             }
 
-            public static void Init (string filename = "", ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all)
+            public static void Init (string filename = "", bool singleHierarchyExport = true, ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all)
             {
                 ExportModelEditorWindow window = (ExportModelEditorWindow)EditorWindow.GetWindow <ExportModelEditorWindow>(WindowTitle, focus:true);
                 window.SetFilename (filename);
                 window.SetAnimationExportType (exportType);
+                window.SetSingleHierarchyExport (singleHierarchyExport);
                 window.Show ();
             }
 
@@ -67,6 +70,14 @@ namespace FbxExporters
 
             public void SetAnimationExportType(ModelExporter.AnimationExportType exportType){
                 m_animExportType = exportType;
+            }
+
+            public void SetSingleHierarchyExport(bool singleHierarchy){
+                m_singleHierarchyExport = singleHierarchy;
+
+                if (innerEditor) {
+                    innerEditor.SetIsSingleHierarchy (m_singleHierarchyExport);
+                }
             }
 
             public void OnPresetDialogClosed()
