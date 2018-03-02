@@ -159,12 +159,10 @@ namespace FbxExporters.UnitTests
             // In FbxPrefab Component of Cube, add SphereFBX/Sphere name mapping
             FbxPrefab fbxPrefabScript = cubePrefabInstance.transform.GetComponent<FbxPrefab>();
 
-
             FbxPrefab.StringPair stringpair = new FbxPrefab.StringPair();
             stringpair.FBXObjectName = "SphereFBX";
             stringpair.UnityObjectName = "Sphere";
             fbxPrefabScript.NameMapping.Add(stringpair);
-
 
             FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility(fbxPrefabScript);
 
@@ -329,7 +327,7 @@ namespace FbxExporters.UnitTests
 
 
         [TearDown]
-        public void stopTest()
+        public void StopTest()
         {
             // Put back the initial setting for the auto-updater toggle
             FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
