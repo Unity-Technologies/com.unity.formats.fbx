@@ -99,6 +99,12 @@ namespace FbxExporters.UnitTests
                 yield return new TestCaseData ("Models/DefaultMale/DefaultMale.prefab");
             }
         }
+
+        public static IEnumerable RotationCurveTestCases {
+            get {
+                yield return new TestCaseData ("Models/Player/Player.prefab");
+            }
+        }
     }
 
     [TestFixture]
@@ -493,6 +499,21 @@ namespace FbxExporters.UnitTests
             }
 
             /// <summary>
+            /// Compares the properties and curves of multiple animation clips
+            /// </summary>
+            /// <param name="animClipsOriginal">Animation clips original.</param>
+            /// <param name="animClipsImported">Animation clips imported.</param>
+            public static void MultiClipTest(AnimationClip[] animClipsOriginal, Dictionary<string, AnimationClip> animClipsImported){
+                Assert.That (animClipsImported.Count, Is.EqualTo (animClipsOriginal.Length));
+
+                foreach (var clip in animClipsOriginal) {
+                    Assert.That (animClipsImported.ContainsKey (clip.name));
+                    var fbxClip = animClipsImported [clip.name];
+                    AnimTester.ClipTest (clip, fbxClip);
+                }
+            }
+
+            /// <summary>
             /// Compares the properties and curves of two animation clips.
             /// </summary>
             /// <param name="animClipOriginal">Animation clip original.</param>
@@ -582,7 +603,7 @@ namespace FbxExporters.UnitTests
                     #if DEBUG_UNITTEST
                     Debug.Log(string.Format("key time={0} actual={1} expected={2} delta={3}", key.time.ToString(), key.value.ToString(), actualKeyValue.ToString(), Mathf.Abs(key.value-actualKeyValue).ToString()));
                     #endif
-                    Assert.That(key.value, Is.EqualTo(actualKeyValue).Within(0.000001), string.Format("{0} key ({1}) doesn't match", message, key.time));
+                    Assert.That(key.value, Is.EqualTo(actualKeyValue).Within(0.1), string.Format("{0} key ({1}) doesn't match", message, key.time));
                 }
             }
 
@@ -653,10 +674,7 @@ namespace FbxExporters.UnitTests
             Assert.That (fbxPath, Is.Not.Null);
 
             // add fbx to scene
-            GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fbxPath) as GameObject;
-            Assert.IsNotNull (originalFbxObj);
-            GameObject originalGO = GameObject.Instantiate (originalFbxObj);
-            Assert.IsTrue (originalGO);
+            GameObject originalGO = AddAssetToScene(fbxPath);
 
             // get clip
             AnimationClip animClipOriginal = originalGO.GetComponentInChildren<Animation>().clip;
@@ -664,9 +682,7 @@ namespace FbxExporters.UnitTests
 
             // export fbx
             // get GameObject
-            string filename = GetRandomFbxFilePath();
-            var exportedFilePath = ModelExporter.ExportObject (filename, originalGO);
-            Assert.That (exportedFilePath, Is.EqualTo (filename));
+            string filename = ExportToFbx(originalGO);
 
             // TODO: Uni-34492 change importer settings of (newly exported model) 
             // so that it's not resampled and it is legacy animation
@@ -807,20 +823,11 @@ namespace FbxExporters.UnitTests
             Assert.That (prefabPath, Is.Not.Null);
 
             // add prefab to scene
-            GameObject originalObj = AssetDatabase.LoadMainAssetAtPath ("Assets/" + prefabPath) as GameObject;
-            Assert.IsNotNull (originalObj);
-            GameObject originalGO = GameObject.Instantiate (originalObj);
-            Assert.IsTrue (originalGO);
+            GameObject originalGO = AddAssetToScene(prefabPath);
 
             // get clips
             var animator = originalGO.GetComponentInChildren<Animator> ();
-            Assert.That (animator, Is.Not.Null);
-
-            var controller = animator.runtimeAnimatorController;
-            Assert.That (controller, Is.Not.Null);
-
-            var animClips = controller.animationClips;
-            Assert.That (animClips, Is.Not.Null);
+            var animClips = GetClipsFromAnimator (animator);
 
             // get the set of GameObject transforms to be exported with the clip
             var animatedObjects = GetAnimatedGameObjects (animClips, animator.gameObject);
@@ -854,13 +861,19 @@ namespace FbxExporters.UnitTests
 
             // compare clips
             var fbxAnimClips = AnimTester.GetClipsFromFbx (filename);
-            Assert.That (fbxAnimClips.Count, Is.EqualTo (animClips.Count()));
+            AnimTester.MultiClipTest (animClips, fbxAnimClips);
+        }
 
-            foreach (var clip in animClips) {
-                Assert.That (fbxAnimClips.ContainsKey (clip.name));
-                var fbxClip = fbxAnimClips [clip.name];
-                AnimTester.ClipTest (clip, fbxClip);
-            }
+        public static AnimationClip[] GetClipsFromAnimator(Animator animator){
+            Assert.That (animator, Is.Not.Null);
+
+            var controller = animator.runtimeAnimatorController;
+            Assert.That (controller, Is.Not.Null);
+
+            var animClips = controller.animationClips;
+            Assert.That (animClips, Is.Not.Null);
+
+            return animClips;
         }
 
         private HashSet<string> GetAnimatedGameObjects(AnimationClip[] animClips, GameObject animatorObject){

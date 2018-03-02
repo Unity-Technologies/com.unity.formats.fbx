@@ -4,5 +4,7 @@ FBXImportAxisConversionEnable -v true;
 FBXImportCameras -v true;
 FBXImportLights -v true;
 
+FBXImportSetTake -takeIndex -1;
+
 // Add and update animation
 FBXImportMode -v merge;

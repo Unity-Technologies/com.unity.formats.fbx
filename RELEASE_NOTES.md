@@ -1,5 +1,65 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint47
+
+NEW FEATURES
+
+* Unity Maya Integration: Add all imported objects to same namespace
+
+Namespace is created according to the filename and is stored as an attribute on the export set.
+
+* Fbx Exporter: "Export Model" option exports with global transform
+
+Center Objects option is disabled by default but still available in the export settings.
+
+* Fbx Export Settings: Add LOD export option
+
+Added 3 options for LOD export: Highest, Lowest, All.
+If "Highest" is selected, then only highest LOD is exported in the hierarchy for GameObjects with LOD groups, and
+vice versa for "Lowest". If All is selected, behaviour will be the same as before, exporting all LODs.
+NOTE: will ignore any LOD meshes not directly parented under the object containing the LOD group.
+
+FIXES
+
+* ConvertToPrefab: Don't re-export fbx model instances
+
+If the object being exported in the scene is an fbx model instance, then create the prefab with the FbxPrefab component,
+and attach it to the existing fbx without re-exporting the fbx.
+
+**Version**: sprint46
+
+NEW FEATURES
+
+* Unity Maya Integration: Allow multi file import
+
+Added ability to select multiple files to import. A different export set is created for each file imported.
+If a file "model.fbx" is imported, and an animation file with the following naming format: "model@anim.fbx"
+is imported, the animation file will be added into the model's export set and additional custom attributes will
+be added showing which animation file is applied to the model. Currently there has to be a 1-1 mapping of
+animation file to model file.
+
+* Unity Maya Integration: Allow multi file export by scene selection
+
+In order to choose which sets to export, select desired objects in scene, then click Unity->Export Model Only order
+Unity->Export Animation Only. All sets containing at least one object in the selection set will be exported.
+
+If "Export Model Only" button is hit, then animation is not exported, and if "Export Animation Only" is clicked,
+then only animation and required nodes (i.e. animated transforms) will be exported to the animation file of format "model@anim.fbx".
+
+* Fbx Exporter: Export animation clips from Timeline
+
+Select GameObject in hierarchy containing PlayableDirector component and right click -> "Export All Timeline Clips" to export
+all tracks and animation clips on the timeline. Each track will be exported to a separate fbx file.
+Select clips on timeline then go to GameObject->Export Selected Timeline Clip to export each selected timeline clip to a separate
+fbx file.
+
+FIXES
+* README: remove line from README about not supporting Maya LT
+* Exporter: export correct rotation order (xyz) for euler rotation animations (previously would export as zxy)
+* Exporter: remove pre-rotation from euler rotation animation on skinned mesh export
+* NameRemapping: fix IndexOutOfRangeException when imported object count doesn't match original object count
+* PrefabAutoUpdater: fix so unit tests don't fail if auto update is turned off
+
 **Version**: sprint45
 
 NEW FEATURES

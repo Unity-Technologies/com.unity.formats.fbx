@@ -737,5 +737,105 @@ namespace FbxExporters.UnitTests
                 }
             }
         }
+
+        [Test]
+        public void LODExportTest(){
+            // Create the following test hierarchy:
+            //  LODGroup
+            //  -- Sphere_LOD0
+            //  -- Capsule_LOD0
+            //  -- Cube_LOD2
+            //  Cylinder_LOD1
+            //
+            // where sphere + capsule renderers are both in LOD0, and cylinder is in LOD1
+            // but not parented under the LOD group
+
+            var lodGroup = new GameObject ("LODGroup");
+            var sphereLOD0 = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+            sphereLOD0.name = "Sphere_LOD0";
+            var capsuleLOD0 = GameObject.CreatePrimitive (PrimitiveType.Capsule);
+            capsuleLOD0.name = "Capsule_LOD0";
+            var cubeLOD2 = GameObject.CreatePrimitive (PrimitiveType.Cube);
+            cubeLOD2.name = "Cube_LOD2";
+            var cylinderLOD1 = GameObject.CreatePrimitive (PrimitiveType.Cylinder);
+            cylinderLOD1.name = "Cylinder_LOD1";
+
+            sphereLOD0.transform.SetParent (lodGroup.transform);
+            capsuleLOD0.transform.SetParent (lodGroup.transform);
+            cubeLOD2.transform.SetParent (lodGroup.transform);
+            cylinderLOD1.transform.SetParent (null);
+
+            // add LOD group
+            var lodGroupComp = lodGroup.AddComponent<LODGroup>();
+            Assert.That (lodGroupComp, Is.Not.Null);
+
+            LOD[] lods = new LOD[3];
+            lods [0] = new LOD (1, new Renderer[]{ sphereLOD0.GetComponent<Renderer>(), capsuleLOD0.GetComponent<Renderer>() });
+            lods [1] = new LOD (0.75f, new Renderer[] { cylinderLOD1.GetComponent<Renderer>() });
+            lods [2] = new LOD (0.5f, new Renderer[] { cubeLOD2.GetComponent<Renderer>() });
+            lodGroupComp.SetLODs (lods);
+            lodGroupComp.RecalculateBounds ();
+
+            // test export all
+            // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
+            string filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.All);
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+            Assert.IsTrue (fbxObj);
+
+            HashSet<string> expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
+            CompareGameObjectChildren (fbxObj, expectedChildren);
+
+            // test export highest
+            // expected LODs exported: Sphere_LOD0, Capsule_LOD0
+            filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.Highest);
+            fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+            Assert.IsTrue (fbxObj);
+
+            expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name };
+            CompareGameObjectChildren (fbxObj, expectedChildren);
+
+            // test export lowest
+            // expected LODs exported: Cube_LOD2
+            filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.Lowest);
+            fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+            Assert.IsTrue (fbxObj);
+
+            expectedChildren = new HashSet<string> () { cubeLOD2.name };
+            CompareGameObjectChildren (fbxObj, expectedChildren);
+
+            // test convert to prefab
+            // this should have the same result as "export all"
+            // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
+            // NOTE: Cylinder_LOD1 is not exported as it is not under the LODGroup hierarchy being exported
+            filename = GetRandomFbxFilePath();
+            var convertedHierarchy = ConvertToModel.Convert(lodGroup, fbxFullPath: filename);
+            Assert.That (convertedHierarchy, Is.Not.Null);
+
+            // check both converted hierarchy and fbx
+            expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
+            CompareGameObjectChildren (convertedHierarchy, expectedChildren);
+
+            fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+            Assert.IsTrue (fbxObj);
+
+            expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
+            CompareGameObjectChildren (fbxObj, expectedChildren);
+        }
+
+
+        /// <summary>
+        /// Compares obj's children to the expected children in the hashset.
+        /// Doesn't recurse through the children.
+        /// </summary>
+        /// <param name="obj">Object.</param>
+        /// <param name="expectedChildren">Expected children.</param>
+        private void CompareGameObjectChildren(GameObject obj, HashSet<string> expectedChildren){
+            Assert.That (obj.transform.childCount, Is.EqualTo (expectedChildren.Count));
+
+            foreach (Transform child in obj.transform) {
+                Assert.That (expectedChildren.Contains (child.name));
+                expectedChildren.Remove (child.name);
+            }
+        }
     }
 }

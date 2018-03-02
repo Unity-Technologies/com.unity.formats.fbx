@@ -18,6 +18,8 @@ public class ManualUpdateEditorWindow : EditorWindow
 
     List<string> m_nodeNameToSuggest;
 
+    public bool Verbose { private set {;} get { return FbxExporters.EditorTools.ExportSettings.instance.Verbose; } }
+
     public void Init(FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility, FbxPrefab fbxPrefab)
     {
         FbxPrefabAutoUpdater.FbxPrefabUtility.UpdateList updates = new FbxPrefabAutoUpdater.FbxPrefabUtility.UpdateList(new FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation(fbxPrefab.FbxHistory), fbxPrefab.FbxModel.transform, fbxPrefab);
@@ -33,9 +35,9 @@ public class ManualUpdateEditorWindow : EditorWindow
         m_nodeNameToSuggest.AddRange(m_nodesToCreate);
         m_nodeNameToSuggest.AddRange(m_nodesToRename);
 
-        // Add extra 1 for the [Delete] option
-        selectedNodesToDestroy = new int[m_nodeNameToSuggest.Count + 1];
-        selectedNodesToRename = new int[m_nodeNameToSuggest.Count + 1];
+        // Keep track of the selected combo option in each type
+        selectedNodesToDestroy = new int[m_nodesToDestroy.Count];
+        selectedNodesToRename = new int[m_nodesToRename.Count];
 
         // Default option for nodes to rename. Shows the current name mapping
         for (int i = 0; i < m_nodesToRename.Count; i++)
@@ -137,7 +139,10 @@ public class ManualUpdateEditorWindow : EditorWindow
                 stringpair.UnityObjectName = m_nodesToDestroy[i];
 
                 m_fbxPrefab.NameMapping.Add(stringpair);
-                Debug.Log("Mapped Unity: " + stringpair.UnityObjectName + " to FBX: " + stringpair.FBXObjectName);
+
+                if (Verbose) {
+                    Debug.Log ("Mapped Unity: " + stringpair.UnityObjectName + " to FBX: " + stringpair.FBXObjectName);
+                }
             }
         }
 
@@ -161,11 +166,15 @@ public class ManualUpdateEditorWindow : EditorWindow
                     stringpair.UnityObjectName = currentUnityNodeName;
                     m_fbxPrefab.NameMapping.Add(stringpair);
 
-                    Debug.Log("Mapped Unity: " + stringpair.UnityObjectName + " to FBX: " + stringpair.FBXObjectName);
+                    if (Verbose) {
+                        Debug.Log ("Mapped Unity: " + stringpair.UnityObjectName + " to FBX: " + stringpair.FBXObjectName);
+                    }
                 }
                 else
                 {
-                    Debug.Log("ALREADY Mapped Unity: " + currentUnityNodeName + " to FBX: " + options[selectedNodesToRename[i]].text);
+                    if (Verbose) {
+                        Debug.Log ("ALREADY Mapped Unity: " + currentUnityNodeName + " to FBX: " + options [selectedNodesToRename [i]].text);
+                    }
                 }
             }
         }
