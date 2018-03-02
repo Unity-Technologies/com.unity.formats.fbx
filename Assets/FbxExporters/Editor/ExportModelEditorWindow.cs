@@ -102,13 +102,44 @@ namespace FbxExporters
                 GUILayout.BeginHorizontal ();
                 EditorGUILayout.LabelField(new GUIContent(
                     "Export Name:",
-                    "Filename to save model to."),GUILayout.Width(LabelWidth - FieldOffset));
+                    "Filename to save model to."),GUILayout.Width(LabelWidth-3));
 
-                m_exportFileName = EditorGUILayout.TextField (m_exportFileName);
+                // Show the export name with an uneditable ".fbx" at the end
+                EditorGUILayout.BeginVertical ();
+                var style = new GUIStyle (EditorStyles.textField);
+                EditorGUILayout.BeginHorizontal(style, GUILayout.Height(EditorGUIUtility.singleLineHeight));
+                EditorGUI.indentLevel--;
+
+                var textFieldStyle = new GUIStyle(GUIStyle.none);
+                textFieldStyle.alignment = TextAnchor.LowerCenter;
+                textFieldStyle.margin = new RectOffset (0, 0, 0, 0);
+                var padding = textFieldStyle.padding;
+                padding.left = 0;
+                padding.right = 0;
+                textFieldStyle.padding = padding;
+                textFieldStyle.clipping = TextClipping.Clip;
+
+                var textFieldSize = textFieldStyle.CalcSize (new GUIContent(m_exportFileName));
+                m_exportFileName = EditorGUILayout.TextField (m_exportFileName, textFieldStyle, GUILayout.Width(textFieldSize.x + 5), GUILayout.MinWidth(5));
+                m_exportFileName = ModelExporter.ConvertToValidFilename (m_exportFileName);
+
+                var labelStyle = new GUIStyle (GUIStyle.none);
+                labelStyle.alignment = TextAnchor.MiddleLeft;
+                labelStyle.richText = true;
+                labelStyle.margin = new RectOffset (0, 0, 0, 0);
+                labelStyle.padding = new RectOffset (0, 0, 0, 0);
+                labelStyle.contentOffset = new Vector2 (-7, 0);
+                var fbxLabelWidth = labelStyle.CalcSize (new GUIContent (".fbx")).x;
+                EditorGUILayout.LabelField ("<color=#808080ff>.fbx</color>", labelStyle, GUILayout.Width(fbxLabelWidth));
+                EditorGUI.indentLevel++;
+
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical ();
+                /*m_exportFileName = EditorGUILayout.TextField (m_exportFileName);
                 if (!m_exportFileName.EndsWith (".fbx")) {
                     m_exportFileName += ".fbx";
                 }
-                m_exportFileName = ModelExporter.ConvertToValidFilename(m_exportFileName);
+                m_exportFileName = ModelExporter.ConvertToValidFilename(m_exportFileName);*/
                 GUILayout.EndHorizontal ();
 
                 GUILayout.BeginHorizontal();
