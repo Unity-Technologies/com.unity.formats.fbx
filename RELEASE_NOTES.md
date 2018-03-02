@@ -1,5 +1,21 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint48
+
+NEW FEATURES
+
+* Export Settings: Added option to export meshes without renderers
+
+If selected, export meshes on GameObjects that have a mesh filter but no mesh renderer (e.g. Colliders).
+
+FIXES
+
+* TimelineClipExport: use EditorClip name instead of AnimationClip name for filename
+* TimelineClipExport: allow user to select filename for export instead of just the folder name
+* FbxExporter: export meshes in model prefab instances as mesh instances in fbx
+* FbxExporter: fix so animating spot angle in Unity animates cone angle in Maya (not penumbra)
+* MayaIntegration: fix so export set names don't contain invalid chars from filenames (e.g. spaces)
+
 **Version**: sprint47
 
 NEW FEATURES
