@@ -448,6 +448,7 @@ namespace FbxExporters.EditorTools {
         public bool HideSendToUnityMenu = true;
         public int ExportFormatSelection;
         public bool BakeAnimation = true;
+        public bool exportMeshNoRenderer = false;
 
         public string IntegrationSavePath;
 
