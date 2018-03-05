@@ -58,7 +58,7 @@ namespace FbxExporters.EditorTools {
 
             exportSettings.exportMeshNoRenderer = EditorGUILayout.Toggle(
                 new GUIContent("Export Unrendered:",
-                    "If unchecked, meshes that don't have renderers won't be exported."),
+                    "If checked, meshes will be exported even if they don't have a Renderer component."),
                 exportSettings.exportMeshNoRenderer
             );
 
