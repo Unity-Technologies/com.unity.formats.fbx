@@ -86,8 +86,8 @@ namespace FbxExporters
                 var wasExported = new List<GameObject>();
                 foreach(var go in toExport) {
                     try {
-                        wasExported.Add(Convert(go,
-                            directoryFullPath: directoryFullPath));
+                        ConvertToPrefabEditorWindow.Init(go);
+                        wasExported.Add(go);
                     } catch(System.Exception xcp) {
                         Debug.LogException(xcp);
                     }
