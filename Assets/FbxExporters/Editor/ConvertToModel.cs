@@ -179,13 +179,6 @@ namespace FbxExporters
                 string directoryFullPath = null,
                 string fbxFullPath = null, string destinationPath = null)
             {
-               /* bool isProjectView;
-                PrefabType unityPrefabType2 = PrefabUtility.GetPrefabType(toConvert);
-                if (unityPrefabType2 == PrefabType.ModelPrefab)
-                {
-                    isProjectView = true;
-                }*/
-
                 // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
                 // Children of model prefab instances will also have "model prefab instance"
                 // as their prefab type, so it is important that it is the root that is selected.
@@ -197,7 +190,12 @@ namespace FbxExporters
                 // Both the Cube and Sphere will have ModelPrefabInstance as their prefab type.
                 // However, when selecting the Sphere to convert, we don't want to connect it to the
                 // existing FBX but create a new FBX containing just the sphere.
+                bool isProjectView = false;
                 PrefabType unityPrefabType = PrefabUtility.GetPrefabType(toConvert);
+                if (unityPrefabType == PrefabType.ModelPrefab)
+                {
+                    isProjectView = true;
+                }
                 if (unityPrefabType == PrefabType.ModelPrefabInstance && toConvert.Equals(PrefabUtility.FindPrefabRoot(toConvert))) {
                     // don't re-export fbx
                     // create prefab out of model instance in scene, link to existing fbx
@@ -219,7 +217,7 @@ namespace FbxExporters
                     string fbxBasename = ModelExporter.ConvertToValidFilename (toConvert.name + ".fbx");
 
                     fbxFullPath = Path.Combine (directoryFullPath, fbxBasename);
-                    if (File.Exists (fbxFullPath) /* && !isProjectView*/) {
+                    if (File.Exists (fbxFullPath)  && !isProjectView) {
                         fbxFullPath = IncrementFileName (directoryFullPath, fbxFullPath);
                     }
                 }
@@ -237,7 +235,7 @@ namespace FbxExporters
                 EnforceUniqueNames (new GameObject[] {toConvert});
 
                 // Export to FBX. It refreshes the database.
-                if (/*!isProjectView*/ unityPrefabType != PrefabType.ModelPrefab)
+                if (!isProjectView)
                 {
                     string fbxActualPath = ModelExporter.ExportObject (fbxFullPath, toConvert, lodExportType: EditorTools.ExportSettings.LODExportType.All);
                     if (fbxActualPath != fbxFullPath) {
@@ -255,7 +253,7 @@ namespace FbxExporters
                 // Copy the mesh/materials from the FBX
                 UpdateFromSourceRecursive (toConvert, unityMainAsset);
 
-                SetupFbxPrefab (toConvert, unityMainAsset, projectRelativePath, fbxFullPath, unityPrefabType == PrefabType.ModelPrefab, destinationPath: destinationPath);
+                SetupFbxPrefab (toConvert, unityMainAsset, projectRelativePath, fbxFullPath, isProjectView, destinationPath: destinationPath);
 
                 toConvert.name = Path.GetFileNameWithoutExtension (fbxFullPath);
                 return toConvert;
