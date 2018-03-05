@@ -35,8 +35,9 @@ namespace FbxExporters.UnitTests
                     GameObject atObject = pd.GetGenericBinding (output.sourceObject) as GameObject;
                     // One file by animation clip
                     foreach (TimelineClip timeLineClip in at.GetClips()) {
-                        ModelExporter.ExportSingleTimelineClip (timeLineClip, folderPath, atObject);
-                        FileAssert.Exists (string.Format("{0}/{1}@{2}", folderPath, atObject.name, "Recorded.fbx"));
+                        var filePath = string.Format ("{0}/{1}@{2}", folderPath, atObject.name, "Recorded.fbx");
+                        ModelExporter.ExportSingleTimelineClip (timeLineClip, atObject, filePath);
+                        FileAssert.Exists (filePath);
                     }
                 }
             }
