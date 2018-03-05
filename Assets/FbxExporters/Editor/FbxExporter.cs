@@ -2951,29 +2951,18 @@ namespace FbxExporters
 			[MenuItem(TimelineClipMenuItemName, false, 31)]
             static void OnClipContextClick(MenuCommand command)
             {
-                // Now that we know we have stuff to export, get the user-desired path.
-                string directory = string.IsNullOrEmpty(LastFilePath)
-                                      ? Application.dataPath
-                                      : System.IO.Path.GetDirectoryName(LastFilePath);
-
-                string title = "Select the folder in which the animation files from the timeline will be exported";
-                string folderPath = EditorUtility.SaveFolderPanel(title, directory, "");
-
-                if (string.IsNullOrEmpty(folderPath))
-                {
-                    return;
-                }
-                Debug.Log(folderPath);
-
                 Object[] selectedObjects = Selection.objects;
 
                 foreach (Object editorClipSelected in selectedObjects)
                 {
-                    ExportSingleEditorClip(editorClipSelected, folderPath);
+                    // export first selected editor clip.
+                    if (ExportSingleEditorClip (editorClipSelected)) {
+                        return;
+                    }
                 }
             }
 
-            public static void ExportSingleEditorClip(Object editorClipSelected, string folderPath)
+            public static bool ExportSingleEditorClip(Object editorClipSelected)
             {
                 if (editorClipSelected.GetType().Name.Contains("EditorClip"))
                 {
@@ -2985,11 +2974,13 @@ namespace FbxExporters
 					AnimationTrack editorClipAnimationTrack = selClipItemParentTrack as AnimationTrack;
                     GameObject animationTrackGObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (editorClipAnimationTrack) as GameObject;
 
-                    ExportSingleTimelineClip(timeLineClip, folderPath, animationTrackGObject);
+                    ExportSingleTimelineClip(timeLineClip, animationTrackGObject);
+                    return true;
                 } 
+                return false;
             }
 
-            public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, string folderPath, GameObject animationTrackGObject)
+            public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, GameObject animationTrackGObject, string folderPath = null)
             {
                 string AnimFbxFormat = AnimFbxFileFormat;
                 if (timelineClipSelected.displayName.Contains("@"))
@@ -2998,9 +2989,15 @@ namespace FbxExporters
                 }
                 string filePath = string.Format(AnimFbxFormat, folderPath, animationTrackGObject.name, timelineClipSelected.displayName);
 
-				//string filePath = folderPath + "/" + animationTrackGObject.name + "@" + timelineClipSelected.animationClip.name + ".fbx";
-				UnityEngine.Object[] myArray = new UnityEngine.Object[] { animationTrackGObject, timelineClipSelected.animationClip };
-				ExportObjects(filePath, myArray, AnimationExportType.timelineAnimationClip);
+                if (string.IsNullOrEmpty (filePath)) {
+                    return;
+                }
+                UnityEngine.Object[] exportArray = new UnityEngine.Object[] {
+                    animationTrackGObject,
+                    timelineClipSelected.animationClip
+                };
+                ExportObjects (filePath, exportArray, AnimationExportType.timelineAnimationClip);
+
             }
 
             /// <summary>
@@ -3047,29 +3044,26 @@ namespace FbxExporters
 
             public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath)
             {
-                Debug.Log(objectWithPlayableDirector.GetType().BaseType.ToString() + ":" + objectWithPlayableDirector.name);
                 PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
                 if (pd != null)
                 {
                     foreach (PlayableBinding output in pd.playableAsset.outputs)
                     {
-                        AnimationTrack at = output.sourceObject as AnimationTrack;
+                        AnimationTrack animationTrack = output.sourceObject as AnimationTrack;
 
-                        GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
+                        GameObject animationTrackObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
 			            // One file by animation clip
-			            foreach(TimelineClip timeLineClip in at.GetClips())
+			            foreach(TimelineClip timelineClip in animationTrack.GetClips())
 			            {
-
                             string AnimFbxFormat = AnimFbxFileFormat;
-                            if (timeLineClip.displayName.Contains("@"))
+                            if (timelineClip.displayName.Contains("@"))
                             {
                                 AnimFbxFormat = "{0}/{2}.fbx";
                             }
-                            string filePath = string.Format(AnimFbxFormat, folderPath, atObject.name, timeLineClip.displayName);
+                            string filePath = string.Format(AnimFbxFormat, folderPath, animationTrackObject.name, timelineClip.displayName);
 
-				            //string filePath = folderPath + "/" + atObject.name + "@" + timeLineClip.animationClip.name + ".fbx";
-				            UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timeLineClip.animationClip };
-				            ExportObjects(filePath, myArray, AnimationExportType.timelineAnimationClip);
+				            UnityEngine.Object[] exportArray = new UnityEngine.Object[] { animationTrackObject, timelineClip.animationClip };
+				            ExportObjects(filePath, exportArray, AnimationExportType.timelineAnimationClip);
 			            }
                     }
                 }
@@ -3647,7 +3641,6 @@ namespace FbxExporters
             /// Export a list of (Game) objects to FBX file. 
             /// Use the SaveFile panel to allow user to enter a file name.
             /// <summary>
-            //public static string ExportObjects (string filePath, UnityEngine.Object[] objects = null, AnimationExportType exportType = AnimationExportType.all /*, bool animOnly = false*/)
             public static string ExportObjects (
                 string filePath,
                 UnityEngine.Object[] objects = null,
@@ -3704,7 +3697,6 @@ namespace FbxExporters
                 return null;
             }
 
-            //public static string ExportObject (string filePath, UnityEngine.Object root, AnimationExportType exportType = AnimationExportType.all /*, bool animOnly = false*/)
             public static string ExportObject (
                 string filePath, UnityEngine.Object root,
                 AnimationExportType exportType = AnimationExportType.all,

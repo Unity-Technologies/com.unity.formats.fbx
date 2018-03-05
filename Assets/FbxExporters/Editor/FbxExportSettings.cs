@@ -56,6 +56,12 @@ namespace FbxExporters.EditorTools {
                 exportSettings.autoUpdaterEnabled
             );
 
+            exportSettings.exportMeshNoRenderer = EditorGUILayout.Toggle(
+                new GUIContent("Export Unrendered:",
+                    "If checked, meshes will be exported even if they don't have a Renderer component."),
+                exportSettings.exportMeshNoRenderer
+            );
+
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
