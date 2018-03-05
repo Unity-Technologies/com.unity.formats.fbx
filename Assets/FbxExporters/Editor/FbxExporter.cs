@@ -2988,8 +2988,11 @@ namespace FbxExporters
                 if (string.IsNullOrEmpty (filePath)) {
                     return;
                 }
-				UnityEngine.Object[] myArray = new UnityEngine.Object[] { animationTrackGObject, timelineClipSelected.animationClip };
-				ExportObjects(filePath, myArray, AnimationExportType.timelineAnimationClip);
+                UnityEngine.Object[] myArray = new UnityEngine.Object[] {
+                    animationTrackGObject,
+                    timelineClipSelected.animationClip
+                };
+                ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
             }
 
             /// <summary>
