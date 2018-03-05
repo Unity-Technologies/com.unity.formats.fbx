@@ -451,6 +451,12 @@ namespace FbxExporters.EditorTools {
         [SerializeField]
         private ExportModelSettingsSerialize exportModelSettingsSerialize;
 
+        [System.NonSerialized]
+        public ConvertToPrefabSettings convertToPrefabSettings;
+
+        [SerializeField]
+        private ConvertToPrefabSettingsSerialize convertToPrefabSettingsSerialize;
+
         // ---------------- get functions for options in ExportModelSettings ----------------
         public static ExportModelSettingsSerialize.ExportFormat GetExportFormat(){
             return instance.exportModelSettings.info.exportFormat;
@@ -498,6 +504,8 @@ namespace FbxExporters.EditorTools {
             BakeAnimation = true;
             exportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             exportModelSettingsSerialize = exportModelSettings.info;
+            convertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
+            convertToPrefabSettingsSerialize = convertToPrefabSettings.info;
         }
 
         /// <summary>
@@ -1234,11 +1242,17 @@ namespace FbxExporters.EditorTools {
                 instance.exportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             }
             instance.exportModelSettings.info = instance.exportModelSettingsSerialize;
+
+            if (!instance.convertToPrefabSettings) {
+                instance.convertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
+            }
+            instance.convertToPrefabSettings.info = instance.convertToPrefabSettingsSerialize;
         }
 
         public void Save()
         {
             exportModelSettingsSerialize = exportModelSettings.info;
+            convertToPrefabSettingsSerialize = convertToPrefabSettings.info;
             instance.Save (true);
         }
     }
