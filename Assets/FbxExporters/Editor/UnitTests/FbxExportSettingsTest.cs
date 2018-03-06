@@ -28,8 +28,8 @@ namespace FbxExporters.UnitTests
                 | System.Reflection.BindingFlags.Instance;
             var t = typeof (ExportSettings);
 
-            s_SavePathField = t.GetField ("convertToModelSavePath", privates);
-            Assert.IsNotNull (s_SavePathField, "convertToModelSavePath");
+            s_SavePathField = t.GetField ("maxStoredSavePaths", privates);
+            Assert.IsNotNull (s_SavePathField, "maxStoredSavePaths");
 
             // static fields can't be found through inheritance with GetField.
             // if we change the inheritance diagram, we have to change t.BaseType here.
