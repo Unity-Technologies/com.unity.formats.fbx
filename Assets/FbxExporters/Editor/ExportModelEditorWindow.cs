@@ -27,7 +27,7 @@ namespace FbxExporters
             protected bool m_singleHierarchyExport = true;
 
             protected UnityEditor.Editor m_innerEditor;
-            private FbxExportPresetSelectorReceiver m_receiver;
+            protected FbxExportPresetSelectorReceiver m_receiver;
 
             private static GUIContent presetIcon { get { return EditorGUIUtility.IconContent ("Preset.Context"); }}
             private static GUIStyle presetIconButton { get { return new GUIStyle("IconButton"); }}
@@ -70,7 +70,7 @@ namespace FbxExporters
                 this.titleContent = m_windowTitle;
             }
 
-            private void InitializeReceiver(){
+            protected void InitializeReceiver(){
                 if (!m_receiver) {
                     m_receiver = ScriptableObject.CreateInstance<FbxExportPresetSelectorReceiver> () as FbxExportPresetSelectorReceiver;
                     m_receiver.SelectionChanged -= OnPresetSelectionChanged;
@@ -128,6 +128,8 @@ namespace FbxExporters
                 return false;
             }
 
+            protected abstract void ShowPresetReceiver ();
+
             protected void OnGUI ()
             {
                 // Increasing the label width so that none of the text gets cut off
@@ -136,10 +138,7 @@ namespace FbxExporters
                 GUILayout.BeginHorizontal ();
                 GUILayout.FlexibleSpace ();
                 if(EditorGUILayout.DropdownButton(presetIcon, FocusType.Keyboard, presetIconButton)){
-                    InitializeReceiver ();
-                    m_receiver.SetTarget(ExportSettings.instance.exportModelSettings);
-                    m_receiver.SetInitialValue (new Preset (ExportSettings.instance.exportModelSettings));
-                    UnityEditor.Presets.PresetSelector.ShowSelector(ExportSettings.instance.exportModelSettings, null, true, m_receiver);
+                    ShowPresetReceiver ();
                 }
                 GUILayout.EndHorizontal();
 
@@ -298,6 +297,14 @@ namespace FbxExporters
                     // asset folder view.
                     AssetDatabase.Refresh ();
                 }
+            }
+
+            protected override void ShowPresetReceiver ()
+            {
+                InitializeReceiver ();
+                m_receiver.SetTarget(ExportSettings.instance.exportModelSettings);
+                m_receiver.SetInitialValue (new Preset (ExportSettings.instance.exportModelSettings));
+                UnityEditor.Presets.PresetSelector.ShowSelector(ExportSettings.instance.exportModelSettings, null, true, m_receiver);
             }
         }
     }
