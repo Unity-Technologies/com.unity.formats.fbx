@@ -163,9 +163,6 @@ namespace FbxExporters.UnitTests
         [Test]
         public void TestGetSetFields ()
         {
-/*            var defaultRelativePath = ExportSettings.GetRelativeSavePath ();
-            Assert.AreEqual (ExportSettings.kDefaultSavePath, defaultRelativePath);
-
             // the path to Assets but with platform-dependent separators
             var appDataPath = Application.dataPath.Replace (Path.AltDirectorySeparatorChar,
                     Path.DirectorySeparatorChar);
@@ -174,15 +171,28 @@ namespace FbxExporters.UnitTests
             var dataPath = Path.GetFullPath (Path.Combine (appDataPath, ExportSettings.kDefaultSavePath));
             Assert.AreEqual (dataPath, defaultAbsolutePath);
 
+            var prefabDefaultAbsPath = ExportSettings.GetPrefabAbsoluteSavePath ();
+            Assert.AreEqual (dataPath, prefabDefaultAbsPath);
+
             // set; check that the saved value is platform-independent,
             // that the relative path uses / like in unity,
             // and that the absolute path is platform-specific
-            ExportSettings.SetRelativeSavePath ("/a\\b/c/\\");
-            var convertToModelSavePath = s_SavePathField.GetValue (ExportSettings.instance);
-            Assert.AreEqual ("a/b/c", convertToModelSavePath);
-            Assert.AreEqual ("a/b/c", ExportSettings.GetRelativeSavePath ());
+            ExportSettings.AddFbxSavePath ("/a\\b/c/\\");
+            ExportSettings.AddPrefabSavePath ("/a\\b/c/\\");
+
+            Assert.That (ExportSettings.GetRelativeFbxSavePaths () [0], Is.EqualTo ("Assets \u2044 a⁄b⁄c"));
+            Assert.That (ExportSettings.GetRelativePrefabSavePaths () [0], Is.EqualTo ("Assets \u2044 a⁄b⁄c"));
+
             var platformPath = Path.Combine ("a", Path.Combine ("b", "c"));
-            Assert.AreEqual (Path.Combine (appDataPath, platformPath), ExportSettings.GetFbxAbsoluteSavePath ());*/
+            Assert.AreEqual (Path.Combine (appDataPath, platformPath), ExportSettings.GetFbxAbsoluteSavePath ());
+            Assert.AreEqual (Path.Combine (appDataPath, platformPath), ExportSettings.GetPrefabAbsoluteSavePath ());
+
+            ExportSettings.AddFbxSavePath ("test");
+            ExportSettings.AddPrefabSavePath ("test2");
+
+            // 3 including the default path
+            Assert.That (ExportSettings.GetRelativeFbxSavePaths ().Length, Is.EqualTo (3));
+            Assert.That (ExportSettings.GetRelativePrefabSavePaths ().Length, Is.EqualTo (3));
         }
 
         [Test]

@@ -960,7 +960,7 @@ namespace FbxExporters.EditorTools {
             // that affects the dropdown layout.
             string forwardslash = "\u2044";
             for (int i = 0; i < relSavePaths.Length; i++) {
-                relSavePaths [i] = string.Format("Assets {0} {1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", "\\"));
+                relSavePaths [i] = string.Format("Assets {0} {1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
             }
             return relSavePaths;
         }
@@ -989,6 +989,7 @@ namespace FbxExporters.EditorTools {
         /// <param name="savePath">Save path.</param>
         /// <param name="exportSavePaths">Export save paths.</param>
         public static void AddSavePath(string savePath, ref List<string> exportSavePaths){
+            savePath = NormalizePath (savePath, isRelative: true);
             if (exportSavePaths.Contains (savePath)) {
                 // move to first place if it isn't already
                 if (exportSavePaths [0] == savePath) {
