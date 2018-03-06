@@ -84,10 +84,7 @@ namespace FbxExporters
 
             protected override void ShowPresetReceiver ()
             {
-                InitializeReceiver ();
-                m_receiver.SetTarget(ExportSettings.instance.convertToPrefabSettings);
-                m_receiver.SetInitialValue (new Preset (ExportSettings.instance.convertToPrefabSettings));
-                UnityEditor.Presets.PresetSelector.ShowSelector(ExportSettings.instance.convertToPrefabSettings, null, true, m_receiver);
+                ShowPresetReceiver (ExportSettings.instance.convertToPrefabSettings);
             }
 
             protected override void CreateCustomUI ()

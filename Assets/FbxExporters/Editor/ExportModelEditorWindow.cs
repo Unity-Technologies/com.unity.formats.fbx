@@ -130,6 +130,13 @@ namespace FbxExporters
 
             protected abstract void ShowPresetReceiver ();
 
+            protected void ShowPresetReceiver(UnityEngine.Object target){
+                InitializeReceiver ();
+                m_receiver.SetTarget(target);
+                m_receiver.SetInitialValue (new Preset (target));
+                UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, m_receiver);
+            }
+
             protected void OnGUI ()
             {
                 // Increasing the label width so that none of the text gets cut off
@@ -301,10 +308,7 @@ namespace FbxExporters
 
             protected override void ShowPresetReceiver ()
             {
-                InitializeReceiver ();
-                m_receiver.SetTarget(ExportSettings.instance.exportModelSettings);
-                m_receiver.SetInitialValue (new Preset (ExportSettings.instance.exportModelSettings));
-                UnityEditor.Presets.PresetSelector.ShowSelector(ExportSettings.instance.exportModelSettings, null, true, m_receiver);
+                ShowPresetReceiver (ExportSettings.instance.exportModelSettings);
             }
         }
     }
