@@ -956,8 +956,11 @@ namespace FbxExporters.EditorTools {
                 exportSavePaths.Add (kDefaultSavePath);
             }
             string[] relSavePaths = new string[exportSavePaths.Count];
+            // use special forward slash unicode char as "/" is a special character
+            // that affects the dropdown layout.
+            string forwardslash = "\u2044";
             for (int i = 0; i < relSavePaths.Length; i++) {
-                relSavePaths [i] = string.Format("Assets\\{0}", exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", "\\"));
+                relSavePaths [i] = string.Format("Assets {0} {1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", "\\"));
             }
             return relSavePaths;
         }
