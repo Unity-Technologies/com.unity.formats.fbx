@@ -122,7 +122,7 @@ namespace FbxExporters.UnitTests
 
             // Convert it to a prefab -- but keep the cube.
             var cubePrefabInstance = ConvertToModel.Convert(cube,
-                directoryFullPath: path);
+                fbxDirectoryFullPath: path);
 
             // Make sure it's what we expect.
             Assert.That(cube); // we kept the original
@@ -155,7 +155,7 @@ namespace FbxExporters.UnitTests
             // Convert it again, make sure there's only one FbxPrefab (see UNI-25528).
             // Also make sure we deleted.
             var cubePrefabInstance2 = ConvertToModel.Convert(cubePrefabInstance,
-                directoryFullPath: path);
+                fbxDirectoryFullPath: path);
             Assert.That(cubePrefabInstance2.GetComponents<FbxPrefab>().Length, Is.EqualTo(1));
         }
 

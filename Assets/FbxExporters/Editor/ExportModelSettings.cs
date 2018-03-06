@@ -43,18 +43,21 @@ namespace FbxExporters.EditorTools
             exportSettings.include = (ExportModelSettingsSerialize.Include)EditorGUILayout.Popup((int)exportSettings.include, includeOptions);
             GUILayout.EndHorizontal();
 
-            // greyed out if animation only
-            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("LOD level", "Select which LOD to export."), GUILayout.Width(LabelWidth - FieldOffset));
+            // greyed out if animation only
+            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
             exportSettings.lodLevel = (ExportModelSettingsSerialize.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodLevel, lodOptions);
+            EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Object(s) Position", "Select an option for exporting object's transform."), GUILayout.Width(LabelWidth - FieldOffset));
+            // greyed out if animation only
+            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
             exportSettings.objectPosition = (ExportModelSettingsSerialize.ObjectPosition)EditorGUILayout.Popup((int)exportSettings.objectPosition, objPositionOptions);
-            GUILayout.EndHorizontal();
             EditorGUI.EndDisabledGroup ();
+            GUILayout.EndHorizontal();
 
             // TODO: add implementation for these options, grey out in the meantime
             EditorGUI.BeginDisabledGroup (true);

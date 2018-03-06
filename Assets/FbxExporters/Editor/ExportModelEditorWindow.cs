@@ -34,9 +34,9 @@ namespace FbxExporters
 
             private bool m_showOptions;
 
-            private GUIStyle m_nameTextFieldStyle;
-            private GUIStyle m_fbxExtLabelStyle;
-            private float m_fbxExtLabelWidth;
+            protected GUIStyle m_nameTextFieldStyle;
+            protected GUIStyle m_fbxExtLabelStyle;
+            protected float m_fbxExtLabelWidth;
 
             protected virtual void OnEnable(){
                 InitializeReceiver ();
@@ -124,6 +124,10 @@ namespace FbxExporters
             /// </summary>
             protected virtual void CreateCustomUI(){}
 
+            protected virtual bool DisableNameSelection(){
+                return false;
+            }
+
             protected void OnGUI ()
             {
                 // Increasing the label width so that none of the text gets cut off
@@ -147,6 +151,7 @@ namespace FbxExporters
                     "Export Name:",
                     "Filename to save model to."),GUILayout.Width(LabelWidth-TextFieldAlignOffset));
 
+                EditorGUI.BeginDisabledGroup (DisableNameSelection());
                 // Show the export name with an uneditable ".fbx" at the end
                 //-------------------------------------
                 EditorGUILayout.BeginVertical ();
@@ -163,6 +168,7 @@ namespace FbxExporters
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.EndVertical ();
                 //-----------------------------------
+                EditorGUI.EndDisabledGroup ();
                 GUILayout.EndHorizontal ();
 
                 GUILayout.BeginHorizontal();
@@ -170,9 +176,9 @@ namespace FbxExporters
                     "Export Path:",
                     "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
 
-                var pathLabels = ExportSettings.GetRelativeSavePaths();
+                var pathLabels = ExportSettings.GetRelativeFbxSavePaths();
 
-                ExportSettings.instance.selectedExportModelPath = EditorGUILayout.Popup (ExportSettings.instance.selectedExportModelPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+                ExportSettings.instance.selectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.selectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
                 if (GUILayout.Button(new GUIContent("...", "Browse to a new location to export to"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
                 {
@@ -192,7 +198,7 @@ namespace FbxExporters
                         }
                         else
                         {
-                            ExportSettings.AddExportModelSavePath(relativePath);
+                            ExportSettings.AddFbxSavePath(relativePath);
 
                             // Make sure focus is removed from the selectable label
                             // otherwise it won't update
@@ -231,6 +237,23 @@ namespace FbxExporters
                     SaveExportSettings ();
                 }
             }
+
+            protected void CheckFileExists(string filePath){
+                // check if file already exists, give a warning if it does
+                if (System.IO.File.Exists (filePath)) {
+                    bool overwrite = UnityEditor.EditorUtility.DisplayDialog (
+                        string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), 
+                        string.Format("File {0} already exists.", filePath), 
+                        "Overwrite", "Cancel");
+                    if (!overwrite) {
+                        this.Close ();
+
+                        if (GUI.changed) {
+                            SaveExportSettings ();
+                        }
+                    }
+                }
+            }
         }
 
         public class ExportModelEditorWindow : ExportOptionsEditorWindow
@@ -258,25 +281,11 @@ namespace FbxExporters
             }
 
             protected override void Export(){
-                var filePath = ExportSettings.GetExportModelAbsoluteSavePath ();
+                var filePath = ExportSettings.GetFbxAbsoluteSavePath ();
 
                 filePath = System.IO.Path.Combine (filePath, m_exportFileName + ".fbx");
 
-                // check if file already exists, give a warning if it does
-                if (System.IO.File.Exists (filePath)) {
-                    bool overwrite = UnityEditor.EditorUtility.DisplayDialog (
-                        string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), 
-                        string.Format("File {0} already exists.", filePath), 
-                        "Overwrite", "Cancel");
-                    if (!overwrite) {
-                        this.Close ();
-
-                        if (GUI.changed) {
-                            SaveExportSettings ();
-                        }
-                        return;
-                    }
-                }
+                CheckFileExists (filePath);
 
                 if (ModelExporter.ExportObjects (filePath, exportType: m_animExportType, lodExportType: ExportSettings.GetLODExportType()) != null) {
                     // refresh the asset database so that the file appears in the

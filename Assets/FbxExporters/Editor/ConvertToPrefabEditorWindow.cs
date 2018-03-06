@@ -12,18 +12,22 @@ namespace FbxExporters
         public class ConvertToPrefabEditorWindow : ExportOptionsEditorWindow
         {
             protected override GUIContent m_windowTitle { get { return new GUIContent ("Convert Options"); }}
-            private GameObject m_toConvert;
+            private GameObject[] m_toConvert;
+            private string m_prefabFileName = "";
 
-            public static void Init (GameObject toConvert)
+            public static void Init (GameObject[] toConvert)
             {
                 ConvertToPrefabEditorWindow window = CreateWindow<ConvertToPrefabEditorWindow> ();
-                window.InitializeWindow (filename: toConvert.name, singleHierarchyExport: true, exportType: ModelExporter.AnimationExportType.all);
-                window.SetGameObjectToConvert (toConvert);
+                window.InitializeWindow (filename: toConvert.Length >= 1? toConvert[0].name : "", singleHierarchyExport: true, exportType: ModelExporter.AnimationExportType.all);
+                window.SetGameObjectsToConvert (toConvert);
                 window.Show ();
             }
 
-            public void SetGameObjectToConvert(GameObject toConvert){
+            public void SetGameObjectsToConvert(GameObject[] toConvert){
                 m_toConvert = toConvert;
+                if (toConvert.Length >= 1) {
+                    m_prefabFileName = toConvert [0].name;
+                }
             }
 
             protected override void OnEnable ()
@@ -42,35 +46,85 @@ namespace FbxExporters
 
             protected override void Export ()
             {
-                var filePath = ExportSettings.GetExportModelAbsoluteSavePath ();
+                var fbxDirPath = ExportSettings.GetFbxAbsoluteSavePath ();
+                var fbxPath = System.IO.Path.Combine (fbxDirPath, m_exportFileName + ".fbx");
 
-                filePath = System.IO.Path.Combine (filePath, m_exportFileName + ".fbx");
+                var prefabDirPath = ExportSettings.GetPrefabAbsoluteSavePath ();
+                var prefabPath = System.IO.Path.Combine (prefabDirPath, m_prefabFileName + ".prefab");
 
                 // check if file already exists, give a warning if it does
-                if (System.IO.File.Exists (filePath)) {
-                    bool overwrite = UnityEditor.EditorUtility.DisplayDialog (
-                        string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), 
-                        string.Format("File {0} already exists.", filePath), 
-                        "Overwrite", "Cancel");
-                    if (!overwrite) {
-                        this.Close ();
+                CheckFileExists (fbxPath);
+                CheckFileExists (prefabPath);
 
-                        if (GUI.changed) {
-                            SaveExportSettings ();
-                        }
-                        return;
-                    }
-                }
-
-                if (!m_toConvert) {
+                if (m_toConvert == null) {
                     Debug.LogError ("FbxExporter: missing object for conversion");
                 }
-                ConvertToModel.Convert (m_toConvert, fbxFullPath: filePath);
+
+                if (m_toConvert.Length == 1) {
+                    ConvertToModel.Convert (m_toConvert[0], fbxFullPath: fbxPath, prefabFullPath: prefabPath);
+                    return;
+                }
+
+                foreach (var go in m_toConvert) {
+                    ConvertToModel.Convert (go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath);
+                }
+            }
+
+            protected override bool DisableNameSelection ()
+            {
+                return m_toConvert.Length > 1;
             }
 
             protected override void CreateCustomUI ()
             {
-                base.CreateCustomUI ();
+                GUILayout.BeginHorizontal ();
+                EditorGUILayout.LabelField(new GUIContent(
+                    "Prefab Name:",
+                    "Filename to save prefab to."),GUILayout.Width(LabelWidth-FieldOffset));
+
+                EditorGUI.BeginDisabledGroup (DisableNameSelection());
+                m_prefabFileName = EditorGUILayout.TextField (m_prefabFileName);
+                m_prefabFileName = ModelExporter.ConvertToValidFilename (m_prefabFileName);
+                EditorGUI.EndDisabledGroup ();
+                GUILayout.EndHorizontal ();
+
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(new GUIContent(
+                    "Prefab Path:",
+                    "Relative path for saving Linked Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
+
+                var pathLabels = ExportSettings.GetRelativePrefabSavePaths();
+
+                ExportSettings.instance.selectedPrefabPath = EditorGUILayout.Popup (ExportSettings.instance.selectedPrefabPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+
+                if (GUILayout.Button(new GUIContent("...", "Browse to a new location to save prefab to"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
+                {
+                    string initialPath = Application.dataPath;
+
+                    string fullPath = EditorUtility.OpenFolderPanel(
+                        "Select Linked Prefab Save Path", initialPath, null
+                    );
+
+                    // Unless the user canceled, make sure they chose something in the Assets folder.
+                    if (!string.IsNullOrEmpty(fullPath))
+                    {
+                        var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
+                        if (string.IsNullOrEmpty(relativePath))
+                        {
+                            Debug.LogWarning("Please select a location in the Assets folder");
+                        }
+                        else
+                        {
+                            ExportSettings.AddPrefabSavePath(relativePath);
+
+                            // Make sure focus is removed from the selectable label
+                            // otherwise it won't update
+                            GUIUtility.hotControl = 0;
+                            GUIUtility.keyboardControl = 0;
+                        }
+                    }
+                }
+                GUILayout.EndHorizontal();
             }
         }	
 	}
