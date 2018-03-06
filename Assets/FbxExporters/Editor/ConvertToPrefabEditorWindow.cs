@@ -53,11 +53,13 @@ namespace FbxExporters
                 var prefabPath = System.IO.Path.Combine (prefabDirPath, m_prefabFileName + ".prefab");
 
                 // check if file already exists, give a warning if it does
-                CheckFileExists (fbxPath);
-                CheckFileExists (prefabPath);
+                if (!OverwriteExistingFile (fbxPath) || !OverwriteExistingFile (prefabPath)) {
+                    return;
+                }
 
                 if (m_toConvert == null) {
                     Debug.LogError ("FbxExporter: missing object for conversion");
+                    return;
                 }
 
                 if (m_toConvert.Length == 1) {

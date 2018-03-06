@@ -238,7 +238,12 @@ namespace FbxExporters
                 }
             }
 
-            protected void CheckFileExists(string filePath){
+            /// <summary>
+            /// Checks whether the file exists and if it does then asks if it should be overwritten.
+            /// </summary>
+            /// <returns><c>true</c>, if file should be overwritten, <c>false</c> otherwise.</returns>
+            /// <param name="filePath">File path.</param>
+            protected bool OverwriteExistingFile(string filePath){
                 // check if file already exists, give a warning if it does
                 if (System.IO.File.Exists (filePath)) {
                     bool overwrite = UnityEditor.EditorUtility.DisplayDialog (
@@ -246,13 +251,13 @@ namespace FbxExporters
                         string.Format("File {0} already exists.", filePath), 
                         "Overwrite", "Cancel");
                     if (!overwrite) {
-                        this.Close ();
-
                         if (GUI.changed) {
                             SaveExportSettings ();
                         }
+                        return false;
                     }
                 }
+                return true;
             }
         }
 
@@ -285,7 +290,9 @@ namespace FbxExporters
 
                 filePath = System.IO.Path.Combine (filePath, m_exportFileName + ".fbx");
 
-                CheckFileExists (filePath);
+                if (!OverwriteExistingFile (filePath)) {
+                    return;
+                }
 
                 if (ModelExporter.ExportObjects (filePath, exportType: m_animExportType, lodExportType: ExportSettings.GetLODExportType()) != null) {
                     // refresh the asset database so that the file appears in the
