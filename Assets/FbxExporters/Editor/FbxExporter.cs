@@ -1260,6 +1260,24 @@ namespace FbxExporters
                         return true;
                     }
                 }
+                else
+                {
+                    // We don't export the mesh because we already have it from the parent, but we still need to assign the material
+                    var renderer = unityGo.GetComponent<Renderer>();
+                    var materials = renderer ? renderer.sharedMaterials : null;
+
+                    Unity.FbxSdk.FbxSurfaceMaterial newMaterial = null;
+                    if (materials != null)
+                    {
+                        foreach (var mat in materials) {
+                            if (MaterialMap.TryGetValue(mat.name, out newMaterial));
+                            {
+                                fbxNode.AddMaterial(newMaterial);
+                            }
+                        }
+                    }
+                }
+            
 
                 if (fbxMesh == null) return false;
 
