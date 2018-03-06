@@ -1260,7 +1260,9 @@ namespace FbxExporters
                         return true;
                     }
                 }
-                else
+
+
+                if (SharedMeshes.TryGetValue (unityPrefabParent.name, out fbxMesh))
                 {
                     // We don't export the mesh because we already have it from the parent, but we still need to assign the material
                     var renderer = unityGo.GetComponent<Renderer>();
@@ -1276,14 +1278,26 @@ namespace FbxExporters
                             }
                         }
                     }
+
+                    // set the fbxNode containing the mesh
+                    fbxNode.SetNodeAttribute (fbxMesh);
+                    fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
                 }
-            
+                else
+                {
+                    if (ExportMesh (unityGo, fbxNode) && fbxNode.GetMesh() != null) {
+                        SharedMeshes [unityPrefabParent.name] = fbxNode.GetMesh ();
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
 
                 if (fbxMesh == null) return false;
 
-                // set the fbxNode containing the mesh
-                fbxNode.SetNodeAttribute (fbxMesh);
-                fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
+
 
                 return true;
             }
