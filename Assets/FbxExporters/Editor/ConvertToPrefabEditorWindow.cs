@@ -15,18 +15,24 @@ namespace FbxExporters
             private GameObject[] m_toConvert;
             private string m_prefabFileName = "";
 
-            public static void Init (GameObject[] toConvert)
+            public static void Init (IEnumerable<GameObject> toConvert)
             {
                 ConvertToPrefabEditorWindow window = CreateWindow<ConvertToPrefabEditorWindow> ();
-                window.InitializeWindow (filename: toConvert.Length >= 1? toConvert[0].name : "", singleHierarchyExport: true, exportType: ModelExporter.AnimationExportType.all);
+                window.InitializeWindow (filename: "", singleHierarchyExport: true, exportType: ModelExporter.AnimationExportType.all);
                 window.SetGameObjectsToConvert (toConvert);
                 window.Show ();
             }
 
-            public void SetGameObjectsToConvert(GameObject[] toConvert){
-                m_toConvert = toConvert;
-                if (toConvert.Length >= 1) {
-                    m_prefabFileName = toConvert [0].name;
+            protected void SetGameObjectsToConvert(IEnumerable<GameObject> toConvert){
+                var tempList = new List<GameObject> ();
+                foreach (var go in toConvert) {
+                    tempList.Add (go);
+                }
+                m_toConvert = tempList.ToArray ();
+
+                if (m_toConvert.Length >= 1) {
+                    m_prefabFileName = m_toConvert [0].name;
+                    this.SetFilename (m_prefabFileName);
                 }
             }
 

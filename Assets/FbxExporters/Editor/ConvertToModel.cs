@@ -144,7 +144,7 @@ namespace FbxExporters
                         fbxFullPath = IncrementFileName (fbxDirectoryFullPath, fbxFullPath);
                     }
                 }
-                var projectRelativePath = GetAssetRelativePath (fbxFullPath);
+                var projectRelativePath = EditorTools.ExportSettings.GetProjectRelativePath (fbxFullPath);
 
                 // Make sure that the object names in the hierarchy are unique.
                 // The import back in to Unity would do this automatically but
@@ -184,23 +184,13 @@ namespace FbxExporters
                         prefabFullPath = IncrementFileName (prefabDirectoryFullPath, prefabFullPath);
                     }
                 }
-                var prefabProjectRelativePath = GetAssetRelativePath (prefabFullPath);
+                var prefabProjectRelativePath = EditorTools.ExportSettings.GetProjectRelativePath (prefabFullPath);
 
                 SetupFbxPrefab (toConvert, unityMainAsset, prefabProjectRelativePath, fbxFullPath);
 
                 toConvert.name = Path.GetFileNameWithoutExtension (fbxFullPath);
                 return toConvert;
             }
-
-            private static string GetAssetRelativePath(string fullPath){
-                var assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fullPath);
-                var projectRelativePath = "Assets/" + assetRelativePath;
-                if (string.IsNullOrEmpty(assetRelativePath)) {
-                    throw new System.Exception("Path " + fullPath + " must be in the Assets folder.");
-                }
-                return projectRelativePath;
-            }
-
 
             /// <summary>
             /// Create the prefab and connect it to the given fbx asset. 

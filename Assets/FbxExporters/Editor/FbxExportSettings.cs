@@ -937,6 +937,15 @@ namespace FbxExporters.EditorTools {
             return instance.dccOptionPaths.Count > 0;
         }
 
+        public static string GetProjectRelativePath(string fullPath){
+            var assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fullPath);
+            var projectRelativePath = "Assets/" + assetRelativePath;
+            if (string.IsNullOrEmpty(assetRelativePath)) {
+                throw new System.Exception("Path " + fullPath + " must be in the Assets folder.");
+            }
+            return projectRelativePath;
+        }
+
         /// <summary>
         /// The relative save paths for given absolute paths.
         /// This is relative to the Application.dataPath ; it uses '/' as the
