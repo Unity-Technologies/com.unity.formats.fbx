@@ -1010,16 +1010,16 @@ namespace FbxExporters.EditorTools {
         }
 
         public static string GetFbxAbsoluteSavePath(){
-            /*if (instance.fbxSavePaths.Count <= 0) {
+            if (instance.fbxSavePaths.Count <= 0) {
                 instance.fbxSavePaths.Add (kDefaultSavePath);
-            }*/
+            }
             return GetAbsoluteSavePath (instance.fbxSavePaths [instance.selectedFbxPath]);
         }
 
         public static string GetPrefabAbsoluteSavePath(){
-            /*if (instance.prefabSavePaths.Count <= 0) {
+            if (instance.prefabSavePaths.Count <= 0) {
                 instance.prefabSavePaths.Add (kDefaultSavePath);
-            }*/
+            }
             return GetAbsoluteSavePath (instance.prefabSavePaths [instance.selectedPrefabPath]);
         }
 
@@ -1203,11 +1203,12 @@ namespace FbxExporters.EditorTools {
         {
             instance.name = "Fbx Export Settings";
             Selection.activeObject = instance;
-            LoadSettings ();
+            instance.Load();
         }
 
-        public static void LoadSettings(){
-            instance.Load();
+        protected override void Load ()
+        {
+            base.Load ();
             if (!instance.exportModelSettings) {
                 instance.exportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             }
@@ -1217,6 +1218,7 @@ namespace FbxExporters.EditorTools {
                 instance.convertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
             }
             instance.convertToPrefabSettings.info = instance.convertToPrefabSettingsSerialize;
+
         }
 
         public void Save()

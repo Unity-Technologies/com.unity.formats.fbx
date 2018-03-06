@@ -37,7 +37,6 @@ namespace FbxExporters
                 if (!m_innerEditor) {
                     var ms = ExportSettings.instance.convertToPrefabSettings;
                     if (!ms) {
-                        ExportSettings.LoadSettings ();
                         ms = ExportSettings.instance.convertToPrefabSettings;
                     }
                     m_innerEditor = UnityEditor.Editor.CreateEditor (ms);
