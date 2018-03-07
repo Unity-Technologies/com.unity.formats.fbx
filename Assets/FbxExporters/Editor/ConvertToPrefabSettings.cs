@@ -74,13 +74,36 @@ namespace FbxExporters.EditorTools
         }
     }
 
-    public class ConvertToPrefabSettings : ScriptableObject
+    public class ConvertToPrefabSettings : ScriptableObject, IExportOptions
     {
         public ConvertToPrefabSettingsSerialize info;
 
         public ConvertToPrefabSettings ()
         {
             info = new ConvertToPrefabSettingsSerialize ();
+        }
+
+        public ExportModelSettingsSerialize.ExportFormat GetExportFormat(){
+            return info.exportFormat;
+        }
+        public ExportModelSettingsSerialize.Include GetModelAnimIncludeOption(){
+            return ExportModelSettingsSerialize.Include.ModelAndAnim;
+        }
+        public ExportModelSettingsSerialize.LODExportType GetLODExportType(){
+            return ExportModelSettingsSerialize.LODExportType.All;
+        }
+        public ExportModelSettingsSerialize.ObjectPosition GetObjectPosition(){
+            return ExportModelSettingsSerialize.ObjectPosition.LocalCentered;
+        }
+        public void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos){
+            // nothing to set
+            return;
+        }
+        public bool AnimateSkinnedMesh(){
+            return info.animatedSkinnedMesh;
+        }
+        public bool UseMayaCompatibleNames(){
+            return info.mayaCompatibleNaming;
         }
     }
 

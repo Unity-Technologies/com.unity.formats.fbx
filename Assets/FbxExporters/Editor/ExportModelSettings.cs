@@ -82,13 +82,45 @@ namespace FbxExporters.EditorTools
         }
     }
 
-    public class ExportModelSettings : ScriptableObject
+    public interface IExportOptions {
+        ExportModelSettingsSerialize.ExportFormat GetExportFormat();
+        ExportModelSettingsSerialize.Include GetModelAnimIncludeOption();
+        ExportModelSettingsSerialize.LODExportType GetLODExportType();
+        ExportModelSettingsSerialize.ObjectPosition GetObjectPosition();
+        void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos);
+        bool AnimateSkinnedMesh();
+        bool UseMayaCompatibleNames();
+    }
+
+    public class ExportModelSettings : ScriptableObject, IExportOptions
     {
         public ExportModelSettingsSerialize info;
 
         public ExportModelSettings ()
         {
             info = new ExportModelSettingsSerialize ();
+        }
+
+        public ExportModelSettingsSerialize.ExportFormat GetExportFormat(){
+            return info.exportFormat;
+        }
+        public ExportModelSettingsSerialize.Include GetModelAnimIncludeOption(){
+            return info.include;
+        }
+        public ExportModelSettingsSerialize.LODExportType GetLODExportType(){
+            return info.lodLevel;
+        }
+        public ExportModelSettingsSerialize.ObjectPosition GetObjectPosition(){
+            return info.objectPosition;
+        }
+        public void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos){
+            info.objectPosition = objPos;
+        }
+        public bool AnimateSkinnedMesh(){
+            return info.animatedSkinnedMesh;
+        }
+        public bool UseMayaCompatibleNames(){
+            return info.mayaCompatibleNaming;
         }
     }
 
