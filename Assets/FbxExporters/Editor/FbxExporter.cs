@@ -2719,7 +2719,7 @@ namespace FbxExporters
             /// </summary>
             public int ExportAll (
                 IEnumerable<UnityEngine.Object> unityExportSet, 
-                Dictionary<GameObject, AnimationOnlyExportData> animationExportData
+                Dictionary<GameObject, AnimationOnlyExportData> animationExportData,
                 AnimationExportType animationExportType = AnimationExportType.all)
             {
                 exportCancelled = false;
@@ -2824,7 +2824,7 @@ namespace FbxExporters
                         }
 
                         Vector3 center = Vector3.zero;
-                        TransformExportType exportType = TransformExportType.Global;
+                        TransformExportType transformExportType = TransformExportType.Global;
                         switch(ExportOptions.GetObjectPosition()){
                         case ExportModelSettingsSerialize.ObjectPosition.LocalCentered:
                             // one object to export -> move to (0,0,0)
@@ -2837,7 +2837,7 @@ namespace FbxExporters
                             center = FindCenter(revisedExportSet);
                             break;
                         case ExportModelSettingsSerialize.ObjectPosition.Reset:
-                            exportType = TransformExportType.Reset;
+                            transformExportType = TransformExportType.Reset;
                             break;
                         // absolute center -> don't do anything
                         default:
@@ -2852,7 +2852,7 @@ namespace FbxExporters
                             }
                             else {
                                 exportProgress = this.ExportTransformHierarchy (unityGo, fbxScene, fbxRootNode,
-                                    exportProgress, count, center, exportType, ExportOptions.GetLODExportType());
+                                    exportProgress, count, center, transformExportType, ExportOptions.GetLODExportType());
                             }
                             if (exportCancelled || exportProgress < 0) {
                                 Debug.LogWarning ("Export Cancelled");
@@ -3664,7 +3664,7 @@ namespace FbxExporters
                 string filePath,
                 UnityEngine.Object[] objects = null,
                 IExportOptions exportOptions = null,
-                AnimationExportType exportType = AnimationExportType.all)
+                AnimationExportType animExportType = AnimationExportType.all)
             {
                 LastFilePath = filePath;
 
@@ -3678,7 +3678,7 @@ namespace FbxExporters
                     }
 
                     Dictionary<GameObject, AnimationOnlyExportData> animationExportData = null;
-                    switch (animationExportType)
+                    switch (animExportType)
                     {
                        case AnimationExportType.timelineAnimationClip:
                             // We expect the first argument in the list to be the GameObject, the second one is the Animation Clip/Track we are exporting from the timeline
@@ -3705,7 +3705,7 @@ namespace FbxExporters
                             break;
                     }
 
-                    if (fbxExporter.ExportAll (objects, animationExportData, animationExportType) > 0) {
+                    if (fbxExporter.ExportAll (objects, animationExportData, animExportType) > 0) {
                         string message = string.Format ("Successfully exported: {0}", filePath);
                         UnityEngine.Debug.Log (message);
 
@@ -3720,7 +3720,7 @@ namespace FbxExporters
                 IExportOptions exportOptions = null,
                 AnimationExportType exportType = AnimationExportType.all)
             {
-                return ExportObjects(filePath, new Object[] { root }, exportOptions, exportType: exportType);
+                return ExportObjects(filePath, new Object[] { root }, exportOptions, animExportType: exportType);
             }
 
             private static void EnsureDirectory (string path)

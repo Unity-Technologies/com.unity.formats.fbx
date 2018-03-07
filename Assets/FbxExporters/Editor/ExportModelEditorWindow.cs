@@ -318,7 +318,7 @@ namespace FbxExporters
                     return;
                 }
 
-                if (ModelExporter.ExportObjects (filePath, m_toExport, ExportSettings.instance.exportModelSettings, exportType: m_animExportType) != null) {
+                if (ModelExporter.ExportObjects (filePath, m_toExport, ExportSettings.instance.exportModelSettings, animExportType: m_animExportType) != null) {
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
                     AssetDatabase.Refresh ();
