@@ -83,10 +83,10 @@ namespace FbxExporters
             //       being called only once regardless of what is selected.
             const string MenuItemName = "GameObject/Export Model...";
 
-            const string ClipMenuItemName = "GameObject/Export All Timeline Clips...";
+            const string ClipMenuItemName = "GameObject/Export All Recorded Animation Clips...";
             const string TimelineClipMenuItemName = "GameObject/Export Selected Timeline Clip...";																				
 
-            const string AnimOnlyMenuItemName = "GameObject/Export Animation Only";
+            const string AnimOnlyMenuItemName = "GameObject/Export Animation Only...";
 
             const string FileBaseName = "Untitled";
 
@@ -182,6 +182,11 @@ namespace FbxExporters
             /// Format for creating unique names
             /// </summary>
             const string UniqueNameFormat = "{0}_{1}";
+
+            /// <summary>
+            /// The animation fbx file format.
+            /// </summary>
+            const string AnimFbxFileFormat = "{0}/{1}@{2}.fbx";
 
             /// <summary>
             /// Gets the export settings.
@@ -1232,7 +1237,8 @@ namespace FbxExporters
             {
                 PrefabType unityPrefabType = PrefabUtility.GetPrefabType(unityGo);
 
-                if (unityPrefabType != PrefabType.PrefabInstance) return false;
+                if (unityPrefabType != PrefabType.PrefabInstance &&
+                    unityPrefabType != PrefabType.ModelPrefabInstance) return false;
 
                 Object unityPrefabParent = PrefabUtility.GetPrefabParent (unityGo);
 
@@ -1524,8 +1530,8 @@ namespace FbxExporters
                     Debug.Log ("Exporting animation for " + uniObj.ToString() + " (" + uniPropertyName + ")");
                 }
 
-                FbxPropertyChannelPair fbxPropertyChannelPair;
-                if (!FbxPropertyChannelPair.TryGetValue (uniPropertyName, out fbxPropertyChannelPair)) {
+                FbxPropertyChannelPair[] fbxPropertyChannelPairs;
+                if (!FbxPropertyChannelPair.TryGetValue (uniPropertyName, out fbxPropertyChannelPairs)) {
                     Debug.LogWarning (string.Format ("no mapping from Unity '{0}' to fbx property", uniPropertyName));
                     return;
                 }
@@ -1543,39 +1549,35 @@ namespace FbxExporters
                     return;
                 }
 
-                // map unity property name to fbx property
-                var fbxProperty = fbxNode.FindProperty(fbxPropertyChannelPair.Property, false);
-                if (!fbxProperty.IsValid())
-                {
-                    var fbxNodeAttribute = fbxNode.GetNodeAttribute();
-                    if (fbxNodeAttribute != null)
-                    {
-                        fbxProperty = fbxNodeAttribute.FindProperty(fbxPropertyChannelPair.Property, false);
+                foreach (var fbxPropertyChannelPair in fbxPropertyChannelPairs) {
+                    // map unity property name to fbx property
+                    var fbxProperty = fbxNode.FindProperty (fbxPropertyChannelPair.Property, false);
+                    if (!fbxProperty.IsValid ()) {
+                        var fbxNodeAttribute = fbxNode.GetNodeAttribute ();
+                        if (fbxNodeAttribute != null) {
+                            fbxProperty = fbxNodeAttribute.FindProperty (fbxPropertyChannelPair.Property, false);
+                        }
                     }
-                }
-                if (!fbxProperty.IsValid())
-                {
-                    Debug.LogError(string.Format("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName()));
-                    return;
-                }
+                    if (!fbxProperty.IsValid ()) {
+                        Debug.LogError (string.Format ("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
+                        return;
+                    }
 
-                // Create the AnimCurve on the channel
-                FbxAnimCurve fbxAnimCurve = fbxProperty.GetCurve (fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
+                    // Create the AnimCurve on the channel
+                    FbxAnimCurve fbxAnimCurve = fbxProperty.GetCurve (fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
 
-                // create a convert scene helper so that we can convert from Unity to Maya
-                // AxisSystem (LeftHanded to RightHanded) and FBX's default units 
-                // (Meters to Centimetres)
-                var convertSceneHelper = new UnityToMayaConvertSceneHelper (uniPropertyName);
+                    // create a convert scene helper so that we can convert from Unity to Maya
+                    // AxisSystem (LeftHanded to RightHanded) and FBX's default units 
+                    // (Meters to Centimetres)
+                    var convertSceneHelper = new UnityToMayaConvertSceneHelper (uniPropertyName);
 
-                // TODO: we'll resample the curve so we don't have to 
-                // configure tangents
-                if (ModelExporter.ExportSettings.BakeAnimation) 
-                {
-                    ExportAnimationSamples(uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
-                }
-                else 
-                {
-                    ExportAnimationKeys(uniAnimCurve, fbxAnimCurve, convertSceneHelper);
+                    // TODO: we'll resample the curve so we don't have to 
+                    // configure tangents
+                    if (ModelExporter.ExportSettings.BakeAnimation) {
+                        ExportAnimationSamples (uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
+                    } else {
+                        ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper);
+                    }
                 }
             }
 
@@ -1630,75 +1632,78 @@ namespace FbxExporters
                 /// Map a Unity property name to the corresponding FBX property and
                 /// channel names.
                 /// </summary>
-                public static bool TryGetValue(string uniPropertyName, out FbxPropertyChannelPair prop)
+                public static bool TryGetValue(string uniPropertyName, out FbxPropertyChannelPair[] prop)
                 {
                     System.StringComparison ct = System.StringComparison.CurrentCulture;
 
                     // Transform Scaling
                     if (uniPropertyName.StartsWith ("m_LocalScale.x", ct) || uniPropertyName.EndsWith ("S.x", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_X);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_X) };
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("m_LocalScale.y", ct) || uniPropertyName.EndsWith ("S.y", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Y) };
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("m_LocalScale.z", ct) || uniPropertyName.EndsWith ("S.z", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Z) };
                         return true;
                     }
 
                     // Transform Translation
                     if (uniPropertyName.StartsWith ("m_LocalPosition.x", ct) || uniPropertyName.EndsWith ("T.x", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_X);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_X) };
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("m_LocalPosition.y", ct) || uniPropertyName.EndsWith ("T.y", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Y);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Y) };
                         return true;
                     }
                     if (uniPropertyName.StartsWith ("m_LocalPosition.z", ct) || uniPropertyName.EndsWith ("T.z", ct)) {
-                        prop = new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z) };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("m_Intensity", ct))
                     {
-                        prop = new FbxPropertyChannelPair ("Intensity", null);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Intensity", null) };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("m_SpotAngle", ct))
                     {
-                        prop = new FbxPropertyChannelPair ("OuterAngle", null);
+                        prop = new FbxPropertyChannelPair[]{ 
+                            new FbxPropertyChannelPair ("OuterAngle", null),
+                            new FbxPropertyChannelPair ("InnerAngle", null)
+                        };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("m_Color.r", ct))
                     {
-                        prop = new FbxPropertyChannelPair ("Color", Globals.FBXSDK_CURVENODE_COLOR_RED);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Color", Globals.FBXSDK_CURVENODE_COLOR_RED) };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("m_Color.g", ct))
                     {
-                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_GREEN);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_GREEN) };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("m_Color.b", ct))
                     {
-                        prop = new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_BLUE);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_BLUE) };
                         return true;
                     }
 
                     if (uniPropertyName.StartsWith("field of view", ct))
                     {
-                        prop = new FbxPropertyChannelPair("FieldOfView", null);
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("FieldOfView", null) };
                         return true;
                     }
 
-                    prop = new FbxPropertyChannelPair ();
+                    prop = new FbxPropertyChannelPair[]{};
                     return false;
                 }
             }
@@ -2949,51 +2954,61 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Add an option "Export selected Timeline clip" in the contextual GameObject menu.
+            /// GameObject/Export Selected Timeline Clip...
             /// </summary>
-            [MenuItem(TimelineClipMenuItemName, false, 31)]
+            /// <param name="command"></param>
+			[MenuItem(TimelineClipMenuItemName, false, 31)]
             static void OnClipContextClick(MenuCommand command)
             {
-                // Now that we know we have stuff to export, get the user-desired path.
-                string directory = string.IsNullOrEmpty(LastFilePath)
-                                      ? Application.dataPath
-                                      : System.IO.Path.GetDirectoryName(LastFilePath);
+                Object[] selectedObjects = Selection.objects;
 
-                string title = "Select the folder in which the animation files from the timeline will be exported";
-                string folderPath = EditorUtility.SaveFolderPanel(title, directory, "");
-
-                if (string.IsNullOrEmpty(folderPath))
+                foreach (Object editorClipSelected in selectedObjects)
                 {
-                    return;
-                }
-
-                var selectedObjects = Selection.objects;
-                foreach (var obj in selectedObjects)
-                {
-                    if (obj.GetType().Name.Contains("EditorClip"))
-                    {
-                        var selClip = obj.GetType ().GetProperty ("clip").GetValue (obj, null);
-                        UnityEngine.Timeline.TimelineClip timeLineClip = selClip as UnityEngine.Timeline.TimelineClip;
-
-                        var selClipItem = obj.GetType ().GetProperty ("item").GetValue (obj, null);
-                        var selClipItemParentTrack = selClipItem.GetType ().GetProperty ("parentTrack").GetValue (selClipItem, null);
-                        AnimationTrack editorClipAnimationTrack = selClipItemParentTrack as AnimationTrack;
-
-                        GameObject animationTrackGObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (editorClipAnimationTrack) as GameObject;
-
-                        string filePath = folderPath + "/" + animationTrackGObject.name + "@" + timeLineClip.animationClip.name + ".fbx";
-                        UnityEngine.Object[] myArray = new UnityEngine.Object[] { animationTrackGObject, timeLineClip.animationClip };
-
-                        ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
-                    } 
+                    // export first selected editor clip.
+                    if (ExportSingleEditorClip (editorClipSelected)) {
+                        return;
+                    }
                 }
             }
 
+            public static bool ExportSingleEditorClip(Object editorClipSelected)
+            {
+                if (editorClipSelected.GetType().Name.Contains("EditorClip"))
+                {
+                    object selClip = editorClipSelected.GetType().GetProperty("clip").GetValue(editorClipSelected, null);
+					UnityEngine.Timeline.TimelineClip timeLineClip = selClip as UnityEngine.Timeline.TimelineClip;
+
+					object selClipItem = editorClipSelected.GetType().GetProperty("item").GetValue(editorClipSelected, null);
+					object selClipItemParentTrack = selClipItem.GetType().GetProperty("parentTrack").GetValue(selClipItem, null);
+					AnimationTrack editorClipAnimationTrack = selClipItemParentTrack as AnimationTrack;
+                    GameObject animationTrackGObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (editorClipAnimationTrack) as GameObject;
+
+                    ExportSingleTimelineClip(timeLineClip, animationTrackGObject);
+                    return true;
+                } 
+                return false;
+            }
+
+            public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, GameObject animationTrackGObject, string filePath = null)
+            {
+                if (string.IsNullOrEmpty (filePath)) {
+                    filePath = GetExportFilePath (animationTrackGObject.name + "@" + timelineClipSelected.displayName);
+                }
+                if (string.IsNullOrEmpty (filePath)) {
+                    return;
+                }
+                UnityEngine.Object[] myArray = new UnityEngine.Object[] {
+                    animationTrackGObject,
+                    timelineClipSelected.animationClip
+                };
+                ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
+            }
+
             /// <summary>
-            /// Add an option "Export all Timeline clips" in the contextual GameObject menu.
+            /// Add an option " GameObject/Export All Recorded Animation Clips..." in the contextual GameObject menu.
             /// </summary>
             [MenuItem(ClipMenuItemName, false, 31)]
-            static void OnGameObjectWithTimelineContextClick(MenuCommand command)
+            public static void OnPlayableDirectorGameObjectContextClick(MenuCommand command)
             {
                 // Now that we know we have stuff to export, get the user-desired path.
                 string directory = string.IsNullOrEmpty(LastFilePath)
@@ -3018,30 +3033,34 @@ namespace FbxExporters
                 else
                 {
                     // We were invoked from the right-click menu, so use the context of the context menu.
-                    var selected = command.context as GameObject;
+                    GameObject selected = command.context as GameObject;
                     if (selected)
                     {
                         selection = new GameObject[] { selected };
                     }
                 }
 
-                foreach (GameObject obj in selection)
+                foreach (GameObject objectWithPlayableDirector in selection)
                 {
-                    PlayableDirector pd = obj.GetComponent<PlayableDirector>();
-                    if (pd != null)
+                    ExportAllTimelineClips(objectWithPlayableDirector,folderPath);
+                }
+            }
+
+            public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath)
+            {
+                PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
+                if (pd != null)
+                {
+                    foreach (PlayableBinding output in pd.playableAsset.outputs)
                     {
-                        foreach (PlayableBinding output in pd.playableAsset.outputs)
-                        {
-                            AnimationTrack at = output.sourceObject as AnimationTrack;
+                        AnimationTrack at = output.sourceObject as AnimationTrack;
 
-                            GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
-                            // One file by animation clip
-                            foreach (TimelineClip timeLineClip in at.GetClips()) {
-                                string filePath = folderPath + "/" + atObject.name + "@" + timeLineClip.animationClip.name + ".fbx";
-                                UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timeLineClip.animationClip };
-                                ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
-
-                            }
+                        GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
+                        // One file by animation clip
+                        foreach (TimelineClip timeLineClip in at.GetClips()) {
+                            string filePath = string.Format(AnimFbxFileFormat, folderPath, atObject.name, timeLineClip.displayName);
+                            UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timeLineClip.animationClip };
+                            ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
                         }
                     }
                 }
@@ -3501,6 +3520,13 @@ namespace FbxExporters
 
                 // If we're here, custom handling didn't work.
                 // Revert to default handling.
+
+                // if user doesn't want to export mesh colliders, and this gameobject doesn't have a renderer
+                // then don't export it.
+                if (!ExportSettings.instance.exportMeshNoRenderer && !gameObject.GetComponent<Renderer>()) {
+                    return false;
+                }
+
                 var meshFilter = defaultComponent as MeshFilter;
                 if (meshFilter) {
                     var renderer = gameObject.GetComponent<Renderer>();
@@ -3556,7 +3582,7 @@ namespace FbxExporters
             private string m_tempFilePath { get; set; }
             private string m_lastFilePath { get; set; }
 
-            const string Extension = "fbx";
+            const string kFBXFileExtension = "fbx";
 			
             public enum AnimationExportType{
                 timelineAnimationClip,
@@ -3566,9 +3592,20 @@ namespace FbxExporters
             }
 
 
-            private static string MakeFileName (string basename = "test", string extension = "fbx")
+            private static string MakeFileName (string basename = "test", string extension = kFBXFileExtension)
             {
                 return basename + "." + extension;
+            }
+
+
+            private static string GetExportFilePath(string filenameSuggestion = ""){
+                var directory = string.IsNullOrEmpty (LastFilePath)
+                    ? Application.dataPath
+                    : System.IO.Path.GetDirectoryName (LastFilePath);
+
+                var title = string.Format ("Export To FBX ({0})", FileBaseName);
+
+                return EditorUtility.SaveFilePanel (title, directory, filenameSuggestion, kFBXFileExtension);
             }
 
             private static void OnExport (AnimationExportType exportType = AnimationExportType.all)
@@ -3576,10 +3613,10 @@ namespace FbxExporters
                 GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
                 string filename = null;
                 if (selectedGOs.Length == 1) {
-                    filename = ConvertToValidFilename (selectedGOs [0].name + ".fbx");
+                    filename = ConvertToValidFilename (selectedGOs [0].name + "." + kFBXFileExtension);
                 } else {
                     filename = string.IsNullOrEmpty (LastFilePath)
-                        ? MakeFileName (basename: FileBaseName, extension: Extension)
+                        ? MakeFileName (basename: FileBaseName, extension: kFBXFileExtension)
                         : System.IO.Path.GetFileName (LastFilePath);
                 }
 

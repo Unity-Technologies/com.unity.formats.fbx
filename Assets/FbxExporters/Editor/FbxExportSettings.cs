@@ -39,6 +39,11 @@ namespace FbxExporters.EditorTools {
                 exportSettings.autoUpdaterEnabled
             );
 
+            exportSettings.exportMeshNoRenderer = EditorGUILayout.Toggle(
+                new GUIContent("Export Unrendered:",
+                    "If checked, meshes will be exported even if they don't have a Renderer component."),
+                exportSettings.exportMeshNoRenderer
+            );
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             EditorGUI.indentLevel--;
@@ -362,6 +367,7 @@ namespace FbxExporters.EditorTools {
         public bool launchAfterInstallation = true;
         public bool HideSendToUnityMenu = true;
         public bool BakeAnimation = true;
+        public bool exportMeshNoRenderer = false;
 
         public string IntegrationSavePath;
 
