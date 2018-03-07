@@ -362,7 +362,7 @@ namespace FbxExporters.UnitTests
             cube.name = "Cube";
             var cubeAssetPath = GetRandomFbxFilePath();
             var autoPrefab = ConvertToModel.Convert(cube,
-                fbxFullPath: cubeAssetPath);
+                fbxFullPath: cubeAssetPath, prefabFullPath: System.IO.Path.ChangeExtension(cubeAssetPath, ".prefab"));
             Assert.IsTrue(autoPrefab);
 
             // Make a maya locator.
@@ -415,8 +415,9 @@ namespace FbxExporters.UnitTests
             building3.transform.parent = building2.transform;
             building3.transform.localScale = new Vector3(.5f, .5f, .5f);
 
+            var filePath = GetRandomFbxFilePath ();
             var original = ConvertToModel.Convert (root,
-                fbxFullPath: GetRandomFbxFilePath ());
+                fbxFullPath: filePath, prefabFullPath: System.IO.Path.ChangeExtension(filePath, ".prefab"));
 
             // Make sure it's OK.
             Assert.That (original.transform.GetChild (0).name, Is.EqualTo ("building2"));
@@ -460,7 +461,7 @@ namespace FbxExporters.UnitTests
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             var cubeMesh = cube.GetComponent<MeshFilter>().sharedMesh;
             var cubePath = GetRandomFbxFilePath();
-            var cubeInstance = ConvertToModel.Convert(cube, fbxFullPath: cubePath);
+            var cubeInstance = ConvertToModel.Convert(cube, fbxFullPath: cubePath, prefabFullPath: System.IO.Path.ChangeExtension(cubePath, ".prefab"));
             var cubeName = cubeInstance.name;
 
             // Create a prefab that has the cube as a child.

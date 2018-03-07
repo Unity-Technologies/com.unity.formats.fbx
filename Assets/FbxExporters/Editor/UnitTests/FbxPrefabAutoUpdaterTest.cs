@@ -84,7 +84,7 @@ namespace FbxExporters.UnitTests
             string filePath1 = GetRandomFbxFilePath ();
 
             //instantiate our hierarchy as a prefab
-            var oldInstance = ConvertToModel.Convert (cube, fbxFullPath: filePath1);
+            var oldInstance = ConvertToModel.Convert (cube, fbxFullPath: filePath1, prefabFullPath: Path.ChangeExtension(filePath1, ".prefab"));
             Assert.IsTrue (oldInstance);
 
             rectTransform = oldInstance.transform.GetChild (0).GetComponent<RectTransform> ();
@@ -154,7 +154,7 @@ namespace FbxExporters.UnitTests
             string filePath = GetRandomFbxFilePath();
 
             // Convert to linked prefab instance (auto-updating prefab)
-            GameObject cubePrefabInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath);
+            GameObject cubePrefabInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath, prefabFullPath: Path.ChangeExtension(filePath, ".prefab"));
 
             // In FbxPrefab Component of Cube, add SphereFBX/Sphere name mapping
             FbxPrefab fbxPrefabScript = cubePrefabInstance.transform.GetComponent<FbxPrefab>();
@@ -187,7 +187,7 @@ namespace FbxExporters.UnitTests
             string filePath = GetRandomFbxFilePath();
 
             // Convert to linked prefab instance (auto-updating prefab)
-            GameObject cubePrefabInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath);
+            GameObject cubePrefabInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath, prefabFullPath: Path.ChangeExtension(filePath, ".prefab"));
             Object cubePrefabParent = PrefabUtility.GetPrefabParent(cubePrefabInstance);
 
             // In FbxPrefab Component of Cube, add SphereFBX/Sphere name mapping
@@ -247,7 +247,7 @@ namespace FbxExporters.UnitTests
             string filePath = GetRandomFbxFilePath();
 
             // Convert to linked prefab instance (auto-updating prefab)
-            GameObject cubePrefabInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath);
+            GameObject cubePrefabInstance = ConvertToModel.Convert(cube, fbxFullPath: filePath, prefabFullPath: Path.ChangeExtension(filePath, ".prefab"));
             Object cubePrefabParent = PrefabUtility.GetPrefabParent(cubePrefabInstance);
 
             // In FbxPrefab Component of Cube, add SphereFBX/Sphere name mapping
@@ -308,7 +308,7 @@ namespace FbxExporters.UnitTests
             GameObject cylinder3 = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             GameObject sphere3 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sphere3.transform.SetParent(cylinder3.transform);
-            GameObject sphere3Instance = ConvertToModel.Convert(sphere3, fbxFullPath: filePath);
+            GameObject sphere3Instance = ConvertToModel.Convert(sphere3, fbxFullPath: filePath, prefabFullPath: Path.ChangeExtension(filePath, ".prefab"));
             Selection.objects = new GameObject[] { sphere3Instance };
             Assert.IsTrue(FbxPrefabAutoUpdater.OnValidateMenuItem());
 

@@ -3,32 +3,21 @@ using UnityEngine;
 
 namespace FbxExporters.EditorTools
 {
-    [CustomEditor (typeof(ExportModelSettings))]
-    public class ExportModelSettingsEditor : UnityEditor.Editor
+    [CustomEditor (typeof(ConvertToPrefabSettings))]
+    public class ConvertToPrefabSettingsEditor : UnityEditor.Editor
     {
         private const float LabelWidth = 175;
         private const float FieldOffset = 18;
 
         private string[] exportFormatOptions = new string[]{ "ASCII", "Binary" };
-        private string[] includeOptions = new string[]{"Model(s) Only", "Animation Only", "Model(s) + Animation"};
-        private string[] lodOptions = new string[]{"All Levels", "Highest", "Lowest"};
+        private string[] includeOptions = new string[]{"Model(s) + Animation"};
+        private string[] lodOptions = new string[]{"All Levels"};
 
-        public const string singleHierarchyOption = "Local Pivot";
-        public const string multiHerarchyOption = "Local Centered";
-        private string hierarchyDepOption = "";
-        private string[] objPositionOptions { get { return new string[]{hierarchyDepOption, "World Absolute"}; }}
-
-        public void SetIsSingleHierarchy(bool singleHierarchy){
-            if (singleHierarchy) {
-                hierarchyDepOption = singleHierarchyOption;
-                return;
-            }
-            hierarchyDepOption = multiHerarchyOption;
-        }
+        private string[] objPositionOptions { get { return new string[]{"Local Pivot"}; }}
 
         public override void OnInspectorGUI ()
         {
-            var exportSettings = ((ExportModelSettings)target).info;
+            var exportSettings = ((ConvertToPrefabSettings)target).info;
 
             EditorGUIUtility.labelWidth = LabelWidth;
 
@@ -40,22 +29,25 @@ namespace FbxExporters.EditorTools
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Include", "Select whether to export models, animation or both."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.include = (ExportModelSettingsSerialize.Include)EditorGUILayout.Popup((int)exportSettings.include, includeOptions);
+            // always greyed out, show only to let user know what will happen
+            EditorGUI.BeginDisabledGroup(true);
+            EditorGUILayout.Popup(0, includeOptions);
+            EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("LOD level", "Select which LOD to export."), GUILayout.Width(LabelWidth - FieldOffset));
-            // greyed out if animation only
-            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
-            exportSettings.lodLevel = (ExportModelSettingsSerialize.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodLevel, lodOptions);
+            // always greyed out, show only to let user know what will happen
+            EditorGUI.BeginDisabledGroup(true);
+            EditorGUILayout.Popup(0, lodOptions);
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Object(s) Position", "Select an option for exporting object's transform."), GUILayout.Width(LabelWidth - FieldOffset));
-            // greyed out if animation only
-            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
-            exportSettings.objectPosition = (ExportModelSettingsSerialize.ObjectPosition)EditorGUILayout.Popup((int)exportSettings.objectPosition, objPositionOptions);
+            // always greyed out, show only to let user know what will happen
+            EditorGUI.BeginDisabledGroup(true);
+            EditorGUILayout.Popup(0, objPositionOptions);
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
@@ -82,39 +74,30 @@ namespace FbxExporters.EditorTools
         }
     }
 
-    public interface IExportOptions {
-        ExportModelSettingsSerialize.ExportFormat GetExportFormat();
-        ExportModelSettingsSerialize.Include GetModelAnimIncludeOption();
-        ExportModelSettingsSerialize.LODExportType GetLODExportType();
-        ExportModelSettingsSerialize.ObjectPosition GetObjectPosition();
-        void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos);
-        bool AnimateSkinnedMesh();
-        bool UseMayaCompatibleNames();
-    }
-
-    public class ExportModelSettings : ScriptableObject, IExportOptions
+    public class ConvertToPrefabSettings : ScriptableObject, IExportOptions
     {
-        public ExportModelSettingsSerialize info;
+        public ConvertToPrefabSettingsSerialize info;
 
-        public ExportModelSettings ()
+        public ConvertToPrefabSettings ()
         {
-            info = new ExportModelSettingsSerialize ();
+            info = new ConvertToPrefabSettingsSerialize ();
         }
 
         public ExportModelSettingsSerialize.ExportFormat GetExportFormat(){
             return info.exportFormat;
         }
         public ExportModelSettingsSerialize.Include GetModelAnimIncludeOption(){
-            return info.include;
+            return ExportModelSettingsSerialize.Include.ModelAndAnim;
         }
         public ExportModelSettingsSerialize.LODExportType GetLODExportType(){
-            return info.lodLevel;
+            return ExportModelSettingsSerialize.LODExportType.All;
         }
         public ExportModelSettingsSerialize.ObjectPosition GetObjectPosition(){
-            return info.objectPosition;
+            return ExportModelSettingsSerialize.ObjectPosition.LocalCentered;
         }
         public void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos){
-            info.objectPosition = objPos;
+            // nothing to set
+            return;
         }
         public bool AnimateSkinnedMesh(){
             return info.animatedSkinnedMesh;
@@ -125,20 +108,9 @@ namespace FbxExporters.EditorTools
     }
 
     [System.Serializable]
-    public class ExportModelSettingsSerialize
+    public class ConvertToPrefabSettingsSerialize
     {
-        public enum ExportFormat { ASCII = 0, Binary = 1}
-
-        public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
-
-        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1 }
-
-        public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
-
-        public ExportFormat exportFormat = ExportFormat.ASCII;
-        public Include include = Include.ModelAndAnim;
-        public LODExportType lodLevel = LODExportType.All;
-        public ObjectPosition objectPosition = ObjectPosition.LocalCentered;
+        public ExportModelSettingsSerialize.ExportFormat exportFormat = ExportModelSettingsSerialize.ExportFormat.ASCII;
         public string rootMotionTransfer = "";
         public bool animatedSkinnedMesh = true;
         public bool mayaCompatibleNaming = true;

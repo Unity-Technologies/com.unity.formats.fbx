@@ -809,7 +809,7 @@ namespace FbxExporters.UnitTests
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
             // NOTE: Cylinder_LOD1 is not exported as it is not under the LODGroup hierarchy being exported
             filename = GetRandomFbxFilePath();
-            var convertedHierarchy = ConvertToModel.Convert(lodGroup, fbxFullPath: filename);
+            var convertedHierarchy = ConvertToModel.Convert(lodGroup, fbxFullPath: filename, prefabFullPath: System.IO.Path.ChangeExtension(filename, ".prefab"));
             Assert.That (convertedHierarchy, Is.Not.Null);
 
             // check both converted hierarchy and fbx
