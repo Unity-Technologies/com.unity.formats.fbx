@@ -2986,7 +2986,7 @@ namespace FbxExporters
                 }
             }
 
-            public static bool ExportSingleEditorClip(Object editorClipSelected)
+            protected static bool ExportSingleEditorClip(Object editorClipSelected)
             {
                 if (editorClipSelected.GetType().Name.Contains("EditorClip"))
                 {
@@ -3006,17 +3006,17 @@ namespace FbxExporters
 
             public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, GameObject animationTrackGObject, string filePath = null)
             {
-                if (string.IsNullOrEmpty (filePath)) {
-                    filePath = GetExportFilePath (animationTrackGObject.name + "@" + timelineClipSelected.displayName);
-                }
-                if (string.IsNullOrEmpty (filePath)) {
-                    return;
-                }
                 UnityEngine.Object[] myArray = new UnityEngine.Object[] {
                     animationTrackGObject,
                     timelineClipSelected.animationClip
                 };
-                //ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
+
+                if (!string.IsNullOrEmpty (filePath)) {
+                    ExportObjects (filePath, myArray, animExportType: AnimationExportType.timelineAnimationClip);
+                    return;
+                }
+
+                ExportModelEditorWindow.Init (myArray, string.Format ("{0}@{1}", animationTrackGObject.name, timelineClipSelected.displayName), AnimationExportType.timelineAnimationClip);
             }
 
             /// <summary>
