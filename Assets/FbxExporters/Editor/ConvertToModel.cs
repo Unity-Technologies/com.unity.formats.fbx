@@ -104,7 +104,8 @@ namespace FbxExporters
                 string fbxDirectoryFullPath = null,
                 string fbxFullPath = null,
                 string prefabDirectoryFullPath = null,
-                string prefabFullPath = null
+                string prefabFullPath = null, 
+                EditorTools.IExportOptions exportOptions = null
             )
             {
                 // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
@@ -154,7 +155,11 @@ namespace FbxExporters
 
                 // Export to FBX. It refreshes the database.
                 {
-                    var fbxActualPath = ModelExporter.ExportObject (fbxFullPath, toConvert, lodExportType: EditorTools.ExportModelSettingsSerialize.LODExportType.All);
+                    var fbxActualPath = ModelExporter.ExportObject (
+                                            fbxFullPath, toConvert,
+                                            exportOptions != null ? exportOptions :
+                                                (ScriptableObject.CreateInstance <EditorTools.ConvertToPrefabSettings> () as EditorTools.ConvertToPrefabSettings)
+                                        );
                     if (fbxActualPath != fbxFullPath) {
                         throw new System.Exception ("Failed to convert " + toConvert.name);
                     }

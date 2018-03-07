@@ -263,12 +263,16 @@ namespace FbxExporters.UnitTests
         /// <returns>The exported fbx file path.</returns>
         /// <param name="hierarchy">Hierarchy.</param>
         /// <param name="animOnly">If set to <c>true</c> export animation only.</param>
-        protected string ExportToFbx (GameObject hierarchy, bool animOnly = false, EditorTools.ExportModelSettingsSerialize.LODExportType lodExportType = EditorTools.ExportModelSettingsSerialize.LODExportType.All){
+        protected string ExportToFbx (
+            GameObject hierarchy, bool animOnly = false,
+            EditorTools.ExportModelSettingsSerialize.LODExportType lodExportType = EditorTools.ExportModelSettingsSerialize.LODExportType.All
+        ){
             string filename = GetRandomFbxFilePath ();
+            var exportOptions = ScriptableObject.CreateInstance <EditorTools.ExportModelSettings> () as EditorTools.ExportModelSettings;
+            exportOptions.SetLODExportType (lodExportType);
             var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (
-                filename, hierarchy,
-                animOnly? FbxExporters.Editor.ModelExporter.AnimationExportType.componentAnimation : FbxExporters.Editor.ModelExporter.AnimationExportType.all,
-                lodExportType: lodExportType
+                filename, hierarchy, exportOptions,
+                animOnly? FbxExporters.Editor.ModelExporter.AnimationExportType.componentAnimation : FbxExporters.Editor.ModelExporter.AnimationExportType.all
             );
             Assert.That (exportedFilePath, Is.EqualTo (filename));
             return filename;

@@ -419,7 +419,7 @@ namespace FbxExporters.EditorTools {
         private ConvertToPrefabSettingsSerialize convertToPrefabSettingsSerialize;
 
         // ---------------- get functions for options in ExportModelSettings ----------------
-        public static ExportModelSettingsSerialize.ExportFormat GetExportFormat(){
+        /*public static ExportModelSettingsSerialize.ExportFormat GetExportFormat(){
             return instance.exportModelSettings.info.exportFormat;
         }
 
@@ -449,7 +449,7 @@ namespace FbxExporters.EditorTools {
 
         public static bool UseMayaCompatibleNames(){
             return instance.exportModelSettings.info.mayaCompatibleNaming;
-        }
+        }*/
         // ---------------------------------------------------------------------------------
 
         protected override void LoadDefaults()

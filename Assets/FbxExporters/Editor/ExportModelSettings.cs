@@ -110,6 +110,9 @@ namespace FbxExporters.EditorTools
         public ExportModelSettingsSerialize.LODExportType GetLODExportType(){
             return info.lodLevel;
         }
+        public void SetLODExportType(ExportModelSettingsSerialize.LODExportType lodType){
+            info.lodLevel = lodType;
+        }
         public ExportModelSettingsSerialize.ObjectPosition GetObjectPosition(){
             return info.objectPosition;
         }
@@ -131,7 +134,7 @@ namespace FbxExporters.EditorTools
 
         public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
 
-        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1 }
+        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1 , Reset = 2 }
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 

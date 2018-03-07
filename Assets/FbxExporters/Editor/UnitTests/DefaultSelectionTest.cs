@@ -23,7 +23,7 @@ namespace FbxExporters.UnitTests
         public override void Init ()
         {
             base.Init();
-            m_centerObjectsSetting = FbxExporters.EditorTools.ExportSettings.GetObjectPosition();
+           // m_centerObjectsSetting = FbxExporters.EditorTools.ExportSettings.GetObjectPosition();
         }
 
         [TearDown]
@@ -34,7 +34,7 @@ namespace FbxExporters.UnitTests
                 UnityEngine.Object.DestroyImmediate (m_root);
             }
             // restore original setting
-            FbxExporters.EditorTools.ExportSettings.SetObjectPosition(m_centerObjectsSetting);
+           // FbxExporters.EditorTools.ExportSettings.SetObjectPosition(m_centerObjectsSetting);
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace FbxExporters.UnitTests
             Assert.IsNotNull (m_root);
 
             // test without centered objects
-            FbxExporters.EditorTools.ExportSettings.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.WorldAbsolute);
+            //FbxExporters.EditorTools.ExportSettings.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.WorldAbsolute);
 
             // test Export Root
             // Expected result: everything gets exported
@@ -98,7 +98,7 @@ namespace FbxExporters.UnitTests
             var goExportSet = new GameObject[]{ child2.gameObject, parent2.gameObject };
 
             // test without centering objects
-            FbxExporters.EditorTools.ExportSettings.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.WorldAbsolute);
+            //FbxExporters.EditorTools.ExportSettings.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.WorldAbsolute);
 
             exportedRoot = ExportSelection (exportSet);
             List<GameObject> children = new List<GameObject> ();
@@ -108,7 +108,7 @@ namespace FbxExporters.UnitTests
             CompareHierarchies (new GameObject[]{ child2, parent2.gameObject }, children.ToArray ());
 
             // test with centered objects
-            FbxExporters.EditorTools.ExportSettings.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.LocalCentered);
+            //FbxExporters.EditorTools.ExportSettings.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.LocalCentered);
             var newCenter = FbxExporters.Editor.ModelExporter.FindCenter (goExportSet);
 
             exportedRoot = ExportSelection (exportSet);

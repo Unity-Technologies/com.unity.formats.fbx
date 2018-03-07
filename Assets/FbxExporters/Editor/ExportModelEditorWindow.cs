@@ -272,24 +272,39 @@ namespace FbxExporters
 
         public class ExportModelEditorWindow : ExportOptionsEditorWindow
         {
-            public static void Init (string filename = "", bool singleHierarchyExport = true, ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all)
+            private UnityEngine.Object[] m_toExport;
+
+            public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all)
             {
                 ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
-                window.InitializeWindow (filename, singleHierarchyExport, exportType);
+                int numObjects = window.SetGameObjectsToExport (toExport);
+                if (string.IsNullOrEmpty (filename)) {
+                    filename = window.GetFilenameFromObjects ();
+                }
+                window.InitializeWindow (filename, singleHierarchyExport: numObjects == 1, exportType: exportType);
                 window.Show ();
+            }
+
+            protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport){
+                m_toExport = System.Linq.Enumerable.ToArray (toExport);
+                return m_toExport.Length;
+            }
+
+            protected string GetFilenameFromObjects(){
+                var filename = "";
+                if (m_toExport.Length == 1) {
+                    filename = m_toExport [0].name;
+                } else {
+                    filename = "Untitled";
+                }
+                return filename;
             }
 
             protected override void OnEnable ()
             {
                 base.OnEnable ();
-
                 if (!m_innerEditor) {
-                    var ms = ExportSettings.instance.exportModelSettings;
-                    if (!ms) {
-                        ms = ExportSettings.instance.exportModelSettings;
-                    }
-                    m_innerEditor = UnityEditor.Editor.CreateEditor (ms);
-                    this.SetSingleHierarchyExport (m_singleHierarchyExport);
+                    m_innerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.exportModelSettings);
                 }
             }
 
@@ -302,7 +317,7 @@ namespace FbxExporters
                     return;
                 }
 
-                if (ModelExporter.ExportObjects (filePath, exportType: m_animExportType, lodExportType: ExportSettings.GetLODExportType()) != null) {
+                if (ModelExporter.ExportObjects (filePath, m_toExport, ExportSettings.instance.exportModelSettings, exportType: m_animExportType) != null) {
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
                     AssetDatabase.Refresh ();

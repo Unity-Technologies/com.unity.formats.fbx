@@ -41,11 +41,7 @@ namespace FbxExporters
             {
                 base.OnEnable ();
                 if (!m_innerEditor) {
-                    var ms = ExportSettings.instance.convertToPrefabSettings;
-                    if (!ms) {
-                        ms = ExportSettings.instance.convertToPrefabSettings;
-                    }
-                    m_innerEditor = UnityEditor.Editor.CreateEditor (ms);
+                    m_innerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.convertToPrefabSettings);
                 }
             }
 
@@ -68,12 +64,16 @@ namespace FbxExporters
                 }
 
                 if (m_toConvert.Length == 1) {
-                    ConvertToModel.Convert (m_toConvert[0], fbxFullPath: fbxPath, prefabFullPath: prefabPath);
+                    ConvertToModel.Convert (
+                        m_toConvert[0], fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings
+                    );
                     return;
                 }
 
                 foreach (var go in m_toConvert) {
-                    ConvertToModel.Convert (go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath);
+                    ConvertToModel.Convert (
+                        go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.convertToPrefabSettings
+                    );
                 }
             }
 

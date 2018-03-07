@@ -93,7 +93,7 @@ namespace FbxExporters.EditorTools
             return ExportModelSettingsSerialize.LODExportType.All;
         }
         public ExportModelSettingsSerialize.ObjectPosition GetObjectPosition(){
-            return ExportModelSettingsSerialize.ObjectPosition.LocalCentered;
+            return ExportModelSettingsSerialize.ObjectPosition.Reset;
         }
         public void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos){
             // nothing to set

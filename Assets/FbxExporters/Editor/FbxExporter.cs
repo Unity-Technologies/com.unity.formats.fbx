@@ -195,6 +195,19 @@ namespace FbxExporters
                 get { return EditorTools.ExportSettings.instance; }
             }
 
+
+            private EditorTools.IExportOptions m_exportOptions;
+            private EditorTools.IExportOptions ExportOptions {
+                get {
+                    if (m_exportOptions == null) {
+                        // get default settings;
+                        m_exportOptions = ScriptableObject.CreateInstance <ExportModelSettings>() as ExportModelSettings;
+                    }
+                    return m_exportOptions;
+                }
+                set { m_exportOptions = value; }
+            }
+
             /// <summary>
             /// Gets the Unity default material.
             /// </summary>
@@ -621,7 +634,7 @@ namespace FbxExporters
                     return true;
                 }
 
-                var fbxName = ExportSettings.UseMayaCompatibleNames()
+                var fbxName = ExportOptions.UseMayaCompatibleNames()
                     ? ConvertToMayaCompatibleName(unityName) : unityName;
 
                 if (Verbose) {
@@ -1928,7 +1941,7 @@ namespace FbxExporters
             {
                 int numObjectsExported = exportProgress;
 
-                if (ExportSettings.UseMayaCompatibleNames()) {
+                if (ExportOptions.UseMayaCompatibleNames()) {
                     unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
                 }
 
@@ -2189,7 +2202,7 @@ namespace FbxExporters
                     return true;
                 }
 
-                if (ExportSettings.UseMayaCompatibleNames()) {
+                if (ExportOptions.UseMayaCompatibleNames()) {
                     unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
                 }
 
@@ -2705,9 +2718,7 @@ namespace FbxExporters
             /// </summary>
             public int ExportAll (
                 IEnumerable<UnityEngine.Object> unityExportSet, 
-                Dictionary<GameObject, AnimationOnlyExportData> animationExportData,
-                TransformExportType exportType = TransformExportType.Global,
-                ExportModelSettingsSerialize.LODExportType lodExportType = ExportModelSettingsSerialize.LODExportType.All)
+                Dictionary<GameObject, AnimationOnlyExportData> animationExportData)
             {
                 exportCancelled = false;
 
@@ -2740,7 +2751,7 @@ namespace FbxExporters
                         // Initialize the exporter.
                         // fileFormat must be binary if we are embedding textures
                         int fileFormat = -1;
-                        if (EditorTools.ExportSettings.GetExportFormat() == ExportModelSettingsSerialize.ExportFormat.ASCII)
+                        if (ExportOptions.GetExportFormat() == ExportModelSettingsSerialize.ExportFormat.ASCII)
                         {
                             fileFormat = fbxManager.GetIOPluginRegistry().FindWriterIDByDescription("FBX ascii (*.fbx)");
                         }                        
@@ -2811,23 +2822,25 @@ namespace FbxExporters
                         }
 
                         Vector3 center = Vector3.zero;
-                        if(exportType == TransformExportType.Global){
-                            switch(ExportSettings.GetObjectPosition()){
-                            case ExportModelSettingsSerialize.ObjectPosition.LocalCentered:
-                                // one object to export -> move to (0,0,0)
-                                if(revisedExportSet.Count == 1){
-                                    var tempList = new List<GameObject>(revisedExportSet);
-                                    center = tempList[0].transform.position;
-                                    break;
-                                }
-                                // more than one object to export -> get bounding center
-                                center = FindCenter(revisedExportSet);
-                                break;
-                            // absolute center -> don't do anything
-                            default:
-                                center = Vector3.zero;
+                        TransformExportType exportType = TransformExportType.Global;
+                        switch(ExportOptions.GetObjectPosition()){
+                        case ExportModelSettingsSerialize.ObjectPosition.LocalCentered:
+                            // one object to export -> move to (0,0,0)
+                            if(revisedExportSet.Count == 1){
+                                var tempList = new List<GameObject>(revisedExportSet);
+                                center = tempList[0].transform.position;
                                 break;
                             }
+                            // more than one object to export -> get bounding center
+                            center = FindCenter(revisedExportSet);
+                            break;
+                        case ExportModelSettingsSerialize.ObjectPosition.Reset:
+                            exportType = TransformExportType.Reset;
+                            break;
+                        // absolute center -> don't do anything
+                        default:
+                            center = Vector3.zero;
+                            break;
                         }
 
                         foreach (var unityGo in revisedExportSet) {
@@ -2837,7 +2850,7 @@ namespace FbxExporters
                             }
                             else {
                                 exportProgress = this.ExportTransformHierarchy (unityGo, fbxScene, fbxRootNode,
-                                    exportProgress, count, center, exportType, lodExportType);
+                                    exportProgress, count, center, exportType, ExportOptions.GetLODExportType());
                             }
                             if (exportCancelled || exportProgress < 0) {
                                 Debug.LogWarning ("Export Cancelled");
@@ -3001,7 +3014,7 @@ namespace FbxExporters
                     animationTrackGObject,
                     timelineClipSelected.animationClip
                 };
-                ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
+                //ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
             }
 
             /// <summary>
@@ -3060,7 +3073,7 @@ namespace FbxExporters
                         foreach (TimelineClip timeLineClip in at.GetClips()) {
                             string filePath = string.Format(AnimFbxFileFormat, folderPath, atObject.name, timeLineClip.displayName);
                             UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timeLineClip.animationClip };
-                            ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
+                            //ExportObjects (filePath, myArray, AnimationExportType.timelineAnimationClip);
                         }
                     }
                 }
@@ -3611,18 +3624,9 @@ namespace FbxExporters
             private static void OnExport (AnimationExportType exportType = AnimationExportType.all)
             {
                 GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
-                string filename = null;
-                if (selectedGOs.Length == 1) {
-                    filename = ConvertToValidFilename (selectedGOs [0].name + "." + kFBXFileExtension);
-                } else {
-                    filename = string.IsNullOrEmpty (LastFilePath)
-                        ? MakeFileName (basename: FileBaseName, extension: kFBXFileExtension)
-                        : System.IO.Path.GetFileName (LastFilePath);
-                }
 
-                var hierarchyCount = ModelExporter.RemoveRedundantObjects(selectedGOs).Count;
-
-                ExportModelEditorWindow.Init (filename, singleHierarchyExport: hierarchyCount == 1, exportType: exportType);
+                var toExport = ModelExporter.RemoveRedundantObjects(selectedGOs);
+                ExportModelEditorWindow.Init (System.Linq.Enumerable.Cast<UnityEngine.Object> (toExport), exportType: exportType);
             }
 
             /// <summary>
@@ -3632,20 +3636,19 @@ namespace FbxExporters
             public static string ExportObjects (
                 string filePath,
                 UnityEngine.Object[] objects = null,
-                AnimationExportType exportType = AnimationExportType.all,
-                TransformExportType transformExportType = TransformExportType.Global,
-                ExportModelSettingsSerialize.LODExportType lodExportType = ExportModelSettingsSerialize.LODExportType.All)
+                IExportOptions exportOptions = null,
+                AnimationExportType exportType = AnimationExportType.all)
             {
                 LastFilePath = filePath;
 
                 using (var fbxExporter = Create ()) {
                     // ensure output directory exists
                     EnsureDirectory (filePath);
+                    fbxExporter.ExportOptions = exportOptions;
 
                     if (objects == null) {
                         objects = Selection.objects;
                     }
-
 
                     Dictionary<GameObject, AnimationOnlyExportData> animationExportData = null;
                     switch (exportType)
@@ -3675,7 +3678,7 @@ namespace FbxExporters
                             break;
                     }
 
-                    if (fbxExporter.ExportAll (objects, animationExportData, transformExportType, lodExportType) > 0) {
+                    if (fbxExporter.ExportAll (objects, animationExportData) > 0) {
                         string message = string.Format ("Successfully exported: {0}", filePath);
                         UnityEngine.Debug.Log (message);
 
@@ -3687,11 +3690,10 @@ namespace FbxExporters
 
             public static string ExportObject (
                 string filePath, UnityEngine.Object root,
-                AnimationExportType exportType = AnimationExportType.all,
-                TransformExportType transformExportType = TransformExportType.Reset,
-                ExportModelSettingsSerialize.LODExportType lodExportType = ExportModelSettingsSerialize.LODExportType.All)
+                IExportOptions exportOptions = null,
+                AnimationExportType exportType = AnimationExportType.all)
             {
-                return ExportObjects(filePath, new Object[] { root }, exportType, transformExportType, lodExportType);
+                return ExportObjects(filePath, new Object[] { root }, exportOptions, exportType: exportType);
             }
 
             private static void EnsureDirectory (string path)
