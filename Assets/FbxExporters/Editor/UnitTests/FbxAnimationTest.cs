@@ -834,9 +834,7 @@ namespace FbxExporters.UnitTests
 
             // export fbx
             // get GameObject
-            string filename = GetRandomFbxFilePath ();
-            var exportedFilePath = ModelExporter.ExportObject (filename, originalGO, ModelExporter.AnimationExportType.componentAnimation);
-            Assert.That (exportedFilePath, Is.EqualTo (filename));
+            string filename = ExportToFbx(originalGO, true);
 
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
             Assert.IsTrue (fbxObj);
