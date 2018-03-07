@@ -1295,10 +1295,6 @@ namespace FbxExporters
                     }
                 }
 
-                if (fbxMesh == null) return false;
-
-
-
                 return true;
             }
 
