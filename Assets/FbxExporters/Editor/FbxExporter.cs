@@ -1724,6 +1724,8 @@ namespace FbxExporters
                 if (Verbose)
                     Debug.Log (string.Format ("Exporting animation clip ({1}) for {0}", uniRoot.name, uniAnimClip.name));
 
+                Debug.Log("ExportAnimationClip: " + uniAnimClip.name + " uniRoot " +  uniRoot.name);
+
                 // setup anim stack
                 FbxAnimStack fbxAnimStack = FbxAnimStack.Create (fbxScene, uniAnimClip.name);
                 fbxAnimStack.Description.Set ("Animation Take: " + uniAnimClip.name);
@@ -1768,6 +1770,7 @@ namespace FbxExporters
 
                 foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (uniAnimClip)) {
                     Object uniObj = AnimationUtility.GetAnimatedObject (uniRoot, uniCurveBinding);
+                    Debug.Log ("Curve " + uniObj.name + " uniCurveBinding " + uniCurveBinding.propertyName);
                     if (!uniObj) { continue; }
 
                     AnimationCurve uniAnimCurve = AnimationUtility.GetEditorCurve (uniAnimClip, uniCurveBinding);
@@ -1846,6 +1849,8 @@ namespace FbxExporters
             /// </summary>
             protected void ExportAnimation (GameObject uniRoot, FbxScene fbxScene)
             {
+                Debug.Log("Export animation: " + uniRoot.name);
+
                 var exportedClips = new HashSet<AnimationClip> ();
 
                 var uniAnimator = uniRoot.GetComponent<Animator> ();
@@ -2507,6 +2512,7 @@ namespace FbxExporters
             /// </summary>
             protected bool ExportComponents(FbxScene fbxScene)
             {
+                bool removeAnimationsFromSkinnedMeshRenderer = true;
                 var animationNodes = new HashSet<GameObject> ();
 
                 int numObjectsExported = 0;
@@ -2542,6 +2548,8 @@ namespace FbxExporters
                         ExportLight (unityGo, fbxScene, fbxNode);
                     }
 
+                    bool hasSkinned = unityGo.GetComponent<SkinnedMeshRenderer>() != null;
+                    Debug.Log(unityGo.name + " hasSkinned " + hasSkinned.ToString());
                     // check if this object contains animation, keep track of it
                     // if it does
                     if (GameObjectHasAnimation (unityGo)) {
