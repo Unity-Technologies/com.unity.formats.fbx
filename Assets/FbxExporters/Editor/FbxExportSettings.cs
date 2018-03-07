@@ -38,12 +38,6 @@ namespace FbxExporters.EditorTools {
                     "Automatically updates prefabs with new fbx data that was imported."),
                 exportSettings.autoUpdaterEnabled
             );
-
-            exportSettings.exportMeshNoRenderer = EditorGUILayout.Toggle(
-                new GUIContent("Export Unrendered:",
-                    "If checked, meshes will be exported even if they don't have a Renderer component."),
-                exportSettings.exportMeshNoRenderer
-            );
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             EditorGUI.indentLevel--;
@@ -367,7 +361,6 @@ namespace FbxExporters.EditorTools {
         public bool launchAfterInstallation = true;
         public bool HideSendToUnityMenu = true;
         public bool BakeAnimation = true;
-        public bool exportMeshNoRenderer = false;
 
         public string IntegrationSavePath;
 
@@ -417,40 +410,6 @@ namespace FbxExporters.EditorTools {
 
         [SerializeField]
         private ConvertToPrefabSettingsSerialize convertToPrefabSettingsSerialize;
-
-        // ---------------- get functions for options in ExportModelSettings ----------------
-        /*public static ExportModelSettingsSerialize.ExportFormat GetExportFormat(){
-            return instance.exportModelSettings.info.exportFormat;
-        }
-
-        public static ExportModelSettingsSerialize.Include GetModelAnimIncludeOption(){
-            return instance.exportModelSettings.info.include;
-        }
-
-        public static ExportModelSettingsSerialize.LODExportType GetLODExportType(){
-            return instance.exportModelSettings.info.lodLevel;
-        }
-
-        public static ExportModelSettingsSerialize.ObjectPosition GetObjectPosition(){
-            return instance.exportModelSettings.info.objectPosition;
-        }
-
-        public static void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos){
-            instance.exportModelSettings.info.objectPosition = objPos;
-        }
-
-        public static string GetRootMotionTransferNode(){
-            return instance.exportModelSettings.info.rootMotionTransfer;
-        }
-
-        public static bool AnimateSkinnedMesh(){
-            return instance.exportModelSettings.info.animatedSkinnedMesh;
-        }
-
-        public static bool UseMayaCompatibleNames(){
-            return instance.exportModelSettings.info.mayaCompatibleNaming;
-        }*/
-        // ---------------------------------------------------------------------------------
 
         protected override void LoadDefaults()
         {

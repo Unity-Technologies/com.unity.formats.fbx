@@ -79,6 +79,12 @@ namespace FbxExporters.EditorTools
                         " and unexpected character replacements in Maya.")
                 ),
                 exportSettings.mayaCompatibleNaming);
+
+            exportSettings.exportUnrendered = EditorGUILayout.Toggle(
+                new GUIContent("Export Unrendered:",
+                    "If checked, meshes will be exported even if they don't have a Renderer component."),
+                exportSettings.exportUnrendered
+            );
         }
     }
 
@@ -90,6 +96,7 @@ namespace FbxExporters.EditorTools
         void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos);
         bool AnimateSkinnedMesh();
         bool UseMayaCompatibleNames();
+        bool ExportUnrendered();
     }
 
     public class ExportModelSettings : ScriptableObject, IExportOptions
@@ -125,6 +132,9 @@ namespace FbxExporters.EditorTools
         public bool UseMayaCompatibleNames(){
             return info.mayaCompatibleNaming;
         }
+        public bool ExportUnrendered(){
+            return info.exportUnrendered;
+        }
     }
 
     [System.Serializable]
@@ -145,5 +155,6 @@ namespace FbxExporters.EditorTools
         public string rootMotionTransfer = "";
         public bool animatedSkinnedMesh = true;
         public bool mayaCompatibleNaming = true;
+        public bool exportUnrendered = true;
     }
 }

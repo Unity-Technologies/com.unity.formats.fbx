@@ -105,6 +105,9 @@ namespace FbxExporters.EditorTools
         public bool UseMayaCompatibleNames(){
             return info.mayaCompatibleNaming;
         }
+        public bool ExportUnrendered(){
+            return true;
+        }
     }
 
     [System.Serializable]

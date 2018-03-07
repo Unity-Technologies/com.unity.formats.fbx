@@ -272,6 +272,7 @@ namespace FbxExporters
 
         public class ExportModelEditorWindow : ExportOptionsEditorWindow
         {
+            protected override float MinWindowHeight { get { return 260; } }
             private UnityEngine.Object[] m_toExport;
 
             public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all)
