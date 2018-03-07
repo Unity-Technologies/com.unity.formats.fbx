@@ -3041,20 +3041,24 @@ namespace FbxExporters
                     }
                 }
 
+                var playableDirectors = new List<UnityEngine.Object> ();
                 foreach (GameObject objectWithPlayableDirector in selection)
                 {
-                    if (ExportAllTimelineClips (objectWithPlayableDirector)) {
-                        return;
+                    PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
+                    if (pd == null) {
+                        continue;
                     }
+                    playableDirectors.Add (objectWithPlayableDirector);
                 }
+                ExportModelEditorWindow.Init (playableDirectors, "(automatic)", isTimelineAnim:true, isPlayableDirector:true);
             }
 
-            public static bool ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath = null)
+            public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath, IExportOptions exportOptions = null)
             {
                 PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
                 if (pd == null)
                 {
-                    return false;
+                    return;
                 }
                 foreach (PlayableBinding output in pd.playableAsset.outputs)
                 {
@@ -3065,10 +3069,9 @@ namespace FbxExporters
                     foreach (TimelineClip timeLineClip in at.GetClips()) {
                         string filePath = string.Format(AnimFbxFileFormat, folderPath, atObject.name, timeLineClip.displayName);
                         UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timeLineClip.animationClip };
-                        ExportObjects (filePath, myArray, timelineAnim: true);
+                        ExportObjects (filePath, myArray, exportOptions, timelineAnim: true);
                     }
                 }
-                return true;
             }
             
             /// <summary>
@@ -3629,22 +3632,20 @@ namespace FbxExporters
                     }
 
                     Dictionary<GameObject, AnimationOnlyExportData> animationExportData = null;
-                    if (exportOptions.GetModelAnimIncludeOption () == ExportModelSettingsSerialize.Include.Anim) {
-                        if (timelineAnim) {
-                            // We expect the first argument in the list to be the GameObject, the second one is the Animation Clip/Track we are exporting from the timeline
-                            GameObject rootObject = ModelExporter.GetGameObject (objects [0]);
-                            AnimationClip timelineClip = objects [1] as AnimationClip;
-                            List<AnimationClip> clipList = new List<AnimationClip> ();
-                            clipList.Add (timelineClip);
-                            animationExportData = fbxExporter.GetTimelineAnimationExportData (rootObject, clipList);
+                    if (timelineAnim) {
+                        // We expect the first argument in the list to be the GameObject, the second one is the Animation Clip/Track we are exporting from the timeline
+                        GameObject rootObject = ModelExporter.GetGameObject (objects [0]);
+                        AnimationClip timelineClip = objects [1] as AnimationClip;
+                        List<AnimationClip> clipList = new List<AnimationClip> ();
+                        clipList.Add (timelineClip);
+                        animationExportData = fbxExporter.GetTimelineAnimationExportData (rootObject, clipList);
+                    }
+                    else if (exportOptions.GetModelAnimIncludeOption () == ExportModelSettingsSerialize.Include.Anim) {
+                        HashSet<GameObject> gos = new HashSet<GameObject> ();
+                        foreach (var obj in objects) {
+                            gos.Add (ModelExporter.GetGameObject (obj));
                         }
-                        else{
-                            HashSet<GameObject> gos = new HashSet<GameObject> ();
-                            foreach (var obj in objects) {
-                                gos.Add (ModelExporter.GetGameObject (obj));
-                            }
-                            animationExportData = fbxExporter.GetAnimationExportData (gos);
-                        }
+                        animationExportData = fbxExporter.GetAnimationExportData (gos);
                     }
 
                     if (fbxExporter.ExportAll (objects, animationExportData) > 0) {

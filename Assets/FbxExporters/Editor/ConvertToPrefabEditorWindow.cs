@@ -21,7 +21,7 @@ namespace FbxExporters
             public static void Init (IEnumerable<GameObject> toConvert)
             {
                 ConvertToPrefabEditorWindow window = CreateWindow<ConvertToPrefabEditorWindow> ();
-                window.InitializeWindow (filename: "", singleHierarchyExport: true, isTimelineAnim: false);
+                window.InitializeWindow ();
                 window.SetGameObjectsToConvert (toConvert);
                 window.Show ();
             }

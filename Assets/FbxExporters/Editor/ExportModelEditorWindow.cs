@@ -26,8 +26,6 @@ namespace FbxExporters
             protected virtual GUIContent WindowTitle { get { return new GUIContent (DefaultWindowTitle); } }
 
             protected string m_exportFileName = "";
-            protected bool m_isTimelineAnim = false;
-            protected bool m_singleHierarchyExport = true;
 
             protected UnityEditor.Editor m_innerEditor;
             protected FbxExportPresetSelectorReceiver m_receiver;
@@ -62,15 +60,9 @@ namespace FbxExporters
                 return (T)EditorWindow.GetWindow <T>(DefaultWindowTitle, focus:true);
             }
 
-            protected virtual void InitializeWindow(string filename = "", bool singleHierarchyExport = true, bool isTimelineAnim = false){
-                this.SetTitle ();
-                this.SetFilename (filename);
-                this.SetAnimationExportType (isTimelineAnim);
-                this.SetSingleHierarchyExport (singleHierarchyExport);
-            }
-
-            private void SetTitle(){
+            protected virtual void InitializeWindow(string filename = ""){
                 this.titleContent = WindowTitle;
+                this.SetFilename (filename);
             }
 
             protected void InitializeReceiver(){
@@ -91,21 +83,6 @@ namespace FbxExporters
                     return;
                 }
                 m_exportFileName = filename.Remove(extIndex);
-            }
-
-            public void SetAnimationExportType(bool isTimelineAnim){
-                m_isTimelineAnim = isTimelineAnim;
-            }
-
-            public void SetSingleHierarchyExport(bool singleHierarchy){
-                m_singleHierarchyExport = singleHierarchy;
-
-                if (m_innerEditor) {
-                    var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
-                    if (exportModelSettingsEditor) {
-                        exportModelSettingsEditor.SetIsSingleHierarchy (m_singleHierarchyExport);
-                    }
-                }
             }
 
             public void SaveExportSettings()
@@ -275,20 +252,55 @@ namespace FbxExporters
             protected override float MinWindowHeight { get { return 260; } }
             private UnityEngine.Object[] m_toExport;
 
-            public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false)
+            private bool m_isTimelineAnim = false;
+            private bool m_singleHierarchyExport = true;
+            private bool m_isPlayableDirector = false;
+
+            public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false, bool isPlayableDirector = false)
             {
                 ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
                 int numObjects = window.SetGameObjectsToExport (toExport);
                 if (string.IsNullOrEmpty (filename)) {
                     filename = window.GetFilenameFromObjects ();
                 }
-                window.InitializeWindow (filename, singleHierarchyExport: numObjects == 1, isTimelineAnim: isTimelineAnim);
+                window.InitializeWindow (filename);
+                window.SetAnimationExportType (isTimelineAnim);
+                window.SetSingleHierarchyExport (numObjects == 1);
+                window.SetIsPlayableDirector (isPlayableDirector);
                 window.Show ();
             }
 
             protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport){
                 m_toExport = System.Linq.Enumerable.ToArray (toExport);
                 return m_toExport.Length;
+            }
+
+            private void SetAnimationExportType(bool isTimelineAnim){
+                m_isTimelineAnim = isTimelineAnim;
+                if (m_isTimelineAnim) {
+                    ExportSettings.instance.exportModelSettings.SetModelAnimIncludeOption (ExportModelSettingsSerialize.Include.Anim);
+                }
+                if (m_innerEditor) {
+                    var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
+                    if (exportModelSettingsEditor) {
+                        exportModelSettingsEditor.DisableIncludeDropdown(m_isTimelineAnim);
+                    }
+                }
+            }
+
+            private void SetSingleHierarchyExport(bool singleHierarchy){
+                m_singleHierarchyExport = singleHierarchy;
+
+                if (m_innerEditor) {
+                    var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
+                    if (exportModelSettingsEditor) {
+                        exportModelSettingsEditor.SetIsSingleHierarchy (m_singleHierarchyExport);
+                    }
+                }
+            }
+
+            private void SetIsPlayableDirector(bool isPlayableDirector){
+                m_isPlayableDirector = isPlayableDirector;
             }
 
             protected string GetFilenameFromObjects(){
@@ -306,15 +318,35 @@ namespace FbxExporters
                 base.OnEnable ();
                 if (!m_innerEditor) {
                     m_innerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.exportModelSettings);
+                    this.SetSingleHierarchyExport (m_singleHierarchyExport);
+                    this.SetAnimationExportType (m_isTimelineAnim);
                 }
             }
 
-            protected override void Export(){
-                var filePath = ExportSettings.GetFbxAbsoluteSavePath ();
+            protected override bool DisableNameSelection ()
+            {
+                return m_isPlayableDirector;
+            }
 
-                filePath = System.IO.Path.Combine (filePath, m_exportFileName + ".fbx");
+            protected override void Export(){
+                var folderPath = ExportSettings.GetFbxAbsoluteSavePath ();
+                var filePath = System.IO.Path.Combine (folderPath, m_exportFileName + ".fbx");
 
                 if (!OverwriteExistingFile (filePath)) {
+                    return;
+                }
+
+                if (m_isPlayableDirector) {
+                    foreach (var obj in m_toExport) {
+                        var go = ModelExporter.GetGameObject (obj);
+                        if (!go) {
+                            continue;
+                        }
+                        ModelExporter.ExportAllTimelineClips (go, folderPath, ExportSettings.instance.exportModelSettings);
+                    }
+                    // refresh the asset database so that the file appears in the
+                    // asset folder view.
+                    AssetDatabase.Refresh ();
                     return;
                 }
 

@@ -18,12 +18,18 @@ namespace FbxExporters.EditorTools
         private string hierarchyDepOption = "";
         private string[] objPositionOptions { get { return new string[]{hierarchyDepOption, "World Absolute"}; }}
 
+        private bool disableIncludeDropdown = false;
+
         public void SetIsSingleHierarchy(bool singleHierarchy){
             if (singleHierarchy) {
                 hierarchyDepOption = singleHierarchyOption;
                 return;
             }
             hierarchyDepOption = multiHerarchyOption;
+        }
+
+        public void DisableIncludeDropdown(bool disable){
+            disableIncludeDropdown = disable;
         }
 
         public override void OnInspectorGUI ()
@@ -40,7 +46,9 @@ namespace FbxExporters.EditorTools
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Include", "Select whether to export models, animation or both."), GUILayout.Width(LabelWidth - FieldOffset));
+            EditorGUI.BeginDisabledGroup(disableIncludeDropdown);
             exportSettings.include = (ExportModelSettingsSerialize.Include)EditorGUILayout.Popup((int)exportSettings.include, includeOptions);
+            EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -147,7 +155,7 @@ namespace FbxExporters.EditorTools
 
         public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
 
-        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1 , Reset = 2 }
+        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/}
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 
