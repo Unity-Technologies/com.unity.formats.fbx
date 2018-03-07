@@ -194,6 +194,9 @@ namespace FbxExporters.UnitTests
         [TearDown]
         public virtual void Term ()
         {
+            // Put back the initial setting for the auto-updater toggle
+            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
+
             if (string.IsNullOrEmpty(_testDirectory)) {
                 return;
             }
@@ -212,7 +215,6 @@ namespace FbxExporters.UnitTests
             isAutoUpdaterOn = FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled;
             FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = true;
         }
-
 
         /// <summary>
         /// Exports the Objects in selected.

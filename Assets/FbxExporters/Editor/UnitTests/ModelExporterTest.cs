@@ -468,6 +468,7 @@ namespace FbxExporters.UnitTests
 
             var gameObject = new GameObject ();
             var meshFilter = gameObject.AddComponent<MeshFilter> ();
+            gameObject.AddComponent<MeshRenderer> ();
 
             meshFilter.sharedMesh = mesh;
 
