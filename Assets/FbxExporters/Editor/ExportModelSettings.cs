@@ -88,11 +88,14 @@ namespace FbxExporters.EditorTools
                 ),
                 exportSettings.mayaCompatibleNaming);
 
-            exportSettings.exportUnrendered = EditorGUILayout.Toggle(
-                new GUIContent("Export Unrendered:",
-                    "If checked, meshes will be exported even if they don't have a Renderer component."),
-                exportSettings.exportUnrendered
-            );
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Export Unrendered:",
+                "If checked, meshes will be exported even if they don't have a Renderer component."), GUILayout.Width(LabelWidth - FieldOffset));
+            // greyed out if animation only
+            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
+            exportSettings.exportUnrendered = EditorGUILayout.Toggle(exportSettings.exportUnrendered);
+            EditorGUI.EndDisabledGroup ();
+            GUILayout.EndHorizontal ();
         }
     }
 
