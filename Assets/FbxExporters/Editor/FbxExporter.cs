@@ -82,7 +82,7 @@ namespace FbxExporters
             //       from being passed to command, thus resulting in OnContextItem()
             //       being called only once regardless of what is selected.
             const string MenuItemName = "GameObject/Export Model...";
-            const string ModelOnlyMenuItemName = "GameObject/Export Model without Animation...";
+            const string ModelOnlyMenuItemName = "GameObject/Export Model Only...";
 
             const string ClipMenuItemName = "GameObject/Export All Timeline Clips...";
             const string TimelineClipMenuItemName = "GameObject/Export Selected Timeline Clip...";																				
@@ -2545,7 +2545,7 @@ namespace FbxExporters
 
                     // check if this object contains animation, keep track of it
                     // if it does
-                    if (GameObjectHasAnimation (unityGo) && animationExportType != AnimationExportType.none) {
+                    if (animationExportType != AnimationExportType.none && GameObjectHasAnimation (unityGo) ) {
                         animationNodes.Add (unityGo);
                     }
                 }
@@ -3674,8 +3674,6 @@ namespace FbxExporters
                                 gos.Add(ModelExporter.GetGameObject(obj));
                             }
                             animationExportData = fbxExporter.GetAnimationExportData(gos);
-                            break;
-                        case AnimationExportType.none:
                             break;
                         default:
                             break;
