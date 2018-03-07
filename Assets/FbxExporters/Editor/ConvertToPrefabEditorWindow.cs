@@ -12,8 +12,9 @@ namespace FbxExporters
     {
         public class ConvertToPrefabEditorWindow : ExportOptionsEditorWindow
         {
-            protected override GUIContent m_windowTitle { get { return new GUIContent ("Convert Options"); }}
+            protected override GUIContent WindowTitle { get { return new GUIContent ("Convert Options"); }}
             protected override float MinWindowHeight { get { return 280; } }
+            protected override string ExportButtonName { get { return "Convert"; } }
             private GameObject[] m_toConvert;
             private string m_prefabFileName = "";
 
@@ -94,7 +95,12 @@ namespace FbxExporters
                     "Filename to save prefab to."),GUILayout.Width(LabelWidth-FieldOffset));
 
                 EditorGUI.BeginDisabledGroup (DisableNameSelection());
-                m_prefabFileName = EditorGUILayout.TextField (m_prefabFileName);
+                var textFieldStyle = new GUIStyle (EditorStyles.textField);
+                // increase padding to match filename text field
+                var padding = textFieldStyle.padding;
+                padding.left = padding.left + 3;
+                textFieldStyle.padding = padding;
+                m_prefabFileName = EditorGUILayout.TextField (m_prefabFileName, textFieldStyle);
                 m_prefabFileName = ModelExporter.ConvertToValidFilename (m_prefabFileName);
                 EditorGUI.EndDisabledGroup ();
                 GUILayout.EndHorizontal ();

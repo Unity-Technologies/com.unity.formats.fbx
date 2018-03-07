@@ -21,7 +21,9 @@ namespace FbxExporters
             protected const float FbxExtOffset = -7;
             protected virtual float MinWindowHeight { get { return 250; } }
 
-            protected virtual GUIContent m_windowTitle { get { return new GUIContent (DefaultWindowTitle); } }
+            protected virtual string ExportButtonName { get { return "Export"; } }
+
+            protected virtual GUIContent WindowTitle { get { return new GUIContent (DefaultWindowTitle); } }
 
             protected string m_exportFileName = "";
             protected ModelExporter.AnimationExportType m_animExportType = ModelExporter.AnimationExportType.all;
@@ -68,7 +70,7 @@ namespace FbxExporters
             }
 
             private void SetTitle(){
-                this.titleContent = m_windowTitle;
+                this.titleContent = WindowTitle;
             }
 
             protected void InitializeReceiver(){
@@ -234,7 +236,7 @@ namespace FbxExporters
                     this.Close ();
                 }
 
-                if (GUILayout.Button ("Export", GUILayout.Width(ExportButtonWidth))) {
+                if (GUILayout.Button (ExportButtonName, GUILayout.Width(ExportButtonWidth))) {
                     Export ();
                     this.Close ();
                 }
