@@ -1259,41 +1259,28 @@ namespace FbxExporters
                         SharedMeshes [unityPrefabParent.name] = fbxNode.GetMesh ();
                         return true;
                     }
+                    return false;
                 }
+                
+                // We don't export the mesh because we already have it from the parent, but we still need to assign the material
+                var renderer = unityGo.GetComponent<Renderer>();
+                var materials = renderer ? renderer.sharedMaterials : null;
 
-
-                if (SharedMeshes.TryGetValue (unityPrefabParent.name, out fbxMesh))
+                Unity.FbxSdk.FbxSurfaceMaterial newMaterial = null;
+                if (materials != null)
                 {
-                    // We don't export the mesh because we already have it from the parent, but we still need to assign the material
-                    var renderer = unityGo.GetComponent<Renderer>();
-                    var materials = renderer ? renderer.sharedMaterials : null;
-
-                    Unity.FbxSdk.FbxSurfaceMaterial newMaterial = null;
-                    if (materials != null)
-                    {
-                        foreach (var mat in materials) {
-                            if (MaterialMap.TryGetValue(mat.name, out newMaterial));
-                            {
-                                fbxNode.AddMaterial(newMaterial);
-                            }
+                    foreach (var mat in materials) {
+                        if (MaterialMap.TryGetValue(mat.name, out newMaterial));
+                        {
+                            fbxNode.AddMaterial(newMaterial);
                         }
                     }
+                }
 
-                    // set the fbxNode containing the mesh
-                    fbxNode.SetNodeAttribute (fbxMesh);
-                    fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
-                }
-                else
-                {
-                    if (ExportMesh (unityGo, fbxNode) && fbxNode.GetMesh() != null) {
-                        SharedMeshes [unityPrefabParent.name] = fbxNode.GetMesh ();
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
+                // set the fbxNode containing the mesh
+                fbxNode.SetNodeAttribute (fbxMesh);
+                fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
+
 
                 return true;
             }
