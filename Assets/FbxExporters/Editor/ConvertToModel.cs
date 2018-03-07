@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor;
 using Unity.FbxSdk;
+using System.Linq;
 
 namespace FbxExporters
 {
@@ -76,8 +77,7 @@ namespace FbxExporters
                 GameObject [] unityGameObjectsToConvert)
             {
                 var toExport = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
-                var wasExported = new GameObject[toExport.Count];
-                toExport.CopyTo (wasExported);
+                var wasExported = Enumerable.ToArray (toExport);
                 ConvertToPrefabEditorWindow.Init (wasExported);
                 return wasExported;
             }

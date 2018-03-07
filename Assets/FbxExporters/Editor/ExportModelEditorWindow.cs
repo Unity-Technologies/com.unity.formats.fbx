@@ -19,6 +19,7 @@ namespace FbxExporters
             protected const float TextFieldAlignOffset = 3;
             protected const float ExportButtonWidth = 100;
             protected const float FbxExtOffset = -7;
+            protected virtual float MinWindowHeight { get { return 250; } }
 
             protected virtual GUIContent m_windowTitle { get { return new GUIContent (DefaultWindowTitle); } }
 
@@ -41,7 +42,7 @@ namespace FbxExporters
             protected virtual void OnEnable(){
                 InitializeReceiver ();
                 m_showOptions = true;
-                this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, 220);
+                this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, MinWindowHeight);
 
                 m_nameTextFieldStyle = new GUIStyle(GUIStyle.none);
                 m_nameTextFieldStyle.alignment = TextAnchor.LowerCenter;

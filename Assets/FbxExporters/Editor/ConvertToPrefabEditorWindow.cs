@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using FbxExporters.EditorTools;
 using UnityEditor.Presets;
+using System.Linq;
 
 namespace FbxExporters
 {
@@ -12,6 +13,7 @@ namespace FbxExporters
         public class ConvertToPrefabEditorWindow : ExportOptionsEditorWindow
         {
             protected override GUIContent m_windowTitle { get { return new GUIContent ("Convert Options"); }}
+            protected override float MinWindowHeight { get { return 280; } }
             private GameObject[] m_toConvert;
             private string m_prefabFileName = "";
 
@@ -24,22 +26,19 @@ namespace FbxExporters
             }
 
             protected void SetGameObjectsToConvert(IEnumerable<GameObject> toConvert){
-                var tempList = new List<GameObject> ();
-                foreach (var go in toConvert) {
-                    tempList.Add (go);
-                }
-                m_toConvert = tempList.ToArray ();
+                m_toConvert = Enumerable.ToArray (toConvert);
 
-                if (m_toConvert.Length >= 1) {
+                if (m_toConvert.Length == 1) {
                     m_prefabFileName = m_toConvert [0].name;
-                    this.SetFilename (m_prefabFileName);
+                } else if (m_toConvert.Length > 1) {
+                    m_prefabFileName = "(automatic)";
                 }
+                this.SetFilename (m_prefabFileName);
             }
 
             protected override void OnEnable ()
             {
                 base.OnEnable ();
-
                 if (!m_innerEditor) {
                     var ms = ExportSettings.instance.convertToPrefabSettings;
                     if (!ms) {
