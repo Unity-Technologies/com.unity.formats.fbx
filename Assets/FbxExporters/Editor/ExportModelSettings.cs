@@ -114,6 +114,9 @@ namespace FbxExporters.EditorTools
         public ExportModelSettingsSerialize.Include GetModelAnimIncludeOption(){
             return info.include;
         }
+        public void SetModelAnimIncludeOption(ExportModelSettingsSerialize.Include include){
+            info.include = include;
+        }
         public ExportModelSettingsSerialize.LODExportType GetLODExportType(){
             return info.lodLevel;
         }

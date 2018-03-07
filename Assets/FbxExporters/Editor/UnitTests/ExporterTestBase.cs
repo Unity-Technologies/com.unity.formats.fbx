@@ -270,9 +270,11 @@ namespace FbxExporters.UnitTests
             string filename = GetRandomFbxFilePath ();
             var exportOptions = ScriptableObject.CreateInstance <EditorTools.ExportModelSettings> () as EditorTools.ExportModelSettings;
             exportOptions.SetLODExportType (lodExportType);
+            if (animOnly) {
+                exportOptions.SetModelAnimIncludeOption (FbxExporters.EditorTools.ExportModelSettingsSerialize.Include.Anim);
+            }
             var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (
-                filename, hierarchy, exportOptions,
-                animOnly? FbxExporters.Editor.ModelExporter.AnimationExportType.componentAnimation : FbxExporters.Editor.ModelExporter.AnimationExportType.all
+                filename, hierarchy, exportOptions
             );
             Assert.That (exportedFilePath, Is.EqualTo (filename));
             return filename;

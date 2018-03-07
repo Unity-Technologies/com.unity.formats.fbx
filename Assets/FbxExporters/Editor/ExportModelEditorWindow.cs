@@ -26,7 +26,7 @@ namespace FbxExporters
             protected virtual GUIContent WindowTitle { get { return new GUIContent (DefaultWindowTitle); } }
 
             protected string m_exportFileName = "";
-            protected ModelExporter.AnimationExportType m_animExportType = ModelExporter.AnimationExportType.all;
+            protected bool m_isTimelineAnim = false;
             protected bool m_singleHierarchyExport = true;
 
             protected UnityEditor.Editor m_innerEditor;
@@ -62,10 +62,10 @@ namespace FbxExporters
                 return (T)EditorWindow.GetWindow <T>(DefaultWindowTitle, focus:true);
             }
 
-            protected virtual void InitializeWindow(string filename = "", bool singleHierarchyExport = true, ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all){
+            protected virtual void InitializeWindow(string filename = "", bool singleHierarchyExport = true, bool isTimelineAnim = false){
                 this.SetTitle ();
                 this.SetFilename (filename);
-                this.SetAnimationExportType (exportType);
+                this.SetAnimationExportType (isTimelineAnim);
                 this.SetSingleHierarchyExport (singleHierarchyExport);
             }
 
@@ -93,8 +93,8 @@ namespace FbxExporters
                 m_exportFileName = filename.Remove(extIndex);
             }
 
-            public void SetAnimationExportType(ModelExporter.AnimationExportType exportType){
-                m_animExportType = exportType;
+            public void SetAnimationExportType(bool isTimelineAnim){
+                m_isTimelineAnim = isTimelineAnim;
             }
 
             public void SetSingleHierarchyExport(bool singleHierarchy){
@@ -275,14 +275,14 @@ namespace FbxExporters
             protected override float MinWindowHeight { get { return 260; } }
             private UnityEngine.Object[] m_toExport;
 
-            public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", ModelExporter.AnimationExportType exportType = ModelExporter.AnimationExportType.all)
+            public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false)
             {
                 ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
                 int numObjects = window.SetGameObjectsToExport (toExport);
                 if (string.IsNullOrEmpty (filename)) {
                     filename = window.GetFilenameFromObjects ();
                 }
-                window.InitializeWindow (filename, singleHierarchyExport: numObjects == 1, exportType: exportType);
+                window.InitializeWindow (filename, singleHierarchyExport: numObjects == 1, isTimelineAnim: isTimelineAnim);
                 window.Show ();
             }
 
@@ -318,7 +318,7 @@ namespace FbxExporters
                     return;
                 }
 
-                if (ModelExporter.ExportObjects (filePath, m_toExport, ExportSettings.instance.exportModelSettings, animExportType: m_animExportType) != null) {
+                if (ModelExporter.ExportObjects (filePath, m_toExport, ExportSettings.instance.exportModelSettings, timelineAnim: m_isTimelineAnim) != null) {
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
                     AssetDatabase.Refresh ();
