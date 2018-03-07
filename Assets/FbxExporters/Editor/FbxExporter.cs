@@ -64,6 +64,9 @@ namespace FbxExporters
 
         public class ModelExporter : System.IDisposable
         {
+            // To be replaced by checkbox in Fbx Export settings
+            bool removeAnimationsFromSkinnedMeshRenderer = true;
+
             const string Title =
                 "exports static meshes with materials and textures";
 
@@ -1787,26 +1790,29 @@ namespace FbxExporters
                         continue;
                     }
 
-                    int index = QuaternionCurve.GetQuaternionIndex (uniCurveBinding.propertyName);
-                    if (index >= 0) {
-                        /* Rotation property; save it to convert quaternion -> euler later. */
-                        RotationCurve rotCurve = GetRotationCurve<QuaternionCurve>(uniGO, uniAnimClip.frameRate, ref rotations);
-                        rotCurve.SetCurve (index, uniAnimCurve);
-                        continue;
-                    } 
+                    // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
+                    if (!removeAnimationsFromSkinnedMeshRenderer || (removeAnimationsFromSkinnedMeshRenderer && uniGO.GetComponent<SkinnedMeshRenderer>() == null && uniGO.GetComponentInChildren<SkinnedMeshRenderer>() == null)) {
+                        int index = QuaternionCurve.GetQuaternionIndex (uniCurveBinding.propertyName);
+                        if (index >= 0) {
+                            /* Rotation property; save it to convert quaternion -> euler later. */
+                            RotationCurve rotCurve = GetRotationCurve<QuaternionCurve>(uniGO, uniAnimClip.frameRate, ref rotations);
+                            rotCurve.SetCurve (index, uniAnimCurve);
+                            continue;
+                        } 
 
-                    index = EulerCurve.GetEulerIndex (uniCurveBinding.propertyName);
-                    if (index >= 0) {
-                        RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
-                        rotCurve.SetCurve (index, uniAnimCurve);
-                        continue;
+                        index = EulerCurve.GetEulerIndex (uniCurveBinding.propertyName);
+                        if (index >= 0) {
+                            RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
+                            rotCurve.SetCurve (index, uniAnimCurve);
+                            continue;
+                        }
+
+                        /* simple property (e.g. intensity), export right away */
+                        ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
+                            uniCurveBinding.propertyName,
+                            fbxScene, 
+                            fbxAnimLayer);
                     }
-
-                    /* simple property (e.g. intensity), export right away */
-                    ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
-                        uniCurveBinding.propertyName,
-                        fbxScene, 
-                        fbxAnimLayer);
                 }
 
                 /* now export all the quaternion curves */
@@ -2512,7 +2518,6 @@ namespace FbxExporters
             /// </summary>
             protected bool ExportComponents(FbxScene fbxScene)
             {
-                bool removeAnimationsFromSkinnedMeshRenderer = true;
                 var animationNodes = new HashSet<GameObject> ();
 
                 int numObjectsExported = 0;
@@ -2548,8 +2553,6 @@ namespace FbxExporters
                         ExportLight (unityGo, fbxScene, fbxNode);
                     }
 
-                    bool hasSkinned = unityGo.GetComponent<SkinnedMeshRenderer>() != null;
-                    Debug.Log(unityGo.name + " hasSkinned " + hasSkinned.ToString());
                     // check if this object contains animation, keep track of it
                     // if it does
                     if (GameObjectHasAnimation (unityGo)) {
