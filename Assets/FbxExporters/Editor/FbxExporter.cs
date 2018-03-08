@@ -2964,6 +2964,24 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Validate the menu item defined by the function OnClipContextClick.
+            /// </summary>
+			[MenuItem(TimelineClipMenuItemName, true, 31)]
+            static bool ValidateOnClipContextClick()
+            {
+                Object[] selectedObjects = Selection.objects;
+
+                foreach (Object editorClipSelected in selectedObjects)
+                {
+                    if (editorClipSelected.GetType().Name.Contains("EditorClip"))
+                    {         
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             public static bool ExportSingleEditorClip(Object editorClipSelected)
             {
                 if (editorClipSelected.GetType().Name.Contains("EditorClip"))
@@ -3043,6 +3061,31 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Validate the menu item defined by the function OnPlayableDirectorGameObjectContextClick.
+            /// </summary>
+            [MenuItem(ClipMenuItemName, true, 31)]
+            public static bool ValidateClipContextClick()
+            {
+                Object[] selection = Selection.objects;
+
+                if (selection == null || selection.Length == 0)
+                {
+                    return false;
+                }
+
+                foreach (Object obj in selection)
+                {
+                    GameObject gameObj = obj as GameObject;
+                    if (gameObj != null && gameObj.GetComponent<PlayableDirector>() != null)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
             public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath)
             {
                 PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
@@ -3069,31 +3112,6 @@ namespace FbxExporters
                     }
                 }
             }
-            
-            /// <summary>
-            /// Validate the menu item defined by the function above.
-            /// </summary>
-            [MenuItem(ClipMenuItemName, true, 31)]
-            public static bool ValidateClipContextClick()
-            {
-                Object[] selection = Selection.objects;
-
-                if (selection == null || selection.Length == 0)
-                {
-                    return false;
-                }
-
-                foreach (Object obj in selection)
-                {
-                    GameObject gameObj = obj as GameObject;
-                    if (gameObj !=null && gameObj.GetComponent<PlayableDirector>() != null)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
 
             /// <summary>
             /// Add a menu item "Export Model..." to a GameObject's context menu.
@@ -3110,7 +3128,7 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Validate the menu item defined by the function above.
+            /// Validate the menu item defined by the function OnContextItem.
             /// </summary>
             [MenuItem (MenuItemName, true, 30)]
             public static bool OnValidateMenuItem ()
@@ -3133,7 +3151,7 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Validate the menu item defined by the function above.
+            /// Validate the menu item defined by the function ModelOnlyOnContextItem.
             /// </summary>
             [MenuItem (ModelOnlyMenuItemName, true, 30)]
             public static bool ModelOnlyOnValidateMenuItem ()
@@ -3163,7 +3181,23 @@ namespace FbxExporters
             [MenuItem (AnimOnlyMenuItemName, true, 30)]
             public static bool OnValidateAnimOnlyMenuItem ()
             {
-                return true;
+                Object[] selection = Selection.objects;
+
+                if (selection == null || selection.Length == 0)
+                {
+                    return false;
+                }
+
+                foreach (Object obj in selection)
+                {
+                    GameObject gameObj = obj as GameObject;
+                    if (gameObj != null && (gameObj.GetComponent<Animation>() != null || gameObj.GetComponent<Animator>() != null))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
 
             public static void DisplayNoSelectionDialog()
