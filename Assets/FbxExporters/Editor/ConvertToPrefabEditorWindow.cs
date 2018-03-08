@@ -18,6 +18,8 @@ namespace FbxExporters
             private GameObject[] m_toConvert;
             private string m_prefabFileName = "";
 
+            private float m_prefabExtLabelWidth;
+
             public static void Init (IEnumerable<GameObject> toConvert)
             {
                 ConvertToPrefabEditorWindow window = CreateWindow<ConvertToPrefabEditorWindow> ();
@@ -43,6 +45,7 @@ namespace FbxExporters
                 if (!m_innerEditor) {
                     m_innerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.convertToPrefabSettings);
                 }
+                m_prefabExtLabelWidth = m_fbxExtLabelStyle.CalcSize (new GUIContent (".prefab")).x;
             }
 
             protected override void Export ()
@@ -92,16 +95,25 @@ namespace FbxExporters
                 GUILayout.BeginHorizontal ();
                 EditorGUILayout.LabelField(new GUIContent(
                     "Prefab Name:",
-                    "Filename to save prefab to."),GUILayout.Width(LabelWidth-FieldOffset));
+                    "Filename to save prefab to."),GUILayout.Width(LabelWidth-TextFieldAlignOffset));
 
                 EditorGUI.BeginDisabledGroup (DisableNameSelection());
-                var textFieldStyle = new GUIStyle (EditorStyles.textField);
-                // increase padding to match filename text field
-                var padding = textFieldStyle.padding;
-                padding.left = padding.left + 3;
-                textFieldStyle.padding = padding;
-                m_prefabFileName = EditorGUILayout.TextField (m_prefabFileName, textFieldStyle);
-                m_prefabFileName = ModelExporter.ConvertToValidFilename (m_prefabFileName);
+                // Show the export name with an uneditable ".prefab" at the end
+                //-------------------------------------
+                EditorGUILayout.BeginVertical ();
+                EditorGUILayout.BeginHorizontal(EditorStyles.textField, GUILayout.Height(EditorGUIUtility.singleLineHeight));
+                EditorGUI.indentLevel--;
+                // continually resize to contents
+                var textFieldSize = m_nameTextFieldStyle.CalcSize (new GUIContent(m_prefabFileName));
+                m_exportFileName = EditorGUILayout.TextField (m_prefabFileName, m_nameTextFieldStyle, GUILayout.Width(textFieldSize.x + 5), GUILayout.MinWidth(5));
+                m_exportFileName = ModelExporter.ConvertToValidFilename (m_prefabFileName);
+
+                EditorGUILayout.LabelField ("<color=#808080ff>.prefab</color>", m_fbxExtLabelStyle, GUILayout.Width(m_prefabExtLabelWidth));
+                EditorGUI.indentLevel++;
+
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical ();
+                //-----------------------------------
                 EditorGUI.EndDisabledGroup ();
                 GUILayout.EndHorizontal ();
 
