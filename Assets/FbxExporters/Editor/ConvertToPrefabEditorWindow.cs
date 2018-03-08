@@ -105,8 +105,8 @@ namespace FbxExporters
                 EditorGUI.indentLevel--;
                 // continually resize to contents
                 var textFieldSize = m_nameTextFieldStyle.CalcSize (new GUIContent(m_prefabFileName));
-                m_exportFileName = EditorGUILayout.TextField (m_prefabFileName, m_nameTextFieldStyle, GUILayout.Width(textFieldSize.x + 5), GUILayout.MinWidth(5));
-                m_exportFileName = ModelExporter.ConvertToValidFilename (m_prefabFileName);
+                m_prefabFileName = EditorGUILayout.TextField (m_prefabFileName, m_nameTextFieldStyle, GUILayout.Width(textFieldSize.x + 5), GUILayout.MinWidth(5));
+                m_prefabFileName = ModelExporter.ConvertToValidFilename (m_prefabFileName);
 
                 EditorGUILayout.LabelField ("<color=#808080ff>.prefab</color>", m_fbxExtLabelStyle, GUILayout.Width(m_prefabExtLabelWidth));
                 EditorGUI.indentLevel++;
