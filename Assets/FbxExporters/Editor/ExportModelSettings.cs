@@ -67,12 +67,13 @@ namespace FbxExporters.EditorTools
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
-            // TODO: add implementation for these options, grey out in the meantime
-            EditorGUI.BeginDisabledGroup (true);
             GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("Transfer Root Motion To", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
-            EditorGUILayout.Popup(0, new string[]{"<None>"});
+            EditorGUILayout.LabelField(new GUIContent("Transfer Animation", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
             GUILayout.EndHorizontal();
+            EditorGUI.indentLevel++;
+            exportSettings.animSource = EditorGUILayout.ObjectField ("Source", exportSettings.animSource, typeof(Transform), allowSceneObjects: true) as Transform;
+            exportSettings.animDest = EditorGUILayout.ObjectField ("Destination", exportSettings.animDest, typeof(Transform), allowSceneObjects: true) as Transform;
+            EditorGUI.indentLevel--;
 
             exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.animatedSkinnedMesh);
             EditorGUI.EndDisabledGroup ();
@@ -124,6 +125,11 @@ namespace FbxExporters.EditorTools
         public string rootMotionTransfer = "";
         public bool animatedSkinnedMesh = true;
         public bool mayaCompatibleNaming = true;
+
+        [System.NonSerialized]
+        public Transform animSource;
+        [System.NonSerialized]
+        public Transform animDest;
 
         public ExportSettings.ExportFormat ExportFormat { get { return exportFormat; } }
         public void SetExportFormat(ExportSettings.ExportFormat format){ this.exportFormat = format; }
