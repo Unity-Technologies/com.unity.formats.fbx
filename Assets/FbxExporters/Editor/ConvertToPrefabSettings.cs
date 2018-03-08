@@ -74,48 +74,11 @@ namespace FbxExporters.EditorTools
         }
     }
 
-    public class ConvertToPrefabSettings : ScriptableObject, IExportOptions
+    public class ConvertToPrefabSettings : ExportOptionsSettingsBase<ConvertToPrefabSettingsSerialize>
     {
-        public ConvertToPrefabSettingsSerialize info;
-
-        public ConvertToPrefabSettings ()
-        {
-            info = new ConvertToPrefabSettingsSerialize ();
-        }
-
-        public ExportModelSettingsSerialize.ExportFormat GetExportFormat(){
-            return info.exportFormat;
-        }
-        public ExportModelSettingsSerialize.Include GetModelAnimIncludeOption(){
-            return ExportModelSettingsSerialize.Include.ModelAndAnim;
-        }
-        public ExportModelSettingsSerialize.LODExportType GetLODExportType(){
-            return ExportModelSettingsSerialize.LODExportType.All;
-        }
-        public ExportModelSettingsSerialize.ObjectPosition GetObjectPosition(){
-            return ExportModelSettingsSerialize.ObjectPosition.Reset;
-        }
-        public void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos){
-            // nothing to set
-            return;
-        }
-        public bool AnimateSkinnedMesh(){
-            return info.animatedSkinnedMesh;
-        }
-        public bool UseMayaCompatibleNames(){
-            return info.mayaCompatibleNaming;
-        }
-        public bool ExportUnrendered(){
-            return true;
-        }
     }
 
     [System.Serializable]
-    public class ConvertToPrefabSettingsSerialize
-    {
-        public ExportModelSettingsSerialize.ExportFormat exportFormat = ExportModelSettingsSerialize.ExportFormat.ASCII;
-        public string rootMotionTransfer = "";
-        public bool animatedSkinnedMesh = true;
-        public bool mayaCompatibleNaming = true;
-    }
+    public class ConvertToPrefabSettingsSerialize : ExportOptionsSettingsSerializeBase
+    {}
 }

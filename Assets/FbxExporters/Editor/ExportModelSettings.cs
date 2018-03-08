@@ -100,59 +100,41 @@ namespace FbxExporters.EditorTools
     }
 
     public interface IExportOptions {
-        ExportModelSettingsSerialize.ExportFormat GetExportFormat();
-        ExportModelSettingsSerialize.Include GetModelAnimIncludeOption();
-        ExportModelSettingsSerialize.LODExportType GetLODExportType();
-        ExportModelSettingsSerialize.ObjectPosition GetObjectPosition();
-        void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos);
-        bool AnimateSkinnedMesh();
-        bool UseMayaCompatibleNames();
-        bool ExportUnrendered();
+        ExportModelSettingsSerialize.ExportFormat GetExportFormat { get; set; }
+        ExportModelSettingsSerialize.Include GetModelAnimIncludeOption { get; set; }
+        ExportModelSettingsSerialize.LODExportType GetLODExportType { get; set; }
+        ExportModelSettingsSerialize.ObjectPosition GetObjectPosition { get; set; }
+        bool AnimateSkinnedMesh { get; set; }
+        bool UseMayaCompatibleNames { get; set; }
     }
 
-    public class ExportModelSettings : ScriptableObject, IExportOptions
+    public abstract class ExportOptionsSettingsBase<T> : ScriptableObject, IExportOptions where T : ExportOptionsSettingsSerializeBase
     {
-        public ExportModelSettingsSerialize info;
+        public T info = new T();
+        ExportModelSettingsSerialize.ExportFormat GetExportFormat { get { return info.exportFormat; } set { info.exportFormat = value; } }
+        ExportModelSettingsSerialize.Include GetModelAnimIncludeOption { get; set; }
+        ExportModelSettingsSerialize.LODExportType GetLODExportType { get; set; }
+        ExportModelSettingsSerialize.ObjectPosition GetObjectPosition { get; set; }
+        bool AnimateSkinnedMesh { get; set; }
+        bool UseMayaCompatibleNames { get; set; }
+        bool ExportUnrendered { get; set; }
+    }
 
-        public ExportModelSettings ()
-        {
-            info = new ExportModelSettingsSerialize ();
-        }
-
-        public ExportModelSettingsSerialize.ExportFormat GetExportFormat(){
-            return info.exportFormat;
-        }
-        public ExportModelSettingsSerialize.Include GetModelAnimIncludeOption(){
-            return info.include;
-        }
-        public void SetModelAnimIncludeOption(ExportModelSettingsSerialize.Include include){
-            info.include = include;
-        }
-        public ExportModelSettingsSerialize.LODExportType GetLODExportType(){
-            return info.lodLevel;
-        }
-        public void SetLODExportType(ExportModelSettingsSerialize.LODExportType lodType){
-            info.lodLevel = lodType;
-        }
-        public ExportModelSettingsSerialize.ObjectPosition GetObjectPosition(){
-            return info.objectPosition;
-        }
-        public void SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition objPos){
-            info.objectPosition = objPos;
-        }
-        public bool AnimateSkinnedMesh(){
-            return info.animatedSkinnedMesh;
-        }
-        public bool UseMayaCompatibleNames(){
-            return info.mayaCompatibleNaming;
-        }
-        public bool ExportUnrendered(){
-            return info.exportUnrendered;
-        }
+    public class ExportModelSettings : ExportOptionsSettingsBase<ExportModelSettingsSerialize>
+    {
     }
 
     [System.Serializable]
-    public class ExportModelSettingsSerialize
+    public abstract class ExportOptionsSettingsSerializeBase
+    {
+        public ExportModelSettingsSerialize.ExportFormat exportFormat = ExportModelSettingsSerialize.ExportFormat.ASCII;
+        public string rootMotionTransfer = "";
+        public bool animatedSkinnedMesh = true;
+        public bool mayaCompatibleNaming = true;
+    }
+
+    [System.Serializable]
+    public class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
         public enum ExportFormat { ASCII = 0, Binary = 1}
 
@@ -162,13 +144,9 @@ namespace FbxExporters.EditorTools
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 
-        public ExportFormat exportFormat = ExportFormat.ASCII;
         public Include include = Include.ModelAndAnim;
         public LODExportType lodLevel = LODExportType.All;
         public ObjectPosition objectPosition = ObjectPosition.LocalCentered;
-        public string rootMotionTransfer = "";
-        public bool animatedSkinnedMesh = true;
-        public bool mayaCompatibleNaming = true;
         public bool exportUnrendered = true;
     }
 }
