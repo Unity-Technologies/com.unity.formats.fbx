@@ -64,6 +64,9 @@ namespace FbxExporters
 
         public class ModelExporter : System.IDisposable
         {
+            // To be replaced by checkbox in Fbx Export settings
+            bool removeAnimationsFromSkinnedMeshRenderer = true;
+
             const string Title =
                 "exports static meshes with materials and textures";
 
@@ -1783,6 +1786,12 @@ namespace FbxExporters
                     var uniGO = GetGameObject (uniObj);
                     if (!uniGO) {
                         continue;
+                    }
+                                
+                    // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
+                    if (removeAnimationsFromSkinnedMeshRenderer && (uniGO.GetComponent<SkinnedMeshRenderer>() != null || uniGO.GetComponentInChildren<SkinnedMeshRenderer>() != null)) 
+                    {
+                        continue;    
                     }
 
                     int index = QuaternionCurve.GetQuaternionIndex (uniCurveBinding.propertyName);
