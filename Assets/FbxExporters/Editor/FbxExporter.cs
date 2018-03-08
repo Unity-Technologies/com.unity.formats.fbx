@@ -1263,9 +1263,23 @@ namespace FbxExporters
                         SharedMeshes [unityPrefabParent.name] = fbxNode.GetMesh ();
                         return true;
                     }
+                    return false;
                 }
+                
+                // We don't export the mesh because we already have it from the parent, but we still need to assign the material
+                var renderer = unityGo.GetComponent<Renderer>();
+                var materials = renderer ? renderer.sharedMaterials : null;
 
-                if (fbxMesh == null) return false;
+                Unity.FbxSdk.FbxSurfaceMaterial newMaterial = null;
+                if (materials != null)
+                {
+                    foreach (var mat in materials) {
+                        if (MaterialMap.TryGetValue(mat.name, out newMaterial));
+                        {
+                            fbxNode.AddMaterial(newMaterial);
+                        }
+                    }
+                }
 
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
