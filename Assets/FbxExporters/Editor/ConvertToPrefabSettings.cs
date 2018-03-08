@@ -24,7 +24,7 @@ namespace FbxExporters.EditorTools
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.exportFormat = (ExportModelSettingsSerialize.ExportFormat)EditorGUILayout.Popup((int)exportSettings.exportFormat, exportFormatOptions);
+            exportSettings.exportFormat = (ExportSettings.ExportFormat)EditorGUILayout.Popup((int)exportSettings.exportFormat, exportFormatOptions);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -75,10 +75,14 @@ namespace FbxExporters.EditorTools
     }
 
     public class ConvertToPrefabSettings : ExportOptionsSettingsBase<ConvertToPrefabSettingsSerialize>
-    {
-    }
+    {}
 
     [System.Serializable]
     public class ConvertToPrefabSettingsSerialize : ExportOptionsSettingsSerializeBase
-    {}
+    {
+        public override ExportSettings.Include ModelAnimIncludeOption { get { return ExportSettings.Include.ModelAndAnim; } set { } }
+        public override ExportSettings.LODExportType LODExportType { get { return ExportSettings.LODExportType.All; } set { } }
+        public override ExportSettings.ObjectPosition ObjectPosition { get { return ExportSettings.ObjectPosition.Reset; } set { } }
+        public override bool ExportUnrendered { get { return true; } set { } }
+    }
 }

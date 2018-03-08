@@ -202,7 +202,7 @@ namespace FbxExporters
                 get {
                     if (m_exportOptions == null) {
                         // get default settings;
-                        m_exportOptions = ScriptableObject.CreateInstance <ExportModelSettings>() as ExportModelSettings;
+                        m_exportOptions = new ExportModelSettingsSerialize();
                     }
                     return m_exportOptions;
                 }
@@ -635,7 +635,7 @@ namespace FbxExporters
                     return true;
                 }
 
-                var fbxName = ExportOptions.UseMayaCompatibleNames()
+                var fbxName = ExportOptions.UseMayaCompatibleNames
                     ? ConvertToMayaCompatibleName(unityName) : unityName;
 
                 if (Verbose) {
@@ -1937,12 +1937,12 @@ namespace FbxExporters
                 GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
                 int exportProgress, int objectCount, Vector3 newCenter,
                 TransformExportType exportType = TransformExportType.Local,
-                ExportModelSettingsSerialize.LODExportType lodExportType = ExportModelSettingsSerialize.LODExportType.All
+                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All
             )
             {
                 int numObjectsExported = exportProgress;
 
-                if (ExportOptions.UseMayaCompatibleNames()) {
+                if (ExportOptions.UseMayaCompatibleNames) {
                     unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
                 }
 
@@ -1975,12 +1975,12 @@ namespace FbxExporters
 
                 // if this object has an LOD group, then export according to the LOD preference setting
                 var lodGroup = unityGo.GetComponent<LODGroup>();
-                if (lodGroup && lodExportType != ExportModelSettingsSerialize.LODExportType.All) {
+                if (lodGroup && lodExportType != ExportSettings.LODExportType.All) {
                     LOD[] lods = lodGroup.GetLODs ();
 
                     // LODs are ordered from highest to lowest.
                     // If exporting lowest LOD, reverse the array
-                    if (lodExportType == ExportModelSettingsSerialize.LODExportType.Lowest) {
+                    if (lodExportType == ExportSettings.LODExportType.Lowest) {
                         // reverse the array
                         LOD[] tempLods = new LOD[lods.Length];
                         System.Array.Copy (lods, tempLods, lods.Length);
@@ -2203,7 +2203,7 @@ namespace FbxExporters
                     return true;
                 }
 
-                if (ExportOptions.UseMayaCompatibleNames()) {
+                if (ExportOptions.UseMayaCompatibleNames) {
                     unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
                 }
 
@@ -2752,7 +2752,7 @@ namespace FbxExporters
                         // Initialize the exporter.
                         // fileFormat must be binary if we are embedding textures
                         int fileFormat = -1;
-                        if (ExportOptions.GetExportFormat() == ExportModelSettingsSerialize.ExportFormat.ASCII)
+                        if (ExportOptions.ExportFormat == ExportSettings.ExportFormat.ASCII)
                         {
                             fileFormat = fbxManager.GetIOPluginRegistry().FindWriterIDByDescription("FBX ascii (*.fbx)");
                         }                        
@@ -2824,8 +2824,8 @@ namespace FbxExporters
 
                         Vector3 center = Vector3.zero;
                         TransformExportType transformExportType = TransformExportType.Global;
-                        switch(ExportOptions.GetObjectPosition()){
-                        case ExportModelSettingsSerialize.ObjectPosition.LocalCentered:
+                        switch(ExportOptions.ObjectPosition){
+                        case ExportSettings.ObjectPosition.LocalCentered:
                             // one object to export -> move to (0,0,0)
                             if(revisedExportSet.Count == 1){
                                 var tempList = new List<GameObject>(revisedExportSet);
@@ -2835,7 +2835,7 @@ namespace FbxExporters
                             // more than one object to export -> get bounding center
                             center = FindCenter(revisedExportSet);
                             break;
-                        case ExportModelSettingsSerialize.ObjectPosition.Reset:
+                        case ExportSettings.ObjectPosition.Reset:
                             transformExportType = TransformExportType.Reset;
                             break;
                         // absolute center -> don't do anything
@@ -2851,7 +2851,7 @@ namespace FbxExporters
                             }
                             else {
                                 exportProgress = this.ExportTransformHierarchy (unityGo, fbxScene, fbxRootNode,
-                                    exportProgress, count, center, transformExportType, ExportOptions.GetLODExportType());
+                                    exportProgress, count, center, transformExportType, ExportOptions.LODExportType);
                             }
                             if (exportCancelled || exportProgress < 0) {
                                 Debug.LogWarning ("Export Cancelled");
@@ -2860,7 +2860,7 @@ namespace FbxExporters
                         }
 
                         if(!animOnly){
-                            if(!ExportComponents(fbxScene, ExportOptions.GetModelAnimIncludeOption() != ExportModelSettingsSerialize.Include.Model)){
+                            if(!ExportComponents(fbxScene, ExportOptions.ModelAnimIncludeOption != ExportSettings.Include.Model)){
                                 Debug.LogWarning ("Export Cancelled");
                                 return 0;
                             }
@@ -3525,7 +3525,7 @@ namespace FbxExporters
 
                 // if user doesn't want to export mesh colliders, and this gameobject doesn't have a renderer
                 // then don't export it.
-                if (!ExportOptions.ExportUnrendered() && !gameObject.GetComponent<Renderer>()) {
+                if (!ExportOptions.ExportUnrendered && !gameObject.GetComponent<Renderer>()) {
                     return false;
                 }
 
@@ -3640,7 +3640,7 @@ namespace FbxExporters
                         clipList.Add (timelineClip);
                         animationExportData = fbxExporter.GetTimelineAnimationExportData (rootObject, clipList);
                     }
-                    else if (fbxExporter.ExportOptions.GetModelAnimIncludeOption () == ExportModelSettingsSerialize.Include.Anim) {
+                    else if (fbxExporter.ExportOptions.ModelAnimIncludeOption == ExportSettings.Include.Anim) {
                         HashSet<GameObject> gos = new HashSet<GameObject> ();
                         foreach (var obj in objects) {
                             gos.Add (ModelExporter.GetGameObject (obj));

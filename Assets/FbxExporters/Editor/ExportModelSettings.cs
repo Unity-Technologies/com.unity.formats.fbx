@@ -41,29 +41,29 @@ namespace FbxExporters.EditorTools
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.exportFormat = (ExportModelSettingsSerialize.ExportFormat)EditorGUILayout.Popup((int)exportSettings.exportFormat, exportFormatOptions);
+            exportSettings.exportFormat = (ExportSettings.ExportFormat)EditorGUILayout.Popup((int)exportSettings.exportFormat, exportFormatOptions);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Include", "Select whether to export models, animation or both."), GUILayout.Width(LabelWidth - FieldOffset));
             EditorGUI.BeginDisabledGroup(disableIncludeDropdown);
-            exportSettings.include = (ExportModelSettingsSerialize.Include)EditorGUILayout.Popup((int)exportSettings.include, includeOptions);
+            exportSettings.include = (ExportSettings.Include)EditorGUILayout.Popup((int)exportSettings.include, includeOptions);
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("LOD level", "Select which LOD to export."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if animation only
-            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
-            exportSettings.lodLevel = (ExportModelSettingsSerialize.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodLevel, lodOptions);
+            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportSettings.Include.Anim);
+            exportSettings.lodLevel = (ExportSettings.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodLevel, lodOptions);
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Object(s) Position", "Select an option for exporting object's transform."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if animation only
-            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
-            exportSettings.objectPosition = (ExportModelSettingsSerialize.ObjectPosition)EditorGUILayout.Popup((int)exportSettings.objectPosition, objPositionOptions);
+            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportSettings.Include.Anim);
+            exportSettings.objectPosition = (ExportSettings.ObjectPosition)EditorGUILayout.Popup((int)exportSettings.objectPosition, objPositionOptions);
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
@@ -92,7 +92,7 @@ namespace FbxExporters.EditorTools
             EditorGUILayout.LabelField(new GUIContent("Export Unrendered:",
                 "If checked, meshes will be exported even if they don't have a Renderer component."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if animation only
-            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportModelSettingsSerialize.Include.Anim);
+            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportSettings.Include.Anim);
             exportSettings.exportUnrendered = EditorGUILayout.Toggle(exportSettings.exportUnrendered);
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal ();
@@ -100,53 +100,51 @@ namespace FbxExporters.EditorTools
     }
 
     public interface IExportOptions {
-        ExportModelSettingsSerialize.ExportFormat GetExportFormat { get; set; }
-        ExportModelSettingsSerialize.Include GetModelAnimIncludeOption { get; set; }
-        ExportModelSettingsSerialize.LODExportType GetLODExportType { get; set; }
-        ExportModelSettingsSerialize.ObjectPosition GetObjectPosition { get; set; }
-        bool AnimateSkinnedMesh { get; set; }
-        bool UseMayaCompatibleNames { get; set; }
-    }
-
-    public abstract class ExportOptionsSettingsBase<T> : ScriptableObject, IExportOptions where T : ExportOptionsSettingsSerializeBase
-    {
-        public T info = new T();
-        ExportModelSettingsSerialize.ExportFormat GetExportFormat { get { return info.exportFormat; } set { info.exportFormat = value; } }
-        ExportModelSettingsSerialize.Include GetModelAnimIncludeOption { get; set; }
-        ExportModelSettingsSerialize.LODExportType GetLODExportType { get; set; }
-        ExportModelSettingsSerialize.ObjectPosition GetObjectPosition { get; set; }
+        ExportSettings.ExportFormat ExportFormat { get; set; }
+        ExportSettings.Include ModelAnimIncludeOption { get; set; }
+        ExportSettings.LODExportType LODExportType { get; set; }
+        ExportSettings.ObjectPosition ObjectPosition { get; set; }
         bool AnimateSkinnedMesh { get; set; }
         bool UseMayaCompatibleNames { get; set; }
         bool ExportUnrendered { get; set; }
     }
 
-    public class ExportModelSettings : ExportOptionsSettingsBase<ExportModelSettingsSerialize>
+    public abstract class ExportOptionsSettingsBase<T> : ScriptableObject where T : ExportOptionsSettingsSerializeBase, new()
     {
+        public T info = new T();
     }
 
+    public class ExportModelSettings : ExportOptionsSettingsBase<ExportModelSettingsSerialize>
+    {}
+
     [System.Serializable]
-    public abstract class ExportOptionsSettingsSerializeBase
+    public abstract class ExportOptionsSettingsSerializeBase : IExportOptions
     {
-        public ExportModelSettingsSerialize.ExportFormat exportFormat = ExportModelSettingsSerialize.ExportFormat.ASCII;
+        public ExportSettings.ExportFormat exportFormat = ExportSettings.ExportFormat.ASCII;
         public string rootMotionTransfer = "";
         public bool animatedSkinnedMesh = true;
         public bool mayaCompatibleNaming = true;
+
+        public ExportSettings.ExportFormat ExportFormat { get { return exportFormat; } set { exportFormat = value; } }
+        public bool AnimateSkinnedMesh { get { return animatedSkinnedMesh; } set { animatedSkinnedMesh = value; } }
+        public bool UseMayaCompatibleNames { get { return mayaCompatibleNaming; } set { mayaCompatibleNaming = value; } }
+        public abstract ExportSettings.Include ModelAnimIncludeOption { get; set; }
+        public abstract ExportSettings.LODExportType LODExportType { get; set; }
+        public abstract ExportSettings.ObjectPosition ObjectPosition { get; set; }
+        public abstract bool ExportUnrendered { get; set; }
     }
 
     [System.Serializable]
     public class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
-        public enum ExportFormat { ASCII = 0, Binary = 1}
-
-        public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
-
-        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/}
-
-        public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
-
-        public Include include = Include.ModelAndAnim;
-        public LODExportType lodLevel = LODExportType.All;
-        public ObjectPosition objectPosition = ObjectPosition.LocalCentered;
+        public ExportSettings.Include include = ExportSettings.Include.ModelAndAnim;
+        public ExportSettings.LODExportType lodLevel = ExportSettings.LODExportType.All;
+        public ExportSettings.ObjectPosition objectPosition = ExportSettings.ObjectPosition.LocalCentered;
         public bool exportUnrendered = true;
+
+        public override ExportSettings.Include ModelAnimIncludeOption { get { return include; } set { include = value; } }
+        public override ExportSettings.LODExportType LODExportType { get { return lodLevel; } set { lodLevel = value; } }
+        public override ExportSettings.ObjectPosition ObjectPosition { get { return objectPosition; } set { objectPosition = value; } }
+        public override bool ExportUnrendered { get { return exportUnrendered; } set { exportUnrendered = value; } }
     }
 }

@@ -156,8 +156,7 @@ namespace FbxExporters
                 {
                     var fbxActualPath = ModelExporter.ExportObject (
                                             fbxFullPath, toConvert,
-                                            exportOptions != null ? exportOptions :
-                                                (ScriptableObject.CreateInstance <EditorTools.ConvertToPrefabSettings> () as EditorTools.ConvertToPrefabSettings)
+                                            exportOptions != null ? exportOptions : new EditorTools.ConvertToPrefabSettingsSerialize()
                                         );
                     if (fbxActualPath != fbxFullPath) {
                         throw new System.Exception ("Failed to convert " + toConvert.name);

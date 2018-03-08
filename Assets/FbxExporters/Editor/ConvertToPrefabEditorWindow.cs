@@ -65,14 +65,14 @@ namespace FbxExporters
 
                 if (m_toConvert.Length == 1) {
                     ConvertToModel.Convert (
-                        m_toConvert[0], fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings
+                        m_toConvert[0], fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
                     return;
                 }
 
                 foreach (var go in m_toConvert) {
                     ConvertToModel.Convert (
-                        go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.convertToPrefabSettings
+                        go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
                 }
             }

@@ -278,7 +278,7 @@ namespace FbxExporters
             private void SetAnimationExportType(bool isTimelineAnim){
                 m_isTimelineAnim = isTimelineAnim;
                 if (m_isTimelineAnim) {
-                    ExportSettings.instance.exportModelSettings.SetModelAnimIncludeOption (ExportModelSettingsSerialize.Include.Anim);
+                    ExportSettings.instance.exportModelSettings.info.ModelAnimIncludeOption = ExportSettings.Include.Anim;
                 }
                 if (m_innerEditor) {
                     var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
@@ -342,7 +342,7 @@ namespace FbxExporters
                         if (!go) {
                             continue;
                         }
-                        ModelExporter.ExportAllTimelineClips (go, folderPath, ExportSettings.instance.exportModelSettings);
+                        ModelExporter.ExportAllTimelineClips (go, folderPath, ExportSettings.instance.exportModelSettings.info);
                     }
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
@@ -350,7 +350,7 @@ namespace FbxExporters
                     return;
                 }
 
-                if (ModelExporter.ExportObjects (filePath, m_toExport, ExportSettings.instance.exportModelSettings, timelineAnim: m_isTimelineAnim) != null) {
+                if (ModelExporter.ExportObjects (filePath, m_toExport, ExportSettings.instance.exportModelSettings.info, timelineAnim: m_isTimelineAnim) != null) {
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
                     AssetDatabase.Refresh ();

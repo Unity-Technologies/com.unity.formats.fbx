@@ -269,13 +269,13 @@ namespace FbxExporters.UnitTests
         /// <param name="animOnly">If set to <c>true</c> export animation only.</param>
         protected string ExportToFbx (
             GameObject hierarchy, bool animOnly = false,
-            EditorTools.ExportModelSettingsSerialize.LODExportType lodExportType = EditorTools.ExportModelSettingsSerialize.LODExportType.All
+            EditorTools.ExportSettings.LODExportType lodExportType = EditorTools.ExportSettings.LODExportType.All
         ){
             string filename = GetRandomFbxFilePath ();
-            var exportOptions = ScriptableObject.CreateInstance <EditorTools.ExportModelSettings> () as EditorTools.ExportModelSettings;
-            exportOptions.SetLODExportType (lodExportType);
+            var exportOptions = new EditorTools.ExportModelSettingsSerialize ();
+            exportOptions.LODExportType = lodExportType;
             if (animOnly) {
-                exportOptions.SetModelAnimIncludeOption (FbxExporters.EditorTools.ExportModelSettingsSerialize.Include.Anim);
+                exportOptions.ModelAnimIncludeOption = FbxExporters.EditorTools.ExportSettings.Include.Anim;
             }
             var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (
                 filename, hierarchy, exportOptions
