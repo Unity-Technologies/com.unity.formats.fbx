@@ -122,7 +122,7 @@ namespace FbxExporters.UnitTests
 
             // Convert it to a prefab -- but keep the cube.
             var cubePrefabInstance = ConvertToModel.Convert(cube,
-                directoryFullPath: path);
+                fbxDirectoryFullPath: path, prefabDirectoryFullPath: path);
 
             // Make sure it's what we expect.
             Assert.That(cube); // we kept the original
@@ -155,7 +155,7 @@ namespace FbxExporters.UnitTests
             // Convert it again, make sure there's only one FbxPrefab (see UNI-25528).
             // Also make sure we deleted.
             var cubePrefabInstance2 = ConvertToModel.Convert(cubePrefabInstance,
-                directoryFullPath: path);
+                fbxDirectoryFullPath: path, prefabDirectoryFullPath: path);
             Assert.That(cubePrefabInstance2.GetComponents<FbxPrefab>().Length, Is.EqualTo(1));
         }
 
@@ -176,7 +176,8 @@ namespace FbxExporters.UnitTests
             Object.DestroyImmediate(meshFilter);
 
             // Convert it.
-            var cubeInstance = ConvertToModel.Convert(cube, fbxFullPath: GetRandomFbxFilePath());
+            var file = GetRandomFbxFilePath();
+            var cubeInstance = ConvertToModel.Convert(cube, fbxFullPath: file, prefabFullPath: Path.ChangeExtension(file, ".prefab"));
 
             // Make sure it doesn't have a skinned mesh renderer on it.
             // In the future we'll want to assert the opposite!
@@ -248,7 +249,7 @@ namespace FbxExporters.UnitTests
 
             // Convert it to a prefab -- but keep the cube.
             var cubePrefabInstance = ConvertToModel.Convert(cube,
-                fbxFullPath: path);
+                fbxFullPath: path, prefabFullPath: Path.ChangeExtension(path, ".prefab"));
 
             Assert.That (cube);
             Assert.That (cubePrefabInstance);

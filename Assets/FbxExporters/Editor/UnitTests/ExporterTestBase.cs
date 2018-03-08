@@ -219,16 +219,27 @@ namespace FbxExporters.UnitTests
         /// </summary>
         /// <returns>Root of Model Prefab.</returns>
         /// <param name="selected">Objects to export.</param>
-        protected virtual GameObject ExportSelection(params Object[] selected)
+        protected virtual GameObject ExportSelection(Object selected, EditorTools.IExportOptions exportOptions = null)
         {
             // export selected to a file, then return the root
             var filename = GetRandomFileNamePath();
-            return ExportSelection (filename, selected);
+            return ExportSelection (filename, selected, exportOptions);
         }
 
-        protected virtual GameObject ExportSelection(string filename, params Object[] selected){
+        protected virtual GameObject ExportSelection(Object[] selected, EditorTools.IExportOptions exportOptions = null){
+            var filename = GetRandomFileNamePath();
+            return ExportSelection (filename, selected, exportOptions);
+        }
+
+        protected virtual GameObject ExportSelection(string filename, Object selected, EditorTools.IExportOptions exportOptions = null)
+        {
+            // export selected to a file, then return the root
+            return ExportSelection (filename, new Object[]{selected}, exportOptions);
+        }
+
+        protected virtual GameObject ExportSelection(string filename, Object[] selected, EditorTools.IExportOptions exportOptions = null){
             Debug.unityLogger.logEnabled = false;
-            var fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects (filename, selected) as string;
+            var fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects (filename, selected, exportOptions) as string;
             Debug.unityLogger.logEnabled = true;
 
             Assert.IsNotNull (fbxFileName);
@@ -248,25 +259,24 @@ namespace FbxExporters.UnitTests
             return fbxRoot;
         }
 
-        protected virtual string ExportSelectedObjects(string filename, params Object[] selected)
-        {
-            string fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects(filename, selected);
-
-            return fbxFileName;
-        }
-
         /// <summary>
         /// Exports a single hierarchy to a random fbx file.
         /// </summary>
         /// <returns>The exported fbx file path.</returns>
         /// <param name="hierarchy">Hierarchy.</param>
         /// <param name="animOnly">If set to <c>true</c> export animation only.</param>
-        protected string ExportToFbx (GameObject hierarchy, bool animOnly = false, EditorTools.ExportSettings.LODExportType lodExportType = EditorTools.ExportSettings.LODExportType.All){
+        protected string ExportToFbx (
+            GameObject hierarchy, bool animOnly = false,
+            EditorTools.ExportSettings.LODExportType lodExportType = EditorTools.ExportSettings.LODExportType.All
+        ){
             string filename = GetRandomFbxFilePath ();
+            var exportOptions = new EditorTools.ExportModelSettingsSerialize ();
+            exportOptions.SetLODExportType(lodExportType);
+            if (animOnly) {
+                exportOptions.SetModelAnimIncludeOption(FbxExporters.EditorTools.ExportSettings.Include.Anim);
+            }
             var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (
-                filename, hierarchy,
-                animOnly? FbxExporters.Editor.ModelExporter.AnimationExportType.componentAnimation : FbxExporters.Editor.ModelExporter.AnimationExportType.all,
-                lodExportType: lodExportType
+                filename, hierarchy, exportOptions
             );
             Assert.That (exportedFilePath, Is.EqualTo (filename));
             return filename;

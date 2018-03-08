@@ -108,12 +108,6 @@ namespace FbxExporters
 
             public const string PACKAGE_UI_NAME = "FBX Exporter";
 
-            public enum ExportFormat
-            {
-                Binary = 0,
-                ASCII = 1
-            }
-
             /// <summary>
             /// name of the scene's default camera
             /// </summary>
@@ -203,6 +197,19 @@ namespace FbxExporters
             /// </summary>
             public static EditorTools.ExportSettings ExportSettings {
                 get { return EditorTools.ExportSettings.instance; }
+            }
+
+
+            private EditorTools.IExportOptions m_exportOptions;
+            private EditorTools.IExportOptions ExportOptions {
+                get {
+                    if (m_exportOptions == null) {
+                        // get default settings;
+                        m_exportOptions = new ExportModelSettingsSerialize();
+                    }
+                    return m_exportOptions;
+                }
+                set { m_exportOptions = value; }
             }
 
             /// <summary>
@@ -631,7 +638,7 @@ namespace FbxExporters
                     return true;
                 }
 
-                var fbxName = ExportSettings.mayaCompatibleNames
+                var fbxName = ExportOptions.UseMayaCompatibleNames
                     ? ConvertToMayaCompatibleName(unityName) : unityName;
 
                 if (Verbose) {
@@ -1274,7 +1281,7 @@ namespace FbxExporters
                 if (materials != null)
                 {
                     foreach (var mat in materials) {
-                        if (MaterialMap.TryGetValue(mat.name, out newMaterial));
+                        if (MaterialMap.TryGetValue(mat.name, out newMaterial))
                         {
                             fbxNode.AddMaterial(newMaterial);
                         }
@@ -1958,7 +1965,7 @@ namespace FbxExporters
             {
                 int numObjectsExported = exportProgress;
 
-                if (ExportSettings.mayaCompatibleNames) {
+                if (ExportOptions.UseMayaCompatibleNames) {
                     unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
                 }
 
@@ -2219,7 +2226,7 @@ namespace FbxExporters
                     return true;
                 }
 
-                if (ExportSettings.mayaCompatibleNames) {
+                if (ExportOptions.UseMayaCompatibleNames) {
                     unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
                 }
 
@@ -2529,7 +2536,7 @@ namespace FbxExporters
             /// Transform components have already been exported.
             /// This function exports the other components and animation.
             /// </summary>
-            protected bool ExportComponents(FbxScene fbxScene, AnimationExportType animationExportType = AnimationExportType.all)
+            protected bool ExportComponents(FbxScene fbxScene, bool exportAnim = true)
             {
                 var animationNodes = new HashSet<GameObject> ();
 
@@ -2568,7 +2575,7 @@ namespace FbxExporters
 
                     // check if this object contains animation, keep track of it
                     // if it does
-                    if (animationExportType != AnimationExportType.none && GameObjectHasAnimation (unityGo) ) {
+                    if (exportAnim && GameObjectHasAnimation (unityGo) ) {
                         animationNodes.Add (unityGo);
                     }
                 }
@@ -2735,10 +2742,7 @@ namespace FbxExporters
             /// </summary>
             public int ExportAll (
                 IEnumerable<UnityEngine.Object> unityExportSet, 
-                Dictionary<GameObject, AnimationOnlyExportData> animationExportData,
-                TransformExportType transformExportType = TransformExportType.Global,
-                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All,
-                AnimationExportType animationExportType = AnimationExportType.all)
+                Dictionary<GameObject, AnimationOnlyExportData> animationExportData)
             {
                 exportCancelled = false;
 
@@ -2771,7 +2775,7 @@ namespace FbxExporters
                         // Initialize the exporter.
                         // fileFormat must be binary if we are embedding textures
                         int fileFormat = -1;
-                        if (EditorTools.ExportSettings.instance.ExportFormatSelection == (int)ExportFormat.ASCII)
+                        if (ExportOptions.ExportFormat == ExportSettings.ExportFormat.ASCII)
                         {
                             fileFormat = fbxManager.GetIOPluginRegistry().FindWriterIDByDescription("FBX ascii (*.fbx)");
                         }                        
@@ -2842,8 +2846,25 @@ namespace FbxExporters
                         }
 
                         Vector3 center = Vector3.zero;
-                        if(transformExportType == TransformExportType.Global){
-                            center = (ExportSettings.centerObjects && revisedExportSet.Count > 1)? FindCenter(revisedExportSet) : Vector3.zero;
+                        TransformExportType transformExportType = TransformExportType.Global;
+                        switch(ExportOptions.ObjectPosition){
+                        case ExportSettings.ObjectPosition.LocalCentered:
+                            // one object to export -> move to (0,0,0)
+                            if(revisedExportSet.Count == 1){
+                                var tempList = new List<GameObject>(revisedExportSet);
+                                center = tempList[0].transform.position;
+                                break;
+                            }
+                            // more than one object to export -> get bounding center
+                            center = FindCenter(revisedExportSet);
+                            break;
+                        case ExportSettings.ObjectPosition.Reset:
+                            transformExportType = TransformExportType.Reset;
+                            break;
+                        // absolute center -> don't do anything
+                        default:
+                            center = Vector3.zero;
+                            break;
                         }
 
                         foreach (var unityGo in revisedExportSet) {
@@ -2853,7 +2874,7 @@ namespace FbxExporters
                             }
                             else {
                                 exportProgress = this.ExportTransformHierarchy (unityGo, fbxScene, fbxRootNode,
-                                    exportProgress, count, center, transformExportType, lodExportType);
+                                    exportProgress, count, center, transformExportType, ExportOptions.LODExportType);
                             }
                             if (exportCancelled || exportProgress < 0) {
                                 Debug.LogWarning ("Export Cancelled");
@@ -2862,7 +2883,7 @@ namespace FbxExporters
                         }
 
                         if(!animOnly){
-                            if(!ExportComponents(fbxScene,animationExportType)){
+                            if(!ExportComponents(fbxScene, ExportOptions.ModelAnimIncludeOption != ExportSettings.Include.Model)){
                                 Debug.LogWarning ("Export Cancelled");
                                 return 0;
                             }
@@ -3005,7 +3026,7 @@ namespace FbxExporters
                 return false;
             }
 
-            public static bool ExportSingleEditorClip(Object editorClipSelected)
+            protected static bool ExportSingleEditorClip(Object editorClipSelected)
             {
                 if (editorClipSelected.GetType().Name.Contains("EditorClip"))
                 {
@@ -3023,23 +3044,25 @@ namespace FbxExporters
                 return false;
             }
 
-            public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, GameObject animationTrackGObject, string folderPath = null)
+            public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, GameObject animationTrackGObject, string filePath = null)
             {
-                string AnimFbxFormat = AnimFbxFileFormat;
-                if (timelineClipSelected.displayName.Contains("@"))
-                {
-                    AnimFbxFormat = "{0}/{2}.fbx";
-                }
-                string filePath = string.Format(AnimFbxFormat, folderPath, animationTrackGObject.name, timelineClipSelected.displayName);
 
-                if (string.IsNullOrEmpty (filePath)) {
-                    return;
-                }
                 UnityEngine.Object[] exportArray = new UnityEngine.Object[] {
                     animationTrackGObject,
                     timelineClipSelected.animationClip
                 };
-                ExportObjects (filePath, exportArray, AnimationExportType.timelineAnimationClip);
+
+                if (!string.IsNullOrEmpty (filePath)) {
+                    ExportObjects (filePath, exportArray, timelineAnim: true);
+                    return;
+                }
+
+                string AnimFbxFormat = "{0}@{1}";
+                if (timelineClipSelected.displayName.Contains("@"))
+                {
+                    AnimFbxFormat = "{1}";
+                }
+                ExportModelEditorWindow.Init (exportArray, string.Format (AnimFbxFormat, animationTrackGObject.name, timelineClipSelected.displayName), isTimelineAnim: true);
             }
 
             /// <summary>
@@ -3048,19 +3071,6 @@ namespace FbxExporters
             [MenuItem(ClipMenuItemName, false, 31)]
             public static void OnPlayableDirectorGameObjectContextClick(MenuCommand command)
             {
-                // Now that we know we have stuff to export, get the user-desired path.
-                string directory = string.IsNullOrEmpty(LastFilePath)
-                                      ? Application.dataPath
-                                      : System.IO.Path.GetDirectoryName(LastFilePath);
-
-                string title = "Select the folder in which the animation files from the timeline will be exported";
-                string folderPath = EditorUtility.SaveFolderPanel(title, directory, "");
-
-                if (string.IsNullOrEmpty(folderPath))
-                {
-                    return;
-                }
-
                 Object[] selection = null;
 
                 if (command == null || command.context == null)
@@ -3078,12 +3088,44 @@ namespace FbxExporters
                     }
                 }
 
+                var playableDirectors = new List<UnityEngine.Object> ();
                 foreach (GameObject objectWithPlayableDirector in selection)
                 {
-                    ExportAllTimelineClips(objectWithPlayableDirector,folderPath);
+                    PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
+                    if (pd == null) {
+                        continue;
+                    }
+                    playableDirectors.Add (objectWithPlayableDirector);
                 }
+                ExportModelEditorWindow.Init (playableDirectors, "(automatic)", isTimelineAnim:true, isPlayableDirector:true);
             }
 
+            public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath, IExportOptions exportOptions = null)
+            {
+                PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
+                if (pd == null)
+                {
+                    return;
+                }
+                foreach (PlayableBinding output in pd.playableAsset.outputs)
+                {
+                    AnimationTrack at = output.sourceObject as AnimationTrack;
+
+                    GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
+                    // One file by animation clip
+                    foreach (TimelineClip timelineClip in at.GetClips()) {
+                        string AnimFbxFormat = AnimFbxFileFormat;
+                        if (timelineClip.displayName.Contains("@"))
+                        {
+                            AnimFbxFormat = "{0}/{2}.fbx";
+                        }
+                        string filePath = string.Format(AnimFbxFormat, folderPath, atObject.name, timelineClip.displayName);
+                        UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timelineClip.animationClip };
+                        ExportObjects (filePath, myArray, exportOptions, timelineAnim: true);
+                    }
+                }
+            }
+            
             /// <summary>
             /// Validate the menu item defined by the function OnPlayableDirectorGameObjectContextClick.
             /// </summary>
@@ -3107,33 +3149,6 @@ namespace FbxExporters
                 }
 
                 return false;
-            }
-
-            public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath)
-            {
-                PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
-                if (pd != null)
-                {
-                    foreach (PlayableBinding output in pd.playableAsset.outputs)
-                    {
-                        AnimationTrack animationTrack = output.sourceObject as AnimationTrack;
-
-                        GameObject animationTrackObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
-			            // One file by animation clip
-			            foreach(TimelineClip timelineClip in animationTrack.GetClips())
-			            {
-                            string AnimFbxFormat = AnimFbxFileFormat;
-                            if (timelineClip.displayName.Contains("@"))
-                            {
-                                AnimFbxFormat = "{0}/{2}.fbx";
-                            }
-                            string filePath = string.Format(AnimFbxFormat, folderPath, animationTrackObject.name, timelineClip.displayName);
-
-				            UnityEngine.Object[] exportArray = new UnityEngine.Object[] { animationTrackObject, timelineClip.animationClip };
-				            ExportObjects(filePath, exportArray, AnimationExportType.timelineAnimationClip);
-			            }
-                    }
-                }
             }
 
             /// <summary>
@@ -3160,42 +3175,12 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Add a menu item "Export Model Only..." to a GameObject's context menu.
-            /// </summary>
-            /// <param name="command">Command.</param>
-            [MenuItem (ModelOnlyMenuItemName, false, 30)]
-            static void ModelOnlyOnContextItem (MenuCommand command)
-            {
-                if (Selection.objects.Length <= 0) {
-                    DisplayNoSelectionDialog ();
-                    return;
-                }
-                OnExport (AnimationExportType.none);
-            }
-
-            /// <summary>
             /// Validate the menu item defined by the function ModelOnlyOnContextItem.
             /// </summary>
             [MenuItem (ModelOnlyMenuItemName, true, 30)]
             public static bool ModelOnlyOnValidateMenuItem ()
             {
                 return true;
-            }
-
-
-            /// <summary>
-            /// Add a menu item "Export Animation Only" to a GameObject's context menu.
-            /// </summary>
-            /// <param name="command">Command.</param>
-            [MenuItem (AnimOnlyMenuItemName, false, 30)]
-            static void OnAnimOnlyContextItem (MenuCommand command)
-            {
-                if (Selection.objects.Length <= 0) {
-                    DisplayNoSelectionDialog ();
-                    return;
-                }
-
-                OnExport (AnimationExportType.componentAnimation);
             }
 
             /// <summary>
@@ -3608,7 +3593,7 @@ namespace FbxExporters
 
                 // if user doesn't want to export mesh colliders, and this gameobject doesn't have a renderer
                 // then don't export it.
-                if (!ExportSettings.instance.exportMeshNoRenderer && !gameObject.GetComponent<Renderer>()) {
+                if (!ExportOptions.ExportUnrendered && !gameObject.GetComponent<Renderer>()) {
                     return false;
                 }
 
@@ -3669,15 +3654,6 @@ namespace FbxExporters
 
             const string kFBXFileExtension = "fbx";
 			
-            public enum AnimationExportType{
-                timelineAnimationClip,
-                timelineAnimationTrack,
-                componentAnimation,
-                all,
-                none
-            }
-
-
             private static string MakeFileName (string basename = "test", string extension = kFBXFileExtension)
             {
                 return basename + "." + extension;
@@ -3694,30 +3670,12 @@ namespace FbxExporters
                 return EditorUtility.SaveFilePanel (title, directory, filenameSuggestion, kFBXFileExtension);
             }
 
-            private static void OnExport (AnimationExportType exportType = AnimationExportType.all)
+            private static void OnExport ()
             {
-                // Now that we know we have stuff to export, get the user-desired path.
                 GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
-                string filename = null;
-                if (selectedGOs.Length == 1) {
-                    filename = ConvertToValidFilename (selectedGOs [0].name + "." + kFBXFileExtension);
-                } else {
-                    filename = string.IsNullOrEmpty (LastFilePath)
-                        ? MakeFileName (basename: FileBaseName, extension: kFBXFileExtension)
-                        : System.IO.Path.GetFileName (LastFilePath);
-                }
 
-                var filePath = GetExportFilePath (filename);
-
-                if (string.IsNullOrEmpty (filePath)) {
-                    return;
-                }
-
-                if (ExportObjects (filePath, animationExportType: exportType, lodExportType: ExportSettings.instance.lodExportType) != null) {
-                    // refresh the asset database so that the file appears in the
-                    // asset folder view.
-                    AssetDatabase.Refresh ();
-                }
+                var toExport = ModelExporter.RemoveRedundantObjects(selectedGOs);
+                ExportModelEditorWindow.Init (System.Linq.Enumerable.Cast<UnityEngine.Object> (toExport), isTimelineAnim: false);
             }
 
             /// <summary>
@@ -3727,50 +3685,38 @@ namespace FbxExporters
             public static string ExportObjects (
                 string filePath,
                 UnityEngine.Object[] objects = null,
-                AnimationExportType animationExportType = AnimationExportType.all,
-                TransformExportType transformExportType = TransformExportType.Global,
-                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All)
+                IExportOptions exportOptions = null,
+                bool timelineAnim = false)
             {
                 LastFilePath = filePath;
 
                 using (var fbxExporter = Create ()) {
                     // ensure output directory exists
                     EnsureDirectory (filePath);
+                    fbxExporter.ExportOptions = exportOptions;
 
                     if (objects == null) {
                         objects = Selection.objects;
                     }
 
-
                     Dictionary<GameObject, AnimationOnlyExportData> animationExportData = null;
-                    switch (animationExportType)
-                    {
-                       case AnimationExportType.timelineAnimationClip:
-                            // We expect the first argument in the list to be the GameObject, the second one is the Animation Clip/Track we are exporting from the timeline
-                            GameObject rootObject = ModelExporter.GetGameObject(objects[0]);
-                            AnimationClip timelineClip = objects[1] as AnimationClip;
-                            List<AnimationClip> clipList = new List<AnimationClip>();
-                            clipList.Add(timelineClip);
-                            animationExportData = fbxExporter.GetTimelineAnimationExportData(rootObject, clipList);
-                            break;
-                        case AnimationExportType.timelineAnimationTrack:
-                            GameObject rootObject2 = ModelExporter.GetGameObject(objects[0]);
-                            AnimationTrack timelineTrack = objects[1] as AnimationTrack;
-                            animationExportData = fbxExporter.GetAnimationExportDataFromAnimationTrack(rootObject2, timelineTrack);
-                            break;
-                        case AnimationExportType.componentAnimation:
-                            HashSet<GameObject> gos = new HashSet<GameObject>();
-                            foreach(var obj in objects)
-                            {
-                                gos.Add(ModelExporter.GetGameObject(obj));
-                            }
-                            animationExportData = fbxExporter.GetAnimationExportData(gos);
-                            break;
-                        default:
-                            break;
+                    if (timelineAnim) {
+                        // We expect the first argument in the list to be the GameObject, the second one is the Animation Clip/Track we are exporting from the timeline
+                        GameObject rootObject = ModelExporter.GetGameObject (objects [0]);
+                        AnimationClip timelineClip = objects [1] as AnimationClip;
+                        List<AnimationClip> clipList = new List<AnimationClip> ();
+                        clipList.Add (timelineClip);
+                        animationExportData = fbxExporter.GetTimelineAnimationExportData (rootObject, clipList);
+                    }
+                    else if (fbxExporter.ExportOptions.ModelAnimIncludeOption == ExportSettings.Include.Anim) {
+                        HashSet<GameObject> gos = new HashSet<GameObject> ();
+                        foreach (var obj in objects) {
+                            gos.Add (ModelExporter.GetGameObject (obj));
+                        }
+                        animationExportData = fbxExporter.GetAnimationExportData (gos);
                     }
 
-                    if (fbxExporter.ExportAll (objects, animationExportData, transformExportType, lodExportType, animationExportType) > 0) {
+                    if (fbxExporter.ExportAll (objects, animationExportData) > 0) {
                         string message = string.Format ("Successfully exported: {0}", filePath);
                         UnityEngine.Debug.Log (message);
 
@@ -3782,11 +3728,10 @@ namespace FbxExporters
 
             public static string ExportObject (
                 string filePath, UnityEngine.Object root,
-                AnimationExportType exportType = AnimationExportType.all,
-                TransformExportType transformExportType = TransformExportType.Reset,
-                ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All)
+                IExportOptions exportOptions = null,
+                bool isTimelineAnim = false)
             {
-                return ExportObjects(filePath, new Object[] { root }, exportType, transformExportType, lodExportType);
+                return ExportObjects(filePath, new Object[] { root }, exportOptions, isTimelineAnim);
             }
 
             private static void EnsureDirectory (string path)
