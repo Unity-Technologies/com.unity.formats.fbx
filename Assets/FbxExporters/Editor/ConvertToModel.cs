@@ -77,9 +77,8 @@ namespace FbxExporters
                 GameObject [] unityGameObjectsToConvert)
             {
                 var toExport = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
-                var wasExported = Enumerable.ToArray (toExport);
-                ConvertToPrefabEditorWindow.Init (wasExported);
-                return wasExported;
+                ConvertToPrefabEditorWindow.Init (toExport);
+                return toExport.ToArray();
             }
 
             /// <summary>

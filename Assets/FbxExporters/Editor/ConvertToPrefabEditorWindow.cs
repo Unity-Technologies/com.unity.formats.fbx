@@ -13,7 +13,7 @@ namespace FbxExporters
         public class ConvertToPrefabEditorWindow : ExportOptionsEditorWindow
         {
             protected override GUIContent WindowTitle { get { return new GUIContent ("Convert Options"); }}
-            protected override float MinWindowHeight { get { return 280; } }
+            protected override float MinWindowHeight { get { return 280; } } // determined by trial and error
             protected override string ExportButtonName { get { return "Convert"; } }
             private GameObject[] m_toConvert;
             private string m_prefabFileName = "";
@@ -27,7 +27,7 @@ namespace FbxExporters
             }
 
             protected void SetGameObjectsToConvert(IEnumerable<GameObject> toConvert){
-                m_toConvert = Enumerable.ToArray (toConvert);
+                m_toConvert = toConvert.OrderBy (go => go.name).ToArray ();
 
                 if (m_toConvert.Length == 1) {
                     m_prefabFileName = m_toConvert [0].name;
