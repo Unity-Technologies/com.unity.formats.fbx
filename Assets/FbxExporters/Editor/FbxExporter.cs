@@ -2967,7 +2967,7 @@ namespace FbxExporters
             /// <summary>
             /// Validate the menu item defined by the function OnClipContextClick.
             /// </summary>
-			[MenuItem(TimelineClipMenuItemName, true, 31)]
+            [MenuItem(TimelineClipMenuItemName, true, 31)]
             static bool ValidateOnClipContextClick()
             {
                 Object[] selectedObjects = Selection.objects;
