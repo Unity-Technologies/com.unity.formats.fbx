@@ -180,8 +180,9 @@ namespace FbxExporters.UnitTests
             ExportSettings.AddFbxSavePath ("/a\\b/c/\\");
             ExportSettings.AddPrefabSavePath ("/a\\b/c/\\");
 
-            Assert.That (ExportSettings.GetRelativeFbxSavePaths () [0], Is.EqualTo ("Assets \u2044 a⁄b⁄c"));
-            Assert.That (ExportSettings.GetRelativePrefabSavePaths () [0], Is.EqualTo ("Assets \u2044 a⁄b⁄c"));
+            string forwardSlash = " ⁄ "; // special unicode forward slash
+            Assert.That (ExportSettings.GetRelativeFbxSavePaths () [0], Is.EqualTo (string.Format("Assets{0}a{0}b{0}c", forwardSlash)));
+            Assert.That (ExportSettings.GetRelativePrefabSavePaths () [0], Is.EqualTo (string.Format("Assets{0}a{0}b{0}c", forwardSlash)));
 
             var platformPath = Path.Combine ("a", Path.Combine ("b", "c"));
             Assert.AreEqual (Path.Combine (appDataPath, platformPath), ExportSettings.GetFbxAbsoluteSavePath ());

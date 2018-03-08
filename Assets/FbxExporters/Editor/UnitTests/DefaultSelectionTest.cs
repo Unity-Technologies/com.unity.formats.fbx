@@ -17,13 +17,13 @@ namespace FbxExporters.UnitTests
     public class DefaultSelectionTest : ExporterTestBase
     {
         protected GameObject m_root;
-        protected ExportModelSettingsSerialize.ObjectPosition m_centerObjectsSetting;
+        protected ExportModelSettings m_centerObjectsSetting;
 
         [SetUp]
         public override void Init ()
         {
             base.Init();
-           // m_centerObjectsSetting = FbxExporters.EditorTools.ExportSettings.GetObjectPosition();
+            m_centerObjectsSetting = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
         }
 
         [TearDown]
@@ -33,8 +33,6 @@ namespace FbxExporters.UnitTests
             if (m_root) {
                 UnityEngine.Object.DestroyImmediate (m_root);
             }
-            // restore original setting
-           // FbxExporters.EditorTools.ExportSettings.SetObjectPosition(m_centerObjectsSetting);
         }
 
         [Test]
@@ -63,12 +61,12 @@ namespace FbxExporters.UnitTests
             Assert.IsNotNull (m_root);
 
             // test without centered objects
-            //FbxExporters.EditorTools.ExportSettings.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.WorldAbsolute);
+            m_centerObjectsSetting.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.WorldAbsolute);
 
             // test Export Root
             // Expected result: everything gets exported
             // Expected transform: all transforms unchanged
-            var exportedRoot = ExportSelection (new Object[]{ m_root });
+            var exportedRoot = ExportSelection (m_root, m_centerObjectsSetting);
             CompareHierarchies (m_root, exportedRoot, true, false);
             CompareGlobalTransform (exportedRoot.transform, m_root.transform);
 
@@ -77,7 +75,7 @@ namespace FbxExporters.UnitTests
             // Expected transform: all transforms unchanged
             var parent1 = m_root.transform.Find ("Parent1");
             var child1 = parent1.Find ("Child1");
-            exportedRoot = ExportSelection (new Object[]{ parent1.gameObject, child1.gameObject });
+            exportedRoot = ExportSelection (new Object[]{ parent1.gameObject, child1.gameObject }, m_centerObjectsSetting);
             CompareHierarchies (parent1.gameObject, exportedRoot, true, false);
             CompareGlobalTransform (exportedRoot.transform, parent1);
 
@@ -85,7 +83,7 @@ namespace FbxExporters.UnitTests
             // Expected result: Child2
             // Expected transform: Child2 unchanged
             var child2 = parent1.Find ("Child2").gameObject;
-            exportedRoot = ExportSelection (new Object[]{ child2 });
+            exportedRoot = ExportSelection (child2, m_centerObjectsSetting);
             CompareHierarchies (child2, exportedRoot, true, false);
             CompareGlobalTransform (exportedRoot.transform, child2.transform);
 
@@ -98,9 +96,9 @@ namespace FbxExporters.UnitTests
             var goExportSet = new GameObject[]{ child2.gameObject, parent2.gameObject };
 
             // test without centering objects
-            //FbxExporters.EditorTools.ExportSettings.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.WorldAbsolute);
+            m_centerObjectsSetting.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.WorldAbsolute);
 
-            exportedRoot = ExportSelection (exportSet);
+            exportedRoot = ExportSelection (exportSet, m_centerObjectsSetting);
             List<GameObject> children = new List<GameObject> ();
             foreach (Transform child in exportedRoot.transform) {
                 children.Add (child.gameObject);
@@ -108,10 +106,10 @@ namespace FbxExporters.UnitTests
             CompareHierarchies (new GameObject[]{ child2, parent2.gameObject }, children.ToArray ());
 
             // test with centered objects
-            //FbxExporters.EditorTools.ExportSettings.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.LocalCentered);
+            m_centerObjectsSetting.SetObjectPosition(ExportModelSettingsSerialize.ObjectPosition.LocalCentered);
             var newCenter = FbxExporters.Editor.ModelExporter.FindCenter (goExportSet);
 
-            exportedRoot = ExportSelection (exportSet);
+            exportedRoot = ExportSelection (exportSet, m_centerObjectsSetting);
             children = new List<GameObject> ();
             foreach (Transform child in exportedRoot.transform) {
                 children.Add (child.gameObject);

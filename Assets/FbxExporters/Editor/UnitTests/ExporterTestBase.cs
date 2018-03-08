@@ -221,16 +221,27 @@ namespace FbxExporters.UnitTests
         /// </summary>
         /// <returns>Root of Model Prefab.</returns>
         /// <param name="selected">Objects to export.</param>
-        protected virtual GameObject ExportSelection(params Object[] selected)
+        protected virtual GameObject ExportSelection(Object selected, EditorTools.IExportOptions exportOptions = null)
         {
             // export selected to a file, then return the root
             var filename = GetRandomFileNamePath();
-            return ExportSelection (filename, selected);
+            return ExportSelection (filename, selected, exportOptions);
         }
 
-        protected virtual GameObject ExportSelection(string filename, params Object[] selected){
+        protected virtual GameObject ExportSelection(Object[] selected, EditorTools.IExportOptions exportOptions = null){
+            var filename = GetRandomFileNamePath();
+            return ExportSelection (filename, selected, exportOptions);
+        }
+
+        protected virtual GameObject ExportSelection(string filename, Object selected, EditorTools.IExportOptions exportOptions = null)
+        {
+            // export selected to a file, then return the root
+            return ExportSelection (filename, new Object[]{selected}, exportOptions);
+        }
+
+        protected virtual GameObject ExportSelection(string filename, Object[] selected, EditorTools.IExportOptions exportOptions = null){
             Debug.unityLogger.logEnabled = false;
-            var fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects (filename, selected) as string;
+            var fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects (filename, selected, exportOptions) as string;
             Debug.unityLogger.logEnabled = true;
 
             Assert.IsNotNull (fbxFileName);
@@ -248,13 +259,6 @@ namespace FbxExporters.UnitTests
 
             Assert.IsNotNull (fbxRoot);
             return fbxRoot;
-        }
-
-        protected virtual string ExportSelectedObjects(string filename, params Object[] selected)
-        {
-            string fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects(filename, selected);
-
-            return fbxFileName;
         }
 
         /// <summary>

@@ -210,7 +210,7 @@ namespace FbxExporters.UnitTests
             //export our updated hierarchy to the same file path as the original
             SleepForFileTimestamp();
             // "Import" model to Unity (Exporting modified FBX to Unity to see if the remapping works)
-            ExportSelectedObjects(filePath, cube2);
+            ExportSelection(filePath, cube2);
             AssetDatabase.Refresh();
 
             // Assert Check Sphere = SphereFBX
@@ -272,7 +272,7 @@ namespace FbxExporters.UnitTests
             //export our updated hierarchy to the same file path as the original
             SleepForFileTimestamp();
             // "Import" model to Unity (Exporting modified FBX to Unity to see if the remapping works)
-            ExportSelectedObjects(filePath, cube2);
+            ExportSelection(filePath, cube2);
             AssetDatabase.Refresh();
 
             // Assert Check Sphere = Sphere and has been changed by the Auto-Updater.

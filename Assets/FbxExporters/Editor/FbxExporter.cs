@@ -3640,7 +3640,7 @@ namespace FbxExporters
                         clipList.Add (timelineClip);
                         animationExportData = fbxExporter.GetTimelineAnimationExportData (rootObject, clipList);
                     }
-                    else if (exportOptions.GetModelAnimIncludeOption () == ExportModelSettingsSerialize.Include.Anim) {
+                    else if (fbxExporter.ExportOptions.GetModelAnimIncludeOption () == ExportModelSettingsSerialize.Include.Anim) {
                         HashSet<GameObject> gos = new HashSet<GameObject> ();
                         foreach (var obj in objects) {
                             gos.Add (ModelExporter.GetGameObject (obj));
