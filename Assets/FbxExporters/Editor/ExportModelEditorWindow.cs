@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using FbxExporters.EditorTools;
 using UnityEditor.Presets;
+using System.Linq;
 
 namespace FbxExporters
 {
@@ -271,7 +272,7 @@ namespace FbxExporters
             }
 
             protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport){
-                m_toExport = System.Linq.Enumerable.ToArray (toExport);
+                m_toExport = toExport.ToArray ();
                 return m_toExport.Length;
             }
 
@@ -303,6 +304,11 @@ namespace FbxExporters
                 m_isPlayableDirector = isPlayableDirector;
             }
 
+            /// <summary>
+            /// Gets the filename from objects to export.
+            /// </summary>
+            /// <returns>The object's name if one object selected, "Untitled" if multiple
+            /// objects selected for export.</returns>
             protected string GetFilenameFromObjects(){
                 var filename = "";
                 if (m_toExport.Length == 1) {
