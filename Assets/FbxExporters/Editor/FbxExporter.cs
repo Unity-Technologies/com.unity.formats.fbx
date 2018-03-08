@@ -64,6 +64,9 @@ namespace FbxExporters
 
         public class ModelExporter : System.IDisposable
         {
+            // To be replaced by checkbox in Fbx Export settings
+            bool removeAnimationsFromSkinnedMeshRenderer = true;
+
             const string Title =
                 "exports static meshes with materials and textures";
 
@@ -1267,9 +1270,23 @@ namespace FbxExporters
                         SharedMeshes [unityPrefabParent.name] = fbxNode.GetMesh ();
                         return true;
                     }
+                    return false;
                 }
+                
+                // We don't export the mesh because we already have it from the parent, but we still need to assign the material
+                var renderer = unityGo.GetComponent<Renderer>();
+                var materials = renderer ? renderer.sharedMaterials : null;
 
-                if (fbxMesh == null) return false;
+                Unity.FbxSdk.FbxSurfaceMaterial newMaterial = null;
+                if (materials != null)
+                {
+                    foreach (var mat in materials) {
+                        if (MaterialMap.TryGetValue(mat.name, out newMaterial));
+                        {
+                            fbxNode.AddMaterial(newMaterial);
+                        }
+                    }
+                }
 
                 // set the fbxNode containing the mesh
                 fbxNode.SetNodeAttribute (fbxMesh);
@@ -1790,6 +1807,12 @@ namespace FbxExporters
                     var uniGO = GetGameObject (uniObj);
                     if (!uniGO) {
                         continue;
+                    }
+                                
+                    // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
+                    if (removeAnimationsFromSkinnedMeshRenderer && (uniGO.GetComponent<SkinnedMeshRenderer>() != null || uniGO.GetComponentInChildren<SkinnedMeshRenderer>() != null)) 
+                    {
+                        continue;    
                     }
 
                     int index = QuaternionCurve.GetQuaternionIndex (uniCurveBinding.propertyName);
@@ -2985,6 +3008,24 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Validate the menu item defined by the function OnClipContextClick.
+            /// </summary>
+            [MenuItem(TimelineClipMenuItemName, true, 31)]
+            static bool ValidateOnClipContextClick()
+            {
+                Object[] selectedObjects = Selection.objects;
+
+                foreach (Object editorClipSelected in selectedObjects)
+                {
+                    if (editorClipSelected.GetType().Name.Contains("EditorClip"))
+                    {         
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             protected static bool ExportSingleEditorClip(Object editorClipSelected)
             {
                 if (editorClipSelected.GetType().Name.Contains("EditorClip"))
@@ -3003,19 +3044,25 @@ namespace FbxExporters
                 return false;
             }
 
-            public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, GameObject animationTrackGObject, string filePath = null)
+            public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, GameObject animationTrackGObject, string folderPath = null)
             {
-                UnityEngine.Object[] myArray = new UnityEngine.Object[] {
+
+                UnityEngine.Object[] exportArray = new UnityEngine.Object[] {
                     animationTrackGObject,
                     timelineClipSelected.animationClip
                 };
 
                 if (!string.IsNullOrEmpty (filePath)) {
-                    ExportObjects (filePath, myArray, timelineAnim: true);
+                    ExportObjects (filePath, exportArray, timelineAnim: true);
                     return;
                 }
 
-                ExportModelEditorWindow.Init (myArray, string.Format ("{0}@{1}", animationTrackGObject.name, timelineClipSelected.displayName), isTimelineAnim: true);
+                string AnimFbxFormat = "{0}@{1}";
+                if (timelineClipSelected.displayName.Contains("@"))
+                {
+                    AnimFbxFormat = "{1}";
+                }
+                ExportModelEditorWindow.Init (myArray, string.Format (AnimFbxFormat, animationTrackGObject.name, timelineClipSelected.displayName), isTimelineAnim: true);
             }
 
             /// <summary>
@@ -3075,7 +3122,7 @@ namespace FbxExporters
             }
             
             /// <summary>
-            /// Validate the menu item defined by the function above.
+            /// Validate the menu item defined by the function OnPlayableDirectorGameObjectContextClick.
             /// </summary>
             [MenuItem(ClipMenuItemName, true, 31)]
             public static bool ValidateClipContextClick()
@@ -3090,13 +3137,40 @@ namespace FbxExporters
                 foreach (Object obj in selection)
                 {
                     GameObject gameObj = obj as GameObject;
-                    if (gameObj !=null && gameObj.GetComponent<PlayableDirector>() != null)
+                    if (gameObj != null && gameObj.GetComponent<PlayableDirector>() != null)
                     {
                         return true;
                     }
                 }
 
                 return false;
+            }
+
+            public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath)
+            {
+                PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
+                if (pd != null)
+                {
+                    foreach (PlayableBinding output in pd.playableAsset.outputs)
+                    {
+                        AnimationTrack animationTrack = output.sourceObject as AnimationTrack;
+
+                        GameObject animationTrackObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
+			            // One file by animation clip
+			            foreach(TimelineClip timelineClip in animationTrack.GetClips())
+			            {
+                            string AnimFbxFormat = AnimFbxFileFormat;
+                            if (timelineClip.displayName.Contains("@"))
+                            {
+                                AnimFbxFormat = "{0}/{2}.fbx";
+                            }
+                            string filePath = string.Format(AnimFbxFormat, folderPath, animationTrackObject.name, timelineClip.displayName);
+
+				            UnityEngine.Object[] exportArray = new UnityEngine.Object[] { animationTrackObject, timelineClip.animationClip };
+				            ExportObjects(filePath, exportArray, AnimationExportType.timelineAnimationClip);
+			            }
+                    }
+                }
             }
 
             /// <summary>
@@ -3114,7 +3188,7 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Validate the menu item defined by the function above.
+            /// Validate the menu item defined by the function OnContextItem.
             /// </summary>
             [MenuItem (MenuItemName, true, 30)]
             public static bool OnValidateMenuItem ()
@@ -3123,7 +3197,7 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Validate the menu item defined by the function above.
+            /// Validate the menu item defined by the function ModelOnlyOnContextItem.
             /// </summary>
             [MenuItem (ModelOnlyMenuItemName, true, 30)]
             public static bool ModelOnlyOnValidateMenuItem ()
@@ -3137,7 +3211,23 @@ namespace FbxExporters
             [MenuItem (AnimOnlyMenuItemName, true, 30)]
             public static bool OnValidateAnimOnlyMenuItem ()
             {
-                return true;
+                Object[] selection = Selection.objects;
+
+                if (selection == null || selection.Length == 0)
+                {
+                    return false;
+                }
+
+                foreach (Object obj in selection)
+                {
+                    GameObject gameObj = obj as GameObject;
+                    if (gameObj != null && (gameObj.GetComponent<Animation>() != null || gameObj.GetComponent<Animator>() != null))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
 
             public static void DisplayNoSelectionDialog()
