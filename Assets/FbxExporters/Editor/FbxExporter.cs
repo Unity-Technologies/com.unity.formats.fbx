@@ -1281,7 +1281,6 @@ namespace FbxExporters
                 fbxNode.SetNodeAttribute (fbxMesh);
                 fbxNode.SetShadingMode (FbxNode.EShadingMode.eWireFrame);
 
-
                 return true;
             }
 
