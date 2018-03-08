@@ -1727,8 +1727,6 @@ namespace FbxExporters
                 if (Verbose)
                     Debug.Log (string.Format ("Exporting animation clip ({1}) for {0}", uniRoot.name, uniAnimClip.name));
 
-                Debug.Log("ExportAnimationClip: " + uniAnimClip.name + " uniRoot " +  uniRoot.name);
-
                 // setup anim stack
                 FbxAnimStack fbxAnimStack = FbxAnimStack.Create (fbxScene, uniAnimClip.name);
                 fbxAnimStack.Description.Set ("Animation Take: " + uniAnimClip.name);
@@ -1773,7 +1771,6 @@ namespace FbxExporters
 
                 foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (uniAnimClip)) {
                     Object uniObj = AnimationUtility.GetAnimatedObject (uniRoot, uniCurveBinding);
-                    Debug.Log ("Curve " + uniObj.name + " uniCurveBinding " + uniCurveBinding.propertyName);
                     if (!uniObj) { continue; }
 
                     AnimationCurve uniAnimCurve = AnimationUtility.GetEditorCurve (uniAnimClip, uniCurveBinding);
@@ -1789,30 +1786,33 @@ namespace FbxExporters
                     if (!uniGO) {
                         continue;
                     }
-
+                                
                     // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
-                    if (!removeAnimationsFromSkinnedMeshRenderer || (removeAnimationsFromSkinnedMeshRenderer && uniGO.GetComponent<SkinnedMeshRenderer>() == null && uniGO.GetComponentInChildren<SkinnedMeshRenderer>() == null)) {
-                        int index = QuaternionCurve.GetQuaternionIndex (uniCurveBinding.propertyName);
-                        if (index >= 0) {
-                            /* Rotation property; save it to convert quaternion -> euler later. */
-                            RotationCurve rotCurve = GetRotationCurve<QuaternionCurve>(uniGO, uniAnimClip.frameRate, ref rotations);
-                            rotCurve.SetCurve (index, uniAnimCurve);
-                            continue;
-                        } 
-
-                        index = EulerCurve.GetEulerIndex (uniCurveBinding.propertyName);
-                        if (index >= 0) {
-                            RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
-                            rotCurve.SetCurve (index, uniAnimCurve);
-                            continue;
-                        }
-
-                        /* simple property (e.g. intensity), export right away */
-                        ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
-                            uniCurveBinding.propertyName,
-                            fbxScene, 
-                            fbxAnimLayer);
+                    if (removeAnimationsFromSkinnedMeshRenderer && (uniGO.GetComponent<SkinnedMeshRenderer>() != null || uniGO.GetComponentInChildren<SkinnedMeshRenderer>() != null)) 
+                    {
+                        continue;    
                     }
+
+                    int index = QuaternionCurve.GetQuaternionIndex (uniCurveBinding.propertyName);
+                    if (index >= 0) {
+                        /* Rotation property; save it to convert quaternion -> euler later. */
+                        RotationCurve rotCurve = GetRotationCurve<QuaternionCurve>(uniGO, uniAnimClip.frameRate, ref rotations);
+                        rotCurve.SetCurve (index, uniAnimCurve);
+                        continue;
+                    } 
+
+                    index = EulerCurve.GetEulerIndex (uniCurveBinding.propertyName);
+                    if (index >= 0) {
+                        RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
+                        rotCurve.SetCurve (index, uniAnimCurve);
+                        continue;
+                    }
+
+                    /* simple property (e.g. intensity), export right away */
+                    ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
+                        uniCurveBinding.propertyName,
+                        fbxScene, 
+                        fbxAnimLayer);
                 }
 
                 /* now export all the quaternion curves */
@@ -1855,8 +1855,6 @@ namespace FbxExporters
             /// </summary>
             protected void ExportAnimation (GameObject uniRoot, FbxScene fbxScene)
             {
-                Debug.Log("Export animation: " + uniRoot.name);
-
                 var exportedClips = new HashSet<AnimationClip> ();
 
                 var uniAnimator = uniRoot.GetComponent<Animator> ();
