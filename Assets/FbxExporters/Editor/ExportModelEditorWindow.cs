@@ -279,7 +279,7 @@ namespace FbxExporters
             private void SetAnimationExportType(bool isTimelineAnim){
                 m_isTimelineAnim = isTimelineAnim;
                 if (m_isTimelineAnim) {
-                    ExportSettings.instance.exportModelSettings.info.ModelAnimIncludeOption = ExportSettings.Include.Anim;
+                    ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
                 }
                 if (m_innerEditor) {
                     var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;

@@ -80,9 +80,9 @@ namespace FbxExporters.EditorTools
     [System.Serializable]
     public class ConvertToPrefabSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
-        public override ExportSettings.Include ModelAnimIncludeOption { get { return ExportSettings.Include.ModelAndAnim; } set { } }
-        public override ExportSettings.LODExportType LODExportType { get { return ExportSettings.LODExportType.All; } set { } }
-        public override ExportSettings.ObjectPosition ObjectPosition { get { return ExportSettings.ObjectPosition.Reset; } set { } }
-        public override bool ExportUnrendered { get { return true; } set { } }
+        public override ExportSettings.Include ModelAnimIncludeOption { get { return ExportSettings.Include.ModelAndAnim; } }
+        public override ExportSettings.LODExportType LODExportType { get { return ExportSettings.LODExportType.All; } }
+        public override ExportSettings.ObjectPosition ObjectPosition { get { return ExportSettings.ObjectPosition.Reset; } }
+        public override bool ExportUnrendered { get { return true; } }
     }
 }

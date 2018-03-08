@@ -100,13 +100,13 @@ namespace FbxExporters.EditorTools
     }
 
     public interface IExportOptions {
-        ExportSettings.ExportFormat ExportFormat { get; set; }
-        ExportSettings.Include ModelAnimIncludeOption { get; set; }
-        ExportSettings.LODExportType LODExportType { get; set; }
-        ExportSettings.ObjectPosition ObjectPosition { get; set; }
-        bool AnimateSkinnedMesh { get; set; }
-        bool UseMayaCompatibleNames { get; set; }
-        bool ExportUnrendered { get; set; }
+        ExportSettings.ExportFormat ExportFormat { get; }
+        ExportSettings.Include ModelAnimIncludeOption { get; }
+        ExportSettings.LODExportType LODExportType { get; }
+        ExportSettings.ObjectPosition ObjectPosition { get; }
+        bool AnimateSkinnedMesh { get; }
+        bool UseMayaCompatibleNames { get; }
+        bool ExportUnrendered { get; }
     }
 
     public abstract class ExportOptionsSettingsBase<T> : ScriptableObject where T : ExportOptionsSettingsSerializeBase, new()
@@ -125,13 +125,16 @@ namespace FbxExporters.EditorTools
         public bool animatedSkinnedMesh = true;
         public bool mayaCompatibleNaming = true;
 
-        public ExportSettings.ExportFormat ExportFormat { get { return exportFormat; } set { exportFormat = value; } }
-        public bool AnimateSkinnedMesh { get { return animatedSkinnedMesh; } set { animatedSkinnedMesh = value; } }
-        public bool UseMayaCompatibleNames { get { return mayaCompatibleNaming; } set { mayaCompatibleNaming = value; } }
-        public abstract ExportSettings.Include ModelAnimIncludeOption { get; set; }
-        public abstract ExportSettings.LODExportType LODExportType { get; set; }
-        public abstract ExportSettings.ObjectPosition ObjectPosition { get; set; }
-        public abstract bool ExportUnrendered { get; set; }
+        public ExportSettings.ExportFormat ExportFormat { get { return exportFormat; } }
+        public void SetExportFormat(ExportSettings.ExportFormat format){ this.exportFormat = format; }
+        public bool AnimateSkinnedMesh { get { return animatedSkinnedMesh; } }
+        public void SetAnimatedSkinnedMesh(bool animatedSkinnedMesh){ this.animatedSkinnedMesh = animatedSkinnedMesh; }
+        public bool UseMayaCompatibleNames { get { return mayaCompatibleNaming; } }
+        public void SetUseMayaCompatibleNames(bool useMayaCompNames){ this.mayaCompatibleNaming = useMayaCompNames; }
+        public abstract ExportSettings.Include ModelAnimIncludeOption { get; }
+        public abstract ExportSettings.LODExportType LODExportType { get; }
+        public abstract ExportSettings.ObjectPosition ObjectPosition { get; }
+        public abstract bool ExportUnrendered { get; }
     }
 
     [System.Serializable]
@@ -142,9 +145,13 @@ namespace FbxExporters.EditorTools
         public ExportSettings.ObjectPosition objectPosition = ExportSettings.ObjectPosition.LocalCentered;
         public bool exportUnrendered = true;
 
-        public override ExportSettings.Include ModelAnimIncludeOption { get { return include; } set { include = value; } }
-        public override ExportSettings.LODExportType LODExportType { get { return lodLevel; } set { lodLevel = value; } }
-        public override ExportSettings.ObjectPosition ObjectPosition { get { return objectPosition; } set { objectPosition = value; } }
-        public override bool ExportUnrendered { get { return exportUnrendered; } set { exportUnrendered = value; } }
+        public override ExportSettings.Include ModelAnimIncludeOption { get { return include; } }
+        public void SetModelAnimIncludeOption(ExportSettings.Include include) { this.include = include; }
+        public override ExportSettings.LODExportType LODExportType { get { return lodLevel; } }
+        public void SetLODExportType(ExportSettings.LODExportType lodLevel){ this.lodLevel = lodLevel; }
+        public override ExportSettings.ObjectPosition ObjectPosition { get { return objectPosition; } }
+        public void SetObjectPosition(ExportSettings.ObjectPosition objPos){ this.objectPosition = objPos; }
+        public override bool ExportUnrendered { get { return exportUnrendered; } }
+        public void SetExportUnredererd(bool exportUnrendered){ this.exportUnrendered = exportUnrendered; }
     }
 }

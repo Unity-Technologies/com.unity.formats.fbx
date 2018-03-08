@@ -273,9 +273,9 @@ namespace FbxExporters.UnitTests
         ){
             string filename = GetRandomFbxFilePath ();
             var exportOptions = new EditorTools.ExportModelSettingsSerialize ();
-            exportOptions.LODExportType = lodExportType;
+            exportOptions.SetLODExportType(lodExportType);
             if (animOnly) {
-                exportOptions.ModelAnimIncludeOption = FbxExporters.EditorTools.ExportSettings.Include.Anim;
+                exportOptions.SetModelAnimIncludeOption(FbxExporters.EditorTools.ExportSettings.Include.Anim);
             }
             var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (
                 filename, hierarchy, exportOptions

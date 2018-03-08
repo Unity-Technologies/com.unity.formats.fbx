@@ -836,7 +836,7 @@ namespace FbxExporters.UnitTests
             // get GameObject
             string filename = GetRandomFbxFilePath ();
             var exportOptions = new EditorTools.ExportModelSettingsSerialize ();
-            exportOptions.ModelAnimIncludeOption = FbxExporters.EditorTools.ExportSettings.Include.Anim;
+            exportOptions.SetModelAnimIncludeOption(FbxExporters.EditorTools.ExportSettings.Include.Anim);
             var exportedFilePath = ModelExporter.ExportObject (filename, originalGO, exportOptions);
             Assert.That (exportedFilePath, Is.EqualTo (filename));
 
