@@ -180,7 +180,7 @@ namespace FbxExporters.UnitTests
             ExportSettings.AddFbxSavePath ("/a\\b/c/\\");
             ExportSettings.AddPrefabSavePath ("/a\\b/c/\\");
 
-            string forwardSlash = " ⁄ "; // special unicode forward slash
+            string forwardSlash = " \u2044 "; // special unicode forward slash
             Assert.That (ExportSettings.GetRelativeFbxSavePaths () [0], Is.EqualTo (string.Format("Assets{0}a{0}b{0}c", forwardSlash)));
             Assert.That (ExportSettings.GetRelativePrefabSavePaths () [0], Is.EqualTo (string.Format("Assets{0}a{0}b{0}c", forwardSlash)));
 
