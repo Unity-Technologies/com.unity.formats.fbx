@@ -3068,7 +3068,8 @@ namespace FbxExporters
             /// <summary>
             /// Add an option " GameObject/Export All Recorded Animation Clips..." in the contextual GameObject menu.
             /// </summary>
-            [MenuItem(ClipMenuItemName, false, 31)]
+            /// Disabled temporarily
+            /*[MenuItem(ClipMenuItemName, false, 31)]
             public static void OnPlayableDirectorGameObjectContextClick(MenuCommand command)
             {
                 Object[] selection = null;
@@ -3098,7 +3099,7 @@ namespace FbxExporters
                     playableDirectors.Add (objectWithPlayableDirector);
                 }
                 ExportModelEditorWindow.Init (playableDirectors, "(automatic)", isTimelineAnim:true, isPlayableDirector:true);
-            }
+            }*/
 
             public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath, IExportOptions exportOptions = null)
             {
@@ -3129,7 +3130,8 @@ namespace FbxExporters
             /// <summary>
             /// Validate the menu item defined by the function OnPlayableDirectorGameObjectContextClick.
             /// </summary>
-            [MenuItem(ClipMenuItemName, true, 31)]
+            /// Disabled temporarily
+            /*[MenuItem(ClipMenuItemName, true, 31)]
             public static bool ValidateClipContextClick()
             {
                 Object[] selection = Selection.objects;
@@ -3149,7 +3151,7 @@ namespace FbxExporters
                 }
 
                 return false;
-            }
+            }*/
 
             /// <summary>
             /// Add a menu item "Export Model..." to a GameObject's context menu.
