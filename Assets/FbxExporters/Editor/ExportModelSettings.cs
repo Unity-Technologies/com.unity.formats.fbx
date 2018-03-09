@@ -108,6 +108,8 @@ namespace FbxExporters.EditorTools
         bool AnimateSkinnedMesh { get; }
         bool UseMayaCompatibleNames { get; }
         bool ExportUnrendered { get; }
+        Transform AnimationSource { get; }
+        Transform AnimationDest { get; }
     }
 
     public abstract class ExportOptionsSettingsBase<T> : ScriptableObject where T : ExportOptionsSettingsSerializeBase, new()
@@ -137,6 +139,8 @@ namespace FbxExporters.EditorTools
         public void SetAnimatedSkinnedMesh(bool animatedSkinnedMesh){ this.animatedSkinnedMesh = animatedSkinnedMesh; }
         public bool UseMayaCompatibleNames { get { return mayaCompatibleNaming; } }
         public void SetUseMayaCompatibleNames(bool useMayaCompNames){ this.mayaCompatibleNaming = useMayaCompNames; }
+        public Transform AnimationSource { get { return animSource; } }
+        public Transform AnimationDest { get { return animDest; } }
         public abstract ExportSettings.Include ModelAnimIncludeOption { get; }
         public abstract ExportSettings.LODExportType LODExportType { get; }
         public abstract ExportSettings.ObjectPosition ObjectPosition { get; }

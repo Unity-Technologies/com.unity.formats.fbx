@@ -1791,53 +1791,88 @@ namespace FbxExporters
                  */
                 var rotations = new Dictionary<GameObject, RotationCurve> ();
 
+                var unityCurves = new Dictionary<GameObject, List<UnityCurve>> ();
+
                 foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (uniAnimClip)) {
                     Object uniObj = AnimationUtility.GetAnimatedObject (uniRoot, uniCurveBinding);
-                    if (!uniObj) { continue; }
+                    if (!uniObj) {
+                        continue;
+                    }
 
                     AnimationCurve uniAnimCurve = AnimationUtility.GetEditorCurve (uniAnimClip, uniCurveBinding);
-                    if (uniAnimCurve == null) { continue; }
-
-                    if (Verbose)
-                    {
-                        Debug.Log (string.Format ("Exporting animation curve bound to {0} {1}", 
-                            uniCurveBinding.propertyName, uniCurveBinding.path));
+                    if (uniAnimCurve == null) {
+                        continue;
                     }
 
                     var uniGO = GetGameObject (uniObj);
                     if (!uniGO) {
                         continue;
                     }
-                                
-                    // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
-                    if (removeAnimationsFromSkinnedMeshRenderer && (uniGO.GetComponent<SkinnedMeshRenderer>() != null || uniGO.GetComponentInChildren<SkinnedMeshRenderer>() != null)) 
-                    {
-                        continue;    
-                    }
 
-                    int index = QuaternionCurve.GetQuaternionIndex (uniCurveBinding.propertyName);
-                    if (index >= 0) {
-                        /* Rotation property; save it to convert quaternion -> euler later. */
-                        RotationCurve rotCurve = GetRotationCurve<QuaternionCurve>(uniGO, uniAnimClip.frameRate, ref rotations);
-                        rotCurve.SetCurve (index, uniAnimCurve);
-                        continue;
-                    } 
-
-                    index = EulerCurve.GetEulerIndex (uniCurveBinding.propertyName);
-                    if (index >= 0) {
-                        RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
-                        rotCurve.SetCurve (index, uniAnimCurve);
+                    if (unityCurves.ContainsKey (uniGO)) {
+                        unityCurves [uniGO].Add (new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve));
                         continue;
                     }
-
-                    /* simple property (e.g. intensity), export right away */
-                    ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
-                        uniCurveBinding.propertyName,
-                        fbxScene, 
-                        fbxAnimLayer);
+                    unityCurves.Add (uniGO, new List<UnityCurve> (){ new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve) });
                 }
 
-                /* now export all the quaternion curves */
+                // transfer root motion
+                var animSource = ExportOptions.AnimationSource;
+                var animDest = ExportOptions.AnimationDest;
+
+                // list of source to dest
+                var transformsInHierarchy = new List<Transform> ();
+                var curr = animDest;
+                while (curr != animSource) {
+                    transformsInHierarchy.Add (curr);
+                    curr = curr.parent;
+                }
+                transformsInHierarchy.Add (animSource);
+                transformsInHierarchy.Reverse ();
+
+                while (transformsInHierarchy.Count >= 2) {
+                    var source = transformsInHierarchy [0];
+                    transformsInHierarchy.RemoveAt (0);
+                    var dest = transformsInHierarchy [0];
+
+                    TransferMotion (source, dest, uniAnimClip.frameRate, ref unityCurves);
+                }
+
+                foreach (var kvp in unityCurves) {
+                    var uniGO = kvp.Key;
+                    foreach (var uniCurve in kvp.Value) {
+                        var propertyName = uniCurve.propertyName;
+                        var uniAnimCurve = uniCurve.uniAnimCurve;
+
+                        // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
+                        if (removeAnimationsFromSkinnedMeshRenderer && (uniGO.GetComponent<SkinnedMeshRenderer> () != null || uniGO.GetComponentInChildren<SkinnedMeshRenderer> () != null)) {
+                            continue;    
+                        }
+
+                        int index = QuaternionCurve.GetQuaternionIndex (propertyName);
+                        if (index >= 0) {
+                            // Rotation property; save it to convert quaternion -> euler later.
+                            RotationCurve rotCurve = GetRotationCurve<QuaternionCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
+                            rotCurve.SetCurve (index, uniAnimCurve);
+                            continue;
+                        } 
+
+                        index = EulerCurve.GetEulerIndex (propertyName);
+                        if (index >= 0) {
+                            RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
+                            rotCurve.SetCurve (index, uniAnimCurve);
+                            continue;
+                        }
+
+                        // simple property (e.g. intensity), export right away
+                        ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
+                            propertyName,
+                            fbxScene, 
+                            fbxAnimLayer);
+                    }
+                }
+
+                // now export all the quaternion curves 
                 foreach (var kvp in rotations) {
                     var unityGo = kvp.Key;
                     var rot = kvp.Value;
@@ -1848,6 +1883,178 @@ namespace FbxExporters
                         continue;
                     }
                     rot.Animate (unityGo.transform, fbxNode, fbxAnimLayer, Verbose);
+                }
+            }
+
+
+            private void TransferMotion(Transform source, Transform dest, float sampleRate, ref Dictionary<GameObject, List<UnityCurve>> unityCurves){
+                // get sample times for curves in dest + source
+                // at each sample time, evaluate all 18 anim curves, creating 2 transform matrices
+                // combine the matrices, get the new values, apply to the 9 new anim curves for dest
+                if (dest.parent != source) {
+                    Debug.LogError ("dest must be a child of source");
+                    return;
+                }
+
+                List<UnityCurve> sourceUnityCurves;
+                if (!unityCurves.TryGetValue (source.gameObject, out sourceUnityCurves)) {
+                    return; // nothing to do
+                }
+
+                List<UnityCurve> destUnityCurves;
+                if (!unityCurves.TryGetValue (dest.gameObject, out destUnityCurves)) {
+                    destUnityCurves = new List<UnityCurve> ();
+                }
+
+                List<AnimationCurve> animCurves = new List<AnimationCurve> ();
+                foreach (var curve in sourceUnityCurves) {
+                    // TODO: check if curve is anim related
+                    animCurves.Add(curve.uniAnimCurve);
+                }
+                foreach (var curve in destUnityCurves) {
+                    animCurves.Add (curve.uniAnimCurve);
+                }
+
+                var sampleTimes = GetSampleTimes (animCurves.ToArray (), sampleRate);
+                // need to create 9 new UnityCurves, one for each property
+                var posKeyFrames = new Keyframe[3][];
+                var rotKeyFrames = new Keyframe[3][];
+                var scaleKeyFrames = new Keyframe[3][];
+
+                for (int t = 0; t < posKeyFrames.Length; t++) {
+                    posKeyFrames [t] = new Keyframe[sampleTimes.Count];
+                    rotKeyFrames[t] = new Keyframe[sampleTimes.Count];
+                    scaleKeyFrames[t] = new Keyframe[sampleTimes.Count];
+                }
+
+                int i = 0;
+                foreach (var currSampleTime in sampleTimes) 
+                {
+                    var sourceLocalMatrix = GetTransformMatrix (currSampleTime, source, sourceUnityCurves);
+                    var destLocalMatrix = GetTransformMatrix (currSampleTime, dest, destUnityCurves);
+
+                    // child * parent
+                    var mewLocalMatrix = destLocalMatrix * sourceLocalMatrix;
+
+                    // FBX is transposed relative to Unity: transpose as we convert.
+                    FbxMatrix matrix = new FbxMatrix ();
+                    matrix.SetColumn (0, new FbxVector4 (mewLocalMatrix.GetRow (0).x, mewLocalMatrix.GetRow (0).y, mewLocalMatrix.GetRow (0).z, mewLocalMatrix.GetRow (0).w));
+                    matrix.SetColumn (1, new FbxVector4 (mewLocalMatrix.GetRow (1).x, mewLocalMatrix.GetRow (1).y, mewLocalMatrix.GetRow (1).z, mewLocalMatrix.GetRow (1).w));
+                    matrix.SetColumn (2, new FbxVector4 (mewLocalMatrix.GetRow (2).x, mewLocalMatrix.GetRow (2).y, mewLocalMatrix.GetRow (2).z, mewLocalMatrix.GetRow (2).w));
+                    matrix.SetColumn (3, new FbxVector4 (mewLocalMatrix.GetRow (3).x, mewLocalMatrix.GetRow (3).y, mewLocalMatrix.GetRow (3).z, mewLocalMatrix.GetRow (3).w));
+
+                    // FBX wants translation, rotation (in euler angles) and scale.
+                    // We assume there's no real shear, just rounding error.
+                    FbxVector4 translation, rotation, shear, scale;
+                    double sign;
+                    matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
+
+                    for (int k = 0; k < 3; k++) {
+                        posKeyFrames [k][i] = new Keyframe(currSampleTime, (float)translation [k]);
+                        rotKeyFrames [k][i] = new Keyframe(currSampleTime, (float)rotation [k]);
+                        scaleKeyFrames [k][i] = new Keyframe(currSampleTime, (float)scale [k]);
+                    }
+                    i++;
+                }
+
+                // create the new list of unity curves, and add it to dest's curves
+                var newUnityCurves = new List<UnityCurve>();
+                string posPropName = "m_LocalPosition.";
+                string rotPropName = "localEulerAnglesRaw.";
+                string scalePropName = "m_LocalScale.";
+                var xyz = new string[]{ "x", "y", "z" };
+                for (int j = 0; j < 3; j++) {
+                    var posUniCurve = new UnityCurve ( posPropName + xyz[j], new AnimationCurve(posKeyFrames[j]) );
+                    newUnityCurves.Add (posUniCurve);
+
+                    var rotUniCurve = new UnityCurve ( rotPropName + xyz[j], new AnimationCurve(rotKeyFrames[j]) );
+                    newUnityCurves.Add (rotUniCurve);
+
+                    var scaleUniCurve = new UnityCurve ( scalePropName + xyz[j], new AnimationCurve(scaleKeyFrames[j]) );
+                    newUnityCurves.Add (scaleUniCurve);
+                }
+
+                unityCurves.Remove (source.gameObject);
+                unityCurves [dest.gameObject] = newUnityCurves;
+            }
+
+            private Matrix4x4 GetTransformMatrix(float currSampleTime, Transform orig, List<UnityCurve> unityCurves){
+                var sourcePos = orig.localPosition;
+                var sourceRot = orig.localRotation;
+                var sourceScale = orig.localScale;
+                foreach (var uniCurve in unityCurves) {
+                    float currSampleValue = uniCurve.uniAnimCurve.Evaluate((float)currSampleTime);
+                    string propName = uniCurve.propertyName;
+                    // try position, scale, quat then euler
+                    int temp = QuaternionCurve.GetQuaternionIndex(propName);
+                    if (temp >= 0) {
+                        sourceRot [temp] = currSampleValue;
+                        continue;
+                    }
+                    temp = EulerCurve.GetEulerIndex (propName);
+                    if (temp >= 0) {
+                        var euler = sourceRot.eulerAngles;
+                        euler [temp] = currSampleValue;
+                        sourceRot.eulerAngles = euler;
+                        continue;
+                    }
+                    temp = GetPositionIndex (propName);
+                    if (temp >= 0) {
+                        sourcePos [temp] = currSampleValue;
+                        continue;
+                    }
+                    temp = GetScaleIndex (propName);
+                    if (temp >= 0) {
+                        sourceScale [temp] = currSampleValue;
+                    }
+                }
+
+                return Matrix4x4.TRS(sourcePos, sourceRot, sourceScale); 
+            }
+
+            struct UnityCurve {
+                public string propertyName;
+                public AnimationCurve uniAnimCurve;
+
+                public UnityCurve(string propertyName, AnimationCurve uniAnimCurve){
+                    this.propertyName = propertyName;
+                    this.uniAnimCurve = uniAnimCurve;
+                }
+            }
+
+            private int GetPositionIndex(string uniPropertyName){
+                System.StringComparison ct = System.StringComparison.CurrentCulture;
+                bool isEulerComponent = uniPropertyName.StartsWith ("m_LocalPosition.", ct);
+
+                if (!isEulerComponent) { return -1; }
+
+                switch (uniPropertyName [uniPropertyName.Length - 1]) {
+                case 'x':
+                    return 0;
+                case 'y':
+                    return 1;
+                case 'z':
+                    return 2;
+                default:
+                    return -1;
+                }
+            }
+
+            private int GetScaleIndex(string uniPropertyName){
+                System.StringComparison ct = System.StringComparison.CurrentCulture;
+                bool isEulerComponent = uniPropertyName.StartsWith ("m_LocalScale.", ct);
+
+                if (!isEulerComponent) { return -1; }
+
+                switch (uniPropertyName [uniPropertyName.Length - 1]) {
+                case 'x':
+                    return 0;
+                case 'y':
+                    return 1;
+                case 'z':
+                    return 2;
+                default:
+                    return -1;
                 }
             }
 
