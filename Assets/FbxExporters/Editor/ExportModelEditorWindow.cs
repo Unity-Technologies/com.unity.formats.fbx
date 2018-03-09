@@ -41,7 +41,9 @@ namespace FbxExporters
             protected float m_fbxExtLabelWidth;
 
             protected virtual void OnEnable(){
-                InitializeReceiver ();
+                if (Application.unityVersion.Contains ("2018")) {
+                    InitializeReceiver ();
+                }
                 m_showOptions = true;
                 this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, MinWindowHeight);
 
@@ -123,12 +125,14 @@ namespace FbxExporters
                 // Increasing the label width so that none of the text gets cut off
                 EditorGUIUtility.labelWidth = LabelWidth;
 
-                GUILayout.BeginHorizontal ();
-                GUILayout.FlexibleSpace ();
-                if(EditorGUILayout.DropdownButton(presetIcon, FocusType.Keyboard, presetIconButton)){
-                    ShowPresetReceiver ();
+                if (Application.unityVersion.Contains ("2018")) {
+                    GUILayout.BeginHorizontal ();
+                    GUILayout.FlexibleSpace ();
+                    if (EditorGUILayout.DropdownButton (presetIcon, FocusType.Keyboard, presetIconButton)) {
+                        ShowPresetReceiver ();
+                    }
+                    GUILayout.EndHorizontal ();
                 }
-                GUILayout.EndHorizontal();
 
                 EditorGUILayout.LabelField("Naming");
                 EditorGUI.indentLevel++;
