@@ -1,5 +1,28 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint49
+
+NEW FEATURES
+
+* Export Settings: Added new UI to set export settings
+
+Window opens when exporting or converting to linked prefab, asking where to save the file and with what filename.
+Last 5 file paths used are saved.
+Ability to save presets for the selected options.
+
+* Fbx Exporter: Added option to export model only
+
+* Fbx Exporter: Added option to not export animation on skinned meshes
+
+When option is checked all animation will be exported. 
+When unchecked, animation on skinned meshes or their ancestors won't be exported
+
+FIXES
+
+* FbxExporter: avoid duplicate @ in filename when exporting timeline clip containing @ in the display name
+* FbxExporter: added validation functions for all context menu items
+* FbxExporter: link materials to objects connected to mesh instances
+
 **Version**: sprint48
 
 NEW FEATURES
