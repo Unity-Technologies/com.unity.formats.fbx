@@ -2199,6 +2199,9 @@ namespace FbxExporters
                 // Use RSrs as the scaling inheritance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
+                if (ResetTransform (unityGo.transform)) {
+                    exportType = TransformExportType.Reset;
+                }
                 ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
 
                 fbxNodeParent.AddChild (fbxNode);
@@ -2245,6 +2248,24 @@ namespace FbxExporters
                 }
 
                 return numObjectsExported;
+            }
+
+
+            private bool ResetTransform(Transform t){
+                var source = ExportOptions.AnimationSource;
+                var dest = ExportOptions.AnimationDest;
+
+                var curr = dest;
+                while (curr != source && curr != null) {
+                    if (t == curr) {
+                        return true;
+                    }
+                    curr = curr.parent;
+                }
+                if (t == source) {
+                    return true;
+                }
+                return false;
             }
 
             /// <summary>
