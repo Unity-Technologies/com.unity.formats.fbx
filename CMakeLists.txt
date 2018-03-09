@@ -190,6 +190,11 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExporterRepairMissingScripts.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ManualUpdateEditorWindow.cs"
                 "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxRotationCurve.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ConvertToPrefabEditorWindow.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ConvertToPrefabSettings.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ExportModelEditorWindow.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/ExportModelSettings.cs"
+                "${CMAKE_SOURCE_DIR}/Assets/FbxExporters/Editor/FbxExportPresetSelectorReceiver.cs"
             REFERENCES
                 "${CSHARP_MSCORLIB_LIBRARY}"
                 "${CSHARP_SYSTEM_CORE_LIBRARY}"
@@ -251,7 +256,12 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             PATTERN "Editor/ManualUpdateEditorWindow.cs" EXCLUDE
             PATTERN "Editor/FbxPrefabInspector.cs" EXCLUDE
             PATTERN "Editor/FbxExporterRepairMissingScripts.cs" EXCLUDE
-            PATTERN "Editor/FbxRotationCurve.cs" EXCLUDE)
+            PATTERN "Editor/FbxRotationCurve.cs" EXCLUDE
+            PATTERN "Editor/ConvertToPrefabEditorWindow.cs" EXCLUDE
+            PATTERN "Editor/ConvertToPrefabSettings.cs" EXCLUDE
+            PATTERN "Editor/ExportModelEditorWindow.cs" EXCLUDE
+            PATTERN "Editor/ExportModelSettings.cs" EXCLUDE
+            PATTERN "Editor/FbxExportPresetSelectorReceiver.cs" EXCLUDE)
     install(FILES ${CLASS_LIBRARY_DEST}/${EDITOR_CLASS_LIBRARY_NAME} DESTINATION FbxExporters/Editor)
     install(FILES ${CLASS_LIBRARY_DEST}/${RUNTIME_CLASS_LIBRARY_NAME} DESTINATION FbxExporters)
 else()
