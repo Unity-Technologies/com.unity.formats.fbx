@@ -1934,7 +1934,7 @@ namespace FbxExporters
                     var destLocalMatrix = GetTransformMatrix (currSampleTime, dest, destUnityCurves);
 
                     // child * parent
-                    var mewLocalMatrix = destLocalMatrix * sourceLocalMatrix;
+                    var mewLocalMatrix = sourceLocalMatrix * destLocalMatrix;
 
                     // FBX is transposed relative to Unity: transpose as we convert.
                     FbxMatrix matrix = new FbxMatrix ();
