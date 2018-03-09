@@ -73,9 +73,9 @@ namespace FbxExporters.EditorTools
             EditorGUILayout.LabelField(new GUIContent("Transfer Root Motion To", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
             EditorGUILayout.Popup(0, new string[]{"<None>"});
             GUILayout.EndHorizontal();
+            EditorGUI.EndDisabledGroup ();
 
             exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.animatedSkinnedMesh);
-            EditorGUI.EndDisabledGroup ();
 
             exportSettings.mayaCompatibleNaming = EditorGUILayout.Toggle (
                 new GUIContent ("Compatible Naming:",
