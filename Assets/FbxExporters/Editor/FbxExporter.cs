@@ -1819,23 +1819,24 @@ namespace FbxExporters
                 // transfer root motion
                 var animSource = ExportOptions.AnimationSource;
                 var animDest = ExportOptions.AnimationDest;
+                if (animSource && animDest) {
+                    // list of source to dest
+                    var transformsInHierarchy = new List<Transform> ();
+                    var curr = animDest;
+                    while (curr != animSource) {
+                        transformsInHierarchy.Add (curr);
+                        curr = curr.parent;
+                    }
+                    transformsInHierarchy.Add (animSource);
+                    transformsInHierarchy.Reverse ();
 
-                // list of source to dest
-                var transformsInHierarchy = new List<Transform> ();
-                var curr = animDest;
-                while (curr != animSource) {
-                    transformsInHierarchy.Add (curr);
-                    curr = curr.parent;
-                }
-                transformsInHierarchy.Add (animSource);
-                transformsInHierarchy.Reverse ();
+                    while (transformsInHierarchy.Count >= 2) {
+                        var source = transformsInHierarchy [0];
+                        transformsInHierarchy.RemoveAt (0);
+                        var dest = transformsInHierarchy [0];
 
-                while (transformsInHierarchy.Count >= 2) {
-                    var source = transformsInHierarchy [0];
-                    transformsInHierarchy.RemoveAt (0);
-                    var dest = transformsInHierarchy [0];
-
-                    TransferMotion (source, dest, uniAnimClip.frameRate, ref unityCurves);
+                        TransferMotion (source, dest, uniAnimClip.frameRate, ref unityCurves);
+                    }
                 }
 
                 foreach (var kvp in unityCurves) {
@@ -1845,7 +1846,7 @@ namespace FbxExporters
                         var uniAnimCurve = uniCurve.uniAnimCurve;
 
                         // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
-                        if (removeAnimationsFromSkinnedMeshRenderer && (uniGO.GetComponent<SkinnedMeshRenderer> () != null || uniGO.GetComponentInChildren<SkinnedMeshRenderer> () != null)) {
+                        if (!ExportOptions.AnimateSkinnedMesh && (uniGO.GetComponent<SkinnedMeshRenderer> () != null || uniGO.GetComponentInChildren<SkinnedMeshRenderer> () != null)) {
                             continue;    
                         }
 
@@ -1934,14 +1935,14 @@ namespace FbxExporters
                     var destLocalMatrix = GetTransformMatrix (currSampleTime, dest, destUnityCurves);
 
                     // child * parent
-                    var mewLocalMatrix = sourceLocalMatrix * destLocalMatrix;
+                    var newLocalMatrix = sourceLocalMatrix * destLocalMatrix;
 
                     // FBX is transposed relative to Unity: transpose as we convert.
                     FbxMatrix matrix = new FbxMatrix ();
-                    matrix.SetColumn (0, new FbxVector4 (mewLocalMatrix.GetRow (0).x, mewLocalMatrix.GetRow (0).y, mewLocalMatrix.GetRow (0).z, mewLocalMatrix.GetRow (0).w));
-                    matrix.SetColumn (1, new FbxVector4 (mewLocalMatrix.GetRow (1).x, mewLocalMatrix.GetRow (1).y, mewLocalMatrix.GetRow (1).z, mewLocalMatrix.GetRow (1).w));
-                    matrix.SetColumn (2, new FbxVector4 (mewLocalMatrix.GetRow (2).x, mewLocalMatrix.GetRow (2).y, mewLocalMatrix.GetRow (2).z, mewLocalMatrix.GetRow (2).w));
-                    matrix.SetColumn (3, new FbxVector4 (mewLocalMatrix.GetRow (3).x, mewLocalMatrix.GetRow (3).y, mewLocalMatrix.GetRow (3).z, mewLocalMatrix.GetRow (3).w));
+                    matrix.SetColumn (0, new FbxVector4 (newLocalMatrix.GetRow (0).x, newLocalMatrix.GetRow (0).y, newLocalMatrix.GetRow (0).z, newLocalMatrix.GetRow (0).w));
+                    matrix.SetColumn (1, new FbxVector4 (newLocalMatrix.GetRow (1).x, newLocalMatrix.GetRow (1).y, newLocalMatrix.GetRow (1).z, newLocalMatrix.GetRow (1).w));
+                    matrix.SetColumn (2, new FbxVector4 (newLocalMatrix.GetRow (2).x, newLocalMatrix.GetRow (2).y, newLocalMatrix.GetRow (2).z, newLocalMatrix.GetRow (2).w));
+                    matrix.SetColumn (3, new FbxVector4 (newLocalMatrix.GetRow (3).x, newLocalMatrix.GetRow (3).y, newLocalMatrix.GetRow (3).z, newLocalMatrix.GetRow (3).w));
 
                     // FBX wants translation, rotation (in euler angles) and scale.
                     // We assume there's no real shear, just rounding error.
@@ -1949,9 +1950,13 @@ namespace FbxExporters
                     double sign;
                     matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
 
+                    // get rotation directly from matrix, as otherwise causes issues
+                    // with negative rotations.
+                    var rot = newLocalMatrix.rotation.eulerAngles;
+
                     for (int k = 0; k < 3; k++) {
                         posKeyFrames [k][i] = new Keyframe(currSampleTime, (float)translation [k]);
-                        rotKeyFrames [k][i] = new Keyframe(currSampleTime, (float)rotation [k]);
+                        rotKeyFrames [k][i] = new Keyframe(currSampleTime, (float)rot [k]);
                         scaleKeyFrames [k][i] = new Keyframe(currSampleTime, (float)scale [k]);
                     }
                     i++;
@@ -1964,13 +1969,13 @@ namespace FbxExporters
                 string scalePropName = "m_LocalScale.";
                 var xyz = new string[]{ "x", "y", "z" };
                 for (int j = 0; j < 3; j++) {
-                    var posUniCurve = new UnityCurve ( posPropName + xyz[j], new AnimationCurve(posKeyFrames[j]) );
+                    var posUniCurve = new UnityCurve ( posPropName + xyz[j], new AnimationCurve(posKeyFrames[j]));
                     newUnityCurves.Add (posUniCurve);
 
-                    var rotUniCurve = new UnityCurve ( rotPropName + xyz[j], new AnimationCurve(rotKeyFrames[j]) );
+                    var rotUniCurve = new UnityCurve ( rotPropName + xyz[j], new AnimationCurve(rotKeyFrames[j]));
                     newUnityCurves.Add (rotUniCurve);
 
-                    var scaleUniCurve = new UnityCurve ( scalePropName + xyz[j], new AnimationCurve(scaleKeyFrames[j]) );
+                    var scaleUniCurve = new UnityCurve ( scalePropName + xyz[j], new AnimationCurve(scaleKeyFrames[j]));
                     newUnityCurves.Add (scaleUniCurve);
                 }
 
@@ -1982,6 +1987,7 @@ namespace FbxExporters
                 var sourcePos = orig.localPosition;
                 var sourceRot = orig.localRotation;
                 var sourceScale = orig.localScale;
+
                 foreach (var uniCurve in unityCurves) {
                     float currSampleValue = uniCurve.uniAnimCurve.Evaluate((float)currSampleTime);
                     string propName = uniCurve.propertyName;
@@ -2009,6 +2015,7 @@ namespace FbxExporters
                     }
                 }
 
+                sourceRot = Quaternion.Euler(sourceRot.eulerAngles.x, sourceRot.eulerAngles.y, sourceRot.eulerAngles.z);
                 return Matrix4x4.TRS(sourcePos, sourceRot, sourceScale); 
             }
 
