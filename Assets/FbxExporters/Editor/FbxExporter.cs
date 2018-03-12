@@ -85,7 +85,7 @@ namespace FbxExporters
             //       from being passed to command, thus resulting in OnContextItem()
             //       being called only once regardless of what is selected.
             const string MenuItemName = "GameObject/Export To FBX...";
-            const string ModelOnlyMenuItemName = "GameObject/Export To FBX Only...";
+            const string ModelOnlyMenuItemName = "GameObject/Export Model Only...";
 
             const string ClipMenuItemName = "GameObject/Export All Recorded Animation Clips...";
             const string TimelineClipMenuItemName = "GameObject/Export Selected Timeline Clip...";																				
