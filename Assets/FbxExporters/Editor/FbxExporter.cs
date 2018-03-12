@@ -1922,13 +1922,13 @@ namespace FbxExporters
                 var rotKeyFrames = new Keyframe[3][];
                 var scaleKeyFrames = new Keyframe[3][];
 
-                for (int t = 0; t < posKeyFrames.Length; t++) {
-                    posKeyFrames [t] = new Keyframe[sampleTimes.Count];
-                    rotKeyFrames[t] = new Keyframe[sampleTimes.Count];
-                    scaleKeyFrames[t] = new Keyframe[sampleTimes.Count];
+                for (int k = 0; k < posKeyFrames.Length; k++) {
+                    posKeyFrames [k] = new Keyframe[sampleTimes.Count];
+                    rotKeyFrames[k] = new Keyframe[sampleTimes.Count];
+                    scaleKeyFrames[k] = new Keyframe[sampleTimes.Count];
                 }
 
-                int i = 0;
+                int keyIndex = 0;
                 foreach (var currSampleTime in sampleTimes) 
                 {
                     var sourceLocalMatrix = GetTransformMatrix (currSampleTime, source, sourceUnityCurves);
@@ -1955,11 +1955,11 @@ namespace FbxExporters
                     var rot = newLocalMatrix.rotation.eulerAngles;
 
                     for (int k = 0; k < 3; k++) {
-                        posKeyFrames [k][i] = new Keyframe(currSampleTime, (float)translation [k]);
-                        rotKeyFrames [k][i] = new Keyframe(currSampleTime, (float)rot [k]);
-                        scaleKeyFrames [k][i] = new Keyframe(currSampleTime, (float)scale [k]);
+                        posKeyFrames [k][keyIndex] = new Keyframe(currSampleTime, (float)translation [k]);
+                        rotKeyFrames [k][keyIndex] = new Keyframe(currSampleTime, (float)rot [k]);
+                        scaleKeyFrames [k][keyIndex] = new Keyframe(currSampleTime, (float)scale [k]);
                     }
-                    i++;
+                    keyIndex++;
                 }
 
                 // create the new list of unity curves, and add it to dest's curves
@@ -1967,15 +1967,15 @@ namespace FbxExporters
                 string posPropName = "m_LocalPosition.";
                 string rotPropName = "localEulerAnglesRaw.";
                 string scalePropName = "m_LocalScale.";
-                var xyz = new string[]{ "x", "y", "z" };
-                for (int j = 0; j < 3; j++) {
-                    var posUniCurve = new UnityCurve ( posPropName + xyz[j], new AnimationCurve(posKeyFrames[j]));
+                var xyz = "xyz";
+                for (int k = 0; k < 3; k++) {
+                    var posUniCurve = new UnityCurve ( posPropName + xyz[k], new AnimationCurve(posKeyFrames[k]));
                     newUnityCurves.Add (posUniCurve);
 
-                    var rotUniCurve = new UnityCurve ( rotPropName + xyz[j], new AnimationCurve(rotKeyFrames[j]));
+                    var rotUniCurve = new UnityCurve ( rotPropName + xyz[k], new AnimationCurve(rotKeyFrames[k]));
                     newUnityCurves.Add (rotUniCurve);
 
-                    var scaleUniCurve = new UnityCurve ( scalePropName + xyz[j], new AnimationCurve(scaleKeyFrames[j]));
+                    var scaleUniCurve = new UnityCurve ( scalePropName + xyz[k], new AnimationCurve(scaleKeyFrames[k]));
                     newUnityCurves.Add (scaleUniCurve);
                 }
 
@@ -2031,9 +2031,9 @@ namespace FbxExporters
 
             private int GetPositionIndex(string uniPropertyName){
                 System.StringComparison ct = System.StringComparison.CurrentCulture;
-                bool isEulerComponent = uniPropertyName.StartsWith ("m_LocalPosition.", ct);
+                bool isPositionComponent = uniPropertyName.StartsWith ("m_LocalPosition.", ct);
 
-                if (!isEulerComponent) { return -1; }
+                if (!isPositionComponent) { return -1; }
 
                 switch (uniPropertyName [uniPropertyName.Length - 1]) {
                 case 'x':
@@ -2049,9 +2049,9 @@ namespace FbxExporters
 
             private int GetScaleIndex(string uniPropertyName){
                 System.StringComparison ct = System.StringComparison.CurrentCulture;
-                bool isEulerComponent = uniPropertyName.StartsWith ("m_LocalScale.", ct);
+                bool isScaleComponent = uniPropertyName.StartsWith ("m_LocalScale.", ct);
 
-                if (!isEulerComponent) { return -1; }
+                if (!isScaleComponent) { return -1; }
 
                 switch (uniPropertyName [uniPropertyName.Length - 1]) {
                 case 'x':
@@ -2257,7 +2257,13 @@ namespace FbxExporters
                 return numObjectsExported;
             }
 
-
+            /// <summary>
+            /// Checks if the transform should be reset.
+            /// Transform should be reset if animation is being transferred, and this transform
+            /// is either the animation source, destination, or between these nodes.
+            /// </summary>
+            /// <returns><c>true</c>, if transform should be reset, <c>false</c> otherwise.</returns>
+            /// <param name="t">Transform.</param>
             private bool ResetTransform(Transform t){
                 var source = ExportOptions.AnimationSource;
                 var dest = ExportOptions.AnimationDest;
