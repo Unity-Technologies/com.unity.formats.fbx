@@ -10,7 +10,7 @@ namespace FbxExporters.EditorTools
         private const float FieldOffset = 18;
 
         private string[] exportFormatOptions = new string[]{ "ASCII", "Binary" };
-        private string[] includeOptions = new string[]{"FBX(s) Only", "Animation Only", "FBX(s) + Animation"};
+        private string[] includeOptions = new string[]{"Model(s) Only", "Animation Only", "Model(s) + Animation"};
         private string[] lodOptions = new string[]{"All Levels", "Highest", "Lowest"};
 
         public const string singleHierarchyOption = "Local Pivot";
