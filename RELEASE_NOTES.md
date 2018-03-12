@@ -1,6 +1,7 @@
 ﻿RELEASE NOTES
 
 **Version**: sprint49
+NOTE: Only works in Unity 2018.1
 
 NEW FEATURES
 
