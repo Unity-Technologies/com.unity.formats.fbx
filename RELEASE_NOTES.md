@@ -1,7 +1,6 @@
 ﻿RELEASE NOTES
 
 **Version**: sprint49
-NOTE: Only works in Unity 2018.1
 
 NEW FEATURES
 
@@ -23,6 +22,10 @@ FIXES
 * FbxExporter: avoid duplicate @ in filename when exporting timeline clip containing @ in the display name
 * FbxExporter: added validation functions for all context menu items
 * FbxExporter: link materials to objects connected to mesh instances
+
+KNOWN ISSUES
+
+* Requires Unity 2018.1.0
 
 **Version**: sprint48
 
