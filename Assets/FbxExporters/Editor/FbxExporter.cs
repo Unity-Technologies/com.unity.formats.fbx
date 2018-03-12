@@ -1793,6 +1793,8 @@ namespace FbxExporters
 
                 var unityCurves = new Dictionary<GameObject, List<UnityCurve>> ();
 
+                // extract and store all necessary information from the curve bindings, namely the animation curves
+                // and their corresponding property names for each GameObject.
                 foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (uniAnimClip)) {
                     Object uniObj = AnimationUtility.GetAnimatedObject (uniRoot, uniCurveBinding);
                     if (!uniObj) {
@@ -1820,25 +1822,29 @@ namespace FbxExporters
                 var animSource = ExportOptions.AnimationSource;
                 var animDest = ExportOptions.AnimationDest;
                 if (animSource && animDest) {
-                    // list of source to dest
-                    var transformsInHierarchy = new List<Transform> ();
+                    // list of all transforms between source and dest, including source and dest
+                    var transformsFromSourceToDest = new List<Transform> ();
                     var curr = animDest;
                     while (curr != animSource) {
-                        transformsInHierarchy.Add (curr);
+                        transformsFromSourceToDest.Add (curr);
                         curr = curr.parent;
                     }
-                    transformsInHierarchy.Add (animSource);
-                    transformsInHierarchy.Reverse ();
+                    transformsFromSourceToDest.Add (animSource);
+                    transformsFromSourceToDest.Reverse ();
 
-                    while (transformsInHierarchy.Count >= 2) {
-                        var source = transformsInHierarchy [0];
-                        transformsInHierarchy.RemoveAt (0);
-                        var dest = transformsInHierarchy [0];
+                    // while there are 2 transforms in the list, transfer the animation from the
+                    // first to the next transform.
+                    // Then remove the first transform from the list.
+                    while (transformsFromSourceToDest.Count >= 2) {
+                        var source = transformsFromSourceToDest [0];
+                        transformsFromSourceToDest.RemoveAt (0);
+                        var dest = transformsFromSourceToDest [0];
 
                         TransferMotion (source, dest, uniAnimClip.frameRate, ref unityCurves);
                     }
                 }
 
+                // export the animation curves for each GameObject that has animation
                 foreach (var kvp in unityCurves) {
                     var uniGO = kvp.Key;
                     foreach (var uniCurve in kvp.Value) {
@@ -1887,10 +1893,17 @@ namespace FbxExporters
                 }
             }
 
-
+            /// <summary>
+            /// Transfers transform animation from source to dest. Replaces dest's Unity Animation Curves with updated animations.
+            /// NOTE: Source must be the parent of dest.
+            /// </summary>
+            /// <param name="source">Source.</param>
+            /// <param name="dest">Destination.</param>
+            /// <param name="sampleRate">Sample rate.</param>
+            /// <param name="unityCurves">Unity curves.</param>
             private void TransferMotion(Transform source, Transform dest, float sampleRate, ref Dictionary<GameObject, List<UnityCurve>> unityCurves){
                 // get sample times for curves in dest + source
-                // at each sample time, evaluate all 18 anim curves, creating 2 transform matrices
+                // at each sample time, evaluate all 18 transfom anim curves, creating 2 transform matrices
                 // combine the matrices, get the new values, apply to the 9 new anim curves for dest
                 if (dest.parent != source) {
                     Debug.LogError ("dest must be a child of source");
@@ -1899,7 +1912,7 @@ namespace FbxExporters
 
                 List<UnityCurve> sourceUnityCurves;
                 if (!unityCurves.TryGetValue (source.gameObject, out sourceUnityCurves)) {
-                    return; // nothing to do
+                    return; // nothing to do, source has no animation
                 }
 
                 List<UnityCurve> destUnityCurves;
@@ -1979,8 +1992,34 @@ namespace FbxExporters
                     newUnityCurves.Add (scaleUniCurve);
                 }
 
-                unityCurves.Remove (source.gameObject);
-                unityCurves [dest.gameObject] = newUnityCurves;
+                // remove old transform curves
+                RemoveTransformCurves (ref sourceUnityCurves);
+                RemoveTransformCurves (ref destUnityCurves);
+
+                unityCurves [source.gameObject] = sourceUnityCurves;
+                if (destUnityCurves.Count == 0) {
+                    unityCurves.Add (dest.gameObject, newUnityCurves);
+                    return;
+                }
+                unityCurves [dest.gameObject].AddRange(newUnityCurves);
+
+            }
+
+
+            private void RemoveTransformCurves(ref List<UnityCurve> curves){
+                var transformCurves = new List<UnityCurve> ();
+                var transformPropNames = new string[]{"m_LocalPosition.", "m_LocalRotation", "localEulerAnglesRaw.", "m_LocalScale."};
+                foreach (var curve in curves) {
+                    foreach (var prop in transformPropNames) {
+                        if (curve.propertyName.StartsWith (prop)) {
+                            transformCurves.Add (curve);
+                            break;
+                        }
+                    }
+                }
+                foreach (var curve in transformCurves) {
+                    curves.Remove (curve);
+                }
             }
 
             private Matrix4x4 GetTransformMatrix(float currSampleTime, Transform orig, List<UnityCurve> unityCurves){
