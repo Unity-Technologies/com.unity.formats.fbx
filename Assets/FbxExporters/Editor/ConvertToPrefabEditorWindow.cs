@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using FbxExporters.EditorTools;
+#if UNITY_2018_1_OR_NEWER
+using UnityEditor.Presets;
+#endif
 using System.Linq;
 
 namespace FbxExporters
@@ -83,7 +86,12 @@ namespace FbxExporters
             {
                 return m_toConvert.Length > 1;
             }
-
+            #if UNITY_2018_1_OR_NEWER
+            protected override void ShowPresetReceiver ()
+            {
+                ShowPresetReceiver (ExportSettings.instance.convertToPrefabSettings);
+            }
+            #endif
             protected override void CreateCustomUI ()
             {
                 GUILayout.BeginHorizontal ();
