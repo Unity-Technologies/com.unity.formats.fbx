@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using FbxExporters.EditorTools;
-using UnityEditor.Presets;
 using System.Linq;
 
 namespace FbxExporters
@@ -29,10 +28,6 @@ namespace FbxExporters
             protected string m_exportFileName = "";
 
             protected UnityEditor.Editor m_innerEditor;
-            protected FbxExportPresetSelectorReceiver m_receiver;
-
-            private static GUIContent presetIcon { get { return EditorGUIUtility.IconContent ("Preset.Context"); }}
-            private static GUIStyle presetIconButton { get { return new GUIStyle("IconButton"); }}
 
             private bool m_showOptions;
 
@@ -41,7 +36,6 @@ namespace FbxExporters
             protected float m_fbxExtLabelWidth;
 
             protected virtual void OnEnable(){
-                InitializeReceiver ();
                 m_showOptions = true;
                 this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, MinWindowHeight);
 
@@ -64,16 +58,6 @@ namespace FbxExporters
             protected virtual void InitializeWindow(string filename = ""){
                 this.titleContent = WindowTitle;
                 this.SetFilename (filename);
-            }
-
-            protected void InitializeReceiver(){
-                if (!m_receiver) {
-                    m_receiver = ScriptableObject.CreateInstance<FbxExportPresetSelectorReceiver> () as FbxExportPresetSelectorReceiver;
-                    m_receiver.SelectionChanged -= OnPresetSelectionChanged;
-                    m_receiver.SelectionChanged += OnPresetSelectionChanged;
-                    m_receiver.DialogClosed -= SaveExportSettings;
-                    m_receiver.DialogClosed += SaveExportSettings;
-                }
             }
 
             public void SetFilename(string filename){
@@ -109,15 +93,6 @@ namespace FbxExporters
                 return false;
             }
 
-            protected abstract void ShowPresetReceiver ();
-
-            protected void ShowPresetReceiver(UnityEngine.Object target){
-                InitializeReceiver ();
-                m_receiver.SetTarget(target);
-                m_receiver.SetInitialValue (new Preset (target));
-                UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, m_receiver);
-            }
-
             protected void OnGUI ()
             {
                 // Increasing the label width so that none of the text gets cut off
@@ -125,9 +100,6 @@ namespace FbxExporters
 
                 GUILayout.BeginHorizontal ();
                 GUILayout.FlexibleSpace ();
-                if(EditorGUILayout.DropdownButton(presetIcon, FocusType.Keyboard, presetIconButton)){
-                    ShowPresetReceiver ();
-                }
                 GUILayout.EndHorizontal();
 
                 EditorGUILayout.LabelField("Naming");
@@ -361,11 +333,6 @@ namespace FbxExporters
                     // asset folder view.
                     AssetDatabase.Refresh ();
                 }
-            }
-
-            protected override void ShowPresetReceiver ()
-            {
-                ShowPresetReceiver (ExportSettings.instance.exportModelSettings);
             }
         }
     }

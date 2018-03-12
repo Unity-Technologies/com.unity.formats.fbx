@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using FbxExporters.EditorTools;
-using UnityEditor.Presets;
 using System.Linq;
 
 namespace FbxExporters
@@ -83,11 +82,6 @@ namespace FbxExporters
             protected override bool DisableNameSelection ()
             {
                 return m_toConvert.Length > 1;
-            }
-
-            protected override void ShowPresetReceiver ()
-            {
-                ShowPresetReceiver (ExportSettings.instance.convertToPrefabSettings);
             }
 
             protected override void CreateCustomUI ()
