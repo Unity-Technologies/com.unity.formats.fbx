@@ -3152,7 +3152,7 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Add a menu item "Export To FBX..." to a GameObject's context menu.
+            /// Add a menu item "Export Model..." to a GameObject's context menu.
             /// </summary>
             /// <param name="command">Command.</param>
             [MenuItem (MenuItemName, false, 30)]
