@@ -2245,7 +2245,7 @@ namespace FbxExporters
                 // Use RSrs as the scaling inheritance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
-                if (ResetTransform (unityGo.transform)) {
+                if (TransformShouldBeReset (unityGo.transform)) {
                     exportType = TransformExportType.Reset;
                 }
                 ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
@@ -2303,7 +2303,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns><c>true</c>, if transform should be reset, <c>false</c> otherwise.</returns>
             /// <param name="t">Transform.</param>
-            private bool ResetTransform(Transform t){
+            private bool TransformShouldBeReset(Transform t){
                 var source = ExportOptions.AnimationSource;
                 var dest = ExportOptions.AnimationDest;
 
