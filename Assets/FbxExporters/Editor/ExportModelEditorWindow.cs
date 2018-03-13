@@ -42,6 +42,7 @@ namespace FbxExporters
 
             protected virtual void OnEnable(){
                 InitializeReceiver ();
+
                 m_showOptions = true;
                 this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, MinWindowHeight);
 
@@ -125,10 +126,10 @@ namespace FbxExporters
 
                 GUILayout.BeginHorizontal ();
                 GUILayout.FlexibleSpace ();
-                if(EditorGUILayout.DropdownButton(presetIcon, FocusType.Keyboard, presetIconButton)){
+                if (EditorGUILayout.DropdownButton (presetIcon, FocusType.Keyboard, presetIconButton)) {
                     ShowPresetReceiver ();
                 }
-                GUILayout.EndHorizontal();
+                GUILayout.EndHorizontal ();
 
                 EditorGUILayout.LabelField("Naming");
                 EditorGUI.indentLevel++;
