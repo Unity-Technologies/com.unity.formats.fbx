@@ -2307,6 +2307,10 @@ namespace FbxExporters
                 var source = ExportOptions.AnimationSource;
                 var dest = ExportOptions.AnimationDest;
 
+                if (!source || !dest) {
+                    return false;
+                }
+
                 // don't want to reset destination, if it's a bone this could cause issues with the skinning
                 var curr = dest.parent;
                 while (curr != source && curr != null) {
