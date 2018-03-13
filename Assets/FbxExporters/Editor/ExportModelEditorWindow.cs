@@ -432,6 +432,9 @@ namespace FbxExporters
             protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport){
                 ToExport = toExport.ToArray ();
 
+                TransferAnimationSource = null;
+                TransferAnimationDest = null;
+
                 // if only one object selected, set transfer source/dest to this object
                 if (ToExport.Length == 1) {
                     var go = ModelExporter.GetGameObject (ToExport [0]);

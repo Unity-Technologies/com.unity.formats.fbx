@@ -30,6 +30,9 @@ namespace FbxExporters
             protected void SetGameObjectsToConvert(IEnumerable<GameObject> toConvert){
                 ToExport = toConvert.OrderBy (go => go.name).ToArray ();
 
+                TransferAnimationSource = null;
+                TransferAnimationDest = null;
+
                 if (ToExport.Length == 1) {
                     m_prefabFileName = ToExport [0].name;
 
