@@ -61,6 +61,9 @@ namespace FbxExporters
                 } else if (m_toConvert.Length > 1) {
                     m_prefabFileName = "(automatic)";
                 }
+
+                DisableTransferAnim = DisableNameSelection = m_toConvert.Length > 1;
+
                 this.SetFilename (m_prefabFileName);
             }
 
@@ -105,11 +108,6 @@ namespace FbxExporters
                 }
             }
 
-            protected override bool DisableNameSelection ()
-            {
-                return m_toConvert.Length > 1;
-            }
-
             protected override void ShowPresetReceiver ()
             {
                 ShowPresetReceiver (ExportSettings.instance.convertToPrefabSettings);
@@ -122,7 +120,7 @@ namespace FbxExporters
                     "Prefab Name:",
                     "Filename to save prefab to."),GUILayout.Width(LabelWidth-TextFieldAlignOffset));
 
-                EditorGUI.BeginDisabledGroup (DisableNameSelection());
+                EditorGUI.BeginDisabledGroup (DisableNameSelection);
                 // Show the export name with an uneditable ".prefab" at the end
                 //-------------------------------------
                 EditorGUILayout.BeginVertical ();

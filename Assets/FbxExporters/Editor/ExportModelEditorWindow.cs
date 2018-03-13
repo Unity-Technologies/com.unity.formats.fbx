@@ -28,6 +28,12 @@ namespace FbxExporters
 
             protected string m_exportFileName = "";
 
+            private bool m_disableTransferAnim = false;
+            protected bool DisableTransferAnim { get { return m_disableTransferAnim; } set { m_disableTransferAnim = value; } }
+
+            private bool m_disableNameSelection = false;
+            protected bool DisableNameSelection { get { return m_disableNameSelection; } set { m_disableNameSelection = value; } }
+
             protected UnityEditor.Editor m_innerEditor;
             protected FbxExportPresetSelectorReceiver m_receiver;
 
@@ -105,10 +111,6 @@ namespace FbxExporters
             /// </summary>
             protected virtual void CreateCustomUI(){}
 
-            protected virtual bool DisableNameSelection(){
-                return false;
-            }
-
             protected abstract void ShowPresetReceiver ();
 
             protected void ShowPresetReceiver(UnityEngine.Object target){
@@ -141,7 +143,7 @@ namespace FbxExporters
                     "Export Name:",
                     "Filename to save model to."),GUILayout.Width(LabelWidth-TextFieldAlignOffset));
 
-                EditorGUI.BeginDisabledGroup (DisableNameSelection());
+                EditorGUI.BeginDisabledGroup (DisableNameSelection);
                 // Show the export name with an uneditable ".fbx" at the end
                 //-------------------------------------
                 EditorGUILayout.BeginVertical ();
@@ -202,6 +204,8 @@ namespace FbxExporters
                 CreateCustomUI();
 
                 EditorGUILayout.Space ();
+
+                EditorGUI.BeginDisabledGroup (DisableTransferAnim);
                 EditorGUI.indentLevel--;
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField(new GUIContent("Transfer Animation", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
@@ -209,8 +213,9 @@ namespace FbxExporters
                 EditorGUI.indentLevel++;
                 TransferAnimationSource = EditorGUILayout.ObjectField ("Source", TransferAnimationSource, typeof(Transform), allowSceneObjects: true) as Transform;
                 TransferAnimationDest = EditorGUILayout.ObjectField ("Destination", TransferAnimationDest, typeof(Transform), allowSceneObjects: true) as Transform;
-
                 EditorGUILayout.Space ();
+                EditorGUI.EndDisabledGroup ();
+
                 EditorGUI.indentLevel--;
                 m_showOptions = EditorGUILayout.Foldout (m_showOptions, "Options");
                 EditorGUI.indentLevel++;
@@ -266,14 +271,55 @@ namespace FbxExporters
             private UnityEngine.Object[] m_toExport;
 
             private bool m_isTimelineAnim = false;
+            protected bool IsTimelineAnim {
+                get { return m_isTimelineAnim; }
+                set{
+                    m_isTimelineAnim = value;
+                    if (m_isTimelineAnim) {
+                        ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+                    }
+                    if (m_innerEditor) {
+                        var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
+                        if (exportModelSettingsEditor) {
+                            exportModelSettingsEditor.DisableIncludeDropdown(m_isTimelineAnim);
+                        }
+                    }
+                }
+            }
+
             private bool m_singleHierarchyExport = true;
+            protected bool SingleHierarchyExport {
+                get { return m_singleHierarchyExport; }
+                set {
+                    m_singleHierarchyExport = value;
+
+                    if (m_innerEditor) {
+                        var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
+                        if (exportModelSettingsEditor) {
+                            exportModelSettingsEditor.SetIsSingleHierarchy (m_singleHierarchyExport);
+                        }
+                    }
+                }
+            }
+
             private bool m_isPlayableDirector = false;
+            protected bool IsPlayableDirector { 
+                get { return m_isPlayableDirector; } 
+                set {
+                    m_isPlayableDirector = value;
+                    DisableNameSelection = m_isPlayableDirector;
+                }
+            }
 
             protected override Transform TransferAnimationSource {
                 get {
                     return ExportSettings.instance.exportModelSettings.info.AnimationSource;
                 }
                 set {
+                    // source must be ancestor to dest
+
+                    // must be in same hierarchy as selected GO
+
                     ExportSettings.instance.exportModelSettings.info.SetAnimationSource (value);
                 }
             }
@@ -295,9 +341,9 @@ namespace FbxExporters
                     filename = window.GetFilenameFromObjects ();
                 }
                 window.InitializeWindow (filename);
-                window.SetAnimationExportType (isTimelineAnim);
-                window.SetSingleHierarchyExport (numObjects == 1);
-                window.SetIsPlayableDirector (isPlayableDirector);
+                window.IsTimelineAnim = isTimelineAnim;
+                window.SingleHierarchyExport = (numObjects == 1);
+                window.IsPlayableDirector = isPlayableDirector;
                 window.Show ();
             }
 
@@ -311,37 +357,10 @@ namespace FbxExporters
                         TransferAnimationSource = go.transform;
                         TransferAnimationDest = go.transform;
                     }
-                }
+                } 
+                DisableTransferAnim = m_toExport.Length > 1;
 
                 return m_toExport.Length;
-            }
-
-            private void SetAnimationExportType(bool isTimelineAnim){
-                m_isTimelineAnim = isTimelineAnim;
-                if (m_isTimelineAnim) {
-                    ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
-                }
-                if (m_innerEditor) {
-                    var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
-                    if (exportModelSettingsEditor) {
-                        exportModelSettingsEditor.DisableIncludeDropdown(m_isTimelineAnim);
-                    }
-                }
-            }
-
-            private void SetSingleHierarchyExport(bool singleHierarchy){
-                m_singleHierarchyExport = singleHierarchy;
-
-                if (m_innerEditor) {
-                    var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
-                    if (exportModelSettingsEditor) {
-                        exportModelSettingsEditor.SetIsSingleHierarchy (m_singleHierarchyExport);
-                    }
-                }
-            }
-
-            private void SetIsPlayableDirector(bool isPlayableDirector){
-                m_isPlayableDirector = isPlayableDirector;
             }
 
             /// <summary>
@@ -364,14 +383,9 @@ namespace FbxExporters
                 base.OnEnable ();
                 if (!m_innerEditor) {
                     m_innerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.exportModelSettings);
-                    this.SetSingleHierarchyExport (m_singleHierarchyExport);
-                    this.SetAnimationExportType (m_isTimelineAnim);
+                    this.SingleHierarchyExport = m_singleHierarchyExport;
+                    this.IsTimelineAnim = m_isTimelineAnim;
                 }
-            }
-
-            protected override bool DisableNameSelection ()
-            {
-                return m_isPlayableDirector;
             }
 
             protected override void Export(){
@@ -382,7 +396,7 @@ namespace FbxExporters
                     return;
                 }
 
-                if (m_isPlayableDirector) {
+                if (IsPlayableDirector) {
                     foreach (var obj in m_toExport) {
                         var go = ModelExporter.GetGameObject (obj);
                         if (!go) {
