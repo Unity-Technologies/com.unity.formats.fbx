@@ -20,7 +20,7 @@ namespace FbxExporters
             protected const float TextFieldAlignOffset = 3;
             protected const float ExportButtonWidth = 100;
             protected const float FbxExtOffset = -7;
-            protected virtual float MinWindowHeight { get { return 250; } }
+            protected virtual float MinWindowHeight { get { return 300; } }
 
             protected virtual string ExportButtonName { get { return "Export"; } }
 
@@ -219,7 +219,7 @@ namespace FbxExporters
                     this.Close ();
                 }
                 GUILayout.EndHorizontal ();
-
+                GUILayout.Space(20);
                 if (GUI.changed) {
                     SaveExportSettings ();
                 }
