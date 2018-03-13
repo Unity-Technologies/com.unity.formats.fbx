@@ -1997,7 +1997,7 @@ namespace FbxExporters
                 RemoveTransformCurves (ref destUnityCurves);
 
                 unityCurves [source.gameObject] = sourceUnityCurves;
-                if (destUnityCurves.Count == 0) {
+                if (!unityCurves.ContainsKey(dest.gameObject)) {
                     unityCurves.Add (dest.gameObject, newUnityCurves);
                     return;
                 }
@@ -2028,7 +2028,7 @@ namespace FbxExporters
                 var sourceScale = orig.localScale;
 
                 foreach (var uniCurve in unityCurves) {
-                    float currSampleValue = uniCurve.uniAnimCurve.Evaluate((float)currSampleTime);
+                    float currSampleValue = uniCurve.uniAnimCurve.Evaluate(currSampleTime);
                     string propName = uniCurve.propertyName;
                     // try position, scale, quat then euler
                     int temp = QuaternionCurve.GetQuaternionIndex(propName);
@@ -2307,7 +2307,8 @@ namespace FbxExporters
                 var source = ExportOptions.AnimationSource;
                 var dest = ExportOptions.AnimationDest;
 
-                var curr = dest;
+                // don't want to reset destination, if it's a bone this could cause issues with the skinning
+                var curr = dest.parent;
                 while (curr != source && curr != null) {
                     if (t == curr) {
                         return true;
