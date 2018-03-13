@@ -25,6 +25,10 @@ namespace FbxExporters
                     return ExportSettings.instance.convertToPrefabSettings.info.AnimationSource;
                 }
                 set {
+                    var selectedGO = ModelExporter.GetGameObject(m_toConvert[0]);
+                    if (!TransferAnimationSourceIsValid (value, selectedGO)) {
+                        return;
+                    }
                     ExportSettings.instance.convertToPrefabSettings.info.SetAnimationSource (value);
                 }
             }
@@ -34,6 +38,10 @@ namespace FbxExporters
                     return ExportSettings.instance.convertToPrefabSettings.info.AnimationDest;
                 }
                 set {
+                    var selectedGO = ModelExporter.GetGameObject(m_toConvert[0]);
+                    if (!TransferAnimationDestIsValid (value, selectedGO)) {
+                        return;
+                    }
                     ExportSettings.instance.convertToPrefabSettings.info.SetAnimationDest (value);
                 }
             }

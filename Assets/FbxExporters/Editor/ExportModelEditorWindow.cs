@@ -123,6 +123,74 @@ namespace FbxExporters
             protected abstract Transform TransferAnimationSource { get; set; }
             protected abstract Transform TransferAnimationDest { get; set; }
 
+            //-------Helper functions for determining if Animation source and dest are valid---------
+
+            /// <summary>
+            /// Determines whether p is an ancestor to t.
+            /// </summary>
+            /// <returns><c>true</c> if p is ancestor to t; otherwise, <c>false</c>.</returns>
+            /// <param name="p">P.</param>
+            /// <param name="t">T.</param>
+            protected bool IsAncestor(Transform p, Transform t){
+                var curr = t;
+                while (curr != null) {
+                    if (curr == p) {
+                        return true;
+                    }
+                    curr = curr.parent;
+                }
+                return false;
+            }
+
+            /// <summary>
+            /// Determines whether t1 and t2 are in the same hierarchy.
+            /// </summary>
+            /// <returns><c>true</c> if t1 is in same hierarchy as t2; otherwise, <c>false</c>.</returns>
+            /// <param name="t1">T1.</param>
+            /// <param name="t2">T2.</param>
+            protected bool IsInSameHierarchy(Transform t1, Transform t2){
+                return (IsAncestor (t1, t2) || IsAncestor (t2, t1));
+            }
+
+
+            protected virtual bool TransferAnimationSourceIsValid(Transform newValue, GameObject selectedGO){
+                if (!newValue) {
+                    return true;
+                }
+
+                // source must be ancestor to dest
+                if (TransferAnimationDest && !IsAncestor(newValue, TransferAnimationDest)) {
+                    Debug.LogWarningFormat("FbxExportSettings: Source {0} must be an ancestor of {1}", newValue.name, TransferAnimationDest.name);
+                    return false;
+                }
+                // must be in same hierarchy as selected GO
+                if (!selectedGO || !IsInSameHierarchy(newValue, selectedGO.transform)) {
+                    Debug.LogWarningFormat("FbxExportSettings: Source {0} must be in the same hierarchy as {1}", newValue.name, selectedGO? selectedGO.name : "the selected object");
+                    return false;
+                }
+                return true;
+            }
+
+            protected virtual bool TransferAnimationDestIsValid(Transform newValue, GameObject selectedGO){
+                if (!newValue) {
+                    return true;
+                }
+
+                // source must be ancestor to dest
+                if (TransferAnimationSource && !IsAncestor(TransferAnimationSource, newValue)) {
+                    Debug.LogWarningFormat("FbxExportSettings: Destination {0} must be a descendant of {1}", newValue.name, TransferAnimationSource.name);
+                    return false;
+                }
+                // must be in same hierarchy as selected GO
+                if (!selectedGO || !IsInSameHierarchy(newValue, selectedGO.transform)) {
+                    Debug.LogWarningFormat("FbxExportSettings: Destination {0} must be in the same hierarchy as {1}", newValue.name, selectedGO? selectedGO.name : "the selected object");
+                    return false;
+                }
+                return true;
+            }
+
+            // -------------------------------------------------------------------------------------
+
             protected void OnGUI ()
             {
                 // Increasing the label width so that none of the text gets cut off
@@ -308,6 +376,7 @@ namespace FbxExporters
                 set {
                     m_isPlayableDirector = value;
                     DisableNameSelection = m_isPlayableDirector;
+                    DisableTransferAnim = m_isPlayableDirector;
                 }
             }
 
@@ -316,10 +385,10 @@ namespace FbxExporters
                     return ExportSettings.instance.exportModelSettings.info.AnimationSource;
                 }
                 set {
-                    // source must be ancestor to dest
-
-                    // must be in same hierarchy as selected GO
-
+                    var selectedGO = ModelExporter.GetGameObject(m_toExport[0]);
+                    if (!TransferAnimationSourceIsValid (value, selectedGO)) {
+                        return;
+                    }
                     ExportSettings.instance.exportModelSettings.info.SetAnimationSource (value);
                 }
             }
@@ -329,6 +398,10 @@ namespace FbxExporters
                     return ExportSettings.instance.exportModelSettings.info.AnimationDest;
                 }
                 set {
+                    var selectedGO = ModelExporter.GetGameObject(m_toExport[0]);
+                    if (!TransferAnimationDestIsValid (value, selectedGO)) {
+                        return;
+                    }
                     ExportSettings.instance.exportModelSettings.info.SetAnimationDest (value);
                 }
             }
