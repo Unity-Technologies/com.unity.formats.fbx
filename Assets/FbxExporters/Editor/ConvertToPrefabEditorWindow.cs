@@ -15,36 +15,9 @@ namespace FbxExporters
             protected override GUIContent WindowTitle { get { return new GUIContent ("Convert Options"); }}
             protected override float MinWindowHeight { get { return 280; } } // determined by trial and error
             protected override string ExportButtonName { get { return "Convert"; } }
-            private GameObject[] m_toConvert;
             private string m_prefabFileName = "";
 
             private float m_prefabExtLabelWidth;
-
-            protected override Transform TransferAnimationSource {
-                get {
-                    return ExportSettings.instance.convertToPrefabSettings.info.AnimationSource;
-                }
-                set {
-                    var selectedGO = ModelExporter.GetGameObject(m_toConvert[0]);
-                    if (!TransferAnimationSourceIsValid (value, selectedGO)) {
-                        return;
-                    }
-                    ExportSettings.instance.convertToPrefabSettings.info.SetAnimationSource (value);
-                }
-            }
-
-            protected override Transform TransferAnimationDest {
-                get {
-                    return ExportSettings.instance.convertToPrefabSettings.info.AnimationDest;
-                }
-                set {
-                    var selectedGO = ModelExporter.GetGameObject(m_toConvert[0]);
-                    if (!TransferAnimationDestIsValid (value, selectedGO)) {
-                        return;
-                    }
-                    ExportSettings.instance.convertToPrefabSettings.info.SetAnimationDest (value);
-                }
-            }
 
             public static void Init (IEnumerable<GameObject> toConvert)
             {
@@ -55,22 +28,22 @@ namespace FbxExporters
             }
 
             protected void SetGameObjectsToConvert(IEnumerable<GameObject> toConvert){
-                m_toConvert = toConvert.OrderBy (go => go.name).ToArray ();
+                ToExport = toConvert.OrderBy (go => go.name).ToArray ();
 
-                if (m_toConvert.Length == 1) {
-                    m_prefabFileName = m_toConvert [0].name;
+                if (ToExport.Length == 1) {
+                    m_prefabFileName = ToExport [0].name;
 
                     // if only one object selected, set transfer source/dest to this object
-                    var go = ModelExporter.GetGameObject (m_toConvert [0]);
+                    var go = ModelExporter.GetGameObject (ToExport [0]);
                     if (go) {
                         TransferAnimationSource = go.transform;
                         TransferAnimationDest = go.transform;
                     }
-                } else if (m_toConvert.Length > 1) {
+                } else if (ToExport.Length > 1) {
                     m_prefabFileName = "(automatic)";
                 }
 
-                DisableTransferAnim = DisableNameSelection = m_toConvert.Length > 1;
+                DisableTransferAnim = DisableNameSelection = ToExport.Length > 1;
 
                 this.SetFilename (m_prefabFileName);
             }
@@ -97,23 +70,30 @@ namespace FbxExporters
                     return;
                 }
 
-                if (m_toConvert == null) {
+                if (ToExport == null) {
                     Debug.LogError ("FbxExporter: missing object for conversion");
                     return;
                 }
 
-                if (m_toConvert.Length == 1) {
+                if (ToExport.Length == 1) {
+                    var go = ModelExporter.GetGameObject (ToExport [0]);
                     ConvertToModel.Convert (
-                        m_toConvert[0], fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
+                        go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
                     return;
                 }
 
-                foreach (var go in m_toConvert) {
+                foreach (var obj in ToExport) {
+                    var go = ModelExporter.GetGameObject (obj);
                     ConvertToModel.Convert (
                         go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
                 }
+            }
+
+            protected override ExportOptionsSettingsSerializeBase SettingsObject
+            {
+                get { return ExportSettings.instance.convertToPrefabSettings.info; }
             }
 
             protected override void ShowPresetReceiver ()

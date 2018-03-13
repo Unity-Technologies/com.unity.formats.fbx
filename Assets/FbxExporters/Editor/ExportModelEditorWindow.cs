@@ -46,6 +46,14 @@ namespace FbxExporters
             protected GUIStyle m_fbxExtLabelStyle;
             protected float m_fbxExtLabelWidth;
 
+            protected abstract EditorTools.ExportOptionsSettingsSerializeBase SettingsObject { get; }
+
+            private UnityEngine.Object[] m_toExport;
+            protected UnityEngine.Object[] ToExport {
+                get { return m_toExport; }
+                set { m_toExport = value; }
+            }
+
             protected virtual void OnEnable(){
                 InitializeReceiver ();
                 m_showOptions = true;
@@ -120,8 +128,31 @@ namespace FbxExporters
                 UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, m_receiver);
             }
 
-            protected abstract Transform TransferAnimationSource { get; set; }
-            protected abstract Transform TransferAnimationDest { get; set; }
+            protected Transform TransferAnimationSource {
+                get {
+                    return SettingsObject.AnimationSource;
+                }
+                set {
+                    var selectedGO = ModelExporter.GetGameObject(ToExport[0]);
+                    if (!TransferAnimationSourceIsValid (value, selectedGO)) {
+                        return;
+                    }
+                    SettingsObject.SetAnimationSource (value);
+                }
+            }
+
+            protected Transform TransferAnimationDest {
+                get {
+                    return SettingsObject.AnimationDest;
+                }
+                set {
+                    var selectedGO = ModelExporter.GetGameObject(ToExport[0]);
+                    if (!TransferAnimationDestIsValid (value, selectedGO)) {
+                        return;
+                    }
+                    SettingsObject.SetAnimationDest (value);
+                }
+            }
 
             //-------Helper functions for determining if Animation source and dest are valid---------
 
@@ -153,7 +184,7 @@ namespace FbxExporters
             }
 
 
-            protected virtual bool TransferAnimationSourceIsValid(Transform newValue, GameObject selectedGO){
+            protected bool TransferAnimationSourceIsValid(Transform newValue, GameObject selectedGO){
                 if (!newValue) {
                     return true;
                 }
@@ -171,7 +202,7 @@ namespace FbxExporters
                 return true;
             }
 
-            protected virtual bool TransferAnimationDestIsValid(Transform newValue, GameObject selectedGO){
+            protected bool TransferAnimationDestIsValid(Transform newValue, GameObject selectedGO){
                 if (!newValue) {
                     return true;
                 }
@@ -336,7 +367,6 @@ namespace FbxExporters
         public class ExportModelEditorWindow : ExportOptionsEditorWindow
         {
             protected override float MinWindowHeight { get { return 260; } }
-            private UnityEngine.Object[] m_toExport;
 
             private bool m_isTimelineAnim = false;
             protected bool IsTimelineAnim {
@@ -380,30 +410,9 @@ namespace FbxExporters
                 }
             }
 
-            protected override Transform TransferAnimationSource {
-                get {
-                    return ExportSettings.instance.exportModelSettings.info.AnimationSource;
-                }
-                set {
-                    var selectedGO = ModelExporter.GetGameObject(m_toExport[0]);
-                    if (!TransferAnimationSourceIsValid (value, selectedGO)) {
-                        return;
-                    }
-                    ExportSettings.instance.exportModelSettings.info.SetAnimationSource (value);
-                }
-            }
-
-            protected override Transform TransferAnimationDest {
-                get {
-                    return ExportSettings.instance.exportModelSettings.info.AnimationDest;
-                }
-                set {
-                    var selectedGO = ModelExporter.GetGameObject(m_toExport[0]);
-                    if (!TransferAnimationDestIsValid (value, selectedGO)) {
-                        return;
-                    }
-                    ExportSettings.instance.exportModelSettings.info.SetAnimationDest (value);
-                }
+            protected override ExportOptionsSettingsSerializeBase SettingsObject
+            {
+                get { return ExportSettings.instance.exportModelSettings.info; }
             }
 
             public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false, bool isPlayableDirector = false)
@@ -421,19 +430,19 @@ namespace FbxExporters
             }
 
             protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport){
-                m_toExport = toExport.ToArray ();
+                ToExport = toExport.ToArray ();
 
                 // if only one object selected, set transfer source/dest to this object
-                if (m_toExport.Length == 1) {
-                    var go = ModelExporter.GetGameObject (m_toExport [0]);
+                if (ToExport.Length == 1) {
+                    var go = ModelExporter.GetGameObject (ToExport [0]);
                     if (go) {
                         TransferAnimationSource = go.transform;
                         TransferAnimationDest = go.transform;
                     }
                 } 
-                DisableTransferAnim = m_toExport.Length > 1;
+                DisableTransferAnim = ToExport.Length > 1;
 
-                return m_toExport.Length;
+                return ToExport.Length;
             }
 
             /// <summary>
@@ -443,8 +452,8 @@ namespace FbxExporters
             /// objects selected for export.</returns>
             protected string GetFilenameFromObjects(){
                 var filename = "";
-                if (m_toExport.Length == 1) {
-                    filename = m_toExport [0].name;
+                if (ToExport.Length == 1) {
+                    filename = ToExport [0].name;
                 } else {
                     filename = "Untitled";
                 }
@@ -470,12 +479,12 @@ namespace FbxExporters
                 }
 
                 if (IsPlayableDirector) {
-                    foreach (var obj in m_toExport) {
+                    foreach (var obj in ToExport) {
                         var go = ModelExporter.GetGameObject (obj);
                         if (!go) {
                             continue;
                         }
-                        ModelExporter.ExportAllTimelineClips (go, folderPath, ExportSettings.instance.exportModelSettings.info);
+                        ModelExporter.ExportAllTimelineClips (go, folderPath, SettingsObject);
                     }
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
@@ -483,7 +492,7 @@ namespace FbxExporters
                     return;
                 }
 
-                if (ModelExporter.ExportObjects (filePath, m_toExport, ExportSettings.instance.exportModelSettings.info, timelineAnim: m_isTimelineAnim) != null) {
+                if (ModelExporter.ExportObjects (filePath, ToExport, SettingsObject, timelineAnim: m_isTimelineAnim) != null) {
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
                     AssetDatabase.Refresh ();
