@@ -64,9 +64,6 @@ namespace FbxExporters
 
         public class ModelExporter : System.IDisposable
         {
-            // To be replaced by checkbox in Fbx Export settings
-            bool removeAnimationsFromSkinnedMeshRenderer = true;
-
             const string Title =
                 "exports static meshes with materials and textures";
 
@@ -1821,7 +1818,7 @@ namespace FbxExporters
                 // transfer root motion
                 var animSource = ExportOptions.AnimationSource;
                 var animDest = ExportOptions.AnimationDest;
-                if (animSource && animDest) {
+                if (animSource && animDest && animSource != animDest) {
                     // list of all transforms between source and dest, including source and dest
                     var transformsFromSourceToDest = new List<Transform> ();
                     var curr = animDest;
@@ -2307,7 +2304,7 @@ namespace FbxExporters
                 var source = ExportOptions.AnimationSource;
                 var dest = ExportOptions.AnimationDest;
 
-                if (!source || !dest) {
+                if (!source || !dest || source == dest) {
                     return false;
                 }
 

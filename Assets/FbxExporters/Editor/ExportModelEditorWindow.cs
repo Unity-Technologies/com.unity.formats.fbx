@@ -118,6 +118,9 @@ namespace FbxExporters
                 UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, m_receiver);
             }
 
+            protected abstract Transform TransferAnimationSource { get; set; }
+            protected abstract Transform TransferAnimationDest { get; set; }
+
             protected void OnGUI ()
             {
                 // Increasing the label width so that none of the text gets cut off
@@ -200,6 +203,15 @@ namespace FbxExporters
 
                 EditorGUILayout.Space ();
                 EditorGUI.indentLevel--;
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(new GUIContent("Transfer Animation", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
+                GUILayout.EndHorizontal();
+                EditorGUI.indentLevel++;
+                TransferAnimationSource = EditorGUILayout.ObjectField ("Source", TransferAnimationSource, typeof(Transform), allowSceneObjects: true) as Transform;
+                TransferAnimationDest = EditorGUILayout.ObjectField ("Destination", TransferAnimationDest, typeof(Transform), allowSceneObjects: true) as Transform;
+
+                EditorGUILayout.Space ();
+                EditorGUI.indentLevel--;
                 m_showOptions = EditorGUILayout.Foldout (m_showOptions, "Options");
                 EditorGUI.indentLevel++;
                 if (m_showOptions) {
@@ -257,6 +269,24 @@ namespace FbxExporters
             private bool m_singleHierarchyExport = true;
             private bool m_isPlayableDirector = false;
 
+            protected override Transform TransferAnimationSource {
+                get {
+                    return ExportSettings.instance.exportModelSettings.info.AnimationSource;
+                }
+                set {
+                    ExportSettings.instance.exportModelSettings.info.SetAnimationSource (value);
+                }
+            }
+
+            protected override Transform TransferAnimationDest {
+                get {
+                    return ExportSettings.instance.exportModelSettings.info.AnimationDest;
+                }
+                set {
+                    ExportSettings.instance.exportModelSettings.info.SetAnimationDest (value);
+                }
+            }
+
             public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false, bool isPlayableDirector = false)
             {
                 ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
@@ -273,6 +303,16 @@ namespace FbxExporters
 
             protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport){
                 m_toExport = toExport.ToArray ();
+
+                // if only one object selected, set transfer source/dest to this object
+                if (m_toExport.Length == 1) {
+                    var go = ModelExporter.GetGameObject (m_toExport [0]);
+                    if (go) {
+                        TransferAnimationSource = go.transform;
+                        TransferAnimationDest = go.transform;
+                    }
+                }
+
                 return m_toExport.Length;
             }
 

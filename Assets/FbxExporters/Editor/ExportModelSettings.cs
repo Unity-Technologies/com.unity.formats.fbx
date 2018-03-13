@@ -67,14 +67,6 @@ namespace FbxExporters.EditorTools
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("Transfer Animation", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
-            GUILayout.EndHorizontal();
-            EditorGUI.indentLevel++;
-            exportSettings.animSource = EditorGUILayout.ObjectField ("Source", exportSettings.animSource, typeof(Transform), allowSceneObjects: true) as Transform;
-            exportSettings.animDest = EditorGUILayout.ObjectField ("Destination", exportSettings.animDest, typeof(Transform), allowSceneObjects: true) as Transform;
-            EditorGUI.indentLevel--;
-
             exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.animatedSkinnedMesh);
             EditorGUI.EndDisabledGroup ();
 
@@ -140,7 +132,9 @@ namespace FbxExporters.EditorTools
         public bool UseMayaCompatibleNames { get { return mayaCompatibleNaming; } }
         public void SetUseMayaCompatibleNames(bool useMayaCompNames){ this.mayaCompatibleNaming = useMayaCompNames; }
         public Transform AnimationSource { get { return animSource; } }
+        public void SetAnimationSource(Transform source) { this.animSource = source; }
         public Transform AnimationDest { get { return animDest; } }
+        public void SetAnimationDest(Transform dest) { this.animDest = dest; }
         public abstract ExportSettings.Include ModelAnimIncludeOption { get; }
         public abstract ExportSettings.LODExportType LODExportType { get; }
         public abstract ExportSettings.ObjectPosition ObjectPosition { get; }

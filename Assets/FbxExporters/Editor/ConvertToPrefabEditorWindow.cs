@@ -20,6 +20,24 @@ namespace FbxExporters
 
             private float m_prefabExtLabelWidth;
 
+            protected override Transform TransferAnimationSource {
+                get {
+                    return ExportSettings.instance.convertToPrefabSettings.info.AnimationSource;
+                }
+                set {
+                    ExportSettings.instance.convertToPrefabSettings.info.SetAnimationSource (value);
+                }
+            }
+
+            protected override Transform TransferAnimationDest {
+                get {
+                    return ExportSettings.instance.convertToPrefabSettings.info.AnimationDest;
+                }
+                set {
+                    ExportSettings.instance.convertToPrefabSettings.info.SetAnimationDest (value);
+                }
+            }
+
             public static void Init (IEnumerable<GameObject> toConvert)
             {
                 ConvertToPrefabEditorWindow window = CreateWindow<ConvertToPrefabEditorWindow> ();
@@ -33,6 +51,13 @@ namespace FbxExporters
 
                 if (m_toConvert.Length == 1) {
                     m_prefabFileName = m_toConvert [0].name;
+
+                    // if only one object selected, set transfer source/dest to this object
+                    var go = ModelExporter.GetGameObject (m_toConvert [0]);
+                    if (go) {
+                        TransferAnimationSource = go.transform;
+                        TransferAnimationDest = go.transform;
+                    }
                 } else if (m_toConvert.Length > 1) {
                     m_prefabFileName = "(automatic)";
                 }
