@@ -439,6 +439,13 @@ namespace FbxExporters
                         toRenderer.sharedMaterials = fromRenderer.sharedMaterials;
                     }
                 }
+                // Point the mesh included in the mesh collider to the mesh in the FBX file, which is the same as the one in mesh filter
+                if (to.GetComponent<MeshCollider> () != null && from.GetComponent<MeshFilter> () != null)
+                {
+                    var toMeshCollider = to.GetComponent<MeshCollider> ();
+                    var fromFilter = from.GetComponent<MeshFilter> ();
+                    toMeshCollider.sharedMesh = fromFilter.sharedMesh;
+                }
             }
         }
     }
