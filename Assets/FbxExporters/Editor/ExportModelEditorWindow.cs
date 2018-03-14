@@ -304,7 +304,10 @@ namespace FbxExporters
                 EditorGUI.BeginDisabledGroup (DisableTransferAnim);
                 EditorGUI.indentLevel--;
                 GUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField(new GUIContent("Transfer Animation", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
+                EditorGUILayout.LabelField(new GUIContent(
+                    "Transfer Animation",
+                    "Transfer transform animation from source to destination. Animation on objects between source and destination will also be transferred to destination."
+                ), GUILayout.Width(LabelWidth - FieldOffset));
                 GUILayout.EndHorizontal();
                 EditorGUI.indentLevel++;
                 TransferAnimationSource = EditorGUILayout.ObjectField ("Source", TransferAnimationSource, typeof(Transform), allowSceneObjects: true) as Transform;
