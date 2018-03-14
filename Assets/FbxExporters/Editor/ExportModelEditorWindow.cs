@@ -130,8 +130,7 @@ namespace FbxExporters
                     return SettingsObject.AnimationSource;
                 }
                 set {
-                    var selectedGO = ModelExporter.GetGameObject(ToExport[0]);
-                    if (!TransferAnimationSourceIsValid (value, selectedGO)) {
+                    if (!TransferAnimationSourceIsValid (value)) {
                         return;
                     }
                     SettingsObject.SetAnimationSource (value);
@@ -143,8 +142,7 @@ namespace FbxExporters
                     return SettingsObject.AnimationDest;
                 }
                 set {
-                    var selectedGO = ModelExporter.GetGameObject(ToExport[0]);
-                    if (!TransferAnimationDestIsValid (value, selectedGO)) {
+                    if (!TransferAnimationDestIsValid (value)) {
                         return;
                     }
                     SettingsObject.SetAnimationDest (value);
@@ -181,10 +179,17 @@ namespace FbxExporters
             }
 
 
-            protected bool TransferAnimationSourceIsValid(Transform newValue, GameObject selectedGO){
+            protected bool TransferAnimationSourceIsValid(Transform newValue){
                 if (!newValue) {
                     return true;
                 }
+
+                if (ToExport == null || ToExport.Length <= 0) {
+                    Debug.LogWarning ("FbxExportSettings: no Objects selected for export, can't transfer animation");
+                    return false;
+                }
+
+                var selectedGO = ModelExporter.GetGameObject(ToExport[0]);
 
                 // source must be ancestor to dest
                 if (TransferAnimationDest && !IsAncestor(newValue, TransferAnimationDest)) {
@@ -199,10 +204,17 @@ namespace FbxExporters
                 return true;
             }
 
-            protected bool TransferAnimationDestIsValid(Transform newValue, GameObject selectedGO){
+            protected bool TransferAnimationDestIsValid(Transform newValue){
                 if (!newValue) {
                     return true;
                 }
+
+                if (ToExport == null || ToExport.Length <= 0) {
+                    Debug.LogWarning ("FbxExportSettings: no Objects selected for export, can't transfer animation");
+                    return false;
+                }
+
+                var selectedGO = ModelExporter.GetGameObject(ToExport[0]);
 
                 // source must be ancestor to dest
                 if (TransferAnimationSource && !IsAncestor(TransferAnimationSource, newValue)) {
