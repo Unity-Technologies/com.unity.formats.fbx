@@ -378,7 +378,7 @@ namespace FbxExporters
 
         public class ExportModelEditorWindow : ExportOptionsEditorWindow
         {
-            protected override float MinWindowHeight { get { return 260; } }
+            protected override float MinWindowHeight { get { return 310; } } // determined by trial and error
             protected override bool DisableNameSelection {
                 get {
                     return IsPlayableDirector;

@@ -13,7 +13,7 @@ namespace FbxExporters
         public class ConvertToPrefabEditorWindow : ExportOptionsEditorWindow
         {
             protected override GUIContent WindowTitle { get { return new GUIContent ("Convert Options"); }}
-            protected override float MinWindowHeight { get { return 280; } } // determined by trial and error
+            protected override float MinWindowHeight { get { return 350; } } // determined by trial and error
             protected override string ExportButtonName { get { return "Convert"; } }
             private string m_prefabFileName = "";
 
