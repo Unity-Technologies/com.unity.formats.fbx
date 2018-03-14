@@ -3578,7 +3578,7 @@ namespace FbxExporters
             private string m_lastFilePath { get; set; }
 
             const string kFBXFileExtension = "fbx";
-			public const string prefabExtension = "prefab";
+            public const string prefabExtension = "prefab";
 
 
             public enum AnimationExportType{
