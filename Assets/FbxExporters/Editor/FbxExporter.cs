@@ -1947,18 +1947,8 @@ namespace FbxExporters
                     // child * parent
                     var newLocalMatrix = sourceLocalMatrix * destLocalMatrix;
 
-                    // FBX is transposed relative to Unity: transpose as we convert.
-                    FbxMatrix matrix = new FbxMatrix ();
-                    matrix.SetColumn (0, new FbxVector4 (newLocalMatrix.GetRow (0).x, newLocalMatrix.GetRow (0).y, newLocalMatrix.GetRow (0).z, newLocalMatrix.GetRow (0).w));
-                    matrix.SetColumn (1, new FbxVector4 (newLocalMatrix.GetRow (1).x, newLocalMatrix.GetRow (1).y, newLocalMatrix.GetRow (1).z, newLocalMatrix.GetRow (1).w));
-                    matrix.SetColumn (2, new FbxVector4 (newLocalMatrix.GetRow (2).x, newLocalMatrix.GetRow (2).y, newLocalMatrix.GetRow (2).z, newLocalMatrix.GetRow (2).w));
-                    matrix.SetColumn (3, new FbxVector4 (newLocalMatrix.GetRow (3).x, newLocalMatrix.GetRow (3).y, newLocalMatrix.GetRow (3).z, newLocalMatrix.GetRow (3).w));
-
-                    // FBX wants translation, rotation (in euler angles) and scale.
-                    // We assume there's no real shear, just rounding error.
-                    FbxVector4 translation, rotation, shear, scale;
-                    double sign;
-                    matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
+                    FbxVector4 translation, rotation, scale;
+                    GetTRSFromMatrix (newLocalMatrix, out translation, out rotation, out scale);
 
                     // get rotation directly from matrix, as otherwise causes issues
                     // with negative rotations.
@@ -2624,18 +2614,8 @@ namespace FbxExporters
                     pose = parentBindPose * bindPose.inverse;
                 }
 
-                // FBX is transposed relative to Unity: transpose as we convert.
-                FbxMatrix matrix = new FbxMatrix ();
-                matrix.SetColumn (0, new FbxVector4 (pose.GetRow (0).x, pose.GetRow (0).y, pose.GetRow (0).z, pose.GetRow (0).w));
-                matrix.SetColumn (1, new FbxVector4 (pose.GetRow (1).x, pose.GetRow (1).y, pose.GetRow (1).z, pose.GetRow (1).w));
-                matrix.SetColumn (2, new FbxVector4 (pose.GetRow (2).x, pose.GetRow (2).y, pose.GetRow (2).z, pose.GetRow (2).w));
-                matrix.SetColumn (3, new FbxVector4 (pose.GetRow (3).x, pose.GetRow (3).y, pose.GetRow (3).z, pose.GetRow (3).w));
-
-                // FBX wants translation, rotation (in euler angles) and scale.
-                // We assume there's no real shear, just rounding error.
-                FbxVector4 translation, rotation, shear, scale;
-                double sign;
-                matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
+                FbxVector4 translation, rotation, scale;
+                GetTRSFromMatrix (pose, out translation, out rotation, out scale);
 
                 // Export bones with zero rotation, using a pivot instead to set the rotation
                 // so that the bones are easier to animate and the rotation shows up as the "joint orientation" in Maya.
@@ -2649,6 +2629,21 @@ namespace FbxExporters
                 fbxNode.SetPreRotation (FbxNode.EPivotSet.eSourcePivot, new FbxVector4 (rotation.X, -rotation.Y, -rotation.Z));
 
                 return true;
+            }
+
+            private void GetTRSFromMatrix(Matrix4x4 unityMatrix, out FbxVector4 translation, out FbxVector4 rotation, out FbxVector4 scale){
+                // FBX is transposed relative to Unity: transpose as we convert.
+                FbxMatrix matrix = new FbxMatrix ();
+                matrix.SetColumn (0, new FbxVector4 (unityMatrix.GetRow (0).x, unityMatrix.GetRow (0).y, unityMatrix.GetRow (0).z, unityMatrix.GetRow (0).w));
+                matrix.SetColumn (1, new FbxVector4 (unityMatrix.GetRow (1).x, unityMatrix.GetRow (1).y, unityMatrix.GetRow (1).z, unityMatrix.GetRow (1).w));
+                matrix.SetColumn (2, new FbxVector4 (unityMatrix.GetRow (2).x, unityMatrix.GetRow (2).y, unityMatrix.GetRow (2).z, unityMatrix.GetRow (2).w));
+                matrix.SetColumn (3, new FbxVector4 (unityMatrix.GetRow (3).x, unityMatrix.GetRow (3).y, unityMatrix.GetRow (3).z, unityMatrix.GetRow (3).w));
+
+                // FBX wants translation, rotation (in euler angles) and scale.
+                // We assume there's no real shear, just rounding error.
+                FbxVector4 shear;
+                double sign;
+                matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
             }
 
             /// <summary>
