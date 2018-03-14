@@ -19,6 +19,17 @@ namespace FbxExporters
 
             private float m_prefabExtLabelWidth;
 
+            protected override bool DisableNameSelection {
+                get {
+                    return (ToExport != null && ToExport.Length > 1);
+                }
+            }
+            protected override bool DisableTransferAnim {
+                get {
+                    return ToExport == null || ToExport.Length > 1;
+                }
+            }
+
             public static void Init (IEnumerable<GameObject> toConvert)
             {
                 ConvertToPrefabEditorWindow window = CreateWindow<ConvertToPrefabEditorWindow> ();
@@ -45,8 +56,6 @@ namespace FbxExporters
                 } else if (ToExport.Length > 1) {
                     m_prefabFileName = "(automatic)";
                 }
-
-                DisableTransferAnim = DisableNameSelection = ToExport.Length > 1;
 
                 this.SetFilename (m_prefabFileName);
             }

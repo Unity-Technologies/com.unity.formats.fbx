@@ -28,12 +28,6 @@ namespace FbxExporters
 
             protected string m_exportFileName = "";
 
-            private bool m_disableTransferAnim = false;
-            protected bool DisableTransferAnim { get { return m_disableTransferAnim; } set { m_disableTransferAnim = value; } }
-
-            private bool m_disableNameSelection = false;
-            protected bool DisableNameSelection { get { return m_disableNameSelection; } set { m_disableNameSelection = value; } }
-
             protected UnityEditor.Editor m_innerEditor;
             protected FbxExportPresetSelectorReceiver m_receiver;
 
@@ -45,6 +39,9 @@ namespace FbxExporters
             protected GUIStyle m_nameTextFieldStyle;
             protected GUIStyle m_fbxExtLabelStyle;
             protected float m_fbxExtLabelWidth;
+
+            protected abstract bool DisableTransferAnim { get; }
+            protected abstract bool DisableNameSelection { get; }
 
             protected abstract EditorTools.ExportOptionsSettingsSerializeBase SettingsObject { get; }
 
@@ -367,6 +364,16 @@ namespace FbxExporters
         public class ExportModelEditorWindow : ExportOptionsEditorWindow
         {
             protected override float MinWindowHeight { get { return 260; } }
+            protected override bool DisableNameSelection {
+                get {
+                    return IsPlayableDirector;
+                }
+            }
+            protected override bool DisableTransferAnim {
+                get {
+                    return ToExport == null || ToExport.Length > 1 || IsPlayableDirector;
+                }
+            }
 
             private bool m_isTimelineAnim = false;
             protected bool IsTimelineAnim {
@@ -405,8 +412,6 @@ namespace FbxExporters
                 get { return m_isPlayableDirector; } 
                 set {
                     m_isPlayableDirector = value;
-                    DisableNameSelection = m_isPlayableDirector;
-                    DisableTransferAnim = m_isPlayableDirector;
                 }
             }
 
@@ -442,8 +447,7 @@ namespace FbxExporters
                         TransferAnimationSource = go.transform;
                         TransferAnimationDest = go.transform;
                     }
-                } 
-                DisableTransferAnim = ToExport.Length > 1;
+                }
 
                 return ToExport.Length;
             }
