@@ -67,11 +67,17 @@ namespace FbxExporters.EditorTools
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
-            exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.animatedSkinnedMesh);
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Animated Skinned Mesh",
+                "If checked, animation on objects with skinned meshes will be exported"), GUILayout.Width(LabelWidth - FieldOffset));
+            // greyed out if model
+            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportSettings.Include.Model);
+            exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle(exportSettings.animatedSkinnedMesh);
             EditorGUI.EndDisabledGroup ();
+            GUILayout.EndHorizontal ();
 
             exportSettings.mayaCompatibleNaming = EditorGUILayout.Toggle (
-                new GUIContent ("Compatible Naming:",
+                new GUIContent ("Compatible Naming",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
                     "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
                     "On export, convert the names of GameObjects so they are Maya compatible." +
@@ -82,7 +88,7 @@ namespace FbxExporters.EditorTools
                 exportSettings.mayaCompatibleNaming);
 
             GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("Export Unrendered:",
+            EditorGUILayout.LabelField(new GUIContent("Export Unrendered",
                 "If checked, meshes will be exported even if they don't have a Renderer component."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if animation only
             EditorGUI.BeginDisabledGroup(exportSettings.include == ExportSettings.Include.Anim);
@@ -121,9 +127,9 @@ namespace FbxExporters.EditorTools
         public bool mayaCompatibleNaming = true;
 
         [System.NonSerialized]
-        public Transform animSource;
+        protected Transform animSource;
         [System.NonSerialized]
-        public Transform animDest;
+        protected Transform animDest;
 
         public ExportSettings.ExportFormat ExportFormat { get { return exportFormat; } }
         public void SetExportFormat(ExportSettings.ExportFormat format){ this.exportFormat = format; }

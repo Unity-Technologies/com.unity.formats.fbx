@@ -371,7 +371,9 @@ namespace FbxExporters
             }
             protected override bool DisableTransferAnim {
                 get {
-                    return ToExport == null || ToExport.Length > 1 || IsPlayableDirector;
+                    // don't transfer animation if we are exporting more than one hierarchy, the timeline clips from
+                    // a playable director, or if only the model is being exported
+                    return ToExport == null || ToExport.Length > 1 || IsPlayableDirector || SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model;
                 }
             }
 

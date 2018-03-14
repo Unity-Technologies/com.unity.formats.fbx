@@ -51,15 +51,7 @@ namespace FbxExporters.EditorTools
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
-            // TODO: add implementation for these options, grey out in the meantime
-            EditorGUI.BeginDisabledGroup (true);
-            GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("Transfer Root Motion To", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
-            EditorGUILayout.Popup(0, new string[]{"<None>"});
-            GUILayout.EndHorizontal();
-
             exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.animatedSkinnedMesh);
-            EditorGUI.EndDisabledGroup ();
 
             exportSettings.mayaCompatibleNaming = EditorGUILayout.Toggle (
                 new GUIContent ("Compatible Naming:",
