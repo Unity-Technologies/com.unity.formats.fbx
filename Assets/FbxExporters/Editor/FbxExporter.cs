@@ -1802,7 +1802,8 @@ namespace FbxExporters
                     }
 
                     var uniGO = GetGameObject (uniObj);
-                    if (!uniGO) {
+                    // Check if the GameObject has an FBX node to the animation. It might be null because the LOD selected doesn't match the one on the gameobject. 
+                    if (!uniGO || MapUnityObjectToFbxNode.ContainsKey(uniGO) == false) {
                         continue;
                     }
                                 
