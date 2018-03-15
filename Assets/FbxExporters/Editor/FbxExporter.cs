@@ -3588,13 +3588,6 @@ namespace FbxExporters
                 all
             }
 
-
-            public static string MakeFileName (string basename = "test", string extension = kFBXFileExtension)
-            {
-                return basename + "." + extension;
-            }
-
-
             private static string GetExportFilePath(string filenameSuggestion = ""){
                 var directory = string.IsNullOrEmpty (LastFilePath)
                     ? Application.dataPath
@@ -3614,7 +3607,7 @@ namespace FbxExporters
                     filename = ConvertToValidFilename (selectedGOs [0].name + "." + kFBXFileExtension);
                 } else {
                     filename = string.IsNullOrEmpty (LastFilePath)
-                        ? MakeFileName (basename: FileBaseName, extension: kFBXFileExtension)
+                        ? System.IO.Path.ChangeExtension(FileBaseName, kFBXFileExtension)
                         : System.IO.Path.GetFileName (LastFilePath);
                 }
 
