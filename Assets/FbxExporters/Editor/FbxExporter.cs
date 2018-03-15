@@ -81,7 +81,7 @@ namespace FbxExporters
             // NOTE: The ellipsis at the end of the Menu Item name prevents the context
             //       from being passed to command, thus resulting in OnContextItem()
             //       being called only once regardless of what is selected.
-            const string MenuItemName = "GameObject/Export Model...";
+            const string MenuItemName = "GameObject/Export To FBX...";
             const string ModelOnlyMenuItemName = "GameObject/Export Model Only...";
 
             const string ClipMenuItemName = "GameObject/Export All Recorded Animation Clips...";
