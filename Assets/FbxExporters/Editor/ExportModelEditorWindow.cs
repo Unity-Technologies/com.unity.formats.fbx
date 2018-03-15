@@ -219,7 +219,7 @@ namespace FbxExporters
                     this.Close ();
                 }
                 GUILayout.EndHorizontal ();
-                GUILayout.Space(20);
+
                 if (GUI.changed) {
                     SaveExportSettings ();
                 }
