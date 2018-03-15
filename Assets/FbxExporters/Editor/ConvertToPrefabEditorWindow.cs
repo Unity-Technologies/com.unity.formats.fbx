@@ -50,8 +50,18 @@ namespace FbxExporters
                 m_prefabExtLabelWidth = m_fbxExtLabelStyle.CalcSize (new GUIContent (".prefab")).x;
             }
 
-            protected override void Export ()
+            protected override bool Export ()
             {
+                if (string.IsNullOrEmpty (m_exportFileName)) {
+                    Debug.LogError ("FbxExporter: Please specify an fbx filename");
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty (m_prefabFileName)) {
+                    Debug.LogError ("FbxExporter: Please specify a prefab filename");
+                    return false;
+                }
+
                 var fbxDirPath = ExportSettings.GetFbxAbsoluteSavePath ();
                 var fbxPath = System.IO.Path.Combine (fbxDirPath, m_exportFileName + ".fbx");
 
@@ -60,19 +70,19 @@ namespace FbxExporters
 
                 // check if file already exists, give a warning if it does
                 if (!OverwriteExistingFile (fbxPath) || !OverwriteExistingFile (prefabPath)) {
-                    return;
+                    return false;
                 }
 
                 if (m_toConvert == null) {
                     Debug.LogError ("FbxExporter: missing object for conversion");
-                    return;
+                    return false;
                 }
 
                 if (m_toConvert.Length == 1) {
                     ConvertToModel.Convert (
                         m_toConvert[0], fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
-                    return;
+                    return true;
                 }
 
                 foreach (var go in m_toConvert) {
@@ -80,6 +90,7 @@ namespace FbxExporters
                         go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
                 }
+                return true;
             }
 
             protected override bool DisableNameSelection ()
