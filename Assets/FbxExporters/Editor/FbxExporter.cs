@@ -82,14 +82,8 @@ namespace FbxExporters
             //       from being passed to command, thus resulting in OnContextItem()
             //       being called only once regardless of what is selected.
             const string MenuItemName = "GameObject/Export To FBX...";
-            const string ModelOnlyMenuItemName = "GameObject/Export Model Only...";
 
-            const string ClipMenuItemName = "GameObject/Export All Recorded Animation Clips...";
-            const string TimelineClipMenuItemName = "GameObject/Export Selected Timeline Clip...";																				
-
-            const string AnimOnlyMenuItemName = "GameObject/Export Animation Only...";
-
-            const string FileBaseName = "Untitled";
+            const string TimelineClipMenuItemName = "GameObject/Export Selected Timeline Clip...";
 
             const string ProgressBarTitle = "Fbx Export";
 
@@ -3112,40 +3106,6 @@ namespace FbxExporters
                 return true;
             }
 
-            /// <summary>
-            /// Validate the menu item defined by the function ModelOnlyOnContextItem.
-            /// </summary>
-            [MenuItem (ModelOnlyMenuItemName, true, 30)]
-            public static bool ModelOnlyOnValidateMenuItem ()
-            {
-                return true;
-            }
-
-            /// <summary>
-            // Validate the menu item defined by the function above.
-            /// </summary>
-            [MenuItem (AnimOnlyMenuItemName, true, 30)]
-            public static bool OnValidateAnimOnlyMenuItem ()
-            {
-                Object[] selection = Selection.objects;
-
-                if (selection == null || selection.Length == 0)
-                {
-                    return false;
-                }
-
-                foreach (Object obj in selection)
-                {
-                    GameObject gameObj = obj as GameObject;
-                    if (gameObj != null && (gameObj.GetComponent<Animation>() != null || gameObj.GetComponent<Animator>() != null))
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
             public static void DisplayNoSelectionDialog()
             {
                 UnityEditor.EditorUtility.DisplayDialog (
@@ -3596,18 +3556,7 @@ namespace FbxExporters
             {
                 return basename + "." + extension;
             }
-
-
-            private static string GetExportFilePath(string filenameSuggestion = ""){
-                var directory = string.IsNullOrEmpty (LastFilePath)
-                    ? Application.dataPath
-                    : System.IO.Path.GetDirectoryName (LastFilePath);
-
-                var title = string.Format ("Export To FBX ({0})", FileBaseName);
-
-                return EditorUtility.SaveFilePanel (title, directory, filenameSuggestion, kFBXFileExtension);
-            }
-
+                
             private static void OnExport ()
             {
                 GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
