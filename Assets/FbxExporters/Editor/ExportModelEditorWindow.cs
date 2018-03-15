@@ -401,7 +401,8 @@ namespace FbxExporters
                 get {
                     // don't transfer animation if we are exporting more than one hierarchy, the timeline clips from
                     // a playable director, or if only the model is being exported
-                    return ToExport == null || ToExport.Length > 1 || IsPlayableDirector || SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model;
+                    // if we are on the timeline then export length can be more than 1
+                    return ToExport == null || ToExport.Length == 0 || (!IsTimelineAnim && ToExport.Length > 1) || IsPlayableDirector || SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model;
                 }
             }
 
@@ -453,14 +454,15 @@ namespace FbxExporters
             public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false, bool isPlayableDirector = false)
             {
                 ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
+                window.IsTimelineAnim = isTimelineAnim;
+                window.IsPlayableDirector = isPlayableDirector;
+
                 int numObjects = window.SetGameObjectsToExport (toExport);
                 if (string.IsNullOrEmpty (filename)) {
                     filename = window.GetFilenameFromObjects ();
                 }
                 window.InitializeWindow (filename);
-                window.IsTimelineAnim = isTimelineAnim;
                 window.SingleHierarchyExport = (numObjects == 1);
-                window.IsPlayableDirector = isPlayableDirector;
                 window.Show ();
             }
 
@@ -471,7 +473,8 @@ namespace FbxExporters
                 TransferAnimationDest = null;
 
                 // if only one object selected, set transfer source/dest to this object
-                if (ToExport.Length == 1) {
+                if (ToExport.Length == 1 || (IsTimelineAnim && ToExport.Length > 0)) {
+                    Debug.Log ("here");
                     var go = ModelExporter.GetGameObject (ToExport [0]);
                     if (go) {
                         TransferAnimationSource = go.transform;
