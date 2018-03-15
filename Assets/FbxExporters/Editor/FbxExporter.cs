@@ -81,7 +81,7 @@ namespace FbxExporters
             // NOTE: The ellipsis at the end of the Menu Item name prevents the context
             //       from being passed to command, thus resulting in OnContextItem()
             //       being called only once regardless of what is selected.
-            const string MenuItemName = "GameObject/Export Model...";
+            const string MenuItemName = "GameObject/Export To FBX...";
             const string ModelOnlyMenuItemName = "GameObject/Export Model Only...";
 
             const string ClipMenuItemName = "GameObject/Export All Recorded Animation Clips...";
@@ -1804,7 +1804,8 @@ namespace FbxExporters
                     }
 
                     var uniGO = GetGameObject (uniObj);
-                    if (!uniGO) {
+                    // Check if the GameObject has an FBX node to the animation. It might be null because the LOD selected doesn't match the one on the gameobject. 
+                    if (!uniGO || MapUnityObjectToFbxNode.ContainsKey(uniGO) == false) {
                         continue;
                     }
 
@@ -3342,41 +3343,6 @@ namespace FbxExporters
                 ExportModelEditorWindow.Init (exportArray, string.Format (AnimFbxFormat, animationTrackGObject.name, timelineClipSelected.displayName), isTimelineAnim: true);
             }
 
-            /// <summary>
-            /// Add an option " GameObject/Export All Recorded Animation Clips..." in the contextual GameObject menu.
-            /// </summary>
-            [MenuItem(ClipMenuItemName, false, 31)]
-            public static void OnPlayableDirectorGameObjectContextClick(MenuCommand command)
-            {
-                Object[] selection = null;
-
-                if (command == null || command.context == null)
-                {
-                    // We were actually invoked from the top GameObject menu, so use the selection.
-                    selection = Selection.GetFiltered<Object>(SelectionMode.Editable | SelectionMode.TopLevel);
-                }
-                else
-                {
-                    // We were invoked from the right-click menu, so use the context of the context menu.
-                    GameObject selected = command.context as GameObject;
-                    if (selected)
-                    {
-                        selection = new GameObject[] { selected };
-                    }
-                }
-
-                var playableDirectors = new List<UnityEngine.Object> ();
-                foreach (GameObject objectWithPlayableDirector in selection)
-                {
-                    PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
-                    if (pd == null) {
-                        continue;
-                    }
-                    playableDirectors.Add (objectWithPlayableDirector);
-                }
-                ExportModelEditorWindow.Init (playableDirectors, "(automatic)", isTimelineAnim:true, isPlayableDirector:true);
-            }
-
             public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath, IExportOptions exportOptions = null)
             {
                 PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
@@ -3401,31 +3367,6 @@ namespace FbxExporters
                         ExportObjects (filePath, myArray, exportOptions, timelineAnim: true);
                     }
                 }
-            }
-            
-            /// <summary>
-            /// Validate the menu item defined by the function OnPlayableDirectorGameObjectContextClick.
-            /// </summary>
-            [MenuItem(ClipMenuItemName, true, 31)]
-            public static bool ValidateClipContextClick()
-            {
-                Object[] selection = Selection.objects;
-
-                if (selection == null || selection.Length == 0)
-                {
-                    return false;
-                }
-
-                foreach (Object obj in selection)
-                {
-                    GameObject gameObj = obj as GameObject;
-                    if (gameObj != null && gameObj.GetComponent<PlayableDirector>() != null)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
             }
 
             /// <summary>
