@@ -108,18 +108,7 @@ namespace FbxExporters
             )
             {
                 // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
-                // Children of model prefab instances will also have "model prefab instance"
-                // as their prefab type, so it is important that it is the root that is selected.
-                //
-                // e.g. If I have the following hierarchy: 
-                //      Cube
-                //      -- Sphere
-                //
-                // Both the Cube and Sphere will have ModelPrefabInstance as their prefab type.
-                // However, when selecting the Sphere to convert, we don't want to connect it to the
-                // existing FBX but create a new FBX containing just the sphere.
-                PrefabType unityPrefabType = PrefabUtility.GetPrefabType(toConvert);
-                if (unityPrefabType == PrefabType.ModelPrefabInstance && toConvert.Equals(PrefabUtility.FindPrefabRoot(toConvert))) {
+                if(IsModelInstance(toConvert)){
                     // don't re-export fbx
                     // create prefab out of model instance in scene, link to existing fbx
                     var mainAsset = PrefabUtility.GetPrefabParent(toConvert) as GameObject;
@@ -221,6 +210,26 @@ namespace FbxExporters
                         string.Format("Failed to create prefab asset in [{0}] from fbx [{1}]",
                             prefabFileName, fbxFullPath));
                 }
+            }
+
+            /// <summary>
+            /// Determines if the given GameObject is a model instance.
+            /// </summary>
+            /// <returns><c>true</c> if go is a model instance; otherwise, <c>false</c>.</returns>
+            /// <param name="go">Go.</param>
+            public static bool IsModelInstance(GameObject go){
+                // Children of model prefab instances will also have "model prefab instance"
+                // as their prefab type, so it is important that it is the root that is selected.
+                //
+                // e.g. If I have the following hierarchy: 
+                //      Cube
+                //      -- Sphere
+                //
+                // Both the Cube and Sphere will have ModelPrefabInstance as their prefab type.
+                // However, when selecting the Sphere to convert, we don't want to connect it to the
+                // existing FBX but create a new FBX containing just the sphere.
+                PrefabType unityPrefabType = PrefabUtility.GetPrefabType(go);
+                return unityPrefabType == PrefabType.ModelPrefabInstance && go.Equals (PrefabUtility.FindPrefabRoot (go));
             }
 
             /// <summary>

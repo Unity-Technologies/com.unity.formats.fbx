@@ -34,8 +34,7 @@ namespace FbxExporters
                 if (m_toConvert.Length == 1) {
                     var go = m_toConvert [0];
                     // check if the GameObject is a model instance, use as default filename and path if it is
-                    PrefabType unityPrefabType = PrefabUtility.GetPrefabType(go);
-                    if (unityPrefabType == PrefabType.ModelPrefabInstance && go.Equals (PrefabUtility.FindPrefabRoot (go))) {
+                    if(ConvertToModel.IsModelInstance(go)) {
                         var mainAsset = PrefabUtility.GetPrefabParent (go) as GameObject;
                         var mainAssetRelPath = AssetDatabase.GetAssetPath (mainAsset);
                         // remove Assets/ from beginning of path
@@ -82,18 +81,7 @@ namespace FbxExporters
                     }
 
                     // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
-                    // Children of model prefab instances will also have "model prefab instance"
-                    // as their prefab type, so it is important that it is the root that is selected.
-                    //
-                    // e.g. If I have the following hierarchy: 
-                    //      Cube
-                    //      -- Sphere
-                    //
-                    // Both the Cube and Sphere will have ModelPrefabInstance as their prefab type.
-                    // However, when selecting the Sphere to convert, we don't want to connect it to the
-                    // existing FBX but create a new FBX containing just the sphere.
-                    PrefabType unityPrefabType = PrefabUtility.GetPrefabType(go);
-                    if (unityPrefabType == PrefabType.ModelPrefabInstance && go.Equals(PrefabUtility.FindPrefabRoot(go))) {
+                    if(ConvertToModel.IsModelInstance(go)) {
                         // don't re-export fbx
                         // create prefab out of model instance in scene, link to existing fbx
                         var mainAsset = PrefabUtility.GetPrefabParent(go) as GameObject;
