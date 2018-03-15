@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if UNITY_2018_1_OR_NEWER
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Presets;
@@ -46,3 +47,4 @@ public class FbxExportPresetSelectorReceiver : PresetSelectorReceiver
         m_InitialValue = initialValue;
     }
 }
+#endif

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using FbxExporters.EditorTools;
+#if UNITY_2018_1_OR_NEWER
 using UnityEditor.Presets;
+#endif
 using System.Linq;
 
 namespace FbxExporters
@@ -20,7 +22,7 @@ namespace FbxExporters
             protected const float TextFieldAlignOffset = 3;
             protected const float ExportButtonWidth = 100;
             protected const float FbxExtOffset = -7;
-            protected virtual float MinWindowHeight { get { return 250; } }
+            protected virtual float MinWindowHeight { get { return 300; } }
 
             protected virtual string ExportButtonName { get { return "Export"; } }
 
@@ -29,8 +31,9 @@ namespace FbxExporters
             protected string m_exportFileName = "";
 
             protected UnityEditor.Editor m_innerEditor;
+            #if UNITY_2018_1_OR_NEWER
             protected FbxExportPresetSelectorReceiver m_receiver;
-
+            #endif
             private static GUIContent presetIcon { get { return EditorGUIUtility.IconContent ("Preset.Context"); }}
             private static GUIStyle presetIconButton { get { return new GUIStyle("IconButton"); }}
 
@@ -52,7 +55,9 @@ namespace FbxExporters
             }
 
             protected virtual void OnEnable(){
+                #if UNITY_2018_1_OR_NEWER
                 InitializeReceiver ();
+                #endif
                 m_showOptions = true;
                 this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, MinWindowHeight);
 
@@ -77,6 +82,7 @@ namespace FbxExporters
                 this.SetFilename (filename);
             }
 
+            #if UNITY_2018_1_OR_NEWER
             protected void InitializeReceiver(){
                 if (!m_receiver) {
                     m_receiver = ScriptableObject.CreateInstance<FbxExportPresetSelectorReceiver> () as FbxExportPresetSelectorReceiver;
@@ -86,6 +92,7 @@ namespace FbxExporters
                     m_receiver.DialogClosed += SaveExportSettings;
                 }
             }
+            #endif
 
             public void SetFilename(string filename){
                 // remove .fbx from end of filename
@@ -116,6 +123,7 @@ namespace FbxExporters
             /// </summary>
             protected virtual void CreateCustomUI(){}
 
+            #if UNITY_2018_1_OR_NEWER  
             protected abstract void ShowPresetReceiver ();
 
             protected void ShowPresetReceiver(UnityEngine.Object target){
@@ -124,6 +132,7 @@ namespace FbxExporters
                 m_receiver.SetInitialValue (new Preset (target));
                 UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, m_receiver);
             }
+            #endif
 
             protected Transform TransferAnimationSource {
                 get {
@@ -238,9 +247,13 @@ namespace FbxExporters
 
                 GUILayout.BeginHorizontal ();
                 GUILayout.FlexibleSpace ();
+                
+                #if UNITY_2018_1_OR_NEWER  
                 if(EditorGUILayout.DropdownButton(presetIcon, FocusType.Keyboard, presetIconButton)){
                     ShowPresetReceiver ();
                 }
+                #endif
+
                 GUILayout.EndHorizontal();
 
                 EditorGUILayout.LabelField("Naming");
@@ -523,10 +536,12 @@ namespace FbxExporters
                 }
             }
 
+            #if UNITY_2018_1_OR_NEWER  
             protected override void ShowPresetReceiver ()
             {
                 ShowPresetReceiver (ExportSettings.instance.exportModelSettings);
             }
+            #endif
         }
     }
 }
