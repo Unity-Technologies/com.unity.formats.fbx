@@ -47,7 +47,12 @@ else()
         get_filename_component(UNITY_EDITOR_DLL_PATH "${UNITY_EDITOR_DLL_PATH}" DIRECTORY)
         set(UNITY_EDITOR_DLL_PATH "${UNITY_EDITOR_DLL_PATH}/Managed")
 
-        list(APPEND MONO_ROOT_PATH "${UNITY_EDITOR_DLL_PATH}/../../../Monodevelop.app/Contents/Frameworks/Mono.framework/Versions/Current")
+        if (DEFINED MONO)
+            set(MONO_ROOT_PATH "${MONO}/Contents/Frameworks/Mono.framework/Versions/Current")
+        else()        
+            set(MONO_ROOT_PATH "${UNITY_EDITOR_DLL_PATH}/../../../Monodevelop.app/Contents/Frameworks/Mono.framework/Versions/Current")
+        endif()
+        message("Using Mono ${MONO_ROOT_PATH}")
 
     elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         # The editor is   .../Unity.exe
@@ -71,23 +76,23 @@ else()
         # The dlls are in Unity.app/Contents/UnityExtensions/.../*.dll
         get_filename_component(UNITY_EXTENSION_ROOT "${UNITY_EDITOR_PATH}" PATH)
         get_filename_component(UNITY_EXTENSION_ROOT "${UNITY_EXTENSION_ROOT}" DIRECTORY)
-		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/Editor")
-		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/RuntimeEditor")
+        list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/Editor")
+        list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/RuntimeEditor")
     elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         # The editor is   .../Unity.exe
         # The dlls are in .../Editor/Data/.../*.dll
         get_filename_component(UNITY_EXTENSION_ROOT "${UNITY_EDITOR_PATH}" PATH)
         get_filename_component(UNITY_EXTENSION_ROOT "${UNITY_EXTENSION_ROOT}" DIRECTORY)
         set(UNITY_EXTENSION_ROOT "${UNITY_EXTENSION_ROOT}/Editor/Data")
-		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/Editor")
-		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/RuntimeEditor")
+        list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/Editor")
+        list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/RuntimeEditor")
     elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         # The editor is   .../Unity
         # The dlls are in .../Editor/Data/.../*.dll
         get_filename_component(UNITY_EXTENSION_ROOT "${UNITY_EDITOR_PATH}" PATH)
         set(UNITY_EXTENSION_ROOT "${UNITY_EXTENSION_ROOT}/Editor/Data")
-		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/Editor")
-		list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/RuntimeEditor")
+        list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/Editor")
+        list(APPEND UNITY_EXTENSION_PATHS "${UNITY_EXTENSION_ROOT}/UnityExtensions/Unity/Timeline/RuntimeEditor")
     endif()
 endif()
 
