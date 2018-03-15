@@ -32,7 +32,20 @@ namespace FbxExporters
                 m_toConvert = toConvert.OrderBy (go => go.name).ToArray ();
 
                 if (m_toConvert.Length == 1) {
-                    m_prefabFileName = m_toConvert [0].name;
+                    var go = m_toConvert [0];
+                    // check if the GameObject is a model instance, use as default filename and path if it is
+                    PrefabType unityPrefabType = PrefabUtility.GetPrefabType(go);
+                    if (unityPrefabType == PrefabType.ModelPrefabInstance && go.Equals (PrefabUtility.FindPrefabRoot (go))) {
+                        var mainAsset = PrefabUtility.GetPrefabParent (go) as GameObject;
+                        var mainAssetRelPath = AssetDatabase.GetAssetPath (mainAsset);
+                        // remove Assets/ from beginning of path
+                        mainAssetRelPath = mainAssetRelPath.Substring ("Assets".Length);
+
+                        m_prefabFileName = System.IO.Path.GetFileNameWithoutExtension (mainAssetRelPath);
+                        ExportSettings.AddFbxSavePath (System.IO.Path.GetDirectoryName (mainAssetRelPath));
+                    } else {
+                        m_prefabFileName = go.name;
+                    }
                 } else if (m_toConvert.Length > 1) {
                     m_prefabFileName = "(automatic)";
                 }
@@ -56,19 +69,51 @@ namespace FbxExporters
                 var prefabDirPath = ExportSettings.GetPrefabAbsoluteSavePath ();
                 var prefabPath = System.IO.Path.Combine (prefabDirPath, m_prefabFileName + ".prefab");
 
-                // check if file already exists, give a warning if it does
-                if (!OverwriteExistingFile (fbxPath) || !OverwriteExistingFile (prefabPath)) {
-                    return;
-                }
-
                 if (m_toConvert == null) {
                     Debug.LogError ("FbxExporter: missing object for conversion");
                     return;
                 }
 
                 if (m_toConvert.Length == 1) {
+                    var go = m_toConvert [0];
+
+                    if (!OverwriteExistingFile (prefabPath)) {
+                        return;
+                    }
+
+                    // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
+                    // Children of model prefab instances will also have "model prefab instance"
+                    // as their prefab type, so it is important that it is the root that is selected.
+                    //
+                    // e.g. If I have the following hierarchy: 
+                    //      Cube
+                    //      -- Sphere
+                    //
+                    // Both the Cube and Sphere will have ModelPrefabInstance as their prefab type.
+                    // However, when selecting the Sphere to convert, we don't want to connect it to the
+                    // existing FBX but create a new FBX containing just the sphere.
+                    PrefabType unityPrefabType = PrefabUtility.GetPrefabType(go);
+                    if (unityPrefabType == PrefabType.ModelPrefabInstance && go.Equals(PrefabUtility.FindPrefabRoot(go))) {
+                        // don't re-export fbx
+                        // create prefab out of model instance in scene, link to existing fbx
+                        var mainAsset = PrefabUtility.GetPrefabParent(go) as GameObject;
+                        var mainAssetRelPath = AssetDatabase.GetAssetPath(mainAsset);
+                        var mainAssetAbsPath = System.IO.Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
+                        var relPrefabPath = ExportSettings.GetProjectRelativePath (prefabPath);
+
+                        if (string.Equals(System.IO.Path.GetFullPath(fbxPath), System.IO.Path.GetFullPath(mainAssetAbsPath))) {
+                            ConvertToModel.SetupFbxPrefab(go, mainAsset, relPrefabPath, mainAssetAbsPath);
+                            return;
+                        }
+                    }
+
+                    // check if file already exists, give a warning if it does
+                    if (!OverwriteExistingFile (fbxPath)) {
+                        return;
+                    }
+
                     ConvertToModel.Convert (
-                        m_toConvert[0], fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
+                        go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
                     return;
                 }
