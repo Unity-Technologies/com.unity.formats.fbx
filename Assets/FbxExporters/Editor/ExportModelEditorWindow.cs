@@ -474,7 +474,6 @@ namespace FbxExporters
 
                 // if only one object selected, set transfer source/dest to this object
                 if (ToExport.Length == 1 || (IsTimelineAnim && ToExport.Length > 0)) {
-                    Debug.Log ("here");
                     var go = ModelExporter.GetGameObject (ToExport [0]);
                     if (go) {
                         TransferAnimationSource = go.transform;
