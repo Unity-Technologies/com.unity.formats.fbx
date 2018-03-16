@@ -54,7 +54,7 @@ namespace FbxExporters.EditorTools
             exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.animatedSkinnedMesh);
 
             exportSettings.mayaCompatibleNaming = EditorGUILayout.Toggle (
-                new GUIContent ("Compatible Naming:",
+                new GUIContent ("Compatible Naming",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
                     "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
                     "On export, convert the names of GameObjects so they are Maya compatible." +
