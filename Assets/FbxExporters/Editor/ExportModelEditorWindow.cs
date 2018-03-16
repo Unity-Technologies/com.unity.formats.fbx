@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -116,7 +116,7 @@ namespace FbxExporters
                 this.Repaint ();
             }
 
-            protected abstract void Export ();
+            protected abstract bool Export ();
 
             /// <summary>
             /// Function to be used by derived classes to add custom UI between the file path selector and export options.
@@ -356,8 +356,9 @@ namespace FbxExporters
                 }
 
                 if (GUILayout.Button (ExportButtonName, GUILayout.Width(ExportButtonWidth))) {
-                    Export ();
-                    this.Close ();
+                    if (Export ()) {
+                        this.Close ();
+                    }
                 }
                 GUILayout.EndHorizontal ();
 
@@ -528,12 +529,17 @@ namespace FbxExporters
                 }
             }
 
-            protected override void Export(){
+
+            protected override bool Export(){
+                if (string.IsNullOrEmpty (m_exportFileName)) {
+                    Debug.LogError ("FbxExporter: Please specify an fbx filename");
+                    return false;
+
                 var folderPath = ExportSettings.GetFbxAbsoluteSavePath ();
                 var filePath = System.IO.Path.Combine (folderPath, m_exportFileName + ".fbx");
 
                 if (!OverwriteExistingFile (filePath)) {
-                    return;
+                    return false;
                 }
 
                 if (IsPlayableDirector) {
@@ -547,7 +553,7 @@ namespace FbxExporters
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
                     AssetDatabase.Refresh ();
-                    return;
+                    return true;
                 }
 
                 if (ModelExporter.ExportObjects (filePath, ToExport, SettingsObject, timelineAnim: m_isTimelineAnim) != null) {
@@ -555,6 +561,7 @@ namespace FbxExporters
                     // asset folder view.
                     AssetDatabase.Refresh ();
                 }
+                return true;
             }
 
             #if UNITY_2018_1_OR_NEWER  
