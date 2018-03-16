@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -413,6 +413,7 @@ namespace FbxExporters
                 set{
                     m_isTimelineAnim = value;
                     if (m_isTimelineAnim) {
+                        m_previousInclude = ExportSettings.instance.exportModelSettings.info.ModelAnimIncludeOption;
                         ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
                     }
                     if (m_innerEditor) {
@@ -451,6 +452,8 @@ namespace FbxExporters
             {
                 get { return ExportSettings.instance.exportModelSettings.info; }
             }
+
+            private ExportSettings.Include m_previousInclude = ExportSettings.Include.ModelAndAnim;
 
             public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false, bool isPlayableDirector = false)
             {
@@ -510,12 +513,28 @@ namespace FbxExporters
                 }
             }
 
+            protected void OnDisable()
+            {
+                RestoreSettings ();
+            }
+
+            /// <summary>
+            /// Restore changed export settings after export
+            /// </summary>
+            protected virtual void RestoreSettings()
+            {
+                if (IsTimelineAnim) {
+                    ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(m_previousInclude);
+                    SaveExportSettings ();
+                }
+            }
+
+
             protected override bool Export(){
                 if (string.IsNullOrEmpty (m_exportFileName)) {
                     Debug.LogError ("FbxExporter: Please specify an fbx filename");
                     return false;
                 }
-
                 var folderPath = ExportSettings.GetFbxAbsoluteSavePath ();
                 var filePath = System.IO.Path.Combine (folderPath, m_exportFileName + ".fbx");
 
