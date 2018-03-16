@@ -27,6 +27,8 @@ FIXES
 * FbxExportSettings: turn animated skinned mesh export off by default
 * FbxExportSettings: export animation on skinned mesh ancestors even if animated skinned mesh option is off
 * FbxExporter: fix error when trying to export animation only on model without animation
+* ConvertToPrefabUI: don't give warning about overwriting fbx if GameObject was model instance
+* FbxExportSettings: give error if empty filename specified
 
 **Version**: sprint49
 
