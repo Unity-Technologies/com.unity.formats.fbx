@@ -152,8 +152,8 @@ namespace FbxExporters.EditorTools {
             }
 
             GUILayout.FlexibleSpace ();
-            GUILayout.EndScrollView ();
             GUILayout.EndVertical();
+            GUILayout.EndScrollView ();
 
             if (GUI.changed) {
                 EditorUtility.SetDirty (exportSettings);
