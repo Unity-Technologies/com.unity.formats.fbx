@@ -45,12 +45,23 @@ namespace FbxExporters
 
                 TransferAnimationSource = null;
                 TransferAnimationDest = null;
-
                 if (ToExport.Length == 1) {
-                    m_prefabFileName = ToExport [0].name;
+                    var go = ModelExporter.GetGameObject (ToExport [0]);
+                    // check if the GameObject is a model instance, use as default filename and path if it is
+                    if(ConvertToModel.IsModelInstance(go)) {
+                        var mainAsset = PrefabUtility.GetPrefabParent (go) as GameObject;
+                        var mainAssetRelPath = AssetDatabase.GetAssetPath (mainAsset);
+                        // remove Assets/ from beginning of path
+                        mainAssetRelPath = mainAssetRelPath.Substring ("Assets".Length);
+
+                        m_prefabFileName = System.IO.Path.GetFileNameWithoutExtension (mainAssetRelPath);
+                        ExportSettings.AddFbxSavePath (System.IO.Path.GetDirectoryName (mainAssetRelPath));
+                    }
+                    else{
+                        m_prefabFileName = ToExport [0].name;
+                    }
 
                     // if only one object selected, set transfer source/dest to this object
-                    var go = ModelExporter.GetGameObject (ToExport [0]);
                     if (go) {
                         TransferAnimationSource = go.transform;
                         TransferAnimationDest = go.transform;
@@ -79,11 +90,6 @@ namespace FbxExporters
                 var prefabDirPath = ExportSettings.GetPrefabAbsoluteSavePath ();
                 var prefabPath = System.IO.Path.Combine (prefabDirPath, m_prefabFileName + ".prefab");
 
-                // check if file already exists, give a warning if it does
-                if (!OverwriteExistingFile (fbxPath) || !OverwriteExistingFile (prefabPath)) {
-                    return;
-                }
-
                 if (ToExport == null) {
                     Debug.LogError ("FbxExporter: missing object for conversion");
                     return;
@@ -91,6 +97,31 @@ namespace FbxExporters
 
                 if (ToExport.Length == 1) {
                     var go = ModelExporter.GetGameObject (ToExport [0]);
+
+                    if (!OverwriteExistingFile (prefabPath)) {
+                        return;
+                    }
+
+                    // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
+                    if(ConvertToModel.IsModelInstance(go)) {
+                        // don't re-export fbx
+                        // create prefab out of model instance in scene, link to existing fbx
+                        var mainAsset = PrefabUtility.GetPrefabParent(go) as GameObject;
+                        var mainAssetRelPath = AssetDatabase.GetAssetPath(mainAsset);
+                        var mainAssetAbsPath = System.IO.Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
+                        var relPrefabPath = ExportSettings.GetProjectRelativePath (prefabPath);
+
+                        if (string.Equals(System.IO.Path.GetFullPath(fbxPath), System.IO.Path.GetFullPath(mainAssetAbsPath))) {
+                            ConvertToModel.SetupFbxPrefab(go, mainAsset, relPrefabPath, mainAssetAbsPath);
+                            return;
+                        }
+                    }
+
+                    // check if file already exists, give a warning if it does
+                    if (!OverwriteExistingFile (fbxPath)) {
+                        return;
+                    }
+
                     ConvertToModel.Convert (
                         go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
