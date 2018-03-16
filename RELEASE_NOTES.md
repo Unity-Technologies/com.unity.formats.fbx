@@ -29,6 +29,8 @@ FIXES
 * FbxExporter: fix error when trying to export animation only on model without animation
 * ConvertToPrefabUI: don't give warning about overwriting fbx if GameObject was model instance
 * FbxExportSettings: give error if empty filename specified
+* ExportModelUI: restore "Include" setting from "Animation Only" after exporting timeline clip
+* FbxExporter: if export unrendered turned off, don't export meshes that have disabled mesh renderers
 
 **Version**: sprint49
 
