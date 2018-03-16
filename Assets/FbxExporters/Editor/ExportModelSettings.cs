@@ -122,7 +122,7 @@ namespace FbxExporters.EditorTools
     {
         public ExportSettings.ExportFormat exportFormat = ExportSettings.ExportFormat.ASCII;
         public string rootMotionTransfer = "";
-        public bool animatedSkinnedMesh = true;
+        public bool animatedSkinnedMesh = false;
         public bool mayaCompatibleNaming = true;
 
         public ExportSettings.ExportFormat ExportFormat { get { return exportFormat; } }
