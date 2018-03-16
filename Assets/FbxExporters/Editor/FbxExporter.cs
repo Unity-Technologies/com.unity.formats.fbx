@@ -1620,7 +1620,7 @@ namespace FbxExporters
                 {
                     System.StringComparison cc = System.StringComparison.CurrentCulture;
 
-                    bool partT = uniPropertyName.StartsWith ("m_LocalPosition.", cc);
+                    bool partT = uniPropertyName.StartsWith ("m_LocalPosition.", cc) || uniPropertyName.EndsWith("T.", cc);
                     bool partTx = uniPropertyName.EndsWith ("Position.x", cc) || uniPropertyName.EndsWith ("T.x", cc);
 
                     convertLtoR |= partTx;
