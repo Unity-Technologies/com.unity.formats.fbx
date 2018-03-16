@@ -119,7 +119,7 @@ namespace FbxExporters
             {
                 GUILayout.BeginHorizontal ();
                 EditorGUILayout.LabelField(new GUIContent(
-                    "Prefab Name:",
+                    "Prefab Name",
                     "Filename to save prefab to."),GUILayout.Width(LabelWidth-TextFieldAlignOffset));
 
                 EditorGUI.BeginDisabledGroup (DisableNameSelection);
@@ -144,7 +144,7 @@ namespace FbxExporters
 
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField(new GUIContent(
-                    "Prefab Path:",
+                    "Prefab Path",
                     "Relative path for saving Linked Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
 
                 var pathLabels = ExportSettings.GetRelativePrefabSavePaths();

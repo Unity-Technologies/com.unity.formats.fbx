@@ -261,7 +261,7 @@ namespace FbxExporters
 
                 GUILayout.BeginHorizontal ();
                 EditorGUILayout.LabelField(new GUIContent(
-                    "Export Name:",
+                    "Export Name",
                     "Filename to save model to."),GUILayout.Width(LabelWidth-TextFieldAlignOffset));
 
                 EditorGUI.BeginDisabledGroup (DisableNameSelection);
@@ -286,7 +286,7 @@ namespace FbxExporters
 
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField(new GUIContent(
-                    "Export Path:",
+                    "Export Path",
                     "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
 
                 var pathLabels = ExportSettings.GetRelativeFbxSavePaths();
