@@ -6,6 +6,11 @@ global string $UnityFbxAnimFileNameAttr = "unityFbxAnimFileName";
 global string $UnityFbxNamespaceAttr = "unityFbxNamespace";
 global string $UnityExportSetNameFormat = "^1s_UnityExportSet";
 
+/* Enum */
+global int $UnityExportAnim = 0;
+global int $UnityExportModel = 1;
+global int $UnityExportModelAnim = 2;
+
 global proc unityRemoveNativeMenuOnLoad(){
     $removeSendToUnityMenu = `optionVar -q "UnityFbxForMaya_removeSendToUnityMenu"`;
     if($removeSendToUnityMenu && `menu -exists "sendToUnityMenu"`){
@@ -411,7 +416,7 @@ proc exportSet(string $unitySet, int $exportAnim){
     }
 }
 
-proc unityExport(int $exportAnim){
+proc unityExport(int $exportType){
     // get the global variables
     global string $UnityExportSets[];
     
@@ -423,8 +428,21 @@ proc unityExport(int $exportAnim){
         return;
     }
     
+    $exportAnim = false;
+    $exportAnimOnly = false;
+    switch($exportType){
+    case 0 /* export animation only */:
+        $exportAnim = true;
+        $exportAnimOnly = true;
+        break;
+    case 1 /* export model only */:
+        break;
+    default: /* export model + animation */
+        $exportAnim = true;
+        break;
+    }
     FBXProperty "Export|IncludeGrp|Animation" -v $exportAnim;
-    FBXExportAnimationOnly -v $exportAnim;
+    FBXExportAnimationOnly -v $exportAnimOnly;
     
     $origSelection = `ls -sl`;
     if(size($origSelection) <= 0){
@@ -460,7 +478,7 @@ proc unityExport(int $exportAnim){
     
     for($unitySet in $setsToExport){
         print ("exporting set: " + $unitySet);
-        exportSet($unitySet, $exportAnim);
+        exportSet($unitySet, $exportAnimOnly);
     }
     
     select -cl;
@@ -470,9 +488,16 @@ proc unityExport(int $exportAnim){
 }
 
 global proc unityExportAnim(){
-    unityExport(true);
+    global int $UnityExportAnim;
+    unityExport($UnityExportAnim);
 }
 
 global proc unityExportModel(){
-    unityExport(false);
+    global int $UnityExportModel;
+    unityExport($UnityExportModel);
+}
+
+global proc unityExportModelAnim(){
+    global int $UnityExportModelAnim;
+    unityExport($UnityExportModelAnim);
 }
