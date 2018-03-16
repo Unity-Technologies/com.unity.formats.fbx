@@ -2792,7 +2792,7 @@ namespace FbxExporters
                     {
                         exportData.defaultClip = rootAnimation.clip;
                     }
-                    else
+                    else if(rootAnimator)
                     {
                         // Try the animator controller (mecanim)
                         var controller = rootAnimator.runtimeAnimatorController;
