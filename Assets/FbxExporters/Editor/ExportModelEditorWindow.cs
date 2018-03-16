@@ -270,6 +270,8 @@ namespace FbxExporters
             private bool m_singleHierarchyExport = true;
             private bool m_isPlayableDirector = false;
 
+            private ExportSettings.Include m_previousInclude = ExportSettings.Include.ModelAndAnim;
+
             public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false, bool isPlayableDirector = false)
             {
                 ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
@@ -292,6 +294,7 @@ namespace FbxExporters
             private void SetAnimationExportType(bool isTimelineAnim){
                 m_isTimelineAnim = isTimelineAnim;
                 if (m_isTimelineAnim) {
+                    m_previousInclude = ExportSettings.instance.exportModelSettings.info.ModelAnimIncludeOption;
                     ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
                 }
                 if (m_innerEditor) {
@@ -339,6 +342,22 @@ namespace FbxExporters
                     m_innerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.exportModelSettings);
                     this.SetSingleHierarchyExport (m_singleHierarchyExport);
                     this.SetAnimationExportType (m_isTimelineAnim);
+                }
+            }
+
+            protected void OnDisable()
+            {
+                RestoreSettings ();
+            }
+
+            /// <summary>
+            /// Restore changed export settings after export
+            /// </summary>
+            protected virtual void RestoreSettings()
+            {
+                if (m_isTimelineAnim) {
+                    ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(m_previousInclude);
+                    SaveExportSettings ();
                 }
             }
 
