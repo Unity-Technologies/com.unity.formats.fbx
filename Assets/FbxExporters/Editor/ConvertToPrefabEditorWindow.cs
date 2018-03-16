@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -82,24 +82,39 @@ namespace FbxExporters
                 m_prefabExtLabelWidth = m_fbxExtLabelStyle.CalcSize (new GUIContent (".prefab")).x;
             }
 
-            protected override void Export ()
+            protected override bool Export ()
             {
+                if (string.IsNullOrEmpty (m_exportFileName)) {
+                    Debug.LogError ("FbxExporter: Please specify an fbx filename");
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty (m_prefabFileName)) {
+                    Debug.LogError ("FbxExporter: Please specify a prefab filename");
+                    return false;
+                }
+
                 var fbxDirPath = ExportSettings.GetFbxAbsoluteSavePath ();
                 var fbxPath = System.IO.Path.Combine (fbxDirPath, m_exportFileName + ".fbx");
 
                 var prefabDirPath = ExportSettings.GetPrefabAbsoluteSavePath ();
                 var prefabPath = System.IO.Path.Combine (prefabDirPath, m_prefabFileName + ".prefab");
 
+                // check if file already exists, give a warning if it does
+                if (!OverwriteExistingFile (fbxPath) || !OverwriteExistingFile (prefabPath)) {
+                    return false;
+                }
+
                 if (ToExport == null) {
                     Debug.LogError ("FbxExporter: missing object for conversion");
-                    return;
+                    return false;
                 }
 
                 if (ToExport.Length == 1) {
                     var go = ModelExporter.GetGameObject (ToExport [0]);
 
                     if (!OverwriteExistingFile (prefabPath)) {
-                        return;
+                        return false;
                     }
 
                     // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
@@ -113,19 +128,19 @@ namespace FbxExporters
 
                         if (string.Equals(System.IO.Path.GetFullPath(fbxPath), System.IO.Path.GetFullPath(mainAssetAbsPath))) {
                             ConvertToModel.SetupFbxPrefab(go, mainAsset, relPrefabPath, mainAssetAbsPath);
-                            return;
+                            return true;
                         }
                     }
 
                     // check if file already exists, give a warning if it does
                     if (!OverwriteExistingFile (fbxPath)) {
-                        return;
+                        return false;
                     }
 
                     ConvertToModel.Convert (
                         go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
-                    return;
+                    return true;
                 }
 
                 foreach (var obj in ToExport) {
@@ -134,6 +149,7 @@ namespace FbxExporters
                         go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
                 }
+                return true;
             }
 
             protected override ExportOptionsSettingsSerializeBase SettingsObject
