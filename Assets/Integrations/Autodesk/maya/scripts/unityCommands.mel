@@ -154,6 +154,8 @@ proc importFile(string $filePathStr){
         
         $fileNameWithoutExt = match("[^@]+", $fileNameWithoutExt);
     }
+    $fileNameWithoutExt = formValidObjectName($fileNameWithoutExt);
+    
     $unityExportSet = `format -stringArg $fileNameWithoutExt $UnityExportSetNameFormat`;
 
     string $origNamespace = `namespaceInfo -cur -an`;
