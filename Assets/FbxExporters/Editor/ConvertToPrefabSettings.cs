@@ -51,18 +51,10 @@ namespace FbxExporters.EditorTools
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
-            // TODO: add implementation for these options, grey out in the meantime
-            EditorGUI.BeginDisabledGroup (true);
-            GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("Transfer Root Motion To", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
-            EditorGUILayout.Popup(0, new string[]{"<None>"});
-            GUILayout.EndHorizontal();
-            EditorGUI.EndDisabledGroup ();
-
             exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.animatedSkinnedMesh);
 
             exportSettings.mayaCompatibleNaming = EditorGUILayout.Toggle (
-                new GUIContent ("Compatible Naming:",
+                new GUIContent ("Compatible Naming",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
                     "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
                     "On export, convert the names of GameObjects so they are Maya compatible." +

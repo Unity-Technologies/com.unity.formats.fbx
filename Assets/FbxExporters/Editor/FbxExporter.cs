@@ -1788,17 +1788,19 @@ namespace FbxExporters
                  */
                 var rotations = new Dictionary<GameObject, RotationCurve> ();
 
+                var unityCurves = new Dictionary<GameObject, List<UnityCurve>> ();
+
+                // extract and store all necessary information from the curve bindings, namely the animation curves
+                // and their corresponding property names for each GameObject.
                 foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (uniAnimClip)) {
                     Object uniObj = AnimationUtility.GetAnimatedObject (uniRoot, uniCurveBinding);
-                    if (!uniObj) { continue; }
+                    if (!uniObj) {
+                        continue;
+                    }
 
                     AnimationCurve uniAnimCurve = AnimationUtility.GetEditorCurve (uniAnimClip, uniCurveBinding);
-                    if (uniAnimCurve == null) { continue; }
-
-                    if (Verbose)
-                    {
-                        Debug.Log (string.Format ("Exporting animation curve bound to {0} {1}", 
-                            uniCurveBinding.propertyName, uniCurveBinding.path));
+                    if (uniAnimCurve == null) {
+                        continue;
                     }
 
                     var uniGO = GetGameObject (uniObj);
@@ -1806,36 +1808,76 @@ namespace FbxExporters
                     if (!uniGO || MapUnityObjectToFbxNode.ContainsKey(uniGO) == false) {
                         continue;
                     }
-                                
-                    // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
-                    if (!ExportOptions.AnimateSkinnedMesh && (uniGO.GetComponent<SkinnedMeshRenderer>() != null || uniGO.GetComponentInChildren<SkinnedMeshRenderer>() != null)) 
-                    {
+
+                    if (unityCurves.ContainsKey (uniGO)) {
+                        unityCurves [uniGO].Add (new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve));
                         continue;
                     }
-
-                    int index = QuaternionCurve.GetQuaternionIndex (uniCurveBinding.propertyName);
-                    if (index >= 0) {
-                        /* Rotation property; save it to convert quaternion -> euler later. */
-                        RotationCurve rotCurve = GetRotationCurve<QuaternionCurve>(uniGO, uniAnimClip.frameRate, ref rotations);
-                        rotCurve.SetCurve (index, uniAnimCurve);
-                        continue;
-                    } 
-
-                    index = EulerCurve.GetEulerIndex (uniCurveBinding.propertyName);
-                    if (index >= 0) {
-                        RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
-                        rotCurve.SetCurve (index, uniAnimCurve);
-                        continue;
-                    }
-
-                    /* simple property (e.g. intensity), export right away */
-                    ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
-                        uniCurveBinding.propertyName,
-                        fbxScene, 
-                        fbxAnimLayer);
+                    unityCurves.Add (uniGO, new List<UnityCurve> (){ new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve) });
                 }
 
-                /* now export all the quaternion curves */
+                // transfer root motion
+                var animSource = ExportOptions.AnimationSource;
+                var animDest = ExportOptions.AnimationDest;
+                if (animSource && animDest && animSource != animDest) {
+                    // list of all transforms between source and dest, including source and dest
+                    var transformsFromSourceToDest = new List<Transform> ();
+                    var curr = animDest;
+                    while (curr != animSource) {
+                        transformsFromSourceToDest.Add (curr);
+                        curr = curr.parent;
+                    }
+                    transformsFromSourceToDest.Add (animSource);
+                    transformsFromSourceToDest.Reverse ();
+
+                    // while there are 2 transforms in the list, transfer the animation from the
+                    // first to the next transform.
+                    // Then remove the first transform from the list.
+                    while (transformsFromSourceToDest.Count >= 2) {
+                        var source = transformsFromSourceToDest [0];
+                        transformsFromSourceToDest.RemoveAt (0);
+                        var dest = transformsFromSourceToDest [0];
+
+                        TransferMotion (source, dest, uniAnimClip.frameRate, ref unityCurves);
+                    }
+                }
+
+                // export the animation curves for each GameObject that has animation
+                foreach (var kvp in unityCurves) {
+                    var uniGO = kvp.Key;
+                    foreach (var uniCurve in kvp.Value) {
+                        var propertyName = uniCurve.propertyName;
+                        var uniAnimCurve = uniCurve.uniAnimCurve;
+
+                        // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
+                        if (!ExportOptions.AnimateSkinnedMesh && (uniGO.GetComponent<SkinnedMeshRenderer> () != null)) {
+                            continue;    
+                        }
+
+                        int index = QuaternionCurve.GetQuaternionIndex (propertyName);
+                        if (index >= 0) {
+                            // Rotation property; save it to convert quaternion -> euler later.
+                            RotationCurve rotCurve = GetRotationCurve<QuaternionCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
+                            rotCurve.SetCurve (index, uniAnimCurve);
+                            continue;
+                        } 
+
+                        index = EulerCurve.GetEulerIndex (propertyName);
+                        if (index >= 0) {
+                            RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
+                            rotCurve.SetCurve (index, uniAnimCurve);
+                            continue;
+                        }
+
+                        // simple property (e.g. intensity), export right away
+                        ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
+                            propertyName,
+                            fbxScene, 
+                            fbxAnimLayer);
+                    }
+                }
+
+                // now export all the quaternion curves 
                 foreach (var kvp in rotations) {
                     var unityGo = kvp.Key;
                     var rot = kvp.Value;
@@ -1846,6 +1888,207 @@ namespace FbxExporters
                         continue;
                     }
                     rot.Animate (unityGo.transform, fbxNode, fbxAnimLayer, Verbose);
+                }
+            }
+
+            /// <summary>
+            /// Transfers transform animation from source to dest. Replaces dest's Unity Animation Curves with updated animations.
+            /// NOTE: Source must be the parent of dest.
+            /// </summary>
+            /// <param name="source">Source.</param>
+            /// <param name="dest">Destination.</param>
+            /// <param name="sampleRate">Sample rate.</param>
+            /// <param name="unityCurves">Unity curves.</param>
+            private void TransferMotion(Transform source, Transform dest, float sampleRate, ref Dictionary<GameObject, List<UnityCurve>> unityCurves){
+                // get sample times for curves in dest + source
+                // at each sample time, evaluate all 18 transfom anim curves, creating 2 transform matrices
+                // combine the matrices, get the new values, apply to the 9 new anim curves for dest
+                if (dest.parent != source) {
+                    Debug.LogError ("dest must be a child of source");
+                    return;
+                }
+
+                List<UnityCurve> sourceUnityCurves;
+                if (!unityCurves.TryGetValue (source.gameObject, out sourceUnityCurves)) {
+                    return; // nothing to do, source has no animation
+                }
+
+                List<UnityCurve> destUnityCurves;
+                if (!unityCurves.TryGetValue (dest.gameObject, out destUnityCurves)) {
+                    destUnityCurves = new List<UnityCurve> ();
+                }
+
+                List<AnimationCurve> animCurves = new List<AnimationCurve> ();
+                foreach (var curve in sourceUnityCurves) {
+                    // TODO: check if curve is anim related
+                    animCurves.Add(curve.uniAnimCurve);
+                }
+                foreach (var curve in destUnityCurves) {
+                    animCurves.Add (curve.uniAnimCurve);
+                }
+
+                var sampleTimes = GetSampleTimes (animCurves.ToArray (), sampleRate);
+                // need to create 9 new UnityCurves, one for each property
+                var posKeyFrames = new Keyframe[3][];
+                var rotKeyFrames = new Keyframe[3][];
+                var scaleKeyFrames = new Keyframe[3][];
+
+                for (int k = 0; k < posKeyFrames.Length; k++) {
+                    posKeyFrames [k] = new Keyframe[sampleTimes.Count];
+                    rotKeyFrames[k] = new Keyframe[sampleTimes.Count];
+                    scaleKeyFrames[k] = new Keyframe[sampleTimes.Count];
+                }
+
+                int keyIndex = 0;
+                foreach (var currSampleTime in sampleTimes) 
+                {
+                    var sourceLocalMatrix = GetTransformMatrix (currSampleTime, source, sourceUnityCurves);
+                    var destLocalMatrix = GetTransformMatrix (currSampleTime, dest, destUnityCurves);
+
+                    // child * parent
+                    var newLocalMatrix = sourceLocalMatrix * destLocalMatrix;
+
+                    FbxVector4 translation, rotation, scale;
+                    GetTRSFromMatrix (newLocalMatrix, out translation, out rotation, out scale);
+
+                    // get rotation directly from matrix, as otherwise causes issues
+                    // with negative rotations.
+                    var rot = newLocalMatrix.rotation.eulerAngles;
+
+                    for (int k = 0; k < 3; k++) {
+                        posKeyFrames [k][keyIndex] = new Keyframe(currSampleTime, (float)translation [k]);
+                        rotKeyFrames [k][keyIndex] = new Keyframe(currSampleTime, (float)rot [k]);
+                        scaleKeyFrames [k][keyIndex] = new Keyframe(currSampleTime, (float)scale [k]);
+                    }
+                    keyIndex++;
+                }
+
+                // create the new list of unity curves, and add it to dest's curves
+                var newUnityCurves = new List<UnityCurve>();
+                string posPropName = "m_LocalPosition.";
+                string rotPropName = "localEulerAnglesRaw.";
+                string scalePropName = "m_LocalScale.";
+                var xyz = "xyz";
+                for (int k = 0; k < 3; k++) {
+                    var posUniCurve = new UnityCurve ( posPropName + xyz[k], new AnimationCurve(posKeyFrames[k]));
+                    newUnityCurves.Add (posUniCurve);
+
+                    var rotUniCurve = new UnityCurve ( rotPropName + xyz[k], new AnimationCurve(rotKeyFrames[k]));
+                    newUnityCurves.Add (rotUniCurve);
+
+                    var scaleUniCurve = new UnityCurve ( scalePropName + xyz[k], new AnimationCurve(scaleKeyFrames[k]));
+                    newUnityCurves.Add (scaleUniCurve);
+                }
+
+                // remove old transform curves
+                RemoveTransformCurves (ref sourceUnityCurves);
+                RemoveTransformCurves (ref destUnityCurves);
+
+                unityCurves [source.gameObject] = sourceUnityCurves;
+                if (!unityCurves.ContainsKey(dest.gameObject)) {
+                    unityCurves.Add (dest.gameObject, newUnityCurves);
+                    return;
+                }
+                unityCurves [dest.gameObject].AddRange(newUnityCurves);
+
+            }
+
+
+            private void RemoveTransformCurves(ref List<UnityCurve> curves){
+                var transformCurves = new List<UnityCurve> ();
+                var transformPropNames = new string[]{"m_LocalPosition.", "m_LocalRotation", "localEulerAnglesRaw.", "m_LocalScale."};
+                foreach (var curve in curves) {
+                    foreach (var prop in transformPropNames) {
+                        if (curve.propertyName.StartsWith (prop)) {
+                            transformCurves.Add (curve);
+                            break;
+                        }
+                    }
+                }
+                foreach (var curve in transformCurves) {
+                    curves.Remove (curve);
+                }
+            }
+
+            private Matrix4x4 GetTransformMatrix(float currSampleTime, Transform orig, List<UnityCurve> unityCurves){
+                var sourcePos = orig.localPosition;
+                var sourceRot = orig.localRotation;
+                var sourceScale = orig.localScale;
+
+                foreach (var uniCurve in unityCurves) {
+                    float currSampleValue = uniCurve.uniAnimCurve.Evaluate(currSampleTime);
+                    string propName = uniCurve.propertyName;
+                    // try position, scale, quat then euler
+                    int temp = QuaternionCurve.GetQuaternionIndex(propName);
+                    if (temp >= 0) {
+                        sourceRot [temp] = currSampleValue;
+                        continue;
+                    }
+                    temp = EulerCurve.GetEulerIndex (propName);
+                    if (temp >= 0) {
+                        var euler = sourceRot.eulerAngles;
+                        euler [temp] = currSampleValue;
+                        sourceRot.eulerAngles = euler;
+                        continue;
+                    }
+                    temp = GetPositionIndex (propName);
+                    if (temp >= 0) {
+                        sourcePos [temp] = currSampleValue;
+                        continue;
+                    }
+                    temp = GetScaleIndex (propName);
+                    if (temp >= 0) {
+                        sourceScale [temp] = currSampleValue;
+                    }
+                }
+
+                sourceRot = Quaternion.Euler(sourceRot.eulerAngles.x, sourceRot.eulerAngles.y, sourceRot.eulerAngles.z);
+                return Matrix4x4.TRS(sourcePos, sourceRot, sourceScale); 
+            }
+
+            struct UnityCurve {
+                public string propertyName;
+                public AnimationCurve uniAnimCurve;
+
+                public UnityCurve(string propertyName, AnimationCurve uniAnimCurve){
+                    this.propertyName = propertyName;
+                    this.uniAnimCurve = uniAnimCurve;
+                }
+            }
+
+            private int GetPositionIndex(string uniPropertyName){
+                System.StringComparison ct = System.StringComparison.CurrentCulture;
+                bool isPositionComponent = uniPropertyName.StartsWith ("m_LocalPosition.", ct);
+
+                if (!isPositionComponent) { return -1; }
+
+                switch (uniPropertyName [uniPropertyName.Length - 1]) {
+                case 'x':
+                    return 0;
+                case 'y':
+                    return 1;
+                case 'z':
+                    return 2;
+                default:
+                    return -1;
+                }
+            }
+
+            private int GetScaleIndex(string uniPropertyName){
+                System.StringComparison ct = System.StringComparison.CurrentCulture;
+                bool isScaleComponent = uniPropertyName.StartsWith ("m_LocalScale.", ct);
+
+                if (!isScaleComponent) { return -1; }
+
+                switch (uniPropertyName [uniPropertyName.Length - 1]) {
+                case 'x':
+                    return 0;
+                case 'y':
+                    return 1;
+                case 'z':
+                    return 2;
+                default:
+                    return -1;
                 }
             }
 
@@ -1990,6 +2233,9 @@ namespace FbxExporters
                 // Use RSrs as the scaling inheritance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
+                if (TransformShouldBeReset (unityGo.transform)) {
+                    exportType = TransformExportType.Reset;
+                }
                 ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
 
                 fbxNodeParent.AddChild (fbxNode);
@@ -2036,6 +2282,35 @@ namespace FbxExporters
                 }
 
                 return numObjectsExported;
+            }
+
+            /// <summary>
+            /// Checks if the transform should be reset.
+            /// Transform should be reset if animation is being transferred, and this transform
+            /// is either the animation source, destination, or between these nodes.
+            /// </summary>
+            /// <returns><c>true</c>, if transform should be reset, <c>false</c> otherwise.</returns>
+            /// <param name="t">Transform.</param>
+            private bool TransformShouldBeReset(Transform t){
+                var source = ExportOptions.AnimationSource;
+                var dest = ExportOptions.AnimationDest;
+
+                if (!source || !dest || source == dest) {
+                    return false;
+                }
+
+                // don't want to reset destination, if it's a bone this could cause issues with the skinning
+                var curr = dest.parent;
+                while (curr != source && curr != null) {
+                    if (t == curr) {
+                        return true;
+                    }
+                    curr = curr.parent;
+                }
+                if (t == source) {
+                    return true;
+                }
+                return false;
             }
 
             /// <summary>
@@ -2156,8 +2431,14 @@ namespace FbxExporters
                     }
                 }
 
+                // make sure anim destination node is exported as well
+                var exportSet = exportData.goExportSet;
+                if (ExportOptions.AnimationDest && ExportOptions.AnimationSource) {
+                    exportSet.Add (ExportOptions.AnimationDest.gameObject);
+                }
+
                 // export everything else
-                foreach (var go in exportData.goExportSet) {
+                foreach (var go in exportSet) {
                     FbxNode node;
                     if (!ExportGameObjectAndParents (
                         go, unityGO, fbxScene, out node, newCenter, exportType, ref numObjectsExported, objectCount
@@ -2254,6 +2535,9 @@ namespace FbxExporters
 
                 // export regular transform if we are not a bone or failed to export as a bone
                 if(!exportedBoneTransform){
+                    if (TransformShouldBeReset (unityGo.transform)) {
+                        exportType = TransformExportType.Reset;
+                    }
                     ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
                 }
 
@@ -2340,18 +2624,8 @@ namespace FbxExporters
                     pose = parentBindPose * bindPose.inverse;
                 }
 
-                // FBX is transposed relative to Unity: transpose as we convert.
-                FbxMatrix matrix = new FbxMatrix ();
-                matrix.SetColumn (0, new FbxVector4 (pose.GetRow (0).x, pose.GetRow (0).y, pose.GetRow (0).z, pose.GetRow (0).w));
-                matrix.SetColumn (1, new FbxVector4 (pose.GetRow (1).x, pose.GetRow (1).y, pose.GetRow (1).z, pose.GetRow (1).w));
-                matrix.SetColumn (2, new FbxVector4 (pose.GetRow (2).x, pose.GetRow (2).y, pose.GetRow (2).z, pose.GetRow (2).w));
-                matrix.SetColumn (3, new FbxVector4 (pose.GetRow (3).x, pose.GetRow (3).y, pose.GetRow (3).z, pose.GetRow (3).w));
-
-                // FBX wants translation, rotation (in euler angles) and scale.
-                // We assume there's no real shear, just rounding error.
-                FbxVector4 translation, rotation, shear, scale;
-                double sign;
-                matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
+                FbxVector4 translation, rotation, scale;
+                GetTRSFromMatrix (pose, out translation, out rotation, out scale);
 
                 // Export bones with zero rotation, using a pivot instead to set the rotation
                 // so that the bones are easier to animate and the rotation shows up as the "joint orientation" in Maya.
@@ -2365,6 +2639,21 @@ namespace FbxExporters
                 fbxNode.SetPreRotation (FbxNode.EPivotSet.eSourcePivot, new FbxVector4 (rotation.X, -rotation.Y, -rotation.Z));
 
                 return true;
+            }
+
+            private void GetTRSFromMatrix(Matrix4x4 unityMatrix, out FbxVector4 translation, out FbxVector4 rotation, out FbxVector4 scale){
+                // FBX is transposed relative to Unity: transpose as we convert.
+                FbxMatrix matrix = new FbxMatrix ();
+                matrix.SetColumn (0, new FbxVector4 (unityMatrix.GetRow (0).x, unityMatrix.GetRow (0).y, unityMatrix.GetRow (0).z, unityMatrix.GetRow (0).w));
+                matrix.SetColumn (1, new FbxVector4 (unityMatrix.GetRow (1).x, unityMatrix.GetRow (1).y, unityMatrix.GetRow (1).z, unityMatrix.GetRow (1).w));
+                matrix.SetColumn (2, new FbxVector4 (unityMatrix.GetRow (2).x, unityMatrix.GetRow (2).y, unityMatrix.GetRow (2).z, unityMatrix.GetRow (2).w));
+                matrix.SetColumn (3, new FbxVector4 (unityMatrix.GetRow (3).x, unityMatrix.GetRow (3).y, unityMatrix.GetRow (3).z, unityMatrix.GetRow (3).w));
+
+                // FBX wants translation, rotation (in euler angles) and scale.
+                // We assume there's no real shear, just rounding error.
+                FbxVector4 shear;
+                double sign;
+                matrix.GetElements (out translation, out rotation, out shear, out scale, out sign);
             }
 
             /// <summary>
@@ -2503,7 +2792,7 @@ namespace FbxExporters
                     {
                         exportData.defaultClip = rootAnimation.clip;
                     }
-                    else
+                    else if(rootAnimator)
                     {
                         // Try the animator controller (mecanim)
                         var controller = rootAnimator.runtimeAnimatorController;

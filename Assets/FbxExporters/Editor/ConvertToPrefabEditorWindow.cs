@@ -15,12 +15,22 @@ namespace FbxExporters
         public class ConvertToPrefabEditorWindow : ExportOptionsEditorWindow
         {
             protected override GUIContent WindowTitle { get { return new GUIContent ("Convert Options"); }}
-            protected override float MinWindowHeight { get { return 300; } } // determined by trial and error
+            protected override float MinWindowHeight { get { return 350; } } // determined by trial and error
             protected override string ExportButtonName { get { return "Convert"; } }
-            private GameObject[] m_toConvert;
             private string m_prefabFileName = "";
 
             private float m_prefabExtLabelWidth;
+
+            protected override bool DisableNameSelection {
+                get {
+                    return (ToExport != null && ToExport.Length > 1);
+                }
+            }
+            protected override bool DisableTransferAnim {
+                get {
+                    return ToExport == null || ToExport.Length > 1;
+                }
+            }
 
             public static void Init (IEnumerable<GameObject> toConvert)
             {
@@ -31,13 +41,24 @@ namespace FbxExporters
             }
 
             protected void SetGameObjectsToConvert(IEnumerable<GameObject> toConvert){
-                m_toConvert = toConvert.OrderBy (go => go.name).ToArray ();
+                ToExport = toConvert.OrderBy (go => go.name).ToArray ();
 
-                if (m_toConvert.Length == 1) {
-                    m_prefabFileName = m_toConvert [0].name;
-                } else if (m_toConvert.Length > 1) {
+                TransferAnimationSource = null;
+                TransferAnimationDest = null;
+
+                if (ToExport.Length == 1) {
+                    m_prefabFileName = ToExport [0].name;
+
+                    // if only one object selected, set transfer source/dest to this object
+                    var go = ModelExporter.GetGameObject (ToExport [0]);
+                    if (go) {
+                        TransferAnimationSource = go.transform;
+                        TransferAnimationDest = go.transform;
+                    }
+                } else if (ToExport.Length > 1) {
                     m_prefabFileName = "(automatic)";
                 }
+
                 this.SetFilename (m_prefabFileName);
             }
 
@@ -73,19 +94,21 @@ namespace FbxExporters
                     return false;
                 }
 
-                if (m_toConvert == null) {
+                if (ToExport == null) {
                     Debug.LogError ("FbxExporter: missing object for conversion");
                     return false;
                 }
 
-                if (m_toConvert.Length == 1) {
+                if (ToExport.Length == 1) {
+                    var go = ModelExporter.GetGameObject (ToExport [0]);
                     ConvertToModel.Convert (
-                        m_toConvert[0], fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
+                        go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
                     return true;
                 }
 
-                foreach (var go in m_toConvert) {
+                foreach (var obj in ToExport) {
+                    var go = ModelExporter.GetGameObject (obj);
                     ConvertToModel.Convert (
                         go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
                     );
@@ -93,9 +116,9 @@ namespace FbxExporters
                 return true;
             }
 
-            protected override bool DisableNameSelection ()
+            protected override ExportOptionsSettingsSerializeBase SettingsObject
             {
-                return m_toConvert.Length > 1;
+                get { return ExportSettings.instance.convertToPrefabSettings.info; }
             }
             #if UNITY_2018_1_OR_NEWER
             protected override void ShowPresetReceiver ()
@@ -107,10 +130,10 @@ namespace FbxExporters
             {
                 GUILayout.BeginHorizontal ();
                 EditorGUILayout.LabelField(new GUIContent(
-                    "Prefab Name:",
+                    "Prefab Name",
                     "Filename to save prefab to."),GUILayout.Width(LabelWidth-TextFieldAlignOffset));
 
-                EditorGUI.BeginDisabledGroup (DisableNameSelection());
+                EditorGUI.BeginDisabledGroup (DisableNameSelection);
                 // Show the export name with an uneditable ".prefab" at the end
                 //-------------------------------------
                 EditorGUILayout.BeginVertical ();
@@ -132,7 +155,7 @@ namespace FbxExporters
 
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField(new GUIContent(
-                    "Prefab Path:",
+                    "Prefab Path",
                     "Relative path for saving Linked Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
 
                 var pathLabels = ExportSettings.GetRelativePrefabSavePaths();
