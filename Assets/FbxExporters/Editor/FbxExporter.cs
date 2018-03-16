@@ -2431,8 +2431,14 @@ namespace FbxExporters
                     }
                 }
 
+                // make sure anim destination node is exported as well
+                var exportSet = exportData.goExportSet;
+                if (ExportOptions.AnimationDest && ExportOptions.AnimationSource) {
+                    exportSet.Add (ExportOptions.AnimationDest.gameObject);
+                }
+
                 // export everything else
-                foreach (var go in exportData.goExportSet) {
+                foreach (var go in exportSet) {
                     FbxNode node;
                     if (!ExportGameObjectAndParents (
                         go, unityGO, fbxScene, out node, newCenter, exportType, ref numObjectsExported, objectCount
@@ -2529,6 +2535,9 @@ namespace FbxExporters
 
                 // export regular transform if we are not a bone or failed to export as a bone
                 if(!exportedBoneTransform){
+                    if (TransformShouldBeReset (unityGo.transform)) {
+                        exportType = TransformExportType.Reset;
+                    }
                     ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
                 }
 
