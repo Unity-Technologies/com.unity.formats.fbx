@@ -110,7 +110,7 @@ namespace FbxExporters.EditorTools {
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
             if (GUILayout.Button (installIntegrationContent)) {
-                FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
+                EditorApplication.delayCall += FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration;
             }
             EditorGUI.EndDisabledGroup ();
 
@@ -152,8 +152,8 @@ namespace FbxExporters.EditorTools {
             }
 
             GUILayout.FlexibleSpace ();
-            GUILayout.EndScrollView ();
             GUILayout.EndVertical();
+            GUILayout.EndScrollView ();
 
             if (GUI.changed) {
                 EditorUtility.SetDirty (exportSettings);

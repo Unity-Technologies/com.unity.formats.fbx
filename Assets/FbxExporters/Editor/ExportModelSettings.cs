@@ -67,18 +67,17 @@ namespace FbxExporters.EditorTools
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
-            // TODO: add implementation for these options, grey out in the meantime
-            EditorGUI.BeginDisabledGroup (true);
             GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("Transfer Root Motion To", "Select bone to transfer root motion animation to."), GUILayout.Width(LabelWidth - FieldOffset));
-            EditorGUILayout.Popup(0, new string[]{"<None>"});
-            GUILayout.EndHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Animated Skinned Mesh",
+                "If checked, animation on objects with skinned meshes will be exported"), GUILayout.Width(LabelWidth - FieldOffset));
+            // greyed out if model
+            EditorGUI.BeginDisabledGroup(exportSettings.include == ExportSettings.Include.Model);
+            exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle(exportSettings.animatedSkinnedMesh);
             EditorGUI.EndDisabledGroup ();
-
-            exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.animatedSkinnedMesh);
+            GUILayout.EndHorizontal ();
 
             exportSettings.mayaCompatibleNaming = EditorGUILayout.Toggle (
-                new GUIContent ("Compatible Naming:",
+                new GUIContent ("Compatible Naming",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
                     "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
                     "On export, convert the names of GameObjects so they are Maya compatible." +
@@ -89,7 +88,7 @@ namespace FbxExporters.EditorTools
                 exportSettings.mayaCompatibleNaming);
 
             GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("Export Unrendered:",
+            EditorGUILayout.LabelField(new GUIContent("Export Unrendered",
                 "If checked, meshes will be exported even if they don't have a Renderer component."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if animation only
             EditorGUI.BeginDisabledGroup(exportSettings.include == ExportSettings.Include.Anim);
@@ -107,6 +106,8 @@ namespace FbxExporters.EditorTools
         bool AnimateSkinnedMesh { get; }
         bool UseMayaCompatibleNames { get; }
         bool ExportUnrendered { get; }
+        Transform AnimationSource { get; }
+        Transform AnimationDest { get; }
     }
 
     public abstract class ExportOptionsSettingsBase<T> : ScriptableObject where T : ExportOptionsSettingsSerializeBase, new()
@@ -122,8 +123,13 @@ namespace FbxExporters.EditorTools
     {
         public ExportSettings.ExportFormat exportFormat = ExportSettings.ExportFormat.ASCII;
         public string rootMotionTransfer = "";
-        public bool animatedSkinnedMesh = true;
+        public bool animatedSkinnedMesh = false;
         public bool mayaCompatibleNaming = true;
+
+        [System.NonSerialized]
+        protected Transform animSource;
+        [System.NonSerialized]
+        protected Transform animDest;
 
         public ExportSettings.ExportFormat ExportFormat { get { return exportFormat; } }
         public void SetExportFormat(ExportSettings.ExportFormat format){ this.exportFormat = format; }
@@ -131,6 +137,10 @@ namespace FbxExporters.EditorTools
         public void SetAnimatedSkinnedMesh(bool animatedSkinnedMesh){ this.animatedSkinnedMesh = animatedSkinnedMesh; }
         public bool UseMayaCompatibleNames { get { return mayaCompatibleNaming; } }
         public void SetUseMayaCompatibleNames(bool useMayaCompNames){ this.mayaCompatibleNaming = useMayaCompNames; }
+        public Transform AnimationSource { get { return animSource; } }
+        public void SetAnimationSource(Transform source) { this.animSource = source; }
+        public Transform AnimationDest { get { return animDest; } }
+        public void SetAnimationDest(Transform dest) { this.animDest = dest; }
         public abstract ExportSettings.Include ModelAnimIncludeOption { get; }
         public abstract ExportSettings.LODExportType LODExportType { get; }
         public abstract ExportSettings.ObjectPosition ObjectPosition { get; }
