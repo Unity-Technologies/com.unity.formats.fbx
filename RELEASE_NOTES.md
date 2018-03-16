@@ -1,5 +1,37 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint50
+
+NEW FEATURES
+
+* Fbx Exporter: remove "Export All Timeline Clips" menu option
+
+* Fbx Export Settings: Added option to transfer transform animation on export
+
+Ability to select source and destination transforms to transfer animation from and to respectively.
+Destination must be a descendant of source.
+All animation on transforms on and between source and destination will be combined and transferred to destination.
+
+* Maya Integration: Added option to export both model and animation to same file
+
+File exported to will be the same as "Export Model Only"
+
+FIXES
+
+* FbxExporterTests: fix Export Timeline Clip unit tests (add back missing scene)
+* FbxExporter: don't export animation on objects (e.g. LODs) that don't get exported
+* FbxExportSettings: remove presets so package works in Unity 2017
+* FbxExportSettings: fix so min dialog size doesn't cut off export button
+* FbxExporter: rename Export Model to Export To FBX
+* FbxExportSettings: fix console error on Mac when clicking "Install Unity Integration"
+* FbxExportSettings: turn animated skinned mesh export off by default
+* FbxExportSettings: export animation on skinned mesh ancestors even if animated skinned mesh option is off
+* FbxExporter: fix error when trying to export animation only on model without animation
+* ConvertToPrefabUI: don't give warning about overwriting fbx if GameObject was model instance
+* FbxExportSettings: give error if empty filename specified
+* ExportModelUI: restore "Include" setting from "Animation Only" after exporting timeline clip
+* FbxExporter: if export unrendered turned off, don't export meshes that have disabled mesh renderers
+
 **Version**: sprint49
 
 NEW FEATURES

@@ -100,11 +100,6 @@ namespace FbxExporters
                 var prefabDirPath = ExportSettings.GetPrefabAbsoluteSavePath ();
                 var prefabPath = System.IO.Path.Combine (prefabDirPath, m_prefabFileName + ".prefab");
 
-                // check if file already exists, give a warning if it does
-                if (!OverwriteExistingFile (fbxPath) || !OverwriteExistingFile (prefabPath)) {
-                    return false;
-                }
-
                 if (ToExport == null) {
                     Debug.LogError ("FbxExporter: missing object for conversion");
                     return false;
