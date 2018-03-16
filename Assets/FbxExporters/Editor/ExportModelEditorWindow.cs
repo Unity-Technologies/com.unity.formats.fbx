@@ -534,7 +534,7 @@ namespace FbxExporters
                 if (string.IsNullOrEmpty (m_exportFileName)) {
                     Debug.LogError ("FbxExporter: Please specify an fbx filename");
                     return false;
-
+                }
                 var folderPath = ExportSettings.GetFbxAbsoluteSavePath ();
                 var filePath = System.IO.Path.Combine (folderPath, m_exportFileName + ".fbx");
 
