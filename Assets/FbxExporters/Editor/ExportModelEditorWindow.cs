@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using FbxExporters.EditorTools;
+#if UNITY_2018_1_OR_NEWER
 using UnityEditor.Presets;
+#endif
 using System.Linq;
 
 namespace FbxExporters
@@ -20,7 +22,7 @@ namespace FbxExporters
             protected const float TextFieldAlignOffset = 3;
             protected const float ExportButtonWidth = 100;
             protected const float FbxExtOffset = -7;
-            protected virtual float MinWindowHeight { get { return 250; } }
+            protected virtual float MinWindowHeight { get { return 300; } }
 
             protected virtual string ExportButtonName { get { return "Export"; } }
 
@@ -29,8 +31,9 @@ namespace FbxExporters
             protected string m_exportFileName = "";
 
             protected UnityEditor.Editor m_innerEditor;
+            #if UNITY_2018_1_OR_NEWER
             protected FbxExportPresetSelectorReceiver m_receiver;
-
+            #endif
             private static GUIContent presetIcon { get { return EditorGUIUtility.IconContent ("Preset.Context"); }}
             private static GUIStyle presetIconButton { get { return new GUIStyle("IconButton"); }}
 
@@ -40,9 +43,21 @@ namespace FbxExporters
             protected GUIStyle m_fbxExtLabelStyle;
             protected float m_fbxExtLabelWidth;
 
-            protected virtual void OnEnable(){
-                InitializeReceiver ();
+            protected abstract bool DisableTransferAnim { get; }
+            protected abstract bool DisableNameSelection { get; }
 
+            protected abstract EditorTools.ExportOptionsSettingsSerializeBase SettingsObject { get; }
+
+            private UnityEngine.Object[] m_toExport;
+            protected UnityEngine.Object[] ToExport {
+                get { return m_toExport; }
+                set { m_toExport = value; }
+            }
+
+            protected virtual void OnEnable(){
+                #if UNITY_2018_1_OR_NEWER
+                InitializeReceiver ();
+                #endif
                 m_showOptions = true;
                 this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, MinWindowHeight);
 
@@ -67,6 +82,7 @@ namespace FbxExporters
                 this.SetFilename (filename);
             }
 
+            #if UNITY_2018_1_OR_NEWER
             protected void InitializeReceiver(){
                 if (!m_receiver) {
                     m_receiver = ScriptableObject.CreateInstance<FbxExportPresetSelectorReceiver> () as FbxExportPresetSelectorReceiver;
@@ -76,6 +92,7 @@ namespace FbxExporters
                     m_receiver.DialogClosed += SaveExportSettings;
                 }
             }
+            #endif
 
             public void SetFilename(string filename){
                 // remove .fbx from end of filename
@@ -106,10 +123,7 @@ namespace FbxExporters
             /// </summary>
             protected virtual void CreateCustomUI(){}
 
-            protected virtual bool DisableNameSelection(){
-                return false;
-            }
-
+            #if UNITY_2018_1_OR_NEWER  
             protected abstract void ShowPresetReceiver ();
 
             protected void ShowPresetReceiver(UnityEngine.Object target){
@@ -118,6 +132,113 @@ namespace FbxExporters
                 m_receiver.SetInitialValue (new Preset (target));
                 UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, m_receiver);
             }
+            #endif
+
+            protected Transform TransferAnimationSource {
+                get {
+                    return SettingsObject.AnimationSource;
+                }
+                set {
+                    if (!TransferAnimationSourceIsValid (value)) {
+                        return;
+                    }
+                    SettingsObject.SetAnimationSource (value);
+                }
+            }
+
+            protected Transform TransferAnimationDest {
+                get {
+                    return SettingsObject.AnimationDest;
+                }
+                set {
+                    if (!TransferAnimationDestIsValid (value)) {
+                        return;
+                    }
+                    SettingsObject.SetAnimationDest (value);
+                }
+            }
+
+            //-------Helper functions for determining if Animation source and dest are valid---------
+
+            /// <summary>
+            /// Determines whether p is an ancestor to t.
+            /// </summary>
+            /// <returns><c>true</c> if p is ancestor to t; otherwise, <c>false</c>.</returns>
+            /// <param name="p">P.</param>
+            /// <param name="t">T.</param>
+            protected bool IsAncestor(Transform p, Transform t){
+                var curr = t;
+                while (curr != null) {
+                    if (curr == p) {
+                        return true;
+                    }
+                    curr = curr.parent;
+                }
+                return false;
+            }
+
+            /// <summary>
+            /// Determines whether t1 and t2 are in the same hierarchy.
+            /// </summary>
+            /// <returns><c>true</c> if t1 is in same hierarchy as t2; otherwise, <c>false</c>.</returns>
+            /// <param name="t1">T1.</param>
+            /// <param name="t2">T2.</param>
+            protected bool IsInSameHierarchy(Transform t1, Transform t2){
+                return (IsAncestor (t1, t2) || IsAncestor (t2, t1));
+            }
+
+
+            protected bool TransferAnimationSourceIsValid(Transform newValue){
+                if (!newValue) {
+                    return true;
+                }
+
+                if (ToExport == null || ToExport.Length <= 0) {
+                    Debug.LogWarning ("FbxExportSettings: no Objects selected for export, can't transfer animation");
+                    return false;
+                }
+
+                var selectedGO = ModelExporter.GetGameObject(ToExport[0]);
+
+                // source must be ancestor to dest
+                if (TransferAnimationDest && !IsAncestor(newValue, TransferAnimationDest)) {
+                    Debug.LogWarningFormat("FbxExportSettings: Source {0} must be an ancestor of {1}", newValue.name, TransferAnimationDest.name);
+                    return false;
+                }
+                // must be in same hierarchy as selected GO
+                if (!selectedGO || !IsInSameHierarchy(newValue, selectedGO.transform)) {
+                    Debug.LogWarningFormat("FbxExportSettings: Source {0} must be in the same hierarchy as {1}", newValue.name, selectedGO? selectedGO.name : "the selected object");
+                    return false;
+                }
+                return true;
+            }
+
+            protected bool TransferAnimationDestIsValid(Transform newValue){
+                if (!newValue) {
+                    return true;
+                }
+
+                if (ToExport == null || ToExport.Length <= 0) {
+                    Debug.LogWarning ("FbxExportSettings: no Objects selected for export, can't transfer animation");
+                    return false;
+                }
+
+                var selectedGO = ModelExporter.GetGameObject(ToExport[0]);
+
+                // source must be ancestor to dest
+                if (TransferAnimationSource && !IsAncestor(TransferAnimationSource, newValue)) {
+                    Debug.LogWarningFormat("FbxExportSettings: Destination {0} must be a descendant of {1}", newValue.name, TransferAnimationSource.name);
+                    return false;
+                }
+                // must be in same hierarchy as selected GO
+                if (!selectedGO || !IsInSameHierarchy(newValue, selectedGO.transform)) {
+                    Debug.LogWarningFormat("FbxExportSettings: Destination {0} must be in the same hierarchy as {1}", newValue.name, selectedGO? selectedGO.name : "the selected object");
+                    return false;
+                }
+                return true;
+            }
+
+            // -------------------------------------------------------------------------------------
 
             protected void OnGUI ()
             {
@@ -126,20 +247,24 @@ namespace FbxExporters
 
                 GUILayout.BeginHorizontal ();
                 GUILayout.FlexibleSpace ();
-                if (EditorGUILayout.DropdownButton (presetIcon, FocusType.Keyboard, presetIconButton)) {
+                
+                #if UNITY_2018_1_OR_NEWER  
+                if(EditorGUILayout.DropdownButton(presetIcon, FocusType.Keyboard, presetIconButton)){
                     ShowPresetReceiver ();
                 }
-                GUILayout.EndHorizontal ();
+                #endif
+
+                GUILayout.EndHorizontal();
 
                 EditorGUILayout.LabelField("Naming");
                 EditorGUI.indentLevel++;
 
                 GUILayout.BeginHorizontal ();
                 EditorGUILayout.LabelField(new GUIContent(
-                    "Export Name:",
+                    "Export Name",
                     "Filename to save model to."),GUILayout.Width(LabelWidth-TextFieldAlignOffset));
 
-                EditorGUI.BeginDisabledGroup (DisableNameSelection());
+                EditorGUI.BeginDisabledGroup (DisableNameSelection);
                 // Show the export name with an uneditable ".fbx" at the end
                 //-------------------------------------
                 EditorGUILayout.BeginVertical ();
@@ -161,7 +286,7 @@ namespace FbxExporters
 
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField(new GUIContent(
-                    "Export Path:",
+                    "Export Path",
                     "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
 
                 var pathLabels = ExportSettings.GetRelativeFbxSavePaths();
@@ -200,6 +325,21 @@ namespace FbxExporters
                 CreateCustomUI();
 
                 EditorGUILayout.Space ();
+
+                EditorGUI.BeginDisabledGroup (DisableTransferAnim);
+                EditorGUI.indentLevel--;
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(new GUIContent(
+                    "Transfer Animation",
+                    "Transfer transform animation from source to destination. Animation on objects between source and destination will also be transferred to destination."
+                ), GUILayout.Width(LabelWidth - FieldOffset));
+                GUILayout.EndHorizontal();
+                EditorGUI.indentLevel++;
+                TransferAnimationSource = EditorGUILayout.ObjectField ("Source", TransferAnimationSource, typeof(Transform), allowSceneObjects: true) as Transform;
+                TransferAnimationDest = EditorGUILayout.ObjectField ("Destination", TransferAnimationDest, typeof(Transform), allowSceneObjects: true) as Transform;
+                EditorGUILayout.Space ();
+                EditorGUI.EndDisabledGroup ();
+
                 EditorGUI.indentLevel--;
                 m_showOptions = EditorGUILayout.Foldout (m_showOptions, "Options");
                 EditorGUI.indentLevel++;
@@ -251,58 +391,97 @@ namespace FbxExporters
 
         public class ExportModelEditorWindow : ExportOptionsEditorWindow
         {
-            protected override float MinWindowHeight { get { return 260; } }
-            private UnityEngine.Object[] m_toExport;
+            protected override float MinWindowHeight { get { return 310; } } // determined by trial and error
+            protected override bool DisableNameSelection {
+                get {
+                    return IsPlayableDirector;
+                }
+            }
+            protected override bool DisableTransferAnim {
+                get {
+                    // don't transfer animation if we are exporting more than one hierarchy, the timeline clips from
+                    // a playable director, or if only the model is being exported
+                    // if we are on the timeline then export length can be more than 1
+                    return ToExport == null || ToExport.Length == 0 || (!IsTimelineAnim && ToExport.Length > 1) || IsPlayableDirector || SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model;
+                }
+            }
 
             private bool m_isTimelineAnim = false;
+            protected bool IsTimelineAnim {
+                get { return m_isTimelineAnim; }
+                set{
+                    m_isTimelineAnim = value;
+                    if (m_isTimelineAnim) {
+                        ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+                    }
+                    if (m_innerEditor) {
+                        var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
+                        if (exportModelSettingsEditor) {
+                            exportModelSettingsEditor.DisableIncludeDropdown(m_isTimelineAnim);
+                        }
+                    }
+                }
+            }
+
             private bool m_singleHierarchyExport = true;
+            protected bool SingleHierarchyExport {
+                get { return m_singleHierarchyExport; }
+                set {
+                    m_singleHierarchyExport = value;
+
+                    if (m_innerEditor) {
+                        var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
+                        if (exportModelSettingsEditor) {
+                            exportModelSettingsEditor.SetIsSingleHierarchy (m_singleHierarchyExport);
+                        }
+                    }
+                }
+            }
+
             private bool m_isPlayableDirector = false;
+            protected bool IsPlayableDirector { 
+                get { return m_isPlayableDirector; } 
+                set {
+                    m_isPlayableDirector = value;
+                }
+            }
+
+            protected override ExportOptionsSettingsSerializeBase SettingsObject
+            {
+                get { return ExportSettings.instance.exportModelSettings.info; }
+            }
 
             public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false, bool isPlayableDirector = false)
             {
                 ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
+                window.IsTimelineAnim = isTimelineAnim;
+                window.IsPlayableDirector = isPlayableDirector;
+
                 int numObjects = window.SetGameObjectsToExport (toExport);
                 if (string.IsNullOrEmpty (filename)) {
                     filename = window.GetFilenameFromObjects ();
                 }
                 window.InitializeWindow (filename);
-                window.SetAnimationExportType (isTimelineAnim);
-                window.SetSingleHierarchyExport (numObjects == 1);
-                window.SetIsPlayableDirector (isPlayableDirector);
+                window.SingleHierarchyExport = (numObjects == 1);
                 window.Show ();
             }
 
             protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport){
-                m_toExport = toExport.ToArray ();
-                return m_toExport.Length;
-            }
+                ToExport = toExport.ToArray ();
 
-            private void SetAnimationExportType(bool isTimelineAnim){
-                m_isTimelineAnim = isTimelineAnim;
-                if (m_isTimelineAnim) {
-                    ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
-                }
-                if (m_innerEditor) {
-                    var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
-                    if (exportModelSettingsEditor) {
-                        exportModelSettingsEditor.DisableIncludeDropdown(m_isTimelineAnim);
+                TransferAnimationSource = null;
+                TransferAnimationDest = null;
+
+                // if only one object selected, set transfer source/dest to this object
+                if (ToExport.Length == 1 || (IsTimelineAnim && ToExport.Length > 0)) {
+                    var go = ModelExporter.GetGameObject (ToExport [0]);
+                    if (go) {
+                        TransferAnimationSource = go.transform;
+                        TransferAnimationDest = go.transform;
                     }
                 }
-            }
 
-            private void SetSingleHierarchyExport(bool singleHierarchy){
-                m_singleHierarchyExport = singleHierarchy;
-
-                if (m_innerEditor) {
-                    var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
-                    if (exportModelSettingsEditor) {
-                        exportModelSettingsEditor.SetIsSingleHierarchy (m_singleHierarchyExport);
-                    }
-                }
-            }
-
-            private void SetIsPlayableDirector(bool isPlayableDirector){
-                m_isPlayableDirector = isPlayableDirector;
+                return ToExport.Length;
             }
 
             /// <summary>
@@ -312,8 +491,8 @@ namespace FbxExporters
             /// objects selected for export.</returns>
             protected string GetFilenameFromObjects(){
                 var filename = "";
-                if (m_toExport.Length == 1) {
-                    filename = m_toExport [0].name;
+                if (ToExport.Length == 1) {
+                    filename = ToExport [0].name;
                 } else {
                     filename = "Untitled";
                 }
@@ -325,14 +504,9 @@ namespace FbxExporters
                 base.OnEnable ();
                 if (!m_innerEditor) {
                     m_innerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.exportModelSettings);
-                    this.SetSingleHierarchyExport (m_singleHierarchyExport);
-                    this.SetAnimationExportType (m_isTimelineAnim);
+                    this.SingleHierarchyExport = m_singleHierarchyExport;
+                    this.IsTimelineAnim = m_isTimelineAnim;
                 }
-            }
-
-            protected override bool DisableNameSelection ()
-            {
-                return m_isPlayableDirector;
             }
 
             protected override void Export(){
@@ -343,13 +517,13 @@ namespace FbxExporters
                     return;
                 }
 
-                if (m_isPlayableDirector) {
-                    foreach (var obj in m_toExport) {
+                if (IsPlayableDirector) {
+                    foreach (var obj in ToExport) {
                         var go = ModelExporter.GetGameObject (obj);
                         if (!go) {
                             continue;
                         }
-                        ModelExporter.ExportAllTimelineClips (go, folderPath, ExportSettings.instance.exportModelSettings.info);
+                        ModelExporter.ExportAllTimelineClips (go, folderPath, SettingsObject);
                     }
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
@@ -357,17 +531,19 @@ namespace FbxExporters
                     return;
                 }
 
-                if (ModelExporter.ExportObjects (filePath, m_toExport, ExportSettings.instance.exportModelSettings.info, timelineAnim: m_isTimelineAnim) != null) {
+                if (ModelExporter.ExportObjects (filePath, ToExport, SettingsObject, timelineAnim: m_isTimelineAnim) != null) {
                     // refresh the asset database so that the file appears in the
                     // asset folder view.
                     AssetDatabase.Refresh ();
                 }
             }
 
+            #if UNITY_2018_1_OR_NEWER  
             protected override void ShowPresetReceiver ()
             {
                 ShowPresetReceiver (ExportSettings.instance.exportModelSettings);
             }
+            #endif
         }
     }
 }
