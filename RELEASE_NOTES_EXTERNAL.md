@@ -32,6 +32,6 @@ FIXES
 **Version**: 1.0.0b1
 
 NEW FEATURES
-* Ability to export objects from UnityFbxSdk
+* Ability to export fbx files from Unity
 * Convert to linked prefab to create a prefab that auto-updates with the linked fbx
 * Maya one button import/export
