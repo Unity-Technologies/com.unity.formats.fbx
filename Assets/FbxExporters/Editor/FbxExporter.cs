@@ -3780,7 +3780,7 @@ namespace FbxExporters
 
                 // if user doesn't want to export mesh colliders, and this gameobject doesn't have a renderer
                 // then don't export it.
-                if (!ExportOptions.ExportUnrendered && !gameObject.GetComponent<Renderer>()) {
+                if (!ExportOptions.ExportUnrendered && (!gameObject.GetComponent<Renderer>() || !gameObject.GetComponent<Renderer>().enabled)) {
                     return false;
                 }
 
