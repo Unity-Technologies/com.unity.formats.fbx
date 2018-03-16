@@ -1850,7 +1850,7 @@ namespace FbxExporters
                         var uniAnimCurve = uniCurve.uniAnimCurve;
 
                         // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
-                        if (!ExportOptions.AnimateSkinnedMesh && (uniGO.GetComponent<SkinnedMeshRenderer> () != null || uniGO.GetComponentInChildren<SkinnedMeshRenderer> () != null)) {
+                        if (!ExportOptions.AnimateSkinnedMesh && (uniGO.GetComponent<SkinnedMeshRenderer> () != null)) {
                             continue;    
                         }
 
