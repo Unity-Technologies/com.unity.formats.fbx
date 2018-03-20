@@ -155,7 +155,6 @@ namespace FbxExporters
                 return wasExported.ToArray();
             }
 
-
             public static GameObject Convert  (
                 GameObject toConvert,
                 string directoryFullPath = null,
@@ -181,9 +180,7 @@ namespace FbxExporters
                 }
                 return toConvert;
             }
-
-
-
+            
             /// <summary>
             /// Convert one object (and the hierarchy below it) to an auto-updating prefab.
             ///
@@ -302,7 +299,7 @@ namespace FbxExporters
                 return toConvert;
             }
 
-             public static GameObject ConvertModelInstance  (
+            public static GameObject ConvertModelInstance  (
                 GameObject toConvert,
                 string directoryFullPath = null,
                 string fbxFullPath = null,
@@ -332,7 +329,6 @@ namespace FbxExporters
                 return null;
             }
 
-
             public static GameObject ConvertPrefabInstance  (
                 GameObject toConvert,
                 string directoryFullPath = null,
@@ -349,6 +345,9 @@ namespace FbxExporters
                     var fbxBasename = ModelExporter.ConvertToValidFilename (toConvert.name + ".fbx");
 
                     fbxFullPath = Path.Combine (directoryFullPath, fbxBasename);
+                    if (File.Exists (fbxFullPath)) {
+                        fbxFullPath = IncrementFileName (directoryFullPath, fbxFullPath);
+                    }
                 }
                 var assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fbxFullPath);
                 var projectRelativePath = "Assets/" + assetRelativePath;
@@ -362,6 +361,14 @@ namespace FbxExporters
                 // same names as exist in Unity.
 
                 EnforceUniqueNames (new GameObject[] {toConvert});
+
+                // Export to FBX. It refreshes the database.
+                {
+                    var fbxActualPath = ModelExporter.ExportObject (fbxFullPath, toConvert, lodExportType: EditorTools.ExportSettings.LODExportType.All);
+                    if (fbxActualPath != fbxFullPath) {
+                        throw new System.Exception ("Failed to convert " + toConvert.name);
+                    }
+                }
 
                 // Replace w Model asset. LoadMainAssetAtPath wants a path
                 // relative to the project, not relative to the assets folder.
