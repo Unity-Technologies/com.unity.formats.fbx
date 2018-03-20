@@ -51,11 +51,11 @@ namespace FbxExporters
         }
 
         public static bool IsFbxAsset(string assetPath) {
-            return assetPath.EndsWith(".fbx");
+            return assetPath.EndsWith(".fbx") || assetPath.EndsWith(".FBX") || assetPath.EndsWith(".Fbx");
         }
 
         public static bool IsPrefabAsset(string assetPath) {
-            return assetPath.EndsWith(".prefab");
+            return assetPath.EndsWith(".prefab") || assetPath.EndsWith(".PREFAB") || assetPath.EndsWith(".Prefab");
         }
 
         /// <summary>
@@ -1447,7 +1447,7 @@ namespace FbxExporters
             /// </summary>
             public void SetSourceModel(GameObject fbxModel) {
                 // Null is OK. But otherwise, fbxModel must be an fbx.
-                if (fbxModel && !UnityEditor.AssetDatabase.GetAssetPath(fbxModel).EndsWith(".fbx")) {
+                if (fbxModel && !IsFbxAsset(UnityEditor.AssetDatabase.GetAssetPath(fbxModel))) {
                     throw new System.ArgumentException("FbxPrefab source model must be an fbx asset");
                 }
 

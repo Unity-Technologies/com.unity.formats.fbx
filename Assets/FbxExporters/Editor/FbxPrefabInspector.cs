@@ -23,7 +23,7 @@ namespace FbxExporters.EditorTools {
             var oldFbxAsset = fbxPrefabUtility.GetFbxAsset();
             var newFbxAsset = EditorGUILayout.ObjectField(new GUIContent("Source Fbx Asset", "The FBX file that is linked to this Prefab"), oldFbxAsset,
                     typeof(GameObject), allowSceneObjects: false) as GameObject;
-            if (newFbxAsset && !AssetDatabase.GetAssetPath(newFbxAsset).EndsWith(".fbx")) {
+            if (newFbxAsset && !FbxPrefabAutoUpdater.IsFbxAsset(UnityEditor.AssetDatabase.GetAssetPath(newFbxAsset))) {
                 Debug.LogError("FbxPrefab must point to an Fbx asset (or none).");
             } else if (newFbxAsset != oldFbxAsset) {
                 fbxPrefabUtility.SetSourceModel(newFbxAsset);
