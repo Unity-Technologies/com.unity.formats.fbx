@@ -1,5 +1,13 @@
 ﻿RELEASE NOTES
 
+**Version**: 1.3.0b1
+
+FIXES
+
+* FbxExporter: if "Animated Skinned Mesh" off, don't export skinned mesh transform
+* Maya Integration: fix so saved files do not lose export set information on export
+* ConvertToPrefab: fix error when converting model instances whose file ends in .FBX (with capitals)
+
 **Version**: sprint50
 
 NEW FEATURES
