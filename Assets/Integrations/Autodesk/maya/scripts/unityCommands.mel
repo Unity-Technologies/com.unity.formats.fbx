@@ -1,4 +1,3 @@
-global string $UnityExportSets[];
 global string $UnityFbxFilePathAttr = "unityFbxModelFilePath";
 global string $UnityFbxFileNameAttr = "unityFbxModelFileName";
 global string $UnityFbxAnimFilePathAttr = "unityFbxAnimFilePath";
@@ -136,7 +135,6 @@ proc string checkNamespaceNeedsUpdate(string $unitySet, string $unityFbxNamespac
 
 proc importFile(string $filePathStr){
     // get the global variables
-    global string $UnityExportSets[];
     global string $UnityFbxFilePathAttr;
     global string $UnityFbxFileNameAttr;
     global string $UnityFbxAnimFilePathAttr;
@@ -278,10 +276,6 @@ proc importFile(string $filePathStr){
         }
         // lock set so it doesn't get deleted when empty
         lockNode -lock true $unityExportSet;
-        
-        if(!stringArrayContains($unityExportSet, $UnityExportSets)){
-            $UnityExportSets[size($UnityExportSets)] = $unityExportSet;
-        }
     }
 }
 
@@ -418,9 +412,41 @@ proc exportSet(string $unitySet, int $exportAnim){
     }
 }
 
+proc int isUnityExportSet(string $mayaSet){
+    global string $UnityFbxFilePathAttr;
+    global string $UnityFbxFileNameAttr;
+
+    if(!endsWith($mayaSet, "_UnityExportSet")){
+        return false;
+    }
+    
+    if(!`attributeExists $UnityFbxFilePathAttr $mayaSet`){
+        return false;
+    }
+    
+    if(!`attributeExists $UnityFbxFileNameAttr $mayaSet`){
+        return false;
+    }
+    return true;
+}
+
+proc string[] getUnityExportSets(){
+    //if the selection set ends w "_UnityExportSet" and it has at least the custom attributes UnityFbxModelFilePath & UnityFbxModelFileName then it's one of ours.
+    string $unityExportSets[];
+    
+    string $mayaSets[] = `listSets -allSets`;
+    
+    int $i = 0;
+    for($k=0; $k<size($mayaSets); ++$k){
+        if(isUnityExportSet($mayaSets[$k])){
+            $unityExportSets[$i] = $mayaSets[$k];
+            $i++;
+        }
+    }
+    return $unityExportSets;
+}
+
 proc unityExport(int $exportType){
-    // get the global variables
-    global string $UnityExportSets[];
     
     if(!loadUnityDependencies()){
         return;
@@ -454,7 +480,8 @@ proc unityExport(int $exportType){
     
     $i = 0;
     string $setsToExport[];
-    for($exportSet in $UnityExportSets){
+    string $unityExportSets[] = getUnityExportSets();
+    for($exportSet in $unityExportSets){
         if(!setExists($exportSet)){
             continue;
         }
