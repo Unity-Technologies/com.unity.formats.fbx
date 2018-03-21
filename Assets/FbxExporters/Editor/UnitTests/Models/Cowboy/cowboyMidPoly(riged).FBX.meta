@@ -1,7 +1,5 @@
 fileFormatVersion: 2
 guid: 9d54076f815bc1745bf5781d01854974
-timeCreated: 1490890042
-licenseType: Store
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
@@ -151,6 +149,8 @@ ModelImporter:
     9500000: //RootNode
     11100000: //RootNode
     13700000: cowboy
+    2186277476908879412: ImportLogs
+    2186277476908879414: ImportLogs
   externalObjects:
   - first:
       type: UnityEngine:Material
@@ -180,6 +180,7 @@ ModelImporter:
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
+    importConstraints: 0
     animationCompression: 3
     animationRotationError: 0.5
     animationPositionError: 0.5

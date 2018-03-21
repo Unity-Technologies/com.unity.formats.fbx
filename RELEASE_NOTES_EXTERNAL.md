@@ -16,6 +16,22 @@ Error caused by UnityFbxSdk.dll being set as compatible with any platform instea
 
 **Version**: 1.2.0b1
 
+NEW FEATURES
+* Added Maya LT one button import/export
+* Added Camera export support 
+
 **Version**: 1.1.0b1
 
+NEW FEATURES
+* Added 3ds Max one button import/export
+
+FIXES
+* Fix so Object references aren't lost when using Convert to Linked Prefab Instance
+* Fix Maya Integration dropdown not appearing in the Export Settings
+
 **Version**: 1.0.0b1
+
+NEW FEATURES
+* Ability to export fbx files from Unity
+* Convert to linked prefab to create a prefab that auto-updates with the linked fbx
+* Maya one button import/export

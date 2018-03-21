@@ -33,95 +33,11 @@ namespace FbxExporters.EditorTools {
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             GUILayout.BeginVertical();
-            exportSettings.mayaCompatibleNames = EditorGUILayout.Toggle (
-                new GUIContent ("Compatible Naming:",
-                    "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
-                    "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
-                    "On export, convert the names of GameObjects so they are Maya compatible." +
-                    (exportSettings.mayaCompatibleNames ? "" :
-                        "\n\nWARNING: Disabling this feature may result in lost material connections," +
-                    " and unexpected character replacements in Maya.")
-                ),
-                exportSettings.mayaCompatibleNames);
-
-            exportSettings.centerObjects = EditorGUILayout.Toggle (
-                new GUIContent("Center Objects:",
-                    "Center objects around a shared root and keep their relative placement unchanged."),
-                exportSettings.centerObjects
-            );
-
             exportSettings.autoUpdaterEnabled = EditorGUILayout.Toggle(
                 new GUIContent("Auto-Updater:",
                     "Automatically updates prefabs with new fbx data that was imported."),
                 exportSettings.autoUpdaterEnabled
             );
-
-            exportSettings.exportMeshNoRenderer = EditorGUILayout.Toggle(
-                new GUIContent("Export Meshes with no Renderers:",
-                    "If unchecked, meshes that don't have renderers won't be exported."),
-                exportSettings.exportMeshNoRenderer
-            );
-
-            GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("Export Format:", "Export the FBX file in the standard binary format." +
-                " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.ExportFormatSelection = EditorGUILayout.Popup(exportSettings.ExportFormatSelection, new string[]{"Binary", "ASCII"});
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("LOD Export:", "Select which LOD to export."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.lodExportType = (ExportSettings.LODExportType)EditorGUILayout.Popup((int)exportSettings.lodExportType, new string[]{"All", "Highest", "Lowest"});
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent(
-                "Export Path:",
-                "Relative path for saving Model Prefabs."), GUILayout.Width(LabelWidth - FieldOffset));
-
-            var pathLabel = ExportSettings.GetRelativeSavePath();
-            if (pathLabel == ".") { pathLabel = "(Assets root)"; }
-            EditorGUILayout.SelectableLabel(pathLabel,
-                EditorStyles.textField,
-                GUILayout.MinWidth(SelectableLabelMinWidth),
-                GUILayout.Height(EditorGUIUtility.singleLineHeight));            
-
-            if (GUILayout.Button(new GUIContent("...", "Browse to a new location for saving model prefabs"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
-            {
-                string initialPath = ExportSettings.GetAbsoluteSavePath();
-
-                // if the directory doesn't exist, set it to the default save path
-                // so we don't open somewhere unexpected
-                if (!System.IO.Directory.Exists(initialPath))
-                {
-                    initialPath = Application.dataPath;
-                }
-
-                string fullPath = EditorUtility.OpenFolderPanel(
-                        "Select Model Prefabs Path", initialPath, null
-                        );
-
-                // Unless the user canceled, make sure they chose something in the Assets folder.
-                if (!string.IsNullOrEmpty(fullPath))
-                {
-                    var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
-                    if (string.IsNullOrEmpty(relativePath))
-                    {
-                        Debug.LogWarning("Please select a location in the Assets folder");
-                    }
-                    else
-                    {
-                        ExportSettings.SetRelativeSavePath(relativePath);
-
-                        // Make sure focus is removed from the selectable label
-                        // otherwise it won't update
-                        GUIUtility.hotControl = 0;
-                        GUIUtility.keyboardControl = 0;
-                    }
-                }
-            }
-
-            GUILayout.EndHorizontal();
-
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             EditorGUI.indentLevel--;
@@ -194,7 +110,7 @@ namespace FbxExporters.EditorTools {
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
             if (GUILayout.Button (installIntegrationContent)) {
-                FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration ();
+                EditorApplication.delayCall += FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration;
             }
             EditorGUI.EndDisabledGroup ();
 
@@ -236,8 +152,8 @@ namespace FbxExporters.EditorTools {
             }
 
             GUILayout.FlexibleSpace ();
-            GUILayout.EndScrollView ();
             GUILayout.EndVertical();
+            GUILayout.EndScrollView ();
 
             if (GUI.changed) {
                 EditorUtility.SetDirty (exportSettings);
@@ -293,6 +209,14 @@ namespace FbxExporters.EditorTools {
     [FilePath("ProjectSettings/FbxExportSettings.asset",FilePathAttribute.Location.ProjectFolder)]
     public class ExportSettings : ScriptableSingleton<ExportSettings>
     {
+        public enum ExportFormat { ASCII = 0, Binary = 1}
+
+        public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
+
+        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/}
+
+        public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
+
         public const string kDefaultSavePath = ".";
         private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};
         //Any additional names require a space after the name
@@ -441,27 +365,14 @@ namespace FbxExporters.EditorTools {
         }
 
         // Note: default values are set in LoadDefaults().
-        public bool mayaCompatibleNames = true;
-        public bool centerObjects = false;
         public bool autoUpdaterEnabled = true;
         public bool launchAfterInstallation = true;
         public bool HideSendToUnityMenu = true;
-        public int ExportFormatSelection;
         public bool BakeAnimation = true;
-        public bool exportMeshNoRenderer = false;
 
         public string IntegrationSavePath;
 
         public int selectedDCCApp = 0;
-
-        [SerializeField]
-        public LODExportType lodExportType = LODExportType.All;
-
-        public enum LODExportType {
-            All = 0,
-            Highest = 1,
-            Lowest = 2
-        }
 
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
@@ -474,7 +385,18 @@ namespace FbxExporters.EditorTools {
         /// value, properly interpreted for the current platform.
         /// </summary>
         [SerializeField]
-        string convertToModelSavePath;
+        private List<string> prefabSavePaths = new List<string> ();
+
+        [SerializeField]
+        private List<string> fbxSavePaths = new List<string> ();
+
+        [SerializeField]
+        public int selectedFbxPath = 0;
+
+        [SerializeField]
+        public int selectedPrefabPath = 0;
+
+        private int maxStoredSavePaths = 5;
 
         // List of names in order that they appear in option list
         [SerializeField]
@@ -483,19 +405,35 @@ namespace FbxExporters.EditorTools {
         [SerializeField]
         private List<string> dccOptionPaths;
 
+        // don't serialize as ScriptableObject does not get properly serialized on export
+        [System.NonSerialized]
+        public ExportModelSettings exportModelSettings;
+
+        // store contents of export model settings for serialization
+        [SerializeField]
+        private ExportModelSettingsSerialize exportModelSettingsSerialize;
+
+        [System.NonSerialized]
+        public ConvertToPrefabSettings convertToPrefabSettings;
+
+        [SerializeField]
+        private ConvertToPrefabSettingsSerialize convertToPrefabSettingsSerialize;
+
         protected override void LoadDefaults()
         {
-            mayaCompatibleNames = true;
-            centerObjects = true;
             autoUpdaterEnabled = true;
             launchAfterInstallation = true;
             HideSendToUnityMenu = true;
-            ExportFormatSelection = 0;
-            convertToModelSavePath = kDefaultSavePath;
+            prefabSavePaths = new List<string>(){ kDefaultSavePath };
+            fbxSavePaths = new List<string> (){ kDefaultSavePath };
             IntegrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
             BakeAnimation = true;
+            exportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
+            exportModelSettingsSerialize = exportModelSettings.info;
+            convertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
+            convertToPrefabSettingsSerialize = convertToPrefabSettings.info;
         }
 
         /// <summary>
@@ -972,36 +910,103 @@ namespace FbxExporters.EditorTools {
             return instance.dccOptionPaths.Count > 0;
         }
 
+        public static string GetProjectRelativePath(string fullPath){
+            var assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fullPath);
+            var projectRelativePath = "Assets/" + assetRelativePath;
+            if (string.IsNullOrEmpty(assetRelativePath)) {
+                throw new System.Exception("Path " + fullPath + " must be in the Assets folder.");
+            }
+            return projectRelativePath;
+        }
+
         /// <summary>
-        /// The path where Convert To Model will save the new fbx and prefab.
+        /// The relative save paths for given absolute paths.
         /// This is relative to the Application.dataPath ; it uses '/' as the
         /// separator on all platforms.
         /// </summary>
-        public static string GetRelativeSavePath() {
-            var relativePath = instance.convertToModelSavePath;
-            if (string.IsNullOrEmpty(relativePath)) {
-                relativePath = kDefaultSavePath;
+        public static string[] GetRelativeSavePaths(List<string> exportSavePaths){
+            if (exportSavePaths.Count == 0) {
+                exportSavePaths.Add (kDefaultSavePath);
             }
-            return NormalizePath(relativePath, isRelative: true);
+            string[] relSavePaths = new string[exportSavePaths.Count];
+            // use special forward slash unicode char as "/" is a special character
+            // that affects the dropdown layout.
+            string forwardslash = " \u2044 ";
+            for (int i = 0; i < relSavePaths.Length; i++) {
+                relSavePaths [i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
+            }
+            return relSavePaths;
         }
 
         /// <summary>
-        /// The path where Convert To Model will save the new fbx and prefab.
-        /// This is an absolute path, with platform separators.
+        /// The path where Export model will save the new fbx.
+        /// This is relative to the Application.dataPath ; it uses '/' as the
+        /// separator on all platforms.
         /// </summary>
-        public static string GetAbsoluteSavePath() {
-            var relativePath = GetRelativeSavePath();
+        public static string[] GetRelativeFbxSavePaths(){
+            return GetRelativeSavePaths(instance.fbxSavePaths);
+        }
+
+        /// <summary>
+        /// The path where Convert to Prefab will save the new prefab.
+        /// This is relative to the Application.dataPath ; it uses '/' as the
+        /// separator on all platforms.
+        /// </summary>
+        public static string[] GetRelativePrefabSavePaths(){
+            return GetRelativeSavePaths(instance.prefabSavePaths);
+        }
+
+        /// <summary>
+        /// Adds the save path to given save path list.
+        /// </summary>
+        /// <param name="savePath">Save path.</param>
+        /// <param name="exportSavePaths">Export save paths.</param>
+        public static void AddSavePath(string savePath, ref List<string> exportSavePaths){
+            savePath = NormalizePath (savePath, isRelative: true);
+            if (exportSavePaths.Contains (savePath)) {
+                // move to first place if it isn't already
+                if (exportSavePaths [0] == savePath) {
+                    return;
+                }
+                exportSavePaths.Remove (savePath);
+            }
+
+            if (exportSavePaths.Count >= instance.maxStoredSavePaths) {
+                // remove last used path
+                exportSavePaths.RemoveAt(exportSavePaths.Count-1);
+            }
+
+            exportSavePaths.Insert (0, savePath);
+        }
+
+        public static void AddFbxSavePath(string savePath){
+            AddSavePath (savePath, ref instance.fbxSavePaths);
+            instance.selectedFbxPath = 0;
+        }
+
+        public static void AddPrefabSavePath(string savePath){
+            AddSavePath (savePath, ref instance.prefabSavePaths);
+            instance.selectedPrefabPath = 0;
+        }
+
+        public static string GetAbsoluteSavePath(string relativePath){
             var absolutePath = Path.Combine(Application.dataPath, relativePath);
             return NormalizePath(absolutePath, isRelative: false,
-                    separator: Path.DirectorySeparatorChar);
+                separator: Path.DirectorySeparatorChar);
         }
 
-        /// <summary>
-        /// Set the path where Convert To Model will save the new fbx and prefab.
-        /// This is interpreted as being relative to the Application.dataPath
-        /// </summary>
-        public static void SetRelativeSavePath(string newPath) {
-            instance.convertToModelSavePath = NormalizePath(newPath, isRelative: true);
+        public static string GetFbxAbsoluteSavePath(){
+            if (instance.fbxSavePaths.Count <= 0) {
+                instance.fbxSavePaths.Add (kDefaultSavePath);
+            }
+            return GetAbsoluteSavePath (instance.fbxSavePaths [instance.selectedFbxPath]);
+        }
+
+        public static string GetPrefabAbsoluteSavePath(){
+            if (instance.prefabSavePaths.Count <= 0) {
+                instance.prefabSavePaths.Add (kDefaultSavePath);
+            }
+            return GetAbsoluteSavePath (instance.prefabSavePaths [instance.selectedPrefabPath]);
         }
 
         public static string GetIntegrationSavePath()
@@ -1187,8 +1192,25 @@ namespace FbxExporters.EditorTools {
             instance.Load();
         }
 
+        protected override void Load ()
+        {
+            base.Load ();
+            if (!instance.exportModelSettings) {
+                instance.exportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
+            }
+            instance.exportModelSettings.info = instance.exportModelSettingsSerialize;
+
+            if (!instance.convertToPrefabSettings) {
+                instance.convertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
+            }
+            instance.convertToPrefabSettings.info = instance.convertToPrefabSettingsSerialize;
+
+        }
+
         public void Save()
         {
+            exportModelSettingsSerialize = exportModelSettings.info;
+            convertToPrefabSettingsSerialize = convertToPrefabSettings.info;
             instance.Save (true);
         }
     }
