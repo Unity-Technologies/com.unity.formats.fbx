@@ -51,11 +51,11 @@ namespace FbxExporters
         }
 
         public static bool IsFbxAsset(string assetPath) {
-            return assetPath.EndsWith(".fbx") || assetPath.EndsWith(".FBX") || assetPath.EndsWith(".Fbx");
+            return assetPath.ToLower().EndsWith(".fbx");
         }
 
         public static bool IsPrefabAsset(string assetPath) {
-            return assetPath.EndsWith(".prefab") || assetPath.EndsWith(".PREFAB") || assetPath.EndsWith(".Prefab");
+            return assetPath.ToLower().EndsWith(".prefab");
         }
 
         /// <summary>
