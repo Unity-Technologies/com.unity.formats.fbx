@@ -2342,7 +2342,8 @@ namespace FbxExporters
 
                 public void ComputeObjectsInAnimationClips(
                     AnimationClip[] animClips, 
-                    GameObject animationRootObject
+                    GameObject animationRootObject,
+                    bool exportSkinnedMeshAnim = true
                 ){
                     foreach (var animClip in animClips) {
                         if (this.animationClips.ContainsKey(animClip)) {
@@ -2360,6 +2361,10 @@ namespace FbxExporters
 
                             GameObject unityGo = GetGameObject (uniObj);
                             if (!unityGo) {
+                                continue;
+                            }
+
+                            if (!exportSkinnedMeshAnim && unityGo.GetComponent<SkinnedMeshRenderer>()) {
                                 continue;
                             }
 
@@ -2720,7 +2725,7 @@ namespace FbxExporters
                 var exportComponent = new Dictionary<GameObject, System.Type>();
 
                 var exportData = new AnimationOnlyExportData(animationClips, goToExport, exportComponent);
-                exportData.ComputeObjectsInAnimationClips(animationClipsList.ToArray(), rootObject);
+                exportData.ComputeObjectsInAnimationClips(animationClipsList.ToArray(), rootObject, ExportOptions.AnimateSkinnedMesh);
 
                 Dictionary<GameObject, AnimationOnlyExportData> data = new Dictionary<GameObject, AnimationOnlyExportData>();
                 data.Add(rootObject, exportData);
@@ -2758,7 +2763,7 @@ namespace FbxExporters
                         }
 
                         var animClips = AnimationUtility.GetAnimationClips(anim.gameObject);
-                        exportData.ComputeObjectsInAnimationClips(animClips, anim.gameObject);
+                        exportData.ComputeObjectsInAnimationClips(animClips, anim.gameObject, ExportOptions.AnimateSkinnedMesh);
                     }
 
                     int depthFromRootAnimator = int.MaxValue;
@@ -2777,7 +2782,7 @@ namespace FbxExporters
                         var controller = anim.runtimeAnimatorController;
                         if (controller)
                         {
-                            exportData.ComputeObjectsInAnimationClips(controller.animationClips, anim.gameObject);
+                            exportData.ComputeObjectsInAnimationClips(controller.animationClips, anim.gameObject, ExportOptions.AnimateSkinnedMesh);
                         }
                     }
 
