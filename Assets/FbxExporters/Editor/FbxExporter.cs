@@ -1692,6 +1692,13 @@ namespace FbxExporters
                         return true;
                     }
 
+                    if (uniPropertyName.StartsWith("Temperature", ct))
+                    {
+                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Temperature", null) };
+                        return true;
+                    }
+                    
+
                     if (uniPropertyName.StartsWith("m_SpotAngle", ct))
                     {
                         prop = new FbxPropertyChannelPair[]{ 
@@ -2840,6 +2847,50 @@ namespace FbxExporters
 
                     var unityGo = entry.Key;
                     var fbxNode = entry.Value;
+                    // Extracting Custom Properties/Parameters from AnimatorController and including them in fbxNode.
+                    Animator animator = unityGo.GetComponent<Animator> ();
+                    if (animator != null)
+                    {
+                        UnityEditor.Animations.AnimatorController animatorController = (UnityEditor.Animations.AnimatorController) animator.runtimeAnimatorController;
+                        if (animatorController != null)
+                        {
+                            for (int i=0; i <  animatorController.parameters.Length; i++)
+                            {
+                                AnimatorControllerParameter param = animatorController.parameters[i];
+                                Unity.FbxSdk.FbxProperty fbxProperty = null;
+                                if (param.type == AnimatorControllerParameterType.Int)
+                                {
+                                    fbxProperty = FbxProperty.Create(fbxNode, Globals.FbxIntDT, param.name);
+                                    if (!fbxProperty.IsValid()) {
+                                        throw new System.NullReferenceException();
+                                    }
+                                    Debug.Log(param.name + " value" +  param.defaultInt);
+                                    fbxProperty.Set(param.defaultInt);
+                                }
+                                else if (param.type == AnimatorControllerParameterType.Float)
+                                {
+                                    fbxProperty = FbxProperty.Create(fbxNode, Globals.FbxFloatDT, param.name);
+                                    if (!fbxProperty.IsValid()) {
+                                        throw new System.NullReferenceException();
+                                    }
+                                    Debug.Log(param.name + " value" +  param.defaultFloat);
+                                    fbxProperty.Set(param.defaultFloat);
+                                }
+                                else if (param.type == AnimatorControllerParameterType.Bool)
+                                {
+                                    fbxProperty = FbxProperty.Create(fbxNode, Globals.FbxBoolDT, param.name);
+                                    if (!fbxProperty.IsValid()) {
+                                        throw new System.NullReferenceException();
+                                    }
+                                    Debug.Log(param.name + " value" +  param.defaultBool);
+                                    fbxProperty.Set(System.Convert.ToInt32(param.defaultBool));
+                                }
+
+                                fbxProperty.ModifyFlag(FbxPropertyFlags.EFlags.eUserDefined, true);
+                                fbxProperty.ModifyFlag(FbxPropertyFlags.EFlags.eAnimatable, true);
+                            }
+                        }
+                    }
 
                     // try export mesh
                     bool exportedMesh = ExportInstance (unityGo, fbxNode, fbxScene);
