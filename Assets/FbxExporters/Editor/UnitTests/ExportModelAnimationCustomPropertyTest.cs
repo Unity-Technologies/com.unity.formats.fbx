@@ -41,8 +41,8 @@ namespace FbxExporters.UnitTests
             animatorComponent.runtimeAnimatorController = animatorController;
 
             AnimationClip clip = new AnimationClip();
-            clip.SetCurve("", typeof(Transform), "position.x", AnimationCurve.EaseInOut(0, 0, 1, 1));
-            clip.SetCurve("", typeof(Transform), "position.x", AnimationCurve.EaseInOut(1, 1, 0, 0));
+            clip.SetCurve("", typeof(Transform), "localPosition.x", AnimationCurve.EaseInOut(0, 0, 1, 1));
+            clip.SetCurve("", typeof(Transform), "localPosition.x", AnimationCurve.EaseInOut(1, 1, 0, 0));
 
             clip.SetCurve("", typeof(UnityEngine.Animator), "Temperature", AnimationCurve.Constant(0, 5, 102));
             clip.SetCurve("", typeof(UnityEngine.Animator), "Temperature", AnimationCurve.Constant(50, 10, 2));
