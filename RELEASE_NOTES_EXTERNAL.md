@@ -21,7 +21,7 @@ FIXES
 * ConvertToPrefab: Don't re-export fbx model instances
 * FbxExportSettings: fix console error on Mac when clicking "Install Unity Integration"
 * FbxExporter: fix so animating spot angle in Unity animates cone angle in Maya (not penumbra)
-* Exporter: export correct rotation order (xyz) for euler rotation animations (previously would export as zxy)
+* FbxExporter: export correct rotation order (xyz) for euler rotation animations (previously would export as zxy)
 
 **Version**: 1.3.0a1
 

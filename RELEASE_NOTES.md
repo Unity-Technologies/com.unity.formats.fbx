@@ -8,6 +8,11 @@ FIXES
 * Maya Integration: fix so saved files do not lose export set information on export
 * ConvertToPrefab: fix error when converting model instances whose file ends in .FBX (with capitals)
 
+KNOWN ISSUES
+
+* FbxExporter: animated meshes in bone hierarchy are not supported
+* ConvertToPrefab: converting model instance that has been modified in the scene won't reexport fbx
+
 **Version**: sprint50
 
 NEW FEATURES
