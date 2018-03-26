@@ -2847,7 +2847,57 @@ namespace FbxExporters
 
                     var unityGo = entry.Key;
                     var fbxNode = entry.Value;
-                    // Extracting Custom Properties/Parameters from AnimatorController and including them in fbxNode.
+
+                    ExportCustomProperty(unityGo,fbxNode);
+
+                    // try export mesh
+                    bool exportedMesh = ExportInstance (unityGo, fbxNode, fbxScene);
+
+                    if (!exportedMesh) {
+                        exportedMesh = ExportMesh (unityGo, fbxNode);
+                    }
+
+                    // export camera, but only if no mesh was exported
+                    bool exportedCamera = false;
+                    if (!exportedMesh) {
+                        exportedCamera = ExportCamera (unityGo, fbxScene, fbxNode);
+                    }
+
+                    // export light, but only if no mesh or camera was exported
+                    if (!exportedMesh && !exportedCamera) {
+                        ExportLight (unityGo, fbxScene, fbxNode);
+                    }
+
+                    // check if this object contains animation, keep track of it
+                    // if it does
+                    if (exportAnim && GameObjectHasAnimation (unityGo) ) {
+                        animationNodes.Add (unityGo);
+                    }
+                }
+
+                // export all GameObjects that have animation
+                if (animationNodes.Count > 0) {
+                    foreach (var go in animationNodes) {
+                        ExportAnimation (go, fbxScene);
+                    }
+                }
+
+                return true;
+            }
+
+
+            /// <summary>
+            /// Extracting Custom Properties/Parameters from AnimatorController and including them in fbxNode.
+            /// </summary>
+            void ExportCustomProperty(GameObject unityGo, FbxNode fbxNode)
+            {
+                //If delegate function is not specified call the default function
+                if (AddProperty != null)
+                {
+                    fbxNode = AddProperty(unityGo,fbxNode);
+                }
+                else
+                {
                     Animator animator = unityGo.GetComponent<Animator> ();
                     if (animator != null)
                     {
@@ -2891,41 +2941,9 @@ namespace FbxExporters
                             }
                         }
                     }
-
-                    // try export mesh
-                    bool exportedMesh = ExportInstance (unityGo, fbxNode, fbxScene);
-
-                    if (!exportedMesh) {
-                        exportedMesh = ExportMesh (unityGo, fbxNode);
-                    }
-
-                    // export camera, but only if no mesh was exported
-                    bool exportedCamera = false;
-                    if (!exportedMesh) {
-                        exportedCamera = ExportCamera (unityGo, fbxScene, fbxNode);
-                    }
-
-                    // export light, but only if no mesh or camera was exported
-                    if (!exportedMesh && !exportedCamera) {
-                        ExportLight (unityGo, fbxScene, fbxNode);
-                    }
-
-                    // check if this object contains animation, keep track of it
-                    // if it does
-                    if (exportAnim && GameObjectHasAnimation (unityGo) ) {
-                        animationNodes.Add (unityGo);
-                    }
                 }
-
-                // export all GameObjects that have animation
-                if (animationNodes.Count > 0) {
-                    foreach (var go in animationNodes) {
-                        ExportAnimation (go, fbxScene);
-                    }
-                }
-
-                return true;
             }
+
 
             /// <summary>
             /// Checks if the GameObject has animation.
@@ -3659,6 +3677,10 @@ namespace FbxExporters
 
                 return null;
             }
+
+            public delegate FbxNode AddCustomProperty(GameObject unityGo, FbxNode fbxNode);
+
+            public static event AddCustomProperty AddProperty;
 
             /// <summary>
             /// If your MonoBehaviour knows about some custom geometry that
