@@ -6,5 +6,6 @@ maxIniFile = (GetMAXIniFile())
 unityCategory = "Unity"
 setINISetting maxIniFile unityCategory "UnityProject" UnityProject
 setINISetting maxIniFile unityCategory "UnityFbxExportSettings" UnityFbxExportSettings
+setINISetting maxIniFile unityCategory "UnityFbxImportSettings" UnityFbxImportSettings
 
 quitMax()

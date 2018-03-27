@@ -577,11 +577,13 @@ namespace FbxExporters.Editor
         private const string ConfigureMaxScript = MaxScriptsPath + "configureUnityFbxForMax.ms";
 
         private const string ExportSettingsFile = MaxScriptsPath + "unityFbxExportSettings.ms";
+        private const string ImportSettingsFile = MaxScriptsPath + "unityFbxImportSettings.ms";
 
         private const string PluginSourceTag = "UnityPluginScript_Source";
         private const string PluginNameTag = "UnityPluginScript_Name";
         private const string ProjectTag = "UnityProject";
         private const string ExportSettingsTag = "UnityFbxExportSettings";
+        private const string ImportSettingsTag = "UnityFbxImportSettings";
 
         public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMax.zip"; } }
 
@@ -600,7 +602,8 @@ namespace FbxExporters.Editor
                 {PluginSourceTag, GetAbsPath(PluginPath) },
                 {PluginNameTag,  PluginName },
                 {ProjectTag, GetProjectPath() },
-                {ExportSettingsTag, GetAbsPath(ExportSettingsFile) }
+                {ExportSettingsTag, GetAbsPath(ExportSettingsFile) },
+                {ImportSettingsTag, GetAbsPath(ImportSettingsFile) }
             };
 
             var installScript = "";
