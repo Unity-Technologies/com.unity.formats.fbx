@@ -30,14 +30,37 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
         )
     );
 
+    -- allow multiple files to be selected for import
+    fn GetMultiOpenFilenames caption:"Open" filename:"" types:"All Files (*.*)|*.*" default:1 =
+    (
+        local dialog = DotNetObject "System.Windows.Forms.OpenFileDialog"
+        dialog.multiSelect = true
+        dialog.title = caption
+
+        if doesFileExist filename then
+            dialog.initialDirectory = filename
+
+        dialog.filter = types
+        dialog.filterIndex = default
+
+        local result = dialog.ShowDialog()
+        if (result.Equals result.OK) then
+            dialog.filenames
+        else
+            undefined
+    )
+    
+    
     -- Make sure the FbxImporter plugin is loaded
     pluginManager.loadClass FbxImporter
     
     loadUnityFbxImportSettings()
     
     unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
-    fbxFileName = getOpenFileName caption:"Import FBX from Unity" filename:(unityProjectPath + "/Assets/")  types:"FBX (*.fbx)|*.fbx|"
-    if fbxFileName != undefined then
+    local unityAssetsPath = (unityProjectPath + "/Assets/")
+    unityAssetsPath = substituteString unityAssetsPath "/" "\\" -- dot net class requires backspaces
+    local fbxFileNames = getMultiOpenFilenames caption:"Import FBX from Unity" filename:unityAssetsPath  types:"FBX (*.fbx)|*.fbx"
+    if fbxFileNames != undefined then
     (
         -- ask to set units to cm if not already
         if (unityAskSetUnits == undefined or not unityAskSetUnits) and units.SystemType != #Centimeters then (
