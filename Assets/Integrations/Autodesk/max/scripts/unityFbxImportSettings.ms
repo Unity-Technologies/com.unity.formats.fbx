@@ -1,6 +1,6 @@
 FbxImporterSetParam "ResetImport"
 
-FbxImporterSetParam "Mode" #exmerge -- add and update animation
+FbxImporterSetParam "Mode" #merge -- update animation
 
 -- Geometry
 FbxImporterSetParam "SmoothingGroups" true
@@ -9,7 +9,7 @@ FbxImporterSetParam "Skin" true
 
 -- Animation
 FbxImporterSetParam "Animation" true
-FbxImporterSetParam "ImportBoneAsDummy" false
+FbxImporterSetParam "ImportBoneAsDummy" true
 FbxImporterSetParam "KeepFrameRate" true
 
 FbxImporterSetParam "Cameras" true
