@@ -139,18 +139,19 @@ namespace FbxExporters
                 EditorTools.IExportOptions exportOptions = null)
             {
                 PrefabType unityPrefabType = PrefabUtility.GetPrefabType(toConvert);
-                if (unityPrefabType == PrefabType.None || unityPrefabType == PrefabType.PrefabInstance)
+                switch (unityPrefabType)
                 {
-                    toConvert = ConvertGameObjectOrPrefabInstance(toConvert,fbxDirectoryFullPath,fbxFullPath, prefabDirectoryFullPath, prefabFullPath, exportOptions);
+                    case PrefabType.ModelPrefab:
+                        toConvert = ConvertModel(toConvert,fbxDirectoryFullPath,fbxFullPath, prefabDirectoryFullPath, prefabFullPath, exportOptions);
+                        break;
+                    case PrefabType.ModelPrefabInstance:
+                        toConvert = ConvertModelInstance(toConvert,fbxDirectoryFullPath,fbxFullPath, prefabDirectoryFullPath, prefabFullPath, exportOptions);
+                        break;
+                    default:
+                        toConvert = ConvertGameObjectOrPrefabInstance(toConvert,fbxDirectoryFullPath,fbxFullPath, prefabDirectoryFullPath, prefabFullPath, exportOptions);
+                        break;
                 }
-                else if (unityPrefabType == PrefabType.ModelPrefab)
-                {
-                    toConvert = ConvertModel(toConvert,fbxDirectoryFullPath,fbxFullPath, prefabDirectoryFullPath, prefabFullPath, exportOptions);
-                }
-                else if(unityPrefabType == PrefabType.ModelPrefabInstance)
-                {
-                    toConvert = ConvertModelInstance(toConvert,fbxDirectoryFullPath,fbxFullPath, prefabDirectoryFullPath, prefabFullPath, exportOptions);
-                }
+
                 return toConvert;
             }
             
@@ -351,11 +352,6 @@ namespace FbxExporters
             public static void SetupFbxPrefabOnPrefab(GameObject toConvert, GameObject unityMainAsset, string projectRelativePath, string fbxFullPath){
                 // Create a prefab from the instantiated and componentized unityGO.
                 var prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");             
-                /*if (destinationPath != null)
-                {
-                    string assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(destinationPath);
-                    prefabFileName = "Assets/" + assetRelativePath;
-                }*/
                 var prefab = PrefabUtility.CreatePrefab(prefabFileName, toConvert, ReplacePrefabOptions.ConnectToPrefab);
                 if (!prefab) {
                     throw new System.Exception(
@@ -388,11 +384,6 @@ namespace FbxExporters
                 
                 // Create a prefab from the instantiated and componentized unityGO.
                 var prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");
-                /*if (destinationPath != null)
-                {
-                    string assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(destinationPath);
-                    prefabFileName = "Assets/" + assetRelativePath;
-                }*/
                 var prefab = PrefabUtility.CreatePrefab(prefabFileName, toConvert, ReplacePrefabOptions.ConnectToPrefab);
                 if (!prefab) {
                     throw new System.Exception(
