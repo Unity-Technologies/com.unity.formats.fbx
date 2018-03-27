@@ -25,63 +25,45 @@ namespace FbxExporters.UnitTests
             Animator animatorComponent = capsule.AddComponent<Animator>();
 
             // Creates the controller
-            UnityEditor.Animations.AnimatorController animatorController = UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath("Assets/StateMachineTransitions.controller");
+            UnityEditor.Animations.AnimatorController animatorController = UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath("Assets/AnimController.controller");
 
             // Add parameters
             animatorController.AddParameter("Temperature", AnimatorControllerParameterType.Float);
 
-            // Add StateMachines
-            UnityEditor.Animations.AnimatorStateMachine rootStateMachine = animatorController.layers[0].stateMachine;
-            UnityEditor.Animations.AnimatorStateMachine stateMachineA = rootStateMachine.AddStateMachine("Temperature");
-
-            // Add States
-            UnityEditor.Animations.AnimatorState stateA1 = stateMachineA.AddState("stateA1");
-
             // Assign Controller to component
             animatorComponent.runtimeAnimatorController = animatorController;
 
-            AnimationClip clip = new AnimationClip();
-            clip.SetCurve("", typeof(Transform), "localPosition.x", AnimationCurve.EaseInOut(0, 0, 1, 1));
-            clip.SetCurve("", typeof(Transform), "localPosition.x", AnimationCurve.EaseInOut(1, 1, 0, 0));
+            AnimationClip originalClip = new AnimationClip();
+            // We need an example curve so the animated custom properties in the FBX will be recognized as well
+            originalClip.SetCurve("", typeof(Transform), "localPosition.x", AnimationCurve.EaseInOut(0, 0, 5, 11));
+            // Animated custom property
+            originalClip.SetCurve("", typeof(UnityEngine.Animator), "Temperature", AnimationCurve.EaseInOut(0,0,5, 102));
 
-            clip.SetCurve("", typeof(UnityEngine.Animator), "Temperature", AnimationCurve.Constant(0, 5, 102));
-            clip.SetCurve("", typeof(UnityEngine.Animator), "Temperature", AnimationCurve.Constant(50, 10, 2));
-            clip.SetCurve("", typeof(UnityEngine.Animator), "Temperature", AnimationCurve.Constant(100, 15, 52));
-
-            AssetDatabase.CreateAsset(clip, "Assets/StateMachineTransitions.anim");
-            UnityEditor.Animations.AnimatorState playMotion = animatorController.AddMotion(clip);
+            AssetDatabase.CreateAsset(originalClip, "Assets/Animation.anim");
+            UnityEditor.Animations.AnimatorState playMotion = animatorController.AddMotion(originalClip);
 
             var filename = GetRandomFileNamePath();
 
-
             // Export GameObject Capsule to Model
             GameObject m_fbx = ExportSelection(filename, capsule, exportSettings);
-            Dictionary<string, AnimationClip> clipsDictionary = GetClipsFromFbx(filename);
-            Assert.IsTrue (clipsDictionary.ContainsKey ("Temperature"));
+            // Check the "Animated custom properties" checkbox
+            ModelImporter modelImporter = AssetImporter.GetAtPath (filename) as ModelImporter;
+            modelImporter.importAnimatedCustomProperties = true;
 
-
-        }
-
-
-        public static Dictionary<string, AnimationClip> GetClipsFromFbx(string path, bool setLegacy = false){
-            //acquire imported object from exported file
-            Object [] goAssetImported = AssetDatabase.LoadAllAssetsAtPath (path);
-            Assert.That (goAssetImported, Is.Not.Null);
-
-            // TODO : configure object so that it imports w Legacy Animation
-
-            var animClips = new Dictionary<string, AnimationClip> ();
-            foreach (Object o in goAssetImported) {
-                var animClipImported = o as AnimationClip;
-                if (animClipImported && !animClipImported.name.StartsWith("__preview__")) {
-                    // TODO : configure import settings so we don't need to force legacy
-                    animClipImported.legacy = setLegacy;
-                    animClips.Add (animClipImported.name, animClipImported);
-                }
+            // Get clips from exported FBX
+            Dictionary<string, AnimationClip> clipsDictionary = FbxAnimationTest.AnimTester.GetClipsFromFbx(filename);
+            foreach(KeyValuePair<string, AnimationClip> entry in clipsDictionary)
+            {
+                // Compare if they match with the original
+                FbxAnimationTest.AnimTester.ClipTest (originalClip, entry.Value);
             }
-            Assert.That (animClips, Is.Not.Empty, "expected imported clips");
-
-            return animClips;
         }
+
+
+
+
     }
+
+
+
 }

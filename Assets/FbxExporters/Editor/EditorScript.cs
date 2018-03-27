@@ -26,7 +26,6 @@ public class EditorScript {
 
 		m_FbxIsLoaded = true;
 	}
-        
 
     private static FbxNode AddCustomProperty(GameObject unityGo, FbxNode fbxNode)
 	{
@@ -46,7 +45,6 @@ public class EditorScript {
                         if (!fbxProperty.IsValid()) {
                             throw new System.NullReferenceException();
                         }
-                        Debug.Log("DELEGATE " + param.name + " value" +  param.defaultInt);
                         fbxProperty.Set(param.defaultInt);
                     }
                     else if (param.type == AnimatorControllerParameterType.Float)
@@ -55,7 +53,6 @@ public class EditorScript {
                         if (!fbxProperty.IsValid()) {
                             throw new System.NullReferenceException();
                         }
-                        Debug.Log("DELEGATE " + param.name + " value" +  param.defaultFloat);
                         fbxProperty.Set(param.defaultFloat);
                     }
                     else if (param.type == AnimatorControllerParameterType.Bool)
@@ -64,7 +61,6 @@ public class EditorScript {
                         if (!fbxProperty.IsValid()) {
                             throw new System.NullReferenceException();
                         }
-                        Debug.Log("DELEGATE " + param.name + " value" +  param.defaultBool);
                         fbxProperty.Set(System.Convert.ToInt32(param.defaultBool));
                     }
 

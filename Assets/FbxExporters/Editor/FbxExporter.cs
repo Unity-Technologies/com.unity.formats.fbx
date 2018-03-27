@@ -2885,7 +2885,6 @@ namespace FbxExporters
                 return true;
             }
 
-
             /// <summary>
             /// Extracting Custom Properties/Parameters from AnimatorController and including them in fbxNode.
             /// </summary>
@@ -2914,7 +2913,6 @@ namespace FbxExporters
                                     if (!fbxProperty.IsValid()) {
                                         throw new System.NullReferenceException();
                                     }
-                                    Debug.Log(param.name + " value" +  param.defaultInt);
                                     fbxProperty.Set(param.defaultInt);
                                 }
                                 else if (param.type == AnimatorControllerParameterType.Float)
@@ -2923,7 +2921,6 @@ namespace FbxExporters
                                     if (!fbxProperty.IsValid()) {
                                         throw new System.NullReferenceException();
                                     }
-                                    Debug.Log(param.name + " value" +  param.defaultFloat);
                                     fbxProperty.Set(param.defaultFloat);
                                 }
                                 else if (param.type == AnimatorControllerParameterType.Bool)
@@ -2932,7 +2929,6 @@ namespace FbxExporters
                                     if (!fbxProperty.IsValid()) {
                                         throw new System.NullReferenceException();
                                     }
-                                    Debug.Log(param.name + " value" +  param.defaultBool);
                                     fbxProperty.Set(System.Convert.ToInt32(param.defaultBool));
                                 }
 
