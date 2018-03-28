@@ -67,7 +67,7 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
     fn getOrCreateSettingsDummy name = (
         unityDummy = getOrCreateDummy name
         
-        if not (isProperty unityDummy "filePath") do (
+        if not (isProperty unityDummy "modelFilePath") do (
             unitySetData = attributes unityData
             (
                 parameters main rollout:params
@@ -204,31 +204,74 @@ macroScript UnityExport category:"Unity" tooltip:"Export a model to Unity"
         FbxExporterSetParam "ScaleFactor" (unitToScaleFactor units.SystemType)
     );
 
+    fn getUnityExportSets = (
+        local unityExportSets = #()
+        for expSet in selectionSets do (
+            if(matchPattern expSet.name pattern:"*_UnityExportSet" and (not isdeleted expSet) and (expSet != undefined)) do (
+                append unityExportSets expSet
+            )
+        )
+        unityExportSets
+    )
+    
+    fn exportUnitySet expSet = (
+        select expSet
+        
+        -- get export set's dummy
+        local expSetDummy = getNodeByName (expSet.name)
+        
+        exportFileName = undefined
+        if expSetDummy != undefined and (isProperty expSetDummy "modelFilePath") and (isProperty expSetDummy "modelFileName") and
+            expSetDummy.unityData.modelFilePath != "" and expSetDummy.unityData.modelFileName != "" then
+        (
+            exportFileName = expSetDummy.unityData.modelFilePath + "/" + expSetDummy.unityData.modelFileName
+        )
+        else(
+            unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
+            exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:(unityProjectPath + "/Assets/") types:"FBX (*.fbx)|*.fbx|"
+        )
+        
+        if exportFileName != undefined then (
+            exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
+        )
+    )
+    
     -- Make sure the FbxExporter plugin is loaded
     pluginManager.loadClass FbxExporter
     
     loadUnityFbxExportSettings()
     
     origSelection = getCurrentSelection()
-    exportSet = selectionSets["UnityFbxExportSet"]
-    if not isdeleted exportSet and exportSet != undefined then(
-        select exportSet
-    )
     
     local origUnits = units.SystemType
     units.SystemType = #Centimeters
     
-    exportFileName = undefined
-    if unityFbxFilePathAttr != undefined and unityFbxFileNameAttr != undefined then(
-        exportFileName = unityFbxFilePathAttr + unityFbxFileNameAttr
-    )
-    else(
-        unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
-        exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:(unityProjectPath + "/Assets/") types:"FBX (*.fbx)|*.fbx|"
+    -- get all the unity export sets
+    local unityExportSets = getUnityExportSets()
+    
+    -- find all sets that contain at least one object from the current selection
+    local setsToExport = #()
+    for expSet in unityExportSets do (
+        for obj in origSelection do (
+            if (findItem expSet obj > 0) do (
+                appendIfUnique setsToExport expSet
+                break
+            )
+        )
     )
     
-    if exportFileName != undefined then (
-        exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
+    -- if no sets are selected, then export selection, otherwise export each set to its corresponding file
+    if (setsToExport.count <= 0) then (
+        local unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
+        local exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:(unityProjectPath + "/Assets/") types:"FBX (*.fbx)|*.fbx|"
+        if exportFileName != undefined do (
+            exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
+        )
+    )
+    else (
+        for expSet in setsToExport do (
+            exportUnitySet expSet
+        )
     )
     
     units.SystemType = origUnits
