@@ -52,23 +52,22 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             undefined
     )
     
-    fn getOrCreateRootDummy = (
-        unityDummy = getNodeByName (rootDummyName)
-        if (unityDummy == undefined) do (
-            unityDummy = Dummy()
-            unityDummy.name = rootDummyName
-            unityDummy.boxsize = [1,1,1]
-        )
-        unityDummy -- return dummy
-    )
-    
-    fn getOrCreateSettingsDummy name = (
+    fn getOrCreateDummy name = (
         unityDummy = getNodeByName (name)
         if (unityDummy == undefined) do (
             unityDummy = Dummy()
             unityDummy.name = name
             unityDummy.boxsize = [1,1,1]
         )
+        unityDummy -- return dummy
+    )
+    
+    fn getOrCreateRootDummy = (
+        getOrCreateDummy rootDummyName
+    )
+    
+    fn getOrCreateSettingsDummy name = (
+        unityDummy = getOrCreateDummy name
         
         if not (isProperty unityDummy "filePath") do (
             unitySetData = attributes unityData
