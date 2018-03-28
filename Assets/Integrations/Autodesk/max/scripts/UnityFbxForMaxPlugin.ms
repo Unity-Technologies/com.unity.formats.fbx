@@ -182,8 +182,17 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
         )
     )
 )
-macroScript UnityExport category:"Unity" tooltip:"Export a model to Unity"
+macroScript UnityExport category:"Unity" tooltip:"Export models and animation to Unity"
+(   
+    UnityExportHelpers.exportSelection modelOnly:false
+)
+
+macroScript UnityExportModel category:"Unity" tooltip:"Export models to Unity"
 (
+    UnityExportHelpers.exportSelection modelOnly:true
+)
+
+struct UnityExportHelpers (
     fn unitToScaleFactor unit = (
         case unit of (
             #Inches: 2.54
@@ -194,15 +203,15 @@ macroScript UnityExport category:"Unity" tooltip:"Export a model to Unity"
             #Meters: 100
             default: 1
         )
-    );
+    ),
 
     fn loadUnityFbxExportSettings = (
         fbxExportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxExportSettings"
         if fbxExportSettings != undefined and doesFileExist fbxExportSettings then(
             filein fbxExportSettings
         )
-        FbxExporterSetParam "ScaleFactor" (unitToScaleFactor units.SystemType)
-    );
+        FbxExporterSetParam "ScaleFactor" (UnityExportHelpers.unitToScaleFactor units.SystemType)
+    ),
 
     fn getUnityExportSets = (
         local unityExportSets = #()
@@ -215,8 +224,8 @@ macroScript UnityExport category:"Unity" tooltip:"Export a model to Unity"
             )
         )
         unityExportSets
-    )
-    
+    ),
+
     fn exportUnitySet expSet = (
         select expSet
         
@@ -237,75 +246,84 @@ macroScript UnityExport category:"Unity" tooltip:"Export a model to Unity"
         if exportFileName != undefined then (
             exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
         )
-    )
+    ),
     
-    -- Make sure the FbxExporter plugin is loaded
-    pluginManager.loadClass FbxExporter
-    
-    loadUnityFbxExportSettings()
-    
-    origSelection = getCurrentSelection()
-    
-    local origUnits = units.SystemType
-    units.SystemType = #Centimeters
-    
-    -- get all the unity export sets
-    local unityExportSets = getUnityExportSets()
-    
-    -- find all sets that contain at least one object from the current selection
-    local setsToExport = #()
-    for expSet in unityExportSets do (
-        for obj in origSelection do (
-            if (findItem expSet obj > 0) do (
-                appendIfUnique setsToExport expSet
-                break
+    fn exportSelection modelOnly:false = (
+        -- Make sure the FbxExporter plugin is loaded
+        pluginManager.loadClass FbxExporter
+        
+        UnityExportHelpers.loadUnityFbxExportSettings()
+        
+        if(modelOnly) do (
+            FbxExporterSetParam "Animation" false
+        )
+        
+        origSelection = getCurrentSelection()
+        
+        local origUnits = units.SystemType
+        units.SystemType = #Centimeters
+        
+        -- get all the unity export sets
+        local unityExportSets = UnityExportHelpers.getUnityExportSets()
+        
+        -- find all sets that contain at least one object from the current selection
+        local setsToExport = #()
+        for expSet in unityExportSets do (
+            for obj in origSelection do (
+                if (findItem expSet obj > 0) do (
+                    appendIfUnique setsToExport expSet
+                    break
+                )
             )
         )
-    )
-    
-    -- if no sets are selected, then export selection, otherwise export each set to its corresponding file
-    if (setsToExport.count <= 0) then (
-        local unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
-        local exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:(unityProjectPath + "/Assets/") types:"FBX (*.fbx)|*.fbx|"
-        if exportFileName != undefined do (
-            exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
+        
+        -- if no sets are selected, then export selection, otherwise export each set to its corresponding file
+        if (setsToExport.count <= 0) then (
+            local unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
+            local exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:(unityProjectPath + "/Assets/") types:"FBX (*.fbx)|*.fbx|"
+            if exportFileName != undefined do (
+                exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
+            )
         )
-    )
-    else (
-        for expSet in setsToExport do (
-            exportUnitySet expSet
+        else (
+            for expSet in setsToExport do (
+                UnityExportHelpers.exportUnitySet expSet
+            )
         )
-    )
-    
-    units.SystemType = origUnits
-    
-    if origSelection != undefined then (
-        select origSelection
+        
+        units.SystemType = origUnits
+        
+        if origSelection != undefined then (
+            select origSelection
+        )
     )
 )
 
-fn createUnityActionItem macroName category title parentMenu = (
-	local unityAction = menuMan.createActionItem macroName category; --create an ActionItem from the MacroScript
-	unityAction.setTitle title;
-	unityAction.setUseCustomTitle true;
-	parentMenu.addItem unityAction -1;
-	unityAction
-);
+struct UnityHelpers (
+    fn createUnityActionItem macroName category title parentMenu = (
+        local unityAction = menuMan.createActionItem macroName category; --create an ActionItem from the MacroScript
+        unityAction.setTitle title;
+        unityAction.setUseCustomTitle true;
+        parentMenu.addItem unityAction -1;
+        unityAction
+    ),
 
-fn createUnityImportAction title parentMenu = (
-	createUnityActionItem "UnityImport" "Unity" title parentMenu;
-);
+    fn createUnityImportAction title parentMenu = (
+        UnityHelpers.createUnityActionItem "UnityImport" "Unity" title parentMenu;
+    ),
 
-fn createUnityExportAction title parentMenu = (
-	createUnityActionItem "UnityExport" "Unity" title parentMenu;
-);
+    fn createUnityExportAction title parentMenu = (
+        UnityHelpers.createUnityActionItem "UnityExport" "Unity" title parentMenu;
+    ),
+    
+    fn createUnityExportModelAction title parentMenu = (
+        UnityHelpers.createUnityActionItem "UnityExportModel" "Unity" title parentMenu;
+    ),
 
-global unityResetExportOptions;
-fn unityResetExportOptions = (
-    unityFbxFilePathAttr=undefined;
-    unityFbxFileNameAttr=undefined;
-    unityAskSetUnits=undefined;
-);
+    fn unityResetExportOptions = (
+        unityAskSetUnits=undefined;
+    )
+)
 
 -- Setup UI in existing Import/Export menus if using 3ds Max 2018+
 if (maxVersion())[1] >= 20000 then(
@@ -332,6 +350,7 @@ if (maxVersion())[1] >= 20000 then(
 		(
 			local unityImportTitle = "Import from Unity"
 			local unityExportTitle = "Export to Unity"
+            local unityExportModelTitle = "Export Model Only to Unity"
 			
 			-- check if menu items already exist, delete if they do
 			local foundUnityImport = false
@@ -354,8 +373,9 @@ if (maxVersion())[1] >= 20000 then(
             id = genClassID returnValue:true
             if menuMan.registerMenuContext id[1] then
             (
-                global unityImportAction = createUnityImportAction unityImportTitle importMenu
-                global unityExportAction = createUnityExportAction unityExportTitle exportMenu
+                global unityImportAction = UnityHelpers.createUnityImportAction unityImportTitle importMenu
+                global unityExportAction = UnityHelpers.createUnityExportAction unityExportTitle exportMenu
+                global unityExportModelAction = UnityHelpers.createUnityExportModelAction unityExportModelTitle exportMenu
                 
                 menuMan.updateMenuBar() --update the menu bar
             )
@@ -372,13 +392,16 @@ if (maxVersion())[1] >= 20000 then(
 		 ) \
 		 if exportMenu != undefined and unityExportAction != undefined then( \
 			exportMenu.removeItem unityExportAction; \
+		 ) \
+		 if exportMenu != undefined and unityExportModelAction != undefined then( \
+			exportMenu.removeItem unityExportModelAction; \
 		 )"
 	)
     
     -- when opening a new scene, reset the export options to make
     -- sure we don't accidentally overwrite anything
-    callbacks.addScript #postSceneReset ("unityResetExportOptions()")
-    callbacks.addScript #systemPreNew ("unityResetExportOptions()")
+    callbacks.addScript #postSceneReset ("UnityHelpers.unityResetExportOptions()")
+    callbacks.addScript #systemPreNew ("UnityHelpers.unityResetExportOptions()")
 )
 else if (maxVersion())[1] == 19000 then (
 	-- for 3ds Max 2017
@@ -395,6 +418,7 @@ else if (maxVersion())[1] == 19000 then (
 		local unityMenu = getUnityMenu()
 		local unityImportTitle = "Import"
 		local unityExportTitle = "Export"
+        local unityExportModelTitle = "Export Model Only"
 		if unityMenu != undefined do
 		(
 			-- remove the menu if it still exists
@@ -409,8 +433,9 @@ else if (maxVersion())[1] == 19000 then (
 			local unityMenuItem = menuMan.createSubMenuItem unityMenuName unityMenu
 			mainMenuBar.addItem unityMenuItem (mainMenuBar.numItems())
 			
-			createUnityImportAction unityImportTitle unityMenu
-			createUnityExportAction unityExportTitle unityMenu
+			UnityHelpers.createUnityImportAction unityImportTitle unityMenu
+			UnityHelpers.createUnityExportAction unityExportTitle unityMenu
+            UnityHelpers.createUnityExportModelAction unityExportModelTitle unityMenu
 			
 			menuMan.updateMenuBar() --update the menu bar
 		)
@@ -427,8 +452,8 @@ else if (maxVersion())[1] == 19000 then (
     
     -- when opening a new scene, reset the export options to make
     -- sure we don't accidentally overwrite anything
-    callbacks.addScript #postSceneReset ("unityResetExportOptions()")
-    callbacks.addScript #systemPreNew ("unityResetExportOptions()")
+    callbacks.addScript #postSceneReset ("UnityHelpers.unityResetExportOptions()")
+    callbacks.addScript #systemPreNew ("UnityHelpers.unityResetExportOptions()")
 )
 else(
     print "Error: Unity Integration only supports 3ds Max 2017 or later"
