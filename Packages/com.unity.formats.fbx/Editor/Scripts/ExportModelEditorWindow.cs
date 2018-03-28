@@ -188,6 +188,10 @@ namespace FbxExporters
                 return (IsAncestor (t1, t2) || IsAncestor (t2, t1));
             }
 
+            protected virtual GameObject GetGameObject()
+            {
+                return ModelExporter.GetGameObject ( ToExport [0] );
+            }
 
             protected bool TransferAnimationSourceIsValid(Transform newValue){
                 if (!newValue) {
@@ -199,7 +203,7 @@ namespace FbxExporters
                     return false;
                 }
 
-                var selectedGO = ModelExporter.GetGameObject(ToExport[0]);
+                var selectedGO = GetGameObject();
 
                 // source must be ancestor to dest
                 if (TransferAnimationDest && !IsAncestor(newValue, TransferAnimationDest)) {
@@ -224,7 +228,7 @@ namespace FbxExporters
                     return false;
                 }
 
-                var selectedGO = ModelExporter.GetGameObject(ToExport[0]);
+                var selectedGO = GetGameObject();
 
                 // source must be ancestor to dest
                 if (TransferAnimationSource && !IsAncestor(TransferAnimationSource, newValue)) {
@@ -399,6 +403,14 @@ namespace FbxExporters
                     return false;
                 }
             }
+
+            protected override GameObject GetGameObject()
+            {
+                return (IsTimelineAnim)
+                    ? ModelExporter.AnimationOnlyExportData.GetGameObjectAndAnimationClip(ToExport [0]).Key
+                    :  ModelExporter.GetGameObject ( ToExport [0] );
+            }
+
             protected override bool DisableTransferAnim {
                 get {
                     // don't transfer animation if we are exporting more than one hierarchy, the timeline clips from
@@ -448,7 +460,7 @@ namespace FbxExporters
 
             private ExportSettings.Include m_previousInclude = ExportSettings.Include.ModelAndAnim;
 
-            public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false, bool isPlayableDirector = false)
+            public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false)
             {
                 ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
                 window.IsTimelineAnim = isTimelineAnim;
@@ -464,20 +476,20 @@ namespace FbxExporters
 
             protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport){
                 ToExport = toExport.ToArray ();
+                if (ToExport.Length==0) return 0;
 
                 TransferAnimationSource = null;
                 TransferAnimationDest = null;
 
                 // if only one object selected, set transfer source/dest to this object
-                if (ToExport.Length == 1 || (IsTimelineAnim && ToExport.Length > 0)) {
-                    var go = ModelExporter.GetGameObject (ToExport [0]);
-                    if (go) {
-                        TransferAnimationSource = go.transform;
-                        TransferAnimationDest = go.transform;
-                    }
+                GameObject go = GetGameObject();                
+
+                if (go) {
+                    TransferAnimationSource = go.transform;
+                    TransferAnimationDest = go.transform;
                 }
 
-                return ToExport.Length;
+                return 1;
             }
 
             /// <summary>
