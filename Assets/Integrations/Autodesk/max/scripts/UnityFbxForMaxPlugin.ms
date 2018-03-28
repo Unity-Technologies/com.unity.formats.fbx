@@ -3,6 +3,7 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
 (
     origObjects = #()
     currSetName = ""
+    rootDummyName = "UnityFbxRootDummy"
 
     persistent global unityFbxFilePathAttr
     persistent global unityFbxFileNameAttr
@@ -32,7 +33,7 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
     );
 
     -- allow multiple files to be selected for import
-    fn GetMultiOpenFilenames caption:"Open" filename:"" types:"All Files (*.*)|*.*" default:1 =
+    fn getMultiOpenFilenames caption:"Open" filename:"" types:"All Files (*.*)|*.*" default:1 =
     (
         local dialog = DotNetObject "System.Windows.Forms.OpenFileDialog"
         dialog.multiSelect = true
@@ -51,6 +52,42 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             undefined
     )
     
+    fn getOrCreateRootDummy = (
+        unityDummy = getNodeByName (rootDummyName)
+        if (unityDummy == undefined) do (
+            unityDummy = Dummy()
+            unityDummy.name = rootDummyName
+            unityDummy.boxsize = [1,1,1]
+        )
+        unityDummy -- return dummy
+    )
+    
+    fn getOrCreateSettingsDummy name = (
+        unityDummy = getNodeByName (name)
+        if (unityDummy == undefined) do (
+            unityDummy = Dummy()
+            unityDummy.name = name
+            unityDummy.boxsize = [1,1,1]
+        )
+        
+        if not (isProperty unityDummy "filePath") do (
+            unitySetData = attributes unityData
+            (
+                parameters main rollout:params
+                (
+                    filePath type: #string ui:filep default:""
+                    fileName type: #string ui:filen default:""
+                )
+                rollout params "Unity Export Parameters"
+                ( 
+                    edittext filep "File Path:" text:filePath readOnly:false
+                    edittext filen "File Name:" text:fileName readOnly:false
+                 )
+            )
+            custAttributes.add unityDummy unitySetData #unique
+        )
+        unityDummy -- return dummy
+    )
     
     -- Make sure the FbxImporter plugin is loaded
     pluginManager.loadClass FbxImporter
@@ -81,11 +118,12 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             )
         )
         
+        local unityFbxFilePathAttr = ""
         for fbxFileName in fbxFileNames do (
             -- Get all objects in scene before importAction
             origObjects = objects as array
             
-            local unityFbxFilePathAttr = getFilenamePath fbxFileName
+            unityFbxFilePathAttr = getFilenamePath fbxFileName
             local unityFbxFileNameAttr = filenameFromPath fbxFileName
             local unityFbxFileName = getFilenameFile fbxFileName
             
@@ -97,53 +135,33 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             
             -- check if dummy already exists in scene
             currSetName = unityFbxFileName + "_UnityExportSet"
-            unityDummy = getNodeByName (currSetName)
-            if (unityDummy == undefined) do (
-                unityDummy = Dummy()
-                unityDummy.name = currSetName
-                unityDummy.boxsize = [1,1,1]
-            )
-            
-            if not (isProperty unityDummy "filePath") do (
-                unitySetData = attributes unityData
-                (
-                    parameters main rollout:params
-                    (
-                        filePath type: #string ui:filep default:""
-                        fileName type: #string ui:filen default:""
-                    )
-                    rollout params "Unity Export Parameters"
-                    ( 
-                        edittext filep "File Path:" text:filePath readOnly:false
-                        edittext filen "File Name:" text:fileName readOnly:false
-                     )
-                )
-
-                custAttributes.add unityDummy unitySetData #unique
-            )
+            unityDummy = getOrCreateSettingsDummy currSetName
             
             unityDummy.unityData.filePath = unityFbxFilePathAttr
             unityDummy.unityData.fileName = unityFbxFileNameAttr
             
-            -- Change Unity project if fbx is from a different Unity project.
-            -- Get the project based on the folder structure (i.e. folder above Assets)
-            local head = unityFbxFilePathAttr
-            head = trimRight head "\\/"
-            -- Check that we are not at the root directory.
-            while head != "" and not (pathConfig.isRootPath head) do(
-                if (pathConfig.stripPathToLeaf head) == "Assets" do (
-                    -- this is a valid Unity project, so set it
-                    unityProject = pathConfig.removePathLeaf head
-                    maxIniFile = (GetMAXIniFile())
-                    setINISetting maxIniFile "Unity" "UnityProject" unityProject
-                        
-                    -- in order to break out of loop without calling break (because "break" is slow)
-                    head = ""
-                )
-                head = pathConfig.removePathLeaf head
-            )
+            unityRootDummy = getOrCreateRootDummy()
+            unityDummy.parent = unityRootDummy
             
             callbacks.removeScripts #postImport id:#unityPlugin
+        )
+        
+        -- Change Unity project if fbx is from a different Unity project.
+        -- Get the project based on the folder structure (i.e. folder above Assets)
+        local head = unityFbxFilePathAttr
+        head = trimRight head "\\/"
+        -- Check that we are not at the root directory.
+        while head != "" and not (pathConfig.isRootPath head) do(
+            if (pathConfig.stripPathToLeaf head) == "Assets" do (
+                -- this is a valid Unity project, so set it
+                unityProject = pathConfig.removePathLeaf head
+                maxIniFile = (GetMAXIniFile())
+                setINISetting maxIniFile "Unity" "UnityProject" unityProject
+                    
+                -- in order to break out of loop without calling break (because "break" is slow)
+                head = ""
+            )
+            head = pathConfig.removePathLeaf head
         )
     )
 )
