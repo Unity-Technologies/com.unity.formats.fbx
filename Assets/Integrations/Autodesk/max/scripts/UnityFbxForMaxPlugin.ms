@@ -5,8 +5,6 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
     currSetName = ""
     rootDummyName = "UnityFbxRootDummy"
 
-    persistent global unityFbxFilePathAttr
-    persistent global unityFbxFileNameAttr
     persistent global unityAskSetUnits
     
     global afterImport
@@ -79,8 +77,8 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
                 )
                 rollout params "Unity Export Parameters"
                 ( 
-                    edittext filep "File Path:" text:filePath readOnly:false
-                    edittext filen "File Name:" text:fileName readOnly:false
+                    edittext filep "File Path:" text:filePath readOnly:false labelOnTop:true
+                    edittext filen "File Name:" text:fileName readOnly:false labelOnTop:true
                  )
             )
             custAttributes.add unityDummy unitySetData #unique
