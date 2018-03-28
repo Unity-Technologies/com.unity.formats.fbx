@@ -3719,34 +3719,6 @@ namespace FbxExporters
                 ExportModelEditorWindow.Init (exportArray, AnimationOnlyExportData.GetFileName(editorClipSelected), isTimelineAnim: true);
             }
 
-             internal static void ExportPlayableDirector(GameObject objectWithPlayableDirector, string folderPath, IExportOptions exportOptions = null)
-             {
-                PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
-                if (pd == null)
-                {
-                    return;
-                }
-                foreach (PlayableBinding output in pd.playableAsset.outputs)
-                {
-                    AnimationTrack at = output.sourceObject as AnimationTrack;
-
-                    GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
-
-                    // One file by animation clip
-                    foreach (TimelineClip timelineClip in at.GetClips()) {
-                        string AnimFbxFormat = AnimFbxFileFormat;
-                        if (timelineClip.displayName.Contains("@"))
-                        {
-                            AnimFbxFormat = "{0}/{2}.fbx";
-                        }
-                        string filePath = string.Format(AnimFbxFormat, folderPath, atObject.name, timelineClip.displayName);
-                        var exportData = GetExportData(atObject, timelineClip.animationClip, exportOptions);
-                        var exportDataDict = new Dictionary<GameObject,IExportData>(){{atObject, exportData}};
-                        ExportObjects(filePath, new Object[1]{atObject}, exportOptions, exportDataDict);
-                    }
-                }
-            }
-
             /// <summary>
             /// Add a menu item "Export Model..." to a GameObject's context menu.
             /// </summary>
