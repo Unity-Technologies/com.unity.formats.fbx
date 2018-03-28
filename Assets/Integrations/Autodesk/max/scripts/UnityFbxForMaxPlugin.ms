@@ -207,7 +207,10 @@ macroScript UnityExport category:"Unity" tooltip:"Export a model to Unity"
     fn getUnityExportSets = (
         local unityExportSets = #()
         for expSet in selectionSets do (
-            if(matchPattern expSet.name pattern:"*_UnityExportSet" and (not isdeleted expSet) and (expSet != undefined)) do (
+            if(matchPattern expSet.name pattern:"*_UnityExportSet" and 
+                (not isdeleted expSet) and (expSet != undefined) and 
+                getNodeByName (expSet.name) != undefined) do 
+            (
                 append unityExportSets expSet
             )
         )
