@@ -396,7 +396,7 @@ namespace FbxExporters
             protected override float MinWindowHeight { get { return 310; } } // determined by trial and error
             protected override bool DisableNameSelection {
                 get {
-                    return IsPlayableDirector;
+                    return false;
                 }
             }
             protected override bool DisableTransferAnim {
@@ -404,7 +404,7 @@ namespace FbxExporters
                     // don't transfer animation if we are exporting more than one hierarchy, the timeline clips from
                     // a playable director, or if only the model is being exported
                     // if we are on the timeline then export length can be more than 1
-                    return ToExport == null || ToExport.Length == 0 || (!IsTimelineAnim && ToExport.Length > 1) || IsPlayableDirector || SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model;
+                    return ToExport == null || ToExport.Length == 0 || (!IsTimelineAnim && ToExport.Length > 1) || SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model;
                 }
             }
 
@@ -441,14 +441,6 @@ namespace FbxExporters
                 }
             }
 
-            private bool m_isPlayableDirector = false;
-            protected bool IsPlayableDirector { 
-                get { return m_isPlayableDirector; } 
-                set {
-                    m_isPlayableDirector = value;
-                }
-            }
-
             protected override ExportOptionsSettingsSerializeBase SettingsObject
             {
                 get { return ExportSettings.instance.exportModelSettings.info; }
@@ -460,7 +452,6 @@ namespace FbxExporters
             {
                 ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
                 window.IsTimelineAnim = isTimelineAnim;
-                window.IsPlayableDirector = isPlayableDirector;
 
                 int numObjects = window.SetGameObjectsToExport (toExport);
                 if (string.IsNullOrEmpty (filename)) {
@@ -541,20 +532,6 @@ namespace FbxExporters
 
                 if (!OverwriteExistingFile (filePath)) {
                     return false;
-                }
-
-                if (IsPlayableDirector) {
-                    foreach (var obj in ToExport) {
-                        var go = ModelExporter.GetGameObject (obj);
-                        if (!go) {
-                            continue;
-                        }
-                        ModelExporter.ExportAllTimelineClips (go, folderPath, SettingsObject);
-                    }
-                    // refresh the asset database so that the file appears in the
-                    // asset folder view.
-                    AssetDatabase.Refresh ();
-                    return true;
                 }
 
                 if (ModelExporter.ExportObjects (filePath, ToExport, SettingsObject) != null) {
