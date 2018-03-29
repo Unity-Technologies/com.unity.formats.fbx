@@ -1889,8 +1889,8 @@ namespace FbxExporters
             /// Transfers transform animation from source to dest. Replaces dest's Unity Animation Curves with updated animations.
             /// NOTE: Source must be the parent of dest.
             /// </summary>
-            /// <param name="source">Source.</param>
-            /// <param name="dest">Destination.</param>
+            /// <param name="source">Source animated object.</param>
+            /// <param name="dest">Destination, child of the source.</param>
             /// <param name="sampleRate">Sample rate.</param>
             /// <param name="unityCurves">Unity curves.</param>
             private void TransferMotion(Transform source, Transform dest, float sampleRate, ref Dictionary<GameObject, List<UnityCurve>> unityCurves){
@@ -1933,14 +1933,23 @@ namespace FbxExporters
                     scaleKeyFrames[k] = new Keyframe[sampleTimes.Count];
                 }
 
+                // If we have a point in local coords represented as a column-vector x, the equation of x in coordinates relative to source's parent is:
+                //   x_grandparent = source * dest * x
+                // Now we're going to change dest to dest' which has the animation from source. And we're going to change
+                // source to source' which has no animation. The equation of x will become:
+                //   x_grandparent = source' * dest' * x
+                // We're not changing x_grandparent and x, so we need that:
+                //   source * dest = source' * dest'
+                // We know dest and source (both animated) and source' (static). Solve for dest':
+                //   dest' = (source')^-1 * source * dest
                 int keyIndex = 0;
+                var sourceStaticMatrixInverse = Matrix4x4.TRS(source.localPosition, source.localRotation, source.localScale).inverse;
                 foreach (var currSampleTime in sampleTimes) 
                 {
                     var sourceLocalMatrix = GetTransformMatrix (currSampleTime, source, sourceUnityCurves);
                     var destLocalMatrix = GetTransformMatrix (currSampleTime, dest, destUnityCurves);
 
-                    // child * parent
-                    var newLocalMatrix = sourceLocalMatrix * destLocalMatrix;
+                    var newLocalMatrix = sourceStaticMatrixInverse * sourceLocalMatrix * destLocalMatrix;
 
                     FbxVector4 translation, rotation, scale;
                     GetTRSFromMatrix (newLocalMatrix, out translation, out rotation, out scale);
@@ -2227,9 +2236,6 @@ namespace FbxExporters
                 // Use RSrs as the scaling inheritance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
-                if (TransformShouldBeReset (unityGo.transform)) {
-                    exportType = TransformExportType.Reset;
-                }
                 ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
 
                 fbxNodeParent.AddChild (fbxNode);
@@ -2276,35 +2282,6 @@ namespace FbxExporters
                 }
 
                 return numObjectsExported;
-            }
-
-            /// <summary>
-            /// Checks if the transform should be reset.
-            /// Transform should be reset if animation is being transferred, and this transform
-            /// is either the animation source, destination, or between these nodes.
-            /// </summary>
-            /// <returns><c>true</c>, if transform should be reset, <c>false</c> otherwise.</returns>
-            /// <param name="t">Transform.</param>
-            private bool TransformShouldBeReset(Transform t){
-                var source = ExportOptions.AnimationSource;
-                var dest = ExportOptions.AnimationDest;
-
-                if (!source || !dest || source == dest) {
-                    return false;
-                }
-
-                // don't want to reset destination, if it's a bone this could cause issues with the skinning
-                var curr = dest.parent;
-                while (curr != source && curr != null) {
-                    if (t == curr) {
-                        return true;
-                    }
-                    curr = curr.parent;
-                }
-                if (t == source) {
-                    return true;
-                }
-                return false;
             }
 
             /// <summary>
@@ -2534,9 +2511,6 @@ namespace FbxExporters
 
                 // export regular transform if we are not a bone or failed to export as a bone
                 if(!exportedBoneTransform){
-                    if (TransformShouldBeReset (unityGo.transform)) {
-                        exportType = TransformExportType.Reset;
-                    }
                     ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
                 }
 
