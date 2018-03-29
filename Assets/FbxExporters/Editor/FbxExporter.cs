@@ -2325,10 +2325,6 @@ namespace FbxExporters
                 // first clip to export
                 public AnimationClip defaultClip;
 
-                // TODO: find a better way to keep track of which components + properties we support
-                private static List<string> cameraProps = new List<string>{"field of view"};
-                private static List<string> lightProps = new List<string>{"m_Intensity", "m_SpotAngle", "m_Color.r", "m_Color.g", "m_Color.b"};
-
                 public AnimationOnlyExportData(
                     Dictionary<AnimationClip, GameObject> animClips,
                     HashSet<GameObject> exportSet,
@@ -2345,6 +2341,13 @@ namespace FbxExporters
                     GameObject animationRootObject,
                     bool exportSkinnedMeshAnim = true
                 ){
+                    // Force export of FbxNodeAttribute for camera and light with animation  
+                    // so that they point the right way when imported into Maya.
+                    if (animationRootObject.GetComponent<Light>())
+                        this.exportComponent[animationRootObject] = typeof(Light);
+                    else if (animationRootObject.GetComponent<Camera>())
+                        this.exportComponent[animationRootObject] = typeof(Camera);
+                    
                     foreach (var animClip in animClips) {
                         if (this.animationClips.ContainsKey(animClip)) {
                             // we have already exported gameobjects for this clip
@@ -2368,11 +2371,10 @@ namespace FbxExporters
                                 continue;
                             }
 
-                            if (lightProps.Contains (uniCurveBinding.propertyName)) {
-                                this.exportComponent.Add (unityGo, typeof(Light));
-                            } else if (cameraProps.Contains (uniCurveBinding.propertyName)) {
-                                this.exportComponent.Add (unityGo, typeof(Camera));
-                            }
+                            if (unityGo.GetComponent<Light>())
+                                this.exportComponent[unityGo] = typeof(Light);
+                            else if (unityGo.GetComponent<Camera>())
+                                this.exportComponent[unityGo] = typeof(Camera);
 
                             this.goExportSet.Add (unityGo);
                         }
