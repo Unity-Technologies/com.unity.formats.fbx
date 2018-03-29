@@ -234,7 +234,7 @@ proc importFile(string $filePathStr){
         storeAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
         storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, "");
     }
-    
+
     if(`namespaceInfo -cur -an` != $targetNamespace){
         namespace -set $targetNamespace;
     }
