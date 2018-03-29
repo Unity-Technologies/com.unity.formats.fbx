@@ -234,7 +234,16 @@ proc importFile(string $filePathStr){
         storeAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
         storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, "");
     }
-    
+    else
+    {
+        // Update animation only
+        FBXImportMode -v exmerge;
+
+        // Don’t change the static values on the cameras and lights
+        FBXImportCameras -v false;
+        FBXImportLights -v false;
+    }
+        
     if(`namespaceInfo -cur -an` != $targetNamespace){
         namespace -set $targetNamespace;
     }

@@ -2337,10 +2337,6 @@ namespace FbxExporters
                 // first clip to export
                 public AnimationClip defaultClip;
 
-                // TODO: find a better way to keep track of which components + properties we support
-                private static List<string> cameraProps = new List<string>{"field of view"};
-                private static List<string> lightProps = new List<string>{"m_Intensity", "m_SpotAngle", "m_Color.r", "m_Color.g", "m_Color.b"};
-
                 public AnimationOnlyExportData(
                     Dictionary<AnimationClip, GameObject> animClips,
                     HashSet<GameObject> exportSet,
@@ -2369,11 +2365,11 @@ namespace FbxExporters
                     {
                         if (rootObject.GetComponent<Light>())
                         {
-                            this.exportComponent.Add (rootObject, typeof(Light));
+                            this.exportComponent[rootObject] = typeof(Light);
                         }
                         else if (rootObject.GetComponent<Camera>())
                         {
-                            this.exportComponent.Add (rootObject, typeof(Camera));
+                            this.exportComponent[rootObject] = typeof(Camera);
                         }
                         this.goExportSet.Add (rootObject);
                     }
@@ -2401,10 +2397,10 @@ namespace FbxExporters
                                 continue;
                             }
 
-                            if (lightProps.Contains (uniCurveBinding.propertyName)) {
-                                this.exportComponent.Add (unityGo, typeof(Light));
-                            } else if (cameraProps.Contains (uniCurveBinding.propertyName)) {
-                                this.exportComponent.Add (unityGo, typeof(Camera));
+                            if (unityGo.GetComponent<Light>()) {
+                                this.exportComponent[unityGo] = typeof(Light);
+                            } else if (unityGo.GetComponent<Camera>()) {
+                                this.exportComponent[unityGo] = typeof(Camera);
                             }
 
                             this.goExportSet.Add (unityGo);
