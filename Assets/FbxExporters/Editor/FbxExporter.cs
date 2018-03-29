@@ -3339,7 +3339,7 @@ namespace FbxExporters
                 };
 
                 if (!string.IsNullOrEmpty (filePath)) {
-                    ExportObjects (filePath, exportArray, timelineAnim: true);
+                    ExportObjects (filePath, exportArray);
                     return;
                 }
 
@@ -3372,7 +3372,7 @@ namespace FbxExporters
                         }
                         string filePath = string.Format(AnimFbxFormat, folderPath, atObject.name, timelineClip.displayName);
                         UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timelineClip.animationClip };
-                        ExportObjects (filePath, myArray, exportOptions, timelineAnim: true);
+                        ExportObjects (filePath, myArray, exportOptions);
                     }
                 }
             }
@@ -3866,8 +3866,7 @@ namespace FbxExporters
             public static string ExportObjects (
                 string filePath,
                 UnityEngine.Object[] objects = null,
-                IExportOptions exportOptions = null,
-                bool timelineAnim = false)
+                IExportOptions exportOptions = null)
             {
                 LastFilePath = filePath;
 
@@ -3881,7 +3880,8 @@ namespace FbxExporters
                     }
 
                     Dictionary<GameObject, AnimationOnlyExportData> animationExportData = null;
-                    if (timelineAnim) {
+                    // if there are only two objects for export and the second is an animation clip, then we are exporting from the timeline
+                    if (objects.Length == 2 && objects[1] is AnimationClip) {
                         // We expect the first argument in the list to be the GameObject, the second one is the Animation Clip/Track we are exporting from the timeline
                         GameObject rootObject = ModelExporter.GetGameObject (objects [0]);
                         AnimationClip timelineClip = objects [1] as AnimationClip;
@@ -3909,10 +3909,9 @@ namespace FbxExporters
 
             public static string ExportObject (
                 string filePath, UnityEngine.Object root,
-                IExportOptions exportOptions = null,
-                bool isTimelineAnim = false)
+                IExportOptions exportOptions = null)
             {
-                return ExportObjects(filePath, new Object[] { root }, exportOptions, isTimelineAnim);
+                return ExportObjects(filePath, new Object[] { root }, exportOptions);
             }
 
             private static void EnsureDirectory (string path)
