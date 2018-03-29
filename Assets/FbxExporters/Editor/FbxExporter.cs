@@ -2341,13 +2341,9 @@ namespace FbxExporters
                     GameObject animationRootObject,
                     bool exportSkinnedMeshAnim = true
                 ){
-                    // Force export of FbxNodeAttribute for camera and light with animation  
-                    // so that they point the right way when imported into Maya.
-                    if (animationRootObject.GetComponent<Light>())
-                        this.exportComponent[animationRootObject] = typeof(Light);
-                    else if (animationRootObject.GetComponent<Camera>())
-                        this.exportComponent[animationRootObject] = typeof(Camera);
-                    
+                    // NOTE: the object (animationRootObject) containing the animation is not necessarily animated
+                    // when driven by an animator or animation component.
+
                     foreach (var animClip in animClips) {
                         if (this.animationClips.ContainsKey(animClip)) {
                             // we have already exported gameobjects for this clip
@@ -2371,6 +2367,8 @@ namespace FbxExporters
                                 continue;
                             }
 
+                            // If we have a clip driving a camera or light then force the export of FbxNodeAttribute
+                            // so that they point the right way when imported into Maya.
                             if (unityGo.GetComponent<Light>())
                                 this.exportComponent[unityGo] = typeof(Light);
                             else if (unityGo.GetComponent<Camera>())
