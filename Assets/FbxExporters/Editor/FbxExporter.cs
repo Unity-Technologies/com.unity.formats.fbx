@@ -2236,9 +2236,6 @@ namespace FbxExporters
                 // Use RSrs as the scaling inheritance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
-                if (TransformShouldBeReset (unityGo.transform)) {
-                    exportType = TransformExportType.Reset;
-                }
                 ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
 
                 fbxNodeParent.AddChild (fbxNode);
@@ -2285,35 +2282,6 @@ namespace FbxExporters
                 }
 
                 return numObjectsExported;
-            }
-
-            /// <summary>
-            /// Checks if the transform should be reset.
-            /// Transform should be reset if animation is being transferred, and this transform
-            /// is either the animation source, destination, or between these nodes.
-            /// </summary>
-            /// <returns><c>true</c>, if transform should be reset, <c>false</c> otherwise.</returns>
-            /// <param name="t">Transform.</param>
-            private bool TransformShouldBeReset(Transform t){
-                var source = ExportOptions.AnimationSource;
-                var dest = ExportOptions.AnimationDest;
-
-                if (!source || !dest || source == dest) {
-                    return false;
-                }
-
-                // don't want to reset destination, if it's a bone this could cause issues with the skinning
-                var curr = dest.parent;
-                while (curr != source && curr != null) {
-                    if (t == curr) {
-                        return true;
-                    }
-                    curr = curr.parent;
-                }
-                if (t == source) {
-                    return true;
-                }
-                return false;
             }
 
             /// <summary>
@@ -2543,9 +2511,6 @@ namespace FbxExporters
 
                 // export regular transform if we are not a bone or failed to export as a bone
                 if(!exportedBoneTransform){
-                    if (TransformShouldBeReset (unityGo.transform)) {
-                        exportType = TransformExportType.Reset;
-                    }
                     ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
                 }
 
