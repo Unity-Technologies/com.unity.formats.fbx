@@ -2,15 +2,15 @@
 macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unity project and auto-configure for exporting"
 (
     origObjects = #()
+    currSetName = ""
+    rootDummyName = "UnityFbxRootDummy"
 
-    persistent global unityFbxFilePathAttr
-    persistent global unityFbxFileNameAttr
     persistent global unityAskSetUnits
     
     global afterImport
     fn afterImport = (
         unityFbxExportSet = #()
-        currSet = selectionSets["UnityFbxExportSet"]
+        currSet = selectionSets[currSetName]
         if not isdeleted currSet and currSet != undefined then (
             unityFbxExportSet = unityFbxExportSet + currSet
         )
@@ -20,7 +20,7 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
                 append unityFbxExportSet obj
             )
         )
-        selectionSets["UnityFbxExportSet"] = unityFbxExportSet
+        selectionSets[currSetName] = unityFbxExportSet
     );
     
     fn loadUnityFbxImportSettings = (
@@ -30,14 +30,76 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
         )
     );
 
+    -- allow multiple files to be selected for import
+    fn getMultiOpenFilenames caption:"Open" filename:"" types:"All Files (*.*)|*.*" default:1 =
+    (
+        local dialog = DotNetObject "System.Windows.Forms.OpenFileDialog"
+        dialog.multiSelect = true
+        dialog.title = caption
+
+        if doesFileExist filename then
+            dialog.initialDirectory = filename
+
+        dialog.filter = types
+        dialog.filterIndex = default
+
+        local result = dialog.ShowDialog()
+        if (result.Equals result.OK) then
+            dialog.filenames
+        else
+            undefined
+    )
+    
+    fn getOrCreateDummy name = (
+        unityDummy = getNodeByName (name)
+        if (unityDummy == undefined) do (
+            unityDummy = Dummy()
+            unityDummy.name = name
+            unityDummy.boxsize = [1,1,1]
+        )
+        unityDummy -- return dummy
+    )
+    
+    fn getOrCreateRootDummy = (
+        getOrCreateDummy rootDummyName
+    )
+    
+    fn getOrCreateSettingsDummy name = (
+        unityDummy = getOrCreateDummy name
+        
+        if not (isProperty unityDummy "filePath") do (
+            unitySetData = attributes unityData
+            (
+                parameters main rollout:params
+                (
+                    modelFilePath type: #string ui:filep default:""
+                    modelFileName type: #string ui:filen default:""
+                    animFilePath type: #string ui:afilep default:""
+                    animFileName type: #string ui:afilen default:""
+                )
+                rollout params "Unity Export Parameters"
+                ( 
+                    edittext filep "Model File Path:" text:modelFilePath readOnly:false labelOnTop:true
+                    edittext filen "Model File Name:" text:modelFileName readOnly:false labelOnTop:true
+                    edittext afilep "Animation File Path:" text:animFilePath readOnly:false labelOnTop:true
+                    edittext afilen "Animation File Name:" text:animFileName readOnly:false labelOnTop:true
+                 )
+            )
+            custAttributes.add unityDummy unitySetData
+        )
+        unityDummy -- return dummy
+    )
+    
     -- Make sure the FbxImporter plugin is loaded
     pluginManager.loadClass FbxImporter
     
     loadUnityFbxImportSettings()
     
     unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
-    fbxFileName = getOpenFileName caption:"Import FBX from Unity" filename:(unityProjectPath + "/Assets/")  types:"FBX (*.fbx)|*.fbx|"
-    if fbxFileName != undefined then
+    local unityAssetsPath = (unityProjectPath + "/Assets/")
+    unityAssetsPath = substituteString unityAssetsPath "/" "\\" -- dot net class requires backspaces
+    local fbxFileNames = getMultiOpenFilenames caption:"Import FBX from Unity" filename:unityAssetsPath  types:"FBX (*.fbx)|*.fbx"
+    if fbxFileNames != undefined then
     (
         -- ask to set units to cm if not already
         if (unityAskSetUnits == undefined or not unityAskSetUnits) and units.SystemType != #Centimeters then (
@@ -56,39 +118,68 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
                 unityAskSetUnits = true
             )
         )
-    
-        -- reset persistent values, in case import fails
-        unityFbxFilePathAttr = ""
-        unityFbxFileNameAttr = ""
-    
-        -- Get all objects in scene before importAction
-        origObjects = objects as array
-        callbacks.addScript #postImport ("afterImport()") id:#unityPlugin
-
-        importFile fbxFileName #noPrompt using:FBXIMP
         
-        unityFbxFilePathAttr = getFilenamePath fbxFileName
-        unityFbxFileNameAttr = filenameFromPath fbxFileName
-		
-		-- Change Unity project if fbx is from a different Unity project.
-		-- Get the project based on the folder structure (i.e. folder above Assets)
-		local head = unityFbxFilePathAttr
-		head = trimRight head "\\/"
-		-- Check that we are not at the root directory.
-		while head != "" and not (pathConfig.isRootPath head) do(
-			if (pathConfig.stripPathToLeaf head) == "Assets" do (
-				-- this is a valid Unity project, so set it
-				unityProject = pathConfig.removePathLeaf head
-				maxIniFile = (GetMAXIniFile())
-				setINISetting maxIniFile "Unity" "UnityProject" unityProject
-					
-			    -- in order to break out of loop without calling break (because "break" is slow)
-			    head = ""
-			)
-			head = pathConfig.removePathLeaf head
-		)
-		
-        callbacks.removeScripts #postImport id:#unityPlugin
+        local unityFbxFilePathAttr = ""
+        for fbxFileName in fbxFileNames do (
+            -- Get all objects in scene before importAction
+            origObjects = objects as array
+            
+            unityFbxFilePathAttr = getFilenamePath fbxFileName
+            local unityFbxFileNameAttr = filenameFromPath fbxFileName
+            local unityFbxFileName = getFilenameFile fbxFileName
+            
+            local unityAnimFilePathAttr = unityFbxFilePathAttr
+            local unityAnimFileNameAttr = unityFbxFileNameAttr
+            
+            -- check if importing an animation file (contains @ symbol)
+            local isAnimFile = false
+            if(matchPattern unityFbxFileName pattern:"*@*") do (
+                isAnimFile = true
+                unityFbxFileName = (filterString unityFbxFileName "@")[1]
+            )
+            
+            currSetName = unityFbxFileName + "_UnityExportSet"
+            
+            callbacks.addScript #postImport ("afterImport()") id:#unityPlugin
+            
+            importFile fbxFileName #noPrompt using:FBXIMP
+            
+            -- check if dummy already exists in scene
+            currSetName = unityFbxFileName + "_UnityExportSet"
+            unityDummy = getOrCreateSettingsDummy currSetName
+            
+            if((not isAnimFile) or unityDummy.unityData.modelFilePath == "") do (
+                unityDummy.unityData.modelFilePath = unityFbxFilePathAttr
+            )
+            if((not isAnimFile) or unityDummy.unityData.modelFileName == "") do (
+                unityDummy.unityData.modelFileName = unityFbxFileNameAttr
+            )
+            unityDummy.unityData.animFilePath = unityAnimFilePathAttr
+            unityDummy.unityData.animFileName = unityAnimFileNameAttr
+            
+            unityRootDummy = getOrCreateRootDummy()
+            unityDummy.parent = unityRootDummy
+            
+            callbacks.removeScripts #postImport id:#unityPlugin
+        )
+        
+        -- Change Unity project if fbx is from a different Unity project.
+        -- Get the project based on the folder structure (i.e. folder above Assets)
+        local head = unityFbxFilePathAttr
+        head = trimRight head "\\/"
+        -- Check that we are not at the root directory.
+        while head != "" and not (pathConfig.isRootPath head) do(
+            if (pathConfig.stripPathToLeaf head) == "Assets" do (
+                -- this is a valid Unity project, so set it
+                unityProject = pathConfig.removePathLeaf head
+                maxIniFile = (GetMAXIniFile())
+                setINISetting maxIniFile "Unity" "UnityProject" unityProject
+                    
+                -- in order to break out of loop without calling break (because "break" is slow)
+                head = ""
+            )
+            head = pathConfig.removePathLeaf head
+        )
     )
 )
 macroScript UnityExport category:"Unity" tooltip:"Export a model to Unity"
