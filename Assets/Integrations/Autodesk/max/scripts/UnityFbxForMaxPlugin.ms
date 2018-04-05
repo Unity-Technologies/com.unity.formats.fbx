@@ -2,46 +2,50 @@
 macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unity project and auto-configure for exporting"
 (
     rootDummyName = "UnityFbxExportSets"
-    
-    origObjects = #()
-    currSetName = ""
-    unityFbxFilePathAttr = ""
-    unityFbxFileNameAttr = ""
-    unityAnimFileNameAttr = ""
-    unityAnimFilePathAttr = ""
-    isAnimFile = false
 
     persistent global unityAskSetUnits
     
-    global afterImport
-    fn afterImport = (
-        unityFbxExportSet = #()
-        currSet = selectionSets[currSetName]
-        if not isdeleted currSet and currSet != undefined then (
-            unityFbxExportSet = unityFbxExportSet + currSet
-        )
-        for obj in objects do(
-            if findItem origObjects obj == 0 then(
-                -- add to selection set
-                append unityFbxExportSet obj
+    global unityAfterFbxImport
+    fn unityAfterFbxImport = (
+        local callbackVars = unityImportCallbackVarsInstance
+        if(callbackVars != undefined) then(
+            local currSetName = callbackVars.currSetName
+            local origObjects = callbackVars.origObjects
+            local unityFbxFilePathAttr = callbackVars.unityFbxFilePathAttr 
+            local unityFbxFileNameAttr = callbackVars.unityFbxFileNameAttr
+            local unityAnimFileNameAttr = callbackVars.unityAnimFileNameAttr
+            local unityAnimFilePathAttr = callbackVars.unityAnimFilePathAttr
+            local isAnimFile = callbackVars.isAnimFile
+            
+            unityFbxExportSet = #()
+            currSet = selectionSets[currSetName]
+            if not isdeleted currSet and currSet != undefined then (
+                unityFbxExportSet = unityFbxExportSet + currSet
             )
+            for obj in objects do(
+                if findItem origObjects obj == 0 then(
+                    -- add to selection set
+                    append unityFbxExportSet obj
+                )
+            )
+            selectionSets[currSetName] = unityFbxExportSet
+            
+            -- check if dummy already exists in scene
+            unityDummy = UnityImportHelpers.getOrCreateSettingsDummy currSetName
+            
+            if((not isAnimFile) or unityDummy.unityData.modelFilePath == "") do (
+                unityDummy.unityData.modelFilePath = unityFbxFilePathAttr
+            )
+            if((not isAnimFile) or unityDummy.unityData.modelFileName == "") do (
+                unityDummy.unityData.modelFileName = unityFbxFileNameAttr
+            )
+            
+            unityDummy.unityData.animFilePath = unityAnimFilePathAttr
+            unityDummy.unityData.animFileName = unityAnimFileNameAttr
+            
+            unityRootDummy = UnityImportHelpers.getOrCreateRootDummy rootDummyName
+            unityDummy.parent = unityRootDummy
         )
-        selectionSets[currSetName] = unityFbxExportSet
-        
-        -- check if dummy already exists in scene
-        unityDummy = UnityImportHelpers.getOrCreateSettingsDummy currSetName
-        
-        if((not isAnimFile) or unityDummy.unityData.modelFilePath == "") do (
-            unityDummy.unityData.modelFilePath = unityFbxFilePathAttr
-        )
-        if((not isAnimFile) or unityDummy.unityData.modelFileName == "") do (
-            unityDummy.unityData.modelFileName = unityFbxFileNameAttr
-        )
-        unityDummy.unityData.animFilePath = unityAnimFilePathAttr
-        unityDummy.unityData.animFileName = unityAnimFileNameAttr
-        
-        unityRootDummy = UnityImportHelpers.getOrCreateRootDummy rootDummyName
-        unityDummy.parent = unityRootDummy
     );
     
     -- Make sure the FbxImporter plugin is loaded
@@ -73,35 +77,7 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             )
         )
         
-        unityFbxFilePathAttr = ""
-        for fbxFileName in fbxFileNames do (
-            -- Get all objects in scene before importAction
-            origObjects = objects as array
-            
-            unityFbxFilePathAttr = getFilenamePath fbxFileName
-            unityFbxFileNameAttr = filenameFromPath fbxFileName
-            unityFbxFileName = getFilenameFile fbxFileName
-            
-            unityAnimFilePathAttr = unityFbxFilePathAttr
-            unityAnimFileNameAttr = unityFbxFileNameAttr
-            
-            -- check if importing an animation file (contains @ symbol)
-            local isAnimFile = false
-            if(matchPattern unityFbxFileName pattern:"*@*") do (
-                isAnimFile = true
-                unityFbxFileName = (filterString unityFbxFileName "@")[1]
-            )
-            
-            currSetName = unityFbxFileName + unityExportSetPostFix
-            
-            callbacks.addScript #postImport ("afterImport()") id:#unityPlugin
-            
-            importFile fbxFileName #noPrompt using:FBXIMP
-            
-            callbacks.removeScripts #postImport id:#unityPlugin
-        )
-        
-        UnityImportHelpers.switchProject unityFbxFilePathAttr
+        UnityImportHelpers.importFiles fbxFileNames
     )
 )
 macroScript UnityExport category:"Unity" tooltip:"Export models and animation to Unity"
@@ -115,6 +91,18 @@ macroScript UnityExportModel category:"Unity" tooltip:"Export models to Unity"
 )
 
 global unityExportSetPostFix = "_UnityExportSet"
+
+struct UnityImportCallbackVars (
+    origObjects = #(),
+    currSetName = "",
+    unityFbxFilePathAttr = "",
+    unityFbxFileNameAttr = "",
+    unityAnimFileNameAttr = "",
+    unityAnimFilePathAttr = "",
+    isAnimFile = false
+)
+
+global unityImportCallbackVarsInstance = undefined
 
 struct UnityImportHelpers (
     fn loadUnityFbxImportSettings = (
@@ -203,6 +191,39 @@ struct UnityImportHelpers (
         )
         
         unityDummy -- return dummy
+    ),
+    
+    fn importFiles fbxFileNames = (
+        local callbackVars = UnityImportCallbackVars()
+        callbacks.addScript #postImport ("unityAfterFbxImport()") id:#unityPlugin
+        callbackVars.unityFbxFilePathAttr = ""
+        for fbxFileName in fbxFileNames do (
+            -- Get all objects in scene before importAction
+            callbackVars.origObjects = objects as array
+            
+            callbackVars.unityFbxFilePathAttr = getFilenamePath fbxFileName
+            callbackVars.unityFbxFileNameAttr = filenameFromPath fbxFileName
+            local unityFbxFileName = getFilenameFile fbxFileName
+            
+            callbackVars.unityAnimFilePathAttr = callbackVars.unityFbxFilePathAttr
+            callbackVars.unityAnimFileNameAttr = callbackVars.unityFbxFileNameAttr
+            
+            -- check if importing an animation file (contains @ symbol)
+            callbackVars.isAnimFile = false
+            if(matchPattern unityFbxFileName pattern:"*@*") do (
+                callbackVars.isAnimFile = true
+                unityFbxFileName = (filterString unityFbxFileName "@")[1]
+            )
+            
+            callbackVars.currSetName = unityFbxFileName + unityExportSetPostFix
+            
+            unityImportCallbackVarsInstance = callbackVars
+            
+            importFile fbxFileName #noPrompt using:FBXIMP
+        )
+        callbacks.removeScripts #postImport id:#unityPlugin
+        
+        UnityImportHelpers.switchProject callbackVars.unityFbxFilePathAttr
     )
 )
 
