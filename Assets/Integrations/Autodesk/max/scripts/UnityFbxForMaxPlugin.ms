@@ -22,9 +22,18 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
         )
         selectionSets["UnityFbxExportSet"] = unityFbxExportSet
     );
+    
+    fn loadUnityFbxImportSettings = (
+        fbxImportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxImportSettings"
+        if fbxImportSettings != undefined and doesFileExist fbxImportSettings then(
+            filein fbxImportSettings
+        )
+    );
 
     -- Make sure the FbxImporter plugin is loaded
     pluginManager.loadClass FbxImporter
+    
+    loadUnityFbxImportSettings()
     
     unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
     fbxFileName = getOpenFileName caption:"Import FBX from Unity" filename:(unityProjectPath + "/Assets/")  types:"FBX (*.fbx)|*.fbx|"
@@ -56,7 +65,7 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
         origObjects = objects as array
         callbacks.addScript #postImport ("afterImport()") id:#unityPlugin
 
-        importFile fbxFileName using:FBXIMP
+        importFile fbxFileName #noPrompt using:FBXIMP
         
         unityFbxFilePathAttr = getFilenamePath fbxFileName
         unityFbxFileNameAttr = filenameFromPath fbxFileName
