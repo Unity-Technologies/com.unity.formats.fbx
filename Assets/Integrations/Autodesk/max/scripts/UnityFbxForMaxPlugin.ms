@@ -272,7 +272,7 @@ struct UnityExportHelpers (
         if expSetDummy != undefined and (isProperty expSetDummy "modelFilePath") and (isProperty expSetDummy "modelFileName") and
             expSetDummy.unityData.modelFilePath != "" and expSetDummy.unityData.modelFileName != "" then
         (
-            exportFileName = expSetDummy.unityData.modelFilePath + "/" + expSetDummy.unityData.modelFileName
+            exportFileName = pathConfig.appendPath expSetDummy.unityData.modelFilePath expSetDummy.unityData.modelFileName
         )
         else(
             unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
