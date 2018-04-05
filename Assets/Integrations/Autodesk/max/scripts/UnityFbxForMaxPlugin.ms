@@ -255,7 +255,9 @@ struct UnityExportHelpers (
         )
         else(
             unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
-            exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:(unityProjectPath + "/Assets/") types:"FBX (*.fbx)|*.fbx|"
+            if(unityProjectPath != undefined and unityProjectPath != "") do (
+                exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:(unityProjectPath + "/Assets/") types:"FBX (*.fbx)|*.fbx|"
+            )
         )
         
         if exportFileName != undefined then (
