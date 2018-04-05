@@ -344,49 +344,49 @@ struct UnityGUI (
 
 -- Setup UI in existing Import/Export menus if using 3ds Max 2018+
 if (maxVersion())[1] >= 20000 then(
-	global importMenuName = "File-Import"
-	global exportMenuName = "File-Export"
-	
-	-- get the import menu
-	global getImportMenu
-	fn getImportMenu = (
-		menuMan.findMenu importMenuName
-	);
+    global importMenuName = "File-Import"
+    global exportMenuName = "File-Export"
+    
+    -- get the import menu
+    global getImportMenu
+    fn getImportMenu = (
+        menuMan.findMenu importMenuName
+    );
 
-	-- get the export menu
-	global getExportMenu
-	fn getExportMenu = (
-		menuMan.findMenu exportMenuName
-	);
-	
-	-- Setup UI
-	fn setupUnityPluginUI = (
-		local importMenu = getImportMenu()
-		local exportMenu = getExportMenu()
-		if importMenu != undefined and exportMenu != undefined do
-		(
-			local unityImportTitle = "Import from Unity..."
-			local unityExportTitle = "Export to Unity"
+    -- get the export menu
+    global getExportMenu
+    fn getExportMenu = (
+        menuMan.findMenu exportMenuName
+    );
+    
+    -- Setup UI
+    fn setupUnityPluginUI = (
+        local importMenu = getImportMenu()
+        local exportMenu = getExportMenu()
+        if importMenu != undefined and exportMenu != undefined do
+        (
+            local unityImportTitle = "Import from Unity..."
+            local unityExportTitle = "Export to Unity"
             local unityExportModelTitle = "Export to Unity (Model Only)"
-			
-			-- check if menu items already exist, delete if they do
-			local foundUnityImport = false
-			for i=1 to importMenu.numItems() while not foundUnityImport do(
-				local mi = importMenu.getItem i
-				if mi.getTitle() == unityImportTitle then(
-					importMenu.removeItem mi
-					foundUnityImport = true
-				)
-			)
-			local foundUnityExport = false
-			for i=1 to exportMenu.numItems() while not foundUnityExport do(
-				local mi = exportMenu.getItem i
-				if mi.getTitle() == unityExportTitle then(
-					exportMenu.removeItem mi
-					foundUnityExport = true
-				)
-			)
-			
+            
+            -- check if menu items already exist, delete if they do
+            local foundUnityImport = false
+            for i=1 to importMenu.numItems() while not foundUnityImport do(
+                local mi = importMenu.getItem i
+                if mi.getTitle() == unityImportTitle then(
+                    importMenu.removeItem mi
+                    foundUnityImport = true
+                )
+            )
+            local foundUnityExport = false
+            for i=1 to exportMenu.numItems() while not foundUnityExport do(
+                local mi = exportMenu.getItem i
+                if mi.getTitle() == unityExportTitle then(
+                    exportMenu.removeItem mi
+                    foundUnityExport = true
+                )
+            )
+            
             id = genClassID returnValue:true
             if menuMan.registerMenuContext id[1] then
             (
@@ -396,24 +396,24 @@ if (maxVersion())[1] >= 20000 then(
                 
                 menuMan.updateMenuBar() --update the menu bar
             )
-		)
-	);
-	setupUnityPluginUI()
+        )
+    );
+    setupUnityPluginUI()
 
-	-- Make sure that Menu gets removed at shutdown, force menu to reload each time Max is opened
-	callbacks.addScript #preSavingMenus (
-		"importMenu = getImportMenu(); \
-		 exportMenu = getExportMenu(); \
-		 if importMenu != undefined and unityImportAction != undefined then( \
-			importMenu.removeItem unityImportAction; \
-		 ) \
-		 if exportMenu != undefined and unityExportAction != undefined then( \
-			exportMenu.removeItem unityExportAction; \
-		 ) \
-		 if exportMenu != undefined and unityExportModelAction != undefined then( \
-			exportMenu.removeItem unityExportModelAction; \
-		 )"
-	)
+    -- Make sure that Menu gets removed at shutdown, force menu to reload each time Max is opened
+    callbacks.addScript #preSavingMenus (
+        "importMenu = getImportMenu(); \
+         exportMenu = getExportMenu(); \
+         if importMenu != undefined and unityImportAction != undefined then( \
+            importMenu.removeItem unityImportAction; \
+         ) \
+         if exportMenu != undefined and unityExportAction != undefined then( \
+            exportMenu.removeItem unityExportAction; \
+         ) \
+         if exportMenu != undefined and unityExportModelAction != undefined then( \
+            exportMenu.removeItem unityExportModelAction; \
+         )"
+    )
     
     -- when opening a new scene, reset the export options to make
     -- sure we don't accidentally overwrite anything
@@ -421,51 +421,51 @@ if (maxVersion())[1] >= 20000 then(
     callbacks.addScript #systemPreNew ("UnityGUI.unityResetExportOptions()")
 )
 else if (maxVersion())[1] == 19000 then (
-	-- for 3ds Max 2017
-	
-	global unityMenuName = "Unity"
-	
-	global getUnityMenu
-	fn getUnityMenu = (
-		menuMan.findMenu unityMenuName
-	);
-	
-	-- Setup UI
-	fn setupUnityPluginUI = (
-		local unityMenu = getUnityMenu()
-		local unityImportTitle = "Import..."
-		local unityExportTitle = "Export"
+    -- for 3ds Max 2017
+    
+    global unityMenuName = "Unity"
+    
+    global getUnityMenu
+    fn getUnityMenu = (
+        menuMan.findMenu unityMenuName
+    );
+    
+    -- Setup UI
+    fn setupUnityPluginUI = (
+        local unityMenu = getUnityMenu()
+        local unityImportTitle = "Import..."
+        local unityExportTitle = "Export"
         local unityExportModelTitle = "Export Model Only"
-		if unityMenu != undefined do
-		(
-			-- remove the menu if it still exists
-			menuMan.unRegisterMenu unityMenu
-		)
-		
-		id = genClassID returnValue:true
-		if menuMan.registerMenuContext id[1] then
-		(
-			local mainMenuBar = menuMan.getMainMenuBar()
-			local unityMenu = menuMan.createMenu unityMenuName
-			local unityMenuItem = menuMan.createSubMenuItem unityMenuName unityMenu
-			mainMenuBar.addItem unityMenuItem (mainMenuBar.numItems())
-			
-			UnityGUI.createUnityImportAction unityImportTitle unityMenu
-			UnityGUI.createUnityExportAction unityExportTitle unityMenu
+        if unityMenu != undefined do
+        (
+            -- remove the menu if it still exists
+            menuMan.unRegisterMenu unityMenu
+        )
+        
+        id = genClassID returnValue:true
+        if menuMan.registerMenuContext id[1] then
+        (
+            local mainMenuBar = menuMan.getMainMenuBar()
+            local unityMenu = menuMan.createMenu unityMenuName
+            local unityMenuItem = menuMan.createSubMenuItem unityMenuName unityMenu
+            mainMenuBar.addItem unityMenuItem (mainMenuBar.numItems())
+            
+            UnityGUI.createUnityImportAction unityImportTitle unityMenu
+            UnityGUI.createUnityExportAction unityExportTitle unityMenu
             UnityGUI.createUnityExportModelAction unityExportModelTitle unityMenu
-			
-			menuMan.updateMenuBar() --update the menu bar
-		)
-	);
-	setupUnityPluginUI()
+            
+            menuMan.updateMenuBar() --update the menu bar
+        )
+    );
+    setupUnityPluginUI()
 
-	-- Make sure that Menu gets removed at shutdown, force menu to reload each time Max is opened
-	callbacks.addScript #preSavingMenus (
-		"unityMenu = getUnityMenu(); \
-		 if unityMenu != undefined do ( \
-			menuMan.unRegisterMenu unityMenu; \
-		 )"
-	)
+    -- Make sure that Menu gets removed at shutdown, force menu to reload each time Max is opened
+    callbacks.addScript #preSavingMenus (
+        "unityMenu = getUnityMenu(); \
+         if unityMenu != undefined do ( \
+            menuMan.unRegisterMenu unityMenu; \
+         )"
+    )
     
     -- when opening a new scene, reset the export options to make
     -- sure we don't accidentally overwrite anything
