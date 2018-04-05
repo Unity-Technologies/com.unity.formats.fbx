@@ -72,16 +72,20 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             (
                 parameters main rollout:params
                 (
-                    filePath type: #string ui:filep default:""
-                    fileName type: #string ui:filen default:""
+                    modelFilePath type: #string ui:filep default:""
+                    modelFileName type: #string ui:filen default:""
+                    animFilePath type: #string ui:afilep default:""
+                    animFileName type: #string ui:afilen default:""
                 )
                 rollout params "Unity Export Parameters"
                 ( 
-                    edittext filep "File Path:" text:filePath readOnly:false labelOnTop:true
-                    edittext filen "File Name:" text:fileName readOnly:false labelOnTop:true
+                    edittext filep "Model File Path:" text:modelFilePath readOnly:false labelOnTop:true
+                    edittext filen "Model File Name:" text:modelFileName readOnly:false labelOnTop:true
+                    edittext afilep "Animation File Path:" text:animFilePath readOnly:false labelOnTop:true
+                    edittext afilen "Animation File Name:" text:animFileName readOnly:false labelOnTop:true
                  )
             )
-            custAttributes.add unityDummy unitySetData #unique
+            custAttributes.add unityDummy unitySetData
         )
         unityDummy -- return dummy
     )
@@ -124,6 +128,16 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             local unityFbxFileNameAttr = filenameFromPath fbxFileName
             local unityFbxFileName = getFilenameFile fbxFileName
             
+            local unityAnimFilePathAttr = unityFbxFilePathAttr
+            local unityAnimFileNameAttr = unityFbxFileNameAttr
+            
+            -- check if importing an animation file (contains @ symbol)
+            local isAnimFile = false
+            if(matchPattern unityFbxFileName pattern:"*@*") do (
+                isAnimFile = true
+                unityFbxFileName = (filterString unityFbxFileName "@")[1]
+            )
+            
             currSetName = unityFbxFileName + "_UnityExportSet"
             
             callbacks.addScript #postImport ("afterImport()") id:#unityPlugin
@@ -134,8 +148,14 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             currSetName = unityFbxFileName + "_UnityExportSet"
             unityDummy = getOrCreateSettingsDummy currSetName
             
-            unityDummy.unityData.filePath = unityFbxFilePathAttr
-            unityDummy.unityData.fileName = unityFbxFileNameAttr
+            if((not isAnimFile) or unityDummy.unityData.modelFilePath == "") do (
+                unityDummy.unityData.modelFilePath = unityFbxFilePathAttr
+            )
+            if((not isAnimFile) or unityDummy.unityData.modelFileName == "") do (
+                unityDummy.unityData.modelFileName = unityFbxFileNameAttr
+            )
+            unityDummy.unityData.animFilePath = unityAnimFilePathAttr
+            unityDummy.unityData.animFileName = unityAnimFileNameAttr
             
             unityRootDummy = getOrCreateRootDummy()
             unityDummy.parent = unityRootDummy
