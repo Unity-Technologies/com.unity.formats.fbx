@@ -3,52 +3,14 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
 (
     origObjects = #()
     currSetName = ""
-    rootDummyName = "UnityFbxRootDummy"
+    rootDummyName = "UnityFbxExportSets"
+    unityFbxFilePathAttr = ""
+    unityFbxFileNameAttr = ""
+    unityAnimFileNameAttr = ""
+    unityAnimFilePathAttr = ""
+    isAnimFile = false
 
     persistent global unityAskSetUnits
-    
-    global afterImport
-    fn afterImport = (
-        unityFbxExportSet = #()
-        currSet = selectionSets[currSetName]
-        if not isdeleted currSet and currSet != undefined then (
-            unityFbxExportSet = unityFbxExportSet + currSet
-        )
-        for obj in objects do(
-            if findItem origObjects obj == 0 then(
-                -- add to selection set
-                append unityFbxExportSet obj
-            )
-        )
-        selectionSets[currSetName] = unityFbxExportSet
-    );
-    
-    fn loadUnityFbxImportSettings = (
-        fbxImportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxImportSettings"
-        if fbxImportSettings != undefined and doesFileExist fbxImportSettings then(
-            filein fbxImportSettings
-        )
-    );
-
-    -- allow multiple files to be selected for import
-    fn getMultiOpenFilenames caption:"Open" filename:"" types:"All Files (*.*)|*.*" default:1 =
-    (
-        local dialog = DotNetObject "System.Windows.Forms.OpenFileDialog"
-        dialog.multiSelect = true
-        dialog.title = caption
-
-        if doesFileExist filename then
-            dialog.initialDirectory = filename
-
-        dialog.filter = types
-        dialog.filterIndex = default
-
-        local result = dialog.ShowDialog()
-        if (result.Equals result.OK) then
-            dialog.filenames
-        else
-            undefined
-    )
     
     fn getOrCreateDummy name = (
         unityDummy = getNodeByName (name)
@@ -87,7 +49,66 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             )
             custAttributes.add unityDummy unitySetData
         )
+        
         unityDummy -- return dummy
+    )
+    
+    global afterImport
+    fn afterImport = (
+        unityFbxExportSet = #()
+        currSet = selectionSets[currSetName]
+        if not isdeleted currSet and currSet != undefined then (
+            unityFbxExportSet = unityFbxExportSet + currSet
+        )
+        for obj in objects do(
+            if findItem origObjects obj == 0 then(
+                -- add to selection set
+                append unityFbxExportSet obj
+            )
+        )
+        selectionSets[currSetName] = unityFbxExportSet
+        
+        -- check if dummy already exists in scene
+        unityDummy = getOrCreateSettingsDummy currSetName
+        
+        if((not isAnimFile) or unityDummy.unityData.modelFilePath == "") do (
+            unityDummy.unityData.modelFilePath = unityFbxFilePathAttr
+        )
+        if((not isAnimFile) or unityDummy.unityData.modelFileName == "") do (
+            unityDummy.unityData.modelFileName = unityFbxFileNameAttr
+        )
+        unityDummy.unityData.animFilePath = unityAnimFilePathAttr
+        unityDummy.unityData.animFileName = unityAnimFileNameAttr
+        
+        unityRootDummy = getOrCreateRootDummy()
+        unityDummy.parent = unityRootDummy
+    );
+    
+    fn loadUnityFbxImportSettings = (
+        fbxImportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxImportSettings"
+        if fbxImportSettings != undefined and doesFileExist fbxImportSettings then(
+            filein fbxImportSettings
+        )
+    );
+
+    -- allow multiple files to be selected for import
+    fn getMultiOpenFilenames caption:"Open" filename:"" types:"All Files (*.*)|*.*" default:1 =
+    (
+        local dialog = DotNetObject "System.Windows.Forms.OpenFileDialog"
+        dialog.multiSelect = true
+        dialog.title = caption
+
+        if doesFileExist filename then
+            dialog.initialDirectory = filename
+
+        dialog.filter = types
+        dialog.filterIndex = default
+
+        local result = dialog.ShowDialog()
+        if (result.Equals result.OK) then
+            dialog.filenames
+        else
+            undefined
     )
     
     -- Make sure the FbxImporter plugin is loaded
@@ -119,17 +140,17 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             )
         )
         
-        local unityFbxFilePathAttr = ""
+        unityFbxFilePathAttr = ""
         for fbxFileName in fbxFileNames do (
             -- Get all objects in scene before importAction
             origObjects = objects as array
             
             unityFbxFilePathAttr = getFilenamePath fbxFileName
-            local unityFbxFileNameAttr = filenameFromPath fbxFileName
-            local unityFbxFileName = getFilenameFile fbxFileName
+            unityFbxFileNameAttr = filenameFromPath fbxFileName
+            unityFbxFileName = getFilenameFile fbxFileName
             
-            local unityAnimFilePathAttr = unityFbxFilePathAttr
-            local unityAnimFileNameAttr = unityFbxFileNameAttr
+            unityAnimFilePathAttr = unityFbxFilePathAttr
+            unityAnimFileNameAttr = unityFbxFileNameAttr
             
             -- check if importing an animation file (contains @ symbol)
             local isAnimFile = false
@@ -143,22 +164,6 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             callbacks.addScript #postImport ("afterImport()") id:#unityPlugin
             
             importFile fbxFileName #noPrompt using:FBXIMP
-            
-            -- check if dummy already exists in scene
-            currSetName = unityFbxFileName + "_UnityExportSet"
-            unityDummy = getOrCreateSettingsDummy currSetName
-            
-            if((not isAnimFile) or unityDummy.unityData.modelFilePath == "") do (
-                unityDummy.unityData.modelFilePath = unityFbxFilePathAttr
-            )
-            if((not isAnimFile) or unityDummy.unityData.modelFileName == "") do (
-                unityDummy.unityData.modelFileName = unityFbxFileNameAttr
-            )
-            unityDummy.unityData.animFilePath = unityAnimFilePathAttr
-            unityDummy.unityData.animFileName = unityAnimFileNameAttr
-            
-            unityRootDummy = getOrCreateRootDummy()
-            unityDummy.parent = unityRootDummy
             
             callbacks.removeScripts #postImport id:#unityPlugin
         )
