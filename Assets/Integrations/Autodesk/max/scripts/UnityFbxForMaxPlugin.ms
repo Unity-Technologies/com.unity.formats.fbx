@@ -12,47 +12,6 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
 
     persistent global unityAskSetUnits
     
-    fn getOrCreateDummy name = (
-        unityDummy = getNodeByName (name)
-        if (unityDummy == undefined) do (
-            unityDummy = Dummy()
-            unityDummy.name = name
-            unityDummy.boxsize = [1,1,1]
-        )
-        unityDummy -- return dummy
-    )
-    
-    fn getOrCreateRootDummy = (
-        getOrCreateDummy rootDummyName
-    )
-    
-    fn getOrCreateSettingsDummy name = (
-        unityDummy = getOrCreateDummy name
-        
-        if not (isProperty unityDummy "modelFilePath") do (
-            unitySetData = attributes unityData
-            (
-                parameters main rollout:params
-                (
-                    modelFilePath type: #string ui:filep default:""
-                    modelFileName type: #string ui:filen default:""
-                    animFilePath type: #string ui:afilep default:""
-                    animFileName type: #string ui:afilen default:""
-                )
-                rollout params "Unity Export Parameters"
-                ( 
-                    edittext filep "Model File Path:" text:modelFilePath readOnly:false labelOnTop:true
-                    edittext filen "Model File Name:" text:modelFileName readOnly:false labelOnTop:true
-                    edittext afilep "Animation File Path:" text:animFilePath readOnly:false labelOnTop:true
-                    edittext afilen "Animation File Name:" text:animFileName readOnly:false labelOnTop:true
-                 )
-            )
-            custAttributes.add unityDummy unitySetData
-        )
-        
-        unityDummy -- return dummy
-    )
-    
     global afterImport
     fn afterImport = (
         unityFbxExportSet = #()
@@ -69,7 +28,7 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
         selectionSets[currSetName] = unityFbxExportSet
         
         -- check if dummy already exists in scene
-        unityDummy = getOrCreateSettingsDummy currSetName
+        unityDummy = UnityImportHelpers.getOrCreateSettingsDummy currSetName
         
         if((not isAnimFile) or unityDummy.unityData.modelFilePath == "") do (
             unityDummy.unityData.modelFilePath = unityFbxFilePathAttr
@@ -80,46 +39,19 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
         unityDummy.unityData.animFilePath = unityAnimFilePathAttr
         unityDummy.unityData.animFileName = unityAnimFileNameAttr
         
-        unityRootDummy = getOrCreateRootDummy()
+        unityRootDummy = UnityImportHelpers.getOrCreateRootDummy rootDummyName
         unityDummy.parent = unityRootDummy
     );
-    
-    fn loadUnityFbxImportSettings = (
-        fbxImportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxImportSettings"
-        if fbxImportSettings != undefined and doesFileExist fbxImportSettings then(
-            filein fbxImportSettings
-        )
-    );
-
-    -- allow multiple files to be selected for import
-    fn getMultiOpenFilenames caption:"Open" filename:"" types:"All Files (*.*)|*.*" default:1 =
-    (
-        local dialog = DotNetObject "System.Windows.Forms.OpenFileDialog"
-        dialog.multiSelect = true
-        dialog.title = caption
-
-        if doesFileExist filename then
-            dialog.initialDirectory = filename
-
-        dialog.filter = types
-        dialog.filterIndex = default
-
-        local result = dialog.ShowDialog()
-        if (result.Equals result.OK) then
-            dialog.filenames
-        else
-            undefined
-    )
     
     -- Make sure the FbxImporter plugin is loaded
     pluginManager.loadClass FbxImporter
     
-    loadUnityFbxImportSettings()
+    UnityImportHelpers.loadUnityFbxImportSettings()
     
     unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
     local unityAssetsPath = (unityProjectPath + "/Assets/")
     unityAssetsPath = substituteString unityAssetsPath "/" "\\" -- dot net class requires backspaces
-    local fbxFileNames = getMultiOpenFilenames caption:"Import FBX from Unity" filename:unityAssetsPath  types:"FBX (*.fbx)|*.fbx"
+    local fbxFileNames = UnityImportHelpers.getMultiOpenFilenames caption:"Import FBX from Unity" filename:unityAssetsPath  types:"FBX (*.fbx)|*.fbx"
     if fbxFileNames != undefined then
     (
         -- ask to set units to cm if not already
@@ -168,9 +100,51 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             callbacks.removeScripts #postImport id:#unityPlugin
         )
         
+        UnityImportHelpers.switchProject unityFbxFilePathAttr
+    )
+)
+macroScript UnityExport category:"Unity" tooltip:"Export models and animation to Unity"
+(   
+    UnityExportHelpers.exportSelection modelOnly:false
+)
+
+macroScript UnityExportModel category:"Unity" tooltip:"Export models to Unity"
+(
+    UnityExportHelpers.exportSelection modelOnly:true
+)
+
+struct UnityImportHelpers (
+    fn loadUnityFbxImportSettings = (
+        fbxImportSettings = getINISetting (GetMAXIniFile()) "Unity" "UnityFbxImportSettings"
+        if fbxImportSettings != undefined and doesFileExist fbxImportSettings then(
+            filein fbxImportSettings
+        )
+    ),
+
+    -- allow multiple files to be selected for import
+    fn getMultiOpenFilenames caption:"Open" filename:"" types:"All Files (*.*)|*.*" default:1 =
+    (
+        local dialog = DotNetObject "System.Windows.Forms.OpenFileDialog"
+        dialog.multiSelect = true
+        dialog.title = caption
+
+        if doesFileExist filename then
+            dialog.initialDirectory = filename
+
+        dialog.filter = types
+        dialog.filterIndex = default
+
+        local result = dialog.ShowDialog()
+        if (result.Equals result.OK) then
+            dialog.filenames
+        else
+            undefined
+    ),
+    
+    fn switchProject filePath = (
         -- Change Unity project if fbx is from a different Unity project.
         -- Get the project based on the folder structure (i.e. folder above Assets)
-        local head = unityFbxFilePathAttr
+        local head = filePath
         head = trimRight head "\\/"
         -- Check that we are not at the root directory.
         while head != "" and not (pathConfig.isRootPath head) do(
@@ -185,16 +159,48 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
             )
             head = pathConfig.removePathLeaf head
         )
+    ),
+    
+    fn getOrCreateDummy name = (
+        unityDummy = getNodeByName (name)
+        if (unityDummy == undefined) do (
+            unityDummy = Dummy()
+            unityDummy.name = name
+            unityDummy.boxsize = [1,1,1]
+        )
+        unityDummy -- return dummy
+    ),
+    
+    fn getOrCreateRootDummy rootDummyName = (
+        UnityImportHelpers.getOrCreateDummy rootDummyName
+    ),
+    
+    fn getOrCreateSettingsDummy name = (
+        unityDummy = UnityImportHelpers.getOrCreateDummy name
+        
+        if not (isProperty unityDummy "modelFilePath") do (
+            unitySetData = attributes unityData
+            (
+                parameters main rollout:params
+                (
+                    modelFilePath type: #string ui:filep default:""
+                    modelFileName type: #string ui:filen default:""
+                    animFilePath type: #string ui:afilep default:""
+                    animFileName type: #string ui:afilen default:""
+                )
+                rollout params "Unity Export Parameters"
+                ( 
+                    edittext filep "Model File Path:" text:modelFilePath readOnly:false labelOnTop:true
+                    edittext filen "Model File Name:" text:modelFileName readOnly:false labelOnTop:true
+                    edittext afilep "Animation File Path:" text:animFilePath readOnly:false labelOnTop:true
+                    edittext afilen "Animation File Name:" text:animFileName readOnly:false labelOnTop:true
+                 )
+            )
+            custAttributes.add unityDummy unitySetData
+        )
+        
+        unityDummy -- return dummy
     )
-)
-macroScript UnityExport category:"Unity" tooltip:"Export models and animation to Unity"
-(   
-    UnityExportHelpers.exportSelection modelOnly:false
-)
-
-macroScript UnityExportModel category:"Unity" tooltip:"Export models to Unity"
-(
-    UnityExportHelpers.exportSelection modelOnly:true
 )
 
 struct UnityExportHelpers (
