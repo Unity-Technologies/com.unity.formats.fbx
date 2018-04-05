@@ -1,5 +1,21 @@
 ﻿RELEASE NOTES
 
+**Version**: 1.3.0b1
+
+FIXES
+
+* FbxExporter: if "Animated Skinned Mesh" off, don't export skinned mesh transform
+* Maya Integration: fix so saved files do not lose export set information on export
+* ConvertToPrefab: fix error when converting model instances whose file ends in .FBX (with capitals)
+
+KNOWN ISSUES
+
+* FbxExporter: animated skinned meshes must be in the bind pose on export (i.e. not being previewed in the Animation or Timeline windows, and the original rig's fbx must not contain animation)
+* FbxExporter: animated meshes in bone hierarchy are not supported
+* FbxExporter: for skinned meshes all bones must be descendants of the root bone
+* 3DIntegration: fbx containing rig must have file units in cm in order for animation exported from Unity to be properly applied
+* ConvertToPrefab: converting model instance that has been modified in the scene won't reexport fbx
+
 **Version**: sprint50
 
 NEW FEATURES

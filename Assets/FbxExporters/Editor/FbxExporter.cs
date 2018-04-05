@@ -1889,8 +1889,8 @@ namespace FbxExporters
             /// Transfers transform animation from source to dest. Replaces dest's Unity Animation Curves with updated animations.
             /// NOTE: Source must be the parent of dest.
             /// </summary>
-            /// <param name="source">Source.</param>
-            /// <param name="dest">Destination.</param>
+            /// <param name="source">Source animated object.</param>
+            /// <param name="dest">Destination, child of the source.</param>
             /// <param name="sampleRate">Sample rate.</param>
             /// <param name="unityCurves">Unity curves.</param>
             private void TransferMotion(Transform source, Transform dest, float sampleRate, ref Dictionary<GameObject, List<UnityCurve>> unityCurves){
@@ -1933,14 +1933,23 @@ namespace FbxExporters
                     scaleKeyFrames[k] = new Keyframe[sampleTimes.Count];
                 }
 
+                // If we have a point in local coords represented as a column-vector x, the equation of x in coordinates relative to source's parent is:
+                //   x_grandparent = source * dest * x
+                // Now we're going to change dest to dest' which has the animation from source. And we're going to change
+                // source to source' which has no animation. The equation of x will become:
+                //   x_grandparent = source' * dest' * x
+                // We're not changing x_grandparent and x, so we need that:
+                //   source * dest = source' * dest'
+                // We know dest and source (both animated) and source' (static). Solve for dest':
+                //   dest' = (source')^-1 * source * dest
                 int keyIndex = 0;
+                var sourceStaticMatrixInverse = Matrix4x4.TRS(source.localPosition, source.localRotation, source.localScale).inverse;
                 foreach (var currSampleTime in sampleTimes) 
                 {
                     var sourceLocalMatrix = GetTransformMatrix (currSampleTime, source, sourceUnityCurves);
                     var destLocalMatrix = GetTransformMatrix (currSampleTime, dest, destUnityCurves);
 
-                    // child * parent
-                    var newLocalMatrix = sourceLocalMatrix * destLocalMatrix;
+                    var newLocalMatrix = sourceStaticMatrixInverse * sourceLocalMatrix * destLocalMatrix;
 
                     FbxVector4 translation, rotation, scale;
                     GetTRSFromMatrix (newLocalMatrix, out translation, out rotation, out scale);
@@ -2227,9 +2236,6 @@ namespace FbxExporters
                 // Use RSrs as the scaling inheritance instead.
                 fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
-                if (TransformShouldBeReset (unityGo.transform)) {
-                    exportType = TransformExportType.Reset;
-                }
                 ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
 
                 fbxNodeParent.AddChild (fbxNode);
@@ -2279,35 +2285,6 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Checks if the transform should be reset.
-            /// Transform should be reset if animation is being transferred, and this transform
-            /// is either the animation source, destination, or between these nodes.
-            /// </summary>
-            /// <returns><c>true</c>, if transform should be reset, <c>false</c> otherwise.</returns>
-            /// <param name="t">Transform.</param>
-            private bool TransformShouldBeReset(Transform t){
-                var source = ExportOptions.AnimationSource;
-                var dest = ExportOptions.AnimationDest;
-
-                if (!source || !dest || source == dest) {
-                    return false;
-                }
-
-                // don't want to reset destination, if it's a bone this could cause issues with the skinning
-                var curr = dest.parent;
-                while (curr != source && curr != null) {
-                    if (t == curr) {
-                        return true;
-                    }
-                    curr = curr.parent;
-                }
-                if (t == source) {
-                    return true;
-                }
-                return false;
-            }
-
-            /// <summary>
             /// Export data containing what to export when
             /// exporting animation only.
             /// </summary>
@@ -2325,10 +2302,6 @@ namespace FbxExporters
                 // first clip to export
                 public AnimationClip defaultClip;
 
-                // TODO: find a better way to keep track of which components + properties we support
-                private static List<string> cameraProps = new List<string>{"field of view"};
-                private static List<string> lightProps = new List<string>{"m_Intensity", "m_SpotAngle", "m_Color.r", "m_Color.g", "m_Color.b"};
-
                 public AnimationOnlyExportData(
                     Dictionary<AnimationClip, GameObject> animClips,
                     HashSet<GameObject> exportSet,
@@ -2345,6 +2318,9 @@ namespace FbxExporters
                     GameObject animationRootObject,
                     bool exportSkinnedMeshAnim = true
                 ){
+                    // NOTE: the object (animationRootObject) containing the animation is not necessarily animated
+                    // when driven by an animator or animation component.
+
                     foreach (var animClip in animClips) {
                         if (this.animationClips.ContainsKey(animClip)) {
                             // we have already exported gameobjects for this clip
@@ -2368,11 +2344,12 @@ namespace FbxExporters
                                 continue;
                             }
 
-                            if (lightProps.Contains (uniCurveBinding.propertyName)) {
-                                this.exportComponent.Add (unityGo, typeof(Light));
-                            } else if (cameraProps.Contains (uniCurveBinding.propertyName)) {
-                                this.exportComponent.Add (unityGo, typeof(Camera));
-                            }
+                            // If we have a clip driving a camera or light then force the export of FbxNodeAttribute
+                            // so that they point the right way when imported into Maya.
+                            if (unityGo.GetComponent<Light>())
+                                this.exportComponent[unityGo] = typeof(Light);
+                            else if (unityGo.GetComponent<Camera>())
+                                this.exportComponent[unityGo] = typeof(Camera);
 
                             this.goExportSet.Add (unityGo);
                         }
@@ -2534,9 +2511,6 @@ namespace FbxExporters
 
                 // export regular transform if we are not a bone or failed to export as a bone
                 if(!exportedBoneTransform){
-                    if (TransformShouldBeReset (unityGo.transform)) {
-                        exportType = TransformExportType.Reset;
-                    }
                     ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
                 }
 
@@ -3339,7 +3313,7 @@ namespace FbxExporters
                 };
 
                 if (!string.IsNullOrEmpty (filePath)) {
-                    ExportObjects (filePath, exportArray, timelineAnim: true);
+                    ExportObjects (filePath, exportArray);
                     return;
                 }
 
@@ -3372,7 +3346,7 @@ namespace FbxExporters
                         }
                         string filePath = string.Format(AnimFbxFormat, folderPath, atObject.name, timelineClip.displayName);
                         UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timelineClip.animationClip };
-                        ExportObjects (filePath, myArray, exportOptions, timelineAnim: true);
+                        ExportObjects (filePath, myArray, exportOptions);
                     }
                 }
             }
@@ -3866,8 +3840,7 @@ namespace FbxExporters
             public static string ExportObjects (
                 string filePath,
                 UnityEngine.Object[] objects = null,
-                IExportOptions exportOptions = null,
-                bool timelineAnim = false)
+                IExportOptions exportOptions = null)
             {
                 LastFilePath = filePath;
 
@@ -3881,7 +3854,8 @@ namespace FbxExporters
                     }
 
                     Dictionary<GameObject, AnimationOnlyExportData> animationExportData = null;
-                    if (timelineAnim) {
+                    // if there are only two objects for export and the second is an animation clip, then we are exporting from the timeline
+                    if (objects.Length == 2 && objects[1] is AnimationClip) {
                         // We expect the first argument in the list to be the GameObject, the second one is the Animation Clip/Track we are exporting from the timeline
                         GameObject rootObject = ModelExporter.GetGameObject (objects [0]);
                         AnimationClip timelineClip = objects [1] as AnimationClip;
@@ -3909,10 +3883,9 @@ namespace FbxExporters
 
             public static string ExportObject (
                 string filePath, UnityEngine.Object root,
-                IExportOptions exportOptions = null,
-                bool isTimelineAnim = false)
+                IExportOptions exportOptions = null)
             {
-                return ExportObjects(filePath, new Object[] { root }, exportOptions, isTimelineAnim);
+                return ExportObjects(filePath, new Object[] { root }, exportOptions);
             }
 
             private static void EnsureDirectory (string path)

@@ -1,5 +1,28 @@
 RELEASE NOTES
 
+**Version**: 1.3.0b1
+
+NEW FEATURES
+* FbxExporter: Export animation clips from Timeline
+* FbxExportSettings: Added new UI to set export settings
+* FbxExportSettings: Added option to transfer transform animation on export
+* FbxExporterSettings: Added option to export model only
+* FbxExporterSettings: Added option to export animation only
+* FbxExporterSettings: Added option not to export animation on skinned meshes
+* FbxExportSettings: Added option to export meshes without renderers
+* FbxExportSettings: Added LOD export option
+* UnityMayaIntegration: Allow multi file import
+* UnityMayaIntegration: Allow multi file export by scene selection
+* FbxPrefabAutoUpdater: new UI to help manage name changes
+
+FIXES
+* FbxExporter: link materials to objects connected to mesh instances
+* FbxExporter: export meshes in model prefab instances as mesh instances in fbx
+* ConvertToPrefab: Don't re-export fbx model instances
+* FbxExportSettings: fix console error on Mac when clicking "Install Unity Integration"
+* FbxExporter: fix so animating spot angle in Unity animates cone angle in Maya (not penumbra)
+* FbxExporter: export correct rotation order (xyz) for euler rotation animations (previously would export as zxy)
+
 **Version**: 1.3.0a1
 
 NEW FEATURES
