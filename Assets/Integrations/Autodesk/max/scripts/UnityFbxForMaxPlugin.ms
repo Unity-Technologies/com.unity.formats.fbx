@@ -316,7 +316,7 @@ struct UnityExportHelpers (
     )
 )
 
-struct UnityHelpers (
+struct UnityGUI (
     fn createUnityActionItem macroName category title parentMenu = (
         local unityAction = menuMan.createActionItem macroName category; --create an ActionItem from the MacroScript
         unityAction.setTitle title;
@@ -326,15 +326,15 @@ struct UnityHelpers (
     ),
 
     fn createUnityImportAction title parentMenu = (
-        UnityHelpers.createUnityActionItem "UnityImport" "Unity" title parentMenu;
+        UnityGUI.createUnityActionItem "UnityImport" "Unity" title parentMenu;
     ),
 
     fn createUnityExportAction title parentMenu = (
-        UnityHelpers.createUnityActionItem "UnityExport" "Unity" title parentMenu;
+        UnityGUI.createUnityActionItem "UnityExport" "Unity" title parentMenu;
     ),
     
     fn createUnityExportModelAction title parentMenu = (
-        UnityHelpers.createUnityActionItem "UnityExportModel" "Unity" title parentMenu;
+        UnityGUI.createUnityActionItem "UnityExportModel" "Unity" title parentMenu;
     ),
 
     fn unityResetExportOptions = (
@@ -365,9 +365,9 @@ if (maxVersion())[1] >= 20000 then(
 		local exportMenu = getExportMenu()
 		if importMenu != undefined and exportMenu != undefined do
 		(
-			local unityImportTitle = "Import from Unity"
+			local unityImportTitle = "Import from Unity..."
 			local unityExportTitle = "Export to Unity"
-            local unityExportModelTitle = "Export Model Only to Unity"
+            local unityExportModelTitle = "Export to Unity (Model Only)"
 			
 			-- check if menu items already exist, delete if they do
 			local foundUnityImport = false
@@ -390,9 +390,9 @@ if (maxVersion())[1] >= 20000 then(
             id = genClassID returnValue:true
             if menuMan.registerMenuContext id[1] then
             (
-                global unityImportAction = UnityHelpers.createUnityImportAction unityImportTitle importMenu
-                global unityExportAction = UnityHelpers.createUnityExportAction unityExportTitle exportMenu
-                global unityExportModelAction = UnityHelpers.createUnityExportModelAction unityExportModelTitle exportMenu
+                global unityImportAction = UnityGUI.createUnityImportAction unityImportTitle importMenu
+                global unityExportAction = UnityGUI.createUnityExportAction unityExportTitle exportMenu
+                global unityExportModelAction = UnityGUI.createUnityExportModelAction unityExportModelTitle exportMenu
                 
                 menuMan.updateMenuBar() --update the menu bar
             )
@@ -417,8 +417,8 @@ if (maxVersion())[1] >= 20000 then(
     
     -- when opening a new scene, reset the export options to make
     -- sure we don't accidentally overwrite anything
-    callbacks.addScript #postSceneReset ("UnityHelpers.unityResetExportOptions()")
-    callbacks.addScript #systemPreNew ("UnityHelpers.unityResetExportOptions()")
+    callbacks.addScript #postSceneReset ("UnityGUI.unityResetExportOptions()")
+    callbacks.addScript #systemPreNew ("UnityGUI.unityResetExportOptions()")
 )
 else if (maxVersion())[1] == 19000 then (
 	-- for 3ds Max 2017
@@ -433,7 +433,7 @@ else if (maxVersion())[1] == 19000 then (
 	-- Setup UI
 	fn setupUnityPluginUI = (
 		local unityMenu = getUnityMenu()
-		local unityImportTitle = "Import"
+		local unityImportTitle = "Import..."
 		local unityExportTitle = "Export"
         local unityExportModelTitle = "Export Model Only"
 		if unityMenu != undefined do
@@ -450,9 +450,9 @@ else if (maxVersion())[1] == 19000 then (
 			local unityMenuItem = menuMan.createSubMenuItem unityMenuName unityMenu
 			mainMenuBar.addItem unityMenuItem (mainMenuBar.numItems())
 			
-			UnityHelpers.createUnityImportAction unityImportTitle unityMenu
-			UnityHelpers.createUnityExportAction unityExportTitle unityMenu
-            UnityHelpers.createUnityExportModelAction unityExportModelTitle unityMenu
+			UnityGUI.createUnityImportAction unityImportTitle unityMenu
+			UnityGUI.createUnityExportAction unityExportTitle unityMenu
+            UnityGUI.createUnityExportModelAction unityExportModelTitle unityMenu
 			
 			menuMan.updateMenuBar() --update the menu bar
 		)
@@ -469,8 +469,8 @@ else if (maxVersion())[1] == 19000 then (
     
     -- when opening a new scene, reset the export options to make
     -- sure we don't accidentally overwrite anything
-    callbacks.addScript #postSceneReset ("UnityHelpers.unityResetExportOptions()")
-    callbacks.addScript #systemPreNew ("UnityHelpers.unityResetExportOptions()")
+    callbacks.addScript #postSceneReset ("UnityGUI.unityResetExportOptions()")
+    callbacks.addScript #systemPreNew ("UnityGUI.unityResetExportOptions()")
 )
 else(
     print "Error: Unity Integration only supports 3ds Max 2017 or later"
