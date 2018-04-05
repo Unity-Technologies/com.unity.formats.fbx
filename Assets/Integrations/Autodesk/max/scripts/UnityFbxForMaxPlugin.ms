@@ -1,9 +1,10 @@
 -- MacroScripts that will perform actions
 macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unity project and auto-configure for exporting"
 (
+    rootDummyName = "UnityFbxExportSets"
+    
     origObjects = #()
     currSetName = ""
-    rootDummyName = "UnityFbxExportSets"
     unityFbxFilePathAttr = ""
     unityFbxFileNameAttr = ""
     unityAnimFileNameAttr = ""
@@ -91,7 +92,7 @@ macroScript UnityImport category:"Unity" tooltip:"Import an FBX file from a Unit
                 unityFbxFileName = (filterString unityFbxFileName "@")[1]
             )
             
-            currSetName = unityFbxFileName + "_UnityExportSet"
+            currSetName = unityFbxFileName + unityExportSetPostFix
             
             callbacks.addScript #postImport ("afterImport()") id:#unityPlugin
             
@@ -112,6 +113,8 @@ macroScript UnityExportModel category:"Unity" tooltip:"Export models to Unity"
 (
     UnityExportHelpers.exportSelection modelOnly:true
 )
+
+global unityExportSetPostFix = "_UnityExportSet"
 
 struct UnityImportHelpers (
     fn loadUnityFbxImportSettings = (
@@ -226,8 +229,9 @@ struct UnityExportHelpers (
 
     fn getUnityExportSets = (
         local unityExportSets = #()
+        local exportSetPattern = ("*" + unityExportSetPostFix)
         for expSet in selectionSets do (
-            if(matchPattern expSet.name pattern:"*_UnityExportSet" and 
+            if(matchPattern expSet.name pattern:exportSetPattern and 
                 (not isdeleted expSet) and (expSet != undefined) and 
                 getNodeByName (expSet.name) != undefined) do 
             (
