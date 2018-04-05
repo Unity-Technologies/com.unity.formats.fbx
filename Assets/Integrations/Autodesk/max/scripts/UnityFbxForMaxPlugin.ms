@@ -283,6 +283,7 @@ struct UnityExportHelpers (
         
         if exportFileName != undefined then (
             exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
+            print ("Result: " + exportFileName)
         )
     ),
     
@@ -308,7 +309,9 @@ struct UnityExportHelpers (
         local setsToExport = #()
         for expSet in unityExportSets do (
             for obj in origSelection do (
-                if (findItem expSet obj > 0) do (
+                -- append export set as set to export if obj is in the set or obj is
+                -- dummy for this set
+                if (findItem expSet obj > 0) or (obj.name == expSet.name and (isProperty obj "modelFilePath")) do (
                     appendIfUnique setsToExport expSet
                     break
                 )
