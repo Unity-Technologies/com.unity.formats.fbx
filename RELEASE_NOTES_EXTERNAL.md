@@ -4,7 +4,8 @@ RELEASE NOTES
 
 NEW FEATURES
 
-* 3ds Max Integration: update to match Maya integration
+* Unity3dsMaxIntegration: Allow multi file import
+* Unity3dsMaxIntegration: Allow multi file export by scene selection
 
 **Version**: 1.3.0b1
 
