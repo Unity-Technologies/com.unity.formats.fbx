@@ -4,7 +4,7 @@
 
 NEW FEATURES
 
-* 3ds Max Integration: update to match Maya integration
+* 3ds Max Integration:
 
 - Add FBX Import settings file
 - Add ability to import multiple files at once
