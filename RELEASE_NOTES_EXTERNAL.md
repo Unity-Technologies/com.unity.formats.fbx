@@ -1,5 +1,11 @@
 RELEASE NOTES
 
+**Version**: 1.3.0b2
+
+NEW FEATURES
+
+* 3ds Max Integration: update to match Maya integration
+
 **Version**: 1.3.0b1
 
 NEW FEATURES
