@@ -12,6 +12,10 @@ NEW FEATURES
 - Add ability to export based on scene selection
 - Add export model only option
 
+KNOWN ISSUES
+
+* Cannot export animation only from 3ds Max
+
 **Version**: 1.3.0b1
 
 FIXES
