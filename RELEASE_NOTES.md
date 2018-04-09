@@ -1,5 +1,21 @@
 ﻿RELEASE NOTES
 
+**Version**: 1.3.0b2
+
+NEW FEATURES
+
+* 3ds Max Integration:
+
+- Add FBX Import settings file
+- Add ability to import multiple files at once
+- Recognize animation files on import
+- Add ability to export based on scene selection
+- Add export model only option
+
+KNOWN ISSUES
+
+* Cannot export animation only from 3ds Max
+
 **Version**: 1.3.0b1
 
 FIXES
