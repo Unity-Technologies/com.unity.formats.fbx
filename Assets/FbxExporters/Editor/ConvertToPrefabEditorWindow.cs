@@ -82,6 +82,19 @@ namespace FbxExporters
                 m_prefabExtLabelWidth = m_fbxExtLabelStyle.CalcSize (new GUIContent (".prefab")).x;
             }
 
+            protected bool ExportSetContainsAnimation ()
+            {
+                foreach(var obj in ToExport)
+                {
+                    var go = ModelExporter.GetGameObject(obj);
+                    if(go.GetComponentInChildren<Animation>() || go.GetComponentInChildren<Animator>())
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             protected override bool Export ()
             {
                 if (string.IsNullOrEmpty (m_exportFileName)) {
@@ -107,11 +120,16 @@ namespace FbxExporters
 
                 if (SettingsObject.UseMayaCompatibleNames && SettingsObject.AllowSceneModification)
                 {
+                    string warning = "Names of objects in the hierarchy may change with the Compatible Naming option turned on";
+                    if (ExportSetContainsAnimation())
+                    {
+                        warning = "Compatible Naming option turned on. Names of objects in hierarchy may change and break animations.";
+                    }
+
                     // give a warning dialog that indicates that names in the scene may change
                     int result = UnityEditor.EditorUtility.DisplayDialogComplex(
-                                string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME),
-                                            "Names of objects in the hierarchy may change with the Compatible Naming option turned on",
-                                            "OK", "Turn off and convert", "Cancel");
+                                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "OK", "Turn off and convert", "Cancel"
+                                );
                     if (result == 1)
                     {
                         // turn compatible naming off
