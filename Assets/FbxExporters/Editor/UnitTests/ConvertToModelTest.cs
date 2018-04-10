@@ -45,19 +45,6 @@ namespace FbxExporters.UnitTests
                 Assert.AreEqual (filename2, ConvertToModel.IncrementFileName (tempPath, filename1));
             }
 
-            // Test EnforceUniqueNames
-            {
-                var a = new GameObject("a");
-                var b = new GameObject("b");
-                var a1 = new GameObject("a");
-                var a2 = new GameObject("a");
-                ConvertToModel.EnforceUniqueNames(new GameObject[] { a, b, a1, a2 });
-                Assert.AreEqual("a", a.name);
-                Assert.AreEqual("b", b.name);
-                Assert.AreEqual("a 1", a1.name);
-                Assert.AreEqual("a 2", a2.name);
-            }
-
             // Test CopyComponents
             {
                 var a = GameObject.CreatePrimitive (PrimitiveType.Cube);
