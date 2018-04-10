@@ -374,6 +374,21 @@ namespace FbxExporters
             /// </summary>
             public static void CopyComponents(GameObject to, GameObject from){
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
+
+                // Point the mesh included in the mesh collider to the mesh in the FBX file, which is the same as the one in mesh filter
+                var toMeshCollider = to.GetComponent<MeshCollider>();
+                var toMeshFilter = to.GetComponent<MeshFilter>();
+                // if the mesh collider isn't pointing to the same mesh as in the current mesh filter then don't
+                // do anything as it's probably pointing to a mesh in a different fbx
+                if (toMeshCollider && toMeshFilter && toMeshCollider.sharedMesh == toMeshFilter.sharedMesh)
+                {
+                    var fromFilter = from.GetComponent<MeshFilter>();
+                    if (fromFilter)
+                    {
+                        toMeshCollider.sharedMesh = fromFilter.sharedMesh;
+                    }
+                }
+
                 // copy over meshes, materials, and nothing else
                 foreach (var component in from.GetComponents<Component>()) {
                     // ignore missing components
@@ -438,13 +453,6 @@ namespace FbxExporters
                         var fromRenderer = component as Renderer;
                         toRenderer.sharedMaterials = fromRenderer.sharedMaterials;
                     }
-                }
-                // Point the mesh included in the mesh collider to the mesh in the FBX file, which is the same as the one in mesh filter
-                if (to.GetComponent<MeshCollider> () != null && from.GetComponent<MeshFilter> () != null)
-                {
-                    var toMeshCollider = to.GetComponent<MeshCollider> ();
-                    var fromFilter = from.GetComponent<MeshFilter> ();
-                    toMeshCollider.sharedMesh = fromFilter.sharedMesh;
                 }
             }
         }
