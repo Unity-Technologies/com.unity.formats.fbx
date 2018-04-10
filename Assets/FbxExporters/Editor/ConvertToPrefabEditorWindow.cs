@@ -48,17 +48,18 @@ namespace FbxExporters
                 if (ToExport.Length == 1) {
                     var go = ModelExporter.GetGameObject (ToExport [0]);
                     // check if the GameObject is a model instance, use as default filename and path if it is
-                    if(ConvertToModel.IsModelInstance(go)) {
-                        var mainAsset = PrefabUtility.GetPrefabParent (go) as GameObject;
+                    var mainAsset = ConvertToModel.GetModelPrefabOrNull(go);
+                    if (!mainAsset) {
+                        // Use the game object's name
+                        m_prefabFileName = go.name;
+                    } else {
+                        // Use the asset's name
                         var mainAssetRelPath = AssetDatabase.GetAssetPath (mainAsset);
                         // remove Assets/ from beginning of path
                         mainAssetRelPath = mainAssetRelPath.Substring ("Assets".Length);
 
                         m_prefabFileName = System.IO.Path.GetFileNameWithoutExtension (mainAssetRelPath);
                         ExportSettings.AddFbxSavePath (System.IO.Path.GetDirectoryName (mainAssetRelPath));
-                    }
-                    else{
-                        m_prefabFileName = ToExport [0].name;
                     }
 
                     // if only one object selected, set transfer source/dest to this object
@@ -113,16 +114,16 @@ namespace FbxExporters
                     }
 
                     // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
-                    if(ConvertToModel.IsModelInstance(go)) {
+                    var mainAsset = ConvertToModel.GetModelPrefabOrNull(go);
+                    if (mainAsset) {
                         // don't re-export fbx
                         // create prefab out of model instance in scene, link to existing fbx
-                        var mainAsset = PrefabUtility.GetPrefabParent(go) as GameObject;
                         var mainAssetRelPath = AssetDatabase.GetAssetPath(mainAsset);
                         var mainAssetAbsPath = System.IO.Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
                         var relPrefabPath = ExportSettings.GetProjectRelativePath (prefabPath);
 
                         if (string.Equals(System.IO.Path.GetFullPath(fbxPath), System.IO.Path.GetFullPath(mainAssetAbsPath))) {
-                            ConvertToModel.SetupFbxPrefab(go, mainAsset, relPrefabPath, mainAssetAbsPath);
+                            ConvertToModel.SetupFbxPrefab(go, mainAsset, relPrefabPath);
                             return true;
                         }
                     }
