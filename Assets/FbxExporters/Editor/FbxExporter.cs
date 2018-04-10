@@ -2212,6 +2212,10 @@ namespace FbxExporters
                 string fbxName = unityGo.name;
                 if (ExportOptions.UseMayaCompatibleNames) {
                     fbxName = ConvertToMayaCompatibleName (unityGo.name);
+                    if (ExportOptions.AllowSceneModification)
+                    {
+                        unityGo.name = fbxName;
+                    }
                 }
 
                 // create an FbxNode and add it as a child of parent
