@@ -111,7 +111,7 @@ namespace FbxExporters
                     int result = UnityEditor.EditorUtility.DisplayDialogComplex(
                                 string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME),
                                             "Names of objects in the hierarchy may change with the Compatible Naming option turned on",
-                                            "OK", "Convert Without Compatible Naming", "Cancel");
+                                            "OK", "Turn off and convert", "Cancel");
                     if (result == 1)
                     {
                         // turn compatible naming off
