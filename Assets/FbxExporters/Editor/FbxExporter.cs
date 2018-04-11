@@ -1,7 +1,7 @@
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.Animations;
 using UnityEditor;
 using Unity.FbxSdk;
 using System.Linq;
@@ -1411,6 +1411,57 @@ namespace FbxExporters
                 fbxNode.SetRotationActive (true);
 
                 return true;
+            }
+
+            protected bool ExportConstraints (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                // check if GameObject has one of the 5 supported constraints: aim, parent, position, rotation, scale
+                var constraints = unityGo.GetComponents<IConstraint>();
+
+                foreach(var constraint in constraints)
+                {
+                    if(constraint.GetType() == typeof(PositionConstraint))
+                    {
+                        PositionConstraint uniPosConstraint = constraint as PositionConstraint;
+
+                        FbxConstraintPosition posConstraint = FbxConstraintPosition.Create(fbxScene, fbxNode.GetName() + "_positionConstraint");
+                        posConstraint.SetConstrainedObject(fbxNode);
+                        var sources = new List<ConstraintSource>();
+                        uniPosConstraint.GetSources(sources);
+                        foreach (var source in sources)
+                        {
+                            // ignore any sources that are not getting exported
+                            FbxNode sourceNode;
+                            if(!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
+                            {
+                                continue;
+                            }
+                            posConstraint.AddConstraintSource(sourceNode, source.weight);
+                        }
+                        posConstraint.Active.Set(uniPosConstraint.constraintActive);
+                        posConstraint.Lock.Set(uniPosConstraint.locked);
+                        posConstraint.Weight.Set(uniPosConstraint.weight);
+
+                        // TODO: figure out how to access "Freeze Position Axes"
+                        posConstraint.AffectX.Set(true);
+                        posConstraint.AffectY.Set(true);
+                        posConstraint.AffectZ.Set(true);
+
+                        var fbxTranslationOffset = ConvertToRightHanded(uniPosConstraint.translationOffset, UnitScaleFactor);
+                        posConstraint.Translation.Set(new FbxDouble3(fbxTranslationOffset.X, fbxTranslationOffset.Y, fbxTranslationOffset.Z));
+
+                        // rest position is the position of the fbx node
+                        var fbxRestTranslation = ConvertToRightHanded(uniPosConstraint.translationAtRest, UnitScaleFactor);
+                        // set the local position of fbxNode
+                        fbxNode.LclTranslation.Set(new FbxDouble3(fbxRestTranslation.X, fbxRestTranslation.Y, fbxRestTranslation.Z));
+                    }
+                    else if (constraint.GetType() == tyepof(RotationConstraint))
+                    {
+
+                    }
+                }
+
+                return false;
             }
 
             /// <summary>
@@ -2858,6 +2909,8 @@ namespace FbxExporters
                     if (!exportedMesh && !exportedCamera) {
                         ExportLight (unityGo, fbxScene, fbxNode);
                     }
+
+                    ExportConstraints(unityGo, fbxScene, fbxNode);
 
                     // check if this object contains animation, keep track of it
                     // if it does
