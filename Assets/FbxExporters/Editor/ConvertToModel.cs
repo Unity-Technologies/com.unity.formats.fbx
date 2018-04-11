@@ -375,6 +375,7 @@ namespace FbxExporters
             public static void CopyComponents(GameObject to, GameObject from){
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
 
+                // UNI-27534: This fixes the issue where the mesh collider would not update to point to the mesh in the fbx after export
                 // Point the mesh included in the mesh collider to the mesh in the FBX file, which is the same as the one in mesh filter
                 var toMeshCollider = to.GetComponent<MeshCollider>();
                 var toMeshFilter = to.GetComponent<MeshFilter>();
