@@ -1442,10 +1442,10 @@ namespace FbxExporters
                         posConstraint.Lock.Set(uniPosConstraint.locked);
                         posConstraint.Weight.Set(uniPosConstraint.weight*UnitScaleFactor);
 
-                        // TODO: figure out how to access "Freeze Position Axes"
-                        posConstraint.AffectX.Set(true);
-                        posConstraint.AffectY.Set(true);
-                        posConstraint.AffectZ.Set(true);
+                        var affectedAxes = uniPosConstraint.translationAxis;
+                        posConstraint.AffectX.Set((affectedAxes & Axis.X) == Axis.X);
+                        posConstraint.AffectY.Set((affectedAxes & Axis.Y) == Axis.Y);
+                        posConstraint.AffectZ.Set((affectedAxes & Axis.Z) == Axis.Z);
 
                         var fbxTranslationOffset = ConvertToRightHanded(uniPosConstraint.translationOffset, UnitScaleFactor);
                         posConstraint.Translation.Set(new FbxDouble3(fbxTranslationOffset.X, fbxTranslationOffset.Y, fbxTranslationOffset.Z));
