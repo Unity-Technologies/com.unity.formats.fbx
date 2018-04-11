@@ -1436,11 +1436,11 @@ namespace FbxExporters
                             {
                                 continue;
                             }
-                            posConstraint.AddConstraintSource(sourceNode, source.weight);
+                            posConstraint.AddConstraintSource(sourceNode, source.weight*UnitScaleFactor);
                         }
                         posConstraint.Active.Set(uniPosConstraint.constraintActive);
                         posConstraint.Lock.Set(uniPosConstraint.locked);
-                        posConstraint.Weight.Set(uniPosConstraint.weight);
+                        posConstraint.Weight.Set(uniPosConstraint.weight*UnitScaleFactor);
 
                         // TODO: figure out how to access "Freeze Position Axes"
                         posConstraint.AffectX.Set(true);
@@ -1455,7 +1455,7 @@ namespace FbxExporters
                         // set the local position of fbxNode
                         fbxNode.LclTranslation.Set(new FbxDouble3(fbxRestTranslation.X, fbxRestTranslation.Y, fbxRestTranslation.Z));
                     }
-                    else if (constraint.GetType() == tyepof(RotationConstraint))
+                    else if (constraint.GetType() == typeof(RotationConstraint))
                     {
 
                     }
