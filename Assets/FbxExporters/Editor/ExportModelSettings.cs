@@ -105,6 +105,7 @@ namespace FbxExporters.EditorTools
         ExportSettings.ObjectPosition ObjectPosition { get; }
         bool AnimateSkinnedMesh { get; }
         bool UseMayaCompatibleNames { get; }
+        bool AllowSceneModification { get; }
         bool ExportUnrendered { get; }
         Transform AnimationSource { get; }
         Transform AnimationDest { get; }
@@ -145,6 +146,7 @@ namespace FbxExporters.EditorTools
         public abstract ExportSettings.LODExportType LODExportType { get; }
         public abstract ExportSettings.ObjectPosition ObjectPosition { get; }
         public abstract bool ExportUnrendered { get; }
+        public abstract bool AllowSceneModification { get; }
     }
 
     [System.Serializable]
@@ -163,5 +165,6 @@ namespace FbxExporters.EditorTools
         public void SetObjectPosition(ExportSettings.ObjectPosition objPos){ this.objectPosition = objPos; }
         public override bool ExportUnrendered { get { return exportUnrendered; } }
         public void SetExportUnredererd(bool exportUnrendered){ this.exportUnrendered = exportUnrendered; }
+        public override bool AllowSceneModification { get { return false; } }
     }
 }

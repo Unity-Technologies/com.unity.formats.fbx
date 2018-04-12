@@ -104,7 +104,7 @@ namespace FbxExporters
                 string fbxFullPath = null,
                 string prefabDirectoryFullPath = null,
                 string prefabFullPath = null, 
-                EditorTools.IExportOptions exportOptions = null
+                EditorTools.ConvertToPrefabSettingsSerialize exportOptions = null
             )
             {
                 // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
@@ -139,7 +139,7 @@ namespace FbxExporters
                 // The import back in to Unity would do this automatically but
                 // we prefer to control it so that the Maya artist can see the
                 // same names as exist in Unity.
-                EnforceUniqueNames (new GameObject[] {toConvert});
+                EnforceUniqueNames(new GameObject[] { toConvert });
 
                 // Export to FBX. It refreshes the database.
                 {
@@ -282,23 +282,28 @@ namespace FbxExporters
             /// <param name="exportSet">Export set.</param>
             public static void EnforceUniqueNames(IEnumerable<GameObject> exportSet)
             {
-                Dictionary<string, int> NameToIndexMap = new Dictionary<string, int> ();
+                Dictionary<string, int> NameToIndexMap = new Dictionary<string, int>();
                 string format = "{0} {1}";
 
-                Queue<GameObject> queue = new Queue<GameObject> (exportSet);
+                Queue<GameObject> queue = new Queue<GameObject>(exportSet);
 
-                while(queue.Count > 0){
-                    var go = queue.Dequeue ();
+                while (queue.Count > 0)
+                {
+                    var go = queue.Dequeue();
                     var name = go.name;
-                    if (NameToIndexMap.ContainsKey (name)) {
-                        go.name = string.Format (format, name, NameToIndexMap [name]);
-                        NameToIndexMap [name]++;
-                    } else {
-                        NameToIndexMap [name] = 1;
+                    if (NameToIndexMap.ContainsKey(name))
+                    {
+                        go.name = string.Format(format, name, NameToIndexMap[name]);
+                        NameToIndexMap[name]++;
+                    }
+                    else
+                    {
+                        NameToIndexMap[name] = 1;
                     }
 
-                    foreach (Transform child in go.transform) {
-                        queue.Enqueue (child.gameObject);
+                    foreach (Transform child in go.transform)
+                    {
+                        queue.Enqueue(child.gameObject);
                     }
                 }
             }
