@@ -3819,6 +3819,7 @@ namespace FbxExporters
             private string m_lastFilePath { get; set; }
 
             const string kFBXFileExtension = "fbx";
+            public const string prefabExtension = "prefab";
 			
             private static string MakeFileName (string basename = "test", string extension = kFBXFileExtension)
             {

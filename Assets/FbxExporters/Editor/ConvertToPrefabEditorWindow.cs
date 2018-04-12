@@ -32,6 +32,12 @@ namespace FbxExporters
                 }
             }
 
+            protected override bool GameObjectIsModel {
+                get {
+                    return ConvertToModel.IsModel(ModelExporter.GetGameObject (ToExport [0]));
+                }
+            }
+
             public static void Init (IEnumerable<GameObject> toConvert)
             {
                 ConvertToPrefabEditorWindow window = CreateWindow<ConvertToPrefabEditorWindow> ();
@@ -122,7 +128,7 @@ namespace FbxExporters
                         var relPrefabPath = ExportSettings.GetProjectRelativePath (prefabPath);
 
                         if (string.Equals(System.IO.Path.GetFullPath(fbxPath), System.IO.Path.GetFullPath(mainAssetAbsPath))) {
-                            ConvertToModel.SetupFbxPrefab(go, mainAsset, relPrefabPath, mainAssetAbsPath);
+                            ConvertToModel.SetupFbxPrefabOnGameObject(go, mainAsset, relPrefabPath, mainAssetAbsPath);
                             return true;
                         }
                     }

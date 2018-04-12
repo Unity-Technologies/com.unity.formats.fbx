@@ -45,6 +45,7 @@ namespace FbxExporters
 
             protected abstract bool DisableTransferAnim { get; }
             protected abstract bool DisableNameSelection { get; }
+            protected abstract bool GameObjectIsModel { get; }
 
             protected abstract EditorTools.ExportOptionsSettingsSerializeBase SettingsObject { get; }
 
@@ -260,10 +261,12 @@ namespace FbxExporters
                 EditorGUI.indentLevel++;
 
                 GUILayout.BeginHorizontal ();
+                EditorGUI.BeginDisabledGroup (GameObjectIsModel);
+
                 EditorGUILayout.LabelField(new GUIContent(
                     "Export Name",
                     "Filename to save model to."),GUILayout.Width(LabelWidth-TextFieldAlignOffset));
-
+                
                 EditorGUI.BeginDisabledGroup (DisableNameSelection);
                 // Show the export name with an uneditable ".fbx" at the end
                 //-------------------------------------
@@ -281,6 +284,7 @@ namespace FbxExporters
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.EndVertical ();
                 //-----------------------------------
+                
                 EditorGUI.EndDisabledGroup ();
                 GUILayout.EndHorizontal ();
 
@@ -288,8 +292,10 @@ namespace FbxExporters
                 EditorGUILayout.LabelField(new GUIContent(
                     "Export Path",
                     "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
-
+                EditorGUI.EndDisabledGroup ();
                 var pathLabels = ExportSettings.GetRelativeFbxSavePaths();
+                
+                EditorGUI.BeginDisabledGroup (GameObjectIsModel);
 
                 ExportSettings.instance.selectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.selectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
@@ -320,6 +326,7 @@ namespace FbxExporters
                         }
                     }
                 }
+                EditorGUI.EndDisabledGroup ();
                 GUILayout.EndHorizontal();
 
                 CreateCustomUI();
@@ -451,6 +458,14 @@ namespace FbxExporters
             protected override ExportOptionsSettingsSerializeBase SettingsObject
             {
                 get { return ExportSettings.instance.exportModelSettings.info; }
+            }
+
+            protected override bool GameObjectIsModel
+            {
+                get
+                {
+                    return ConvertToModel.IsModel(ModelExporter.GetGameObject (ToExport [0]));
+                }
             }
 
             private ExportSettings.Include m_previousInclude = ExportSettings.Include.ModelAndAnim;
