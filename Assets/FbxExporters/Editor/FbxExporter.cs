@@ -1413,6 +1413,96 @@ namespace FbxExporters
                 return true;
             }
 
+            protected bool ExportCommonConstraintProperties<T,U>(T uniConstraint, U fbxConstraint) where T : IConstraint where U : FbxConstraint
+            {
+                fbxConstraint.Active.Set(uniConstraint.constraintActive);
+                fbxConstraint.Lock.Set(uniConstraint.locked);
+                fbxConstraint.Weight.Set(uniConstraint.weight * UnitScaleFactor);
+                return true;
+            }
+
+            protected bool ExportPositionConstraint(PositionConstraint uniPosConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                if(uniPosConstraint == null)
+                {
+                    return false;
+                }
+
+                FbxConstraintPosition posConstraint = FbxConstraintPosition.Create(fbxScene, fbxNode.GetName() + "_positionConstraint");
+                posConstraint.SetConstrainedObject(fbxNode);
+                var sources = new List<ConstraintSource>();
+                uniPosConstraint.GetSources(sources);
+                foreach (var source in sources)
+                {
+                    // ignore any sources that are not getting exported
+                    FbxNode sourceNode;
+                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
+                    {
+                        continue;
+                    }
+                    posConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
+                }
+                ExportCommonConstraintProperties(uniPosConstraint, posConstraint);
+
+                var affectedAxes = uniPosConstraint.translationAxis;
+                posConstraint.AffectX.Set((affectedAxes & Axis.X) == Axis.X);
+                posConstraint.AffectY.Set((affectedAxes & Axis.Y) == Axis.Y);
+                posConstraint.AffectZ.Set((affectedAxes & Axis.Z) == Axis.Z);
+
+                var fbxTranslationOffset = ConvertToRightHanded(uniPosConstraint.translationOffset, UnitScaleFactor);
+                posConstraint.Translation.Set(new FbxDouble3(fbxTranslationOffset.X, fbxTranslationOffset.Y, fbxTranslationOffset.Z));
+
+                // rest position is the position of the fbx node
+                var fbxRestTranslation = ConvertToRightHanded(uniPosConstraint.translationAtRest, UnitScaleFactor);
+                // set the local position of fbxNode
+                fbxNode.LclTranslation.Set(new FbxDouble3(fbxRestTranslation.X, fbxRestTranslation.Y, fbxRestTranslation.Z));
+
+                posConstraint.ConnectDstObject(fbxScene);
+                return true;
+            }
+
+            protected bool ExportRotationConstraint(RotationConstraint uniRotConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                if(uniRotConstraint == null)
+                {
+                    return false;
+                }
+
+                FbxConstraintRotation rotConstraint = FbxConstraintRotation.Create(fbxScene, fbxNode.GetName() + "_rotationConstraint");
+                rotConstraint.SetConstrainedObject(fbxNode);
+                var sources = new List<ConstraintSource>();
+                uniRotConstraint.GetSources(sources);
+                foreach (var source in sources)
+                {
+                    // ignore any sources that are not getting exported
+                    FbxNode sourceNode;
+                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
+                    {
+                        continue;
+                    }
+                    rotConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
+                }
+                ExportCommonConstraintProperties(uniRotConstraint, rotConstraint);
+
+                var affectedAxes = uniRotConstraint.rotationAxis;
+                rotConstraint.AffectX.Set((affectedAxes & Axis.X) == Axis.X);
+                rotConstraint.AffectY.Set((affectedAxes & Axis.Y) == Axis.Y);
+                rotConstraint.AffectZ.Set((affectedAxes & Axis.Z) == Axis.Z);
+
+                var rotationQuat = Quaternion.Euler(uniRotConstraint.rotationOffset);
+                var fbxRotationOffset = ConvertQuaternionToXYZEuler(rotationQuat);
+                rotConstraint.Rotation.Set(fbxRotationOffset);
+
+                // rest rotation is the rotation of the fbx node
+                var restRotationQuat = Quaternion.Euler(uniRotConstraint.rotationAtRest);
+                var fbxRestRotation = ConvertQuaternionToXYZEuler(restRotationQuat);
+                // set the local rotation of fbxNode
+                fbxNode.LclRotation.Set(fbxRestRotation);
+
+                rotConstraint.ConnectDstObject(fbxScene);
+                return true;
+            }
+
             protected bool ExportConstraints (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
             {
                 // check if GameObject has one of the 5 supported constraints: aim, parent, position, rotation, scale
@@ -1420,44 +1510,17 @@ namespace FbxExporters
 
                 foreach(var constraint in constraints)
                 {
-                    if(constraint.GetType() == typeof(PositionConstraint))
+                    var constraintType = constraint.GetType();
+                    if(constraintType == typeof(PositionConstraint))
                     {
-                        PositionConstraint uniPosConstraint = constraint as PositionConstraint;
-
-                        FbxConstraintPosition posConstraint = FbxConstraintPosition.Create(fbxScene, fbxNode.GetName() + "_positionConstraint");
-                        posConstraint.SetConstrainedObject(fbxNode);
-                        var sources = new List<ConstraintSource>();
-                        uniPosConstraint.GetSources(sources);
-                        foreach (var source in sources)
-                        {
-                            // ignore any sources that are not getting exported
-                            FbxNode sourceNode;
-                            if(!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
-                            {
-                                continue;
-                            }
-                            posConstraint.AddConstraintSource(sourceNode, source.weight*UnitScaleFactor);
-                        }
-                        posConstraint.Active.Set(uniPosConstraint.constraintActive);
-                        posConstraint.Lock.Set(uniPosConstraint.locked);
-                        posConstraint.Weight.Set(uniPosConstraint.weight*UnitScaleFactor);
-
-                        var affectedAxes = uniPosConstraint.translationAxis;
-                        posConstraint.AffectX.Set((affectedAxes & Axis.X) == Axis.X);
-                        posConstraint.AffectY.Set((affectedAxes & Axis.Y) == Axis.Y);
-                        posConstraint.AffectZ.Set((affectedAxes & Axis.Z) == Axis.Z);
-
-                        var fbxTranslationOffset = ConvertToRightHanded(uniPosConstraint.translationOffset, UnitScaleFactor);
-                        posConstraint.Translation.Set(new FbxDouble3(fbxTranslationOffset.X, fbxTranslationOffset.Y, fbxTranslationOffset.Z));
-
-                        // rest position is the position of the fbx node
-                        var fbxRestTranslation = ConvertToRightHanded(uniPosConstraint.translationAtRest, UnitScaleFactor);
-                        // set the local position of fbxNode
-                        fbxNode.LclTranslation.Set(new FbxDouble3(fbxRestTranslation.X, fbxRestTranslation.Y, fbxRestTranslation.Z));
+                        ExportPositionConstraint(constraint as PositionConstraint, fbxScene, fbxNode);
                     }
-                    else if (constraint.GetType() == typeof(RotationConstraint))
+                    else if (constraintType == typeof(RotationConstraint))
                     {
-
+                        ExportRotationConstraint(constraint as RotationConstraint, fbxScene, fbxNode);
+                    }
+                    else if(constraintType == typeof(ScaleConstraint))
+                    {
                     }
                 }
 
