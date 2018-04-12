@@ -128,7 +128,7 @@ namespace FbxExporters
 
                     // give a warning dialog that indicates that names in the scene may change
                     int result = UnityEditor.EditorUtility.DisplayDialogComplex(
-                                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "OK", "Turn off and convert", "Cancel"
+                                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "OK", "Turn off and continue", "Cancel"
                                 );
                     if (result == 1)
                     {
