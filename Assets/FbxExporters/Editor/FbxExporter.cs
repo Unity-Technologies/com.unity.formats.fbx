@@ -2209,12 +2209,13 @@ namespace FbxExporters
             {
                 int numObjectsExported = exportProgress;
 
+                string fbxName = unityGo.name;
                 if (ExportOptions.UseMayaCompatibleNames) {
-                    unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
+                    fbxName = ConvertToMayaCompatibleName (unityGo.name);
                 }
 
                 // create an FbxNode and add it as a child of parent
-                FbxNode fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
+                FbxNode fbxNode = FbxNode.Create (fbxScene, GetUniqueName (fbxName));
                 MapUnityObjectToFbxNode [unityGo] = fbxNode;
 
                 if (Verbose)
@@ -2481,12 +2482,13 @@ namespace FbxExporters
                     return true;
                 }
 
+                string fbxName = unityGo.name;
                 if (ExportOptions.UseMayaCompatibleNames) {
-                    unityGo.name = ConvertToMayaCompatibleName (unityGo.name);
+                    fbxName = ConvertToMayaCompatibleName (unityGo.name);
                 }
 
                 // create an FbxNode and add it as a child of parent
-                fbxNode = FbxNode.Create (fbxScene, GetUniqueName (unityGo.name));
+                fbxNode = FbxNode.Create (fbxScene, GetUniqueName (fbxName));
                 MapUnityObjectToFbxNode [unityGo] = fbxNode;
 
                 exportProgress++;
