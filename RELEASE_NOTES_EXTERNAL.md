@@ -1,9 +1,14 @@
 RELEASE NOTES
 
+**Version**: 1.3.0b3
+
+FIXES
+* ConvertToPrefab: fix Mesh Collider not pointing to exported mesh after converting
+* FbxExporter: fix so "Compatible Naming" doesn't modify scene on export
+
 **Version**: 1.3.0b2
 
 NEW FEATURES
-
 * Unity3dsMaxIntegration: Allow multi file import
 * Unity3dsMaxIntegration: Allow multi file export by scene selection
 
