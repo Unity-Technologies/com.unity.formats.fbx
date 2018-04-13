@@ -1622,6 +1622,54 @@ namespace FbxExporters
                 return true;
             }
 
+            protected bool ExportParentConstraint(ParentConstraint uniParentConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                if (uniParentConstraint == null)
+                {
+                    return false;
+                }
+
+                FbxConstraintParent parentConstraint = FbxConstraintParent.Create(fbxScene, fbxNode.GetName() + "_parentConstraint");
+                parentConstraint.SetConstrainedObject(fbxNode);
+                var sources = new List<ConstraintSource>();
+                var translationOffsets = uniParentConstraint.translationOffsets;
+                var rotationOffsets = uniParentConstraint.rotationOffsets;
+                uniParentConstraint.GetSources(sources);
+                for(int i = 0; i < sources.Count; i++)
+                {
+                    var source = sources[i];
+                    var translationOffset = translationOffsets[i];
+                    var rotationOffset = rotationOffsets[i];
+
+                    // ignore any sources that are not getting exported
+                    FbxNode sourceNode;
+                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
+                    {
+                        continue;
+                    }
+                    parentConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
+                    
+                    var fbxTranslationOffset = ConvertToRightHanded(translationOffset, UnitScaleFactor);
+
+                    var rotationQuat = Quaternion.Euler(rotationOffset);
+                    var fbxRotationOffset = ConvertQuaternionToXYZEuler(rotationQuat);
+
+                }
+                ExportCommonConstraintProperties(uniParentConstraint, parentConstraint);
+
+                var translationAxes = uniParentConstraint.translationAxis;
+                parentConstraint.AffectTranslationX.Set((translationAxes & Axis.X) == Axis.X);
+                parentConstraint.AffectTranslationY.Set((translationAxes & Axis.Y) == Axis.Y);
+                parentConstraint.AffectTranslationZ.Set((translationAxes & Axis.Z) == Axis.Z);
+
+                var rotationAxes = uniParentConstraint.rotationAxis;
+                parentConstraint.AffectRotationX.Set((rotationAxes & Axis.X) == Axis.X);
+                parentConstraint.AffectRotationY.Set((rotationAxes & Axis.Y) == Axis.Y);
+                parentConstraint.AffectRotationZ.Set((rotationAxes & Axis.Z) == Axis.Z);
+
+                return true;
+            }
+
             protected bool ExportConstraints (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
             {
                 // check if GameObject has one of the 5 supported constraints: aim, parent, position, rotation, scale
@@ -1646,9 +1694,17 @@ namespace FbxExporters
                     {
                         ExportAimConstraint(constraint as AimConstraint, fbxScene, fbxNode);
                     }
+                    else if(constraintType == typeof(ParentConstraint))
+                    {
+                        ExportParentConstraint(constraint as ParentConstraint, fbxScene, fbxNode);
+                    }
+                    else
+                    {
+                        throw new System.NotImplementedException();
+                    }
                 }
 
-                return false;
+                return true;
             }
 
             /// <summary>
