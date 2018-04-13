@@ -1,5 +1,17 @@
 ﻿RELEASE NOTES
 
+**Version**: 1.3.0b3
+
+NEW FEATURES
+
+* Updated documentation
+
+FIXES
+
+* ConvertToPrefab: fix Mesh Collider not pointing to exported mesh after converting
+* FbxExporter: fix so "Compatible Naming" doesn't modify scene on export
+* ConvertToPrefab: warn that hierarchy might change and animations could break when "Compatible Naming" is enabled
+
 **Version**: 1.3.0b2
 
 NEW FEATURES
