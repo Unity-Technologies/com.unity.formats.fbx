@@ -1539,14 +1539,86 @@ namespace FbxExporters
                 var restScale = uniScaleConstraint.scaleAtRest;
                 var fbxRestScale = new FbxDouble3(restScale.x, restScale.y, restScale.z);
                 // set the local rotation of fbxNode
-                fbxNode.LclRotation.Set(fbxRestScale);
+                fbxNode.LclScaling.Set(fbxRestScale);
 
                 scaleConstraint.ConnectDstObject(fbxScene);
                 return true;
             }
 
-            protected bool ExportAimConstraint()
+            protected bool ExportAimConstraint(AimConstraint uniAimConstraint, FbxScene fbxScene, FbxNode fbxNode)
             {
+                if (uniAimConstraint == null)
+                {
+                    return false;
+                }
+
+                FbxConstraintAim aimConstraint = FbxConstraintAim.Create(fbxScene, fbxNode.GetName() + "_aimConstraint");
+                aimConstraint.SetConstrainedObject(fbxNode);
+                var sources = new List<ConstraintSource>();
+                uniAimConstraint.GetSources(sources);
+                foreach (var source in sources)
+                {
+                    // ignore any sources that are not getting exported
+                    FbxNode sourceNode;
+                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
+                    {
+                        continue;
+                    }
+                    aimConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
+                }
+                ExportCommonConstraintProperties(uniAimConstraint, aimConstraint);
+
+                var affectedAxes = uniAimConstraint.rotationAxis;
+                aimConstraint.AffectX.Set((affectedAxes & Axis.X) == Axis.X);
+                aimConstraint.AffectY.Set((affectedAxes & Axis.Y) == Axis.Y);
+                aimConstraint.AffectZ.Set((affectedAxes & Axis.Z) == Axis.Z);
+
+                var rotationQuat = Quaternion.Euler(uniAimConstraint.rotationOffset);
+                var fbxRotationOffset = ConvertQuaternionToXYZEuler(rotationQuat);
+                aimConstraint.RotationOffset.Set(fbxRotationOffset);
+
+                // rest rotation is the rotation of the fbx node
+                var restRotationQuat = Quaternion.Euler(uniAimConstraint.rotationAtRest);
+                var fbxRestRotation = ConvertQuaternionToXYZEuler(restRotationQuat);
+                // set the local rotation of fbxNode
+                fbxNode.LclRotation.Set(fbxRestRotation);
+
+                FbxConstraintAim.EWorldUp worldUpType = FbxConstraintAim.EWorldUp.eAimAtNone;
+                switch (uniAimConstraint.worldUpType)
+                {
+                    case AimConstraint.WorldUpType.None:
+                        worldUpType = FbxConstraintAim.EWorldUp.eAimAtNone;
+                        break;
+                    case AimConstraint.WorldUpType.ObjectRotationUp:
+                        worldUpType = FbxConstraintAim.EWorldUp.eAimAtObjectRotationUp;
+                        break;
+                    case AimConstraint.WorldUpType.ObjectUp:
+                        worldUpType = FbxConstraintAim.EWorldUp.eAimAtObjectUp;
+                        break;
+                    case AimConstraint.WorldUpType.SceneUp:
+                        worldUpType = FbxConstraintAim.EWorldUp.eAimAtSceneUp;
+                        break;
+                    case AimConstraint.WorldUpType.Vector:
+                        worldUpType = FbxConstraintAim.EWorldUp.eAimAtVector;
+                        break;
+                    default:
+                        throw new System.NotImplementedException();
+                }
+                aimConstraint.WorldUpType.Set((int)worldUpType);
+
+                var aimVector = ConvertToRightHanded(uniAimConstraint.aimVector, UnitScaleFactor);
+                aimConstraint.AimVector.Set(new FbxDouble3(aimVector.X, aimVector.Y, aimVector.Z));
+                var upVector = ConvertToRightHanded(uniAimConstraint.upVector, UnitScaleFactor);
+                aimConstraint.UpVector.Set(new FbxDouble3(upVector.X, upVector.Y, upVector.Z));
+                var worldUpVector = ConvertToRightHanded(uniAimConstraint.worldUpVector, UnitScaleFactor);
+                aimConstraint.WorldUpVector.Set(new FbxDouble3(worldUpVector.X, worldUpVector.Y, worldUpVector.Z));
+
+                if (uniAimConstraint.worldUpObject && MapUnityObjectToFbxNode.ContainsKey(uniAimConstraint.worldUpObject.gameObject))
+                {
+                    aimConstraint.SetWorldUpObject(MapUnityObjectToFbxNode[uniAimConstraint.worldUpObject.gameObject]);
+                }
+
+                aimConstraint.ConnectDstObject(fbxScene);
                 return true;
             }
 
@@ -1572,7 +1644,7 @@ namespace FbxExporters
                     }
                     else if(constraintType == typeof(AimConstraint))
                     {
-
+                        ExportAimConstraint(constraint as AimConstraint, fbxScene, fbxNode);
                     }
                 }
 
