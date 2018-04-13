@@ -1503,6 +1503,53 @@ namespace FbxExporters
                 return true;
             }
 
+            protected bool ExportScaleConstraint(ScaleConstraint uniScaleConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                if (uniScaleConstraint == null)
+                {
+                    return false;
+                }
+
+                FbxConstraintScale scaleConstraint = FbxConstraintScale.Create(fbxScene, fbxNode.GetName() + "_scaleConstraint");
+                scaleConstraint.SetConstrainedObject(fbxNode);
+                var sources = new List<ConstraintSource>();
+                uniScaleConstraint.GetSources(sources);
+                foreach (var source in sources)
+                {
+                    // ignore any sources that are not getting exported
+                    FbxNode sourceNode;
+                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
+                    {
+                        continue;
+                    }
+                    scaleConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
+                }
+                ExportCommonConstraintProperties(uniScaleConstraint, scaleConstraint);
+
+                var affectedAxes = uniScaleConstraint.scalingAxis;
+                scaleConstraint.AffectX.Set((affectedAxes & Axis.X) == Axis.X);
+                scaleConstraint.AffectY.Set((affectedAxes & Axis.Y) == Axis.Y);
+                scaleConstraint.AffectZ.Set((affectedAxes & Axis.Z) == Axis.Z);
+
+                var scaleOffset = uniScaleConstraint.scaleOffset;
+                var fbxScalingOffset = new FbxDouble3(scaleOffset.x, scaleOffset.y, scaleOffset.z);
+                scaleConstraint.Scaling.Set(fbxScalingOffset);
+
+                // rest rotation is the rotation of the fbx node
+                var restScale = uniScaleConstraint.scaleAtRest;
+                var fbxRestScale = new FbxDouble3(restScale.x, restScale.y, restScale.z);
+                // set the local rotation of fbxNode
+                fbxNode.LclRotation.Set(fbxRestScale);
+
+                scaleConstraint.ConnectDstObject(fbxScene);
+                return true;
+            }
+
+            protected bool ExportAimConstraint()
+            {
+                return true;
+            }
+
             protected bool ExportConstraints (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
             {
                 // check if GameObject has one of the 5 supported constraints: aim, parent, position, rotation, scale
@@ -1521,6 +1568,11 @@ namespace FbxExporters
                     }
                     else if(constraintType == typeof(ScaleConstraint))
                     {
+                        ExportScaleConstraint(constraint as ScaleConstraint, fbxScene, fbxNode);
+                    }
+                    else if(constraintType == typeof(AimConstraint))
+                    {
+
                     }
                 }
 
