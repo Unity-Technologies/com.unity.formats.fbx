@@ -16,4 +16,4 @@ FbxImporterSetParam "Cameras" true
 FbxImporterSetParam "Lights" true
 
 -- Axis Conversion
-FbxImporterSetParam "UpAxis" "Y"
+FbxImporterSetParam "UpAxis" "Z"

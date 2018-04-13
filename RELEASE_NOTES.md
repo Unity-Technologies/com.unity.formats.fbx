@@ -1,5 +1,33 @@
 ﻿RELEASE NOTES
 
+**Version**: 1.3.0b3
+
+NEW FEATURES
+
+* Updated documentation
+
+FIXES
+
+* ConvertToPrefab: fix Mesh Collider not pointing to exported mesh after converting
+* FbxExporter: fix so "Compatible Naming" doesn't modify scene on export
+* ConvertToPrefab: warn that hierarchy might change and animations could break when "Compatible Naming" is enabled
+
+**Version**: 1.3.0b2
+
+NEW FEATURES
+
+* 3ds Max Integration:
+
+- Add FBX Import settings file
+- Add ability to import multiple files at once
+- Recognize animation files on import
+- Add ability to export based on scene selection
+- Add export model only option
+
+KNOWN ISSUES
+
+* Cannot export animation only from 3ds Max
+
 **Version**: 1.3.0b1
 
 FIXES

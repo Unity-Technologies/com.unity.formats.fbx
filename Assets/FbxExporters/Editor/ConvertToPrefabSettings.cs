@@ -76,5 +76,6 @@ namespace FbxExporters.EditorTools
         public override ExportSettings.LODExportType LODExportType { get { return ExportSettings.LODExportType.All; } }
         public override ExportSettings.ObjectPosition ObjectPosition { get { return ExportSettings.ObjectPosition.Reset; } }
         public override bool ExportUnrendered { get { return true; } }
+        public override bool AllowSceneModification { get { return true; } }
     }
 }

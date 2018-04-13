@@ -113,7 +113,7 @@ namespace FbxExporters
                 string fbxFullPath = null,
                 string prefabDirectoryFullPath = null,
                 string prefabFullPath = null, 
-                EditorTools.IExportOptions exportOptions = null)
+                EditorTools.ConvertToPrefabSettingsSerialize exportOptions = null)
             {
                 // If we selected the something that's already backed by an FBX, don't export.
                 var mainAsset = GetOrCreateFbxAsset (toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
@@ -166,7 +166,7 @@ namespace FbxExporters
             public static GameObject GetOrCreateFbxAsset(GameObject toConvert,
                     string fbxDirectoryFullPath = null,
                     string fbxFullPath = null,
-                    EditorTools.IExportOptions exportOptions = null)
+                    EditorTools.ConvertToPrefabSettingsSerialize exportOptions = null)
             {
                 var mainAsset = GetFbxAssetOrNull(toConvert);
                 if (mainAsset) {
@@ -193,7 +193,7 @@ namespace FbxExporters
                 // The import back in to Unity would do this automatically but
                 // we prefer to control it so that the Maya artist can see the
                 // same names as exist in Unity.
-                EnforceUniqueNames (new GameObject[] {toConvert});
+                EnforceUniqueNames(new GameObject[] { toConvert });
 
                 // Export to FBX. It refreshes the database.
                 {
@@ -392,23 +392,28 @@ namespace FbxExporters
             /// <param name="exportSet">Export set.</param>
             public static void EnforceUniqueNames(IEnumerable<GameObject> exportSet)
             {
-                Dictionary<string, int> NameToIndexMap = new Dictionary<string, int> ();
+                Dictionary<string, int> NameToIndexMap = new Dictionary<string, int>();
                 string format = "{0} {1}";
 
-                Queue<GameObject> queue = new Queue<GameObject> (exportSet);
+                Queue<GameObject> queue = new Queue<GameObject>(exportSet);
 
-                while(queue.Count > 0){
-                    var go = queue.Dequeue ();
+                while (queue.Count > 0)
+                {
+                    var go = queue.Dequeue();
                     var name = go.name;
-                    if (NameToIndexMap.ContainsKey (name)) {
-                        go.name = string.Format (format, name, NameToIndexMap [name]);
-                        NameToIndexMap [name]++;
-                    } else {
-                        NameToIndexMap [name] = 1;
+                    if (NameToIndexMap.ContainsKey(name))
+                    {
+                        go.name = string.Format(format, name, NameToIndexMap[name]);
+                        NameToIndexMap[name]++;
+                    }
+                    else
+                    {
+                        NameToIndexMap[name] = 1;
                     }
 
-                    foreach (Transform child in go.transform) {
-                        queue.Enqueue (child.gameObject);
+                    foreach (Transform child in go.transform)
+                    {
+                        queue.Enqueue(child.gameObject);
                     }
                 }
             }
@@ -493,6 +498,22 @@ namespace FbxExporters
             /// </summary>
             public static void CopyComponents(GameObject to, GameObject from){
                 var originalComponents = new List<Component>(to.GetComponents<Component> ());
+
+                // UNI-27534: This fixes the issue where the mesh collider would not update to point to the mesh in the fbx after export
+                // Point the mesh included in the mesh collider to the mesh in the FBX file, which is the same as the one in mesh filter
+                var toMeshCollider = to.GetComponent<MeshCollider>();
+                var toMeshFilter = to.GetComponent<MeshFilter>();
+                // if the mesh collider isn't pointing to the same mesh as in the current mesh filter then don't
+                // do anything as it's probably pointing to a mesh in a different fbx
+                if (toMeshCollider && toMeshFilter && toMeshCollider.sharedMesh == toMeshFilter.sharedMesh)
+                {
+                    var fromFilter = from.GetComponent<MeshFilter>();
+                    if (fromFilter)
+                    {
+                        toMeshCollider.sharedMesh = fromFilter.sharedMesh;
+                    }
+                }
+
                 // copy over meshes, materials, and nothing else
                 foreach (var component in from.GetComponents<Component>()) {
                     // ignore missing components
