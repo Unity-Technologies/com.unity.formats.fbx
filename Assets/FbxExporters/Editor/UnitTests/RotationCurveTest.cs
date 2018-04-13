@@ -52,7 +52,7 @@ namespace FbxExporters.UnitTests
             var animClips = FbxAnimationTest.GetClipsFromAnimator (animator);
 
             // export fbx
-            string filename = ExportToFbx(originalGO);
+            string filename = AssetDatabase.GetAssetPath(ExportToFbx(originalGO));
 
             var fbxAnimClips = FbxAnimationTest.AnimTester.GetClipsFromFbx (filename);
 

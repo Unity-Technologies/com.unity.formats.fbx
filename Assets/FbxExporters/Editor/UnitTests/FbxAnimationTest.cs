@@ -682,7 +682,7 @@ namespace FbxExporters.UnitTests
 
             // export fbx
             // get GameObject
-            string filename = ExportToFbx(originalGO);
+            string filename = AssetDatabase.GetAssetPath(ExportToFbx(originalGO));
 
             // TODO: Uni-34492 change importer settings of (newly exported model) 
             // so that it's not resampled and it is legacy animation
@@ -834,9 +834,7 @@ namespace FbxExporters.UnitTests
 
             // export fbx
             // get GameObject
-            string filename = ExportToFbx(originalGO, true);
-
-            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+            GameObject fbxObj = ExportToFbx(originalGO, true);
             Assert.IsTrue (fbxObj);
 
             // compare hierarchy matches animated objects
@@ -858,7 +856,7 @@ namespace FbxExporters.UnitTests
             }
 
             // compare clips
-            var fbxAnimClips = AnimTester.GetClipsFromFbx (filename);
+            var fbxAnimClips = AnimTester.GetClipsFromFbx (AssetDatabase.GetAssetPath(fbxObj));
             AnimTester.MultiClipTest (animClips, fbxAnimClips);
         }
 
