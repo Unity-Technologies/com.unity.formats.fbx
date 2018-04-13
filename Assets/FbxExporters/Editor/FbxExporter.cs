@@ -1650,9 +1650,11 @@ namespace FbxExporters
                     parentConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
                     
                     var fbxTranslationOffset = ConvertToRightHanded(translationOffset, UnitScaleFactor);
+                    parentConstraint.SetTranslationOffset(sourceNode, fbxTranslationOffset);
 
                     var rotationQuat = Quaternion.Euler(rotationOffset);
                     var fbxRotationOffset = ConvertQuaternionToXYZEuler(rotationQuat);
+                    parentConstraint.SetRotationOffset(sourceNode, new FbxVector4(fbxRotationOffset));
 
                 }
                 ExportCommonConstraintProperties(uniParentConstraint, parentConstraint);
