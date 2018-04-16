@@ -137,8 +137,16 @@ namespace FbxExporters
                 string prefabFullPath = null, 
                 EditorTools.ConvertToPrefabSettingsSerialize exportOptions = null)
             {
-                // If we selected the something that's already backed by an FBX, don't export.
+                // If we selected the something that's already backed by an
+                // FBX, don't export.
                 var mainAsset = GetOrCreateFbxAsset (toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
+
+                // If we selected a prefab *instance* then break the
+                // connection. We only want to update an existing prefab if
+                // we're converting an existing prefab (not an instance).
+                if (PrefabUtility.GetPrefabType(toConvert) == PrefabType.PrefabInstance) {
+                    PrefabUtility.DisconnectPrefabInstance(toConvert);
+                }
 
                 // Get 'toConvert' into an editable state. We can't edit
                 // assets, and toConvert might be an asset.
@@ -147,8 +155,9 @@ namespace FbxExporters
                 // Set it up to track the FbxPrefab.
                 SetupFbxPrefab (toConvertInstance, mainAsset);
 
-                // Now get 'toConvertInstance' into a prefab. If toConvert is already a prefab,
-                // this is equivalent to an 'apply' ; if it's not, we're creating a new prefab.
+                // Now get 'toConvertInstance' into a prefab. If toConvert is
+                // already a prefab, this is equivalent to an 'apply' ; if it's
+                // not, we're creating a new prefab.
                 var prefab = ApplyOrCreatePrefab (toConvertInstance, prefabDirectoryFullPath, prefabFullPath);
 
                 if (toConvertInstance == toConvert) {
@@ -166,10 +175,11 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Check whether GetOrCreateFbxAsset will be exporting an fbx file, or reusing one.
+            /// Check whether <see>Convert</see> will be exporting an fbx file,
+            /// or reusing one.
             /// </summary>
-            public static bool WillExportFbx(GameObject go) {
-                return GetFbxAssetOrNull(go) == null;
+            public static bool WillExportFbx(GameObject toConvert) {
+                return GetFbxAssetOrNull(toConvert) == null;
             }
 
             /// <summary>
@@ -266,24 +276,46 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Check whether ApplyOrCreatePrefab will be creating a new prefab, or updating one.
+            /// Check whether <see>Convert</see> will be creating a new prefab, or
+            /// updating one.
+            ///
+            /// Note that ApplyOrCreatePrefab will create in different
+            /// circumstances than Convert will.
             /// </summary>
-            public static bool WillCreatePrefab(GameObject go) {
-                return PrefabUtility.GetPrefabType(go) != PrefabType.PrefabInstance;
+            public static bool WillCreatePrefab(GameObject toConvert) {
+                return PrefabUtility.GetPrefabType(toConvert) != PrefabType.Prefab;
             }
 
             /// <summary>
             /// Create a prefab from 'instance', or apply 'instance' to its
             /// prefab if it's already an instance of a prefab.
             ///
-            /// Return the new or updated prefab.
+            /// If it's an instance of a model prefab (an fbx file) we will
+            /// lose that connection and point to a new prefab file.
+            ///
+            /// To avoid applying to an existing prefab, break the prefab
+            /// connection with <c>PrefabUtility.DisconnectPrefabInstance</c>.
+            ///
+            /// Returns the new or updated prefab.
             /// </summary>
+            /// <param name="instance">A GameObject in the scene. After this
+            /// call, it will be a prefab instance (it might already be
+            /// one).</param>
+            /// <param name="prefabFullPath">The full path to a prefab file we
+            /// will create. Ignored if <paramref name="instance"/> is a
+            /// prefab instance already. May be null, in which case we'll use <paramref
+            /// name="prefabDirectoryFullPath"/> to generate a new name</param>
+            /// <param name="prefabDirectoryFullPath">The full path to a
+            /// directory that will hold the new prefab. Ignored if <paramref
+            /// name="instance"/> is a prefab instance already. Ignored if
+            /// <paramref name="prefabFullPath"/> is provided. May be null, in
+            /// which case we'll use the project export settings.</param>
+            /// <returns>The new or existing prefab.</returns>
             public static GameObject ApplyOrCreatePrefab(GameObject instance,
                 string prefabDirectoryFullPath = null,
                 string prefabFullPath = null)
             {
                 if(PrefabUtility.GetPrefabType(instance) == PrefabType.PrefabInstance) {
-                    // Apply: there's already a prefab.
                     return PrefabUtility.ReplacePrefab(instance, PrefabUtility.GetPrefabParent(instance));
                 }
 

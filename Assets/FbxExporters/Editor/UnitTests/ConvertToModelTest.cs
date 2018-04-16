@@ -115,11 +115,11 @@ namespace FbxExporters.UnitTests
                 Assert.AreEqual(1, a.GetComponents<FbxPrefab>().Length);
             }
 
-            // Test ApplyOrCreatePrefab and WillCreatePrefab
+            // Test ApplyOrCreatePrefab
             {
                 // Create a hierarchy that isn't a prefab, apply it (creating a new prefab).
                 var a = CreateHierarchy();
-                Assert.That(ConvertToModel.WillCreatePrefab(a));
+
                 var aPath = GetRandomPrefabAssetPath();
                 var aPrefab = ConvertToModel.ApplyOrCreatePrefab(a, prefabFullPath: aPath);
                 Assert.AreEqual(aPrefab, PrefabUtility.GetPrefabParent(a));
@@ -127,10 +127,34 @@ namespace FbxExporters.UnitTests
                 // Now apply it again (replacing aPrefab). Make sure we use the
                 // same file rather than creating a new one.
                 var bPath = GetRandomPrefabAssetPath();
-                Assert.That(!ConvertToModel.WillCreatePrefab(a));
                 var bPrefab = ConvertToModel.ApplyOrCreatePrefab(a, prefabFullPath: bPath);
                 Assert.AreEqual(bPrefab, PrefabUtility.GetPrefabParent(a));
                 Assert.AreEqual(aPath, AssetDatabase.GetAssetPath(bPrefab));
+            }
+
+            // Test WillCreatePrefab
+            // Remember that it answers what convert will do, not what
+            // apply-or-create will do (it's different).
+            {
+                // Create depends on prefab type.
+                var a = CreateHierarchy();
+
+                // None => create
+                Assert.That(ConvertToModel.WillCreatePrefab(a));
+
+                // PrefabInstance => create
+                // Prefab => don't create
+                // DisconnectedPrefabInstance => create
+                var aPrefab = PrefabUtility.CreatePrefab(GetRandomPrefabAssetPath(), a);
+                Assert.That(ConvertToModel.WillCreatePrefab(a));
+                Assert.That(!ConvertToModel.WillCreatePrefab(aPrefab));
+                PrefabUtility.DisconnectPrefabInstance(a);
+                Assert.That(ConvertToModel.WillCreatePrefab(a));
+
+                // ModelPrefabInstance or ModelPrefab => create
+                var aFbx = ExportToFbx(a);
+                Assert.That(ConvertToModel.WillCreatePrefab(aFbx));
+                Assert.That(ConvertToModel.WillCreatePrefab(PrefabUtility.InstantiatePrefab(aFbx) as GameObject));
             }
 
             // Test CopyComponents
