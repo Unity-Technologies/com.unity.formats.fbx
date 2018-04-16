@@ -1,5 +1,7 @@
 ﻿RELEASE NOTES
 
+**Version**: 1.3.0f1
+
 **Version**: 1.3.0b3
 
 NEW FEATURES
