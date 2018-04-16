@@ -97,16 +97,38 @@ namespace FbxExporters
             /// Returns the prefab asset that's linked to the fbx.
             ///
             /// If 'toConvert' is:
-            /// (1) an object in the scene, then the hierarchy will be exported and a new auto-updating prefab created pointing to the new fbx
-            /// (2) the root of an fbx asset, or the root of an instance of an fbx asset, then a new auto-updating prefab will be created pointing to the existing fbx
-            /// (3) a prefab asset (but *not* if it's an instance of a prefab), then a new fbx asset will be exported and the prefab will be made to auto-update from the new fbx
+            /// <list>
+            /// <item>An object in the scene, then the hierarchy will be exported
+            /// and a new auto-updating prefab created pointing to the new fbx.</item>
+            /// <item>The root of an fbx asset, or the root of an instance of an
+            /// fbx asset, then a new auto-updating prefab will be created
+            /// pointing to the existing fbx.</item>
+            /// <item>A prefab asset (but *not* if it's an instance of a prefab),
+            /// then a new fbx asset will be exported and the prefab will be made
+            /// to auto-update from the new fbx.</item>
+            /// </list>
             /// </summary>
             /// <returns>The prefab asset linked to an fbx file.</returns>
             /// <param name="toConvert">Object to convert.</param>
-            /// <param name="fbxFullPath">Absolute platform-specific path to the fbx file. If the file already exists, it will be overwritten. May be null, in which case we construct a unique filename. Ignored if 'toConvert' is an fbx asset or is an instance of one.</param>
-            /// <param name="fbxDirectoryFullPath">Absolute platform-specific path to a directory in which to put the fbx file under a unique filename. May be null, in which case we use the export settings. Ignored if 'fbxFullPath' is specified. Ignored if 'toConvert' is an fbx asset or an instance of one.</param>
-            /// <param name="prefabFullPath">Absolute platform-specific path to the prefab file. If the file already exists, it will be overwritten. May be null, in which case we construct a unique filename. Ignored if 'toConvert' is a prefab asset.</param>
-            /// <param name="prefabDirectoryFullPath">Absolute platform-specific path to a directory in which to put the prefab file under a unique filename. May be null, in which case we use the export settings. Ignored if 'prefabFullPath' is specified. Ignored if 'toConvert' is a prefab asset.
+            /// <param name="fbxFullPath">Absolute platform-specific path to
+            /// the fbx file. If the file already exists, it will be overwritten.
+            /// May be null, in which case we construct a unique filename.
+            /// Ignored if 'toConvert' is an fbx asset or is an instance of
+            /// one.</param>
+            /// <param name="fbxDirectoryFullPath">Absolute platform-specific
+            /// path to a directory in which to put the fbx file under a unique
+            /// filename. May be null, in which case we use the export settings.
+            /// Ignored if 'fbxFullPath' is specified. Ignored if 'toConvert' is
+            /// an fbx asset or an instance of one.</param>
+            /// <param name="prefabFullPath">Absolute platform-specific path to
+            /// the prefab file. If the file already exists, it will be
+            /// overwritten. May be null, in which case we construct a unique
+            /// filename. Ignored if 'toConvert' is a prefab asset.</param>
+            /// <param name="prefabDirectoryFullPath">Absolute
+            /// platform-specific path to a directory in which to put the prefab
+            /// file under a unique filename. May be null, in which case we use
+            /// the export settings. Ignored if 'prefabFullPath' is specified.
+            /// Ignored if 'toConvert' is a prefab asset.</param>
             public static GameObject Convert (
                 GameObject toConvert,
                 string fbxDirectoryFullPath = null,
@@ -155,13 +177,20 @@ namespace FbxExporters
             ///
             /// If 'toConvert' is the root of an FBX asset, return it.
             ///
-            /// If it's an instance in a scene the points to the root of an FBX asset, return that asset.
+            /// If it's an instance in a scene the points to the root of an FBX
+            /// asset, return that asset.
             ///
-            /// Otherwise, export according to the paths and options, and return the new asset.
+            /// Otherwise, export according to the paths and options, and
+            /// return the new asset.
             /// </summary>
             /// <param name="toConvert">GameObject for which we want an fbx asset</param>
-            /// <param name="fbxDirectoryFullPath">Export will choose an appropriate filename in this directory. Ignored if fbxFullPath is set. Ignored if toConvert is an fbx asset or an instance of an fbx.</param>
-            /// <param name="fbxDirectoryFullPath">Export will create this file. Overrides fbxDirectoryFullPath. Ignored if toConvert is an fbx asset or an instance of an fbx.</param>
+            /// <param name="fbxDirectoryFullPath">Export will choose an
+            /// appropriate filename in this directory. Ignored if fbxFullPath is
+            /// set. Ignored if toConvert is an fbx asset or an instance of an
+            /// fbx.</param>
+            /// <param name="fbxDirectoryFullPath">Export will create this
+            /// file. Overrides fbxDirectoryFullPath. Ignored if toConvert is an
+            /// fbx asset or an instance of an fbx.</param>
             /// <returns>The root of a model prefab asset.</returns>
             public static GameObject GetOrCreateFbxAsset(GameObject toConvert,
                     string fbxDirectoryFullPath = null,
