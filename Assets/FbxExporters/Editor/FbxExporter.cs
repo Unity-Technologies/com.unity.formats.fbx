@@ -1456,8 +1456,6 @@ namespace FbxExporters
                 var fbxRestTranslation = ConvertToRightHanded(uniPosConstraint.translationAtRest, UnitScaleFactor);
                 // set the local position of fbxNode
                 fbxNode.LclTranslation.Set(new FbxDouble3(fbxRestTranslation.X, fbxRestTranslation.Y, fbxRestTranslation.Z));
-
-                posConstraint.ConnectDstObject(fbxScene);
                 return true;
             }
 
@@ -1498,8 +1496,6 @@ namespace FbxExporters
                 var fbxRestRotation = ConvertQuaternionToXYZEuler(restRotationQuat);
                 // set the local rotation of fbxNode
                 fbxNode.LclRotation.Set(fbxRestRotation);
-
-                rotConstraint.ConnectDstObject(fbxScene);
                 return true;
             }
 
@@ -1540,8 +1536,6 @@ namespace FbxExporters
                 var fbxRestScale = new FbxDouble3(restScale.x, restScale.y, restScale.z);
                 // set the local rotation of fbxNode
                 fbxNode.LclScaling.Set(fbxRestScale);
-
-                scaleConstraint.ConnectDstObject(fbxScene);
                 return true;
             }
 
@@ -1617,8 +1611,6 @@ namespace FbxExporters
                 {
                     aimConstraint.SetWorldUpObject(MapUnityObjectToFbxNode[uniAimConstraint.worldUpObject.gameObject]);
                 }
-
-                aimConstraint.ConnectDstObject(fbxScene);
                 return true;
             }
 
@@ -1668,8 +1660,6 @@ namespace FbxExporters
                 parentConstraint.AffectRotationX.Set((rotationAxes & Axis.X) == Axis.X);
                 parentConstraint.AffectRotationY.Set((rotationAxes & Axis.Y) == Axis.Y);
                 parentConstraint.AffectRotationZ.Set((rotationAxes & Axis.Z) == Axis.Z);
-
-                parentConstraint.ConnectDstObject(fbxScene);
                 return true;
             }
 
