@@ -308,7 +308,7 @@ namespace FbxExporters.UnitTests
             GameObject cylinder3 = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             GameObject sphere3 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sphere3.transform.SetParent(cylinder3.transform);
-            GameObject sphere3Parent = ConvertToModel.Convert(sphere3, fbxFullPath: filePath, prefabFullPath: Path.ChangeExtension(filePath, ".prefab"));
+            ConvertToModel.Convert(sphere3, fbxFullPath: filePath, prefabFullPath: Path.ChangeExtension(filePath, ".prefab"));
             Selection.objects = new GameObject[] { sphere3 };
             Assert.IsTrue(FbxPrefabAutoUpdater.OnValidateMenuItem());
 

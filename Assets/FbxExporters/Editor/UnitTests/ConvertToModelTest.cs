@@ -339,7 +339,7 @@ namespace FbxExporters.UnitTests
                 AssertSameHierarchy(aFbxInstanceChild, aConvert, ignoreRootName: true);
                 var aConvertFbxPrefab = aConvert.GetComponent<FbxPrefab>();
                 Assert.AreNotEqual(aFbx, aConvertFbxPrefab.FbxModel);
-                Assert.AreEqual(aConvertFbxPath, AssetDatabase.GetAssetPath(aConvertFbxPrefab.FbxModel));
+                Assert.AreEqual(aConvertFbxPath.Replace("\\","/"), AssetDatabase.GetAssetPath(aConvertFbxPrefab.FbxModel));
             }
         }
 
@@ -473,7 +473,9 @@ namespace FbxExporters.UnitTests
             Assert.That (boxCollider, Is.Not.Null);
 
             // convert to prefab
-            GameObject converted = ConvertToModel.Convert (fbxInstance, Path.GetDirectoryName(filename));
+            GameObject converted = ConvertToModel.Convert (fbxInstance,
+                    fbxFullPath: GetRandomFbxFilePath(),
+                    prefabFullPath: GetRandomPrefabAssetPath());
             Assert.That (converted, Is.EqualTo (PrefabUtility.GetPrefabParent(fbxInstance)));
 
             // check meshes link to original fbx
