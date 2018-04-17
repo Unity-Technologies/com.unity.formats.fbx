@@ -1669,6 +1669,7 @@ namespace FbxExporters
                 parentConstraint.AffectRotationY.Set((rotationAxes & Axis.Y) == Axis.Y);
                 parentConstraint.AffectRotationZ.Set((rotationAxes & Axis.Z) == Axis.Z);
 
+                parentConstraint.ConnectDstObject(fbxScene);
                 return true;
             }
 
@@ -1939,11 +1940,68 @@ namespace FbxExporters
             /// Default constructor added because it needs to be called before autoimplemented properties can be assigned. Otherwise we get build errors
             /// </summary>
             struct FbxPropertyChannelPair {
-                public string Property { get ; private set; }
-                public string Channel { get ; private set; }
-                public FbxPropertyChannelPair(string p, string c):this() {
+                public string Property { get; private set; }
+                public string Channel { get; private set; }
+                private static Dictionary<string, string> TransformProperties = new Dictionary<string, string>()
+                    {
+                        { "m_LocalScale", "Lcl Scaling" },
+                        { "S", "Lcl Scaling" },
+                        { "m_LocalPosition", "Lcl Translation" },
+                        { "T", "Lcl Translation" },
+                        { "m_AimVector", "AimVector" },
+                        { "m_UpVector", "UpVector" },
+                        { "m_WorldUpVector", "WorldUpVector" },
+                        { "m_TranslationOffset", "TranslationOffset" },
+                        { "m_RotationOffset", "RotationOffset" },
+                        { "m_ScaleOffset", "ScaleOffset" }
+                    };
+                private static Dictionary<string, string> TransformChannels = new Dictionary<string, string>()
+                    {
+                        { "x", Globals.FBXSDK_CURVENODE_COMPONENT_X },
+                        { "y", Globals.FBXSDK_CURVENODE_COMPONENT_Y },
+                        { "z", Globals.FBXSDK_CURVENODE_COMPONENT_Z }
+                    };
+                private static Dictionary<string, string> ColorProperties = new Dictionary<string, string>()
+                    {
+                        { "m_Color", "Color" }
+                    };
+                private static Dictionary<string, string> ColorChannels = new Dictionary<string, string>()
+                    {
+                        { "b", Globals.FBXSDK_CURVENODE_COLOR_BLUE },
+                        { "g", Globals.FBXSDK_CURVENODE_COLOR_GREEN },
+                        { "r", Globals.FBXSDK_CURVENODE_COLOR_RED }
+                    };
+                private static Dictionary<string, string> OtherProperties = new Dictionary<string, string>()
+                    {
+                        { "m_Intensity", "Intensity" },
+                        { "field of view", "FieldOfView" },
+                        { "m_Weight", "Weight" }
+                    };
+                public FbxPropertyChannelPair(string p, string c) : this() {
                     Property = p;
                     Channel = c;
+                }
+
+                private static bool TryGetChannelPairs(string uniPropertyName, string propFormat, Dictionary<string, string> properties, Dictionary<string, string> channels, ref FbxPropertyChannelPair[] channelPairs)
+                {
+                    System.StringComparison ct = System.StringComparison.CurrentCulture;
+
+                    foreach (var item in properties)
+                    {
+                        var uniName = item.Key;
+                        var fbxName = item.Value;
+                        foreach (var entry in channels)
+                        {
+                            var uniChannel = entry.Key;
+                            var fbxChannel = entry.Value;
+                            if (uniPropertyName.StartsWith(string.Format(propFormat, uniName, uniChannel), ct))
+                            {
+                                channelPairs = new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, fbxChannel) };
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
                 }
 
                 /// <summary>
@@ -1953,41 +2011,29 @@ namespace FbxExporters
                 public static bool TryGetValue(string uniPropertyName, out FbxPropertyChannelPair[] prop)
                 {
                     System.StringComparison ct = System.StringComparison.CurrentCulture;
+                    
+                    prop = new FbxPropertyChannelPair[] { };
 
-                    // Transform Scaling
-                    if (uniPropertyName.StartsWith ("m_LocalScale.x", ct) || uniPropertyName.EndsWith ("S.x", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_X) };
-                        return true;
-                    }
-                    if (uniPropertyName.StartsWith ("m_LocalScale.y", ct) || uniPropertyName.EndsWith ("S.y", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Y) };
-                        return true;
-                    }
-                    if (uniPropertyName.StartsWith ("m_LocalScale.z", ct) || uniPropertyName.EndsWith ("S.z", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Z) };
-                        return true;
-                    }
-
-                    // Transform Translation
-                    if (uniPropertyName.StartsWith ("m_LocalPosition.x", ct) || uniPropertyName.EndsWith ("T.x", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_X) };
-                        return true;
-                    }
-                    if (uniPropertyName.StartsWith ("m_LocalPosition.y", ct) || uniPropertyName.EndsWith ("T.y", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Y) };
-                        return true;
-                    }
-                    if (uniPropertyName.StartsWith ("m_LocalPosition.z", ct) || uniPropertyName.EndsWith ("T.z", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z) };
-                        return true;
-                    }
-
-                    if (uniPropertyName.StartsWith("m_Intensity", ct))
+                    // Transform Properties
+                    var propFormat = "{0}.{1}";
+                    if(TryGetChannelPairs(uniPropertyName, propFormat, TransformProperties, TransformChannels, ref prop))
                     {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Intensity", null) };
                         return true;
                     }
 
+                    // Color Properties
+                    if(TryGetChannelPairs(uniPropertyName, propFormat, ColorProperties, ColorChannels, ref prop))
+                    {
+                        return true;
+                    }
+
+                    // Other Properties
+                    if(TryGetChannelPairs(uniPropertyName, "{0}", OtherProperties, new Dictionary<string, string>() { { "", null } }, ref prop))
+                    {
+                        return true;
+                    }
+
+                    // spot angle is a special case as it returns two channel pairs instead of one
                     if (uniPropertyName.StartsWith("m_SpotAngle", ct))
                     {
                         prop = new FbxPropertyChannelPair[]{ 
@@ -1997,31 +2043,6 @@ namespace FbxExporters
                         return true;
                     }
 
-                    if (uniPropertyName.StartsWith("m_Color.r", ct))
-                    {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Color", Globals.FBXSDK_CURVENODE_COLOR_RED) };
-                        return true;
-                    }
-
-                    if (uniPropertyName.StartsWith("m_Color.g", ct))
-                    {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_GREEN) };
-                        return true;
-                    }
-
-                    if (uniPropertyName.StartsWith("m_Color.b", ct))
-                    {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_BLUE) };
-                        return true;
-                    }
-
-                    if (uniPropertyName.StartsWith("field of view", ct))
-                    {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("FieldOfView", null) };
-                        return true;
-                    }
-
-                    prop = new FbxPropertyChannelPair[]{};
                     return false;
                 }
             }
