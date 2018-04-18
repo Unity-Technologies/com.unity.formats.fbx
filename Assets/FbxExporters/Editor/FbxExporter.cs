@@ -1942,8 +1942,8 @@ namespace FbxExporters
                         { "m_UpVector", "UpVector" },
                         { "m_WorldUpVector", "WorldUpVector" },
                         { "m_TranslationOffset", "Translation" },
-                        { "m_RotationOffset", "RotationOffset" },
-                        { "m_ScaleOffset", "ScaleOffset" }
+                        { "m_RotationOffset", "Rotation" },
+                        { "m_ScaleOffset", "Scaling" }
                     };
                 private static Dictionary<string, string> TransformChannels = new Dictionary<string, string>()
                     {
