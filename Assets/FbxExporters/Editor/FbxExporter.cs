@@ -1901,7 +1901,7 @@ namespace FbxExporters
                 {
                     System.StringComparison cc = System.StringComparison.CurrentCulture;
 
-                    bool partT = uniPropertyName.StartsWith ("m_LocalPosition.", cc);
+                    bool partT = uniPropertyName.StartsWith ("m_LocalPosition.", cc) || uniPropertyName.StartsWith("m_TranslationOffset.", cc);
                     bool partTx = uniPropertyName.EndsWith ("Position.x", cc) || uniPropertyName.EndsWith ("T.x", cc);
 
                     convertLtoR |= partTx;
@@ -1941,7 +1941,7 @@ namespace FbxExporters
                         { "m_AimVector", "AimVector" },
                         { "m_UpVector", "UpVector" },
                         { "m_WorldUpVector", "WorldUpVector" },
-                        { "m_TranslationOffset", "TranslationOffset" },
+                        { "m_TranslationOffset", "Translation" },
                         { "m_RotationOffset", "RotationOffset" },
                         { "m_ScaleOffset", "ScaleOffset" }
                     };
