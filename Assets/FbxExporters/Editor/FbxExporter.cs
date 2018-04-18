@@ -1840,6 +1840,26 @@ namespace FbxExporters
                 }
             }
 
+
+            protected System.Type FbxToUnityConstraintType(FbxConstraint.EType fbxConstraintType)
+            {
+                switch (fbxConstraintType)
+                {
+                    case FbxConstraint.EType.eAim:
+                        return typeof(AimConstraint);
+                    case FbxConstraint.EType.eParent:
+                        return typeof(ParentConstraint);
+                    case FbxConstraint.EType.ePosition:
+                        return typeof(PositionConstraint);
+                    case FbxConstraint.EType.eRotation:
+                        return typeof(RotationConstraint);
+                    case FbxConstraint.EType.eScale:
+                        return typeof(ScaleConstraint);
+                    default:
+                        throw new System.NotImplementedException();
+                }
+            }
+
             /// <summary>
             /// Export an AnimationCurve.
             /// NOTE: This is not used for rotations, because we need to convert from
@@ -1849,6 +1869,7 @@ namespace FbxExporters
                                                  AnimationCurve uniAnimCurve,
                                                  float frameRate,
                                                  string uniPropertyName,
+                                                 System.Type uniPropertyType,
                                                  FbxScene fbxScene,
                                                  FbxAnimLayer fbxAnimLayer)
             {
@@ -1891,6 +1912,11 @@ namespace FbxExporters
                             if (MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraints))
                             {
                                 foreach(var constraint in constraints) {
+                                    if(uniPropertyType != FbxToUnityConstraintType(constraint.GetConstraintType()))
+                                    {
+                                        continue;
+                                    }
+                                    
                                     var temp = constraint.FindProperty(fbxPropertyChannelPair.Property, false);
                                     if (temp.IsValid())
                                     {
@@ -2145,10 +2171,10 @@ namespace FbxExporters
                     }
 
                     if (unityCurves.ContainsKey (uniGO)) {
-                        unityCurves [uniGO].Add (new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve));
+                        unityCurves [uniGO].Add (new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve, uniCurveBinding.type));
                         continue;
                     }
-                    unityCurves.Add (uniGO, new List<UnityCurve> (){ new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve) });
+                    unityCurves.Add (uniGO, new List<UnityCurve> (){ new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve, uniCurveBinding.type) });
                 }
 
                 // transfer root motion
@@ -2206,7 +2232,7 @@ namespace FbxExporters
 
                         // simple property (e.g. intensity), export right away
                         ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
-                            propertyName,
+                            propertyName, uniCurve.propertyType,
                             fbxScene, 
                             fbxAnimLayer);
                     }
@@ -2305,13 +2331,13 @@ namespace FbxExporters
                 string scalePropName = "m_LocalScale.";
                 var xyz = "xyz";
                 for (int k = 0; k < 3; k++) {
-                    var posUniCurve = new UnityCurve ( posPropName + xyz[k], new AnimationCurve(posKeyFrames[k]));
+                    var posUniCurve = new UnityCurve ( posPropName + xyz[k], new AnimationCurve(posKeyFrames[k]), typeof(Transform));
                     newUnityCurves.Add (posUniCurve);
 
-                    var rotUniCurve = new UnityCurve ( rotPropName + xyz[k], new AnimationCurve(rotKeyFrames[k]));
+                    var rotUniCurve = new UnityCurve ( rotPropName + xyz[k], new AnimationCurve(rotKeyFrames[k]), typeof(Transform));
                     newUnityCurves.Add (rotUniCurve);
 
-                    var scaleUniCurve = new UnityCurve ( scalePropName + xyz[k], new AnimationCurve(scaleKeyFrames[k]));
+                    var scaleUniCurve = new UnityCurve ( scalePropName + xyz[k], new AnimationCurve(scaleKeyFrames[k]), typeof(Transform));
                     newUnityCurves.Add (scaleUniCurve);
                 }
 
@@ -2384,10 +2410,12 @@ namespace FbxExporters
             struct UnityCurve {
                 public string propertyName;
                 public AnimationCurve uniAnimCurve;
+                public System.Type propertyType;
 
-                public UnityCurve(string propertyName, AnimationCurve uniAnimCurve){
+                public UnityCurve(string propertyName, AnimationCurve uniAnimCurve, System.Type propertyType){
                     this.propertyName = propertyName;
                     this.uniAnimCurve = uniAnimCurve;
+                    this.propertyType = propertyType;
                 }
             }
 
