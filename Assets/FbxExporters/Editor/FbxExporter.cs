@@ -153,6 +153,12 @@ namespace FbxExporters
             Dictionary<GameObject, FbxNode> MapUnityObjectToFbxNode = new Dictionary<GameObject, FbxNode> ();
 
             /// <summary>
+            /// keep a map between the constrained FbxNode (in Unity this is the GameObject with constraint component)
+            /// and it's FbxConstraints for quick lookup when exporting constraint animations.
+            /// </summary>
+            Dictionary<FbxNode, List<FbxConstraint>> MapConstrainedObjectToConstraints = new Dictionary<FbxNode, List<FbxConstraint>>();
+
+            /// <summary>
             /// Map Unity material name to FBX material object
             /// </summary>
             Dictionary<string, FbxSurfaceMaterial> MaterialMap = new Dictionary<string, FbxSurfaceMaterial> ();
@@ -1413,12 +1419,23 @@ namespace FbxExporters
                 return true;
             }
 
-            protected bool ExportCommonConstraintProperties<T,U>(T uniConstraint, U fbxConstraint) where T : IConstraint where U : FbxConstraint
+            protected bool ExportCommonConstraintProperties<T,U>(T uniConstraint, U fbxConstraint, FbxNode fbxNode) where T : IConstraint where U : FbxConstraint
             {
                 fbxConstraint.Active.Set(uniConstraint.constraintActive);
                 fbxConstraint.Lock.Set(uniConstraint.locked);
                 fbxConstraint.Weight.Set(uniConstraint.weight * UnitScaleFactor);
+
+                AddFbxNodeToConstraintsMapping(fbxNode, fbxConstraint);
                 return true;
+            }
+
+            protected void AddFbxNodeToConstraintsMapping<T>(FbxNode fbxNode, T fbxConstraint) where T : FbxConstraint
+            {
+                if (!MapConstrainedObjectToConstraints.ContainsKey(fbxNode))
+                {
+                    MapConstrainedObjectToConstraints.Add(fbxNode, new List<FbxConstraint>());
+                }
+                MapConstrainedObjectToConstraints[fbxNode].Add(fbxConstraint);
             }
 
             protected bool ExportPositionConstraint(PositionConstraint uniPosConstraint, FbxScene fbxScene, FbxNode fbxNode)
@@ -1442,7 +1459,7 @@ namespace FbxExporters
                     }
                     posConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
                 }
-                ExportCommonConstraintProperties(uniPosConstraint, posConstraint);
+                ExportCommonConstraintProperties(uniPosConstraint, posConstraint, fbxNode);
 
                 var affectedAxes = uniPosConstraint.translationAxis;
                 posConstraint.AffectX.Set((affectedAxes & Axis.X) == Axis.X);
@@ -1480,7 +1497,7 @@ namespace FbxExporters
                     }
                     rotConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
                 }
-                ExportCommonConstraintProperties(uniRotConstraint, rotConstraint);
+                ExportCommonConstraintProperties(uniRotConstraint, rotConstraint, fbxNode);
 
                 var affectedAxes = uniRotConstraint.rotationAxis;
                 rotConstraint.AffectX.Set((affectedAxes & Axis.X) == Axis.X);
@@ -1520,7 +1537,7 @@ namespace FbxExporters
                     }
                     scaleConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
                 }
-                ExportCommonConstraintProperties(uniScaleConstraint, scaleConstraint);
+                ExportCommonConstraintProperties(uniScaleConstraint, scaleConstraint, fbxNode);
 
                 var affectedAxes = uniScaleConstraint.scalingAxis;
                 scaleConstraint.AffectX.Set((affectedAxes & Axis.X) == Axis.X);
@@ -1560,7 +1577,7 @@ namespace FbxExporters
                     }
                     aimConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
                 }
-                ExportCommonConstraintProperties(uniAimConstraint, aimConstraint);
+                ExportCommonConstraintProperties(uniAimConstraint, aimConstraint, fbxNode);
 
                 var affectedAxes = uniAimConstraint.rotationAxis;
                 aimConstraint.AffectX.Set((affectedAxes & Axis.X) == Axis.X);
@@ -1649,7 +1666,7 @@ namespace FbxExporters
                     parentConstraint.SetRotationOffset(sourceNode, new FbxVector4(fbxRotationOffset));
 
                 }
-                ExportCommonConstraintProperties(uniParentConstraint, parentConstraint);
+                ExportCommonConstraintProperties(uniParentConstraint, parentConstraint, fbxNode);
 
                 var translationAxes = uniParentConstraint.translationAxis;
                 parentConstraint.AffectTranslationX.Set((translationAxes & Axis.X) == Axis.X);
@@ -1866,6 +1883,23 @@ namespace FbxExporters
                         if (fbxNodeAttribute != null) {
                             fbxProperty = fbxNodeAttribute.FindProperty (fbxPropertyChannelPair.Property, false);
                         }
+
+                        // try mapping to constraint
+                        if (!fbxProperty.IsValid())
+                        {
+                            List<FbxConstraint> constraints;
+                            if (MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraints))
+                            {
+                                foreach(var constraint in constraints) {
+                                    var temp = constraint.FindProperty(fbxPropertyChannelPair.Property, false);
+                                    if (temp.IsValid())
+                                    {
+                                        fbxProperty = temp;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                     if (!fbxProperty.IsValid ()) {
                         Debug.LogError (string.Format ("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
@@ -1902,7 +1936,7 @@ namespace FbxExporters
                     System.StringComparison cc = System.StringComparison.CurrentCulture;
 
                     bool partT = uniPropertyName.StartsWith ("m_LocalPosition.", cc) || uniPropertyName.StartsWith("m_TranslationOffset.", cc);
-                    bool partTx = uniPropertyName.EndsWith ("Position.x", cc) || uniPropertyName.EndsWith ("T.x", cc);
+                    bool partTx = uniPropertyName.EndsWith ("Position.x", cc) || uniPropertyName.EndsWith ("T.x", cc) || uniPropertyName.EndsWith("TranslationOffset.x", cc);
 
                     convertLtoR |= partTx;
 
@@ -2752,6 +2786,8 @@ namespace FbxExporters
                         // export cancelled
                         return -1;
                     }
+
+                    ExportConstraints(go, fbxScene, node);
 
                     System.Type compType;
                     if (exportData.exportComponent.TryGetValue (go, out compType)) {
