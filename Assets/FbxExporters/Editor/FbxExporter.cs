@@ -1862,37 +1862,40 @@ namespace FbxExporters
 
             protected FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType)
             {
-                // map unity property name to fbx property
-                var fbxProperty = fbxNode.FindProperty(fbxPropertyName, false);
-                if (!fbxProperty.IsValid())
+                FbxProperty fbxProperty = null;
+                // check if property maps to a constraint
+                if(uniPropertyType.GetInterfaces().Contains(typeof(IConstraint)))
                 {
-                    var fbxNodeAttribute = fbxNode.GetNodeAttribute();
-                    if (fbxNodeAttribute != null)
+                    List<FbxConstraint> constraints;
+                    if (MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraints))
                     {
-                        fbxProperty = fbxNodeAttribute.FindProperty(fbxPropertyName, false);
-                    }
+                        foreach (var constraint in constraints)
+                        {
+                            if (uniPropertyType != FbxToUnityConstraintType(constraint.GetConstraintType()))
+                            {
+                                continue;
+                            }
 
-                    // try mapping to constraint
+                            var temp = constraint.FindProperty(fbxPropertyName, false);
+                            if (temp.IsValid())
+                            {
+                                fbxProperty = temp;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (fbxProperty == null || !fbxProperty.IsValid())
+                {
+                    // map unity property name to fbx property
+                    fbxProperty = fbxNode.FindProperty(fbxPropertyName, false);
                     if (!fbxProperty.IsValid())
                     {
-                        List<FbxConstraint> constraints;
-                        if (MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraints))
+                        var fbxNodeAttribute = fbxNode.GetNodeAttribute();
+                        if (fbxNodeAttribute != null)
                         {
-                            foreach (var constraint in constraints)
-                            {
-                                if (uniPropertyType != FbxToUnityConstraintType(constraint.GetConstraintType()))
-                                {
-                                    continue;
-                                }
-
-                                var temp = constraint.FindProperty(fbxPropertyName, false);
-                                if (temp.IsValid())
-                                {
-                                    fbxProperty = temp;
-                                    Debug.Log(fbxNode.GetName() + ": " + constraint.GetName() + ": " + temp.GetName());
-                                    break;
-                                }
-                            }
+                            fbxProperty = fbxNodeAttribute.FindProperty(fbxPropertyName, false);
                         }
                     }
                 }
@@ -2231,6 +2234,13 @@ namespace FbxExporters
                         index = EulerCurve.GetEulerIndex (propertyName);
                         if (index >= 0) {
                             CreateRotationCurve<EulerCurve> (uniGO, fbxNode, propertyType, uniAnimClip.frameRate, index, uniAnimCurve, ref rotations);
+                            continue;
+                        }
+
+                        index = AimConstraintRotationCurve.GetRotationIndex(propertyName, propertyType);
+                        if(index >= 0)
+                        {
+                            CreateRotationCurve<AimConstraintRotationCurve>(uniGO, fbxNode, propertyType, uniAnimClip.frameRate, index, uniAnimCurve, ref rotations);
                             continue;
                         }
 
