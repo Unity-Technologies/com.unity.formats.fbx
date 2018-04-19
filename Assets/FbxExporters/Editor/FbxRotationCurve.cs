@@ -22,6 +22,8 @@ namespace FbxExporters
 
             public abstract string FbxPropertyName { get; }
 
+            protected virtual bool UndoPrerotation { get { return true; } }
+
             public struct Key {
                 public FbxTime time;
                 public FbxVector4 euler;
@@ -35,10 +37,10 @@ namespace FbxExporters
 
             protected abstract FbxQuaternion GetConvertedQuaternionRotation (float seconds, UnityEngine.Quaternion restRotation);
 
-            private Key [] ComputeKeys(UnityEngine.Quaternion restRotation, bool undoPrerotation = true) {
+            private Key [] ComputeKeys(UnityEngine.Quaternion restRotation) {
                 // Get the source pivot pre-rotation if any, so we can
                 // remove it from the animation we get from Unity.
-                var fbxPreRotationEuler = undoPrerotation && m_fbxNode != null && m_fbxNode.GetRotationActive() 
+                var fbxPreRotationEuler = UndoPrerotation && m_fbxNode != null && m_fbxNode.GetRotationActive() 
                     ? m_fbxNode.GetPreRotation(FbxNode.EPivotSet.eSourcePivot)
                     : new FbxVector4();
 
@@ -78,7 +80,7 @@ namespace FbxExporters
                 return keys;
             }
 
-            public void Animate(Quaternion restRotation, FbxAnimLayer fbxAnimLayer, bool Verbose, bool undoPreRotation = true) {
+            public void Animate(Quaternion restRotation, FbxAnimLayer fbxAnimLayer, bool Verbose) {
                 if (!AnimatedProperty.IsValid())
                 {
                     Debug.LogError("missing animatable property");
@@ -92,7 +94,7 @@ namespace FbxExporters
                 /* set the keys */
                 using (new FbxAnimCurveModifyHelper(new List<FbxAnimCurve>{fbxAnimCurveX,fbxAnimCurveY,fbxAnimCurveZ}))
                 {
-                    foreach (var key in ComputeKeys(restRotation, undoPreRotation)) {
+                    foreach (var key in ComputeKeys(restRotation)) {
 
                         int i = fbxAnimCurveX.KeyAdd(key.time);
                         fbxAnimCurveX.KeySet(i, key.time, (float)key.euler.X);
@@ -189,6 +191,14 @@ namespace FbxExporters
                 }
             }
 
+            protected override bool UndoPrerotation
+            {
+                get
+                {
+                    return false;
+                }
+            }
+
             /// <summary>
             /// Gets the index of the rotation constraint's curve by property name.
             /// x = 0, y = 1, z = 2
@@ -213,6 +223,14 @@ namespace FbxExporters
                 get
                 {
                     return "Rotation";
+                }
+            }
+
+            protected override bool UndoPrerotation
+            {
+                get
+                {
+                    return false;
                 }
             }
 
