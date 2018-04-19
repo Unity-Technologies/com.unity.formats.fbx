@@ -461,13 +461,13 @@ namespace FbxExporters.UnitTests
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             var cubeMesh = cube.GetComponent<MeshFilter>().sharedMesh;
             var cubePath = GetRandomFbxFilePath();
-            var cubeInstance = ConvertToModel.Convert(cube, fbxFullPath: cubePath, prefabFullPath: System.IO.Path.ChangeExtension(cubePath, ".prefab"));
-            var cubeName = cubeInstance.name;
+            var cubePrefab = ConvertToModel.Convert(cube, fbxFullPath: cubePath, prefabFullPath: System.IO.Path.ChangeExtension(cubePath, ".prefab"));
+            var cubeName = cubePrefab.name;
 
             // Create a prefab that has the cube as a child.
             // Test the test: make sure the structure is what we expect.
             var root = new GameObject("root");
-            cubeInstance.transform.parent = root.transform;
+            cube.transform.parent = root.transform;
             var rootPrefab = PrefabUtility.CreatePrefab(GetRandomPrefabAssetPath(), root);
             Assert.That(rootPrefab);
             Assert.That(rootPrefab.GetComponent<MeshFilter>(), Is.Null);

@@ -246,11 +246,18 @@ namespace FbxExporters
         /// <summary>
         /// Launch the manual update of the linked prefab specified
         /// </summary>
-        public static void UpdateLinkedPrefab(GameObject prefabInstance)
+        public static void UpdateLinkedPrefab(GameObject prefabOrInstance)
         {
-            GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(prefabInstance) as GameObject;
-            if (!prefab)
-            {
+            // Find the prefab, bail if this is neither a prefab nor an instance.
+            GameObject prefab;
+            switch(PrefabUtility.GetPrefabType(prefabOrInstance)) {
+            case PrefabType.Prefab:
+                prefab = prefabOrInstance;
+                break;
+            case PrefabType.PrefabInstance:
+                prefab = PrefabUtility.GetPrefabParent(prefabOrInstance) as GameObject;
+                break;
+            default:
                 return;
             }
 
