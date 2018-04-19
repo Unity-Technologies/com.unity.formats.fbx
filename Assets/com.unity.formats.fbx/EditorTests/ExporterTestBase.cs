@@ -274,7 +274,7 @@ namespace FbxExporters.UnitTests
         /// <returns>The exported fbx file path.</returns>
         /// <param name="hierarchy">Hierarchy.</param>
         /// <param name="animOnly">If set to <c>true</c> export animation only.</param>
-        protected string ExportToFbx (
+        protected GameObject ExportToFbx (
             GameObject hierarchy, bool animOnly = false,
             EditorTools.ExportSettings.LODExportType lodExportType = EditorTools.ExportSettings.LODExportType.All
         ){
@@ -288,7 +288,8 @@ namespace FbxExporters.UnitTests
                 filename, hierarchy, exportOptions
             );
             Assert.That (exportedFilePath, Is.EqualTo (filename));
-            return filename;
+            var exported = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            return exported;
         }
 
         /// <summary>

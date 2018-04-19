@@ -779,8 +779,7 @@ namespace FbxExporters.UnitTests
 
             // test export all
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
-            string filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.All);
-            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+            GameObject fbxObj = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.All);
             Assert.IsTrue (fbxObj);
 
             HashSet<string> expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
@@ -788,8 +787,7 @@ namespace FbxExporters.UnitTests
 
             // test export highest
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0
-            filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.Highest);
-            fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+            fbxObj = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.Highest);
             Assert.IsTrue (fbxObj);
 
             expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name };
@@ -797,8 +795,7 @@ namespace FbxExporters.UnitTests
 
             // test export lowest
             // expected LODs exported: Cube_LOD2
-            filename = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.Lowest);
-            fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+            fbxObj = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.Lowest);
             Assert.IsTrue (fbxObj);
 
             expectedChildren = new HashSet<string> () { cubeLOD2.name };
@@ -808,15 +805,16 @@ namespace FbxExporters.UnitTests
             // this should have the same result as "export all"
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
             // NOTE: Cylinder_LOD1 is not exported as it is not under the LODGroup hierarchy being exported
-            filename = GetRandomFbxFilePath();
-            var convertedHierarchy = ConvertToModel.Convert(lodGroup, fbxFullPath: filename, prefabFullPath: System.IO.Path.ChangeExtension(filename, ".prefab"));
+            var convertedHierarchy = ConvertToModel.Convert(lodGroup,
+                    fbxFullPath: GetRandomFbxFilePath(),
+                    prefabFullPath: GetRandomPrefabAssetPath());
             Assert.That (convertedHierarchy, Is.Not.Null);
 
             // check both converted hierarchy and fbx
             expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
             CompareGameObjectChildren (convertedHierarchy, expectedChildren);
 
-            fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
+            fbxObj = convertedHierarchy.GetComponent<FbxPrefab>().FbxModel;
             Assert.IsTrue (fbxObj);
 
             expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };

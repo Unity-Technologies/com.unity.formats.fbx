@@ -12,7 +12,8 @@ namespace FbxExporters
     {
         public static class ConvertToModel
         {
-            const string MenuItemName1 = "GameObject/Convert To Linked Prefab Instance...";
+            const string GameObjectMenuItemName = "GameObject/Convert To Linked Prefab Instance...";
+            const string AssetsMenuItemName = "Assets/Convert To Linked Prefab...";
 
             /// <summary>
             /// OnContextItem is called either:
@@ -23,14 +24,22 @@ namespace FbxExporters
             /// parent and child are selected, then OnContextItem will only be
             /// called on the parent)
             /// </summary>
-            [MenuItem (MenuItemName1, false, 30)]
-            static void OnContextItem (MenuCommand command)
+            [MenuItem (GameObjectMenuItemName, false, 30)]
+            static void OnGameObjectContextItem (MenuCommand command) {
+                OnContextItem(command, SelectionMode.Editable | SelectionMode.TopLevel);
+            }
+            [MenuItem (AssetsMenuItemName, false, 30)]
+            static void OnAssetsContextItem (MenuCommand command) {
+                OnContextItem(command, SelectionMode.Assets);
+            }
+
+            static void OnContextItem (MenuCommand command, SelectionMode mode)
             {
                 GameObject [] selection = null;
 
                 if (command == null || command.context == null) {
                     // We were actually invoked from the top GameObject menu, so use the selection.
-                    selection = Selection.GetFiltered<GameObject> (SelectionMode.Editable | SelectionMode.TopLevel);
+                    selection = Selection.GetFiltered<GameObject> (mode);
                 } else {
                     // We were invoked from the right-click menu, so use the context of the context menu.
                     var selected = command.context as GameObject;
@@ -48,9 +57,10 @@ namespace FbxExporters
             }
 
             /// <summary>
-            // Validate the menu item defined by the function above.
+            // Validate the menu items defined above.
             /// </summary>
-            [MenuItem (MenuItemName1, true, 30)]
+            [MenuItem (GameObjectMenuItemName, true, 30)]
+            [MenuItem (AssetsMenuItemName, true, 30)]
             public static bool OnValidateMenuItem ()
             {
                 return true;
@@ -84,39 +94,122 @@ namespace FbxExporters
             /// <summary>
             /// Convert one object (and the hierarchy below it) to an auto-updating prefab.
             ///
-            /// This returns a new object; the converted object may be modified or destroyed.
+            /// Returns the prefab asset that's linked to the fbx.
             ///
-            /// This refreshes the asset database.
+            /// If 'toConvert' is:
+            /// <list>
+            /// <item>An object in the scene, then the hierarchy will be exported
+            /// and a new auto-updating prefab created pointing to the new fbx.</item>
+            /// <item>The root of an fbx asset, or the root of an instance of an
+            /// fbx asset, then a new auto-updating prefab will be created
+            /// pointing to the existing fbx.</item>
+            /// <item>A prefab asset (but *not* if it's an instance of a prefab),
+            /// then a new fbx asset will be exported and the prefab will be made
+            /// to auto-update from the new fbx.</item>
+            /// </list>
             /// </summary>
-            /// <returns>The instance that replaces 'toConvert' in the scene.</returns>
-            /// <param name="toConvert">GameObject hierarchy to replace with a prefab.</param>
+            /// <returns>The prefab asset linked to an fbx file.</returns>
+            /// <param name="toConvert">Object to convert.</param>
             /// <param name="fbxFullPath">Absolute platform-specific path to
-            /// the fbx file. May be null, in which case we construct a unique
-            /// filename from the object name and the
-            /// directoryFullPath.</param>
-            /// <param name="directoryFullPath">Absolute platform-specific path
-            /// to a directory in which to put the fbx file. Ignored if
-            /// fbxFullPath is specified. May be null, in which case we use the
-            /// export settings.</param>
+            /// the fbx file. If the file already exists, it will be overwritten.
+            /// May be null, in which case we construct a unique filename.
+            /// Ignored if 'toConvert' is an fbx asset or is an instance of
+            /// one.</param>
+            /// <param name="fbxDirectoryFullPath">Absolute platform-specific
+            /// path to a directory in which to put the fbx file under a unique
+            /// filename. May be null, in which case we use the export settings.
+            /// Ignored if 'fbxFullPath' is specified. Ignored if 'toConvert' is
+            /// an fbx asset or an instance of one.</param>
+            /// <param name="prefabFullPath">Absolute platform-specific path to
+            /// the prefab file. If the file already exists, it will be
+            /// overwritten. May be null, in which case we construct a unique
+            /// filename. Ignored if 'toConvert' is a prefab asset.</param>
+            /// <param name="prefabDirectoryFullPath">Absolute
+            /// platform-specific path to a directory in which to put the prefab
+            /// file under a unique filename. May be null, in which case we use
+            /// the export settings. Ignored if 'prefabFullPath' is specified.
+            /// Ignored if 'toConvert' is a prefab asset.</param>
             public static GameObject Convert (
                 GameObject toConvert,
                 string fbxDirectoryFullPath = null,
                 string fbxFullPath = null,
                 string prefabDirectoryFullPath = null,
                 string prefabFullPath = null, 
-                EditorTools.ConvertToPrefabSettingsSerialize exportOptions = null
-            )
+                EditorTools.ConvertToPrefabSettingsSerialize exportOptions = null)
             {
-                // Only create the prefab (no FBX export) if we have selected the root of a model prefab instance.
-                if(IsModelInstance(toConvert)){
-                    // don't re-export fbx
-                    // create prefab out of model instance in scene, link to existing fbx
-                    var mainAsset = PrefabUtility.GetPrefabParent(toConvert) as GameObject;
-                    var mainAssetRelPath = AssetDatabase.GetAssetPath(mainAsset);
-                    var mainAssetAbsPath = Directory.GetParent(Application.dataPath) + "/" + mainAssetRelPath;
-                    SetupFbxPrefab(toConvert, mainAsset, mainAssetRelPath, mainAssetAbsPath);
+                // If we selected the something that's already backed by an
+                // FBX, don't export.
+                var mainAsset = GetOrCreateFbxAsset (toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
 
-                    return toConvert;
+                // If we selected a prefab *instance* then break the
+                // connection. We only want to update an existing prefab if
+                // we're converting an existing prefab (not an instance).
+                if (PrefabUtility.GetPrefabType(toConvert) == PrefabType.PrefabInstance) {
+                    PrefabUtility.DisconnectPrefabInstance(toConvert);
+                }
+
+                // Get 'toConvert' into an editable state. We can't edit
+                // assets, and toConvert might be an asset.
+                var toConvertInstance = GetOrCreateInstance (toConvert);
+
+                // Set it up to track the FbxPrefab.
+                SetupFbxPrefab (toConvertInstance, mainAsset);
+
+                // Now get 'toConvertInstance' into a prefab. If toConvert is
+                // already a prefab, this is equivalent to an 'apply' ; if it's
+                // not, we're creating a new prefab.
+                var prefab = ApplyOrCreatePrefab (toConvertInstance, prefabDirectoryFullPath, prefabFullPath);
+
+                if (toConvertInstance == toConvert) {
+                    // If we were converting an instance, the caller expects
+                    // the instance to have the name it got saved with.
+                    var path = AssetDatabase.GetAssetPath (prefab);
+                    var filename = Path.GetFileNameWithoutExtension (path);
+                    toConvert.name = filename;
+                } else {
+                    // If 'toConvert' was an asset, we created a temp
+                    // instance to add the component; destroy it.
+                    Object.DestroyImmediate(toConvertInstance);
+                }
+                return prefab;
+            }
+
+            /// <summary>
+            /// Check whether <see>Convert</see> will be exporting an fbx file,
+            /// or reusing one.
+            /// </summary>
+            public static bool WillExportFbx(GameObject toConvert) {
+                return GetFbxAssetOrNull(toConvert) == null;
+            }
+
+            /// <summary>
+            /// Return an FBX asset that corresponds to 'toConvert'.
+            ///
+            /// If 'toConvert' is the root of an FBX asset, return it.
+            ///
+            /// If it's an instance in a scene the points to the root of an FBX
+            /// asset, return that asset.
+            ///
+            /// Otherwise, export according to the paths and options, and
+            /// return the new asset.
+            /// </summary>
+            /// <param name="toConvert">GameObject for which we want an fbx asset</param>
+            /// <param name="fbxDirectoryFullPath">Export will choose an
+            /// appropriate filename in this directory. Ignored if fbxFullPath is
+            /// set. Ignored if toConvert is an fbx asset or an instance of an
+            /// fbx.</param>
+            /// <param name="fbxDirectoryFullPath">Export will create this
+            /// file. Overrides fbxDirectoryFullPath. Ignored if toConvert is an
+            /// fbx asset or an instance of an fbx.</param>
+            /// <returns>The root of a model prefab asset.</returns>
+            public static GameObject GetOrCreateFbxAsset(GameObject toConvert,
+                    string fbxDirectoryFullPath = null,
+                    string fbxFullPath = null,
+                    EditorTools.ConvertToPrefabSettingsSerialize exportOptions = null)
+            {
+                var mainAsset = GetFbxAssetOrNull(toConvert);
+                if (mainAsset) {
+                    return mainAsset;
                 }
 
                 if (string.IsNullOrEmpty(fbxFullPath)) {
@@ -162,14 +255,79 @@ namespace FbxExporters
                 // Copy the mesh/materials from the FBX
                 UpdateFromSourceRecursive (toConvert, unityMainAsset);
 
+                return unityMainAsset;
+            }
+
+            /// <summary>
+            /// Return a gameobject in the scene that corresponds to 'toConvert'.
+            ///
+            /// If toConvert is an asset, instantiate it and retain the link.
+            /// If it's a gameobject in the scene, return it.
+            /// </summary>
+            public static GameObject GetOrCreateInstance(GameObject toConvert)
+            {
+                switch(PrefabUtility.GetPrefabType(toConvert)) {
+                    case PrefabType.Prefab:
+                    case PrefabType.ModelPrefab:
+                        return PrefabUtility.InstantiatePrefab(toConvert) as GameObject;
+                    default:
+                        return toConvert;
+                }
+            }
+
+            /// <summary>
+            /// Check whether <see>Convert</see> will be creating a new prefab, or
+            /// updating one.
+            ///
+            /// Note that ApplyOrCreatePrefab will create in different
+            /// circumstances than Convert will.
+            /// </summary>
+            public static bool WillCreatePrefab(GameObject toConvert) {
+                return PrefabUtility.GetPrefabType(toConvert) != PrefabType.Prefab;
+            }
+
+            /// <summary>
+            /// Create a prefab from 'instance', or apply 'instance' to its
+            /// prefab if it's already an instance of a prefab.
+            ///
+            /// If it's an instance of a model prefab (an fbx file) we will
+            /// lose that connection and point to a new prefab file.
+            ///
+            /// To avoid applying to an existing prefab, break the prefab
+            /// connection with <c>PrefabUtility.DisconnectPrefabInstance</c>.
+            ///
+            /// Returns the new or updated prefab.
+            /// </summary>
+            /// <param name="instance">A GameObject in the scene. After this
+            /// call, it will be a prefab instance (it might already be
+            /// one).</param>
+            /// <param name="prefabFullPath">The full path to a prefab file we
+            /// will create. Ignored if <paramref name="instance"/> is a
+            /// prefab instance already. May be null, in which case we'll use <paramref
+            /// name="prefabDirectoryFullPath"/> to generate a new name</param>
+            /// <param name="prefabDirectoryFullPath">The full path to a
+            /// directory that will hold the new prefab. Ignored if <paramref
+            /// name="instance"/> is a prefab instance already. Ignored if
+            /// <paramref name="prefabFullPath"/> is provided. May be null, in
+            /// which case we'll use the project export settings.</param>
+            /// <returns>The new or existing prefab.</returns>
+            public static GameObject ApplyOrCreatePrefab(GameObject instance,
+                string prefabDirectoryFullPath = null,
+                string prefabFullPath = null)
+            {
+                if(PrefabUtility.GetPrefabType(instance) == PrefabType.PrefabInstance) {
+                    return PrefabUtility.ReplacePrefab(instance, PrefabUtility.GetPrefabParent(instance));
+                }
+
+                // Otherwise, create a new prefab. First choose its filename/path.
                 if (string.IsNullOrEmpty(prefabFullPath)) {
                     // Generate a unique filename.
                     if (string.IsNullOrEmpty (prefabDirectoryFullPath)) {
-                        fbxDirectoryFullPath = FbxExporters.EditorTools.ExportSettings.GetPrefabAbsoluteSavePath();
+                        prefabDirectoryFullPath = FbxExporters.EditorTools.ExportSettings.GetPrefabAbsoluteSavePath();
                     } else {
-                        fbxDirectoryFullPath = Path.GetFullPath (prefabDirectoryFullPath);
+                        prefabDirectoryFullPath = Path.GetFullPath (prefabDirectoryFullPath);
                     }
-                    var prefabBasename = ModelExporter.ConvertToValidFilename (toConvert.name + ".prefab");
+                    var prefabBasename = ModelExporter.ConvertToValidFilename (instance.name + ".prefab");
 
                     prefabFullPath = Path.Combine (prefabDirectoryFullPath, prefabBasename);
                     if (File.Exists (prefabFullPath)) {
@@ -177,47 +335,45 @@ namespace FbxExporters
                     }
                 }
                 var prefabProjectRelativePath = EditorTools.ExportSettings.GetProjectRelativePath (prefabFullPath);
+                var prefabFileName = Path.ChangeExtension(prefabProjectRelativePath, ".prefab");
 
-                SetupFbxPrefab (toConvert, unityMainAsset, prefabProjectRelativePath, fbxFullPath);
-
-                toConvert.name = Path.GetFileNameWithoutExtension (fbxFullPath);
-                return toConvert;
+                var prefab = PrefabUtility.CreatePrefab(prefabFileName, instance, ReplacePrefabOptions.ConnectToPrefab);
+                if (!prefab) {
+                    throw new System.Exception(string.Format("Failed to create prefab asset in [{0}]", prefabFileName));
+                }
+                return prefab;
             }
 
             /// <summary>
-            /// Create the prefab and connect it to the given fbx asset. 
+            /// Connect 'toSetUp' to the main asset.
+            ///
+            /// Adds the FbxPrefab components and links it. Does not actually create or update a prefab asset.
             /// </summary>
-            /// <param name="toConvert">Hierarchy to convert.</param>
+            /// <param name="toSetUp">Instance in the scene that we want to link to the fbx asset.</param>
             /// <param name="unityMainAsset">Main asset in the FBX.</param>
-            /// <param name="projectRelativePath">Fbx project relative path.</param>
-            /// <param name="fbxFullPath">Fbx full path.</param>
-            public static void SetupFbxPrefab(GameObject toConvert, GameObject unityMainAsset, string projectRelativePath, string fbxFullPath){
+            public static void SetupFbxPrefab(GameObject toSetUp, GameObject unityMainAsset)
+            {
                 // Set up the FbxPrefab component so it will auto-update.
                 // Make sure to delete whatever FbxPrefab history we had.
-                var fbxPrefab = toConvert.GetComponent<FbxPrefab>();
+                var fbxPrefab = toSetUp.GetComponent<FbxPrefab>();
                 if (fbxPrefab) {
                     Object.DestroyImmediate(fbxPrefab);
                 }
-                fbxPrefab = toConvert.AddComponent<FbxPrefab>();
+                fbxPrefab = toSetUp.AddComponent<FbxPrefab>();
                 var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
                 fbxPrefabUtility.SetSourceModel(unityMainAsset);
-
-                // Create a prefab from the instantiated and componentized unityGO.
-                var prefabFileName = Path.ChangeExtension(projectRelativePath, ".prefab");
-                var prefab = PrefabUtility.CreatePrefab(prefabFileName, toConvert, ReplacePrefabOptions.ConnectToPrefab);
-                if (!prefab) {
-                    throw new System.Exception(
-                        string.Format("Failed to create prefab asset in [{0}] from fbx [{1}]",
-                            prefabFileName, fbxFullPath));
-                }
             }
 
             /// <summary>
-            /// Determines if the given GameObject is a model instance.
+            /// Returns the fbx asset on disk corresponding to the same hierarchy as is selected.
+            ///
+            /// Returns go if go is the root of a model prefab.
+            /// Returns the prefab parent of go if it's the root of a model prefab.
+            /// Returns null in all other circumstances.
             /// </summary>
-            /// <returns><c>true</c> if go is a model instance; otherwise, <c>false</c>.</returns>
-            /// <param name="go">Go.</param>
-            public static bool IsModelInstance(GameObject go){
+            /// <returns>The root of a model prefab asset, or null.</returns>
+            /// <param name="go">A gameobject either in the scene or in the assets folder.</param>
+            public static GameObject GetFbxAssetOrNull(GameObject go) {
                 // Children of model prefab instances will also have "model prefab instance"
                 // as their prefab type, so it is important that it is the root that is selected.
                 //
@@ -229,7 +385,22 @@ namespace FbxExporters
                 // However, when selecting the Sphere to convert, we don't want to connect it to the
                 // existing FBX but create a new FBX containing just the sphere.
                 PrefabType unityPrefabType = PrefabUtility.GetPrefabType(go);
-                return unityPrefabType == PrefabType.ModelPrefabInstance && go.Equals (PrefabUtility.FindPrefabRoot (go));
+                switch(unityPrefabType) {
+                case PrefabType.ModelPrefabInstance:
+                    if (go.Equals(PrefabUtility.FindPrefabRoot (go))) {
+                        return PrefabUtility.GetPrefabParent(go) as GameObject;
+                    } else {
+                        return null;
+                    }
+                case PrefabType.ModelPrefab:
+                    if (go.Equals(PrefabUtility.FindPrefabRoot (go))) {
+                        return go;
+                    } else {
+                        return null;
+                    }
+                default:
+                    return null;
+                }
             }
 
             /// <summary>
