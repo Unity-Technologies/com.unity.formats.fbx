@@ -510,7 +510,7 @@ namespace FbxExporters.UnitTests
 
         private void ExportSkinnedMesh(string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh){
             // add fbx to scene
-            GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath("Assets/" + fileToExport) as GameObject;
+            GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath(fileToExport) as GameObject;
             Assert.IsNotNull (originalFbxObj);
             GameObject originalGO = GameObject.Instantiate (originalFbxObj);
             Assert.IsTrue (originalGO);

@@ -1,0 +1,13 @@
+{
+    "name": "com.unity.formats.fbx.editortests",
+    "references": [
+        "com.unity.formats.fbx.editor",
+        "com.unity.formats.fbx.runtime"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}
