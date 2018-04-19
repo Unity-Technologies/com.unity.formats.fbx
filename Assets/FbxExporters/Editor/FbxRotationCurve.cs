@@ -1,6 +1,7 @@
 ﻿using Unity.FbxSdk;
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 namespace FbxExporters
 {
@@ -14,6 +15,12 @@ namespace FbxExporters
         public abstract class RotationCurve {
             public double sampleRate;
             public AnimationCurve[] m_curves;
+            public FbxNode m_fbxNode;
+
+            private FbxProperty m_animatedProperty;
+            public FbxProperty AnimatedProperty { get { return m_animatedProperty; } set { m_animatedProperty = value; } }
+
+            public abstract string FbxPropertyName { get; }
 
             public struct Key {
                 public FbxTime time;
@@ -28,11 +35,11 @@ namespace FbxExporters
 
             protected abstract FbxQuaternion GetConvertedQuaternionRotation (float seconds, UnityEngine.Quaternion restRotation);
 
-            private Key [] ComputeKeys(UnityEngine.Quaternion restRotation, FbxNode node) {
+            private Key [] ComputeKeys(UnityEngine.Quaternion restRotation, bool undoPrerotation = true) {
                 // Get the source pivot pre-rotation if any, so we can
                 // remove it from the animation we get from Unity.
-                var fbxPreRotationEuler = node.GetRotationActive() 
-                    ? node.GetPreRotation(FbxNode.EPivotSet.eSourcePivot)
+                var fbxPreRotationEuler = undoPrerotation && m_fbxNode != null && m_fbxNode.GetRotationActive() 
+                    ? m_fbxNode.GetPreRotation(FbxNode.EPivotSet.eSourcePivot)
                     : new FbxVector4();
 
                 // Get the inverse of the prerotation
@@ -71,17 +78,21 @@ namespace FbxExporters
                 return keys;
             }
 
-            public void Animate(Transform unityTransform, FbxNode fbxNode, FbxAnimLayer fbxAnimLayer, bool Verbose) {
+            public void Animate(Quaternion restRotation, FbxAnimLayer fbxAnimLayer, bool Verbose, bool undoPreRotation = true) {
+                if (!AnimatedProperty.IsValid())
+                {
+                    Debug.LogError("missing animatable property");
+                }
 
                 /* Find or create the three curves. */
-                var fbxAnimCurveX = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_X, true);
-                var fbxAnimCurveY = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Y, true);
-                var fbxAnimCurveZ = fbxNode.LclRotation.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Z, true);
+                var fbxAnimCurveX = AnimatedProperty.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_X, true);
+                var fbxAnimCurveY = AnimatedProperty.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Y, true);
+                var fbxAnimCurveZ = AnimatedProperty.GetCurve(fbxAnimLayer, Globals.FBXSDK_CURVENODE_COMPONENT_Z, true);
 
                 /* set the keys */
                 using (new FbxAnimCurveModifyHelper(new List<FbxAnimCurve>{fbxAnimCurveX,fbxAnimCurveY,fbxAnimCurveZ}))
                 {
-                    foreach (var key in ComputeKeys(unityTransform.localRotation, fbxNode)) {
+                    foreach (var key in ComputeKeys(restRotation, undoPreRotation)) {
 
                         int i = fbxAnimCurveX.KeyAdd(key.time);
                         fbxAnimCurveX.KeySet(i, key.time, (float)key.euler.X);
@@ -95,13 +106,13 @@ namespace FbxExporters
                 }
 
                 // Uni-35616 unroll curves to preserve continuous rotations
-                var fbxCurveNode = fbxNode.LclRotation.GetCurveNode(fbxAnimLayer, false /*should already exist*/);
+                var fbxCurveNode = AnimatedProperty.GetCurveNode(fbxAnimLayer, false /*should already exist*/);
 
                 FbxAnimCurveFilterUnroll fbxAnimUnrollFilter = new FbxAnimCurveFilterUnroll();
                 fbxAnimUnrollFilter.Apply(fbxCurveNode);
 
-                if (Verbose) {
-                    Debug.Log("Exported rotation animation for " + fbxNode.GetName());
+                if (Verbose && m_fbxNode != null) {
+                    Debug.Log("Exported rotation animation for " + m_fbxNode.GetName());
                 }
             }
         }
@@ -112,6 +123,25 @@ namespace FbxExporters
         /// </summary>
         public class EulerCurve : RotationCurve {
             public EulerCurve() { m_curves = new AnimationCurve[3]; }
+
+            public override string FbxPropertyName
+            {
+                get
+                {
+                    return "Lcl Rotation";
+                }
+            }
+
+            protected static int GetAxisIndex(char axis)
+            {
+                switch (axis)
+                {
+                    case 'x': return 0;
+                    case 'y': return 1;
+                    case 'z': return 2;
+                    default: return -1;
+                }
+            }
 
             /// <summary>
             /// Gets the index of the euler curve by property name.
@@ -125,12 +155,7 @@ namespace FbxExporters
 
                 if (!isEulerComponent) { return -1; }
 
-                switch(uniPropertyName[uniPropertyName.Length - 1]) {
-                case 'x': return 0;
-                case 'y': return 1;
-                case 'z': return 2;
-                default: return -1;
-                }
+                return GetAxisIndex(uniPropertyName[uniPropertyName.Length - 1]);
             }
 
             protected override FbxQuaternion GetConvertedQuaternionRotation (float seconds, Quaternion restRotation)
@@ -154,6 +179,60 @@ namespace FbxExporters
             }
         }
 
+        public class AimConstraintRotationCurve : EulerCurve
+        {
+            public override string FbxPropertyName
+            {
+                get
+                {
+                    return "RotationOffset";
+                }
+            }
+
+            /// <summary>
+            /// Gets the index of the rotation constraint's curve by property name.
+            /// x = 0, y = 1, z = 2
+            /// </summary>
+            /// <returns>The index of the curve, or -1 if property doesn't map to Euler curve.</returns>
+            /// <param name="uniPropertyName">Unity property name.</param>
+            public static int GetRotationIndex(string uniPropertyName, Type constraintType)
+            {
+                System.StringComparison ct = System.StringComparison.CurrentCulture;
+                bool isRotationComponent = uniPropertyName.StartsWith("m_RotationOffset.", ct) && constraintType == typeof(UnityEngine.Animations.AimConstraint);
+
+                if (!isRotationComponent) { return -1; }
+
+                return GetAxisIndex(uniPropertyName[uniPropertyName.Length - 1]);
+            }
+        }
+
+        public class RotationConstraintCurve : EulerCurve
+        {
+            public override string FbxPropertyName
+            {
+                get
+                {
+                    return "Rotation";
+                }
+            }
+
+            /// <summary>
+            /// Gets the index of the rotation constraint's curve by property name.
+            /// x = 0, y = 1, z = 2
+            /// </summary>
+            /// <returns>The index of the curve, or -1 if property doesn't map to Euler curve.</returns>
+            /// <param name="uniPropertyName">Unity property name.</param>
+            public static int GetRotationIndex(string uniPropertyName, Type constraintType)
+            {
+                System.StringComparison ct = System.StringComparison.CurrentCulture;
+                bool isRotationComponent = uniPropertyName.StartsWith("m_RotationOffset.", ct) && constraintType == typeof(UnityEngine.Animations.RotationConstraint);
+
+                if (!isRotationComponent) { return -1; }
+
+                return GetAxisIndex(uniPropertyName[uniPropertyName.Length - 1]);
+            }
+        }
+
         /// <summary>
         /// Exporting rotations is more complicated. We need to convert
         /// from quaternion to euler. We use this class to help.
@@ -161,6 +240,14 @@ namespace FbxExporters
         public class QuaternionCurve : RotationCurve {
 
             public QuaternionCurve() { m_curves = new AnimationCurve[4]; }
+
+            public override string FbxPropertyName
+            {
+                get
+                {
+                    return "Lcl Rotation";
+                }
+            }
 
             /// <summary>
             /// Gets the index of the curve by property name.

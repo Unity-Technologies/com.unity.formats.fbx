@@ -1860,12 +1860,51 @@ namespace FbxExporters
                 }
             }
 
+            protected FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType)
+            {
+                // map unity property name to fbx property
+                var fbxProperty = fbxNode.FindProperty(fbxPropertyName, false);
+                if (!fbxProperty.IsValid())
+                {
+                    var fbxNodeAttribute = fbxNode.GetNodeAttribute();
+                    if (fbxNodeAttribute != null)
+                    {
+                        fbxProperty = fbxNodeAttribute.FindProperty(fbxPropertyName, false);
+                    }
+
+                    // try mapping to constraint
+                    if (!fbxProperty.IsValid())
+                    {
+                        List<FbxConstraint> constraints;
+                        if (MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraints))
+                        {
+                            foreach (var constraint in constraints)
+                            {
+                                if (uniPropertyType != FbxToUnityConstraintType(constraint.GetConstraintType()))
+                                {
+                                    continue;
+                                }
+
+                                var temp = constraint.FindProperty(fbxPropertyName, false);
+                                if (temp.IsValid())
+                                {
+                                    fbxProperty = temp;
+                                    Debug.Log(fbxNode.GetName() + ": " + constraint.GetName() + ": " + temp.GetName());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                return fbxProperty;
+            }
+
             /// <summary>
             /// Export an AnimationCurve.
             /// NOTE: This is not used for rotations, because we need to convert from
             /// quaternion to euler and various other stuff.
             /// </summary>
-            protected void ExportAnimationCurve (UnityEngine.Object uniObj,
+            protected void ExportAnimationCurve (FbxNode fbxNode,
                                                  AnimationCurve uniAnimCurve,
                                                  float frameRate,
                                                  string uniPropertyName,
@@ -1874,7 +1913,7 @@ namespace FbxExporters
                                                  FbxAnimLayer fbxAnimLayer)
             {
                 if (Verbose) {
-                    Debug.Log ("Exporting animation for " + uniObj.ToString() + " (" + uniPropertyName + ")");
+                    Debug.Log ("Exporting animation for " + fbxNode.GetName() + " (" + uniPropertyName + ")");
                 }
 
                 FbxPropertyChannelPair[] fbxPropertyChannelPairs;
@@ -1883,50 +1922,9 @@ namespace FbxExporters
                     return;
                 }
 
-                GameObject unityGo = GetGameObject (uniObj);
-                if (unityGo == null) {
-                    Debug.LogError (string.Format ("cannot find gameobject for {0}", uniObj.ToString()));
-                    return;
-                }
-
-                FbxNode fbxNode;
-                if (!MapUnityObjectToFbxNode.TryGetValue(unityGo, out fbxNode))
-                {
-                    Debug.LogError(string.Format("no fbx node for {0}", unityGo.ToString()));
-                    return;
-                }
-
                 foreach (var fbxPropertyChannelPair in fbxPropertyChannelPairs) {
                     // map unity property name to fbx property
-                    var fbxProperty = fbxNode.FindProperty (fbxPropertyChannelPair.Property, false);
-                    if (!fbxProperty.IsValid ()) {
-                        var fbxNodeAttribute = fbxNode.GetNodeAttribute ();
-                        if (fbxNodeAttribute != null) {
-                            fbxProperty = fbxNodeAttribute.FindProperty (fbxPropertyChannelPair.Property, false);
-                        }
-
-                        // try mapping to constraint
-                        if (!fbxProperty.IsValid())
-                        {
-                            List<FbxConstraint> constraints;
-                            if (MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraints))
-                            {
-                                foreach(var constraint in constraints) {
-                                    if(uniPropertyType != FbxToUnityConstraintType(constraint.GetConstraintType()))
-                                    {
-                                        continue;
-                                    }
-                                    
-                                    var temp = constraint.FindProperty(fbxPropertyChannelPair.Property, false);
-                                    if (temp.IsValid())
-                                    {
-                                        fbxProperty = temp;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    var fbxProperty = GetFbxProperty(fbxNode, fbxPropertyChannelPair.Property, uniPropertyType);
                     if (!fbxProperty.IsValid ()) {
                         Debug.LogError (string.Format ("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
                         return;
@@ -2003,7 +2001,6 @@ namespace FbxExporters
                         { "m_UpVector", "UpVector" },
                         { "m_WorldUpVector", "WorldUpVector" },
                         { "m_TranslationOffset", "Translation" },
-                        { "m_RotationOffset", "Rotation" },
                         { "m_ScaleOffset", "Scaling" }
                     };
                 private static Dictionary<string, string> TransformChannels = new Dictionary<string, string>()
@@ -2045,7 +2042,7 @@ namespace FbxExporters
                         {
                             var uniChannel = entry.Key;
                             var fbxChannel = entry.Value;
-                            if (uniPropertyName.StartsWith(string.Format(propFormat, uniName, uniChannel), ct))
+                            if (uniPropertyName.EndsWith(string.Format(propFormat, uniName, uniChannel), ct))
                             {
                                 channelPairs = new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, fbxChannel) };
                                 return true;
@@ -2137,19 +2134,6 @@ namespace FbxExporters
 
                 fbxAnimStack.SetLocalTimeSpan (new FbxTimeSpan (fbxStartTime, fbxStopTime));
 
-                /* The major difficulty: Unity uses quaternions for rotation
-                 * (which is how it should be) but FBX uses Euler angles. So we
-                 * need to gather up the list of transform curves per object.
-                 * 
-                 * For euler angles, Unity uses ZXY rotation order while Maya uses XYZ.
-                 * Maya doesn't import files with ZXY rotation correctly, so have to convert to XYZ.
-                 * Need all 3 curves in order to convert.
-                 * 
-                 * Also, in both cases, prerotation has to be removed from the animated rotation if
-                 * there are bones being exported.
-                 */
-                var rotations = new Dictionary<GameObject, RotationCurve> ();
-
                 var unityCurves = new Dictionary<GameObject, List<UnityCurve>> ();
 
                 // extract and store all necessary information from the curve bindings, namely the animation curves
@@ -2204,11 +2188,25 @@ namespace FbxExporters
                     }
                 }
 
+                /* The major difficulty: Unity uses quaternions for rotation
+                 * (which is how it should be) but FBX uses Euler angles. So we
+                 * need to gather up the list of transform curves per object.
+                 * 
+                 * For euler angles, Unity uses ZXY rotation order while Maya uses XYZ.
+                 * Maya doesn't import files with ZXY rotation correctly, so have to convert to XYZ.
+                 * Need all 3 curves in order to convert.
+                 * 
+                 * Also, in both cases, prerotation has to be removed from the animated rotation if
+                 * there are bones being exported.
+                 */
+                var rotations = new Dictionary<GameObject, RotationCurve>();
+
                 // export the animation curves for each GameObject that has animation
                 foreach (var kvp in unityCurves) {
                     var uniGO = kvp.Key;
                     foreach (var uniCurve in kvp.Value) {
                         var propertyName = uniCurve.propertyName;
+                        var propertyType = uniCurve.propertyType;
                         var uniAnimCurve = uniCurve.uniAnimCurve;
 
                         // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
@@ -2216,23 +2214,35 @@ namespace FbxExporters
                             continue;    
                         }
 
+                        FbxNode fbxNode;
+                        if (!MapUnityObjectToFbxNode.TryGetValue(uniGO, out fbxNode))
+                        {
+                            Debug.LogError(string.Format("no FbxNode found for {0}", uniGO.name));
+                            continue;
+                        }
+
                         int index = QuaternionCurve.GetQuaternionIndex (propertyName);
                         if (index >= 0) {
                             // Rotation property; save it to convert quaternion -> euler later.
-                            RotationCurve rotCurve = GetRotationCurve<QuaternionCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
-                            rotCurve.SetCurve (index, uniAnimCurve);
+                            CreateRotationCurve<QuaternionCurve> (uniGO, fbxNode, propertyType, uniAnimClip.frameRate, index, uniAnimCurve, ref rotations);
                             continue;
                         } 
 
                         index = EulerCurve.GetEulerIndex (propertyName);
                         if (index >= 0) {
-                            RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
-                            rotCurve.SetCurve (index, uniAnimCurve);
+                            CreateRotationCurve<EulerCurve> (uniGO, fbxNode, propertyType, uniAnimClip.frameRate, index, uniAnimCurve, ref rotations);
+                            continue;
+                        }
+
+                        index = RotationConstraintCurve.GetRotationIndex(propertyName, propertyType);
+                        if (index >= 0)
+                        {
+                            CreateRotationCurve<RotationConstraintCurve>(uniGO, fbxNode, propertyType, uniAnimClip.frameRate, index, uniAnimCurve, ref rotations);
                             continue;
                         }
 
                         // simple property (e.g. intensity), export right away
-                        ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
+                        ExportAnimationCurve (fbxNode, uniAnimCurve, uniAnimClip.frameRate, 
                             propertyName, uniCurve.propertyType,
                             fbxScene, 
                             fbxAnimLayer);
@@ -2244,12 +2254,7 @@ namespace FbxExporters
                     var unityGo = kvp.Key;
                     var rot = kvp.Value;
 
-                    FbxNode fbxNode;
-                    if (!MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
-                        Debug.LogError (string.Format ("no FbxNode found for {0}", unityGo.name));
-                        continue;
-                    }
-                    rot.Animate (unityGo.transform, fbxNode, fbxAnimLayer, Verbose);
+                    rot.Animate(unityGo.transform.localRotation, fbxAnimLayer, Verbose);
                 }
             }
 
@@ -2457,24 +2462,31 @@ namespace FbxExporters
             }
 
             /// <summary>
-            /// Gets or creates the rotation curve for GameObject uniGO.
+            /// Gets or creates the rotation curve for GameObject uniGO, then sets the anim curve at the given index.
             /// </summary>
             /// <returns>The rotation curve.</returns>
             /// <param name="uniGO">Unity GameObject.</param>
             /// <param name="frameRate">Frame rate.</param>
             /// <param name="rotations">Rotations.</param>
             /// <typeparam name="T"> RotationCurve is abstract so specify type of RotationCurve to create.</typeparam>
-            private RotationCurve GetRotationCurve<T>(
-                GameObject uniGO, float frameRate,
+            private void CreateRotationCurve<T>(
+                GameObject uniGO, FbxNode fbxNode, System.Type propertyType, float frameRate, int index, AnimationCurve uniAnimCurve,
                 ref Dictionary<GameObject, RotationCurve> rotations
                 ) where T : RotationCurve, new()
             {
                 RotationCurve rotCurve;
                 if (!rotations.TryGetValue (uniGO, out rotCurve)) {
-                    rotCurve = new T { sampleRate = frameRate };
+                    rotCurve = new T { sampleRate = frameRate, m_fbxNode = fbxNode };
+                    var fbxProperty = GetFbxProperty(fbxNode, rotCurve.FbxPropertyName, propertyType);
+                    if (!fbxProperty.IsValid())
+                    {
+                        Debug.LogErrorFormat("no rotation property matching {0}", rotCurve.FbxPropertyName);
+                    } else { 
+                        rotCurve.AnimatedProperty = fbxProperty;
+                    }
                     rotations.Add (uniGO, rotCurve);
                 }
-                return rotCurve;
+                rotCurve.SetCurve(index, uniAnimCurve);
             }
 
             /// <summary>
