@@ -12,6 +12,12 @@ a linked prefab asset for the fbx. It will not create an instance in the scene.
 Right click on a prefab in the project view and select Convert to Linked Prefab to export the prefab to an fbx file
 and link the existing prefab to the newly created fbx.
 
+KNOWN ISSUES
+
+* ConvertToPrefab: UI doesn't provide feedback about whether it will be converting an existing file or creating new files. When
+converting an existing FBX file, the fbx filename and fbx export options are ignored (but not greyed out). When converting an 
+existing prefab, the prefab filename is ignored (but not greyed out)
+
 **Version**: 1.3.0f1
 
 NEW FEATURES
