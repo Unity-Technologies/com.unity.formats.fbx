@@ -1,5 +1,17 @@
 ﻿RELEASE NOTES
 
+**Version**: sprint55
+
+NEW FEATURES
+
+* ConvertToPrefab: Add ability to convert an fbx or prefab asset from the Project view
+
+Right click on an fbx in the project view then select Convert to Linked Prefab to create
+a linked prefab asset for the fbx. It will not create an instance in the scene.
+
+Right click on a prefab in the project view and select Convert to Linked Prefab to export the prefab to an fbx file
+and link the existing prefab to the newly created fbx.
+
 **Version**: 1.3.0f1
 
 NEW FEATURES
