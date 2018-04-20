@@ -154,7 +154,7 @@ namespace FbxExporters
 
             /// <summary>
             /// keep a map between the constrained FbxNode (in Unity this is the GameObject with constraint component)
-            /// and it's FbxConstraints for quick lookup when exporting constraint animations.
+            /// and its FbxConstraints for quick lookup when exporting constraint animations.
             /// </summary>
             Dictionary<FbxNode, List<FbxConstraint>> MapConstrainedObjectToConstraints = new Dictionary<FbxNode, List<FbxConstraint>>();
 
@@ -1429,6 +1429,36 @@ namespace FbxExporters
                 return true;
             }
 
+            protected struct FbxConstraintSource
+            {
+                public FbxNode node;
+                public float weight;
+
+                public FbxConstraintSource(FbxNode node, float weight)
+                {
+                    this.node = node;
+                    this.weight = weight;
+                }
+            }
+
+            protected List<FbxConstraintSource> GetConstraintSources(IConstraint unityConstraint)
+            {
+                var fbxSources = new List<FbxConstraintSource>();
+                var sources = new List<ConstraintSource>();
+                unityConstraint.GetSources(sources);
+                foreach (var source in sources)
+                {
+                    // ignore any sources that are not getting exported
+                    FbxNode sourceNode;
+                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
+                    {
+                        continue;
+                    }
+                    fbxSources.Add(new FbxConstraintSource(sourceNode, source.weight * UnitScaleFactor));
+                }
+                return fbxSources;
+            }
+
             protected void AddFbxNodeToConstraintsMapping<T>(FbxNode fbxNode, T fbxConstraint) where T : FbxConstraint
             {
                 if (!MapConstrainedObjectToConstraints.ContainsKey(fbxNode))
@@ -1447,17 +1477,10 @@ namespace FbxExporters
 
                 FbxConstraintPosition posConstraint = FbxConstraintPosition.Create(fbxScene, fbxNode.GetName() + "_positionConstraint");
                 posConstraint.SetConstrainedObject(fbxNode);
-                var sources = new List<ConstraintSource>();
-                uniPosConstraint.GetSources(sources);
+                var sources = GetConstraintSources(uniPosConstraint);
                 foreach (var source in sources)
                 {
-                    // ignore any sources that are not getting exported
-                    FbxNode sourceNode;
-                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
-                    {
-                        continue;
-                    }
-                    posConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
+                    posConstraint.AddConstraintSource(source.node, source.weight);
                 }
                 ExportCommonConstraintProperties(uniPosConstraint, posConstraint, fbxNode);
 
@@ -1485,17 +1508,10 @@ namespace FbxExporters
 
                 FbxConstraintRotation rotConstraint = FbxConstraintRotation.Create(fbxScene, fbxNode.GetName() + "_rotationConstraint");
                 rotConstraint.SetConstrainedObject(fbxNode);
-                var sources = new List<ConstraintSource>();
-                uniRotConstraint.GetSources(sources);
+                var sources = GetConstraintSources(uniRotConstraint);
                 foreach (var source in sources)
                 {
-                    // ignore any sources that are not getting exported
-                    FbxNode sourceNode;
-                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
-                    {
-                        continue;
-                    }
-                    rotConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
+                    rotConstraint.AddConstraintSource(source.node, source.weight);
                 }
                 ExportCommonConstraintProperties(uniRotConstraint, rotConstraint, fbxNode);
 
@@ -1525,17 +1541,10 @@ namespace FbxExporters
 
                 FbxConstraintScale scaleConstraint = FbxConstraintScale.Create(fbxScene, fbxNode.GetName() + "_scaleConstraint");
                 scaleConstraint.SetConstrainedObject(fbxNode);
-                var sources = new List<ConstraintSource>();
-                uniScaleConstraint.GetSources(sources);
+                var sources = GetConstraintSources(uniScaleConstraint);
                 foreach (var source in sources)
                 {
-                    // ignore any sources that are not getting exported
-                    FbxNode sourceNode;
-                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
-                    {
-                        continue;
-                    }
-                    scaleConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
+                    scaleConstraint.AddConstraintSource(source.node, source.weight);
                 }
                 ExportCommonConstraintProperties(uniScaleConstraint, scaleConstraint, fbxNode);
 
@@ -1565,17 +1574,10 @@ namespace FbxExporters
 
                 FbxConstraintAim aimConstraint = FbxConstraintAim.Create(fbxScene, fbxNode.GetName() + "_aimConstraint");
                 aimConstraint.SetConstrainedObject(fbxNode);
-                var sources = new List<ConstraintSource>();
-                uniAimConstraint.GetSources(sources);
+                var sources = GetConstraintSources(uniAimConstraint);
                 foreach (var source in sources)
                 {
-                    // ignore any sources that are not getting exported
-                    FbxNode sourceNode;
-                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
-                    {
-                        continue;
-                    }
-                    aimConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
+                    aimConstraint.AddConstraintSource(source.node, source.weight);
                 }
                 ExportCommonConstraintProperties(uniAimConstraint, aimConstraint, fbxNode);
 
@@ -1640,31 +1642,23 @@ namespace FbxExporters
 
                 FbxConstraintParent parentConstraint = FbxConstraintParent.Create(fbxScene, fbxNode.GetName() + "_parentConstraint");
                 parentConstraint.SetConstrainedObject(fbxNode);
-                var sources = new List<ConstraintSource>();
+                var sources = GetConstraintSources(uniParentConstraint);
                 var translationOffsets = uniParentConstraint.translationOffsets;
                 var rotationOffsets = uniParentConstraint.rotationOffsets;
-                uniParentConstraint.GetSources(sources);
                 for(int i = 0; i < sources.Count; i++)
                 {
                     var source = sources[i];
                     var translationOffset = translationOffsets[i];
                     var rotationOffset = rotationOffsets[i];
 
-                    // ignore any sources that are not getting exported
-                    FbxNode sourceNode;
-                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
-                    {
-                        continue;
-                    }
-                    parentConstraint.AddConstraintSource(sourceNode, source.weight * UnitScaleFactor);
+                    parentConstraint.AddConstraintSource(source.node, source.weight);
                     
                     var fbxTranslationOffset = ConvertToRightHanded(translationOffset, UnitScaleFactor);
-                    parentConstraint.SetTranslationOffset(sourceNode, fbxTranslationOffset);
+                    parentConstraint.SetTranslationOffset(source.node, fbxTranslationOffset);
 
                     var rotationQuat = Quaternion.Euler(rotationOffset);
                     var fbxRotationOffset = ConvertQuaternionToXYZEuler(rotationQuat);
-                    parentConstraint.SetRotationOffset(sourceNode, new FbxVector4(fbxRotationOffset));
-
+                    parentConstraint.SetRotationOffset(source.node, new FbxVector4(fbxRotationOffset));
                 }
                 ExportCommonConstraintProperties(uniParentConstraint, parentConstraint, fbxNode);
 
@@ -1710,7 +1704,7 @@ namespace FbxExporters
                     }
                     else
                     {
-                        throw new System.NotImplementedException();
+                        throw new System.NotImplementedException(constraintType.Name);
                     }
                 }
 
@@ -1856,14 +1850,15 @@ namespace FbxExporters
                     case FbxConstraint.EType.eScale:
                         return typeof(ScaleConstraint);
                     default:
-                        throw new System.NotImplementedException();
+                        throw new System.NotImplementedException(fbxConstraintType.ToString());
                 }
             }
 
             protected FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType)
             {
-                FbxProperty fbxProperty = null;
                 // check if property maps to a constraint
+                // check this first because both constraints and FbxNodes can contain a RotationOffset property,
+                // but only the constraint one is animatable.
                 if(uniPropertyType.GetInterfaces().Contains(typeof(IConstraint)))
                 {
                     List<FbxConstraint> constraints;
@@ -1879,25 +1874,23 @@ namespace FbxExporters
                             var temp = constraint.FindProperty(fbxPropertyName, false);
                             if (temp.IsValid())
                             {
-                                fbxProperty = temp;
-                                break;
+                                return temp;
                             }
                         }
                     }
                 }
-
-                if (fbxProperty == null || !fbxProperty.IsValid())
+                
+                // map unity property name to fbx property
+                var fbxProperty = fbxNode.FindProperty(fbxPropertyName, false);
+                if (fbxProperty.IsValid())
                 {
-                    // map unity property name to fbx property
-                    fbxProperty = fbxNode.FindProperty(fbxPropertyName, false);
-                    if (!fbxProperty.IsValid())
-                    {
-                        var fbxNodeAttribute = fbxNode.GetNodeAttribute();
-                        if (fbxNodeAttribute != null)
-                        {
-                            fbxProperty = fbxNodeAttribute.FindProperty(fbxPropertyName, false);
-                        }
-                    }
+                    return fbxProperty;
+                }
+
+                var fbxNodeAttribute = fbxNode.GetNodeAttribute();
+                if (fbxNodeAttribute != null)
+                {
+                    fbxProperty = fbxNodeAttribute.FindProperty(fbxPropertyName, false);
                 }
                 return fbxProperty;
             }
