@@ -2236,7 +2236,7 @@ namespace FbxExporters
                         }
 
                         // simple property (e.g. intensity), export right away
-                        ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
+                        ExportAnimationCurve (fbxNode, uniAnimCurve, uniAnimClip.frameRate, 
                             propertyName, uniCurve.propertyType,
                             fbxScene, 
                             fbxAnimLayer);
