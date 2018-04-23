@@ -1860,12 +1860,51 @@ namespace FbxExporters
                 }
             }
 
+            protected FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType)
+            {
+                // map unity property name to fbx property
+                var fbxProperty = fbxNode.FindProperty(fbxPropertyName, false);
+                if (!fbxProperty.IsValid())
+                {
+                    var fbxNodeAttribute = fbxNode.GetNodeAttribute();
+                    if (fbxNodeAttribute != null)
+                    {
+                        fbxProperty = fbxNodeAttribute.FindProperty(fbxPropertyName, false);
+                    }
+
+                    // try mapping to constraint
+                    if (!fbxProperty.IsValid())
+                    {
+                        List<FbxConstraint> constraints;
+                        if (MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraints))
+                        {
+                            foreach (var constraint in constraints)
+                            {
+                                if (uniPropertyType != FbxToUnityConstraintType(constraint.GetConstraintType()))
+                                {
+                                    continue;
+                                }
+
+                                var temp = constraint.FindProperty(fbxPropertyName, false);
+                                if (temp.IsValid())
+                                {
+                                    fbxProperty = temp;
+                                    Debug.Log(fbxNode.GetName() + ": " + constraint.GetName() + ": " + temp.GetName());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                return fbxProperty;
+            }
+
             /// <summary>
             /// Export an AnimationCurve.
             /// NOTE: This is not used for rotations, because we need to convert from
             /// quaternion to euler and various other stuff.
             /// </summary>
-            protected void ExportAnimationCurve (UnityEngine.Object uniObj,
+            protected void ExportAnimationCurve (FbxNode fbxNode,
                                                  AnimationCurve uniAnimCurve,
                                                  float frameRate,
                                                  string uniPropertyName,
@@ -1874,7 +1913,7 @@ namespace FbxExporters
                                                  FbxAnimLayer fbxAnimLayer)
             {
                 if (Verbose) {
-                    Debug.Log ("Exporting animation for " + uniObj.ToString() + " (" + uniPropertyName + ")");
+                    Debug.Log ("Exporting animation for " + fbxNode.GetName() + " (" + uniPropertyName + ")");
                 }
 
                 FbxPropertyChannelPair[] fbxPropertyChannelPairs;
@@ -1883,50 +1922,9 @@ namespace FbxExporters
                     return;
                 }
 
-                GameObject unityGo = GetGameObject (uniObj);
-                if (unityGo == null) {
-                    Debug.LogError (string.Format ("cannot find gameobject for {0}", uniObj.ToString()));
-                    return;
-                }
-
-                FbxNode fbxNode;
-                if (!MapUnityObjectToFbxNode.TryGetValue(unityGo, out fbxNode))
-                {
-                    Debug.LogError(string.Format("no fbx node for {0}", unityGo.ToString()));
-                    return;
-                }
-
                 foreach (var fbxPropertyChannelPair in fbxPropertyChannelPairs) {
                     // map unity property name to fbx property
-                    var fbxProperty = fbxNode.FindProperty (fbxPropertyChannelPair.Property, false);
-                    if (!fbxProperty.IsValid ()) {
-                        var fbxNodeAttribute = fbxNode.GetNodeAttribute ();
-                        if (fbxNodeAttribute != null) {
-                            fbxProperty = fbxNodeAttribute.FindProperty (fbxPropertyChannelPair.Property, false);
-                        }
-
-                        // try mapping to constraint
-                        if (!fbxProperty.IsValid())
-                        {
-                            List<FbxConstraint> constraints;
-                            if (MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraints))
-                            {
-                                foreach(var constraint in constraints) {
-                                    if(uniPropertyType != FbxToUnityConstraintType(constraint.GetConstraintType()))
-                                    {
-                                        continue;
-                                    }
-                                    
-                                    var temp = constraint.FindProperty(fbxPropertyChannelPair.Property, false);
-                                    if (temp.IsValid())
-                                    {
-                                        fbxProperty = temp;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    var fbxProperty = GetFbxProperty(fbxNode, fbxPropertyChannelPair.Property, uniPropertyType);
                     if (!fbxProperty.IsValid ()) {
                         Debug.LogError (string.Format ("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
                         return;
@@ -2003,7 +2001,6 @@ namespace FbxExporters
                         { "m_UpVector", "UpVector" },
                         { "m_WorldUpVector", "WorldUpVector" },
                         { "m_TranslationOffset", "Translation" },
-                        { "m_RotationOffset", "Rotation" },
                         { "m_ScaleOffset", "Scaling" }
                     };
                 private static Dictionary<string, string> TransformChannels = new Dictionary<string, string>()
@@ -2045,7 +2042,7 @@ namespace FbxExporters
                         {
                             var uniChannel = entry.Key;
                             var fbxChannel = entry.Value;
-                            if (uniPropertyName.StartsWith(string.Format(propFormat, uniName, uniChannel), ct))
+                            if (uniPropertyName.EndsWith(string.Format(propFormat, uniName, uniChannel), ct))
                             {
                                 channelPairs = new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, fbxChannel) };
                                 return true;
@@ -2137,19 +2134,6 @@ namespace FbxExporters
 
                 fbxAnimStack.SetLocalTimeSpan (new FbxTimeSpan (fbxStartTime, fbxStopTime));
 
-                /* The major difficulty: Unity uses quaternions for rotation
-                 * (which is how it should be) but FBX uses Euler angles. So we
-                 * need to gather up the list of transform curves per object.
-                 * 
-                 * For euler angles, Unity uses ZXY rotation order while Maya uses XYZ.
-                 * Maya doesn't import files with ZXY rotation correctly, so have to convert to XYZ.
-                 * Need all 3 curves in order to convert.
-                 * 
-                 * Also, in both cases, prerotation has to be removed from the animated rotation if
-                 * there are bones being exported.
-                 */
-                var rotations = new Dictionary<GameObject, RotationCurve> ();
-
                 var unityCurves = new Dictionary<GameObject, List<UnityCurve>> ();
 
                 // extract and store all necessary information from the curve bindings, namely the animation curves
@@ -2204,6 +2188,19 @@ namespace FbxExporters
                     }
                 }
 
+                /* The major difficulty: Unity uses quaternions for rotation
+                 * (which is how it should be) but FBX uses Euler angles. So we
+                 * need to gather up the list of transform curves per object.
+                 * 
+                 * For euler angles, Unity uses ZXY rotation order while Maya uses XYZ.
+                 * Maya doesn't import files with ZXY rotation correctly, so have to convert to XYZ.
+                 * Need all 3 curves in order to convert.
+                 * 
+                 * Also, in both cases, prerotation has to be removed from the animated rotation if
+                 * there are bones being exported.
+                 */
+                var rotations = new Dictionary<GameObject, RotationCurve>();
+
                 // export the animation curves for each GameObject that has animation
                 foreach (var kvp in unityCurves) {
                     var uniGO = kvp.Key;
@@ -2214,6 +2211,13 @@ namespace FbxExporters
                         // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
                         if (!ExportOptions.AnimateSkinnedMesh && (uniGO.GetComponent<SkinnedMeshRenderer> () != null)) {
                             continue;    
+                        }
+
+                        FbxNode fbxNode;
+                        if (!MapUnityObjectToFbxNode.TryGetValue(uniGO, out fbxNode))
+                        {
+                            Debug.LogError(string.Format("no FbxNode found for {0}", uniGO.name));
+                            continue;
                         }
 
                         int index = QuaternionCurve.GetQuaternionIndex (propertyName);
