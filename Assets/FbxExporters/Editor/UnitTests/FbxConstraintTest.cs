@@ -8,6 +8,114 @@ namespace FbxExporters.UnitTests
 {
     public class FbxConstraintTest : ExporterTestBase
     {
+        /// <summary>
+        /// Create and begin setting up constraint of type T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="toExport"></param>
+        /// <returns></returns>
+        protected T CreateConstraint<T>(out List<Object> toExport) where T : Component, IConstraint
+        {
+            // setup constrained object and sources
+            var constrainedGO = new GameObject("constrained");
+            var sourceGO = new GameObject("source");
+
+            toExport = new List<Object>();
+            toExport.Add(constrainedGO);
+            toExport.Add(sourceGO);
+
+            sourceGO.transform.localPosition = new Vector3(1, 2, 3);
+            sourceGO.transform.localRotation = Quaternion.Euler(20, 45, 90);
+            sourceGO.transform.localScale = new Vector3(1, 1.5f, 2);
+
+            var uniConstraint = SetupConstraintWithSources<T>(constrainedGO, new List<GameObject>() { sourceGO });
+
+            uniConstraint.constraintActive = true;
+            uniConstraint.locked = false;
+            uniConstraint.weight = 0.75f;
+
+            return uniConstraint;
+        }
+
+        /// <summary>
+        /// Export constraint of type T and check some of its properties on import.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="uniConstraint"></param>
+        /// <param name="toExport"></param>
+        /// <returns>The imported constraint</returns>
+        protected T ExportAndCheckConstraint<T>(T uniConstraint, Object[] toExport) where T : Component, IConstraint
+        {
+            // export and compare
+            var exportedGO = ExportConstraints(toExport);
+
+            // get exported constraint
+            var expConstraint = exportedGO.GetComponentInChildren<T>();
+            Assert.That(expConstraint, Is.Not.Null);
+
+            TestSourcesMatch(uniConstraint, expConstraint);
+
+            Assert.That(expConstraint.constraintActive, Is.EqualTo(uniConstraint.constraintActive));
+            Assert.That(expConstraint.locked, Is.EqualTo(true)); // locked always imports as true
+            Assert.That(expConstraint.weight, Is.EqualTo(uniConstraint.weight).Within(0.0001f));
+
+            return expConstraint;
+        }
+        
+        [Test]
+        public void TestPositionConstraintExport()
+        {
+            List<Object> toExport;
+            var posConstraint = CreateConstraint<PositionConstraint>(out toExport);
+
+            // setup position specific properties
+            posConstraint.translationAtRest = new Vector3(0.5f, 0.5f, 0.5f);
+            posConstraint.translationAxis = Axis.X | Axis.Z;
+            posConstraint.translationOffset = new Vector3(0.25f, 0.5f, 0.75f);
+
+            var expConstraint = ExportAndCheckConstraint(posConstraint, toExport.ToArray());
+
+            Assert.That(expConstraint.translationAtRest, Is.EqualTo(posConstraint.translationAtRest));
+            Assert.That(expConstraint.translationAxis, Is.EqualTo(posConstraint.translationAxis));
+            Assert.That(expConstraint.translationOffset, Is.EqualTo(posConstraint.translationOffset));
+        }
+
+        [Test]
+        public void TestRotationConstraint()
+        {
+            List<Object> toExport;
+            var rotConstraint = CreateConstraint<RotationConstraint>(out toExport);
+
+            // setup rotation specific properties
+            rotConstraint.rotationAtRest = new Vector3(30, 20, 10);
+            rotConstraint.rotationOffset = new Vector3(45, 60, 180);
+            rotConstraint.rotationAxis = Axis.Y;
+
+            var expConstraint = ExportAndCheckConstraint(rotConstraint, toExport.ToArray());
+
+            Assert.That(AreEqual(expConstraint.rotationAtRest, rotConstraint.rotationAtRest, 0.001), Is.True);
+            Assert.That(expConstraint.rotationAxis, Is.EqualTo(rotConstraint.rotationAxis));
+            Assert.That(expConstraint.rotationOffset, Is.EqualTo(rotConstraint.rotationOffset));
+        }
+
+        [Test]
+        public void TestScaleConstraint()
+        {
+            // setup constrained object and sources
+            List<Object> toExport;
+            var scaleConstraint = CreateConstraint<ScaleConstraint>(out toExport);
+
+            scaleConstraint.scaleAtRest = new Vector3(2, 2, 2);
+            scaleConstraint.scaleOffset = new Vector3(1, 0.3f, 0.7f);
+            scaleConstraint.scalingAxis = Axis.X | Axis.Y | Axis.Z;
+
+            // export and compare
+            var expConstraint = ExportAndCheckConstraint(scaleConstraint, toExport.ToArray());
+
+            Assert.That(expConstraint.scalingAxis, Is.EqualTo(scaleConstraint.scalingAxis));
+            Assert.That(expConstraint.scaleAtRest, Is.EqualTo(scaleConstraint.scaleAtRest));
+            Assert.That(expConstraint.scaleOffset, Is.EqualTo(scaleConstraint.scaleOffset));
+        }
 
         [Test]
         public void TestParentConstraintExport()
@@ -21,111 +129,6 @@ namespace FbxExporters.UnitTests
 
         }
 
-        [Test]
-        public void TestPositionConstraintExport()
-        {
-            // setup constrained object and sources
-            var constrainedGO = new GameObject("constrained");
-            var sourceGO = new GameObject("source");
-            var sourceGO2 = new GameObject("source2");
-
-            sourceGO.transform.localPosition = new Vector3(1, 2, 3);
-            sourceGO2.transform.localPosition = new Vector3(4, 5, 6);
-
-            var posConstraint = SetupConstraintWithSources<PositionConstraint>(constrainedGO, new List<GameObject>() { sourceGO, sourceGO2 });
-
-            posConstraint.constraintActive = true;
-            posConstraint.locked = true;
-            posConstraint.translationAtRest = new Vector3(0.5f, 0.5f, 0.5f);
-            posConstraint.translationAxis = Axis.X | Axis.Z;
-            posConstraint.translationOffset = new Vector3(0.25f, 0.5f, 0.75f);
-            posConstraint.weight = 0.8f;
-
-            // export and compare
-            var exportedGO = ExportConstraints( new Object[] { constrainedGO, sourceGO, sourceGO2 });
-
-            // get exported constraint
-            var expConstraint = exportedGO.GetComponentInChildren<PositionConstraint>();
-            Assert.That(expConstraint, Is.Not.Null);
-
-            TestSourcesMatch(posConstraint, expConstraint);
-
-            Assert.That(expConstraint.constraintActive, Is.EqualTo(posConstraint.constraintActive));
-            Assert.That(expConstraint.locked, Is.EqualTo(true)); // locked always imports as true
-            Assert.That(expConstraint.translationAtRest, Is.EqualTo(posConstraint.translationAtRest));
-            Assert.That(expConstraint.translationAxis, Is.EqualTo(posConstraint.translationAxis));
-            Assert.That(expConstraint.translationOffset, Is.EqualTo(posConstraint.translationOffset));
-            Assert.That(expConstraint.weight, Is.EqualTo(posConstraint.weight).Within(0.0001f));
-        }
-
-        [Test]
-        public void TestRotationConstraint()
-        {
-            // setup constrained object and sources
-            var constrainedGO = new GameObject("constrained");
-            var sourceGO = new GameObject("source");
-
-            sourceGO.transform.localRotation = Quaternion.Euler(20, 45, 90);
-
-            var rotConstraint = SetupConstraintWithSources<RotationConstraint>(constrainedGO, new List<GameObject>() { sourceGO });
-
-            rotConstraint.constraintActive = true;
-            rotConstraint.locked = false;
-            rotConstraint.rotationAtRest = new Vector3(30, 20, 10);
-            rotConstraint.rotationAxis = Axis.Y;
-            rotConstraint.weight = 0.4f;
-
-            // export and compare
-            var exportedGO = ExportConstraints(new Object[] { constrainedGO, sourceGO });
-
-            // get exported constraint
-            var expConstraint = exportedGO.GetComponentInChildren<RotationConstraint>();
-            Assert.That(expConstraint, Is.Not.Null);
-
-            TestSourcesMatch(rotConstraint, expConstraint);
-
-            Assert.That(expConstraint.constraintActive, Is.EqualTo(rotConstraint.constraintActive));
-            Assert.That(expConstraint.locked, Is.EqualTo(true)); // locked always imports as true
-            Assert.That(AreEqual(expConstraint.rotationAtRest, rotConstraint.rotationAtRest, 0.001), Is.True);
-            Assert.That(expConstraint.rotationAxis, Is.EqualTo(rotConstraint.rotationAxis));
-            Assert.That(expConstraint.rotationOffset, Is.EqualTo(rotConstraint.rotationOffset));
-            Assert.That(expConstraint.weight, Is.EqualTo(rotConstraint.weight).Within(0.0001f));
-        }
-
-        [Test]
-        public void TestScaleConstraint()
-        {
-            // setup constrained object and sources
-            var constrainedGO = new GameObject("constrained");
-            var sourceGO = new GameObject("source");
-
-            sourceGO.transform.localScale = new Vector3(1, 1.5f, 2);
-
-            var scaleConstraint = SetupConstraintWithSources<ScaleConstraint>(constrainedGO, new List<GameObject>() { sourceGO });
-
-            scaleConstraint.constraintActive = false;
-            scaleConstraint.locked = true;
-            scaleConstraint.weight = 1f;
-            scaleConstraint.scaleAtRest = new Vector3(2, 2, 2);
-            scaleConstraint.scaleOffset = new Vector3(1, 0.3f, 0.7f);
-            scaleConstraint.scalingAxis = Axis.X | Axis.Y | Axis.Z;
-
-            // export and compare
-            var exportedGO = ExportConstraints(new Object[] { constrainedGO, sourceGO });
-
-            // get exported constraint
-            var expConstraint = exportedGO.GetComponentInChildren<ScaleConstraint>();
-            Assert.That(expConstraint, Is.Not.Null);
-
-            TestSourcesMatch(scaleConstraint, expConstraint);
-
-            Assert.That(expConstraint.constraintActive, Is.EqualTo(scaleConstraint.constraintActive));
-            Assert.That(expConstraint.locked, Is.EqualTo(true)); // locked always imports as true
-            Assert.That(expConstraint.weight, Is.EqualTo(scaleConstraint.weight).Within(0.0001f));
-            Assert.That(expConstraint.scalingAxis, Is.EqualTo(scaleConstraint.scalingAxis));
-            Assert.That(expConstraint.scaleAtRest, Is.EqualTo(scaleConstraint.scaleAtRest));
-            Assert.That(expConstraint.scaleOffset, Is.EqualTo(scaleConstraint.scaleOffset));
-        }
 
         public bool AreEqual(Vector3 a, Vector3 b, double epsilon = 0.0001)
         {
