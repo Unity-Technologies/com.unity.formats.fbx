@@ -32,22 +32,7 @@ namespace FbxExporters.UnitTests
             sourceGO.transform.localPosition = new Vector3(1, 2, 3);
             sourceGO2.transform.localPosition = new Vector3(4, 5, 6);
 
-            var posConstraint = constrainedGO.AddComponent<PositionConstraint>();
-            Assert.That(posConstraint, Is.Not.Null);
-
-            var cSource1 = new ConstraintSource();
-            cSource1.sourceTransform = sourceGO.transform;
-            cSource1.weight = 0.5f;
-
-            var cSource2 = new ConstraintSource();
-            cSource2.sourceTransform = sourceGO2.transform;
-            cSource2.weight = 0.37f;
-
-            int index = posConstraint.AddSource(cSource1);
-            Assert.That(index, Is.EqualTo(0));
-            index = posConstraint.AddSource(cSource2);
-            Assert.That(index, Is.EqualTo(1));
-            Assert.That(posConstraint.sourceCount, Is.EqualTo(2));
+            var posConstraint = SetupConstraintWithSources<PositionConstraint>(constrainedGO, new List<GameObject>() { sourceGO, sourceGO2 });
 
             posConstraint.constraintActive = true;
             posConstraint.locked = true;
@@ -57,9 +42,7 @@ namespace FbxExporters.UnitTests
             posConstraint.weight = 0.8f;
 
             // export and compare
-            var filename = GetRandomFileNamePath();
-            var exportedGO = ExportSelection(filename, new Object[] { constrainedGO, sourceGO, sourceGO2 });
-            ImportConstraints(filename);
+            var exportedGO = ExportConstraints( new Object[] { constrainedGO, sourceGO, sourceGO2 });
 
             // get exported constraint
             var expConstraint = exportedGO.GetComponentInChildren<PositionConstraint>();
@@ -68,11 +51,83 @@ namespace FbxExporters.UnitTests
             TestSourcesMatch(posConstraint, expConstraint);
 
             Assert.That(expConstraint.constraintActive, Is.EqualTo(posConstraint.constraintActive));
-            Assert.That(expConstraint.locked, Is.EqualTo(posConstraint.locked));
+            Assert.That(expConstraint.locked, Is.EqualTo(true)); // locked always imports as true
             Assert.That(expConstraint.translationAtRest, Is.EqualTo(posConstraint.translationAtRest));
             Assert.That(expConstraint.translationAxis, Is.EqualTo(posConstraint.translationAxis));
             Assert.That(expConstraint.translationOffset, Is.EqualTo(posConstraint.translationOffset));
             Assert.That(expConstraint.weight, Is.EqualTo(posConstraint.weight).Within(0.0001f));
+        }
+
+        [Test]
+        public void TestRotationConstraint()
+        {
+            // setup constrained object and sources
+            var constrainedGO = new GameObject("constrained");
+            var sourceGO = new GameObject("source");
+
+            sourceGO.transform.localRotation = Quaternion.Euler(20, 45, 90);
+
+            var rotConstraint = SetupConstraintWithSources<RotationConstraint>(constrainedGO, new List<GameObject>() { sourceGO });
+
+            rotConstraint.constraintActive = true;
+            rotConstraint.locked = false;
+            rotConstraint.rotationAtRest = new Vector3(30, 20, 10);
+            rotConstraint.rotationAxis = Axis.Y;
+            rotConstraint.weight = 0.4f;
+
+            // export and compare
+            var exportedGO = ExportConstraints(new Object[] { constrainedGO, sourceGO });
+
+            // get exported constraint
+            var expConstraint = exportedGO.GetComponentInChildren<RotationConstraint>();
+            Assert.That(expConstraint, Is.Not.Null);
+
+            TestSourcesMatch(rotConstraint, expConstraint);
+
+            Assert.That(expConstraint.constraintActive, Is.EqualTo(rotConstraint.constraintActive));
+            Assert.That(expConstraint.locked, Is.EqualTo(true)); // locked always imports as true
+            Assert.That(AreEqual(expConstraint.rotationAtRest, rotConstraint.rotationAtRest, 0.001), Is.True);
+            Assert.That(expConstraint.rotationAxis, Is.EqualTo(rotConstraint.rotationAxis));
+            Assert.That(expConstraint.rotationOffset, Is.EqualTo(rotConstraint.rotationOffset));
+            Assert.That(expConstraint.weight, Is.EqualTo(rotConstraint.weight).Within(0.0001f));
+        }
+
+        [Test]
+        public void TestScaleConstraint()
+        {
+
+        }
+
+        public bool AreEqual(Vector3 a, Vector3 b, double epsilon = 0.0001)
+        {
+            return Vector3.SqrMagnitude(a - b) < epsilon;
+        }
+
+        /// <summary>
+        /// Setup the constraint component on the constrained object with the given sources.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="constrained"></param>
+        /// <param name="sources"></param>
+        /// <returns></returns>
+        protected T SetupConstraintWithSources<T>(GameObject constrained, List<GameObject> sources) where T : Component, IConstraint
+        {
+            var constraint = constrained.AddComponent<T>();
+            Assert.That(constraint, Is.Not.Null);
+
+            int sourceCount = sources.Count;
+            for(int i = 0;  i < sourceCount; i++)
+            {
+                var source = sources[i];
+                var cSource = new ConstraintSource();
+                cSource.sourceTransform = source.transform;
+                cSource.weight = i / ((float)sourceCount);
+
+                int index = constraint.AddSource(cSource);
+                Assert.That(index, Is.EqualTo(i));
+            }
+            Assert.That(constraint.sourceCount, Is.EqualTo(sourceCount));
+            return constraint;
         }
 
         protected void TestSourcesMatch(IConstraint original, IConstraint exported)
@@ -93,6 +148,14 @@ namespace FbxExporters.UnitTests
                 Assert.That(expSource.sourceTransform, Is.EqualTo(origSource.sourceTransform));
                 Assert.That(expSource.weight, Is.EqualTo(origSource.weight));
             }
+        }
+
+        protected GameObject ExportConstraints(Object[] toExport)
+        {
+            var filename = GetRandomFileNamePath();
+            var exportedGO = ExportSelection(filename, toExport);
+            ImportConstraints(filename);
+            return exportedGO;
         }
 
         protected void ImportConstraints(string filename)
