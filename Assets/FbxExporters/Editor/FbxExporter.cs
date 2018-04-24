@@ -1854,32 +1854,55 @@ namespace FbxExporters
                 }
             }
 
+            /// <summary>
+            /// Get the FbxConstraint associated with the constrained node.
+            /// </summary>
+            /// <param name="constrainedNode"></param>
+            /// <param name="uniConstraintType"></param>
+            /// <returns></returns>
+            protected FbxConstraint GetFbxConstraint(FbxNode constrainedNode, System.Type uniConstraintType)
+            {
+                if (!uniConstraintType.GetInterfaces().Contains(typeof(IConstraint)))
+                {
+                    // not actually a constraint
+                    return null;
+                }
+
+                List<FbxConstraint> constraints;
+                if (!MapConstrainedObjectToConstraints.TryGetValue(constrainedNode, out constraints))
+                {
+                    return null;
+                }
+
+
+                foreach (var constraint in constraints)
+                {
+                    if (uniConstraintType != FbxToUnityConstraintType(constraint.GetConstraintType()))
+                    {
+                        continue;
+                    }
+
+                    return constraint;
+                }
+
+                return null;
+            }
+
             protected FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType)
             {
                 // check if property maps to a constraint
                 // check this first because both constraints and FbxNodes can contain a RotationOffset property,
                 // but only the constraint one is animatable.
-                if(uniPropertyType.GetInterfaces().Contains(typeof(IConstraint)))
+                var fbxConstraint = GetFbxConstraint(fbxNode, uniPropertyType);
+                if(fbxConstraint != null)
                 {
-                    List<FbxConstraint> constraints;
-                    if (MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraints))
+                    var prop = fbxConstraint.FindProperty(fbxPropertyName, false);
+                    if (prop.IsValid())
                     {
-                        foreach (var constraint in constraints)
-                        {
-                            if (uniPropertyType != FbxToUnityConstraintType(constraint.GetConstraintType()))
-                            {
-                                continue;
-                            }
-
-                            var temp = constraint.FindProperty(fbxPropertyName, false);
-                            if (temp.IsValid())
-                            {
-                                return temp;
-                            }
-                        }
+                        return prop;
                     }
                 }
-                
+
                 // map unity property name to fbx property
                 var fbxProperty = fbxNode.FindProperty(fbxPropertyName, false);
                 if (fbxProperty.IsValid())
@@ -1912,9 +1935,10 @@ namespace FbxExporters
                     Debug.Log ("Exporting animation for " + fbxNode.GetName() + " (" + uniPropertyName + ")");
                 }
 
+                var fbxConstraint = GetFbxConstraint(fbxNode, uniPropertyType);
                 FbxPropertyChannelPair[] fbxPropertyChannelPairs;
-                if (!FbxPropertyChannelPair.TryGetValue (uniPropertyName, out fbxPropertyChannelPairs)) {
-                    Debug.LogWarning (string.Format ("no mapping from Unity '{0}' to fbx property", uniPropertyName));
+                if (!FbxPropertyChannelPair.TryGetValue (uniPropertyName, out fbxPropertyChannelPairs, fbxConstraint)) {
+                    Debug.LogWarning(string.Format("no mapping from Unity '{0}' to fbx property", uniPropertyName));
                     return;
                 }
 
@@ -1988,39 +2012,39 @@ namespace FbxExporters
                 public string Property { get; private set; }
                 public string Channel { get; private set; }
                 private static Dictionary<string, string> TransformProperties = new Dictionary<string, string>()
-                    {
-                        { "m_LocalScale", "Lcl Scaling" },
-                        { "S", "Lcl Scaling" },
-                        { "m_LocalPosition", "Lcl Translation" },
-                        { "T", "Lcl Translation" },
-                        { "m_AimVector", "AimVector" },
-                        { "m_UpVector", "UpVector" },
-                        { "m_WorldUpVector", "WorldUpVector" },
-                        { "m_TranslationOffset", "Translation" },
-                        { "m_ScaleOffset", "Scaling" }
-                    };
+                {
+                    { "m_LocalScale", "Lcl Scaling" },
+                    { "S", "Lcl Scaling" },
+                    { "m_LocalPosition", "Lcl Translation" },
+                    { "T", "Lcl Translation" }
+                };
                 private static Dictionary<string, string> TransformChannels = new Dictionary<string, string>()
-                    {
-                        { "x", Globals.FBXSDK_CURVENODE_COMPONENT_X },
-                        { "y", Globals.FBXSDK_CURVENODE_COMPONENT_Y },
-                        { "z", Globals.FBXSDK_CURVENODE_COMPONENT_Z }
-                    };
+                {
+                    { "x", Globals.FBXSDK_CURVENODE_COMPONENT_X },
+                    { "y", Globals.FBXSDK_CURVENODE_COMPONENT_Y },
+                    { "z", Globals.FBXSDK_CURVENODE_COMPONENT_Z }
+                };
                 private static Dictionary<string, string> ColorProperties = new Dictionary<string, string>()
-                    {
-                        { "m_Color", "Color" }
-                    };
+                {
+                    { "m_Color", "Color" }
+                };
                 private static Dictionary<string, string> ColorChannels = new Dictionary<string, string>()
-                    {
-                        { "b", Globals.FBXSDK_CURVENODE_COLOR_BLUE },
-                        { "g", Globals.FBXSDK_CURVENODE_COLOR_GREEN },
-                        { "r", Globals.FBXSDK_CURVENODE_COLOR_RED }
-                    };
+                {
+                    { "b", Globals.FBXSDK_CURVENODE_COLOR_BLUE },
+                    { "g", Globals.FBXSDK_CURVENODE_COLOR_GREEN },
+                    { "r", Globals.FBXSDK_CURVENODE_COLOR_RED }
+                };
                 private static Dictionary<string, string> OtherProperties = new Dictionary<string, string>()
-                    {
-                        { "m_Intensity", "Intensity" },
-                        { "field of view", "FieldOfView" },
-                        { "m_Weight", "Weight" }
-                    };
+                {
+                    { "m_Intensity", "Intensity" },
+                    { "field of view", "FieldOfView" },
+                    { "m_Weight", "Weight" }
+                };
+                private static Dictionary<string, string> ConstraintSourceProperties = new Dictionary<string, string>()
+                {
+                    { "m_Sources\\.Array\\.data\\[(\\d+)\\]\\.weight", "{0}.Weight" }
+                };
+
                 public FbxPropertyChannelPair(string p, string c) : this() {
                     Property = p;
                     Channel = c;
@@ -2048,11 +2072,33 @@ namespace FbxExporters
                     return false;
                 }
 
+                private static bool TryGetConstraintSourceChannelPairs(string uniPropertyName, FbxConstraint constraint, ref FbxPropertyChannelPair[] channelPairs)
+                {
+                    foreach (var prop in ConstraintSourceProperties)
+                    {
+                        var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, prop.Key);
+                        if (match.Success && match.Groups.Count > 0)
+                        {
+                            var matchedStr = match.Groups[1].Value;
+                            int index;
+                            if (!int.TryParse(matchedStr, out index))
+                            {
+                                continue;
+                            }
+                            var source = constraint.GetConstraintSource(index);
+                            var fbxName = string.Format(prop.Value, source.GetName());
+                            channelPairs = new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, null) };
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
                 /// <summary>
                 /// Map a Unity property name to the corresponding FBX property and
                 /// channel names.
                 /// </summary>
-                public static bool TryGetValue(string uniPropertyName, out FbxPropertyChannelPair[] prop)
+                public static bool TryGetValue(string uniPropertyName, out FbxPropertyChannelPair[] prop, FbxConstraint constraint = null)
                 {
                     System.StringComparison ct = System.StringComparison.CurrentCulture;
                     
@@ -2084,6 +2130,11 @@ namespace FbxExporters
                             new FbxPropertyChannelPair ("OuterAngle", null),
                             new FbxPropertyChannelPair ("InnerAngle", null)
                         };
+                        return true;
+                    }
+
+                    if(constraint != null && TryGetConstraintSourceChannelPairs(uniPropertyName, constraint, ref prop))
+                    {
                         return true;
                     }
 
