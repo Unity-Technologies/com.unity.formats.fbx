@@ -1986,7 +1986,7 @@ namespace FbxExporters
 
                     convertDistance |= partT;
                     convertDistance |= uniPropertyName.StartsWith ("m_Intensity", cc);
-                    convertDistance |= uniPropertyName.StartsWith("m_Weight", cc);
+                    convertDistance |= uniPropertyName.ToLower().EndsWith("weight", cc);
 
                     if (convertDistance) 
                         unitScaleFactor = ModelExporter.UnitScaleFactor;
