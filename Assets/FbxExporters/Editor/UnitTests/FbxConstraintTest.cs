@@ -95,7 +95,36 @@ namespace FbxExporters.UnitTests
         [Test]
         public void TestScaleConstraint()
         {
+            // setup constrained object and sources
+            var constrainedGO = new GameObject("constrained");
+            var sourceGO = new GameObject("source");
 
+            sourceGO.transform.localScale = new Vector3(1, 1.5f, 2);
+
+            var scaleConstraint = SetupConstraintWithSources<ScaleConstraint>(constrainedGO, new List<GameObject>() { sourceGO });
+
+            scaleConstraint.constraintActive = false;
+            scaleConstraint.locked = true;
+            scaleConstraint.weight = 1f;
+            scaleConstraint.scaleAtRest = new Vector3(2, 2, 2);
+            scaleConstraint.scaleOffset = new Vector3(1, 0.3f, 0.7f);
+            scaleConstraint.scalingAxis = Axis.X | Axis.Y | Axis.Z;
+
+            // export and compare
+            var exportedGO = ExportConstraints(new Object[] { constrainedGO, sourceGO });
+
+            // get exported constraint
+            var expConstraint = exportedGO.GetComponentInChildren<ScaleConstraint>();
+            Assert.That(expConstraint, Is.Not.Null);
+
+            TestSourcesMatch(scaleConstraint, expConstraint);
+
+            Assert.That(expConstraint.constraintActive, Is.EqualTo(scaleConstraint.constraintActive));
+            Assert.That(expConstraint.locked, Is.EqualTo(true)); // locked always imports as true
+            Assert.That(expConstraint.weight, Is.EqualTo(scaleConstraint.weight).Within(0.0001f));
+            Assert.That(expConstraint.scalingAxis, Is.EqualTo(scaleConstraint.scalingAxis));
+            Assert.That(expConstraint.scaleAtRest, Is.EqualTo(scaleConstraint.scaleAtRest));
+            Assert.That(expConstraint.scaleOffset, Is.EqualTo(scaleConstraint.scaleOffset));
         }
 
         public bool AreEqual(Vector3 a, Vector3 b, double epsilon = 0.0001)
