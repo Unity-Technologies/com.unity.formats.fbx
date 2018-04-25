@@ -747,7 +747,7 @@ namespace FbxExporters.UnitTests
             }
 
             KeyData keyData = new TransformKeyData { 
-                importSettings = new {resampleCurves = false, animationType= ModelImporterAnimationType.Legacy, animationCompression = ModelImporterAnimationCompression.Off},
+                importSettings = new {resampleCurves = false, animationType= ModelImporterAnimationType.Legacy, animationCompression = ModelImporterAnimationCompression.Off, importConstraints = true},
                 compareOriginalKeys=compareOriginalKeys, RotationType = rotCurveType, propertyNames = propertyNames, componentType = componentType, keyTimes = keyTimesInSeconds, keyEulerValues = keyEulerValues };
 
             var tester = new AnimTester {keyData=keyData, testName=testName, path=GetRandomFbxFilePath ()};
