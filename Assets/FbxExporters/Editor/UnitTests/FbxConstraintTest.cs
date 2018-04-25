@@ -1,11 +1,24 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Animations;
 
 namespace FbxExporters.UnitTests
 {
+    public class ConstraintAnimationTestDataClass
+    {
+        public static IEnumerable TestCases
+        {
+            get
+            {
+                yield return new TestCaseData(new float[] { 1f, 20f, 30f }, new float[] { 0f, 0.5f, 1f }, "m_Weight").Returns(1);
+                yield return new TestCaseData(new float[] { 2, 9, 33 },  new float[] { 0.1f, 0.67f, 0.2f }, "m_Sources.Array.data[0].weight").Returns(1);
+            }
+        }
+    }
+
     public class FbxConstraintTest : ExporterTestBase
     {
         /// <summary>
@@ -174,6 +187,35 @@ namespace FbxExporters.UnitTests
             Assert.That(expConstraint.worldUpVector, Is.EqualTo(aimConstraint.worldUpVector));
         }
 
+        [Test, TestCaseSource(typeof(ConstraintAnimationTestDataClass), "TestCases")]
+        public int TestWeightAnimation(float[] keyTimes, float[] keyValues, string propertyName)
+        {
+            var go = new GameObject("root");
+            var source = new GameObject("source");
+
+            source.transform.parent = go.transform;
+
+            var constraint = go.AddComponent<RotationConstraint>();
+            Assert.That(constraint, Is.Not.Null);
+
+            var cSource = new ConstraintSource();
+            cSource.sourceTransform = source.transform;
+
+            int index = constraint.AddSource(cSource);
+            Assert.That(index, Is.EqualTo(0));
+
+            var keyData = new FbxAnimationTest.PropertyKeyData
+            {
+                targetObject = go,
+                componentType = typeof(RotationConstraint),
+                propertyName = propertyName,
+                keyTimes = keyTimes,
+                keyFloatValues = keyValues
+            };
+            var tester = new FbxAnimationTest.AnimTester { keyData = keyData, testName = "ConstraintWeightAnim_" + propertyName, path = GetRandomFbxFilePath() };
+
+            return tester.DoIt();
+        }
 
         public bool AreEqual(Vector3 a, Vector3 b, double epsilon = 0.0001)
         {

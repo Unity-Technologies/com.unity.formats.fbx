@@ -347,9 +347,10 @@ namespace FbxExporters.UnitTests
                 if (customSettings==null)
                 {
                     customSettings = new {
-                        resampleCurves = false, 
-                        animationType= ModelImporterAnimationType.Legacy, 
-                        animationCompression = ModelImporterAnimationCompression.Off
+                        resampleCurves = false,
+                        animationType = ModelImporterAnimationType.Legacy,
+                        animationCompression = ModelImporterAnimationCompression.Off,
+                        importConstraints = true
                     };                 
                 }
 
@@ -358,6 +359,7 @@ namespace FbxExporters.UnitTests
                 AssetDatabase.ImportAsset (filename);
                 modelImporter.animationType = (ModelImporterAnimationType)customSettings.GetType().GetProperty("animationType").GetValue(customSettings,null);
                 modelImporter.animationCompression = (ModelImporterAnimationCompression)customSettings.GetType().GetProperty("animationCompression").GetValue(customSettings,null);
+                modelImporter.importConstraints = (bool)customSettings.GetType().GetProperty("importConstraints").GetValue(customSettings, null);
                 AssetDatabase.ImportAsset (filename);
             }
 
