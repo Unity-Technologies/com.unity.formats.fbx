@@ -217,6 +217,38 @@ namespace FbxExporters.UnitTests
             return tester.DoIt();
         }
 
+        [Test]
+        public void TestDontExportSource()
+        {
+            // test that no error occurs if a source is not exported
+            var constrained = new GameObject("constrained");
+            var source1 = new GameObject("source1");
+            var source2 = new GameObject("source2");
+            var source3 = new GameObject("source3");
+
+            var constraint = SetupConstraintWithSources<PositionConstraint>(constrained, new List<GameObject>() { source1, source2, source3 });
+
+            // don't export source2
+            var exportedGO = ExportConstraints(new Object[] { constrained, source1, source3 });
+
+            // get exported constraint
+            var expConstraint = exportedGO.GetComponentInChildren<PositionConstraint>();
+            Assert.That(expConstraint, Is.Not.Null);
+
+            var origSources = new List<ConstraintSource>();
+            constraint.GetSources(origSources);
+
+            var expSources = new List<ConstraintSource>();
+            expConstraint.GetSources(expSources);
+
+            Assert.That(expSources.Count, Is.EqualTo(origSources.Count-1));
+
+            Assert.That(expSources[0].sourceTransform, Is.EqualTo(origSources[0].sourceTransform));
+            Assert.That(expSources[0].weight, Is.EqualTo(origSources[0].weight));
+            Assert.That(expSources[1].sourceTransform, Is.EqualTo(origSources[2].sourceTransform));
+            Assert.That(expSources[1].weight, Is.EqualTo(origSources[2].weight));
+        }
+
         public bool AreEqual(Vector3 a, Vector3 b, double epsilon = 0.0001)
         {
             return Vector3.SqrMagnitude(a - b) < epsilon;
