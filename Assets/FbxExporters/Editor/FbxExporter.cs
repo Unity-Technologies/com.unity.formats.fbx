@@ -1620,13 +1620,13 @@ namespace FbxExporters
                         throw new System.NotImplementedException();
                 }
                 aimConstraint.WorldUpType.Set((int)worldUpType);
-
-                var aimVector = ConvertToRightHanded(uniAimConstraint.aimVector, UnitScaleFactor);
+                
+                var aimVector = ConvertToRightHanded(uniAimConstraint.aimVector);
                 aimConstraint.AimVector.Set(new FbxDouble3(aimVector.X, aimVector.Y, aimVector.Z));
-                var upVector = ConvertToRightHanded(uniAimConstraint.upVector, UnitScaleFactor);
-                aimConstraint.UpVector.Set(new FbxDouble3(upVector.X, upVector.Y, upVector.Z));
-                var worldUpVector = ConvertToRightHanded(uniAimConstraint.worldUpVector, UnitScaleFactor);
-                aimConstraint.WorldUpVector.Set(new FbxDouble3(worldUpVector.X, worldUpVector.Y, worldUpVector.Z));
+                var upVector = uniAimConstraint.upVector;
+                aimConstraint.UpVector.Set(new FbxDouble3(upVector.x, upVector.y, upVector.z));
+                var worldUpVector = uniAimConstraint.worldUpVector;
+                aimConstraint.WorldUpVector.Set(new FbxDouble3(worldUpVector.x, worldUpVector.y, worldUpVector.z));
 
                 if (uniAimConstraint.worldUpObject && MapUnityObjectToFbxNode.ContainsKey(uniAimConstraint.worldUpObject.gameObject))
                 {

@@ -145,7 +145,33 @@ namespace FbxExporters.UnitTests
         [Test]
         public void TestAimConstraintExport()
         {
+            List<Object> toExport;
+            var aimConstraint = CreateConstraint<AimConstraint>(out toExport);
 
+            GameObject worldUpObject = new GameObject("worldUpObject");
+            worldUpObject.transform.localEulerAngles = new Vector3(29, 190, 34);
+            toExport.Add(worldUpObject);
+
+            aimConstraint.aimVector = new Vector3(20, 170, 5);
+            aimConstraint.rotationAtRest = new Vector3(230, 29, 49);
+            aimConstraint.rotationAxis = Axis.X | Axis.Y | Axis.Z;
+            aimConstraint.rotationOffset = new Vector3(190, 120, 30);
+            aimConstraint.upVector = new Vector3(50, 280, 10);
+            aimConstraint.worldUpType = AimConstraint.WorldUpType.ObjectRotationUp;
+            aimConstraint.worldUpObject = worldUpObject.transform;
+            aimConstraint.worldUpVector = new Vector3(94, 38, 299);
+
+            // export and compare
+            var expConstraint = ExportAndCheckConstraint(aimConstraint, toExport.ToArray());
+            
+            Assert.That(expConstraint.aimVector, Is.EqualTo(aimConstraint.aimVector));
+            Assert.That(AreRotationEqual(expConstraint.rotationAtRest, aimConstraint.rotationAtRest), Is.True);
+            Assert.That(expConstraint.rotationAxis, Is.EqualTo(aimConstraint.rotationAxis));
+            Assert.That(AreRotationEqual(expConstraint.rotationOffset, aimConstraint.rotationOffset), Is.True);
+            Assert.That(expConstraint.upVector, Is.EqualTo(aimConstraint.upVector));
+            Assert.That(expConstraint.worldUpType, Is.EqualTo(aimConstraint.worldUpType));
+            Assert.That(expConstraint.worldUpObject.transform, Is.EqualTo(aimConstraint.worldUpObject.transform));
+            Assert.That(expConstraint.worldUpVector, Is.EqualTo(aimConstraint.worldUpVector));
         }
 
 
