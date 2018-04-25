@@ -93,9 +93,9 @@ namespace FbxExporters.UnitTests
 
             var expConstraint = ExportAndCheckConstraint(rotConstraint, toExport.ToArray());
 
-            Assert.That(AreEqual(expConstraint.rotationAtRest, rotConstraint.rotationAtRest, 0.001), Is.True);
+            Assert.That(AreRotationEqual(expConstraint.rotationAtRest, rotConstraint.rotationAtRest, 0.001), Is.True);
             Assert.That(expConstraint.rotationAxis, Is.EqualTo(rotConstraint.rotationAxis));
-            Assert.That(expConstraint.rotationOffset, Is.EqualTo(rotConstraint.rotationOffset));
+            Assert.That(AreRotationEqual(expConstraint.rotationOffset, rotConstraint.rotationOffset, 0.001), Is.True);
         }
 
         [Test]
@@ -120,7 +120,26 @@ namespace FbxExporters.UnitTests
         [Test]
         public void TestParentConstraintExport()
         {
+            List<Object> toExport;
+            var parentConstraint = CreateConstraint<ParentConstraint>(out toExport);
 
+            parentConstraint.rotationAtRest = new Vector3(50, 120, 34);
+            parentConstraint.rotationAxis = Axis.None;
+            parentConstraint.translationAtRest = new Vector3(5, 6, 7);
+            parentConstraint.translationAxis = Axis.X;
+
+            parentConstraint.SetTranslationOffset(0, new Vector3(10, 2.4f, 3));
+            parentConstraint.SetRotationOffset(0, new Vector3(80, 200, 19));
+
+            // export and compare
+            var expConstraint = ExportAndCheckConstraint(parentConstraint, toExport.ToArray());
+            
+            Assert.That(AreRotationEqual(expConstraint.rotationAtRest, parentConstraint.rotationAtRest, 0.001), Is.True);
+            Assert.That(expConstraint.rotationAxis, Is.EqualTo(parentConstraint.rotationAxis));
+            Assert.That(expConstraint.translationAtRest, Is.EqualTo(parentConstraint.translationAtRest));
+            Assert.That(expConstraint.translationAxis, Is.EqualTo(parentConstraint.translationAxis));
+            Assert.That(AreRotationEqual(expConstraint.GetRotationOffset(0), parentConstraint.GetRotationOffset(0)), Is.True);
+            Assert.That(expConstraint.GetTranslationOffset(0), Is.EqualTo(parentConstraint.GetTranslationOffset(0)));
         }
 
         [Test]
@@ -133,6 +152,16 @@ namespace FbxExporters.UnitTests
         public bool AreEqual(Vector3 a, Vector3 b, double epsilon = 0.0001)
         {
             return Vector3.SqrMagnitude(a - b) < epsilon;
+        }
+
+        public bool AreRotationEqual(Vector3 a, Vector3 b, double epsilon = 0.0001)
+        {
+            Quaternion c = Quaternion.Euler(a.x, a.y, a.z);
+            Quaternion d = Quaternion.Euler(b.x, b.y, b.z);
+
+            float angle = Quaternion.Angle(c,d);
+
+            return Mathf.Abs(angle) < epsilon;
         }
 
         /// <summary>
