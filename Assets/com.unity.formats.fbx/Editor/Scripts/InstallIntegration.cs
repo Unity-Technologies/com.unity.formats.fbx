@@ -95,7 +95,7 @@ namespace FbxExporters.Editor
         private string MODULE_TEMPLATE_PATH { get { return "Integrations/Autodesk/maya/" + MODULE_FILENAME + ".txt"; } }
         private string MODULE_FILENAME { get { return "UnityFbxForMaya"; } }
 
-        private const string PACKAGE_NAME = "FbxExporters";
+        private const string PACKAGE_NAME = "com.unity.formats.fbx";
         private const string VERSION_FILENAME = "README.txt";
         private const string VERSION_FIELD = "VERSION";
         private const string VERSION_TAG = "{Version}";

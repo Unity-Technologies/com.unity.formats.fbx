@@ -9,6 +9,14 @@ namespace FbxExporters.UnitTests
 {
     public abstract class ExporterTestBase
     {
+        /// <summary>
+        /// Path to the directory that holds the tests.
+        ///
+        /// Use this path if you want to load some data for testing, e.g. a
+        /// material or scene or fbx.
+        /// </summary>
+        public const string PathToTestData = "Assets/com.unity.formats.fbx/EditorTests";
+
         bool isAutoUpdaterOn;
         /// <summary>
         /// Sleep an amount of time (in ms) so we can safely assume that the
@@ -17,6 +25,7 @@ namespace FbxExporters.UnitTests
         public void SleepForFileTimestamp() {
             System.Threading.Thread.Sleep(1000);
         }
+
 
         private string _testDirectory;
         protected string filePath {
@@ -289,7 +298,10 @@ namespace FbxExporters.UnitTests
         /// <returns>The new GameObject in the scene.</returns>
         /// <param name="assetPath">Asset path.</param>
         protected GameObject AddAssetToScene(string assetPath){
-            GameObject originalObj = AssetDatabase.LoadMainAssetAtPath ("Assets/" + assetPath) as GameObject;
+            if (!assetPath.StartsWith("Assets/")) {
+                assetPath = "Assets/" + assetPath;
+            }
+            GameObject originalObj = AssetDatabase.LoadMainAssetAtPath (assetPath) as GameObject;
             Assert.IsNotNull (originalObj);
             GameObject originalGO = GameObject.Instantiate (originalObj);
             Assert.IsTrue (originalGO);
@@ -327,19 +339,18 @@ namespace FbxExporters.UnitTests
         }
 
         /// <summary>
-        /// Given the path to a file, find the file relative to
-        /// the UnitTests folder.
+        /// Given a relative path starting from the folder that contains the
+        /// unit tests, generate the corresponding Unity virtual path.
+        ///
+        /// Return null if the file doesn't actually exist.
         /// </summary>
-        /// <returns>The path in unit tests.</returns>
-        /// <param name="partialPath">Partial path.</param>
-        protected static string FindPathInUnitTests(string partialPath){
-            foreach (var dir in Directory.GetDirectories(Application.dataPath, "UnitTests", SearchOption.AllDirectories)) {
-                var fullPath = Path.Combine (dir, partialPath);
-                if (File.Exists (fullPath)) {
-                    return FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath (fullPath);
-                }
+        public string FindPathInUnitTests(string path) {
+            // This used to be complicated; not so much anymore.
+            var virtualPath = PathToTestData + '/' + path;
+            if (!System.IO.File.Exists(virtualPath)) {
+                return null;
             }
-            return null;
+            return virtualPath;
         }
     }
 }

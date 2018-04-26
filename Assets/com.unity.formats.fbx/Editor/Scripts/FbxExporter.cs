@@ -76,7 +76,10 @@ namespace FbxExporters
             const string Comments =
                 @"";
 
-            const string ReadmeRelativePath = "FbxExporters/README.txt";
+            /// <summary>
+            /// Path to the README file in Unity's virtual file system.
+            /// </summary>
+            const string ReadmeRelativePath = "Assets/com.unity.formats.fbx/README.txt";
 
             // NOTE: The ellipsis at the end of the Menu Item name prevents the context
             //       from being passed to command, thus resulting in OnContextItem()
@@ -235,15 +238,14 @@ namespace FbxExporters
                     Debug.LogWarning ("Missing relative path to README");
                     return null;
                 }
-                string absPath = Path.Combine (Application.dataPath, ReadmeRelativePath);
-                if (!File.Exists (absPath)) {
-                    Debug.LogWarning (string.Format("Could not find README.txt at: {0}", absPath));
+                if (!File.Exists (ReadmeRelativePath)) {
+                    Debug.LogWarning (string.Format("Could not find README.txt at: {0}", ReadmeRelativePath));
                     return null;
                 }
 
                 try{
                     var versionHeader = "VERSION:";
-                    var lines = File.ReadAllLines (absPath);
+                    var lines = File.ReadAllLines (ReadmeRelativePath);
                     foreach (var line in lines) {
                         if (line.StartsWith(versionHeader)) {
                             var version = line.Replace (versionHeader, "");
@@ -252,10 +254,11 @@ namespace FbxExporters
                     }
                 }
                 catch(IOException e){
-                    Debug.LogWarning (string.Format("Error will reading file {0} ({1})", absPath, e));
+                    Debug.LogException (e);
+                    Debug.LogWarning (string.Format("Error will reading file {0} ({1})", ReadmeRelativePath, e));
                     return null;
                 }
-                Debug.LogWarning (string.Format("Could not find version number in README.txt at: {0}", absPath));
+                Debug.LogWarning (string.Format("Could not find version number in README.txt at: {0}", ReadmeRelativePath));
                 return null;
             }
 
