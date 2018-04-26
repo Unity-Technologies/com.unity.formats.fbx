@@ -13,8 +13,24 @@ namespace FbxExporters.UnitTests
         {
             get
             {
-                yield return new TestCaseData(new float[] { 1f, 20f, 30f }, new float[] { 0f, 0.5f, 1f }, "m_Weight").Returns(1);
-                yield return new TestCaseData(new float[] { 2, 9, 33 },  new float[] { 0.1f, 0.67f, 0.2f }, "m_Sources.Array.data[0].weight").Returns(1);
+                /* Test Weight */
+                yield return new TestCaseData(typeof(RotationConstraint), new float[] { 1f, 20f, 30f }, new float[] { 0f, 0.5f, 1f }, "m_Weight").Returns(1);
+                yield return new TestCaseData(typeof(RotationConstraint), new float[] { 2, 9, 33 },  new float[] { 0.1f, 0.67f, 0.2f }, "m_Sources.Array.data[0].weight").Returns(1);
+
+                /* Test Aim */
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 30f, 10f }, new float[] { 10f, 180f, 10f }, "m_AimVector.x").Returns(1);
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 30f, 10f }, new float[] { 90f, 45f, 60f }, "m_AimVector.y").Returns(1);
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 30f, 10f }, new float[] { 10f, 180f, 10f }, "m_AimVector.z").Returns(1);
+
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 2f, 4f }, new float[] { 100f, 80f, 19f }, "m_UpVector.x").Returns(1);
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 2f, 4f }, new float[] { 4f, 154f, 454f }, "m_UpVector.y").Returns(1);
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 2f, 4f }, new float[] { 8f, 14f, 6f }, "m_UpVector.z").Returns(1);
+
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 2f, 30f, 77f }, new float[] { 29.3f, 322f, -190f }, "m_WorldUpVector.x").Returns(1);
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 2f, 30f, 77f }, new float[] { 145f, 180f, 40f }, "m_WorldUpVector.y").Returns(1);
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 2f, 30f, 77f }, new float[] { 10f, 180f, 10f }, "m_WorldUpVector.z").Returns(1);
+            }
+        }
             }
         }
     }
@@ -188,14 +204,14 @@ namespace FbxExporters.UnitTests
         }
 
         [Test, TestCaseSource(typeof(ConstraintAnimationTestDataClass), "TestCases")]
-        public int TestWeightAnimation(float[] keyTimes, float[] keyValues, string propertyName)
+        public int TestConstraintAnimation(System.Type componentType, float[] keyTimes, float[] keyValues, string propertyName)
         {
             var go = new GameObject("root");
             var source = new GameObject("source");
 
             source.transform.parent = go.transform;
 
-            var constraint = go.AddComponent<RotationConstraint>();
+            var constraint = go.AddComponent(componentType) as IConstraint;
             Assert.That(constraint, Is.Not.Null);
 
             var cSource = new ConstraintSource();
@@ -207,12 +223,12 @@ namespace FbxExporters.UnitTests
             var keyData = new FbxAnimationTest.PropertyKeyData
             {
                 targetObject = go,
-                componentType = typeof(RotationConstraint),
+                componentType = componentType,
                 propertyName = propertyName,
                 keyTimes = keyTimes,
                 keyFloatValues = keyValues
             };
-            var tester = new FbxAnimationTest.AnimTester { keyData = keyData, testName = "ConstraintWeightAnim_" + propertyName, path = GetRandomFbxFilePath() };
+            var tester = new FbxAnimationTest.AnimTester { keyData = keyData, testName = "ConstraintAnim_" + propertyName, path = GetRandomFbxFilePath() };
 
             return tester.DoIt();
         }
