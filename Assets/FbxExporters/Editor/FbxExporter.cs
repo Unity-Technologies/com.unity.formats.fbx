@@ -2028,7 +2028,12 @@ namespace FbxExporters
                     { "m_LocalScale", "Lcl Scaling" },
                     { "S", "Lcl Scaling" },
                     { "m_LocalPosition", "Lcl Translation" },
-                    { "T", "Lcl Translation" }
+                    { "T", "Lcl Translation" },
+                    { "m_AimVector", "AimVector" },
+                    { "m_UpVector", "UpVector" },
+                    { "m_WorldUpVector", "WorldUpVector" },
+                    { "m_TranslationOffset", "Translation" },
+                    { "m_ScaleOffset", "Scaling" }
                 };
                 private static Dictionary<string, string> TransformChannels = new Dictionary<string, string>()
                 {
