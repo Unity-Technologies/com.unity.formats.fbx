@@ -29,6 +29,16 @@ namespace FbxExporters.UnitTests
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 2f, 30f, 77f }, new float[] { 29.3f, 322f, -190f }, "m_WorldUpVector.x").Returns(1);
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 2f, 30f, 77f }, new float[] { 145f, 180f, 40f }, "m_WorldUpVector.y").Returns(1);
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 2f, 30f, 77f }, new float[] { 10f, 180f, 10f }, "m_WorldUpVector.z").Returns(1);
+
+                /* Test Translation Offset */
+                yield return new TestCaseData(typeof(PositionConstraint), new float[] { 1f, 2f, 3f }, new float[] { 10f, 180f, 10f }, "m_TranslationOffset.x").Returns(1);
+                yield return new TestCaseData(typeof(PositionConstraint), new float[] { 4f, 5f, 6f }, new float[] { 1f, -18f, 50f }, "m_TranslationOffset.y").Returns(1);
+                yield return new TestCaseData(typeof(PositionConstraint), new float[] { 1f, 2f, 3f }, new float[] { 12f, 23f, 4f }, "m_TranslationOffset.z").Returns(1);
+
+                /* Test Scale Offset */
+                yield return new TestCaseData(typeof(ScaleConstraint), new float[] { 1f, 2f, 3f }, new float[] { 10f, 180f, 10f }, "m_ScaleOffset.x").Returns(1);
+                yield return new TestCaseData(typeof(ScaleConstraint), new float[] { 4f, 5f, 6f }, new float[] { 1f, 18f, 50f }, "m_ScaleOffset.y").Returns(1);
+                yield return new TestCaseData(typeof(ScaleConstraint), new float[] { 1f, 2f, 3f }, new float[] { 2f, 23f, 4f }, "m_ScaleOffset.z").Returns(1);
             }
         }
             }
