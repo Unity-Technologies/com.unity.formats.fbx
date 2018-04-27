@@ -1468,8 +1468,9 @@ namespace FbxExporters
                 MapConstrainedObjectToConstraints[fbxNode].Add(fbxConstraint, uniConstraintType);
             }
 
-            protected bool ExportPositionConstraint(PositionConstraint uniPosConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            protected bool ExportPositionConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
             {
+                var uniPosConstraint = uniConstraint as PositionConstraint;
                 if(uniPosConstraint == null)
                 {
                     return false;
@@ -1499,8 +1500,9 @@ namespace FbxExporters
                 return true;
             }
 
-            protected bool ExportRotationConstraint(RotationConstraint uniRotConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            protected bool ExportRotationConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
             {
+                var uniRotConstraint = uniConstraint as RotationConstraint;
                 if(uniRotConstraint == null)
                 {
                     return false;
@@ -1534,8 +1536,9 @@ namespace FbxExporters
                 return true;
             }
 
-            protected bool ExportScaleConstraint(ScaleConstraint uniScaleConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            protected bool ExportScaleConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
             {
+                var uniScaleConstraint = uniConstraint as ScaleConstraint;
                 if (uniScaleConstraint == null)
                 {
                     return false;
@@ -1567,8 +1570,9 @@ namespace FbxExporters
                 return true;
             }
 
-            protected bool ExportAimConstraint(AimConstraint uniAimConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            protected bool ExportAimConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
             {
+                var uniAimConstraint = uniConstraint as AimConstraint;
                 if (uniAimConstraint == null)
                 {
                     return false;
@@ -1635,8 +1639,9 @@ namespace FbxExporters
                 return true;
             }
 
-            protected bool ExportParentConstraint(ParentConstraint uniParentConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            protected bool ExportParentConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
             {
+                var uniParentConstraint = uniConstraint as ParentConstraint;
                 if (uniParentConstraint == null)
                 {
                     return false;
@@ -1686,38 +1691,30 @@ namespace FbxExporters
                 return true;
             }
 
+            private delegate bool ExportConstraintDelegate(IConstraint c , FbxScene fs, FbxNode fn);
+
             protected bool ExportConstraints (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
             {
+                var mapConstraintTypeToExportFunction = new Dictionary<System.Type, ExportConstraintDelegate>()
+                {
+                    { typeof(PositionConstraint), ExportPositionConstraint },
+                    { typeof(RotationConstraint), ExportRotationConstraint },
+                    { typeof(ScaleConstraint), ExportScaleConstraint },
+                    { typeof(AimConstraint), ExportAimConstraint },
+                    { typeof(ParentConstraint), ExportParentConstraint }
+                };
+
                 // check if GameObject has one of the 5 supported constraints: aim, parent, position, rotation, scale
                 var constraints = unityGo.GetComponents<IConstraint>();
 
                 foreach(var constraint in constraints)
                 {
                     var constraintType = constraint.GetType();
-                    if(constraintType == typeof(PositionConstraint))
-                    {
-                        ExportPositionConstraint(constraint as PositionConstraint, fbxScene, fbxNode);
-                    }
-                    else if (constraintType == typeof(RotationConstraint))
-                    {
-                        ExportRotationConstraint(constraint as RotationConstraint, fbxScene, fbxNode);
-                    }
-                    else if(constraintType == typeof(ScaleConstraint))
-                    {
-                        ExportScaleConstraint(constraint as ScaleConstraint, fbxScene, fbxNode);
-                    }
-                    else if(constraintType == typeof(AimConstraint))
-                    {
-                        ExportAimConstraint(constraint as AimConstraint, fbxScene, fbxNode);
-                    }
-                    else if(constraintType == typeof(ParentConstraint))
-                    {
-                        ExportParentConstraint(constraint as ParentConstraint, fbxScene, fbxNode);
-                    }
-                    else
+                    if (!mapConstraintTypeToExportFunction.ContainsKey(constraintType))
                     {
                         throw new System.NotImplementedException(constraintType.Name);
                     }
+                    mapConstraintTypeToExportFunction[constraintType](constraint, fbxScene, fbxNode);
                 }
 
                 return true;
