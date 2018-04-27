@@ -1493,7 +1493,7 @@ namespace FbxExporters
             protected bool ExportPositionConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
             {
                 var uniPosConstraint = uniConstraint as PositionConstraint;
-                Debug.Assert (uniPosConstraint == null);
+                Debug.Assert (uniPosConstraint != null);
 
                 FbxConstraintPosition fbxPosConstraint = FbxConstraintPosition.Create(fbxScene, fbxNode.GetName() + "_positionConstraint");
                 fbxPosConstraint.SetConstrainedObject(fbxNode);
@@ -1519,7 +1519,7 @@ namespace FbxExporters
             protected bool ExportRotationConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
             {
                 var uniRotConstraint = uniConstraint as RotationConstraint;
-                Debug.Assert(uniRotConstraint == null);
+                Debug.Assert(uniRotConstraint != null);
 
                 FbxConstraintRotation fbxRotConstraint = FbxConstraintRotation.Create(fbxScene, fbxNode.GetName() + "_rotationConstraint");
                 fbxRotConstraint.SetConstrainedObject(fbxNode);
@@ -1549,7 +1549,7 @@ namespace FbxExporters
             protected bool ExportScaleConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
             {
                 var uniScaleConstraint = uniConstraint as ScaleConstraint;
-                Debug.Assert(uniScaleConstraint == null);
+                Debug.Assert(uniScaleConstraint != null);
 
                 FbxConstraintScale fbxScaleConstraint = FbxConstraintScale.Create(fbxScene, fbxNode.GetName() + "_scaleConstraint");
                 fbxScaleConstraint.SetConstrainedObject(fbxNode);
@@ -1577,7 +1577,7 @@ namespace FbxExporters
             protected bool ExportAimConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
             {
                 var uniAimConstraint = uniConstraint as AimConstraint;
-                Debug.Assert(uniAimConstraint == null);
+                Debug.Assert(uniAimConstraint != null);
 
                 FbxConstraintAim fbxAimConstraint = FbxConstraintAim.Create(fbxScene, fbxNode.GetName() + "_aimConstraint");
                 fbxAimConstraint.SetConstrainedObject(fbxNode);
@@ -1638,7 +1638,7 @@ namespace FbxExporters
             protected bool ExportParentConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
             {
                 var uniParentConstraint = uniConstraint as ParentConstraint;
-                Debug.Assert(uniParentConstraint == null);
+                Debug.Assert(uniParentConstraint != null);
 
                 FbxConstraintParent fbxParentConstraint = FbxConstraintParent.Create(fbxScene, fbxNode.GetName() + "_parentConstraint");
                 fbxParentConstraint.SetConstrainedObject(fbxNode);
