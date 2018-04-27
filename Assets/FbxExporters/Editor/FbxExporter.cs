@@ -156,7 +156,7 @@ namespace FbxExporters
             /// keep a map between the constrained FbxNode (in Unity this is the GameObject with constraint component)
             /// and its FbxConstraints for quick lookup when exporting constraint animations.
             /// </summary>
-            Dictionary<FbxNode, List<FbxConstraint>> MapConstrainedObjectToConstraints = new Dictionary<FbxNode, List<FbxConstraint>>();
+            Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>> MapConstrainedObjectToConstraints = new Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>>();
 
             /// <summary>
             /// Map Unity material name to FBX material object
@@ -1425,7 +1425,7 @@ namespace FbxExporters
                 fbxConstraint.Lock.Set(uniConstraint.locked);
                 fbxConstraint.Weight.Set(uniConstraint.weight * UnitScaleFactor);
 
-                AddFbxNodeToConstraintsMapping(fbxNode, fbxConstraint);
+                AddFbxNodeToConstraintsMapping(fbxNode, fbxConstraint, typeof(T));
                 return true;
             }
 
@@ -1459,13 +1459,13 @@ namespace FbxExporters
                 return fbxSources;
             }
 
-            protected void AddFbxNodeToConstraintsMapping<T>(FbxNode fbxNode, T fbxConstraint) where T : FbxConstraint
+            protected void AddFbxNodeToConstraintsMapping<T>(FbxNode fbxNode, T fbxConstraint, System.Type uniConstraintType) where T : FbxConstraint
             {
                 if (!MapConstrainedObjectToConstraints.ContainsKey(fbxNode))
                 {
-                    MapConstrainedObjectToConstraints.Add(fbxNode, new List<FbxConstraint>());
+                    MapConstrainedObjectToConstraints.Add(fbxNode, new Dictionary<FbxConstraint, System.Type>());
                 }
-                MapConstrainedObjectToConstraints[fbxNode].Add(fbxConstraint);
+                MapConstrainedObjectToConstraints[fbxNode].Add(fbxConstraint, uniConstraintType);
             }
 
             protected bool ExportPositionConstraint(PositionConstraint uniPosConstraint, FbxScene fbxScene, FbxNode fbxNode)
@@ -1846,26 +1846,6 @@ namespace FbxExporters
                 }
             }
 
-
-            protected System.Type FbxToUnityConstraintType(FbxConstraint.EType fbxConstraintType)
-            {
-                switch (fbxConstraintType)
-                {
-                    case FbxConstraint.EType.eAim:
-                        return typeof(AimConstraint);
-                    case FbxConstraint.EType.eParent:
-                        return typeof(ParentConstraint);
-                    case FbxConstraint.EType.ePosition:
-                        return typeof(PositionConstraint);
-                    case FbxConstraint.EType.eRotation:
-                        return typeof(RotationConstraint);
-                    case FbxConstraint.EType.eScale:
-                        return typeof(ScaleConstraint);
-                    default:
-                        throw new System.NotImplementedException(fbxConstraintType.ToString());
-                }
-            }
-
             /// <summary>
             /// Get the FbxConstraint associated with the constrained node.
             /// </summary>
@@ -1880,21 +1860,20 @@ namespace FbxExporters
                     return null;
                 }
 
-                List<FbxConstraint> constraints;
+                Dictionary<FbxConstraint, System.Type> constraints;
                 if (!MapConstrainedObjectToConstraints.TryGetValue(constrainedNode, out constraints))
                 {
                     return null;
                 }
-
-
+                
                 foreach (var constraint in constraints)
                 {
-                    if (uniConstraintType != FbxToUnityConstraintType(constraint.GetConstraintType()))
+                    if (uniConstraintType != constraint.Value)
                     {
                         continue;
                     }
 
-                    return constraint;
+                    return constraint.Key;
                 }
 
                 return null;
