@@ -15,12 +15,20 @@ namespace FbxExporters.UnitTests
             {
                 /* Test Weight */
                 yield return new TestCaseData(typeof(RotationConstraint), new float[] { 1f, 20f, 30f }, new float[] { 0f, 0.5f, 1f }, "m_Weight").Returns(1);
-                yield return new TestCaseData(typeof(RotationConstraint), new float[] { 2, 9, 33 },  new float[] { 0.1f, 0.67f, 0.2f }, "m_Sources.Array.data[0].weight").Returns(1);
+                yield return new TestCaseData(typeof(RotationConstraint), new float[] { 2, 9, 33 }, new float[] { 0.1f, 0.67f, 0.2f }, "m_Sources.Array.data[0].weight").Returns(1);
+
+                /* Test Rotation */
+                yield return new TestCaseData(typeof(RotationConstraint), new float[] { 1, 0.3f, 10f }, new float[] { -4, 39, 45 }, "m_RotationOffset.x").Returns(1);
+                yield return new TestCaseData(typeof(RotationConstraint), new float[] { 1, 4f, 3f }, new float[] { -4, -39, 145 }, "m_RotationOffset.y").Returns(1);
+                yield return new TestCaseData(typeof(RotationConstraint), new float[] { 1.2f, 0.8f, 10.3f }, new float[] { 194, 9, 195 }, "m_RotationOffset.z").Returns(1);
 
                 /* Test Aim */
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 30f, 10f }, new float[] { 10f, 180f, 10f }, "m_AimVector.x").Returns(1);
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 30f, 10f }, new float[] { 90f, 45f, 60f }, "m_AimVector.y").Returns(1);
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 30f, 10f }, new float[] { 10f, 180f, 10f }, "m_AimVector.z").Returns(1);
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 1, 0.3f, 10f }, new float[] { -4, 39, 45 }, "m_RotationOffset.x").Returns(1);
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 1, 4f, 3f }, new float[] { -4, -39, 145 }, "m_RotationOffset.y").Returns(1);
+                yield return new TestCaseData(typeof(AimConstraint), new float[] { 1.2f, 0.8f, 10.3f }, new float[] { 194, 9, 195 }, "m_RotationOffset.z").Returns(1);
 
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 2f, 4f }, new float[] { 100f, 80f, 19f }, "m_UpVector.x").Returns(1);
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 2f, 4f }, new float[] { 4f, 154f, 454f }, "m_UpVector.y").Returns(1);

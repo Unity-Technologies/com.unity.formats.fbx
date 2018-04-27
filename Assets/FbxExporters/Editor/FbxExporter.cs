@@ -1993,8 +1993,10 @@ namespace FbxExporters
 
                     bool partT = uniPropertyName.StartsWith ("m_LocalPosition.", cc) || uniPropertyName.StartsWith("m_TranslationOffset.", cc);
                     bool partTx = uniPropertyName.EndsWith ("Position.x", cc) || uniPropertyName.EndsWith ("T.x", cc) || uniPropertyName.EndsWith("TranslationOffset.x", cc);
+                    bool partRyz = uniPropertyName.StartsWith("m_RotationOffset", cc) && (uniPropertyName.EndsWith(".y") || uniPropertyName.EndsWith(".z"));
 
                     convertLtoR |= partTx;
+                    convertLtoR |= partRyz;
 
                     convertDistance |= partT;
                     convertDistance |= uniPropertyName.StartsWith ("m_Intensity", cc);
@@ -2029,12 +2031,19 @@ namespace FbxExporters
                     { "S", "Lcl Scaling" },
                     { "m_LocalPosition", "Lcl Translation" },
                     { "T", "Lcl Translation" },
+                    { "m_TranslationOffset", "Translation" },
+                    { "m_ScaleOffset", "Scaling" },
+                    { "m_RotationOffset", "Rotation" }
+                };
+
+                private static Dictionary<string, string> AimConstraintProperties = new Dictionary<string, string>()
+                {
                     { "m_AimVector", "AimVector" },
                     { "m_UpVector", "UpVector" },
                     { "m_WorldUpVector", "WorldUpVector" },
-                    { "m_TranslationOffset", "Translation" },
-                    { "m_ScaleOffset", "Scaling" }
+                    { "m_RotationOffset", "RotationOffset" }
                 };
+
                 private static Dictionary<string, string> TransformChannels = new Dictionary<string, string>()
                 {
                     { "x", Globals.FBXSDK_CURVENODE_COMPONENT_X },
@@ -2059,7 +2068,9 @@ namespace FbxExporters
                 };
                 private static Dictionary<string, string> ConstraintSourceProperties = new Dictionary<string, string>()
                 {
-                    { "m_Sources\\.Array\\.data\\[(\\d+)\\]\\.weight", "{0}.Weight" }
+                    { "m_Sources\\.Array\\.data\\[(\\d+)\\]\\.weight", "{0}.Weight" },
+                    { "m_TranslationOffsets\\.Array\\.data\\[(\\d+)\\]", "{0}.Offset T" },
+                    { "m_RotationOffsets\\.Array\\.data\\[\\d+)\\]", "{0}.Offset R" }
                 };
 
                 public FbxPropertyChannelPair(string p, string c) : this() {
@@ -2150,9 +2161,21 @@ namespace FbxExporters
                         return true;
                     }
 
-                    if(constraint != null && TryGetConstraintSourceChannelPairs(uniPropertyName, constraint, ref prop))
+                    if(constraint != null)
                     {
-                        return true;
+                        // Aim constraint shares the RotationOffset property with RotationConstraint, so make sure that the correct FBX property is returned
+                        if (constraint.GetConstraintType() == FbxConstraint.EType.eAim)
+                        {
+                            if (TryGetChannelPairs(uniPropertyName, propFormat, AimConstraintProperties, TransformChannels, ref prop))
+                            {
+                                return true;
+                            }
+                        }
+
+                        if (TryGetConstraintSourceChannelPairs(uniPropertyName, constraint, ref prop))
+                        {
+                            return true;
+                        }
                     }
 
                     return false;
