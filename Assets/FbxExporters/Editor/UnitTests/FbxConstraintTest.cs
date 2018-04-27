@@ -47,6 +47,15 @@ namespace FbxExporters.UnitTests
                 yield return new TestCaseData(typeof(ScaleConstraint), new float[] { 1f, 2f, 3f }, new float[] { 10f, 180f, 10f }, "m_ScaleOffset.x").Returns(1);
                 yield return new TestCaseData(typeof(ScaleConstraint), new float[] { 4f, 5f, 6f }, new float[] { 1f, 18f, 50f }, "m_ScaleOffset.y").Returns(1);
                 yield return new TestCaseData(typeof(ScaleConstraint), new float[] { 1f, 2f, 3f }, new float[] { 2f, 23f, 4f }, "m_ScaleOffset.z").Returns(1);
+
+                /* Test Parent */
+                yield return new TestCaseData(typeof(ParentConstraint), new float[] { 1, 3, 35 }, new float[] { 45f, 34.7f, 56f }, "m_TranslationOffsets.Array.data[0].x").Returns(1);
+                yield return new TestCaseData(typeof(ParentConstraint), new float[] { 4, 7, 75 }, new float[] { 3f, 65.67f, -34f }, "m_TranslationOffsets.Array.data[0].y").Returns(1);
+                yield return new TestCaseData(typeof(ParentConstraint), new float[] { 3, 4, 32 }, new float[] { -223f, 56.7f, 0.2f }, "m_TranslationOffsets.Array.data[0].z").Returns(1);
+
+                yield return new TestCaseData(typeof(ParentConstraint), new float[] { 1, 3, 35 }, new float[] { 45f, 34.7f, -56f }, "m_RotationOffsets.Array.data[0].x").Returns(1);
+                yield return new TestCaseData(typeof(ParentConstraint), new float[] { 4, 7, 75 }, new float[] { 3f, 65.67f, 180f }, "m_RotationOffsets.Array.data[0].y").Returns(1);
+                yield return new TestCaseData(typeof(ParentConstraint), new float[] { 3, 4, 32 }, new float[] { -223f, 56.7f, 0.2f }, "m_RotationOffsets.Array.data[0].z").Returns(1);
             }
         }
     }

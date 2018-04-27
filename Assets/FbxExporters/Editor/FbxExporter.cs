@@ -1984,6 +1984,7 @@ namespace FbxExporters
             {
                 bool convertDistance = false;
                 bool convertLtoR = false;
+                bool convertToRadian = false;
 
                 float unitScaleFactor = 1f;
 
@@ -1991,8 +1992,8 @@ namespace FbxExporters
                 {
                     System.StringComparison cc = System.StringComparison.CurrentCulture;
 
-                    bool partT = uniPropertyName.StartsWith ("m_LocalPosition.", cc) || uniPropertyName.StartsWith("m_TranslationOffset.", cc);
-                    bool partTx = uniPropertyName.EndsWith ("Position.x", cc) || uniPropertyName.EndsWith ("T.x", cc) || uniPropertyName.EndsWith("TranslationOffset.x", cc);
+                    bool partT = uniPropertyName.StartsWith("m_LocalPosition.", cc) || uniPropertyName.StartsWith("m_TranslationOffset", cc);
+                    bool partTx = uniPropertyName.EndsWith("Position.x", cc) || uniPropertyName.EndsWith("T.x", cc) || (uniPropertyName.StartsWith("m_TranslationOffset") && uniPropertyName.EndsWith(".x", cc));
                     bool partRyz = uniPropertyName.StartsWith("m_RotationOffset", cc) && (uniPropertyName.EndsWith(".y") || uniPropertyName.EndsWith(".z"));
 
                     convertLtoR |= partTx;
@@ -2002,11 +2003,19 @@ namespace FbxExporters
                     convertDistance |= uniPropertyName.StartsWith ("m_Intensity", cc);
                     convertDistance |= uniPropertyName.ToLower().EndsWith("weight", cc);
 
-                    if (convertDistance) 
+                    // The ParentConstraint's source Rotation Offsets are read in as radians, so make sure they are exported as radians
+                    convertToRadian = uniPropertyName.StartsWith("m_RotationOffsets.Array.data", cc);
+
+                    if (convertDistance)
                         unitScaleFactor = ModelExporter.UnitScaleFactor;
 
                     if (convertLtoR)
                         unitScaleFactor = -unitScaleFactor;
+
+                    if (convertToRadian)
+                    {
+                        unitScaleFactor *= (Mathf.PI / 180);
+                    }
                 }
 
                 public float Convert(float value)
@@ -2066,11 +2075,15 @@ namespace FbxExporters
                     { "field of view", "FieldOfView" },
                     { "m_Weight", "Weight" }
                 };
+                private static Dictionary<string, string> NullChannel = new Dictionary<string, string>() { { "", null } };
                 private static Dictionary<string, string> ConstraintSourceProperties = new Dictionary<string, string>()
                 {
-                    { "m_Sources\\.Array\\.data\\[(\\d+)\\]\\.weight", "{0}.Weight" },
+                    { "m_Sources\\.Array\\.data\\[(\\d+)\\]\\.weight", "{0}.Weight" }
+                };
+                private static Dictionary<string, string> ConstraintSourceTransformProperties = new Dictionary<string, string>()
+                {
                     { "m_TranslationOffsets\\.Array\\.data\\[(\\d+)\\]", "{0}.Offset T" },
-                    { "m_RotationOffsets\\.Array\\.data\\[\\d+)\\]", "{0}.Offset R" }
+                    { "m_RotationOffsets\\.Array\\.data\\[(\\d+)\\]", "{0}.Offset R" }
                 };
 
                 public FbxPropertyChannelPair(string p, string c) : this() {
@@ -2078,31 +2091,41 @@ namespace FbxExporters
                     Channel = c;
                 }
 
-                private static bool TryGetChannelPairs(string uniPropertyName, string propFormat, Dictionary<string, string> properties, Dictionary<string, string> channels, ref FbxPropertyChannelPair[] channelPairs)
+                private static bool TryGetChannel(string uniPropertyName, string uniName, string propFormat, Dictionary<string, string> channels, out string outChannel)
                 {
-                    System.StringComparison ct = System.StringComparison.CurrentCulture;
-
-                    foreach (var item in properties)
+                    outChannel = null;
+                    foreach (var channel in channels)
                     {
-                        var uniName = item.Key;
-                        var fbxName = item.Value;
-                        foreach (var entry in channels)
+                        var uniChannel = channel.Key;
+                        var fbxChannel = channel.Value;
+                        if (uniPropertyName.EndsWith(string.Format(propFormat, uniName, uniChannel)))
                         {
-                            var uniChannel = entry.Key;
-                            var fbxChannel = entry.Value;
-                            if (uniPropertyName.EndsWith(string.Format(propFormat, uniName, uniChannel), ct))
-                            {
-                                channelPairs = new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, fbxChannel) };
-                                return true;
-                            }
+                            outChannel = fbxChannel;
+                            return true;
                         }
                     }
                     return false;
                 }
 
-                private static bool TryGetConstraintSourceChannelPairs(string uniPropertyName, FbxConstraint constraint, ref FbxPropertyChannelPair[] channelPairs)
+                private static bool TryGetChannelPairs(string uniPropertyName, string propFormat, Dictionary<string, string> properties, Dictionary<string, string> channels, ref FbxPropertyChannelPair[] channelPairs)
                 {
-                    foreach (var prop in ConstraintSourceProperties)
+                    foreach (var item in properties)
+                    {
+                        var uniName = item.Key;
+                        var fbxName = item.Value;
+
+                        string channel;
+                        if(TryGetChannel(uniPropertyName, uniName, propFormat, channels, out channel)) {
+                            channelPairs = new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, channel) };
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                private static bool TryGetConstraintSourceChannelPairs(string uniPropertyName, FbxConstraint constraint, Dictionary<string, string> properties, Dictionary<string, string> channels, ref FbxPropertyChannelPair[] channelPairs)
+                {
+                    foreach (var prop in properties)
                     {
                         var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, prop.Key);
                         if (match.Success && match.Groups.Count > 0)
@@ -2115,8 +2138,12 @@ namespace FbxExporters
                             }
                             var source = constraint.GetConstraintSource(index);
                             var fbxName = string.Format(prop.Value, source.GetName());
-                            channelPairs = new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, null) };
-                            return true;
+                            string channel;
+                            // we've already matched with the property name, just get the channel
+                            if(TryGetChannel(uniPropertyName, "", "{1}", channels, out channel)){
+                                channelPairs = new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, channel) };
+                                return true;
+                            }
                         }
                     }
                     return false;
@@ -2131,9 +2158,31 @@ namespace FbxExporters
                     System.StringComparison ct = System.StringComparison.CurrentCulture;
                     
                     prop = new FbxPropertyChannelPair[] { };
+                    var propFormat = "{0}.{1}";
+
+                    if (constraint != null)
+                    {
+                        // Aim constraint shares the RotationOffset property with RotationConstraint, so make sure that the correct FBX property is returned
+                        if (constraint.GetConstraintType() == FbxConstraint.EType.eAim)
+                        {
+                            if (TryGetChannelPairs(uniPropertyName, propFormat, AimConstraintProperties, TransformChannels, ref prop))
+                            {
+                                return true;
+                            }
+                        }
+
+                        if (TryGetConstraintSourceChannelPairs(uniPropertyName, constraint, ConstraintSourceProperties, NullChannel, ref prop))
+                        {
+                            return true;
+                        }
+                        
+                        if(TryGetConstraintSourceChannelPairs(uniPropertyName, constraint, ConstraintSourceTransformProperties, TransformChannels, ref prop))
+                        {
+                            return true;
+                        }
+                    }
 
                     // Transform Properties
-                    var propFormat = "{0}.{1}";
                     if(TryGetChannelPairs(uniPropertyName, propFormat, TransformProperties, TransformChannels, ref prop))
                     {
                         return true;
@@ -2146,7 +2195,7 @@ namespace FbxExporters
                     }
 
                     // Other Properties
-                    if(TryGetChannelPairs(uniPropertyName, "{0}", OtherProperties, new Dictionary<string, string>() { { "", null } }, ref prop))
+                    if(TryGetChannelPairs(uniPropertyName, "{0}", OtherProperties, NullChannel, ref prop))
                     {
                         return true;
                     }
@@ -2159,23 +2208,6 @@ namespace FbxExporters
                             new FbxPropertyChannelPair ("InnerAngle", null)
                         };
                         return true;
-                    }
-
-                    if(constraint != null)
-                    {
-                        // Aim constraint shares the RotationOffset property with RotationConstraint, so make sure that the correct FBX property is returned
-                        if (constraint.GetConstraintType() == FbxConstraint.EType.eAim)
-                        {
-                            if (TryGetChannelPairs(uniPropertyName, propFormat, AimConstraintProperties, TransformChannels, ref prop))
-                            {
-                                return true;
-                            }
-                        }
-
-                        if (TryGetConstraintSourceChannelPairs(uniPropertyName, constraint, ref prop))
-                        {
-                            return true;
-                        }
                     }
 
                     return false;
