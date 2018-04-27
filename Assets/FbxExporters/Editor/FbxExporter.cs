@@ -1429,21 +1429,21 @@ namespace FbxExporters
                 return true;
             }
 
-            protected struct FbxConstraintSource
+            protected struct ExpConstraintSource
             {
                 public FbxNode node;
                 public float weight;
 
-                public FbxConstraintSource(FbxNode node, float weight)
+                public ExpConstraintSource(FbxNode node, float weight)
                 {
                     this.node = node;
                     this.weight = weight;
                 }
             }
 
-            protected List<FbxConstraintSource> GetConstraintSources(IConstraint unityConstraint)
+            protected List<ExpConstraintSource> GetConstraintSources(IConstraint unityConstraint)
             {
-                var fbxSources = new List<FbxConstraintSource>();
+                var fbxSources = new List<ExpConstraintSource>();
                 var sources = new List<ConstraintSource>();
                 unityConstraint.GetSources(sources);
                 foreach (var source in sources)
@@ -1454,7 +1454,7 @@ namespace FbxExporters
                     {
                         continue;
                     }
-                    fbxSources.Add(new FbxConstraintSource(sourceNode, source.weight * UnitScaleFactor));
+                    fbxSources.Add(new ExpConstraintSource(sourceNode, source.weight * UnitScaleFactor));
                 }
                 return fbxSources;
             }
@@ -1479,10 +1479,7 @@ namespace FbxExporters
                 FbxConstraintPosition fbxPosConstraint = FbxConstraintPosition.Create(fbxScene, fbxNode.GetName() + "_positionConstraint");
                 fbxPosConstraint.SetConstrainedObject(fbxNode);
                 var uniSources = GetConstraintSources(uniPosConstraint);
-                foreach (var uniSource in uniSources)
-                {
-                    fbxPosConstraint.AddConstraintSource(uniSource.node, uniSource.weight);
-                }
+                uniSources.ForEach(uniSource => fbxPosConstraint.AddConstraintSource(uniSource.node, uniSource.weight));
                 ExportCommonConstraintProperties(uniPosConstraint, fbxPosConstraint, fbxNode);
 
                 var uniAffectedAxes = uniPosConstraint.translationAxis;
@@ -1511,10 +1508,7 @@ namespace FbxExporters
                 FbxConstraintRotation fbxRotConstraint = FbxConstraintRotation.Create(fbxScene, fbxNode.GetName() + "_rotationConstraint");
                 fbxRotConstraint.SetConstrainedObject(fbxNode);
                 var uniSources = GetConstraintSources(uniRotConstraint);
-                foreach (var uniSource in uniSources)
-                {
-                    fbxRotConstraint.AddConstraintSource(uniSource.node, uniSource.weight);
-                }
+                uniSources.ForEach(uniSource => fbxRotConstraint.AddConstraintSource(uniSource.node, uniSource.weight));
                 ExportCommonConstraintProperties(uniRotConstraint, fbxRotConstraint, fbxNode);
 
                 var uniAffectedAxes = uniRotConstraint.rotationAxis;
@@ -1547,10 +1541,7 @@ namespace FbxExporters
                 FbxConstraintScale fbxScaleConstraint = FbxConstraintScale.Create(fbxScene, fbxNode.GetName() + "_scaleConstraint");
                 fbxScaleConstraint.SetConstrainedObject(fbxNode);
                 var uniSources = GetConstraintSources(uniScaleConstraint);
-                foreach (var uniSource in uniSources)
-                {
-                    fbxScaleConstraint.AddConstraintSource(uniSource.node, uniSource.weight);
-                }
+                uniSources.ForEach(uniSource => fbxScaleConstraint.AddConstraintSource(uniSource.node, uniSource.weight));
                 ExportCommonConstraintProperties(uniScaleConstraint, fbxScaleConstraint, fbxNode);
 
                 var uniAffectedAxes = uniScaleConstraint.scalingAxis;
@@ -1581,10 +1572,7 @@ namespace FbxExporters
                 FbxConstraintAim fbxAimConstraint = FbxConstraintAim.Create(fbxScene, fbxNode.GetName() + "_aimConstraint");
                 fbxAimConstraint.SetConstrainedObject(fbxNode);
                 var uniSources = GetConstraintSources(uniAimConstraint);
-                foreach (var uniSource in uniSources)
-                {
-                    fbxAimConstraint.AddConstraintSource(uniSource.node, uniSource.weight);
-                }
+                uniSources.ForEach(uniSource => fbxAimConstraint.AddConstraintSource(uniSource.node, uniSource.weight));
                 ExportCommonConstraintProperties(uniAimConstraint, fbxAimConstraint, fbxNode);
 
                 var uniAffectedAxes = uniAimConstraint.rotationAxis;
