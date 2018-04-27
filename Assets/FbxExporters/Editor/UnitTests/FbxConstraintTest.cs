@@ -41,8 +41,6 @@ namespace FbxExporters.UnitTests
                 yield return new TestCaseData(typeof(ScaleConstraint), new float[] { 1f, 2f, 3f }, new float[] { 2f, 23f, 4f }, "m_ScaleOffset.z").Returns(1);
             }
         }
-            }
-        }
     }
 
     public class FbxConstraintTest : ExporterTestBase
