@@ -9,14 +9,13 @@ namespace FbxExporters.Editor
     public class RepairMissingScripts
     {
         private const string m_forumPackageGUID = "2d81c55c4d9d85146b1d2de96e084b63";
-        private const string m_currentPackageGUID = "628ffbda3fdf4df4588770785d91a698";
+        private const string m_assetStorePackageGUID = "628ffbda3fdf4df4588770785d91a698";
 
         private const string m_fbxPrefabDLLFileId = "69888640";
 
         private const string m_idFormat = "{{fileID: {0}, guid: {1}, type:";
 
         private static string m_forumPackageSearchID;
-
         private static string ForumPackageSearchID {
             get {
                 if (string.IsNullOrEmpty (m_forumPackageSearchID)) {
@@ -26,14 +25,13 @@ namespace FbxExporters.Editor
             }
         }
 
-        private static string m_currentPackageSearchID;
-
-        private static string CurrentPackageSearchID {
+        private static string m_assetStorePackageSearchID;
+        private static string AssetStorePackageSearchID {
             get {
-                if (string.IsNullOrEmpty (m_currentPackageSearchID)) {
-                    m_currentPackageSearchID = string.Format (m_idFormat, m_fbxPrefabDLLFileId, m_currentPackageGUID);
+                if (string.IsNullOrEmpty (m_assetStorePackageSearchID)) {
+                    m_assetStorePackageSearchID = string.Format (m_idFormat, m_fbxPrefabDLLFileId, m_assetStorePackageGUID);
                 }
-                return m_currentPackageSearchID;
+                return m_assetStorePackageSearchID;
             }
         }
 
@@ -45,6 +43,20 @@ namespace FbxExporters.Editor
                 }
                 return m_assetsToRepair;
             }
+        }
+
+        public static bool TryGetSourceCodeSearchID(out string searchID)
+        {
+            var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxExporters.FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
+            searchID = null;
+            string guid;
+            long fileId;
+            if(AssetDatabase.TryGetGUIDAndLocalFileIdentifier(fbxPrefabObj, out guid, out fileId))
+            {
+                searchID = string.Format(m_idFormat, fileId, guid);
+                return true;
+            }
+            return false;
         }
 
         public int GetAssetsToRepairCount(){
@@ -91,7 +103,7 @@ namespace FbxExporters.Editor
                     }
 
                     var contents = sr.ReadToEnd();
-                    if(contents.Contains(ForumPackageSearchID)){
+                    if(contents.Contains(ForumPackageSearchID) || contents.Contains(AssetStorePackageSearchID)){
                         sr.Close();
                         return true;
                     }
@@ -105,9 +117,14 @@ namespace FbxExporters.Editor
 
         public bool ReplaceGUIDInTextAssets ()
         {
+            string sourceCodeSearchID;
+            if(!TryGetSourceCodeSearchID(out sourceCodeSearchID))
+            {
+                return false;
+            }
             bool replacedGUID = false;
             foreach (string file in AssetsToRepair) {
-                replacedGUID |= ReplaceGUIDInFile (file);
+                replacedGUID |= ReplaceGUIDInFile (file, sourceCodeSearchID);
             }
             if (replacedGUID) {
                 AssetDatabase.Refresh ();
@@ -115,7 +132,7 @@ namespace FbxExporters.Editor
             return replacedGUID;
         }
 
-        private static bool ReplaceGUIDInFile (string path)
+        private static bool ReplaceGUIDInFile (string path, string replacementSearchID)
         {
             // try to read file, assume it's a text file for now
             bool modified = false;
@@ -146,7 +163,13 @@ namespace FbxExporters.Editor
                             var line = sr.ReadLine ();
 
                             if (line.Contains (ForumPackageSearchID)) {
-                                line = line.Replace (ForumPackageSearchID, CurrentPackageSearchID);
+                                line = line.Replace (ForumPackageSearchID, replacementSearchID);
+                                modified = true;
+                            }
+
+                            if (line.Contains(AssetStorePackageSearchID))
+                            {
+                                line = line.Replace (AssetStorePackageSearchID, replacementSearchID);
                                 modified = true;
                             }
 
