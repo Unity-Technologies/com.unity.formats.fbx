@@ -15,23 +15,18 @@ namespace FbxExporters.Editor
 
         private const string m_idFormat = "{{fileID: {0}, guid: {1}, type:";
 
-        private static string m_forumPackageSearchID;
-        private static string ForumPackageSearchID {
-            get {
-                if (string.IsNullOrEmpty (m_forumPackageSearchID)) {
-                    m_forumPackageSearchID = string.Format (m_idFormat, m_fbxPrefabDLLFileId, m_forumPackageGUID);
+        private static List<string> m_searchIDsToReplace;
+        private static string[] SearchIDsToReplace
+        {
+            get
+            {
+                if(m_searchIDsToReplace == null || m_searchIDsToReplace.Count <= 0)
+                {
+                    m_searchIDsToReplace = new List<string>();
+                    m_searchIDsToReplace.Add(string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_forumPackageGUID));
+                    m_searchIDsToReplace.Add(string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_assetStorePackageGUID));
                 }
-                return m_forumPackageSearchID;
-            }
-        }
-
-        private static string m_assetStorePackageSearchID;
-        private static string AssetStorePackageSearchID {
-            get {
-                if (string.IsNullOrEmpty (m_assetStorePackageSearchID)) {
-                    m_assetStorePackageSearchID = string.Format (m_idFormat, m_fbxPrefabDLLFileId, m_assetStorePackageGUID);
-                }
-                return m_assetStorePackageSearchID;
+                return m_searchIDsToReplace.ToArray();
             }
         }
 
@@ -103,9 +98,13 @@ namespace FbxExporters.Editor
                     }
 
                     var contents = sr.ReadToEnd();
-                    if(contents.Contains(ForumPackageSearchID) || contents.Contains(AssetStorePackageSearchID)){
-                        sr.Close();
-                        return true;
+                    foreach(var searchId in SearchIDsToReplace)
+                    {
+                        if (contents.Contains(searchId))
+                        {
+                            sr.Close();
+                            return true;
+                        }
                     }
                 }
             }
@@ -162,15 +161,13 @@ namespace FbxExporters.Editor
                         while (sr.Peek () > -1) {
                             var line = sr.ReadLine ();
 
-                            if (line.Contains (ForumPackageSearchID)) {
-                                line = line.Replace (ForumPackageSearchID, replacementSearchID);
-                                modified = true;
-                            }
-
-                            if (line.Contains(AssetStorePackageSearchID))
+                            foreach(var searchId in SearchIDsToReplace)
                             {
-                                line = line.Replace (AssetStorePackageSearchID, replacementSearchID);
-                                modified = true;
+                                if (line.Contains(searchId))
+                                {
+                                    line = line.Replace(searchId, replacementSearchID);
+                                    modified = true;
+                                }
                             }
 
                             sw.WriteLine (line);
