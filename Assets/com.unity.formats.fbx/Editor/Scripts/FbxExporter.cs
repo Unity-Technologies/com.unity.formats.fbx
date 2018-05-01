@@ -1251,7 +1251,7 @@ namespace FbxExporters
                 if (unityPrefabType != PrefabType.PrefabInstance &&
                     unityPrefabType != PrefabType.ModelPrefabInstance) return false;
 
-                Object unityPrefabParent = PrefabUtility.GetPrefabParent (unityGo);
+                Object unityPrefabParent = PrefabUtility.GetCorrespondingObjectFromSource (unityGo);
 
                 if (Verbose)
                     Debug.Log (string.Format ("exporting instance {0}({1})", unityGo.name, unityPrefabParent.name));
@@ -3305,9 +3305,24 @@ namespace FbxExporters
 					object selClipItem = editorClipSelected.GetType().GetProperty("item").GetValue(editorClipSelected, null);
 					object selClipItemParentTrack = selClipItem.GetType().GetProperty("parentTrack").GetValue(selClipItem, null);
 					AnimationTrack editorClipAnimationTrack = selClipItemParentTrack as AnimationTrack;
-                    GameObject animationTrackGObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (editorClipAnimationTrack) as GameObject;
+                    Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.inspectedDirector.GetGenericBinding (editorClipAnimationTrack);
+                    GameObject animationTrackGO = null;
+                    if (animationTrackObject is GameObject)
+                    {
+                        animationTrackGO = animationTrackObject as GameObject;
+                    }
+                    else if (animationTrackObject is Animator)
+                    {
+                        animationTrackGO = (animationTrackObject as Animator).gameObject;
+                    }
+                    
+                    if(animationTrackGO == null) 
+                    {
+                        Debug.LogErrorFormat("Could not export animation track object of type {0}", animationTrackObject.GetType().Name);
+                        return false;
+                    }
 
-                    ExportSingleTimelineClip(timeLineClip, animationTrackGObject);
+                    ExportSingleTimelineClip(timeLineClip, animationTrackGO);
                     return true;
                 } 
                 return false;
