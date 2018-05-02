@@ -16,17 +16,18 @@ namespace FbxExporters.Editor
         private const string m_idFormat = "{{fileID: {0}, guid: {1}, type:";
 
         private static List<string> m_searchIDsToReplace;
-        private static string[] SearchIDsToReplace
+        private static List<string> SearchIDsToReplace
         {
             get
             {
-                if(m_searchIDsToReplace == null || m_searchIDsToReplace.Count <= 0)
+                if (m_searchIDsToReplace == null || m_searchIDsToReplace.Count <= 0)
                 {
-                    m_searchIDsToReplace = new List<string>();
-                    m_searchIDsToReplace.Add(string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_forumPackageGUID));
-                    m_searchIDsToReplace.Add(string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_assetStorePackageGUID));
+                    m_searchIDsToReplace = new List<string>() {
+                        string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_forumPackageGUID),
+                        string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_assetStorePackageGUID)
+                    };
                 }
-                return m_searchIDsToReplace.ToArray();
+                return m_searchIDsToReplace;
             }
         }
 
@@ -40,18 +41,17 @@ namespace FbxExporters.Editor
             }
         }
 
-        public static bool TryGetSourceCodeSearchID(out string searchID)
+        public static string GetSourceCodeSearchID()
         {
             var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxExporters.FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
-            searchID = null;
+            string searchID = null;
             string guid;
             long fileId;
             if(AssetDatabase.TryGetGUIDAndLocalFileIdentifier(fbxPrefabObj, out guid, out fileId))
             {
                 searchID = string.Format(m_idFormat, fileId, guid);
-                return true;
             }
-            return false;
+            return searchID;
         }
 
         public int GetAssetsToRepairCount(){
@@ -98,13 +98,10 @@ namespace FbxExporters.Editor
                     }
 
                     var contents = sr.ReadToEnd();
-                    foreach(var searchId in SearchIDsToReplace)
+                    if (SearchIDsToReplace.Exists(searchId => contents.Contains(searchId)))
                     {
-                        if (contents.Contains(searchId))
-                        {
-                            sr.Close();
-                            return true;
-                        }
+                        sr.Close();
+                        return true;
                     }
                 }
             }
@@ -116,8 +113,8 @@ namespace FbxExporters.Editor
 
         public bool ReplaceGUIDInTextAssets ()
         {
-            string sourceCodeSearchID;
-            if(!TryGetSourceCodeSearchID(out sourceCodeSearchID))
+            string sourceCodeSearchID = GetSourceCodeSearchID();
+            if(string.IsNullOrEmpty(sourceCodeSearchID))
             {
                 return false;
             }
@@ -129,6 +126,16 @@ namespace FbxExporters.Editor
                 AssetDatabase.Refresh ();
             }
             return replacedGUID;
+        }
+
+        private static bool ReplaceID(string searchId, string replacementId, ref string line)
+        {
+            if (line.Contains(searchId))
+            {
+                line = line.Replace(searchId, replacementId);
+                return true;
+            }
+            return false;
         }
 
         private static bool ReplaceGUIDInFile (string path, string replacementSearchID)
@@ -160,15 +167,9 @@ namespace FbxExporters.Editor
 
                         while (sr.Peek () > -1) {
                             var line = sr.ReadLine ();
-
-                            foreach(var searchId in SearchIDsToReplace)
-                            {
-                                if (line.Contains(searchId))
-                                {
-                                    line = line.Replace(searchId, replacementSearchID);
-                                    modified = true;
-                                }
-                            }
+                            SearchIDsToReplace.ForEach(searchId =>
+                                modified |= ReplaceID(searchId, replacementSearchID, ref line)
+                            );
 
                             sw.WriteLine (line);
                         }
