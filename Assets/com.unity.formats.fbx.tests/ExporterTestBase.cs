@@ -15,7 +15,7 @@ namespace FbxExporters.UnitTests
         /// Use this path if you want to load some data for testing, e.g. a
         /// material or scene or fbx.
         /// </summary>
-        public const string PathToTestData = "Assets/com.unity.formats.fbx/EditorTests";
+        public const string PathToTestData = "Assets/com.unity.formats.fbx.tests";
 
         bool isAutoUpdaterOn;
         /// <summary>
