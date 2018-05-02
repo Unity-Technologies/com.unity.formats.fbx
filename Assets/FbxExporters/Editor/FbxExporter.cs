@@ -1699,16 +1699,17 @@ namespace FbxExporters
 
                 // check if GameObject has one of the 5 supported constraints: aim, parent, position, rotation, scale
                 var uniConstraints = unityGo.GetComponents<IConstraint>();
-                System.Array.ForEach(uniConstraints, uniConstraint =>
+
+                foreach(var uniConstraint in uniConstraints)
                 {
                     var uniConstraintType = uniConstraint.GetType();
                     if (!mapConstraintTypeToExportFunction.ContainsKey(uniConstraintType))
                     {
                         Debug.LogWarningFormat("FbxExporter: Missing function to export constraint of type {0}", uniConstraintType.Name);
-                        return;
+                        continue;
                     }
                     mapConstraintTypeToExportFunction[uniConstraintType](uniConstraint, fbxScene, fbxNode);
-                });
+                }
 
                 return true;
             }
