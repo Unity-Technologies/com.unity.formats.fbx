@@ -48,13 +48,6 @@ namespace FbxExporters
                 }
             }
 
-            private static PropertyChannelMap TransformPropertyMap = new PropertyChannelMap(MapTransformPropToFbxProp, MapTransformChannelToFbxChannel);
-            private static PropertyChannelMap AimConstraintPropertyMap = new PropertyChannelMap(MapAimConstraintPropToFbxProp, MapTransformChannelToFbxChannel);
-            private static PropertyChannelMap ColorPropertyMap = new PropertyChannelMap(MapColorPropToFbxProp, MapColorChannelToFbxChannel);
-            private static PropertyChannelMap ConstraintSourcePropertyMap = new PropertyChannelMap(MapConstraintSourcePropToFbxProp, null);
-            private static PropertyChannelMap ConstraintSourceTransformPropertyMap = new PropertyChannelMap(MapConstraintSourceTransformPropToFbxProp, MapTransformChannelToFbxChannel);
-            private static PropertyChannelMap OtherPropertyMap = new PropertyChannelMap(MapPropToFbxProp, null);
-
             // =========== Property Maps ================
             // These are dictionaries that map a Unity property name to it's corresponding Fbx property name.
             // Split up into multiple dictionaries as some are channel and object dependant.
@@ -146,6 +139,13 @@ namespace FbxExporters
                 };
 
             // =======================================================
+
+            private static PropertyChannelMap TransformPropertyMap = new PropertyChannelMap(MapTransformPropToFbxProp, MapTransformChannelToFbxChannel);
+            private static PropertyChannelMap AimConstraintPropertyMap = new PropertyChannelMap(MapAimConstraintPropToFbxProp, MapTransformChannelToFbxChannel);
+            private static PropertyChannelMap ColorPropertyMap = new PropertyChannelMap(MapColorPropToFbxProp, MapColorChannelToFbxChannel);
+            private static PropertyChannelMap ConstraintSourcePropertyMap = new PropertyChannelMap(MapConstraintSourcePropToFbxProp, null);
+            private static PropertyChannelMap ConstraintSourceTransformPropertyMap = new PropertyChannelMap(MapConstraintSourceTransformPropToFbxProp, MapTransformChannelToFbxChannel);
+            private static PropertyChannelMap OtherPropertyMap = new PropertyChannelMap(MapPropToFbxProp, null);
 
             /// <summary>
             /// Separates and returns the property and channel from the full Unity property name.
