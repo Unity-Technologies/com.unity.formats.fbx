@@ -77,9 +77,9 @@ namespace FbxExporters
                 @"";
 
             /// <summary>
-            /// Path to the README file in Unity's virtual file system.
+            /// Path to the CHANGELOG file in Unity's virtual file system. Used to get the version number.
             /// </summary>
-            const string ReadmeRelativePath = "Assets/com.unity.formats.fbx/README.txt";
+            const string ChangeLogPath = "Packages/com.unity.formats.fbx/CHANGELOG.md";
 
             // NOTE: The ellipsis at the end of the Menu Item name prevents the context
             //       from being passed to command, thus resulting in OnContextItem()
@@ -234,32 +234,34 @@ namespace FbxExporters
             /// </summary>
             public static string GetVersionFromReadme()
             {
-                if (string.IsNullOrEmpty (ReadmeRelativePath)) {
-                    Debug.LogWarning ("Missing relative path to README");
-                    return null;
-                }
-                if (!File.Exists (ReadmeRelativePath)) {
-                    Debug.LogWarning (string.Format("Could not find README.txt at: {0}", ReadmeRelativePath));
+                if (!File.Exists (ChangeLogPath)) {
+                    Debug.LogWarning (string.Format("Could not find version number, the ChangeLog file is missing from: {0}", ChangeLogPath));
                     return null;
                 }
 
-                try{
-                    var versionHeader = "VERSION:";
-                    var lines = File.ReadAllLines (ReadmeRelativePath);
+                try {
+                    // The format is:
+                    // ## [a.b.c-whatever] - yyyy-mm-dd
+                    // we extract the first bit.
+                    var lines = File.ReadAllLines (ChangeLogPath);
                     foreach (var line in lines) {
-                        if (line.StartsWith(versionHeader)) {
-                            var version = line.Replace (versionHeader, "");
+                        var match = System.Text.RegularExpressions.Regex.Match(line, @"^\s*##\s*\[(.*)\]");
+                        if (match.Success) {
+                            var version = match.Groups[1].Value;
                             return version.Trim ();
                         }
                     }
+
+                    // If we're here, we didn't find any match.
+                    Debug.LogWarning (string.Format("Could not find most recent version number in {0}", ChangeLogPath));
+                    return null;
                 }
                 catch(IOException e){
                     Debug.LogException (e);
-                    Debug.LogWarning (string.Format("Error will reading file {0} ({1})", ReadmeRelativePath, e));
+                    Debug.LogWarning (string.Format("Error reading file {0} ({1})", ChangeLogPath, e));
                     return null;
                 }
-                Debug.LogWarning (string.Format("Could not find version number in README.txt at: {0}", ReadmeRelativePath));
-                return null;
+
             }
 
             /// <summary>
