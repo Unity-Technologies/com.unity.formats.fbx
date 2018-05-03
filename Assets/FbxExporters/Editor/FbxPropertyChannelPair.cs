@@ -14,10 +14,55 @@ namespace FbxExporters
             public string Property { get; private set; }
             public string Channel { get; private set; }
 
+            public FbxPropertyChannelPair(string p, string c) : this()
+            {
+                Property = p;
+                Channel = c;
+            }
+
+            struct UnityPropertyChannelPair
+            {
+                public string property;
+                public string channel;
+
+                public UnityPropertyChannelPair(string p, string c)
+                {
+                    property = p;
+                    channel = c;
+                }
+            }
+
+            /// <summary>
+            /// Contains the two dictionaries that map Unity property to FBX property and Unity channel to Fbx channel
+            /// for a set of properties.
+            /// </summary>
+            struct PropertyChannelMap
+            {
+                public Dictionary<string, string> MapUnityPropToFbxProp;
+                public Dictionary<string, string> MapUnityChannelToFbxChannel;
+
+                public PropertyChannelMap(Dictionary<string,string> propertyMap, Dictionary<string, string> channelMap)
+                {
+                    MapUnityPropToFbxProp = propertyMap;
+                    MapUnityChannelToFbxChannel = channelMap;
+                }
+            }
+
+            private static PropertyChannelMap TransformPropertyMap = new PropertyChannelMap(MapTransformPropToFbxProp, MapTransformChannelToFbxChannel);
+            private static PropertyChannelMap AimConstraintPropertyMap = new PropertyChannelMap(MapAimConstraintPropToFbxProp, MapTransformChannelToFbxChannel);
+            private static PropertyChannelMap ColorPropertyMap = new PropertyChannelMap(MapColorPropToFbxProp, MapColorChannelToFbxChannel);
+            private static PropertyChannelMap ConstraintSourcePropertyMap = new PropertyChannelMap(MapConstraintSourcePropToFbxProp, null);
+            private static PropertyChannelMap ConstraintSourceTransformPropertyMap = new PropertyChannelMap(MapConstraintSourceTransformPropToFbxProp, MapTransformChannelToFbxChannel);
+            private static PropertyChannelMap OtherPropertyMap = new PropertyChannelMap(MapPropToFbxProp, null);
+
+            // =========== Property Maps ================
+            // These are dictionaries that map a Unity property name to it's corresponding Fbx property name.
+            // Split up into multiple dictionaries as some are channel and object dependant.
+
             /// <summary>
             /// Map of Unity transform properties to their FBX equivalent.
             /// </summary>
-            private static Dictionary<string, string> TransformProperties = new Dictionary<string, string>()
+            private static Dictionary<string, string> MapTransformPropToFbxProp = new Dictionary<string, string>()
                 {
                     { "m_LocalScale", "Lcl Scaling" },
                     { "Motion S", "Lcl Scaling" },
@@ -31,7 +76,7 @@ namespace FbxExporters
             /// <summary>
             /// Map of Unity Aim constraint properties to their FBX equivalent.
             /// </summary>
-            private static Dictionary<string, string> AimConstraintProperties = new Dictionary<string, string>()
+            private static Dictionary<string, string> MapAimConstraintPropToFbxProp = new Dictionary<string, string>()
                 {
                     { "m_AimVector", "AimVector" },
                     { "m_UpVector", "UpVector" },
@@ -40,37 +85,17 @@ namespace FbxExporters
                 };
 
             /// <summary>
-            /// Map of Unity transform channels to their FBX equivalent.
-            /// </summary>
-            private static Dictionary<string, string> TransformChannels = new Dictionary<string, string>()
-                {
-                    { "x", Globals.FBXSDK_CURVENODE_COMPONENT_X },
-                    { "y", Globals.FBXSDK_CURVENODE_COMPONENT_Y },
-                    { "z", Globals.FBXSDK_CURVENODE_COMPONENT_Z }
-                };
-
-            /// <summary>
             /// Map of Unity color properties to their FBX equivalent.
             /// </summary>
-            private static Dictionary<string, string> ColorProperties = new Dictionary<string, string>()
+            private static Dictionary<string, string> MapColorPropToFbxProp = new Dictionary<string, string>()
                 {
                     { "m_Color", "Color" }
                 };
 
             /// <summary>
-            /// Map of Unity color channels to their FBX equivalent.
-            /// </summary>
-            private static Dictionary<string, string> ColorChannels = new Dictionary<string, string>()
-                {
-                    { "b", Globals.FBXSDK_CURVENODE_COLOR_BLUE },
-                    { "g", Globals.FBXSDK_CURVENODE_COLOR_GREEN },
-                    { "r", Globals.FBXSDK_CURVENODE_COLOR_RED }
-                };
-
-            /// <summary>
             /// Map of Unity properties to their FBX equivalent.
             /// </summary>
-            private static Dictionary<string, string> OtherProperties = new Dictionary<string, string>()
+            private static Dictionary<string, string> MapPropToFbxProp = new Dictionary<string, string>()
                 {
                     { "m_Intensity", "Intensity" },
                     { "field of view", "FieldOfView" },
@@ -78,16 +103,11 @@ namespace FbxExporters
                 };
 
             /// <summary>
-            /// Map of empty string to null, used for properties that don't need a channel.
-            /// </summary>
-            private static Dictionary<string, string> NullChannel = new Dictionary<string, string>() { { "", null } };
-
-            /// <summary>
             /// Map of Unity constraint source property name as a regular expression to the FBX property as a string format.
             /// This is necessary because the Unity property contains an index in to an array, and the FBX property contains
             /// the name of the source object.
             /// </summary>
-            private static Dictionary<string, string> ConstraintSourceProperties = new Dictionary<string, string>()
+            private static Dictionary<string, string> MapConstraintSourcePropToFbxProp = new Dictionary<string, string>()
                 {
                     { @"m_Sources\.Array\.data\[(\d+)\]\.weight", "{0}.Weight" }
                 };
@@ -97,38 +117,65 @@ namespace FbxExporters
             /// This is necessary because the Unity property contains an index in to an array, and the FBX property contains
             /// the name of the source object.
             /// </summary>
-            private static Dictionary<string, string> ConstraintSourceTransformProperties = new Dictionary<string, string>()
+            private static Dictionary<string, string> MapConstraintSourceTransformPropToFbxProp = new Dictionary<string, string>()
                 {
                     { @"m_TranslationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset T" },
                     { @"m_RotationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset R" }
                 };
 
-            public FbxPropertyChannelPair(string p, string c) : this()
-            {
-                Property = p;
-                Channel = c;
-            }
+            // ================== Channel Maps ======================
 
-            private static bool TryGetChannel(string uniPropertyName, string uniName, string propFormat, Dictionary<string, string> channels, out string outChannel)
-            {
-                outChannel = null;
-                foreach (var channel in channels)
+            /// <summary>
+            /// Map of Unity transform channels to their FBX equivalent.
+            /// </summary>
+            private static Dictionary<string, string> MapTransformChannelToFbxChannel = new Dictionary<string, string>()
                 {
-                    var uniChannel = channel.Key;
-                    var fbxChannel = channel.Value;
-                    if (uniPropertyName.EndsWith(string.Format(propFormat, uniName, uniChannel)))
-                    {
-                        outChannel = fbxChannel;
-                        return true;
-                    }
+                    { "x", Globals.FBXSDK_CURVENODE_COMPONENT_X },
+                    { "y", Globals.FBXSDK_CURVENODE_COMPONENT_Y },
+                    { "z", Globals.FBXSDK_CURVENODE_COMPONENT_Z }
+                };
+
+            /// <summary>
+            /// Map of Unity color channels to their FBX equivalent.
+            /// </summary>
+            private static Dictionary<string, string> MapColorChannelToFbxChannel = new Dictionary<string, string>()
+                {
+                    { "b", Globals.FBXSDK_CURVENODE_COLOR_BLUE },
+                    { "g", Globals.FBXSDK_CURVENODE_COLOR_GREEN },
+                    { "r", Globals.FBXSDK_CURVENODE_COLOR_RED }
+                };
+
+            // =======================================================
+
+            /// <summary>
+            /// Separates and returns the property and channel from the full Unity property name.
+            /// 
+            /// Takes what is after the last period as the channel.
+            /// In order to use this have to be certain that there are channels, as there are cases where what is after
+            /// the last period is still the property name. E.g. m_Sources.Array.data[0].weight has no channel.
+            /// </summary>
+            /// <param name="fullPropertyName"></param>
+            /// <returns></returns>
+            private static UnityPropertyChannelPair GetUnityPropertyChannelPair(string fullPropertyName)
+            {
+                int index = fullPropertyName.LastIndexOf('.');
+                if (index < 0)
+                {
+                    return new UnityPropertyChannelPair(fullPropertyName, null);
                 }
-                return false;
+
+                var property = fullPropertyName.Substring(0, index);
+                var channel = fullPropertyName.Substring(index + 1);
+                return new UnityPropertyChannelPair(property, channel);
             }
 
-            private static FbxPropertyChannelPair[] GetChannelPairs(string uniPropertyName, Dictionary<string, string> properties, Dictionary<string, string> channels = null)
+            private static FbxPropertyChannelPair[] GetChannelPairs(string uniPropertyName, PropertyChannelMap propertyChannelMap)
             {
                 // Unity property name is of the format "property.channel". Split by the last '.' and search for the property in the property dict, and channel in the channel dict.
                 // If the property name is just "property" then the channel is null.
+
+                var properties = propertyChannelMap.MapUnityPropToFbxProp;
+                var channels = propertyChannelMap.MapUnityChannelToFbxChannel;
 
                 // First handle case where there's no channels.
                 if (channels == null)
@@ -141,14 +188,15 @@ namespace FbxExporters
                     return null;
                 }
 
-                int index = uniPropertyName.LastIndexOf('.');
-                if (index < 0)
+                var uniPropChannelPair = GetUnityPropertyChannelPair(uniPropertyName);
+                if(uniPropChannelPair.channel == null)
                 {
+                    // We've already checked the case where there are no channels
                     return null;
                 }
 
-                var property = uniPropertyName.Substring(0, index);
-                var channel = uniPropertyName.Substring(index + 1);
+                var property = uniPropChannelPair.property;
+                var channel = uniPropChannelPair.channel;
 
                 string fbxProp;
                 if(!properties.TryGetValue(property, out fbxProp))
@@ -165,9 +213,12 @@ namespace FbxExporters
                 return new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxProp, fbxChannel) };
             }
 
-            private static bool TryGetConstraintSourceChannelPairs(string uniPropertyName, FbxConstraint constraint, Dictionary<string, string> properties, Dictionary<string, string> channels, ref FbxPropertyChannelPair[] channelPairs)
+            private static FbxPropertyChannelPair[] GetConstraintSourceChannelPairs(string uniPropertyName, FbxConstraint constraint, PropertyChannelMap propertyChannelMap)
             {
-                foreach (var prop in properties)
+                var properties = propertyChannelMap.MapUnityPropToFbxProp;
+                var channels = propertyChannelMap.MapUnityChannelToFbxChannel;
+
+                foreach(var prop in properties)
                 {
                     var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, prop.Key);
                     if (match.Success && match.Groups.Count > 0)
@@ -180,16 +231,32 @@ namespace FbxExporters
                         }
                         var source = constraint.GetConstraintSource(index);
                         var fbxName = string.Format(prop.Value, source.GetName());
-                        string channel;
-                        // we've already matched with the property name, just get the channel
-                        if (TryGetChannel(uniPropertyName, "", "{1}", channels, out channel))
+
+                        // Have the fbx name, now need the channel
+                        if(channels == null)
                         {
-                            channelPairs = new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, channel) };
-                            return true;
+                            // no channel, we have what we need
+                            return new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, null) };
                         }
+
+                        var uniPropChannelPair = GetUnityPropertyChannelPair(uniPropertyName);
+                        if (uniPropChannelPair.channel == null)
+                        {
+                            // We've already checked the case where there are no channels
+                            return null;
+                        }
+                        
+                        var channel = uniPropChannelPair.channel;
+                        string fbxChannel;
+                        if (!channels.TryGetValue(channel, out fbxChannel))
+                        {
+                            return null;
+                        }
+                        return new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, fbxChannel) };
                     }
                 }
-                return false;
+
+                return null;
             }
 
             /// <summary>
@@ -198,55 +265,10 @@ namespace FbxExporters
             /// </summary>
             public static bool TryGetValue(string uniPropertyName, out FbxPropertyChannelPair[] prop, FbxConstraint constraint = null)
             {
-                System.StringComparison ct = System.StringComparison.CurrentCulture;
-
                 prop = new FbxPropertyChannelPair[] { };
-                var propFormat = "{0}.{1}";
-
-                if (constraint != null)
-                {
-                    // Aim constraint shares the RotationOffset property with RotationConstraint, so make sure that the correct FBX property is returned
-                    if (constraint.GetConstraintType() == FbxConstraint.EType.eAim)
-                    {
-                        prop = GetChannelPairs(uniPropertyName, AimConstraintProperties, TransformChannels);
-                        if(prop != null)
-                        {
-                            return true;
-                        }
-                    }
-
-                    prop = GetChannelPairs(uniPropertyName, ConstraintSourceProperties);
-                    if(prop != null)
-                    {
-                        return true;
-                    }
-
-                    prop = GetChannelPairs(uniPropertyName, ConstraintSourceTransformProperties, TransformChannels);
-                    if(prop != null)
-                    {
-                        return true;
-                    }
-                }
-
-                // Transform Properties
-                if (TryGetChannelPairs(uniPropertyName, propFormat, TransformProperties, TransformChannels, ref prop))
-                {
-                    return true;
-                }
-
-                // Color Properties
-                if (TryGetChannelPairs(uniPropertyName, propFormat, ColorProperties, ColorChannels, ref prop))
-                {
-                    return true;
-                }
-
-                // Other Properties
-                if (TryGetChannelPairs(uniPropertyName, "{0}", OtherProperties, NullChannel, ref prop))
-                {
-                    return true;
-                }
-
+                
                 // spot angle is a special case as it returns two channel pairs instead of one
+                System.StringComparison ct = System.StringComparison.CurrentCulture;
                 if (uniPropertyName.StartsWith("m_SpotAngle", ct))
                 {
                     prop = new FbxPropertyChannelPair[]{
@@ -254,6 +276,52 @@ namespace FbxExporters
                             new FbxPropertyChannelPair ("InnerAngle", null)
                         };
                     return true;
+                }
+
+                // Try get constraint specific channel pairs first as we know this is a constraint
+                if (constraint != null)
+                {
+                    // Aim constraint shares the RotationOffset property with RotationConstraint, so make sure that the correct FBX property is returned
+                    if (constraint.GetConstraintType() == FbxConstraint.EType.eAim)
+                    {
+                        prop = GetChannelPairs(uniPropertyName, AimConstraintPropertyMap);
+                        if (prop != null)
+                        {
+                            return true;
+                        }
+                    }
+
+                    var constraintPropertyMaps = new List<PropertyChannelMap>()
+                    {
+                        ConstraintSourcePropertyMap,
+                        ConstraintSourceTransformPropertyMap
+                    };
+
+                    foreach(var propMap in constraintPropertyMaps)
+                    {
+                        prop = GetConstraintSourceChannelPairs(uniPropertyName, constraint, propMap);
+                        if(prop != null)
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                // Check if this is a transform, color, or other property and return the channel pairs if they match.
+                var propertyMaps = new List<PropertyChannelMap>()
+                {
+                    TransformPropertyMap,
+                    ColorPropertyMap,
+                    OtherPropertyMap
+                };
+
+                foreach (var propMap in propertyMaps)
+                {
+                    prop = GetChannelPairs(uniPropertyName, propMap);
+                    if (prop != null)
+                    {
+                        return true;
+                    }
                 }
 
                 return false;
