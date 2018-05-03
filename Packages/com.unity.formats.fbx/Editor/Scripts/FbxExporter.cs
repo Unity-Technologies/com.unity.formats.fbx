@@ -1436,8 +1436,8 @@ namespace FbxExporters
                     lastTime = System.Math.Max(lastTime, ac[ac.length-1].time);
                 }
 
-                int firstframe = (int)(firstTime * sampleRate);
-                int lastframe = (int)(lastTime * sampleRate);
+                int firstframe = (int)System.Math.Floor(firstTime * sampleRate);
+                int lastframe = (int)System.Math.Ceiling(lastTime * sampleRate);
                 for (int i = firstframe; i <= lastframe; i++) {
                     keyTimes.Add ((float)(i * fs));
                 }
