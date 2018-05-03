@@ -1483,11 +1483,13 @@ namespace FbxExporters
 
             protected void AddFbxNodeToConstraintsMapping<T>(FbxNode fbxNode, T fbxConstraint, System.Type uniConstraintType) where T : FbxConstraint
             {
-                if (!MapConstrainedObjectToConstraints.ContainsKey(fbxNode))
+                Dictionary<FbxConstraint, System.Type> constraintMapping;
+                if (!MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraintMapping))
                 {
-                    MapConstrainedObjectToConstraints.Add(fbxNode, new Dictionary<FbxConstraint, System.Type>());
+                    constraintMapping = new Dictionary<FbxConstraint, System.Type>();
+                    MapConstrainedObjectToConstraints.Add(fbxNode, constraintMapping);
                 }
-                MapConstrainedObjectToConstraints[fbxNode].Add(fbxConstraint, uniConstraintType);
+                constraintMapping.Add(fbxConstraint, uniConstraintType);
             }
 
             protected bool ExportPositionConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
@@ -1703,12 +1705,13 @@ namespace FbxExporters
                 foreach(var uniConstraint in uniConstraints)
                 {
                     var uniConstraintType = uniConstraint.GetType();
-                    if (!mapConstraintTypeToExportFunction.ContainsKey(uniConstraintType))
+                    ExportConstraintDelegate constraintDelegate;
+                    if (!mapConstraintTypeToExportFunction.TryGetValue(uniConstraintType, out constraintDelegate))
                     {
                         Debug.LogWarningFormat("FbxExporter: Missing function to export constraint of type {0}", uniConstraintType.Name);
                         continue;
                     }
-                    mapConstraintTypeToExportFunction[uniConstraintType](uniConstraint, fbxScene, fbxNode);
+                    constraintDelegate(uniConstraint, fbxScene, fbxNode);
                 }
 
                 return true;
@@ -2004,6 +2007,10 @@ namespace FbxExporters
             struct FbxPropertyChannelPair {
                 public string Property { get; private set; }
                 public string Channel { get; private set; }
+
+                /// <summary>
+                /// Map of Unity transform properties to their FBX equivalent.
+                /// </summary>
                 private static Dictionary<string, string> TransformProperties = new Dictionary<string, string>()
                 {
                     { "m_LocalScale", "Lcl Scaling" },
@@ -2015,6 +2022,9 @@ namespace FbxExporters
                     { "m_RotationOffset", "Rotation" }
                 };
 
+                /// <summary>
+                /// Map of Unity Aim constraint properties to their FBX equivalent.
+                /// </summary>
                 private static Dictionary<string, string> AimConstraintProperties = new Dictionary<string, string>()
                 {
                     { "m_AimVector", "AimVector" },
@@ -2023,37 +2033,68 @@ namespace FbxExporters
                     { "m_RotationOffset", "RotationOffset" }
                 };
 
+                /// <summary>
+                /// Map of Unity transform channels to their FBX equivalent.
+                /// </summary>
                 private static Dictionary<string, string> TransformChannels = new Dictionary<string, string>()
                 {
                     { "x", Globals.FBXSDK_CURVENODE_COMPONENT_X },
                     { "y", Globals.FBXSDK_CURVENODE_COMPONENT_Y },
                     { "z", Globals.FBXSDK_CURVENODE_COMPONENT_Z }
                 };
+
+                /// <summary>
+                /// Map of Unity color properties to their FBX equivalent.
+                /// </summary>
                 private static Dictionary<string, string> ColorProperties = new Dictionary<string, string>()
                 {
                     { "m_Color", "Color" }
                 };
+
+                /// <summary>
+                /// Map of Unity color channels to their FBX equivalent.
+                /// </summary>
                 private static Dictionary<string, string> ColorChannels = new Dictionary<string, string>()
                 {
                     { "b", Globals.FBXSDK_CURVENODE_COLOR_BLUE },
                     { "g", Globals.FBXSDK_CURVENODE_COLOR_GREEN },
                     { "r", Globals.FBXSDK_CURVENODE_COLOR_RED }
                 };
+
+                /// <summary>
+                /// Map of Unity properties to their FBX equivalent.
+                /// </summary>
                 private static Dictionary<string, string> OtherProperties = new Dictionary<string, string>()
                 {
                     { "m_Intensity", "Intensity" },
                     { "field of view", "FieldOfView" },
                     { "m_Weight", "Weight" }
                 };
+
+                /// <summary>
+                /// Map of empty string to null, used for properties that don't need a channel.
+                /// </summary>
                 private static Dictionary<string, string> NullChannel = new Dictionary<string, string>() { { "", null } };
+
+                /// <summary>
+                /// Map of Unity constraint source property name as a regular expression to the FBX property as a string format.
+                /// This is necessary because the Unity property contains an index in to an array, and the FBX property contains
+                /// the name of the source object.
+                /// </summary>
                 private static Dictionary<string, string> ConstraintSourceProperties = new Dictionary<string, string>()
                 {
-                    { "m_Sources\\.Array\\.data\\[(\\d+)\\]\\.weight", "{0}.Weight" }
+                    { @"m_Sources\.Array\.data\[(\d+)\]\.weight", "{0}.Weight" }
                 };
+
+                /// <summary>
+                /// Map of Unity constraint source transform property name as a regular expression to the FBX property as a string format.
+                /// This is necessary because the Unity property contains an index in to an array, and the FBX property contains
+                /// the name of the source object.
+                /// </summary>
                 private static Dictionary<string, string> ConstraintSourceTransformProperties = new Dictionary<string, string>()
                 {
-                    { "m_TranslationOffsets\\.Array\\.data\\[(\\d+)\\]", "{0}.Offset T" },
-                    { "m_RotationOffsets\\.Array\\.data\\[(\\d+)\\]", "{0}.Offset R" }
+                    { @"m_TranslationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset T" },
+                    { @"m_RotationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset R" }
                 };
 
                 public FbxPropertyChannelPair(string p, string c) : this() {
