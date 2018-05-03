@@ -169,58 +169,20 @@ namespace FbxExporters
                 return new UnityPropertyChannelPair(property, channel);
             }
 
-            private static FbxPropertyChannelPair[] GetChannelPairs(string uniPropertyName, PropertyChannelMap propertyChannelMap)
+            private static string GetFbxProperty(string uniProperty, Dictionary<string, string> propertyMap)
             {
-                // Unity property name is of the format "property.channel". Split by the last '.' and search for the property in the property dict, and channel in the channel dict.
-                // If the property name is just "property" then the channel is null.
-
-                var properties = propertyChannelMap.MapUnityPropToFbxProp;
-                var channels = propertyChannelMap.MapUnityChannelToFbxChannel;
-
-                // First handle case where there's no channels.
-                if (channels == null)
-                {
-                    string fbxProperty;
-                    if (properties.TryGetValue(uniPropertyName, out fbxProperty))
-                    {
-                        return new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxProperty, null) };
-                    }
+                string fbxProperty;
+                if(!propertyMap.TryGetValue(uniProperty, out fbxProperty)){
                     return null;
                 }
-
-                var uniPropChannelPair = GetUnityPropertyChannelPair(uniPropertyName);
-                if(uniPropChannelPair.channel == null)
-                {
-                    // We've already checked the case where there are no channels
-                    return null;
-                }
-
-                var property = uniPropChannelPair.property;
-                var channel = uniPropChannelPair.channel;
-
-                string fbxProp;
-                if(!properties.TryGetValue(property, out fbxProp))
-                {
-                    return null;
-                }
-
-                string fbxChannel;
-                if(!channels.TryGetValue(channel, out fbxChannel))
-                {
-                    return null;
-                }
-
-                return new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxProp, fbxChannel) };
+                return fbxProperty;
             }
 
-            private static FbxPropertyChannelPair[] GetConstraintSourceChannelPairs(string uniPropertyName, FbxConstraint constraint, PropertyChannelMap propertyChannelMap)
+            private static string GetFbxConstraintSourceProperty(string uniProperty, FbxConstraint constraint, Dictionary<string, string> propertyMap)
             {
-                var properties = propertyChannelMap.MapUnityPropToFbxProp;
-                var channels = propertyChannelMap.MapUnityChannelToFbxChannel;
-
-                foreach(var prop in properties)
+                foreach (var prop in propertyMap)
                 {
-                    var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, prop.Key);
+                    var match = System.Text.RegularExpressions.Regex.Match(uniProperty, prop.Key);
                     if (match.Success && match.Groups.Count > 0)
                     {
                         var matchedStr = match.Groups[1].Value;
@@ -230,32 +192,62 @@ namespace FbxExporters
                             continue;
                         }
                         var source = constraint.GetConstraintSource(index);
-                        var fbxName = string.Format(prop.Value, source.GetName());
-
-                        // Have the fbx name, now need the channel
-                        if(channels == null)
-                        {
-                            // no channel, we have what we need
-                            return new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, null) };
-                        }
-
-                        var uniPropChannelPair = GetUnityPropertyChannelPair(uniPropertyName);
-                        if (uniPropChannelPair.channel == null)
-                        {
-                            // We've already checked the case where there are no channels
-                            return null;
-                        }
-                        
-                        var channel = uniPropChannelPair.channel;
-                        string fbxChannel;
-                        if (!channels.TryGetValue(channel, out fbxChannel))
-                        {
-                            return null;
-                        }
-                        return new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxName, fbxChannel) };
+                        return string.Format(prop.Value, source.GetName());
                     }
                 }
+                return null;
+            }
 
+            private static string GetFbxChannel(string uniChannel, Dictionary<string, string> channelMap)
+            {
+                string fbxChannel;
+                if(!channelMap.TryGetValue(uniChannel, out fbxChannel))
+                {
+                    return null;
+                }
+                return fbxChannel;
+            }
+
+            private static FbxPropertyChannelPair[] GetChannelPairs(string uniPropertyName, PropertyChannelMap propertyChannelMap, FbxConstraint constraint = null)
+            {
+                // Unity property name is of the format "property.channel" or "property". Handle both cases.
+                var possibleUniPropChannelPairs = new List<UnityPropertyChannelPair>();
+
+                // could give same result as already in the list, avoid checking this case twice
+                var propChannelPair = GetUnityPropertyChannelPair(uniPropertyName);
+                possibleUniPropChannelPairs.Add(propChannelPair);
+                if (propChannelPair.property != uniPropertyName)
+                {
+                    possibleUniPropChannelPairs.Add(new UnityPropertyChannelPair(uniPropertyName, null));
+                }
+
+                foreach (var uniPropChannelPair in possibleUniPropChannelPairs)
+                {
+                    // try to match property
+                    var fbxProperty = GetFbxProperty(uniPropChannelPair.property, propertyChannelMap.MapUnityPropToFbxProp);
+                    if (string.IsNullOrEmpty(fbxProperty) && constraint != null)
+                    {
+                        // check if it's a constraint source property
+                        fbxProperty = GetFbxConstraintSourceProperty(uniPropChannelPair.property, constraint, propertyChannelMap.MapUnityPropToFbxProp);
+                    }
+                    if (string.IsNullOrEmpty(fbxProperty))
+                    {
+                        continue;
+                    }
+
+                    // matched property, now try to match channel
+                    string fbxChannel = null;
+                    if(!string.IsNullOrEmpty(uniPropChannelPair.channel) && propertyChannelMap.MapUnityChannelToFbxChannel != null)
+                    {
+                        fbxChannel = GetFbxChannel(uniPropChannelPair.channel, propertyChannelMap.MapUnityChannelToFbxChannel);
+                        if (string.IsNullOrEmpty(fbxChannel))
+                        {
+                            // couldn't match the Unity channel to the fbx channel
+                            continue;
+                        }
+                    }
+                    return new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxProperty, fbxChannel) };
+                }
                 return null;
             }
 
@@ -278,52 +270,34 @@ namespace FbxExporters
                     return true;
                 }
 
+                var propertyMaps = new List<PropertyChannelMap>();
+
                 // Try get constraint specific channel pairs first as we know this is a constraint
                 if (constraint != null)
                 {
                     // Aim constraint shares the RotationOffset property with RotationConstraint, so make sure that the correct FBX property is returned
                     if (constraint.GetConstraintType() == FbxConstraint.EType.eAim)
                     {
-                        prop = GetChannelPairs(uniPropertyName, AimConstraintPropertyMap);
-                        if (prop != null)
-                        {
-                            return true;
-                        }
+                        propertyMaps.Add(AimConstraintPropertyMap);
                     }
 
-                    var constraintPropertyMaps = new List<PropertyChannelMap>()
-                    {
-                        ConstraintSourcePropertyMap,
-                        ConstraintSourceTransformPropertyMap
-                    };
-
-                    foreach(var propMap in constraintPropertyMaps)
-                    {
-                        prop = GetConstraintSourceChannelPairs(uniPropertyName, constraint, propMap);
-                        if(prop != null)
-                        {
-                            return true;
-                        }
-                    }
+                    propertyMaps.Add(ConstraintSourcePropertyMap);
+                    propertyMaps.Add(ConstraintSourceTransformPropertyMap);
                 }
 
                 // Check if this is a transform, color, or other property and return the channel pairs if they match.
-                var propertyMaps = new List<PropertyChannelMap>()
-                {
-                    TransformPropertyMap,
-                    ColorPropertyMap,
-                    OtherPropertyMap
-                };
+                propertyMaps.Add(TransformPropertyMap);
+                propertyMaps.Add(ColorPropertyMap);
+                propertyMaps.Add(OtherPropertyMap);
 
                 foreach (var propMap in propertyMaps)
                 {
-                    prop = GetChannelPairs(uniPropertyName, propMap);
+                    prop = GetChannelPairs(uniPropertyName, propMap, constraint);
                     if (prop != null)
                     {
                         return true;
                     }
                 }
-
                 return false;
             }
         }
