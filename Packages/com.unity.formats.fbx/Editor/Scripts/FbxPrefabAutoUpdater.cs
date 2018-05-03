@@ -24,10 +24,12 @@ namespace FbxExporters
     /// </summary>
     public /*static*/ class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
     {
-        #if UNITY_EDITOR
-        public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
-        #else
+        #if COM_UNITY_FORMATS_FBX_AS_ASSET
         public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
+        #elif UNITY_2018_2_OR_LATER
+        public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
+        #else // Unity 2018.1 and fbx installed as a package
+        public const string FBX_PREFAB_FILE = "Packages/com.unity.formats.fbx/Runtime/FbxPrefab.cs";
         #endif
 
         const string MenuItemName = "GameObject/Update from FBX";
@@ -37,17 +39,36 @@ namespace FbxExporters
 
         public static string FindFbxPrefabAssetPath()
         {
+        #if COM_UNITY_FORMATS_FBX_AS_ASSET || UNITY_2018_2_OR_LATER
             // Find guids that are scripts that look like FbxPrefab.
             // That catches FbxPrefabTest too, so we have to make sure.
             var allGuids = AssetDatabase.FindAssets("FbxPrefab t:MonoScript");
+            string foundPath = "";
             foreach (var guid in allGuids) {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
                 if (path.EndsWith(FBX_PREFAB_FILE)) {
-                    return path;
+                    if (!string.IsNullOrEmpty(foundPath)) {
+                        // How did this happen? Anyway, just don't try.
+                        Debug.LogWarning(string.Format("{0} found in multiple places; did you forget to delete one of these?\n{1}\n{2}",
+                                FBX_PREFAB_FILE.Substring(1), foundPath, path));
+                        return "";
+                    }
+                    foundPath = path;
                 }
             }
-            Debug.LogError(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
+            Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
             return "";
+        #else
+            // In Unity 2018.1, FindAssets can't find FbxPrefab.cs in a package.
+            // So we hardcode the path.
+            var path = FBX_PREFAB_FILE;
+            if (System.IO.File.Exists(System.IO.Path.GetFullPath(path))) {
+                return path;
+            } else {
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE, FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
+                return "";
+            }
+        #endif
         }
 
         public static bool IsFbxAsset(string assetPath) {
@@ -68,19 +89,22 @@ namespace FbxExporters
         public static bool MayHaveFbxPrefabToFbxAsset(string prefabPath,
                 string fbxPrefabScriptPath, HashSet<string> fbxImported) {
             var depPaths = AssetDatabase.GetDependencies(prefabPath, recursive: false);
-            bool dependsOnFbxPrefab = false;
-            bool dependsOnImportedFbx = false;
-            foreach (var dep in depPaths) {
-                if (dep == fbxPrefabScriptPath) {
-                    if (dependsOnImportedFbx) { return true; }
-                    dependsOnFbxPrefab = true;
-                } else if (fbxImported.Contains(dep)) {
-                    if (dependsOnFbxPrefab) { return true; }
-                    dependsOnImportedFbx = true;
+
+            // If we can find the path to the FbxPrefab, check that the prefab depends on it.
+            // If we can't find FbxPrefab.cs then just ignore that dependence requirement.
+            if (!string.IsNullOrEmpty(fbxPrefabScriptPath)) {
+                if (!depPaths.Contains(fbxPrefabScriptPath)) {
+                    return false;
                 }
             }
-            // Either none or only one of the conditions was true, which
-            // means this prefab certainly doesn't match.
+
+            // We found (or don't care about) the FbxPrefab, now check if we
+            // depend on any of the imported fbx files.
+            foreach (var dep in depPaths) {
+                if (fbxImported.Contains(dep)) {
+                    return true;
+                }
+            }
             return false;
         }
 
