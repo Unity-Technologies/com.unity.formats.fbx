@@ -316,7 +316,7 @@ namespace FbxExporters
                 string prefabFullPath = null)
             {
                 if(PrefabUtility.GetPrefabType(instance) == PrefabType.PrefabInstance) {
-                    return PrefabUtility.ReplacePrefab(instance, PrefabUtility.GetCorrespondingObjectFromSource(instance));
+                    return PrefabUtility.ReplacePrefab(instance, PrefabUtility.GetPrefabParent(instance));
                 }
 
                 // Otherwise, create a new prefab. First choose its filename/path.
@@ -388,7 +388,7 @@ namespace FbxExporters
                 switch(unityPrefabType) {
                 case PrefabType.ModelPrefabInstance:
                     if (go.Equals(PrefabUtility.FindPrefabRoot (go))) {
-                        return PrefabUtility.GetCorrespondingObjectFromSource(go) as GameObject;
+                        return PrefabUtility.GetPrefabParent(go) as GameObject;
                     } else {
                         return null;
                     }
