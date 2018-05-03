@@ -169,6 +169,12 @@ namespace FbxExporters
                 return new UnityPropertyChannelPair(property, channel);
             }
 
+            /// <summary>
+            /// Get the Fbx property name for the given Unity property name from the given dictionary.
+            /// </summary>
+            /// <param name="uniProperty"></param>
+            /// <param name="propertyMap"></param>
+            /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
             private static string GetFbxProperty(string uniProperty, Dictionary<string, string> propertyMap)
             {
                 string fbxProperty;
@@ -178,6 +184,16 @@ namespace FbxExporters
                 return fbxProperty;
             }
 
+            /// <summary>
+            /// Get the Fbx property name for the given Unity constraint source property name from the given dictionary.
+            /// 
+            /// This is different from GetFbxProperty() because the Unity constraint source properties contain indices, and
+            /// the Fbx constraint source property contains the name of the source object.
+            /// </summary>
+            /// <param name="uniProperty"></param>
+            /// <param name="constraint"></param>
+            /// <param name="propertyMap"></param>
+            /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
             private static string GetFbxConstraintSourceProperty(string uniProperty, FbxConstraint constraint, Dictionary<string, string> propertyMap)
             {
                 foreach (var prop in propertyMap)
@@ -198,6 +214,12 @@ namespace FbxExporters
                 return null;
             }
 
+            /// <summary>
+            /// Get the Fbx channel name for the given Unity channel from the given dictionary.
+            /// </summary>
+            /// <param name="uniChannel"></param>
+            /// <param name="channelMap"></param>
+            /// <returns>The Fbx channel name or null if there was no match in the dictionary</returns>
             private static string GetFbxChannel(string uniChannel, Dictionary<string, string> channelMap)
             {
                 string fbxChannel;
@@ -208,6 +230,13 @@ namespace FbxExporters
                 return fbxChannel;
             }
 
+            /// <summary>
+            /// Try to get the property channel pairs for the given Unity property from the given property channel mapping.
+            /// </summary>
+            /// <param name="uniPropertyName"></param>
+            /// <param name="propertyChannelMap"></param>
+            /// <param name="constraint"></param>
+            /// <returns>The property channel pairs or null if there was no match</returns>
             private static FbxPropertyChannelPair[] GetChannelPairs(string uniPropertyName, PropertyChannelMap propertyChannelMap, FbxConstraint constraint = null)
             {
                 // Unity property name is of the format "property.channel" or "property". Handle both cases.
