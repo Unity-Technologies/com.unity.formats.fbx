@@ -523,12 +523,6 @@ proc string[] getUnityExportSets(){
 }
 
 proc setupNewExportSet(string $exportPath, int $exportAnimOnly, string $selectedObjects[]){
-    // extract name from path
-    // create export set
-    // create namespace
-    // move objects into namespace
-    // add objects to export set
-    // add attributes to set
     $isAnimFile = $exportAnimOnly;
     
     // Get the export set attributes
@@ -570,10 +564,6 @@ proc setupNewExportSet(string $exportPath, int $exportAnimOnly, string $selected
     
     setExportSetAttributes($unityExportSet, $isAnimFile, $setCreated, $exportAttrs, $targetNamespace);
     
-    // add to the targetNamespace
-    // iterate over all selected objects and rename
-    // rename FOO:sphere2 :BAR:sphere2;
-    
     if (setExists($unityExportSet) == true){
         // add newly imported items to set
         if (size($selectedObjects) > 0){
@@ -581,6 +571,12 @@ proc setupNewExportSet(string $exportPath, int $exportAnimOnly, string $selected
         }
         // lock set so it doesn't get deleted when empty
         lockNode -lock true $unityExportSet;
+    }
+    
+    // add to the targetNamespace
+    // iterate over all selected objects and rename
+    for($object in $selectedObjects){
+        rename $object ($targetNamespace + ":" + $object);
     }
 }
 
