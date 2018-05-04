@@ -148,7 +148,7 @@ proc string[] getExportSetAttributes(string $exportPath, int $exportAnimOnly){
         // import as animation
         $exportAnimFileName = $exportFileName;
         
-        if(match("@", basename($exportDir, ".fbx")) != ""){
+        if(match("@", basename($exportPath, ".fbx")) != ""){
             $fileNameWithoutExt = match("[^@]+", $fileNameWithoutExt);
         }
     }
