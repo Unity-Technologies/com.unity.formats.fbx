@@ -635,7 +635,6 @@ proc unityExport(int $exportType){
     
     // if selection doesn't belong to a set, export to a new file
     if(size($setsToExport) <= 0){
-        //eval "GamePipelineSendToUnity 1";
         $unityProject = `optionVar -q "UnityProject"`;
         $exportPath = `fileDialog2 -ds 2 -cap "FBX Export Selection" -dir $unityProject -ff "*.fbx" -fm 0`;
         if(size($exportPath)<=0){
