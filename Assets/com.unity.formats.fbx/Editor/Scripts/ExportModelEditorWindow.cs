@@ -64,6 +64,7 @@ namespace FbxExporters
                 m_nameTextFieldStyle = new GUIStyle(GUIStyle.none);
                 m_nameTextFieldStyle.alignment = TextAnchor.LowerCenter;
                 m_nameTextFieldStyle.clipping = TextClipping.Clip;
+                m_nameTextFieldStyle.normal.textColor = EditorStyles.textField.normal.textColor;
 
                 m_fbxExtLabelStyle = new GUIStyle (GUIStyle.none);
                 m_fbxExtLabelStyle.alignment = TextAnchor.MiddleLeft;
