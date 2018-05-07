@@ -124,9 +124,8 @@ namespace FbxExporters.EditorTools {
 
             var repairMissingScripts = new GUIContent (
                                        "Run Component Updater",
-                                        "If the forum package 1.1.0b1 was previously installed, then links to the FbxPrefab component " +
-                                        "in assets created with the FBX exporter will need updating.\n" +
-                                        "Run this button to update all FbxPrefab references in text serialized prefabs and scene files.");
+                                        "If FBX exporter version 1.3.0f1 or earlier was previously installed, then links to the FbxPrefab component will need updating.\n" +
+                                        "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
 
             if (GUILayout.Button (repairMissingScripts)) {
                 var componentUpdater = new FbxExporters.Editor.RepairMissingScripts ();
