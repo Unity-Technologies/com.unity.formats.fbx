@@ -1,5 +1,9 @@
 # Changes in FBX SDK C# Bindings
 
+## [0.0.6-preview] - 2018-05-07
+
+- Fix minor documentation bugs.
+
 ## [0.0.4-preview] - 2018-05-04
 
 - Fix path on Windows

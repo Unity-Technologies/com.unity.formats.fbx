@@ -1,6 +1,6 @@
 # About the FBX Exporter package 
 
-__Version__: 1.3.0f1
+__Version__: 0.0.6-preview
 
 The FBX Exporter package provides round-trip workflows between Unity and 3D modeling software. Use this workflow to send geometry, Lights, Cameras, and animation from Unity to Maya, Maya LT, or 3ds Max, and back again, with minimal effort.
 
@@ -16,7 +16,7 @@ The FBX Exporter package includes the following features:
 
 The FBX Exporter package is compatible with the following versions of the Unity Editor:
 
-* 2017.3 and later
+* 2018.1 and later
 
 The Unity Integration for Maya feature supports the following versions of Maya:
 
