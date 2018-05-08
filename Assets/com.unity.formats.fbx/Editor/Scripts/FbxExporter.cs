@@ -1,7 +1,7 @@
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.Animations;
 using UnityEditor;
 using Unity.FbxSdk;
 using System.Linq;
@@ -154,6 +154,12 @@ namespace FbxExporters
             /// animation.
             /// </summary>
             Dictionary<GameObject, FbxNode> MapUnityObjectToFbxNode = new Dictionary<GameObject, FbxNode> ();
+
+            /// <summary>
+            /// keep a map between the constrained FbxNode (in Unity this is the GameObject with constraint component)
+            /// and its FbxConstraints for quick lookup when exporting constraint animations.
+            /// </summary>
+            Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>> MapConstrainedObjectToConstraints = new Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>>();
 
             /// <summary>
             /// Map Unity material name to FBX material object
@@ -1172,6 +1178,28 @@ namespace FbxExporters
                 return new FbxVector4 (vector4.X, -vector4.Y, -vector4.Z, vector4.W);
             }
 
+            public static FbxDouble3 ToFbxDouble3(Vector3 v)
+            {
+                return new FbxDouble3(v.x, v.y, v.z);
+            }
+
+            public static FbxDouble3 ToFbxDouble3(FbxVector4 v)
+            {
+                return new FbxDouble3(v.X, v.Y, v.Z);
+            }
+
+            public static FbxVector4 ToFbxVector4(FbxDouble3 v)
+            {
+                return new FbxVector4(v.X, v.Y, v.Z);
+            }
+
+            public static FbxDouble3 ConvertToRightHandedEuler(Vector3 rot)
+            {
+                rot.y *= -1;
+                rot.z *= -1;
+                return ToFbxDouble3(rot);
+            }
+
             /// <summary>
             /// Euler to quaternion without axis conversion.
             /// </summary>
@@ -1416,6 +1444,282 @@ namespace FbxExporters
                 return true;
             }
 
+            protected bool ExportCommonConstraintProperties<T,U>(T uniConstraint, U fbxConstraint, FbxNode fbxNode) where T : IConstraint where U : FbxConstraint
+            {
+                fbxConstraint.Active.Set(uniConstraint.constraintActive);
+                fbxConstraint.Lock.Set(uniConstraint.locked);
+                fbxConstraint.Weight.Set(uniConstraint.weight * UnitScaleFactor);
+
+                AddFbxNodeToConstraintsMapping(fbxNode, fbxConstraint, typeof(T));
+                return true;
+            }
+
+            protected struct ExpConstraintSource
+            {
+                public FbxNode node;
+                public float weight;
+
+                public ExpConstraintSource(FbxNode node, float weight)
+                {
+                    this.node = node;
+                    this.weight = weight;
+                }
+            }
+
+            protected List<ExpConstraintSource> GetConstraintSources(IConstraint unityConstraint)
+            {
+                var fbxSources = new List<ExpConstraintSource>();
+                var sources = new List<ConstraintSource>();
+                unityConstraint.GetSources(sources);
+                foreach (var source in sources)
+                {
+                    // ignore any sources that are not getting exported
+                    FbxNode sourceNode;
+                    if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
+                    {
+                        continue;
+                    }
+                    fbxSources.Add(new ExpConstraintSource(sourceNode, source.weight * UnitScaleFactor));
+                }
+                return fbxSources;
+            }
+
+            protected void AddFbxNodeToConstraintsMapping<T>(FbxNode fbxNode, T fbxConstraint, System.Type uniConstraintType) where T : FbxConstraint
+            {
+                Dictionary<FbxConstraint, System.Type> constraintMapping;
+                if (!MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraintMapping))
+                {
+                    constraintMapping = new Dictionary<FbxConstraint, System.Type>();
+                    MapConstrainedObjectToConstraints.Add(fbxNode, constraintMapping);
+                }
+                constraintMapping.Add(fbxConstraint, uniConstraintType);
+            }
+
+            protected bool ExportPositionConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                var uniPosConstraint = uniConstraint as PositionConstraint;
+                Debug.Assert (uniPosConstraint != null);
+
+                FbxConstraintPosition fbxPosConstraint = FbxConstraintPosition.Create(fbxScene, fbxNode.GetName() + "_positionConstraint");
+                fbxPosConstraint.SetConstrainedObject(fbxNode);
+                var uniSources = GetConstraintSources(uniPosConstraint);
+                uniSources.ForEach(uniSource => fbxPosConstraint.AddConstraintSource(uniSource.node, uniSource.weight));
+                ExportCommonConstraintProperties(uniPosConstraint, fbxPosConstraint, fbxNode);
+
+                var uniAffectedAxes = uniPosConstraint.translationAxis;
+                fbxPosConstraint.AffectX.Set((uniAffectedAxes & Axis.X) == Axis.X);
+                fbxPosConstraint.AffectY.Set((uniAffectedAxes & Axis.Y) == Axis.Y);
+                fbxPosConstraint.AffectZ.Set((uniAffectedAxes & Axis.Z) == Axis.Z);
+
+                var fbxTranslationOffset = ConvertToRightHanded(uniPosConstraint.translationOffset, UnitScaleFactor);
+                fbxPosConstraint.Translation.Set(ToFbxDouble3(fbxTranslationOffset));
+
+                // rest position is the position of the fbx node
+                var fbxRestTranslation = ConvertToRightHanded(uniPosConstraint.translationAtRest, UnitScaleFactor);
+                // set the local position of fbxNode
+                fbxNode.LclTranslation.Set(ToFbxDouble3(fbxRestTranslation));
+                return true;
+            }
+
+            protected bool ExportRotationConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                var uniRotConstraint = uniConstraint as RotationConstraint;
+                Debug.Assert(uniRotConstraint != null);
+
+                FbxConstraintRotation fbxRotConstraint = FbxConstraintRotation.Create(fbxScene, fbxNode.GetName() + "_rotationConstraint");
+                fbxRotConstraint.SetConstrainedObject(fbxNode);
+                var uniSources = GetConstraintSources(uniRotConstraint);
+                uniSources.ForEach(uniSource => fbxRotConstraint.AddConstraintSource(uniSource.node, uniSource.weight));
+                ExportCommonConstraintProperties(uniRotConstraint, fbxRotConstraint, fbxNode);
+
+                var uniAffectedAxes = uniRotConstraint.rotationAxis;
+                fbxRotConstraint.AffectX.Set((uniAffectedAxes & Axis.X) == Axis.X);
+                fbxRotConstraint.AffectY.Set((uniAffectedAxes & Axis.Y) == Axis.Y);
+                fbxRotConstraint.AffectZ.Set((uniAffectedAxes & Axis.Z) == Axis.Z);
+
+                // Not converting rotation offset to XYZ euler as it gives the incorrect result in both Maya and Unity.
+                var uniRotationOffset = uniRotConstraint.rotationOffset;
+                var fbxRotationOffset = ConvertToRightHandedEuler(uniRotationOffset);
+
+                fbxRotConstraint.Rotation.Set(fbxRotationOffset);
+
+                // rest rotation is the rotation of the fbx node
+                var uniRestRotationQuat = Quaternion.Euler(uniRotConstraint.rotationAtRest);
+                var fbxRestRotation = ConvertQuaternionToXYZEuler(uniRestRotationQuat);
+                // set the local rotation of fbxNode
+                fbxNode.LclRotation.Set(fbxRestRotation);
+                return true;
+            }
+
+            protected bool ExportScaleConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                var uniScaleConstraint = uniConstraint as ScaleConstraint;
+                Debug.Assert(uniScaleConstraint != null);
+
+                FbxConstraintScale fbxScaleConstraint = FbxConstraintScale.Create(fbxScene, fbxNode.GetName() + "_scaleConstraint");
+                fbxScaleConstraint.SetConstrainedObject(fbxNode);
+                var uniSources = GetConstraintSources(uniScaleConstraint);
+                uniSources.ForEach(uniSource => fbxScaleConstraint.AddConstraintSource(uniSource.node, uniSource.weight));
+                ExportCommonConstraintProperties(uniScaleConstraint, fbxScaleConstraint, fbxNode);
+
+                var uniAffectedAxes = uniScaleConstraint.scalingAxis;
+                fbxScaleConstraint.AffectX.Set((uniAffectedAxes & Axis.X) == Axis.X);
+                fbxScaleConstraint.AffectY.Set((uniAffectedAxes & Axis.Y) == Axis.Y);
+                fbxScaleConstraint.AffectZ.Set((uniAffectedAxes & Axis.Z) == Axis.Z);
+
+                var uniScaleOffset = uniScaleConstraint.scaleOffset;
+                var fbxScalingOffset = ToFbxDouble3(uniScaleOffset);
+                fbxScaleConstraint.Scaling.Set(fbxScalingOffset);
+
+                // rest rotation is the rotation of the fbx node
+                var uniRestScale = uniScaleConstraint.scaleAtRest;
+                var fbxRestScale = ToFbxDouble3(uniRestScale);
+                // set the local rotation of fbxNode
+                fbxNode.LclScaling.Set(fbxRestScale);
+                return true;
+            }
+
+            protected bool ExportAimConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                var uniAimConstraint = uniConstraint as AimConstraint;
+                Debug.Assert(uniAimConstraint != null);
+
+                FbxConstraintAim fbxAimConstraint = FbxConstraintAim.Create(fbxScene, fbxNode.GetName() + "_aimConstraint");
+                fbxAimConstraint.SetConstrainedObject(fbxNode);
+                var uniSources = GetConstraintSources(uniAimConstraint);
+                uniSources.ForEach(uniSource => fbxAimConstraint.AddConstraintSource(uniSource.node, uniSource.weight));
+                ExportCommonConstraintProperties(uniAimConstraint, fbxAimConstraint, fbxNode);
+
+                var uniAffectedAxes = uniAimConstraint.rotationAxis;
+                fbxAimConstraint.AffectX.Set((uniAffectedAxes & Axis.X) == Axis.X);
+                fbxAimConstraint.AffectY.Set((uniAffectedAxes & Axis.Y) == Axis.Y);
+                fbxAimConstraint.AffectZ.Set((uniAffectedAxes & Axis.Z) == Axis.Z);
+
+                var uniRotationOffset = uniAimConstraint.rotationOffset;
+                var fbxRotationOffset = ConvertToRightHandedEuler(uniRotationOffset);
+                fbxAimConstraint.RotationOffset.Set(fbxRotationOffset);
+
+                // rest rotation is the rotation of the fbx node
+                var uniRestRotationQuat = Quaternion.Euler(uniAimConstraint.rotationAtRest);
+                var fbxRestRotation = ConvertQuaternionToXYZEuler(uniRestRotationQuat);
+                // set the local rotation of fbxNode
+                fbxNode.LclRotation.Set(fbxRestRotation);
+
+                FbxConstraintAim.EWorldUp fbxWorldUpType = FbxConstraintAim.EWorldUp.eAimAtNone;
+                switch (uniAimConstraint.worldUpType)
+                {
+                    case AimConstraint.WorldUpType.None:
+                        fbxWorldUpType = FbxConstraintAim.EWorldUp.eAimAtNone;
+                        break;
+                    case AimConstraint.WorldUpType.ObjectRotationUp:
+                        fbxWorldUpType = FbxConstraintAim.EWorldUp.eAimAtObjectRotationUp;
+                        break;
+                    case AimConstraint.WorldUpType.ObjectUp:
+                        fbxWorldUpType = FbxConstraintAim.EWorldUp.eAimAtObjectUp;
+                        break;
+                    case AimConstraint.WorldUpType.SceneUp:
+                        fbxWorldUpType = FbxConstraintAim.EWorldUp.eAimAtSceneUp;
+                        break;
+                    case AimConstraint.WorldUpType.Vector:
+                        fbxWorldUpType = FbxConstraintAim.EWorldUp.eAimAtVector;
+                        break;
+                    default:
+                        throw new System.NotImplementedException();
+                }
+                fbxAimConstraint.WorldUpType.Set((int)fbxWorldUpType);
+                
+                var uniAimVector = ConvertToRightHanded(uniAimConstraint.aimVector);
+                fbxAimConstraint.AimVector.Set(ToFbxDouble3(uniAimVector));
+                fbxAimConstraint.UpVector.Set(ToFbxDouble3(uniAimConstraint.upVector));
+                fbxAimConstraint.WorldUpVector.Set(ToFbxDouble3(uniAimConstraint.worldUpVector));
+
+                if (uniAimConstraint.worldUpObject && MapUnityObjectToFbxNode.ContainsKey(uniAimConstraint.worldUpObject.gameObject))
+                {
+                    fbxAimConstraint.SetWorldUpObject(MapUnityObjectToFbxNode[uniAimConstraint.worldUpObject.gameObject]);
+                }
+                return true;
+            }
+
+            protected bool ExportParentConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                var uniParentConstraint = uniConstraint as ParentConstraint;
+                Debug.Assert(uniParentConstraint != null);
+
+                FbxConstraintParent fbxParentConstraint = FbxConstraintParent.Create(fbxScene, fbxNode.GetName() + "_parentConstraint");
+                fbxParentConstraint.SetConstrainedObject(fbxNode);
+                var uniSources = GetConstraintSources(uniParentConstraint);
+                var uniTranslationOffsets = uniParentConstraint.translationOffsets;
+                var uniRotationOffsets = uniParentConstraint.rotationOffsets;
+                for(int i = 0; i < uniSources.Count; i++)
+                {
+                    var uniSource = uniSources[i];
+                    var uniTranslationOffset = uniTranslationOffsets[i];
+                    var uniRotationOffset = uniRotationOffsets[i];
+
+                    fbxParentConstraint.AddConstraintSource(uniSource.node, uniSource.weight);
+                    
+                    var fbxTranslationOffset = ConvertToRightHanded(uniTranslationOffset, UnitScaleFactor);
+                    fbxParentConstraint.SetTranslationOffset(uniSource.node, fbxTranslationOffset);
+                    
+                    var fbxRotationOffset = ToFbxVector4(ConvertToRightHandedEuler(uniRotationOffset));
+                    fbxParentConstraint.SetRotationOffset(uniSource.node, fbxRotationOffset);
+                }
+                ExportCommonConstraintProperties(uniParentConstraint, fbxParentConstraint, fbxNode);
+
+                var uniTranslationAxes = uniParentConstraint.translationAxis;
+                fbxParentConstraint.AffectTranslationX.Set((uniTranslationAxes & Axis.X) == Axis.X);
+                fbxParentConstraint.AffectTranslationY.Set((uniTranslationAxes & Axis.Y) == Axis.Y);
+                fbxParentConstraint.AffectTranslationZ.Set((uniTranslationAxes & Axis.Z) == Axis.Z);
+
+                var uniRotationAxes = uniParentConstraint.rotationAxis;
+                fbxParentConstraint.AffectRotationX.Set((uniRotationAxes & Axis.X) == Axis.X);
+                fbxParentConstraint.AffectRotationY.Set((uniRotationAxes & Axis.Y) == Axis.Y);
+                fbxParentConstraint.AffectRotationZ.Set((uniRotationAxes & Axis.Z) == Axis.Z);
+
+                // rest position is the position of the fbx node
+                var fbxRestTranslation = ConvertToRightHanded(uniParentConstraint.translationAtRest, UnitScaleFactor);
+                // set the local position of fbxNode
+                fbxNode.LclTranslation.Set(ToFbxDouble3(fbxRestTranslation));
+
+                // rest rotation is the rotation of the fbx node
+                var uniRestRotationQuat = Quaternion.Euler(uniParentConstraint.rotationAtRest);
+                var fbxRestRotation = ConvertQuaternionToXYZEuler(uniRestRotationQuat);
+                // set the local rotation of fbxNode
+                fbxNode.LclRotation.Set(fbxRestRotation);
+                return true;
+            }
+
+            private delegate bool ExportConstraintDelegate(IConstraint c , FbxScene fs, FbxNode fn);
+
+            protected bool ExportConstraints (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
+            {
+                var mapConstraintTypeToExportFunction = new Dictionary<System.Type, ExportConstraintDelegate>()
+                {
+                    { typeof(PositionConstraint), ExportPositionConstraint },
+                    { typeof(RotationConstraint), ExportRotationConstraint },
+                    { typeof(ScaleConstraint), ExportScaleConstraint },
+                    { typeof(AimConstraint), ExportAimConstraint },
+                    { typeof(ParentConstraint), ExportParentConstraint }
+                };
+
+                // check if GameObject has one of the 5 supported constraints: aim, parent, position, rotation, scale
+                var uniConstraints = unityGo.GetComponents<IConstraint>();
+
+                foreach(var uniConstraint in uniConstraints)
+                {
+                    var uniConstraintType = uniConstraint.GetType();
+                    ExportConstraintDelegate constraintDelegate;
+                    if (!mapConstraintTypeToExportFunction.TryGetValue(uniConstraintType, out constraintDelegate))
+                    {
+                        Debug.LogWarningFormat("FbxExporter: Missing function to export constraint of type {0}", uniConstraintType.Name);
+                        continue;
+                    }
+                    constraintDelegate(uniConstraint, fbxScene, fbxNode);
+                }
+
+                return true;
+            }
+
             /// <summary>
             /// Return set of sample times to cover all keys on animation curves
             /// </summary>
@@ -1540,49 +1844,95 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Get the FbxConstraint associated with the constrained node.
+            /// </summary>
+            /// <param name="constrainedNode"></param>
+            /// <param name="uniConstraintType"></param>
+            /// <returns></returns>
+            protected FbxConstraint GetFbxConstraint(FbxNode constrainedNode, System.Type uniConstraintType)
+            {
+                if (!uniConstraintType.GetInterfaces().Contains(typeof(IConstraint)))
+                {
+                    // not actually a constraint
+                    return null;
+                }
+
+                Dictionary<FbxConstraint, System.Type> constraints;
+                if (!MapConstrainedObjectToConstraints.TryGetValue(constrainedNode, out constraints))
+                {
+                    return null;
+                }
+                
+                foreach (var constraint in constraints)
+                {
+                    if (uniConstraintType != constraint.Value)
+                    {
+                        continue;
+                    }
+
+                    return constraint.Key;
+                }
+
+                return null;
+            }
+
+            protected FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType)
+            {
+                // check if property maps to a constraint
+                // check this first because both constraints and FbxNodes can contain a RotationOffset property,
+                // but only the constraint one is animatable.
+                var fbxConstraint = GetFbxConstraint(fbxNode, uniPropertyType);
+                if(fbxConstraint != null)
+                {
+                    var prop = fbxConstraint.FindProperty(fbxPropertyName, false);
+                    if (prop.IsValid())
+                    {
+                        return prop;
+                    }
+                }
+
+                // map unity property name to fbx property
+                var fbxProperty = fbxNode.FindProperty(fbxPropertyName, false);
+                if (fbxProperty.IsValid())
+                {
+                    return fbxProperty;
+                }
+
+                var fbxNodeAttribute = fbxNode.GetNodeAttribute();
+                if (fbxNodeAttribute != null)
+                {
+                    fbxProperty = fbxNodeAttribute.FindProperty(fbxPropertyName, false);
+                }
+                return fbxProperty;
+            }
+
+            /// <summary>
             /// Export an AnimationCurve.
             /// NOTE: This is not used for rotations, because we need to convert from
             /// quaternion to euler and various other stuff.
             /// </summary>
-            protected void ExportAnimationCurve (UnityEngine.Object uniObj,
+            protected void ExportAnimationCurve (FbxNode fbxNode,
                                                  AnimationCurve uniAnimCurve,
                                                  float frameRate,
                                                  string uniPropertyName,
+                                                 System.Type uniPropertyType,
                                                  FbxScene fbxScene,
                                                  FbxAnimLayer fbxAnimLayer)
             {
                 if (Verbose) {
-                    Debug.Log ("Exporting animation for " + uniObj.ToString() + " (" + uniPropertyName + ")");
+                    Debug.Log ("Exporting animation for " + fbxNode.GetName() + " (" + uniPropertyName + ")");
                 }
 
+                var fbxConstraint = GetFbxConstraint(fbxNode, uniPropertyType);
                 FbxPropertyChannelPair[] fbxPropertyChannelPairs;
-                if (!FbxPropertyChannelPair.TryGetValue (uniPropertyName, out fbxPropertyChannelPairs)) {
-                    Debug.LogWarning (string.Format ("no mapping from Unity '{0}' to fbx property", uniPropertyName));
-                    return;
-                }
-
-                GameObject unityGo = GetGameObject (uniObj);
-                if (unityGo == null) {
-                    Debug.LogError (string.Format ("cannot find gameobject for {0}", uniObj.ToString()));
-                    return;
-                }
-
-                FbxNode fbxNode;
-                if (!MapUnityObjectToFbxNode.TryGetValue(unityGo, out fbxNode))
-                {
-                    Debug.LogError(string.Format("no fbx node for {0}", unityGo.ToString()));
+                if (!FbxPropertyChannelPair.TryGetValue (uniPropertyName, out fbxPropertyChannelPairs, fbxConstraint)) {
+                    Debug.LogWarning(string.Format("no mapping from Unity '{0}' to fbx property", uniPropertyName));
                     return;
                 }
 
                 foreach (var fbxPropertyChannelPair in fbxPropertyChannelPairs) {
                     // map unity property name to fbx property
-                    var fbxProperty = fbxNode.FindProperty (fbxPropertyChannelPair.Property, false);
-                    if (!fbxProperty.IsValid ()) {
-                        var fbxNodeAttribute = fbxNode.GetNodeAttribute ();
-                        if (fbxNodeAttribute != null) {
-                            fbxProperty = fbxNodeAttribute.FindProperty (fbxPropertyChannelPair.Property, false);
-                        }
-                    }
+                    var fbxProperty = GetFbxProperty(fbxNode, fbxPropertyChannelPair.Property, uniPropertyType);
                     if (!fbxProperty.IsValid ()) {
                         Debug.LogError (string.Format ("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
                         return;
@@ -1610,6 +1960,7 @@ namespace FbxExporters
             {
                 bool convertDistance = false;
                 bool convertLtoR = false;
+                bool convertToRadian = false;
 
                 float unitScaleFactor = 1f;
 
@@ -1617,19 +1968,30 @@ namespace FbxExporters
                 {
                     System.StringComparison cc = System.StringComparison.CurrentCulture;
 
-                    bool partT = uniPropertyName.StartsWith ("m_LocalPosition.", cc);
-                    bool partTx = uniPropertyName.EndsWith ("Position.x", cc) || uniPropertyName.EndsWith ("T.x", cc);
+                    bool partT = uniPropertyName.StartsWith("m_LocalPosition.", cc) || uniPropertyName.StartsWith("m_TranslationOffset", cc);
+                    bool partTx = uniPropertyName.EndsWith("Position.x", cc) || uniPropertyName.EndsWith("T.x", cc) || (uniPropertyName.StartsWith("m_TranslationOffset") && uniPropertyName.EndsWith(".x", cc));
+                    bool partRyz = uniPropertyName.StartsWith("m_RotationOffset", cc) && (uniPropertyName.EndsWith(".y") || uniPropertyName.EndsWith(".z"));
 
                     convertLtoR |= partTx;
+                    convertLtoR |= partRyz;
 
                     convertDistance |= partT;
                     convertDistance |= uniPropertyName.StartsWith ("m_Intensity", cc);
+                    convertDistance |= uniPropertyName.ToLower().EndsWith("weight", cc);
 
-                    if (convertDistance) 
+                    // The ParentConstraint's source Rotation Offsets are read in as radians, so make sure they are exported as radians
+                    convertToRadian = uniPropertyName.StartsWith("m_RotationOffsets.Array.data", cc);
+
+                    if (convertDistance)
                         unitScaleFactor = ModelExporter.UnitScaleFactor;
 
                     if (convertLtoR)
                         unitScaleFactor = -unitScaleFactor;
+
+                    if (convertToRadian)
+                    {
+                        unitScaleFactor *= (Mathf.PI / 180);
+                    }
                 }
 
                 public float Convert(float value)
@@ -1639,98 +2001,6 @@ namespace FbxExporters
                     return unitScaleFactor * value;
                 }
 
-            }
-
-            /// <summary>
-            /// Store FBX property name and channel name 
-            /// Default constructor added because it needs to be called before autoimplemented properties can be assigned. Otherwise we get build errors
-            /// </summary>
-            struct FbxPropertyChannelPair {
-                public string Property { get ; private set; }
-                public string Channel { get ; private set; }
-                public FbxPropertyChannelPair(string p, string c):this() {
-                    Property = p;
-                    Channel = c;
-                }
-
-                /// <summary>
-                /// Map a Unity property name to the corresponding FBX property and
-                /// channel names.
-                /// </summary>
-                public static bool TryGetValue(string uniPropertyName, out FbxPropertyChannelPair[] prop)
-                {
-                    System.StringComparison ct = System.StringComparison.CurrentCulture;
-
-                    // Transform Scaling
-                    if (uniPropertyName.StartsWith ("m_LocalScale.x", ct) || uniPropertyName.EndsWith ("S.x", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_X) };
-                        return true;
-                    }
-                    if (uniPropertyName.StartsWith ("m_LocalScale.y", ct) || uniPropertyName.EndsWith ("S.y", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Y) };
-                        return true;
-                    }
-                    if (uniPropertyName.StartsWith ("m_LocalScale.z", ct) || uniPropertyName.EndsWith ("S.z", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Scaling", Globals.FBXSDK_CURVENODE_COMPONENT_Z) };
-                        return true;
-                    }
-
-                    // Transform Translation
-                    if (uniPropertyName.StartsWith ("m_LocalPosition.x", ct) || uniPropertyName.EndsWith ("T.x", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_X) };
-                        return true;
-                    }
-                    if (uniPropertyName.StartsWith ("m_LocalPosition.y", ct) || uniPropertyName.EndsWith ("T.y", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Y) };
-                        return true;
-                    }
-                    if (uniPropertyName.StartsWith ("m_LocalPosition.z", ct) || uniPropertyName.EndsWith ("T.z", ct)) {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Lcl Translation", Globals.FBXSDK_CURVENODE_COMPONENT_Z) };
-                        return true;
-                    }
-
-                    if (uniPropertyName.StartsWith("m_Intensity", ct))
-                    {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Intensity", null) };
-                        return true;
-                    }
-
-                    if (uniPropertyName.StartsWith("m_SpotAngle", ct))
-                    {
-                        prop = new FbxPropertyChannelPair[]{ 
-                            new FbxPropertyChannelPair ("OuterAngle", null),
-                            new FbxPropertyChannelPair ("InnerAngle", null)
-                        };
-                        return true;
-                    }
-
-                    if (uniPropertyName.StartsWith("m_Color.r", ct))
-                    {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair ("Color", Globals.FBXSDK_CURVENODE_COLOR_RED) };
-                        return true;
-                    }
-
-                    if (uniPropertyName.StartsWith("m_Color.g", ct))
-                    {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_GREEN) };
-                        return true;
-                    }
-
-                    if (uniPropertyName.StartsWith("m_Color.b", ct))
-                    {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("Color", Globals.FBXSDK_CURVENODE_COLOR_BLUE) };
-                        return true;
-                    }
-
-                    if (uniPropertyName.StartsWith("field of view", ct))
-                    {
-                        prop = new FbxPropertyChannelPair[]{ new FbxPropertyChannelPair("FieldOfView", null) };
-                        return true;
-                    }
-
-                    prop = new FbxPropertyChannelPair[]{};
-                    return false;
-                }
             }
 
             /// <summary>
@@ -1772,19 +2042,6 @@ namespace FbxExporters
 
                 fbxAnimStack.SetLocalTimeSpan (new FbxTimeSpan (fbxStartTime, fbxStopTime));
 
-                /* The major difficulty: Unity uses quaternions for rotation
-                 * (which is how it should be) but FBX uses Euler angles. So we
-                 * need to gather up the list of transform curves per object.
-                 * 
-                 * For euler angles, Unity uses ZXY rotation order while Maya uses XYZ.
-                 * Maya doesn't import files with ZXY rotation correctly, so have to convert to XYZ.
-                 * Need all 3 curves in order to convert.
-                 * 
-                 * Also, in both cases, prerotation has to be removed from the animated rotation if
-                 * there are bones being exported.
-                 */
-                var rotations = new Dictionary<GameObject, RotationCurve> ();
-
                 var unityCurves = new Dictionary<GameObject, List<UnityCurve>> ();
 
                 // extract and store all necessary information from the curve bindings, namely the animation curves
@@ -1807,10 +2064,10 @@ namespace FbxExporters
                     }
 
                     if (unityCurves.ContainsKey (uniGO)) {
-                        unityCurves [uniGO].Add (new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve));
+                        unityCurves [uniGO].Add (new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve, uniCurveBinding.type));
                         continue;
                     }
-                    unityCurves.Add (uniGO, new List<UnityCurve> (){ new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve) });
+                    unityCurves.Add (uniGO, new List<UnityCurve> (){ new UnityCurve(uniCurveBinding.propertyName, uniAnimCurve, uniCurveBinding.type) });
                 }
 
                 // transfer root motion
@@ -1839,6 +2096,19 @@ namespace FbxExporters
                     }
                 }
 
+                /* The major difficulty: Unity uses quaternions for rotation
+                 * (which is how it should be) but FBX uses Euler angles. So we
+                 * need to gather up the list of transform curves per object.
+                 * 
+                 * For euler angles, Unity uses ZXY rotation order while Maya uses XYZ.
+                 * Maya doesn't import files with ZXY rotation correctly, so have to convert to XYZ.
+                 * Need all 3 curves in order to convert.
+                 * 
+                 * Also, in both cases, prerotation has to be removed from the animated rotation if
+                 * there are bones being exported.
+                 */
+                var rotations = new Dictionary<GameObject, RotationCurve>();
+
                 // export the animation curves for each GameObject that has animation
                 foreach (var kvp in unityCurves) {
                     var uniGO = kvp.Key;
@@ -1849,6 +2119,13 @@ namespace FbxExporters
                         // Do not create the curves if the component is a SkinnedMeshRenderer and if the option in FBX Export settings is toggled on.
                         if (!ExportOptions.AnimateSkinnedMesh && (uniGO.GetComponent<SkinnedMeshRenderer> () != null)) {
                             continue;    
+                        }
+
+                        FbxNode fbxNode;
+                        if (!MapUnityObjectToFbxNode.TryGetValue(uniGO, out fbxNode))
+                        {
+                            Debug.LogError(string.Format("no FbxNode found for {0}", uniGO.name));
+                            continue;
                         }
 
                         int index = QuaternionCurve.GetQuaternionIndex (propertyName);
@@ -1867,8 +2144,8 @@ namespace FbxExporters
                         }
 
                         // simple property (e.g. intensity), export right away
-                        ExportAnimationCurve (uniGO, uniAnimCurve, uniAnimClip.frameRate, 
-                            propertyName,
+                        ExportAnimationCurve (fbxNode, uniAnimCurve, uniAnimClip.frameRate, 
+                            propertyName, uniCurve.propertyType,
                             fbxScene, 
                             fbxAnimLayer);
                     }
@@ -1976,13 +2253,13 @@ namespace FbxExporters
                 string scalePropName = "m_LocalScale.";
                 var xyz = "xyz";
                 for (int k = 0; k < 3; k++) {
-                    var posUniCurve = new UnityCurve ( posPropName + xyz[k], new AnimationCurve(posKeyFrames[k]));
+                    var posUniCurve = new UnityCurve ( posPropName + xyz[k], new AnimationCurve(posKeyFrames[k]), typeof(Transform));
                     newUnityCurves.Add (posUniCurve);
 
-                    var rotUniCurve = new UnityCurve ( rotPropName + xyz[k], new AnimationCurve(rotKeyFrames[k]));
+                    var rotUniCurve = new UnityCurve ( rotPropName + xyz[k], new AnimationCurve(rotKeyFrames[k]), typeof(Transform));
                     newUnityCurves.Add (rotUniCurve);
 
-                    var scaleUniCurve = new UnityCurve ( scalePropName + xyz[k], new AnimationCurve(scaleKeyFrames[k]));
+                    var scaleUniCurve = new UnityCurve ( scalePropName + xyz[k], new AnimationCurve(scaleKeyFrames[k]), typeof(Transform));
                     newUnityCurves.Add (scaleUniCurve);
                 }
 
@@ -2055,10 +2332,12 @@ namespace FbxExporters
             struct UnityCurve {
                 public string propertyName;
                 public AnimationCurve uniAnimCurve;
+                public System.Type propertyType;
 
-                public UnityCurve(string propertyName, AnimationCurve uniAnimCurve){
+                public UnityCurve(string propertyName, AnimationCurve uniAnimCurve, System.Type propertyType){
                     this.propertyName = propertyName;
                     this.uniAnimCurve = uniAnimCurve;
+                    this.propertyType = propertyType;
                 }
             }
 
@@ -2430,6 +2709,8 @@ namespace FbxExporters
                         // export cancelled
                         return -1;
                     }
+
+                    ExportConstraints(go, fbxScene, node);
 
                     System.Type compType;
                     if (exportData.exportComponent.TryGetValue (go, out compType)) {
@@ -2841,6 +3122,8 @@ namespace FbxExporters
                     if (!exportedMesh && !exportedCamera) {
                         ExportLight (unityGo, fbxScene, fbxNode);
                     }
+
+                    ExportConstraints(unityGo, fbxScene, fbxNode);
 
                     // check if this object contains animation, keep track of it
                     // if it does
