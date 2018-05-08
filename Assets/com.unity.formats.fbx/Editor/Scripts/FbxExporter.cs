@@ -1750,6 +1750,7 @@ namespace FbxExporters
 
                 public float Convert(float value)
                 {
+                    // left handed to right handed conversion
                     // meters to centimetres conversion
                     return unitScaleFactor * value;
                 }
