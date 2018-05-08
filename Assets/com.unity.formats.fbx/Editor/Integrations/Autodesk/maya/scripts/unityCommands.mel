@@ -320,8 +320,8 @@ proc switchUnityProject(string $newProjectPath){
             optionVar -sv "UnityProject" $head;
             break;
         }
-        $head = dirname($head);
         $tail = basename($head, "");
+        $head = dirname($head);
     }
 }
 
