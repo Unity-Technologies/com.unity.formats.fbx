@@ -101,6 +101,28 @@ public class FbxConstraintParent : FbxConstraint {
     } 
   }
 
+  public void SetTranslationOffset(FbxObject pObject, FbxVector4 pTranslation) {
+    GlobalsPINVOKE.FbxConstraintParent_SetTranslationOffset(swigCPtr, FbxObject.getCPtr(pObject), pTranslation);
+    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public FbxVector4 GetTranslationOffset(FbxObject pObject) {
+    var ret = GlobalsPINVOKE.FbxConstraintParent_GetTranslationOffset(swigCPtr, FbxObject.getCPtr(pObject));
+    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public virtual void SetRotationOffset(FbxObject pObject, FbxVector4 pRotation) {
+    GlobalsPINVOKE.FbxConstraintParent_SetRotationOffset(swigCPtr, FbxObject.getCPtr(pObject), pRotation);
+    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public FbxVector4 GetRotationOffset(FbxObject pObject) {
+    var ret = GlobalsPINVOKE.FbxConstraintParent_GetRotationOffset(swigCPtr, FbxObject.getCPtr(pObject));
+    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public void AddConstraintSource(FbxObject pObject, double pWeight) {
     GlobalsPINVOKE.FbxConstraintParent_AddConstraintSource__SWIG_0(swigCPtr, FbxObject.getCPtr(pObject), pWeight);
     if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
