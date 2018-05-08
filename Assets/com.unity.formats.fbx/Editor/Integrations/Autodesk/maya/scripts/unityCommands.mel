@@ -141,6 +141,12 @@ proc string checkNamespaceNeedsUpdate(string $unitySet, string $unityFbxNamespac
 
 // =======================
 
+// Determine the export attributes to be used by the export set for the given export path.
+// If animation only, check for {model}@{animation}.fbx naming convention and set the name to be used for the export set and namespace (filename without ext)
+// to be {model} so that if {model}.fbx has already been imported, the animation is applied.
+//
+// returns an array of export attributes: 
+// export file path, file name, animation file path, animation file name, and filename without ext (for the export set and namespace names)
 proc string[] getExportSetAttributes(string $exportPath, int $exportAnimOnly){
     global int $UnityFbxFilePathIndex;
     global int $UnityFbxFileNameIndex;
@@ -175,11 +181,15 @@ proc string[] getExportSetAttributes(string $exportPath, int $exportAnimOnly){
     return $exportAttributes;
 }
 
+// Get export set name with format "{$fileNameWithoutExt}_UnityExportSet"
 proc string getNewExportSetName(string $fileNameWithoutExt){
     global string $UnityExportSetNameFormat;
     return `format -stringArg $fileNameWithoutExt $UnityExportSetNameFormat`;
 }
 
+// Get the name of the namespace to add contents of fbx into.
+// Namespace name is {currentNamespace}:{$fileNameWithoutExt} or :{$fileNameWithoutExt} 
+// if current namespace is root namespace.
 proc string getTargetNamespaceName(string $fileNameWithoutExt){
     string $origNamespace = `namespaceInfo -cur -an`;
     string $targetNamespace = ":" + $fileNameWithoutExt;
@@ -190,7 +200,9 @@ proc string getTargetNamespaceName(string $fileNameWithoutExt){
     return $targetNamespace;
 }
 
-
+// Get the name of the namespace containing the contents of the given export set
+// or "" if none.
+// The name of the namespace is stored as an attribute on the set.
 proc string getSetNamespace(string $unityExportSet){
     global string $UnityFbxNamespaceAttr;
     
@@ -206,12 +218,15 @@ proc string getSetNamespace(string $unityExportSet){
         $setNamespace = checkNamespaceNeedsUpdate($unityExportSet, $setNamespace, getObjectNamespace($unitySetContents[0]));
     }
     
+    // check if the namespace exists
     if($setNamespace != "" && `namespace -exists $setNamespace`){
         return $setNamespace;
     }
     return "";
 }
 
+// Get or create the export set in the root namespace.
+// Return true if a set has been created, and false if it already exists.
 proc int getOrCreateExportSet(string $unityExportSet, string $origNamespace){
     if (setExists($unityExportSet)){
         return false;
@@ -236,6 +251,12 @@ proc int getOrCreateExportSet(string $unityExportSet, string $origNamespace){
     return true;
 }
 
+// Add or update the following five attributes of the given export set, to be used for exporting:
+// - export directory
+// - export file name
+// - export animation directory
+// - export animation file name
+// - target namespace name (namespace that the contents of set belong to)
 proc setExportSetAttributes(
     string $unityExportSet, int $isAnimFile, int $setCreated, string $exportAttrs[], string $targetNamespace
     ){
@@ -278,6 +299,29 @@ proc setExportSetAttributes(
     
     if($fileNameWithoutExt != ""){
         storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, $targetNamespace);
+    }
+    
+    // lock set so it doesn't get deleted when empty
+    lockNode -lock true $unityExportSet;
+}
+
+proc switchUnityProject(string $newProjectPath){
+    $currentDir = dirname($newProjectPath);
+    // Change Unity project if fbx is from a different Unity project.
+    // Get the project based on the folder structure (i.e. folder above Assets)
+    $head = dirname($currentDir);
+    $tail = basename($currentDir, "");
+    // Check that we are not at the root directory.
+    // dirname($head) returns the last directory name in the path, 
+    // or head if head is the root directory.
+    while ($head != "" && dirname($head) != $head){
+        if (`strcmp $tail "Assets"` == 0){
+            // this is a valid Unity project, so set it
+            optionVar -sv "UnityProject" $head;
+            break;
+        }
+        $head = dirname($head);
+        $tail = basename($head, "");
     }
 }
 
@@ -374,8 +418,6 @@ proc importFile(string $filePathStr){
         if (size($newItems) > 0){
             sets -include $unityExportSet $newItems;
         }
-        // lock set so it doesn't get deleted when empty
-        lockNode -lock true $unityExportSet;
     }
 }
 
@@ -424,23 +466,8 @@ global proc unityImport(){
         importFile($filePathStr);
     }
     
-    $currentDir = dirname($filePaths[0]);
-    // Change Unity project if fbx is from a different Unity project.
-    // Get the project based on the folder structure (i.e. folder above Assets)
-    $head = dirname($currentDir);
-    $tail = basename($currentDir, "");
-    // Check that we are not at the root directory.
-    // dirname($head) returns the last directory name in the path, 
-    // or head if head is the root directory.
-    while ($head != "" && dirname($head) != $head){
-        if (`strcmp $tail "Assets"` == 0){
-            // this is a valid Unity project, so set it
-            optionVar -sv "UnityProject" $head;
-            break;
-        }
-        $head = dirname($head);
-        $tail = basename($head, "");
-    }
+    // switch project if file imported from a different Unity project
+    switchUnityProject($filePaths[0]);
 }
 
 // returns the intersection of two string arrays
@@ -599,8 +626,6 @@ proc setupNewExportSet(string $exportPath, int $exportAnimOnly, string $selected
         if (size($selectedObjects) > 0){
             sets -include $unityExportSet $selectedObjects;
         }
-        // lock set so it doesn't get deleted when empty
-        lockNode -lock true $unityExportSet;
     }
     
     // add to the targetNamespace
@@ -608,6 +633,9 @@ proc setupNewExportSet(string $exportPath, int $exportAnimOnly, string $selected
     for($object in $selectedObjects){
         rename $object ($targetNamespace + ":" + $object);
     }
+    
+    // switch project if file exported to a different Unity project
+    switchUnityProject($exportPath);
 }
 
 proc unityExport(int $exportType){
@@ -666,6 +694,7 @@ proc unityExport(int $exportType){
     // if selection doesn't belong to a set, export to a new file
     if(size($setsToExport) <= 0){
         $unityProject = `optionVar -q "UnityProject"`;
+        $unityProject = $unityProject + "/Assets";
         $exportPath = `fileDialog2 -ds 2 -cap "FBX Export Selection" -dir $unityProject -ff "*.fbx" -fm 0`;
         if(size($exportPath)<=0){
             return;
