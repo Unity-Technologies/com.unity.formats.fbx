@@ -1395,7 +1395,6 @@ namespace FbxExporters
                 fbxCamera.FilmAspectRatio.Set(aspectRatio);
                 fbxCamera.SetApertureWidth (apertureWidthInInches);
                 fbxCamera.SetApertureHeight (apertureHeightInInches);
-                fbxCamera.SetApertureMode (FbxCamera.EApertureMode.eFocalLength); 
 
                 // Fit the resolution gate horizontally within the film gate.
                 fbxCamera.GateFit.Set(FbxCamera.EGateFit.eFitHorizontal);
@@ -1407,12 +1406,10 @@ namespace FbxExporters
                 fbxCamera.FilmOffsetY.Set(uniCamera.lensShift.y);
 
                 // Focal Length
-                double focalLength = uniCamera.focalLength;
+                fbxCamera.SetApertureMode (FbxCamera.EApertureMode.eFocalLength); 
 
+                double focalLength = (double)uniCamera.focalLength;
                 fbxCamera.FocalLength.Set(focalLength); /* in millimeters */
-
-                // Field of View
-                fbxCamera.FieldOfView.Set (uniCamera.fieldOfView); /* in degrees */
 
                 // NearPlane
                 fbxCamera.SetNearPlane (uniCamera.nearClipPlane.Meters().ToCentimeters());
