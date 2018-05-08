@@ -5,6 +5,12 @@ global string $UnityFbxAnimFileNameAttr = "unityFbxAnimFileName";
 global string $UnityFbxNamespaceAttr = "unityFbxNamespace";
 global string $UnityExportSetNameFormat = "^1s_UnityExportSet";
 
+global int $UnityFbxFilePathIndex = 0;
+global int $UnityFbxFileNameIndex = 1;
+global int $UnityFbxAnimFilePathIndex = 2;
+global int $UnityFbxAnimFileNameIndex = 3;
+global int $UnityFileNameWithoutExtIndex = 4;
+
 /* Enum */
 global int $UnityExportAnim = 0;
 global int $UnityExportModel = 1;
@@ -136,6 +142,12 @@ proc string checkNamespaceNeedsUpdate(string $unitySet, string $unityFbxNamespac
 // =======================
 
 proc string[] getExportSetAttributes(string $exportPath, int $exportAnimOnly){
+    global int $UnityFbxFilePathIndex;
+    global int $UnityFbxFileNameIndex;
+    global int $UnityFbxAnimFilePathIndex;
+    global int $UnityFbxAnimFileNameIndex;
+    global int $UnityFileNameWithoutExtIndex;
+
     string $exportAttributes[5];
     
     $exportDir = dirname($exportPath);
@@ -154,11 +166,11 @@ proc string[] getExportSetAttributes(string $exportPath, int $exportAnimOnly){
     }
     $fileNameWithoutExt = formValidObjectName($fileNameWithoutExt);
     
-    $exportAttributes[0] = $exportDir;
-    $exportAttributes[1] = $exportFileName;
-    $exportAttributes[2] = $exportAnimDir;
-    $exportAttributes[3] = $exportAnimFileName;
-    $exportAttributes[4] = $fileNameWithoutExt;
+    $exportAttributes[$UnityFbxFilePathIndex] = $exportDir;
+    $exportAttributes[$UnityFbxFileNameIndex] = $exportFileName;
+    $exportAttributes[$UnityFbxAnimFilePathIndex] = $exportAnimDir;
+    $exportAttributes[$UnityFbxAnimFileNameIndex] = $exportAnimFileName;
+    $exportAttributes[$UnityFileNameWithoutExtIndex] = $fileNameWithoutExt;
     
     return $exportAttributes;
 }
@@ -233,11 +245,17 @@ proc setExportSetAttributes(
     global string $UnityFbxAnimFileNameAttr;
     global string $UnityFbxNamespaceAttr;
     
-    $exportDir = $exportAttrs[0];
-    $exportFileName = $exportAttrs[1];
-    $exportAnimDir = $exportAttrs[2];
-    $exportAnimFileName = $exportAttrs[3];
-    $fileNameWithoutExt = $exportAttrs[4];
+    global int $UnityFbxFilePathIndex;
+    global int $UnityFbxFileNameIndex;
+    global int $UnityFbxAnimFilePathIndex;
+    global int $UnityFbxAnimFileNameIndex;
+    global int $UnityFileNameWithoutExtIndex;
+    
+    $exportDir = $exportAttrs[$UnityFbxFilePathIndex];
+    $exportFileName = $exportAttrs[$UnityFbxFileNameIndex];
+    $exportAnimDir = $exportAttrs[$UnityFbxAnimFilePathIndex];
+    $exportAnimFileName = $exportAttrs[$UnityFbxAnimFileNameIndex];
+    $fileNameWithoutExt = $exportAttrs[$UnityFileNameWithoutExtIndex];
     
     // unlock set so we can add attributes to it
     lockNode -lock false $unityExportSet;
@@ -273,6 +291,12 @@ proc importFile(string $filePathStr){
     global string $UnityFbxAnimFileNameAttr;
     global string $UnityFbxNamespaceAttr;
     
+    global int $UnityFbxFilePathIndex;
+    global int $UnityFbxFileNameIndex;
+    global int $UnityFbxAnimFilePathIndex;
+    global int $UnityFbxAnimFileNameIndex;
+    global int $UnityFileNameWithoutExtIndex;
+    
     $isAnimFile = false;
     if(match("@", basename($filePathStr, ".fbx")) != ""){
         // import as animation
@@ -281,11 +305,11 @@ proc importFile(string $filePathStr){
     
     $exportAttrs = getExportSetAttributes($filePathStr, $isAnimFile);
     
-    $currentDir = $exportAttrs[0];
-    $fileName = $exportAttrs[1];
-    $currentAnimDir = $exportAttrs[2];
-    $animFileName = $exportAttrs[3];
-    $fileNameWithoutExt = $exportAttrs[4];
+    $currentDir = $exportAttrs[$UnityFbxFilePathIndex];
+    $fileName = $exportAttrs[$UnityFbxFileNameIndex];
+    $currentAnimDir = $exportAttrs[$UnityFbxAnimFilePathIndex];
+    $animFileName = $exportAttrs[$UnityFbxAnimFileNameIndex];
+    $fileNameWithoutExt = $exportAttrs[$UnityFileNameWithoutExtIndex];
     
     $unityExportSet = getNewExportSetName($fileNameWithoutExt);
 
@@ -523,15 +547,21 @@ proc string[] getUnityExportSets(){
 }
 
 proc setupNewExportSet(string $exportPath, int $exportAnimOnly, string $selectedObjects[]){
+    global int $UnityFbxFilePathIndex;
+    global int $UnityFbxFileNameIndex;
+    global int $UnityFbxAnimFilePathIndex;
+    global int $UnityFbxAnimFileNameIndex;
+    global int $UnityFileNameWithoutExtIndex;
+
     $isAnimFile = $exportAnimOnly;
     
     // Get the export set attributes
     $exportAttrs = getExportSetAttributes($exportPath, $exportAnimOnly);
-    $exportDir = $exportAttrs[0];
-    $exportFileName = $exportAttrs[1];
-    $exportAnimDir = $exportAttrs[2];
-    $exportAnimFileName = $exportAttrs[3];
-    $fileNameWithoutExt = $exportAttrs[4];
+    $exportDir = $exportAttrs[$UnityFbxFilePathIndex];
+    $exportFileName = $exportAttrs[$UnityFbxFileNameIndex];
+    $exportAnimDir = $exportAttrs[$UnityFbxAnimFilePathIndex];
+    $exportAnimFileName = $exportAttrs[$UnityFbxAnimFileNameIndex];
+    $fileNameWithoutExt = $exportAttrs[$UnityFileNameWithoutExtIndex];
     
     $unityExportSet = getNewExportSetName($fileNameWithoutExt);
     
