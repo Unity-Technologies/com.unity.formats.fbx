@@ -3588,7 +3588,13 @@ namespace FbxExporters
 					object selClipItem = editorClipSelected.GetType().GetProperty("item").GetValue(editorClipSelected, null);
 					object selClipItemParentTrack = selClipItem.GetType().GetProperty("parentTrack").GetValue(selClipItem, null);
 					AnimationTrack editorClipAnimationTrack = selClipItemParentTrack as AnimationTrack;
-                    Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.inspectedDirector.GetGenericBinding (editorClipAnimationTrack);
+
+#if UNITY_2018_2_OR_NEWER
+                    Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.inspectedDirector.GetGenericBinding(editorClipAnimationTrack);
+#else // UNITY_2018_2_OR_NEWER
+                    Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding(editorClipAnimationTrack);
+#endif // UNITY_2018_2_OR_NEWER
+
                     GameObject animationTrackGO = null;
                     if (animationTrackObject is GameObject)
                     {
