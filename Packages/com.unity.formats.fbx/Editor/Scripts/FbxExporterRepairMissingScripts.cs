@@ -46,7 +46,7 @@ namespace FbxExporters.Editor
             var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxExporters.FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
             string searchID = null;
             string guid;
-#if UNITY_2018_2_OR_LATER
+#if UNITY_2018_2_OR_NEWER || UNITY_2018_2_OR_LATER
             long fileId;
 #else
             int fileId;
