@@ -23,6 +23,9 @@
 [Pp]rojectSettings/*.asset
 [Pp]rojectSettings/*.txt
 
+# Ignore npmrc because it has auth keys in it
+.npmrc
+
 # below taken from: https://github.com/github/gitignore/blob/master/Unity.gitignore
 
 [Ll]ibrary/
