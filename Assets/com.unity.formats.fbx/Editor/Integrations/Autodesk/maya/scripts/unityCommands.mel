@@ -622,6 +622,9 @@ proc setupNewExportSet(string $exportPath, int $exportAnimOnly, string $selected
     setExportSetAttributes($unityExportSet, $isAnimFile, $setCreated, $exportAttrs, $targetNamespace);
     
     if (setExists($unityExportSet) == true){
+        // clear contents of set
+        sets -clear $unityExportSet;
+        
         // add newly imported items to set
         if (size($selectedObjects) > 0){
             sets -include $unityExportSet $selectedObjects;
@@ -695,14 +698,35 @@ proc unityExport(int $exportType){
     if(size($setsToExport) <= 0){
         $unityProject = `optionVar -q "UnityProject"`;
         $unityProject = $unityProject + "/Assets";
-        $exportPath = `fileDialog2 -ds 2 -cap "FBX Export Selection" -dir $unityProject -ff "*.fbx" -fm 0`;
-        if(size($exportPath)<=0){
+        $exportPaths = `fileDialog2 -ds 2 -cap "FBX Export Selection" -dir $unityProject -ff "*.fbx" -fm 0`;
+        if(size($exportPaths)<=0){
             return;
         }
-        $exportCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $exportPath[0] + "\"";
+        $exportFilePath = $exportPaths[0];
+        
+        // check if export set with this filename already exists in the scene, and warn user that
+        // if it does the existing set will be overriden
+        global int $UnityFileNameWithoutExtIndex;
+    
+        // Get the export set attributes
+        $exportAttrs = getExportSetAttributes($exportFilePath, $exportAnimOnly);
+        $exportSetName = getNewExportSetName($exportAttrs[$UnityFileNameWithoutExtIndex]);
+        if(setExists($exportSetName)){
+            // warn user
+            if(!showConfirmDialog("Warning",
+                "Exporting to " + $exportFilePath + " will overwrite contents of " + $exportSetName + " export set. To export selection + contents of set, first add selection to set.",
+                "Continue", "Cancel"
+                   )){
+                    // cancelled, don't export this fbx
+                    print ("Export to "  + $exportFilePath + " cancelled");
+                    return;
+            }
+        }
+        
+        $exportCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $exportFilePath + "\"";
         eval $exportCmd;
         
-        setupNewExportSet($exportPath[0], $exportAnimOnly, $origSelection);
+        setupNewExportSet($exportFilePath, $exportAnimOnly, $origSelection);
         return;
     }
     
