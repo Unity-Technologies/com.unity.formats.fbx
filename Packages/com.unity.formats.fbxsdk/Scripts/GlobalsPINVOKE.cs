@@ -33,7 +33,7 @@ class GlobalsPINVOKE {
     static ExceptionArgumentDelegate argumentNullDelegate = new ExceptionArgumentDelegate(SetPendingArgumentNullException);
     static ExceptionArgumentDelegate argumentOutOfRangeDelegate = new ExceptionArgumentDelegate(SetPendingArgumentOutOfRangeException);
 
-    [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="SWIGRegisterExceptionCallbacks_Globals")]
+    [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="SWIGRegisterExceptionCallbacks_Globals")]
     public static extern void SWIGRegisterExceptionCallbacks_Globals(
                                 ExceptionDelegate applicationDelegate,
                                 ExceptionDelegate arithmeticDelegate,
@@ -47,7 +47,7 @@ class GlobalsPINVOKE {
                                 ExceptionDelegate overflowDelegate, 
                                 ExceptionDelegate systemExceptionDelegate);
 
-    [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="SWIGRegisterExceptionArgumentCallbacks_Globals")]
+    [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="SWIGRegisterExceptionArgumentCallbacks_Globals")]
     public static extern void SWIGRegisterExceptionCallbacksArgument_Globals(
                                 ExceptionArgumentDelegate argumentDelegate,
                                 ExceptionArgumentDelegate argumentNullDelegate,
@@ -169,7 +169,7 @@ class GlobalsPINVOKE {
     public delegate string SWIGStringDelegate(string message);
     static SWIGStringDelegate stringDelegate = new SWIGStringDelegate(CreateString);
 
-    [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="SWIGRegisterStringCallback_Globals")]
+    [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="SWIGRegisterStringCallback_Globals")]
     public static extern void SWIGRegisterStringCallback_Globals(SWIGStringDelegate stringDelegate);
 
     static string CreateString(string cString) {
@@ -189,7 +189,7 @@ class GlobalsPINVOKE {
 
 
   // Set up the FBX allocators at static init time.
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_Globals_InitFbxAllocators")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_Globals_InitFbxAllocators")]
   private static extern int _InitFbxAllocators();
 
   private static int InitFbxAllocators()
@@ -210,4181 +210,4183 @@ class GlobalsPINVOKE {
     
   protected static int initFbx = InitFbxAllocators(); /* protected to quiet a warning */
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_Globals_Release_WeakPointerHandle")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_Globals_Release_WeakPointerHandle")]
   public static extern void ReleaseWeakPointerHandle(global::System.Runtime.InteropServices.HandleRef handle);
 
 
-  /// <summary>
-  /// String to use in the DllImport below.
-  ///
-  /// This must be a constant, but it changes depending on the platform and deployment.
-  ///
-  /// When deploying as an asset (a .unitypackage), define
-  /// COM_UNITY_FORMATS_FBX_AS_ASSET and compile the package.
-  ///
-  /// When deploying with Unity Package Manager, do not add defines: the
-  /// default platform defines suffice.
-  /// </summary>
-#if COM_UNITY_FORMATS_FBX_AS_ASSET
-  const string DllImportName = "UnityFbxSdkNative";
-#elif UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
-  const string DllImportName = "Packages/com.unity.formats.fbxsdk/MacOS/UnityFbxSdkNative.bundle/Contents/MacOS/UnityFbxSdkNative";
-#elif UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
-  const string DllImportName = "Packages/com.unity.formats.fbxsdk/Linux/UnityFbxSdkNative.so";
-#elif UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-  const string DllImportName = "Packages/com.unity.formats.fbxsdk/Windows/UnityFbxSdkNative.dll";
-#else
-  #error "FbxSdk: C# bindings for this platform haven't been implemented yet, sorry."
-  const string DllImportName = "UnityFbxSdkNative";
-#endif
-
-
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxDouble4x4__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxDouble4x4__SWIG_0___")]
   public static extern global::System.IntPtr new_FbxDouble4x4__SWIG_0();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxDouble4x4__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxDouble4x4__SWIG_1___")]
   public static extern global::System.IntPtr new_FbxDouble4x4__SWIG_1(FbxDouble4 jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxDouble4x4__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxDouble4x4__SWIG_2___")]
   public static extern global::System.IntPtr new_FbxDouble4x4__SWIG_2(FbxDouble4 jarg1, FbxDouble4 jarg2, FbxDouble4 jarg3, FbxDouble4 jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxDouble4x4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxDouble4x4___")]
   public static extern void delete_FbxDouble4x4(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDouble4x4__equals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDouble4x4__equals___")]
   public static extern bool FbxDouble4x4__equals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxDouble4x4__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxDouble4x4__SWIG_3___")]
   public static extern global::System.IntPtr new_FbxDouble4x4__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDouble4x4__get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDouble4x4__get___")]
   public static extern FbxDouble4 FbxDouble4x4__get(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDouble4x4__set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDouble4x4__set___")]
   public static extern void FbxDouble4x4__set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxDouble4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_PROPERTY_ID_NULL_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_PROPERTY_ID_NULL_get___")]
   public static extern int FBXSDK_PROPERTY_ID_NULL_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_PROPERTY_ID_ROOT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_PROPERTY_ID_ROOT_get___")]
   public static extern int FBXSDK_PROPERTY_ID_ROOT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxProperty_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, string jarg3, string jarg4, bool jarg5, out bool jarg6);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxProperty_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, string jarg3, string jarg4, bool jarg5);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_2___")]
   public static extern global::System.IntPtr FbxProperty_Create__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, string jarg3, string jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_3___")]
   public static extern global::System.IntPtr FbxProperty_Create__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, string jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_4___")]
   public static extern global::System.IntPtr FbxProperty_Create__SWIG_4(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, string jarg3, string jarg4, bool jarg5, out bool jarg6);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_5___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_5___")]
   public static extern global::System.IntPtr FbxProperty_Create__SWIG_5(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, string jarg3, string jarg4, bool jarg5);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_6___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_6___")]
   public static extern global::System.IntPtr FbxProperty_Create__SWIG_6(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, string jarg3, string jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_7___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Create__SWIG_7___")]
   public static extern global::System.IntPtr FbxProperty_Create__SWIG_7(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, string jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Destroy___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Destroy___")]
   public static extern void FbxProperty_Destroy(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DestroyRecursively___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DestroyRecursively___")]
   public static extern void FbxProperty_DestroyRecursively(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DestroyChildren___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DestroyChildren___")]
   public static extern void FbxProperty_DestroyChildren(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetPropertyDataType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetPropertyDataType___")]
   public static extern global::System.IntPtr FbxProperty_GetPropertyDataType(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetName___")]
   public static extern string FbxProperty_GetName(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetHierarchicalName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetHierarchicalName___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxProperty_GetHierarchicalName(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetLabel__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetLabel__SWIG_0___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxProperty_GetLabel__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetLabel__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetLabel__SWIG_1___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxProperty_GetLabel__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_SetLabel___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_SetLabel___")]
   public static extern void FbxProperty_SetLabel(global::System.Runtime.InteropServices.HandleRef jarg1, [global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFbxObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFbxObject___")]
   public static extern global::System.IntPtr FbxProperty_GetFbxObject(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ModifyFlag___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ModifyFlag___")]
   public static extern void FbxProperty_ModifyFlag(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFlag___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFlag___")]
   public static extern bool FbxProperty_GetFlag(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFlags___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFlags___")]
   public static extern int FbxProperty_GetFlags(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFlagInheritType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFlagInheritType___")]
   public static extern int FbxProperty_GetFlagInheritType(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_SetFlagInheritType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_SetFlagInheritType___")]
   public static extern bool FbxProperty_SetFlagInheritType(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ModifiedFlag___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ModifiedFlag___")]
   public static extern bool FbxProperty_ModifiedFlag(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty__equals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty__equals___")]
   public static extern bool FbxProperty__equals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_IsValid___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_IsValid___")]
   public static extern bool FbxProperty_IsValid(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_0___")]
   public static extern global::System.IntPtr FbxProperty_GetCurveNode__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_1___")]
   public static extern global::System.IntPtr FbxProperty_GetCurveNode__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_2___")]
   public static extern global::System.IntPtr FbxProperty_GetCurveNode__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_3___")]
   public static extern global::System.IntPtr FbxProperty_GetCurveNode__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_4___")]
   public static extern global::System.IntPtr FbxProperty_GetCurveNode__SWIG_4(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_5___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurveNode__SWIG_5___")]
   public static extern global::System.IntPtr FbxProperty_GetCurveNode__SWIG_5(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurve__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurve__SWIG_0___")]
   public static extern global::System.IntPtr FbxProperty_GetCurve__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurve__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurve__SWIG_1___")]
   public static extern global::System.IntPtr FbxProperty_GetCurve__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurve__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurve__SWIG_2___")]
   public static extern global::System.IntPtr FbxProperty_GetCurve__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, string jarg3, bool jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurve__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurve__SWIG_3___")]
   public static extern global::System.IntPtr FbxProperty_GetCurve__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, string jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurve__SWIG_4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetCurve__SWIG_4___")]
   public static extern global::System.IntPtr FbxProperty_GetCurve__SWIG_4(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, string jarg3, string jarg4, bool jarg5);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ConnectSrcObject__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ConnectSrcObject__SWIG_0___")]
   public static extern bool FbxProperty_ConnectSrcObject__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ConnectSrcObject__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ConnectSrcObject__SWIG_1___")]
   public static extern bool FbxProperty_ConnectSrcObject__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_IsConnectedSrcObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_IsConnectedSrcObject___")]
   public static extern bool FbxProperty_IsConnectedSrcObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DisconnectSrcObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DisconnectSrcObject___")]
   public static extern bool FbxProperty_DisconnectSrcObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DisconnectAllSrcObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DisconnectAllSrcObject___")]
   public static extern bool FbxProperty_DisconnectAllSrcObject(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetSrcObjectCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetSrcObjectCount___")]
   public static extern int FbxProperty_GetSrcObjectCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetSrcObject__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetSrcObject__SWIG_0___")]
   public static extern global::System.IntPtr FbxProperty_GetSrcObject__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetSrcObject__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetSrcObject__SWIG_1___")]
   public static extern global::System.IntPtr FbxProperty_GetSrcObject__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_FindSrcObjectInternal___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_FindSrcObjectInternal___")]
   public static extern global::System.IntPtr FbxProperty_FindSrcObjectInternal(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ConnectDstObject__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ConnectDstObject__SWIG_0___")]
   public static extern bool FbxProperty_ConnectDstObject__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ConnectDstObject__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_ConnectDstObject__SWIG_1___")]
   public static extern bool FbxProperty_ConnectDstObject__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_IsConnectedDstObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_IsConnectedDstObject___")]
   public static extern bool FbxProperty_IsConnectedDstObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DisconnectDstObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DisconnectDstObject___")]
   public static extern bool FbxProperty_DisconnectDstObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DisconnectAllDstObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_DisconnectAllDstObject___")]
   public static extern bool FbxProperty_DisconnectAllDstObject(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetDstObjectCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetDstObjectCount___")]
   public static extern int FbxProperty_GetDstObjectCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetDstObject__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetDstObject__SWIG_0___")]
   public static extern global::System.IntPtr FbxProperty_GetDstObject__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetDstObject__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetDstObject__SWIG_1___")]
   public static extern global::System.IntPtr FbxProperty_GetDstObject__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_FindDstObjectInternal___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_FindDstObjectInternal___")]
   public static extern global::System.IntPtr FbxProperty_FindDstObjectInternal(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFloat___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFloat___")]
   public static extern float FbxProperty_GetFloat(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetBool___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetBool___")]
   public static extern bool FbxProperty_GetBool(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetDouble___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetDouble___")]
   public static extern double FbxProperty_GetDouble(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFbxDouble3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFbxDouble3___")]
   public static extern FbxDouble3 FbxProperty_GetFbxDouble3(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetString___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetString___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxProperty_GetString(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFbxColor___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetFbxColor___")]
   public static extern FbxColor FbxProperty_GetFbxColor(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetInt___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_GetInt___")]
   public static extern int FbxProperty_GetInt(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Set__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Set__SWIG_1___")]
   public static extern bool FbxProperty_Set__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, FbxColor jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Set__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxProperty_Set__SWIG_2___")]
   public static extern bool FbxProperty_Set__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, float jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_Set___")]
   public static extern global::System.IntPtr FbxPropertyBool_Set(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_Get___")]
   public static extern bool FbxPropertyBool_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_EvaluateValue__SWIG_0___")]
   public static extern bool FbxPropertyBool_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_EvaluateValue__SWIG_1___")]
   public static extern bool FbxPropertyBool_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_EvaluateValue__SWIG_2___")]
   public static extern bool FbxPropertyBool_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_Set___")]
   public static extern global::System.IntPtr FbxPropertyDouble_Set(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_Get___")]
   public static extern double FbxPropertyDouble_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_EvaluateValue__SWIG_0___")]
   public static extern double FbxPropertyDouble_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_EvaluateValue__SWIG_1___")]
   public static extern double FbxPropertyDouble_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_EvaluateValue__SWIG_2___")]
   public static extern double FbxPropertyDouble_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_Set___")]
   public static extern global::System.IntPtr FbxPropertyDouble3_Set(global::System.Runtime.InteropServices.HandleRef jarg1, FbxDouble3 jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_Get___")]
   public static extern FbxDouble3 FbxPropertyDouble3_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_EvaluateValue__SWIG_0___")]
   public static extern FbxDouble3 FbxPropertyDouble3_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_EvaluateValue__SWIG_1___")]
   public static extern FbxDouble3 FbxPropertyDouble3_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_EvaluateValue__SWIG_2___")]
   public static extern FbxDouble3 FbxPropertyDouble3_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_Set___")]
   public static extern global::System.IntPtr FbxPropertyString_Set(global::System.Runtime.InteropServices.HandleRef jarg1, [global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_Get___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxPropertyString_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_EvaluateValue__SWIG_0___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxPropertyString_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_EvaluateValue__SWIG_1___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxPropertyString_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_EvaluateValue__SWIG_2___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxPropertyString_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_Set___")]
   public static extern global::System.IntPtr FbxPropertyInt_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_Get___")]
   public static extern int FbxPropertyInt_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_EvaluateValue__SWIG_0___")]
   public static extern int FbxPropertyInt_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_EvaluateValue__SWIG_1___")]
   public static extern int FbxPropertyInt_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_EvaluateValue__SWIG_2___")]
   public static extern int FbxPropertyInt_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_Set___")]
   public static extern global::System.IntPtr FbxPropertyFloat_Set(global::System.Runtime.InteropServices.HandleRef jarg1, float jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_Get___")]
   public static extern float FbxPropertyFloat_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_EvaluateValue__SWIG_0___")]
   public static extern float FbxPropertyFloat_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_EvaluateValue__SWIG_1___")]
   public static extern float FbxPropertyFloat_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_EvaluateValue__SWIG_2___")]
   public static extern float FbxPropertyFloat_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_Set___")]
   public static extern global::System.IntPtr FbxPropertyEProjectionType_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_Get___")]
   public static extern int FbxPropertyEProjectionType_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_EvaluateValue__SWIG_0___")]
   public static extern int FbxPropertyEProjectionType_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_EvaluateValue__SWIG_1___")]
   public static extern int FbxPropertyEProjectionType_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_EvaluateValue__SWIG_2___")]
   public static extern int FbxPropertyEProjectionType_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_Set___")]
   public static extern global::System.IntPtr FbxPropertyELightType_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_Get___")]
   public static extern int FbxPropertyELightType_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_EvaluateValue__SWIG_0___")]
   public static extern int FbxPropertyELightType_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_EvaluateValue__SWIG_1___")]
   public static extern int FbxPropertyELightType_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_EvaluateValue__SWIG_2___")]
   public static extern int FbxPropertyELightType_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_Set___")]
   public static extern global::System.IntPtr FbxPropertyEAreaLightShape_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_Get___")]
   public static extern int FbxPropertyEAreaLightShape_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_EvaluateValue__SWIG_0___")]
   public static extern int FbxPropertyEAreaLightShape_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_EvaluateValue__SWIG_1___")]
   public static extern int FbxPropertyEAreaLightShape_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_EvaluateValue__SWIG_2___")]
   public static extern int FbxPropertyEAreaLightShape_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_Set___")]
   public static extern global::System.IntPtr FbxPropertyEDecayType_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_Get___")]
   public static extern int FbxPropertyEDecayType_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_EvaluateValue__SWIG_0___")]
   public static extern int FbxPropertyEDecayType_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_EvaluateValue__SWIG_1___")]
   public static extern int FbxPropertyEDecayType_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_EvaluateValue__SWIG_2___")]
   public static extern int FbxPropertyEDecayType_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_Set___")]
   public static extern global::System.IntPtr FbxPropertyMarkerELook_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_Get___")]
   public static extern int FbxPropertyMarkerELook_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_EvaluateValue__SWIG_0___")]
   public static extern int FbxPropertyMarkerELook_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_EvaluateValue__SWIG_1___")]
   public static extern int FbxPropertyMarkerELook_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_EvaluateValue__SWIG_2___")]
   public static extern int FbxPropertyMarkerELook_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_Set___")]
   public static extern global::System.IntPtr FbxPropertyNullELook_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_Get___")]
   public static extern int FbxPropertyNullELook_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_EvaluateValue__SWIG_0___")]
   public static extern int FbxPropertyNullELook_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_EvaluateValue__SWIG_1___")]
   public static extern int FbxPropertyNullELook_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_EvaluateValue__SWIG_2___")]
   public static extern int FbxPropertyNullELook_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_Set___")]
   public static extern global::System.IntPtr FbxPropertyEInheritType_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_Get___")]
   public static extern int FbxPropertyEInheritType_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_EvaluateValue__SWIG_0___")]
   public static extern int FbxPropertyEInheritType_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_EvaluateValue__SWIG_1___")]
   public static extern int FbxPropertyEInheritType_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_EvaluateValue__SWIG_2___")]
   public static extern int FbxPropertyEInheritType_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_Set___")]
   public static extern global::System.IntPtr FbxPropertyEBlendMode_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_Get___")]
   public static extern int FbxPropertyEBlendMode_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_EvaluateValue__SWIG_0___")]
   public static extern int FbxPropertyEBlendMode_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_EvaluateValue__SWIG_1___")]
   public static extern int FbxPropertyEBlendMode_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_EvaluateValue__SWIG_2___")]
   public static extern int FbxPropertyEBlendMode_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_Set___")]
   public static extern global::System.IntPtr FbxPropertyEWrapMode_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_Get___")]
   public static extern int FbxPropertyEWrapMode_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_EvaluateValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_EvaluateValue__SWIG_0___")]
   public static extern int FbxPropertyEWrapMode_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_EvaluateValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_EvaluateValue__SWIG_1___")]
   public static extern int FbxPropertyEWrapMode_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_EvaluateValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_EvaluateValue__SWIG_2___")]
   public static extern int FbxPropertyEWrapMode_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElement_SetMappingMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_Set___")]
+  public static extern global::System.IntPtr FbxPropertyEGateFit_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_Get___")]
+  public static extern int FbxPropertyEGateFit_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_EvaluateValue__SWIG_0___")]
+  public static extern int FbxPropertyEGateFit_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_EvaluateValue__SWIG_1___")]
+  public static extern int FbxPropertyEGateFit_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_EvaluateValue__SWIG_2___")]
+  public static extern int FbxPropertyEGateFit_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElement_SetMappingMode___")]
   public static extern void FbxLayerElement_SetMappingMode(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElement_SetReferenceMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElement_SetReferenceMode___")]
   public static extern void FbxLayerElement_SetReferenceMode(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElement_GetMappingMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElement_GetMappingMode___")]
   public static extern int FbxLayerElement_GetMappingMode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElement_GetReferenceMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElement_GetReferenceMode___")]
   public static extern int FbxLayerElement_GetReferenceMode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArray___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArray___")]
   public static extern global::System.IntPtr new_FbxLayerElementArray(int jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArray___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArray___")]
   public static extern void delete_FbxLayerElementArray(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_GetCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_GetCount___")]
   public static extern int FbxLayerElementArray_GetCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_SetCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_SetCount___")]
   public static extern void FbxLayerElementArray_SetCount(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_Add__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_Add__SWIG_1___")]
   public static extern int FbxLayerElementArray_Add__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_Add__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_Add__SWIG_2___")]
   public static extern int FbxLayerElementArray_Add__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, FbxColor jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_Add__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_Add__SWIG_3___")]
   public static extern int FbxLayerElementArray_Add__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector2 jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_Add__SWIG_4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_Add__SWIG_4___")]
   public static extern int FbxLayerElementArray_Add__SWIG_4(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_SetAt__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_SetAt__SWIG_1___")]
   public static extern void FbxLayerElementArray_SetAt__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_SetAt__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_SetAt__SWIG_2___")]
   public static extern void FbxLayerElementArray_SetAt__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxColor jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_SetAt__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_SetAt__SWIG_3___")]
   public static extern void FbxLayerElementArray_SetAt__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxVector2 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_SetAt__SWIG_4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArray_SetAt__SWIG_4___")]
   public static extern void FbxLayerElementArray_SetAt__SWIG_4(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector4_GetDirectArray___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector4_GetDirectArray___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxVector4_GetDirectArray(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector4_GetIndexArray___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector4_GetIndexArray___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxVector4_GetIndexArray(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector2_GetDirectArray___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector2_GetDirectArray___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxVector2_GetDirectArray(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector2_GetIndexArray___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector2_GetIndexArray___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxVector2_GetIndexArray(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxColor_GetDirectArray___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxColor_GetDirectArray___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxColor_GetDirectArray(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxColor_GetIndexArray___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxColor_GetIndexArray___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxColor_GetIndexArray(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxSurfaceMaterial_GetDirectArray___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxSurfaceMaterial_GetDirectArray___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxSurfaceMaterial_GetDirectArray(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxSurfaceMaterial_GetIndexArray___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxSurfaceMaterial_GetIndexArray___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxSurfaceMaterial_GetIndexArray(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxSurfaceMaterial_GetAtUnchecked___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxSurfaceMaterial_GetAtUnchecked___")]
   public static extern global::System.IntPtr FbxLayerElementArrayTemplateFbxSurfaceMaterial_GetAtUnchecked(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArrayTemplateFbxSurfaceMaterial___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArrayTemplateFbxSurfaceMaterial___")]
   public static extern global::System.IntPtr new_FbxLayerElementArrayTemplateFbxSurfaceMaterial();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArrayTemplateFbxSurfaceMaterial___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArrayTemplateFbxSurfaceMaterial___")]
   public static extern void delete_FbxLayerElementArrayTemplateFbxSurfaceMaterial(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementNormal_Create___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementNormal_Create___")]
   public static extern global::System.IntPtr FbxLayerElementNormal_Create(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementBinormal_Create___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementBinormal_Create___")]
   public static extern global::System.IntPtr FbxLayerElementBinormal_Create(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTangent_Create___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTangent_Create___")]
   public static extern global::System.IntPtr FbxLayerElementTangent_Create(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementMaterial_Create___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementMaterial_Create___")]
   public static extern global::System.IntPtr FbxLayerElementMaterial_Create(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementUV_Create___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementUV_Create___")]
   public static extern global::System.IntPtr FbxLayerElementUV_Create(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementVertexColor_Create___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementVertexColor_Create___")]
   public static extern global::System.IntPtr FbxLayerElementVertexColor_Create(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetNormals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetNormals___")]
   public static extern global::System.IntPtr FbxLayer_GetNormals(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetTangents___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetTangents___")]
   public static extern global::System.IntPtr FbxLayer_GetTangents(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetBinormals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetBinormals___")]
   public static extern global::System.IntPtr FbxLayer_GetBinormals(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetMaterials___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetMaterials___")]
   public static extern global::System.IntPtr FbxLayer_GetMaterials(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetUVs__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetUVs__SWIG_0___")]
   public static extern global::System.IntPtr FbxLayer_GetUVs__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetUVs__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetUVs__SWIG_1___")]
   public static extern global::System.IntPtr FbxLayer_GetUVs__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetVertexColors___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_GetVertexColors___")]
   public static extern global::System.IntPtr FbxLayer_GetVertexColors(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetNormals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetNormals___")]
   public static extern void FbxLayer_SetNormals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetBinormals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetBinormals___")]
   public static extern void FbxLayer_SetBinormals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetTangents___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetTangents___")]
   public static extern void FbxLayer_SetTangents(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetMaterials___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetMaterials___")]
   public static extern void FbxLayer_SetMaterials(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetUVs__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetUVs__SWIG_0___")]
   public static extern void FbxLayer_SetUVs__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetUVs__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetUVs__SWIG_1___")]
   public static extern void FbxLayer_SetUVs__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetVertexColors___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayer_SetVertexColors___")]
   public static extern void FbxLayer_SetVertexColors(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxColor_GetAtUnchecked___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxColor_GetAtUnchecked___")]
   public static extern FbxColor FbxLayerElementArrayTemplateFbxColor_GetAtUnchecked(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArrayTemplateFbxColor___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArrayTemplateFbxColor___")]
   public static extern global::System.IntPtr new_FbxLayerElementArrayTemplateFbxColor();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArrayTemplateFbxColor___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArrayTemplateFbxColor___")]
   public static extern void delete_FbxLayerElementArrayTemplateFbxColor(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxVector2_GetAtUnchecked___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxVector2_GetAtUnchecked___")]
   public static extern FbxVector2 FbxLayerElementArrayTemplateFbxVector2_GetAtUnchecked(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArrayTemplateFbxVector2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArrayTemplateFbxVector2___")]
   public static extern global::System.IntPtr new_FbxLayerElementArrayTemplateFbxVector2();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArrayTemplateFbxVector2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArrayTemplateFbxVector2___")]
   public static extern void delete_FbxLayerElementArrayTemplateFbxVector2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxVector4_GetAtUnchecked___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxVector4_GetAtUnchecked___")]
   public static extern FbxVector4 FbxLayerElementArrayTemplateFbxVector4_GetAtUnchecked(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArrayTemplateFbxVector4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArrayTemplateFbxVector4___")]
   public static extern global::System.IntPtr new_FbxLayerElementArrayTemplateFbxVector4();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArrayTemplateFbxVector4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArrayTemplateFbxVector4___")]
   public static extern void delete_FbxLayerElementArrayTemplateFbxVector4(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateInt_GetAtUnchecked___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateInt_GetAtUnchecked___")]
   public static extern int FbxLayerElementArrayTemplateInt_GetAtUnchecked(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArrayTemplateInt___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxLayerElementArrayTemplateInt___")]
   public static extern global::System.IntPtr new_FbxLayerElementArrayTemplateInt();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArrayTemplateInt___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxLayerElementArrayTemplateInt___")]
   public static extern void delete_FbxLayerElementArrayTemplateInt(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_0___")]
   public static extern global::System.IntPtr new_FbxMatrix__SWIG_0();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_1___")]
   public static extern global::System.IntPtr new_FbxMatrix__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_2___")]
   public static extern global::System.IntPtr new_FbxMatrix__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_3___")]
   public static extern global::System.IntPtr new_FbxMatrix__SWIG_3(FbxVector4 jarg1, FbxVector4 jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_4___")]
   public static extern global::System.IntPtr new_FbxMatrix__SWIG_4(FbxVector4 jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_5___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxMatrix__SWIG_5___")]
   public static extern global::System.IntPtr new_FbxMatrix__SWIG_5(double jarg1, double jarg2, double jarg3, double jarg4, double jarg5, double jarg6, double jarg7, double jarg8, double jarg9, double jarg10, double jarg11, double jarg12, double jarg13, double jarg14, double jarg15, double jarg16);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxMatrix___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxMatrix___")]
   public static extern void delete_FbxMatrix(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_Get___")]
   public static extern double FbxMatrix_Get(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_GetRow___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_GetRow___")]
   public static extern FbxVector4 FbxMatrix_GetRow(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_GetColumn___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_GetColumn___")]
   public static extern FbxVector4 FbxMatrix_GetColumn(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_Set___")]
   public static extern void FbxMatrix_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3, double jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetTRS___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetTRS___")]
   public static extern void FbxMatrix_SetTRS(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2, FbxVector4 jarg3, FbxVector4 jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetTQS___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetTQS___")]
   public static extern void FbxMatrix_SetTQS(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, FbxVector4 jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetRow___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetRow___")]
   public static extern void FbxMatrix_SetRow(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetColumn___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetColumn___")]
   public static extern void FbxMatrix_SetColumn(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_GetElements__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_GetElements__SWIG_0___")]
   public static extern void FbxMatrix_GetElements__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, out FbxVector4 jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, out FbxVector4 jarg4, out FbxVector4 jarg5, out double jarg6);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_GetElements__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_GetElements__SWIG_1___")]
   public static extern void FbxMatrix_GetElements__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, out FbxVector4 jarg2, out FbxVector4 jarg3, out FbxVector4 jarg4, out FbxVector4 jarg5, out double jarg6);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_operator_Negate___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_operator_Negate___")]
   public static extern global::System.IntPtr FbxMatrix_operator_Negate(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_operator_Add___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_operator_Add___")]
   public static extern global::System.IntPtr FbxMatrix_operator_Add(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_operator_Sub___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_operator_Sub___")]
   public static extern global::System.IntPtr FbxMatrix_operator_Sub(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_operator_Mul___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_operator_Mul___")]
   public static extern global::System.IntPtr FbxMatrix_operator_Mul(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix__equals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix__equals___")]
   public static extern bool FbxMatrix__equals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_Inverse___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_Inverse___")]
   public static extern global::System.IntPtr FbxMatrix_Inverse(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_Transpose___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_Transpose___")]
   public static extern global::System.IntPtr FbxMatrix_Transpose(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetIdentity___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetIdentity___")]
   public static extern void FbxMatrix_SetIdentity(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetLookToLH___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetLookToLH___")]
   public static extern void FbxMatrix_SetLookToLH(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2, FbxVector4 jarg3, FbxVector4 jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetLookToRH___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetLookToRH___")]
   public static extern void FbxMatrix_SetLookToRH(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2, FbxVector4 jarg3, FbxVector4 jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetLookAtLH___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetLookAtLH___")]
   public static extern void FbxMatrix_SetLookAtLH(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2, FbxVector4 jarg3, FbxVector4 jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetLookAtRH___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SetLookAtRH___")]
   public static extern void FbxMatrix_SetLookAtRH(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2, FbxVector4 jarg3, FbxVector4 jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_MultNormalize___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_MultNormalize___")]
   public static extern FbxVector4 FbxMatrix_MultNormalize(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_GetHashCode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_GetHashCode___")]
   public static extern int FbxMatrix_GetHashCode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxAMatrix__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxAMatrix__SWIG_0___")]
   public static extern global::System.IntPtr new_FbxAMatrix__SWIG_0();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxAMatrix__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxAMatrix__SWIG_1___")]
   public static extern global::System.IntPtr new_FbxAMatrix__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxAMatrix__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxAMatrix__SWIG_2___")]
   public static extern global::System.IntPtr new_FbxAMatrix__SWIG_2(FbxVector4 jarg1, FbxVector4 jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxAMatrix___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxAMatrix___")]
   public static extern void delete_FbxAMatrix(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_Get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_Get___")]
   public static extern double FbxAMatrix_Get(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetT___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetT___")]
   public static extern FbxVector4 FbxAMatrix_GetT(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetR___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetR___")]
   public static extern FbxVector4 FbxAMatrix_GetR(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetQ___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetQ___")]
   public static extern global::System.IntPtr FbxAMatrix_GetQ(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetS___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetS___")]
   public static extern FbxVector4 FbxAMatrix_GetS(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetRow___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetRow___")]
   public static extern FbxVector4 FbxAMatrix_GetRow(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetColumn___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetColumn___")]
   public static extern FbxVector4 FbxAMatrix_GetColumn(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetIdentity___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetIdentity___")]
   public static extern void FbxAMatrix_SetIdentity(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetT___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetT___")]
   public static extern void FbxAMatrix_SetT(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetR___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetR___")]
   public static extern void FbxAMatrix_SetR(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetQ___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetQ___")]
   public static extern void FbxAMatrix_SetQ(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetS___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetS___")]
   public static extern void FbxAMatrix_SetS(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetTRS___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetTRS___")]
   public static extern void FbxAMatrix_SetTRS(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2, FbxVector4 jarg3, FbxVector4 jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetTQS___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SetTQS___")]
   public static extern void FbxAMatrix_SetTQS(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, FbxVector4 jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_operator_Scale___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_operator_Scale___")]
   public static extern global::System.IntPtr FbxAMatrix_operator_Scale(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_operator_InvScale___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_operator_InvScale___")]
   public static extern global::System.IntPtr FbxAMatrix_operator_InvScale(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_MultT___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_MultT___")]
   public static extern FbxVector4 FbxAMatrix_MultT(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_MultR___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_MultR___")]
   public static extern FbxVector4 FbxAMatrix_MultR(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_MultQ___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_MultQ___")]
   public static extern global::System.IntPtr FbxAMatrix_MultQ(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_MultS___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_MultS___")]
   public static extern FbxVector4 FbxAMatrix_MultS(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_operator_Negate___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_operator_Negate___")]
   public static extern global::System.IntPtr FbxAMatrix_operator_Negate(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_operator_Mul___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_operator_Mul___")]
   public static extern global::System.IntPtr FbxAMatrix_operator_Mul(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_Inverse___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_Inverse___")]
   public static extern global::System.IntPtr FbxAMatrix_Inverse(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_Transpose___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_Transpose___")]
   public static extern global::System.IntPtr FbxAMatrix_Transpose(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_Slerp___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_Slerp___")]
   public static extern global::System.IntPtr FbxAMatrix_Slerp(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix__equals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix__equals___")]
   public static extern bool FbxAMatrix__equals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_IsIdentity__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_IsIdentity__SWIG_0___")]
   public static extern bool FbxAMatrix_IsIdentity__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_IsIdentity__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_IsIdentity__SWIG_1___")]
   public static extern bool FbxAMatrix_IsIdentity__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetHashCode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_GetHashCode___")]
   public static extern int FbxAMatrix_GetHashCode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxManager_Create___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxManager_Create___")]
   public static extern global::System.IntPtr FbxManager_Create();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxManager_Destroy___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxManager_Destroy___")]
   public static extern void FbxManager_Destroy(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxManager_GetVersion__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxManager_GetVersion__SWIG_0___")]
   public static extern string FbxManager_GetVersion__SWIG_0(bool jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxManager_GetVersion__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxManager_GetVersion__SWIG_1___")]
   public static extern string FbxManager_GetVersion__SWIG_1();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxManager_GetFileFormatVersion___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxManager_GetFileFormatVersion___")]
   public static extern void FbxManager_GetFileFormatVersion(out int jarg1, out int jarg2, out int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxManager_GetIOSettings___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxManager_GetIOSettings___")]
   public static extern global::System.IntPtr FbxManager_GetIOSettings(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxManager_SetIOSettings___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxManager_SetIOSettings___")]
   public static extern void FbxManager_SetIOSettings(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxManager_GetIOPluginRegistry___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxManager_GetIOPluginRegistry___")]
   public static extern global::System.IntPtr FbxManager_GetIOPluginRegistry(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxAxisSystem__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxAxisSystem__SWIG_0___")]
   public static extern global::System.IntPtr new_FbxAxisSystem__SWIG_0();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxAxisSystem__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxAxisSystem__SWIG_1___")]
   public static extern global::System.IntPtr new_FbxAxisSystem__SWIG_1(int jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxAxisSystem__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxAxisSystem__SWIG_2___")]
   public static extern global::System.IntPtr new_FbxAxisSystem__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxAxisSystem__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxAxisSystem__SWIG_3___")]
   public static extern global::System.IntPtr new_FbxAxisSystem__SWIG_3(int jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxAxisSystem___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxAxisSystem___")]
   public static extern void delete_FbxAxisSystem(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem__equals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem__equals___")]
   public static extern bool FbxAxisSystem__equals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_MayaZUp_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_MayaZUp_get___")]
   public static extern global::System.IntPtr FbxAxisSystem_MayaZUp_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_MayaYUp_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_MayaYUp_get___")]
   public static extern global::System.IntPtr FbxAxisSystem_MayaYUp_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_Max_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_Max_get___")]
   public static extern global::System.IntPtr FbxAxisSystem_Max_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_Motionbuilder_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_Motionbuilder_get___")]
   public static extern global::System.IntPtr FbxAxisSystem_Motionbuilder_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_OpenGL_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_OpenGL_get___")]
   public static extern global::System.IntPtr FbxAxisSystem_OpenGL_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_DirectX_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_DirectX_get___")]
   public static extern global::System.IntPtr FbxAxisSystem_DirectX_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_Lightwave_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_Lightwave_get___")]
   public static extern global::System.IntPtr FbxAxisSystem_Lightwave_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_ConvertScene___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_ConvertScene___")]
   public static extern void FbxAxisSystem_ConvertScene(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_GetCoorSystem___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_GetCoorSystem___")]
   public static extern int FbxAxisSystem_GetCoorSystem(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_GetUpVector___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_GetUpVector___")]
   public static extern int FbxAxisSystem_GetUpVector(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_GetFrontVector___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_GetFrontVector___")]
   public static extern int FbxAxisSystem_GetFrontVector(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_GetHashCode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAxisSystem_GetHashCode___")]
   public static extern int FbxAxisSystem_GetHashCode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxSystemUnit_ConversionOptions___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxSystemUnit_ConversionOptions___")]
   public static extern global::System.IntPtr new_FbxSystemUnit_ConversionOptions();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxSystemUnit_ConversionOptions___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxSystemUnit_ConversionOptions___")]
   public static extern void delete_FbxSystemUnit_ConversionOptions(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxSystemUnit__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxSystemUnit__SWIG_0___")]
   public static extern global::System.IntPtr new_FbxSystemUnit__SWIG_0(double jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxSystemUnit__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxSystemUnit__SWIG_1___")]
   public static extern global::System.IntPtr new_FbxSystemUnit__SWIG_1(double jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxSystemUnit___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxSystemUnit___")]
   public static extern void delete_FbxSystemUnit(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_mm_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_mm_get___")]
   public static extern global::System.IntPtr FbxSystemUnit_mm_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_dm_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_dm_get___")]
   public static extern global::System.IntPtr FbxSystemUnit_dm_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_cm_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_cm_get___")]
   public static extern global::System.IntPtr FbxSystemUnit_cm_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_m_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_m_get___")]
   public static extern global::System.IntPtr FbxSystemUnit_m_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_km_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_km_get___")]
   public static extern global::System.IntPtr FbxSystemUnit_km_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_Inch_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_Inch_get___")]
   public static extern global::System.IntPtr FbxSystemUnit_Inch_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_Foot_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_Foot_get___")]
   public static extern global::System.IntPtr FbxSystemUnit_Foot_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_Yard_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_Yard_get___")]
   public static extern global::System.IntPtr FbxSystemUnit_Yard_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_ConvertScene__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_ConvertScene__SWIG_0___")]
   public static extern void FbxSystemUnit_ConvertScene__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_ConvertScene__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_ConvertScene__SWIG_1___")]
   public static extern void FbxSystemUnit_ConvertScene__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetScaleFactor___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetScaleFactor___")]
   public static extern double FbxSystemUnit_GetScaleFactor(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetScaleFactorAsString__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetScaleFactorAsString__SWIG_0___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxSystemUnit_GetScaleFactorAsString__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetScaleFactorAsString__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetScaleFactorAsString__SWIG_1___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxSystemUnit_GetScaleFactorAsString__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetMultiplier___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetMultiplier___")]
   public static extern double FbxSystemUnit_GetMultiplier(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit__equals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit__equals___")]
   public static extern bool FbxSystemUnit__equals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetConversionFactorTo___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetConversionFactorTo___")]
   public static extern double FbxSystemUnit_GetConversionFactorTo(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetConversionFactorFrom___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetConversionFactorFrom___")]
   public static extern double FbxSystemUnit_GetConversionFactorFrom(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetHashCode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSystemUnit_GetHashCode___")]
   public static extern int FbxSystemUnit_GetHashCode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxDataType__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxDataType__SWIG_0___")]
   public static extern global::System.IntPtr new_FbxDataType__SWIG_0();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxDataType__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxDataType__SWIG_1___")]
   public static extern global::System.IntPtr new_FbxDataType__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxDataType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxDataType___")]
   public static extern void delete_FbxDataType(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDataType__equals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDataType__equals___")]
   public static extern bool FbxDataType__equals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDataType_Valid___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDataType_Valid___")]
   public static extern bool FbxDataType_Valid(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDataType_Is___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDataType_Is___")]
   public static extern bool FbxDataType_Is(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDataType_ToEnum___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDataType_ToEnum___")]
   public static extern int FbxDataType_ToEnum(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDataType_GetName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDataType_GetName___")]
   public static extern string FbxDataType_GetName(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxDataType__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxDataType__SWIG_2___")]
   public static extern global::System.IntPtr new_FbxDataType__SWIG_2(string jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxDataType__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxDataType__SWIG_3___")]
   public static extern global::System.IntPtr new_FbxDataType__SWIG_3(string jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxDataType__SWIG_4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxDataType__SWIG_4___")]
   public static extern global::System.IntPtr new_FbxDataType__SWIG_4(int jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDataType_GetNameForIO___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDataType_GetNameForIO___")]
   public static extern string FbxDataType_GetNameForIO(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxUndefinedDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxUndefinedDT_get___")]
   public static extern global::System.IntPtr FbxUndefinedDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBoolDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBoolDT_get___")]
   public static extern global::System.IntPtr FbxBoolDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCharDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCharDT_get___")]
   public static extern global::System.IntPtr FbxCharDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxUCharDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxUCharDT_get___")]
   public static extern global::System.IntPtr FbxUCharDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxShortDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxShortDT_get___")]
   public static extern global::System.IntPtr FbxShortDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxUShortDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxUShortDT_get___")]
   public static extern global::System.IntPtr FbxUShortDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIntDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIntDT_get___")]
   public static extern global::System.IntPtr FbxIntDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxUIntDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxUIntDT_get___")]
   public static extern global::System.IntPtr FbxUIntDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLongLongDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLongLongDT_get___")]
   public static extern global::System.IntPtr FbxLongLongDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxULongLongDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxULongLongDT_get___")]
   public static extern global::System.IntPtr FbxULongLongDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFloatDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFloatDT_get___")]
   public static extern global::System.IntPtr FbxFloatDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxHalfFloatDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxHalfFloatDT_get___")]
   public static extern global::System.IntPtr FbxHalfFloatDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDoubleDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDoubleDT_get___")]
   public static extern global::System.IntPtr FbxDoubleDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDouble2DT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDouble2DT_get___")]
   public static extern global::System.IntPtr FbxDouble2DT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDouble3DT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDouble3DT_get___")]
   public static extern global::System.IntPtr FbxDouble3DT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDouble4DT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDouble4DT_get___")]
   public static extern global::System.IntPtr FbxDouble4DT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDouble4x4DT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDouble4x4DT_get___")]
   public static extern global::System.IntPtr FbxDouble4x4DT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxEnumDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxEnumDT_get___")]
   public static extern global::System.IntPtr FbxEnumDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxStringDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxStringDT_get___")]
   public static extern global::System.IntPtr FbxStringDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeDT_get___")]
   public static extern global::System.IntPtr FbxTimeDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxReferenceDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxReferenceDT_get___")]
   public static extern global::System.IntPtr FbxReferenceDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlobDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlobDT_get___")]
   public static extern global::System.IntPtr FbxBlobDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDistanceDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDistanceDT_get___")]
   public static extern global::System.IntPtr FbxDistanceDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDateTimeDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDateTimeDT_get___")]
   public static extern global::System.IntPtr FbxDateTimeDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxColor3DT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxColor3DT_get___")]
   public static extern global::System.IntPtr FbxColor3DT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxColor4DT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxColor4DT_get___")]
   public static extern global::System.IntPtr FbxColor4DT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCompoundDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCompoundDT_get___")]
   public static extern global::System.IntPtr FbxCompoundDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxReferenceObjectDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxReferenceObjectDT_get___")]
   public static extern global::System.IntPtr FbxReferenceObjectDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxReferencePropertyDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxReferencePropertyDT_get___")]
   public static extern global::System.IntPtr FbxReferencePropertyDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxVisibilityDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxVisibilityDT_get___")]
   public static extern global::System.IntPtr FbxVisibilityDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxVisibilityInheritanceDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxVisibilityInheritanceDT_get___")]
   public static extern global::System.IntPtr FbxVisibilityInheritanceDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxUrlDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxUrlDT_get___")]
   public static extern global::System.IntPtr FbxUrlDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxXRefUrlDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxXRefUrlDT_get___")]
   public static extern global::System.IntPtr FbxXRefUrlDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTranslationDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTranslationDT_get___")]
   public static extern global::System.IntPtr FbxTranslationDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxRotationDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxRotationDT_get___")]
   public static extern global::System.IntPtr FbxRotationDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScalingDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScalingDT_get___")]
   public static extern global::System.IntPtr FbxScalingDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternionDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternionDT_get___")]
   public static extern global::System.IntPtr FbxQuaternionDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLocalTranslationDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLocalTranslationDT_get___")]
   public static extern global::System.IntPtr FbxLocalTranslationDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLocalRotationDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLocalRotationDT_get___")]
   public static extern global::System.IntPtr FbxLocalRotationDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLocalScalingDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLocalScalingDT_get___")]
   public static extern global::System.IntPtr FbxLocalScalingDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLocalQuaternionDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLocalQuaternionDT_get___")]
   public static extern global::System.IntPtr FbxLocalQuaternionDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTransformMatrixDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTransformMatrixDT_get___")]
   public static extern global::System.IntPtr FbxTransformMatrixDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTranslationMatrixDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTranslationMatrixDT_get___")]
   public static extern global::System.IntPtr FbxTranslationMatrixDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxRotationMatrixDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxRotationMatrixDT_get___")]
   public static extern global::System.IntPtr FbxRotationMatrixDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScalingMatrixDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScalingMatrixDT_get___")]
   public static extern global::System.IntPtr FbxScalingMatrixDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialEmissiveDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialEmissiveDT_get___")]
   public static extern global::System.IntPtr FbxMaterialEmissiveDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialEmissiveFactorDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialEmissiveFactorDT_get___")]
   public static extern global::System.IntPtr FbxMaterialEmissiveFactorDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialAmbientDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialAmbientDT_get___")]
   public static extern global::System.IntPtr FbxMaterialAmbientDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialAmbientFactorDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialAmbientFactorDT_get___")]
   public static extern global::System.IntPtr FbxMaterialAmbientFactorDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialDiffuseDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialDiffuseDT_get___")]
   public static extern global::System.IntPtr FbxMaterialDiffuseDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialDiffuseFactorDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialDiffuseFactorDT_get___")]
   public static extern global::System.IntPtr FbxMaterialDiffuseFactorDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialBumpDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialBumpDT_get___")]
   public static extern global::System.IntPtr FbxMaterialBumpDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialNormalMapDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialNormalMapDT_get___")]
   public static extern global::System.IntPtr FbxMaterialNormalMapDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialTransparentColorDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialTransparentColorDT_get___")]
   public static extern global::System.IntPtr FbxMaterialTransparentColorDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialTransparencyFactorDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialTransparencyFactorDT_get___")]
   public static extern global::System.IntPtr FbxMaterialTransparencyFactorDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialSpecularDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialSpecularDT_get___")]
   public static extern global::System.IntPtr FbxMaterialSpecularDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialSpecularFactorDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialSpecularFactorDT_get___")]
   public static extern global::System.IntPtr FbxMaterialSpecularFactorDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialShininessDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialShininessDT_get___")]
   public static extern global::System.IntPtr FbxMaterialShininessDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialReflectionDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialReflectionDT_get___")]
   public static extern global::System.IntPtr FbxMaterialReflectionDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialReflectionFactorDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialReflectionFactorDT_get___")]
   public static extern global::System.IntPtr FbxMaterialReflectionFactorDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialDisplacementDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialDisplacementDT_get___")]
   public static extern global::System.IntPtr FbxMaterialDisplacementDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialVectorDisplacementDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialVectorDisplacementDT_get___")]
   public static extern global::System.IntPtr FbxMaterialVectorDisplacementDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialCommonFactorDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialCommonFactorDT_get___")]
   public static extern global::System.IntPtr FbxMaterialCommonFactorDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialCommonTextureDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMaterialCommonTextureDT_get___")]
   public static extern global::System.IntPtr FbxMaterialCommonTextureDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementUndefinedDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementUndefinedDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementUndefinedDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementNormalDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementNormalDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementNormalDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementBinormalDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementBinormalDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementBinormalDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTangentDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTangentDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementTangentDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementMaterialDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementMaterialDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementMaterialDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTextureDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTextureDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementTextureDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementPolygonGroupDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementPolygonGroupDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementPolygonGroupDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementUVDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementUVDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementUVDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementVertexColorDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementVertexColorDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementVertexColorDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementSmoothingDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementSmoothingDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementSmoothingDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementCreaseDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementCreaseDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementCreaseDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementHoleDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementHoleDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementHoleDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementUserDataDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementUserDataDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementUserDataDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementVisibilityDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementVisibilityDT_get___")]
   public static extern global::System.IntPtr FbxLayerElementVisibilityDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAliasDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAliasDT_get___")]
   public static extern global::System.IntPtr FbxAliasDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPresetsDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPresetsDT_get___")]
   public static extern global::System.IntPtr FbxPresetsDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxStatisticsDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxStatisticsDT_get___")]
   public static extern global::System.IntPtr FbxStatisticsDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTextLineDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTextLineDT_get___")]
   public static extern global::System.IntPtr FbxTextLineDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxUnitsDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxUnitsDT_get___")]
   public static extern global::System.IntPtr FbxUnitsDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxWarningDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxWarningDT_get___")]
   public static extern global::System.IntPtr FbxWarningDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxWebDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxWebDT_get___")]
   public static extern global::System.IntPtr FbxWebDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxActionDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxActionDT_get___")]
   public static extern global::System.IntPtr FbxActionDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCameraIndexDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCameraIndexDT_get___")]
   public static extern global::System.IntPtr FbxCameraIndexDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCharPtrDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCharPtrDT_get___")]
   public static extern global::System.IntPtr FbxCharPtrDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConeAngleDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConeAngleDT_get___")]
   public static extern global::System.IntPtr FbxConeAngleDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxEventDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxEventDT_get___")]
   public static extern global::System.IntPtr FbxEventDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFieldOfViewDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFieldOfViewDT_get___")]
   public static extern global::System.IntPtr FbxFieldOfViewDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFieldOfViewXDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFieldOfViewXDT_get___")]
   public static extern global::System.IntPtr FbxFieldOfViewXDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFieldOfViewYDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFieldOfViewYDT_get___")]
   public static extern global::System.IntPtr FbxFieldOfViewYDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFogDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFogDT_get___")]
   public static extern global::System.IntPtr FbxFogDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxHSBDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxHSBDT_get___")]
   public static extern global::System.IntPtr FbxHSBDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIKReachTranslationDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIKReachTranslationDT_get___")]
   public static extern global::System.IntPtr FbxIKReachTranslationDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIKReachRotationDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIKReachRotationDT_get___")]
   public static extern global::System.IntPtr FbxIKReachRotationDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIntensityDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIntensityDT_get___")]
   public static extern global::System.IntPtr FbxIntensityDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLookAtDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLookAtDT_get___")]
   public static extern global::System.IntPtr FbxLookAtDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxOcclusionDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxOcclusionDT_get___")]
   public static extern global::System.IntPtr FbxOcclusionDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxOpticalCenterXDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxOpticalCenterXDT_get___")]
   public static extern global::System.IntPtr FbxOpticalCenterXDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxOpticalCenterYDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxOpticalCenterYDT_get___")]
   public static extern global::System.IntPtr FbxOpticalCenterYDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxOrientationDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxOrientationDT_get___")]
   public static extern global::System.IntPtr FbxOrientationDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxRealDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxRealDT_get___")]
   public static extern global::System.IntPtr FbxRealDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxRollDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxRollDT_get___")]
   public static extern global::System.IntPtr FbxRollDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScalingUVDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScalingUVDT_get___")]
   public static extern global::System.IntPtr FbxScalingUVDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxShapeDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxShapeDT_get___")]
   public static extern global::System.IntPtr FbxShapeDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxStringListDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxStringListDT_get___")]
   public static extern global::System.IntPtr FbxStringListDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTextureRotationDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTextureRotationDT_get___")]
   public static extern global::System.IntPtr FbxTextureRotationDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeCodeDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeCodeDT_get___")]
   public static extern global::System.IntPtr FbxTimeCodeDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeWarpDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeWarpDT_get___")]
   public static extern global::System.IntPtr FbxTimeWarpDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTranslationUVDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTranslationUVDT_get___")]
   public static extern global::System.IntPtr FbxTranslationUVDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxWeightDT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxWeightDT_get___")]
   public static extern global::System.IntPtr FbxWeightDT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_IsValidColor___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_IsValidColor___")]
   public static extern bool IsValidColor(FbxColor jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxTime___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxTime___")]
   public static extern global::System.IntPtr new_FbxTime();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_SetGlobalTimeMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_SetGlobalTimeMode___")]
   public static extern void FbxTime_SetGlobalTimeMode(int jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetGlobalTimeMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetGlobalTimeMode___")]
   public static extern int FbxTime_GetGlobalTimeMode();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_SetGlobalTimeProtocol___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_SetGlobalTimeProtocol___")]
   public static extern void FbxTime_SetGlobalTimeProtocol(int jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetGlobalTimeProtocol___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetGlobalTimeProtocol___")]
   public static extern int FbxTime_GetGlobalTimeProtocol();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameRate___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameRate___")]
   public static extern double FbxTime_GetFrameRate(int jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_ConvertFrameRateToTimeMode__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_ConvertFrameRateToTimeMode__SWIG_0___")]
   public static extern int FbxTime_ConvertFrameRateToTimeMode__SWIG_0(double jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_ConvertFrameRateToTimeMode__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_ConvertFrameRateToTimeMode__SWIG_1___")]
   public static extern int FbxTime_ConvertFrameRateToTimeMode__SWIG_1(double jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetRaw___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetRaw___")]
   public static extern long FbxTime_GetRaw(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetMilliSeconds___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetMilliSeconds___")]
   public static extern long FbxTime_GetMilliSeconds(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetSecondDouble___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetSecondDouble___")]
   public static extern double FbxTime_GetSecondDouble(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetTime__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetTime__SWIG_0___")]
   public static extern bool FbxTime_GetTime__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, out int jarg2, out int jarg3, out int jarg4, out int jarg5, out int jarg6, out int jarg7, int jarg8);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetTime__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetTime__SWIG_1___")]
   public static extern bool FbxTime_GetTime__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, out int jarg2, out int jarg3, out int jarg4, out int jarg5, out int jarg6, out int jarg7);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFramedTime__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFramedTime__SWIG_0___")]
   public static extern global::System.IntPtr FbxTime_GetFramedTime__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFramedTime__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFramedTime__SWIG_1___")]
   public static extern global::System.IntPtr FbxTime_GetFramedTime__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetHourCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetHourCount___")]
   public static extern int FbxTime_GetHourCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetMinuteCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetMinuteCount___")]
   public static extern int FbxTime_GetMinuteCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetSecondCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetSecondCount___")]
   public static extern int FbxTime_GetSecondCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameCount__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameCount__SWIG_0___")]
   public static extern long FbxTime_GetFrameCount__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameCount__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameCount__SWIG_1___")]
   public static extern long FbxTime_GetFrameCount__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameCountPrecise__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameCountPrecise__SWIG_0___")]
   public static extern double FbxTime_GetFrameCountPrecise__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameCountPrecise__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameCountPrecise__SWIG_1___")]
   public static extern double FbxTime_GetFrameCountPrecise__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFieldCount__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFieldCount__SWIG_0___")]
   public static extern long FbxTime_GetFieldCount__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFieldCount__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFieldCount__SWIG_1___")]
   public static extern long FbxTime_GetFieldCount__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetResidual__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetResidual__SWIG_0___")]
   public static extern int FbxTime_GetResidual__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetResidual__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetResidual__SWIG_1___")]
   public static extern int FbxTime_GetResidual__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_IsDropFrame__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_IsDropFrame__SWIG_0___")]
   public static extern bool FbxTime_IsDropFrame__SWIG_0(int jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_IsDropFrame__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_IsDropFrame__SWIG_1___")]
   public static extern bool FbxTime_IsDropFrame__SWIG_1();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameSeparator__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameSeparator__SWIG_0___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.U8)]
   public static extern byte FbxTime_GetFrameSeparator__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameSeparator__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetFrameSeparator__SWIG_1___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.U8)]
   public static extern byte FbxTime_GetFrameSeparator__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetTimeStringNoOptionalArgs___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetTimeStringNoOptionalArgs___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxTime_GetTimeStringNoOptionalArgs(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3, int jarg4, int jarg5);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetOneFrameValue__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetOneFrameValue__SWIG_0___")]
   public static extern long FbxTime_GetOneFrameValue__SWIG_0(int jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetOneFrameValue__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_GetOneFrameValue__SWIG_1___")]
   public static extern long FbxTime_GetOneFrameValue__SWIG_1();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromRaw___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromRaw___")]
   public static extern global::System.IntPtr FbxTime_FromRaw(long jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromMilliSeconds___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromMilliSeconds___")]
   public static extern global::System.IntPtr FbxTime_FromMilliSeconds(long jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromSecondDouble___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromSecondDouble___")]
   public static extern global::System.IntPtr FbxTime_FromSecondDouble(double jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromTimeNoOptionalArgs___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromTimeNoOptionalArgs___")]
   public static extern global::System.IntPtr FbxTime_FromTimeNoOptionalArgs(int jarg1, int jarg2, int jarg3, int jarg4, int jarg5, int jarg6, int jarg7);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromFrame__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromFrame__SWIG_0___")]
   public static extern global::System.IntPtr FbxTime_FromFrame__SWIG_0(long jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromFrame__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromFrame__SWIG_1___")]
   public static extern global::System.IntPtr FbxTime_FromFrame__SWIG_1(long jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromFramePrecise__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromFramePrecise__SWIG_0___")]
   public static extern global::System.IntPtr FbxTime_FromFramePrecise__SWIG_0(double jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromFramePrecise__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromFramePrecise__SWIG_1___")]
   public static extern global::System.IntPtr FbxTime_FromFramePrecise__SWIG_1(double jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromTimeStringNoOptionalArgs___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTime_FromTimeStringNoOptionalArgs___")]
   public static extern global::System.IntPtr FbxTime_FromTimeStringNoOptionalArgs(string jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxTime___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxTime___")]
   public static extern void delete_FbxTime(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxTimeSpan__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxTimeSpan__SWIG_0___")]
   public static extern global::System.IntPtr new_FbxTimeSpan__SWIG_0();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxTimeSpan__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxTimeSpan__SWIG_1___")]
   public static extern global::System.IntPtr new_FbxTimeSpan__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_Set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_Set___")]
   public static extern void FbxTimeSpan_Set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_SetStart___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_SetStart___")]
   public static extern void FbxTimeSpan_SetStart(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_SetStop___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_SetStop___")]
   public static extern void FbxTimeSpan_SetStop(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_GetStart___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_GetStart___")]
   public static extern global::System.IntPtr FbxTimeSpan_GetStart(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_GetStop___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_GetStop___")]
   public static extern global::System.IntPtr FbxTimeSpan_GetStop(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_GetDuration___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_GetDuration___")]
   public static extern global::System.IntPtr FbxTimeSpan_GetDuration(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_GetSignedDuration___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_GetSignedDuration___")]
   public static extern global::System.IntPtr FbxTimeSpan_GetSignedDuration(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_GetDirection___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_GetDirection___")]
   public static extern int FbxTimeSpan_GetDirection(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_IsInside___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_IsInside___")]
   public static extern bool FbxTimeSpan_IsInside(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_Intersect___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_Intersect___")]
   public static extern global::System.IntPtr FbxTimeSpan_Intersect(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan__equals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan__equals___")]
   public static extern bool FbxTimeSpan__equals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_UnionAssignment__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_UnionAssignment__SWIG_0___")]
   public static extern void FbxTimeSpan_UnionAssignment__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_UnionAssignment__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTimeSpan_UnionAssignment__SWIG_1___")]
   public static extern void FbxTimeSpan_UnionAssignment__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxTimeSpan___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxTimeSpan___")]
   public static extern void delete_FbxTimeSpan(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxStatus__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxStatus__SWIG_0___")]
   public static extern global::System.IntPtr new_FbxStatus__SWIG_0();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxStatus__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxStatus__SWIG_1___")]
   public static extern global::System.IntPtr new_FbxStatus__SWIG_1(int jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxStatus__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxStatus__SWIG_2___")]
   public static extern global::System.IntPtr new_FbxStatus__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxStatus__equals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxStatus__equals___")]
   public static extern bool FbxStatus__equals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_Error___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_Error___")]
   public static extern bool FbxStatus_Error(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_Clear___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_Clear___")]
   public static extern void FbxStatus_Clear(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_GetCode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_GetCode___")]
   public static extern int FbxStatus_GetCode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_SetCode__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_SetCode__SWIG_0___")]
   public static extern void FbxStatus_SetCode__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_GetErrorString___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_GetErrorString___")]
   public static extern string FbxStatus_GetErrorString(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_SetCode__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxStatus_SetCode__SWIG_1___")]
   public static extern void FbxStatus_SetCode__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, string jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxStatus___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxStatus___")]
   public static extern void delete_FbxStatus(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxQuaternion__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxQuaternion__SWIG_0___")]
   public static extern global::System.IntPtr new_FbxQuaternion__SWIG_0();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxQuaternion__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxQuaternion__SWIG_1___")]
   public static extern global::System.IntPtr new_FbxQuaternion__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxQuaternion__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxQuaternion__SWIG_2___")]
   public static extern global::System.IntPtr new_FbxQuaternion__SWIG_2(double jarg1, double jarg2, double jarg3, double jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxQuaternion__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxQuaternion__SWIG_3___")]
   public static extern global::System.IntPtr new_FbxQuaternion__SWIG_3(double jarg1, double jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxQuaternion__SWIG_4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxQuaternion__SWIG_4___")]
   public static extern global::System.IntPtr new_FbxQuaternion__SWIG_4(FbxVector4 jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxQuaternion___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxQuaternion___")]
   public static extern void delete_FbxQuaternion(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_GetAtUnchecked___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_GetAtUnchecked___")]
   public static extern double FbxQuaternion_GetAtUnchecked(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_SetAtUnchecked___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_SetAtUnchecked___")]
   public static extern void FbxQuaternion_SetAtUnchecked(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Set__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Set__SWIG_0___")]
   public static extern void FbxQuaternion_Set__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2, double jarg3, double jarg4, double jarg5);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Set__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Set__SWIG_1___")]
   public static extern void FbxQuaternion_Set__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2, double jarg3, double jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Add__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Add__SWIG_0___")]
   public static extern global::System.IntPtr FbxQuaternion_operator_Add__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Sub__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Sub__SWIG_0___")]
   public static extern global::System.IntPtr FbxQuaternion_operator_Sub__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Mul__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Mul__SWIG_0___")]
   public static extern global::System.IntPtr FbxQuaternion_operator_Mul__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Div__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Div__SWIG_0___")]
   public static extern global::System.IntPtr FbxQuaternion_operator_Div__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Negate___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Negate___")]
   public static extern global::System.IntPtr FbxQuaternion_operator_Negate(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Add__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Add__SWIG_1___")]
   public static extern global::System.IntPtr FbxQuaternion_operator_Add__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Sub__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Sub__SWIG_1___")]
   public static extern global::System.IntPtr FbxQuaternion_operator_Sub__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Mul__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Mul__SWIG_1___")]
   public static extern global::System.IntPtr FbxQuaternion_operator_Mul__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Div__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_operator_Div__SWIG_1___")]
   public static extern global::System.IntPtr FbxQuaternion_operator_Div__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Product___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Product___")]
   public static extern global::System.IntPtr FbxQuaternion_Product(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_DotProduct___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_DotProduct___")]
   public static extern double FbxQuaternion_DotProduct(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Normalize___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Normalize___")]
   public static extern void FbxQuaternion_Normalize(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Conjugate___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Conjugate___")]
   public static extern void FbxQuaternion_Conjugate(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Length___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Length___")]
   public static extern double FbxQuaternion_Length(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Inverse___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Inverse___")]
   public static extern void FbxQuaternion_Inverse(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_SetAxisAngle___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_SetAxisAngle___")]
   public static extern void FbxQuaternion_SetAxisAngle(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Slerp___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Slerp___")]
   public static extern global::System.IntPtr FbxQuaternion_Slerp(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_ComposeSphericalXYZ___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_ComposeSphericalXYZ___")]
   public static extern void FbxQuaternion_ComposeSphericalXYZ(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_DecomposeSphericalXYZ___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_DecomposeSphericalXYZ___")]
   public static extern FbxVector4 FbxQuaternion_DecomposeSphericalXYZ(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion__equals___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion__equals___")]
   public static extern bool FbxQuaternion__equals(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Compare__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Compare__SWIG_0___")]
   public static extern int FbxQuaternion_Compare__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Compare__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_Compare__SWIG_1___")]
   public static extern int FbxQuaternion_Compare__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_GetHashCode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxQuaternion_GetHashCode___")]
   public static extern int FbxQuaternion_GetHashCode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxSharpProgressCallback___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxSharpProgressCallback___")]
   public static extern global::System.IntPtr new_FbxSharpProgressCallback();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxSharpProgressCallback___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxSharpProgressCallback___")]
   public static extern void delete_FbxSharpProgressCallback(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSharpProgressCallback_Progress___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSharpProgressCallback_Progress___")]
   public static extern bool FbxSharpProgressCallback_Progress(global::System.Runtime.InteropServices.HandleRef jarg1, float jarg2, string jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSharpProgressCallback_director_connect___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSharpProgressCallback_director_connect___")]
   public static extern void FbxSharpProgressCallback_director_connect(global::System.Runtime.InteropServices.HandleRef jarg1, FbxSharpProgressCallback.SwigDelegateFbxSharpProgressCallback_0 delegate0);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxObject_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxObject_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetFbxManager___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetFbxManager___")]
   public static extern global::System.IntPtr FbxObject_GetFbxManager(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetScene___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetScene___")]
   public static extern global::System.IntPtr FbxObject_GetScene(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_Destroy__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_Destroy__SWIG_0___")]
   public static extern void FbxObject_Destroy__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_Destroy__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_Destroy__SWIG_1___")]
   public static extern void FbxObject_Destroy__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SetName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SetName___")]
   public static extern void FbxObject_SetName(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetName___")]
   public static extern string FbxObject_GetName(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetNameWithoutNameSpacePrefix___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetNameWithoutNameSpacePrefix___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxObject_GetNameWithoutNameSpacePrefix(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SetInitialName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SetInitialName___")]
   public static extern void FbxObject_SetInitialName(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetInitialName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetInitialName___")]
   public static extern string FbxObject_GetInitialName(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetNameSpaceOnly___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetNameSpaceOnly___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxObject_GetNameSpaceOnly(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SetNameSpace___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SetNameSpace___")]
   public static extern void FbxObject_SetNameSpace(global::System.Runtime.InteropServices.HandleRef jarg1, [global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_StripPrefix___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_StripPrefix___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxObject_StripPrefix(string jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSelected___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSelected___")]
   public static extern bool FbxObject_GetSelected(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SetSelected___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SetSelected___")]
   public static extern void FbxObject_SetSelected(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectSrcObject__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectSrcObject__SWIG_0___")]
   public static extern bool FbxObject_ConnectSrcObject__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectSrcObject__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectSrcObject__SWIG_1___")]
   public static extern bool FbxObject_ConnectSrcObject__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_IsConnectedSrcObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_IsConnectedSrcObject___")]
   public static extern bool FbxObject_IsConnectedSrcObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_DisconnectSrcObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_DisconnectSrcObject___")]
   public static extern bool FbxObject_DisconnectSrcObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcObjectCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcObjectCount___")]
   public static extern int FbxObject_GetSrcObjectCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcObject__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcObject__SWIG_0___")]
   public static extern global::System.IntPtr FbxObject_GetSrcObject__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcObject__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcObject__SWIG_1___")]
   public static extern global::System.IntPtr FbxObject_GetSrcObject__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindSrcObject__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindSrcObject__SWIG_0___")]
   public static extern global::System.IntPtr FbxObject_FindSrcObject__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindSrcObject__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindSrcObject__SWIG_1___")]
   public static extern global::System.IntPtr FbxObject_FindSrcObject__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectDstObject__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectDstObject__SWIG_0___")]
   public static extern bool FbxObject_ConnectDstObject__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectDstObject__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectDstObject__SWIG_1___")]
   public static extern bool FbxObject_ConnectDstObject__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_IsConnectedDstObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_IsConnectedDstObject___")]
   public static extern bool FbxObject_IsConnectedDstObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_DisconnectDstObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_DisconnectDstObject___")]
   public static extern bool FbxObject_DisconnectDstObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstObjectCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstObjectCount___")]
   public static extern int FbxObject_GetDstObjectCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstObject__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstObject__SWIG_0___")]
   public static extern global::System.IntPtr FbxObject_GetDstObject__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstObject__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstObject__SWIG_1___")]
   public static extern global::System.IntPtr FbxObject_GetDstObject__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindDstObject__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindDstObject__SWIG_0___")]
   public static extern global::System.IntPtr FbxObject_FindDstObject__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindDstObject__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindDstObject__SWIG_1___")]
   public static extern global::System.IntPtr FbxObject_FindDstObject__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetFirstProperty___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetFirstProperty___")]
   public static extern global::System.IntPtr FbxObject_GetFirstProperty(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetNextProperty___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetNextProperty___")]
   public static extern global::System.IntPtr FbxObject_GetNextProperty(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindProperty__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindProperty__SWIG_0___")]
   public static extern global::System.IntPtr FbxObject_FindProperty__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindProperty__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindProperty__SWIG_1___")]
   public static extern global::System.IntPtr FbxObject_FindProperty__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindProperty__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindProperty__SWIG_2___")]
   public static extern global::System.IntPtr FbxObject_FindProperty__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, bool jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindProperty__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindProperty__SWIG_3___")]
   public static extern global::System.IntPtr FbxObject_FindProperty__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindPropertyHierarchical__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindPropertyHierarchical__SWIG_0___")]
   public static extern global::System.IntPtr FbxObject_FindPropertyHierarchical__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindPropertyHierarchical__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindPropertyHierarchical__SWIG_1___")]
   public static extern global::System.IntPtr FbxObject_FindPropertyHierarchical__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindPropertyHierarchical__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindPropertyHierarchical__SWIG_2___")]
   public static extern global::System.IntPtr FbxObject_FindPropertyHierarchical__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, bool jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindPropertyHierarchical__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindPropertyHierarchical__SWIG_3___")]
   public static extern global::System.IntPtr FbxObject_FindPropertyHierarchical__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetClassRootProperty___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetClassRootProperty___")]
   public static extern global::System.IntPtr FbxObject_GetClassRootProperty(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectSrcProperty___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectSrcProperty___")]
   public static extern bool FbxObject_ConnectSrcProperty(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_IsConnectedSrcProperty___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_IsConnectedSrcProperty___")]
   public static extern bool FbxObject_IsConnectedSrcProperty(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_DisconnectSrcProperty___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_DisconnectSrcProperty___")]
   public static extern bool FbxObject_DisconnectSrcProperty(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcPropertyCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcPropertyCount___")]
   public static extern int FbxObject_GetSrcPropertyCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcProperty__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcProperty__SWIG_0___")]
   public static extern global::System.IntPtr FbxObject_GetSrcProperty__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcProperty__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetSrcProperty__SWIG_1___")]
   public static extern global::System.IntPtr FbxObject_GetSrcProperty__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindSrcProperty__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindSrcProperty__SWIG_0___")]
   public static extern global::System.IntPtr FbxObject_FindSrcProperty__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindSrcProperty__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindSrcProperty__SWIG_1___")]
   public static extern global::System.IntPtr FbxObject_FindSrcProperty__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectDstProperty___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_ConnectDstProperty___")]
   public static extern bool FbxObject_ConnectDstProperty(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_IsConnectedDstProperty___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_IsConnectedDstProperty___")]
   public static extern bool FbxObject_IsConnectedDstProperty(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_DisconnectDstProperty___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_DisconnectDstProperty___")]
   public static extern bool FbxObject_DisconnectDstProperty(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstPropertyCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstPropertyCount___")]
   public static extern int FbxObject_GetDstPropertyCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstProperty__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstProperty__SWIG_0___")]
   public static extern global::System.IntPtr FbxObject_GetDstProperty__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstProperty__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDstProperty__SWIG_1___")]
   public static extern global::System.IntPtr FbxObject_GetDstProperty__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindDstProperty__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindDstProperty__SWIG_0___")]
   public static extern global::System.IntPtr FbxObject_FindDstProperty__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindDstProperty__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_FindDstProperty__SWIG_1___")]
   public static extern global::System.IntPtr FbxObject_FindDstProperty__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_AddImplementation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_AddImplementation___")]
   public static extern bool FbxObject_AddImplementation(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_RemoveImplementation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_RemoveImplementation___")]
   public static extern bool FbxObject_RemoveImplementation(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_HasDefaultImplementation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_HasDefaultImplementation___")]
   public static extern bool FbxObject_HasDefaultImplementation(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDefaultImplementation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_GetDefaultImplementation___")]
   public static extern global::System.IntPtr FbxObject_GetDefaultImplementation(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SetDefaultImplementation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SetDefaultImplementation___")]
   public static extern bool FbxObject_SetDefaultImplementation(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxCollection_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxCollection_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_Clear___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_Clear___")]
   public static extern void FbxCollection_Clear(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_AddMember___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_AddMember___")]
   public static extern bool FbxCollection_AddMember(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_GetMemberCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_GetMemberCount___")]
   public static extern int FbxCollection_GetMemberCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_GetAnimLayerMember__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_GetAnimLayerMember__SWIG_0___")]
   public static extern global::System.IntPtr FbxCollection_GetAnimLayerMember__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_GetAnimLayerMember__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_GetAnimLayerMember__SWIG_1___")]
   public static extern global::System.IntPtr FbxCollection_GetAnimLayerMember__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxDocumentInfo_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxDocumentInfo_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_LastSavedUrl_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_LastSavedUrl_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_LastSavedUrl_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Url_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Url_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_Url_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Original_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Original_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_Original_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Original_ApplicationVendor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Original_ApplicationVendor_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_Original_ApplicationVendor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Original_ApplicationName_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Original_ApplicationName_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_Original_ApplicationName_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Original_ApplicationVersion_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Original_ApplicationVersion_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_Original_ApplicationVersion_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Original_FileName_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Original_FileName_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_Original_FileName_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_LastSaved_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_LastSaved_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_LastSaved_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_LastSaved_ApplicationVendor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_LastSaved_ApplicationVendor_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_LastSaved_ApplicationVendor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_LastSaved_ApplicationName_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_LastSaved_ApplicationName_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_LastSaved_ApplicationName_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_LastSaved_ApplicationVersion_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_LastSaved_ApplicationVersion_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_LastSaved_ApplicationVersion_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_EmbeddedUrl_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_EmbeddedUrl_get___")]
   public static extern global::System.IntPtr FbxDocumentInfo_EmbeddedUrl_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mTitle_set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mTitle_set___")]
   public static extern void FbxDocumentInfo_mTitle_set(global::System.Runtime.InteropServices.HandleRef jarg1, [global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mTitle_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mTitle_get___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxDocumentInfo_mTitle_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mSubject_set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mSubject_set___")]
   public static extern void FbxDocumentInfo_mSubject_set(global::System.Runtime.InteropServices.HandleRef jarg1, [global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mSubject_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mSubject_get___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxDocumentInfo_mSubject_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mAuthor_set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mAuthor_set___")]
   public static extern void FbxDocumentInfo_mAuthor_set(global::System.Runtime.InteropServices.HandleRef jarg1, [global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mAuthor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mAuthor_get___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxDocumentInfo_mAuthor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mKeywords_set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mKeywords_set___")]
   public static extern void FbxDocumentInfo_mKeywords_set(global::System.Runtime.InteropServices.HandleRef jarg1, [global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mKeywords_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mKeywords_get___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxDocumentInfo_mKeywords_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mRevision_set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mRevision_set___")]
   public static extern void FbxDocumentInfo_mRevision_set(global::System.Runtime.InteropServices.HandleRef jarg1, [global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mRevision_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mRevision_get___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxDocumentInfo_mRevision_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mComment_set___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mComment_set___")]
   public static extern void FbxDocumentInfo_mComment_set(global::System.Runtime.InteropServices.HandleRef jarg1, [global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mComment_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_mComment_get___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxDocumentInfo_mComment_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Clear___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_Clear___")]
   public static extern void FbxDocumentInfo_Clear(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocument_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocument_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxDocument_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocument_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocument_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxDocument_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocument_GetDocumentInfo___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocument_GetDocumentInfo___")]
   public static extern global::System.IntPtr FbxDocument_GetDocumentInfo(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocument_SetDocumentInfo___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocument_SetDocumentInfo___")]
   public static extern void FbxDocument_SetDocumentInfo(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxScene_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxScene_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetRootNode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetRootNode___")]
   public static extern global::System.IntPtr FbxScene_GetRootNode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetPose___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetPose___")]
   public static extern global::System.IntPtr FbxScene_GetPose(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_AddPose___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_AddPose___")]
   public static extern bool FbxScene_AddPose(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetSceneInfo___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetSceneInfo___")]
   public static extern global::System.IntPtr FbxScene_GetSceneInfo(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_SetSceneInfo___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_SetSceneInfo___")]
   public static extern void FbxScene_SetSceneInfo(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetGlobalSettings___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetGlobalSettings___")]
   public static extern global::System.IntPtr FbxScene_GetGlobalSettings(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_SetCurrentAnimationStack___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_SetCurrentAnimationStack___")]
   public static extern void FbxScene_SetCurrentAnimationStack(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetCurrentAnimationStack___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetCurrentAnimationStack___")]
   public static extern global::System.IntPtr FbxScene_GetCurrentAnimationStack(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetNodeCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_GetNodeCount___")]
   public static extern int FbxScene_GetNodeCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_IOSROOT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_IOSROOT_get___")]
   public static extern string IOSROOT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_IMP_FBX_GLOBAL_SETTINGS_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_IMP_FBX_GLOBAL_SETTINGS_get___")]
   public static extern string IMP_FBX_GLOBAL_SETTINGS_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_IMP_FBX_MATERIAL_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_IMP_FBX_MATERIAL_get___")]
   public static extern string IMP_FBX_MATERIAL_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_IMP_FBX_TEXTURE_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_IMP_FBX_TEXTURE_get___")]
   public static extern string IMP_FBX_TEXTURE_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_IMP_FBX_ANIMATION_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_IMP_FBX_ANIMATION_get___")]
   public static extern string IMP_FBX_ANIMATION_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_IMP_FBX_EXTRACT_EMBEDDED_DATA_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_IMP_FBX_EXTRACT_EMBEDDED_DATA_get___")]
   public static extern string IMP_FBX_EXTRACT_EMBEDDED_DATA_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_EXP_FBX_GLOBAL_SETTINGS_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_EXP_FBX_GLOBAL_SETTINGS_get___")]
   public static extern string EXP_FBX_GLOBAL_SETTINGS_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_EXP_FBX_MATERIAL_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_EXP_FBX_MATERIAL_get___")]
   public static extern string EXP_FBX_MATERIAL_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_EXP_FBX_TEXTURE_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_EXP_FBX_TEXTURE_get___")]
   public static extern string EXP_FBX_TEXTURE_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_EXP_FBX_ANIMATION_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_EXP_FBX_ANIMATION_get___")]
   public static extern string EXP_FBX_ANIMATION_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_EXP_FBX_EMBEDDED_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_EXP_FBX_EMBEDDED_get___")]
   public static extern string EXP_FBX_EMBEDDED_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxIOBase_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxIOBase_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_Initialize__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_Initialize__SWIG_0___")]
   public static extern bool FbxIOBase_Initialize__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, int jarg3, global::System.Runtime.InteropServices.HandleRef jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_Initialize__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_Initialize__SWIG_1___")]
   public static extern bool FbxIOBase_Initialize__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_Initialize__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_Initialize__SWIG_2___")]
   public static extern bool FbxIOBase_Initialize__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_GetFileName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_GetFileName___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxIOBase_GetFileName(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_GetStatus___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_GetStatus___")]
   public static extern global::System.IntPtr FbxIOBase_GetStatus(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxExporter_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxExporter_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_Export___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_Export___")]
   public static extern bool FbxExporter_Export(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_SetFileExportVersion___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_SetFileExportVersion___")]
   public static extern bool FbxExporter_SetFileExportVersion(global::System.Runtime.InteropServices.HandleRef jarg1, [global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_GetFileHeaderInfo___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_GetFileHeaderInfo___")]
   public static extern global::System.IntPtr FbxExporter_GetFileHeaderInfo(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_SetFbxSharpProgressCallback___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_SetFbxSharpProgressCallback___")]
   public static extern void FbxExporter_SetFbxSharpProgressCallback(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxExporter__getCurrentWritableVersionsLength___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxExporter__getCurrentWritableVersionsLength___")]
   public static extern int FbxExporter__getCurrentWritableVersionsLength(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxExporter__getCurrentWritableVersionByIndex___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxExporter__getCurrentWritableVersionByIndex___")]
   public static extern string FbxExporter__getCurrentWritableVersionByIndex(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxImporter_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxImporter_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_GetFileVersion___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_GetFileVersion___")]
   public static extern void FbxImporter_GetFileVersion(global::System.Runtime.InteropServices.HandleRef jarg1, out int jarg2, out int jarg3, out int jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_GetFileHeaderInfo___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_GetFileHeaderInfo___")]
   public static extern global::System.IntPtr FbxImporter_GetFileHeaderInfo(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_Import___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_Import___")]
   public static extern bool FbxImporter_Import(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_GetAnimStackCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_GetAnimStackCount___")]
   public static extern int FbxImporter_GetAnimStackCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_GetActiveAnimStackName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_GetActiveAnimStackName___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxImporter_GetActiveAnimStackName(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_IsFBX___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_IsFBX___")]
   public static extern bool FbxImporter_IsFBX(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_SetFbxSharpProgressCallback___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_SetFbxSharpProgressCallback___")]
   public static extern void FbxImporter_SetFbxSharpProgressCallback(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOSettings_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOSettings_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxIOSettings_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOSettings_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOSettings_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxIOSettings_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOSettings_SetBoolProp___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOSettings_SetBoolProp___")]
   public static extern void FbxIOSettings_SetBoolProp(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxNode_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxNode_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetParent___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetParent___")]
   public static extern global::System.IntPtr FbxNode_GetParent(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_AddChild___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_AddChild___")]
   public static extern bool FbxNode_AddChild(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_RemoveChild___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_RemoveChild___")]
   public static extern global::System.IntPtr FbxNode_RemoveChild(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetChildCount__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetChildCount__SWIG_0___")]
   public static extern int FbxNode_GetChildCount__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetChildCount__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetChildCount__SWIG_1___")]
   public static extern int FbxNode_GetChildCount__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetChild___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetChild___")]
   public static extern global::System.IntPtr FbxNode_GetChild(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_FindChild__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_FindChild__SWIG_0___")]
   public static extern global::System.IntPtr FbxNode_FindChild__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, bool jarg3, bool jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_FindChild__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_FindChild__SWIG_1___")]
   public static extern global::System.IntPtr FbxNode_FindChild__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_FindChild__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_FindChild__SWIG_2___")]
   public static extern global::System.IntPtr FbxNode_FindChild__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetVisibility___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetVisibility___")]
   public static extern void FbxNode_SetVisibility(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetVisibility___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetVisibility___")]
   public static extern bool FbxNode_GetVisibility(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetShadingMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetShadingMode___")]
   public static extern void FbxNode_SetShadingMode(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetShadingMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetShadingMode___")]
   public static extern int FbxNode_GetShadingMode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetNodeAttribute___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetNodeAttribute___")]
   public static extern global::System.IntPtr FbxNode_SetNodeAttribute(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetNodeAttribute___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetNodeAttribute___")]
   public static extern global::System.IntPtr FbxNode_GetNodeAttribute(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetSkeleton___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetSkeleton___")]
   public static extern global::System.IntPtr FbxNode_GetSkeleton(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetGeometry___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetGeometry___")]
   public static extern global::System.IntPtr FbxNode_GetGeometry(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetMesh___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetMesh___")]
   public static extern global::System.IntPtr FbxNode_GetMesh(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetCamera___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetCamera___")]
   public static extern global::System.IntPtr FbxNode_GetCamera(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetLight___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetLight___")]
   public static extern global::System.IntPtr FbxNode_GetLight(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetTransformationInheritType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetTransformationInheritType___")]
   public static extern void FbxNode_SetTransformationInheritType(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetPivotState___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetPivotState___")]
   public static extern void FbxNode_SetPivotState(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetRotationOrder___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetRotationOrder___")]
   public static extern void FbxNode_SetRotationOrder(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetRotationOrder___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetRotationOrder___")]
   public static extern void FbxNode_GetRotationOrder(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, out int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetRotationActive___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetRotationActive___")]
   public static extern void FbxNode_SetRotationActive(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetRotationActive___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetRotationActive___")]
   public static extern bool FbxNode_GetRotationActive(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetRotationOffset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetRotationOffset___")]
   public static extern void FbxNode_SetRotationOffset(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetRotationOffset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetRotationOffset___")]
   public static extern FbxVector4 FbxNode_GetRotationOffset(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetRotationPivot___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetRotationPivot___")]
   public static extern void FbxNode_SetRotationPivot(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetRotationPivot___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetRotationPivot___")]
   public static extern FbxVector4 FbxNode_GetRotationPivot(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetPreRotation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetPreRotation___")]
   public static extern void FbxNode_SetPreRotation(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetPreRotation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetPreRotation___")]
   public static extern FbxVector4 FbxNode_GetPreRotation(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetPostRotation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetPostRotation___")]
   public static extern void FbxNode_SetPostRotation(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetPostRotation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetPostRotation___")]
   public static extern FbxVector4 FbxNode_GetPostRotation(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetScalingOffset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetScalingOffset___")]
   public static extern void FbxNode_SetScalingOffset(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetScalingOffset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetScalingOffset___")]
   public static extern FbxVector4 FbxNode_GetScalingOffset(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetScalingPivot___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SetScalingPivot___")]
   public static extern void FbxNode_SetScalingPivot(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetScalingPivot___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetScalingPivot___")]
   public static extern FbxVector4 FbxNode_GetScalingPivot(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateGlobalTransform__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateGlobalTransform__SWIG_0___")]
   public static extern global::System.IntPtr FbxNode_EvaluateGlobalTransform__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3, bool jarg4, bool jarg5);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateGlobalTransform__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateGlobalTransform__SWIG_1___")]
   public static extern global::System.IntPtr FbxNode_EvaluateGlobalTransform__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3, bool jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateGlobalTransform__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateGlobalTransform__SWIG_2___")]
   public static extern global::System.IntPtr FbxNode_EvaluateGlobalTransform__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateGlobalTransform__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateGlobalTransform__SWIG_3___")]
   public static extern global::System.IntPtr FbxNode_EvaluateGlobalTransform__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateGlobalTransform__SWIG_4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateGlobalTransform__SWIG_4___")]
   public static extern global::System.IntPtr FbxNode_EvaluateGlobalTransform__SWIG_4(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateLocalTransform__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateLocalTransform__SWIG_0___")]
   public static extern global::System.IntPtr FbxNode_EvaluateLocalTransform__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3, bool jarg4, bool jarg5);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateLocalTransform__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateLocalTransform__SWIG_1___")]
   public static extern global::System.IntPtr FbxNode_EvaluateLocalTransform__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3, bool jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateLocalTransform__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateLocalTransform__SWIG_2___")]
   public static extern global::System.IntPtr FbxNode_EvaluateLocalTransform__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateLocalTransform__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateLocalTransform__SWIG_3___")]
   public static extern global::System.IntPtr FbxNode_EvaluateLocalTransform__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateLocalTransform__SWIG_4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_EvaluateLocalTransform__SWIG_4___")]
   public static extern global::System.IntPtr FbxNode_EvaluateLocalTransform__SWIG_4(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_AddMaterial___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_AddMaterial___")]
   public static extern int FbxNode_AddMaterial(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetMaterial___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetMaterial___")]
   public static extern global::System.IntPtr FbxNode_GetMaterial(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetMaterialIndex___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_GetMaterialIndex___")]
   public static extern int FbxNode_GetMaterialIndex(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_LclTranslation_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_LclTranslation_get___")]
   public static extern global::System.IntPtr FbxNode_LclTranslation_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_LclRotation_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_LclRotation_get___")]
   public static extern global::System.IntPtr FbxNode_LclRotation_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_LclScaling_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_LclScaling_get___")]
   public static extern global::System.IntPtr FbxNode_LclScaling_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_VisibilityInheritance_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_VisibilityInheritance_get___")]
   public static extern global::System.IntPtr FbxNode_VisibilityInheritance_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_InheritType_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_InheritType_get___")]
   public static extern global::System.IntPtr FbxNode_InheritType_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxNodeAttribute_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxNodeAttribute_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_sColor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_sColor_get___")]
   public static extern string FbxNodeAttribute_sColor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_sDefaultColor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_sDefaultColor_get___")]
   public static extern FbxDouble3 FbxNodeAttribute_sDefaultColor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_Color_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_Color_get___")]
   public static extern global::System.IntPtr FbxNodeAttribute_Color_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_GetAttributeType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_GetAttributeType___")]
   public static extern int FbxNodeAttribute_GetAttributeType(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_GetNodeCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_GetNodeCount___")]
   public static extern int FbxNodeAttribute_GetNodeCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_GetNode__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_GetNode__SWIG_0___")]
   public static extern global::System.IntPtr FbxNodeAttribute_GetNode__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_GetNode__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_GetNode__SWIG_1___")]
   public static extern global::System.IntPtr FbxNodeAttribute_GetNode__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNull_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNull_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxNull_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNull_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNull_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxNull_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNull_Reset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNull_Reset___")]
   public static extern void FbxNull_Reset(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNull_GetSizeDefaultValue___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNull_GetSizeDefaultValue___")]
   public static extern double FbxNull_GetSizeDefaultValue(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNull_sSize_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNull_sSize_get___")]
   public static extern string FbxNull_sSize_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNull_sLook_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNull_sLook_get___")]
   public static extern string FbxNull_sLook_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNull_sDefaultSize_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNull_sDefaultSize_get___")]
   public static extern double FbxNull_sDefaultSize_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNull_sDefaultLook_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNull_sDefaultLook_get___")]
   public static extern int FbxNull_sDefaultLook_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNull_Size_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNull_Size_get___")]
   public static extern global::System.IntPtr FbxNull_Size_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNull_Look_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNull_Look_get___")]
   public static extern global::System.IntPtr FbxNull_Look_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxLayerContainer_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxLayerContainer_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_CreateLayer___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_CreateLayer___")]
   public static extern int FbxLayerContainer_CreateLayer(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_GetLayerCount__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_GetLayerCount__SWIG_0___")]
   public static extern int FbxLayerContainer_GetLayerCount__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_GetLayerCount__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_GetLayerCount__SWIG_1___")]
   public static extern int FbxLayerContainer_GetLayerCount__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_GetLayerCount__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_GetLayerCount__SWIG_2___")]
   public static extern int FbxLayerContainer_GetLayerCount__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_GetLayer___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_GetLayer___")]
   public static extern global::System.IntPtr FbxLayerContainer_GetLayer(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxGeometryBase_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxGeometryBase_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_InitControlPoints___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_InitControlPoints___")]
   public static extern void FbxGeometryBase_InitControlPoints(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_GetControlPointAt___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_GetControlPointAt___")]
   public static extern FbxVector4 FbxGeometryBase_GetControlPointAt(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_GetControlPointsCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_GetControlPointsCount___")]
   public static extern int FbxGeometryBase_GetControlPointsCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_CreateElementNormal___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_CreateElementNormal___")]
   public static extern global::System.IntPtr FbxGeometryBase_CreateElementNormal(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_CreateElementTangent___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_CreateElementTangent___")]
   public static extern global::System.IntPtr FbxGeometryBase_CreateElementTangent(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_SetControlPointAt___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_SetControlPointAt___")]
   public static extern void FbxGeometryBase_SetControlPointAt(global::System.Runtime.InteropServices.HandleRef jarg1, FbxVector4 jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxGeometry_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxGeometry_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_AddDeformer___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_AddDeformer___")]
   public static extern int FbxGeometry_AddDeformer(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformerCount__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformerCount__SWIG_0___")]
   public static extern int FbxGeometry_GetDeformerCount__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformer__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformer__SWIG_0___")]
   public static extern global::System.IntPtr FbxGeometry_GetDeformer__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformer__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformer__SWIG_1___")]
   public static extern global::System.IntPtr FbxGeometry_GetDeformer__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformerCount__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformerCount__SWIG_1___")]
   public static extern int FbxGeometry_GetDeformerCount__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformer__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformer__SWIG_2___")]
   public static extern global::System.IntPtr FbxGeometry_GetDeformer__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3, global::System.Runtime.InteropServices.HandleRef jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformer__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetDeformer__SWIG_3___")]
   public static extern global::System.IntPtr FbxGeometry_GetDeformer__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetBlendShapeDeformer__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetBlendShapeDeformer__SWIG_0___")]
   public static extern global::System.IntPtr FbxGeometry_GetBlendShapeDeformer__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetBlendShapeDeformer__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_GetBlendShapeDeformer__SWIG_1___")]
   public static extern global::System.IntPtr FbxGeometry_GetBlendShapeDeformer__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxMesh_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxMesh_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_BeginPolygonUnchecked___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_BeginPolygonUnchecked___")]
   public static extern void FbxMesh_BeginPolygonUnchecked(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3, int jarg4, bool jarg5);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_AddPolygonUnchecked___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_AddPolygonUnchecked___")]
   public static extern void FbxMesh_AddPolygonUnchecked(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_EndPolygonUnchecked___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_EndPolygonUnchecked___")]
   public static extern void FbxMesh_EndPolygonUnchecked(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_GetPolygonCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_GetPolygonCount___")]
   public static extern int FbxMesh_GetPolygonCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_GetPolygonSize___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_GetPolygonSize___")]
   public static extern int FbxMesh_GetPolygonSize(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_GetPolygonVertex___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_GetPolygonVertex___")]
   public static extern int FbxMesh_GetPolygonVertex(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_GetPolygonVertexCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_GetPolygonVertexCount___")]
   public static extern int FbxMesh_GetPolygonVertexCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxGlobalSettings_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxGlobalSettings_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SetAxisSystem___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SetAxisSystem___")]
   public static extern void FbxGlobalSettings_SetAxisSystem(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_GetAxisSystem___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_GetAxisSystem___")]
   public static extern global::System.IntPtr FbxGlobalSettings_GetAxisSystem(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SetSystemUnit___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SetSystemUnit___")]
   public static extern void FbxGlobalSettings_SetSystemUnit(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_GetSystemUnit___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_GetSystemUnit___")]
   public static extern global::System.IntPtr FbxGlobalSettings_GetSystemUnit(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SetAmbientColor___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SetAmbientColor___")]
   public static extern void FbxGlobalSettings_SetAmbientColor(global::System.Runtime.InteropServices.HandleRef jarg1, FbxColor jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_GetAmbientColor___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_GetAmbientColor___")]
   public static extern FbxColor FbxGlobalSettings_GetAmbientColor(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SetDefaultCamera___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SetDefaultCamera___")]
   public static extern bool FbxGlobalSettings_SetDefaultCamera(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_GetDefaultCamera___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_GetDefaultCamera___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxGlobalSettings_GetDefaultCamera(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SetTimeMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SetTimeMode___")]
   public static extern void FbxGlobalSettings_SetTimeMode(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_GetTimeMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_GetTimeMode___")]
   public static extern int FbxGlobalSettings_GetTimeMode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxImplementation_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxImplementation_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_Language_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_Language_get___")]
   public static extern global::System.IntPtr FbxImplementation_Language_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_LanguageVersion_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_LanguageVersion_get___")]
   public static extern global::System.IntPtr FbxImplementation_LanguageVersion_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_RenderAPI_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_RenderAPI_get___")]
   public static extern global::System.IntPtr FbxImplementation_RenderAPI_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_RenderAPIVersion_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_RenderAPIVersion_get___")]
   public static extern global::System.IntPtr FbxImplementation_RenderAPIVersion_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_RootBindingName_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_RootBindingName_get___")]
   public static extern global::System.IntPtr FbxImplementation_RootBindingName_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_AddNewTable___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_AddNewTable___")]
   public static extern global::System.IntPtr FbxImplementation_AddNewTable(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, string jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_GetRootTable___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_GetRootTable___")]
   public static extern global::System.IntPtr FbxImplementation_GetRootTable(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_SHADING_LANGUAGE_HLSL_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_SHADING_LANGUAGE_HLSL_get___")]
   public static extern string FBXSDK_SHADING_LANGUAGE_HLSL_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_SHADING_LANGUAGE_GLSL_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_SHADING_LANGUAGE_GLSL_get___")]
   public static extern string FBXSDK_SHADING_LANGUAGE_GLSL_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_SHADING_LANGUAGE_CGFX_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_SHADING_LANGUAGE_CGFX_get___")]
   public static extern string FBXSDK_SHADING_LANGUAGE_CGFX_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_SHADING_LANGUAGE_SFX_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_SHADING_LANGUAGE_SFX_get___")]
   public static extern string FBXSDK_SHADING_LANGUAGE_SFX_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_SHADING_LANGUAGE_MRSL_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_SHADING_LANGUAGE_MRSL_get___")]
   public static extern string FBXSDK_SHADING_LANGUAGE_MRSL_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_RENDERING_API_DIRECTX_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_RENDERING_API_DIRECTX_get___")]
   public static extern string FBXSDK_RENDERING_API_DIRECTX_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_RENDERING_API_OPENGL_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_RENDERING_API_OPENGL_get___")]
   public static extern string FBXSDK_RENDERING_API_OPENGL_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_RENDERING_API_MENTALRAY_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_RENDERING_API_MENTALRAY_get___")]
   public static extern string FBXSDK_RENDERING_API_MENTALRAY_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_RENDERING_API_PREVIEW_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_RENDERING_API_PREVIEW_get___")]
   public static extern string FBXSDK_RENDERING_API_PREVIEW_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxSurfaceMaterial_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxSurfaceMaterial_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sShadingModel_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sShadingModel_get___")]
   public static extern string FbxSurfaceMaterial_sShadingModel_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sMultiLayer_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sMultiLayer_get___")]
   public static extern string FbxSurfaceMaterial_sMultiLayer_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sEmissive_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sEmissive_get___")]
   public static extern string FbxSurfaceMaterial_sEmissive_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sEmissiveFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sEmissiveFactor_get___")]
   public static extern string FbxSurfaceMaterial_sEmissiveFactor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sAmbient_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sAmbient_get___")]
   public static extern string FbxSurfaceMaterial_sAmbient_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sAmbientFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sAmbientFactor_get___")]
   public static extern string FbxSurfaceMaterial_sAmbientFactor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sDiffuse_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sDiffuse_get___")]
   public static extern string FbxSurfaceMaterial_sDiffuse_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sDiffuseFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sDiffuseFactor_get___")]
   public static extern string FbxSurfaceMaterial_sDiffuseFactor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sSpecular_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sSpecular_get___")]
   public static extern string FbxSurfaceMaterial_sSpecular_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sSpecularFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sSpecularFactor_get___")]
   public static extern string FbxSurfaceMaterial_sSpecularFactor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sShininess_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sShininess_get___")]
   public static extern string FbxSurfaceMaterial_sShininess_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sBump_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sBump_get___")]
   public static extern string FbxSurfaceMaterial_sBump_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sNormalMap_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sNormalMap_get___")]
   public static extern string FbxSurfaceMaterial_sNormalMap_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sBumpFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sBumpFactor_get___")]
   public static extern string FbxSurfaceMaterial_sBumpFactor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sTransparentColor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sTransparentColor_get___")]
   public static extern string FbxSurfaceMaterial_sTransparentColor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sTransparencyFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sTransparencyFactor_get___")]
   public static extern string FbxSurfaceMaterial_sTransparencyFactor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sReflection_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sReflection_get___")]
   public static extern string FbxSurfaceMaterial_sReflection_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sReflectionFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sReflectionFactor_get___")]
   public static extern string FbxSurfaceMaterial_sReflectionFactor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sDisplacementColor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sDisplacementColor_get___")]
   public static extern string FbxSurfaceMaterial_sDisplacementColor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sDisplacementFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sDisplacementFactor_get___")]
   public static extern string FbxSurfaceMaterial_sDisplacementFactor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sVectorDisplacementColor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sVectorDisplacementColor_get___")]
   public static extern string FbxSurfaceMaterial_sVectorDisplacementColor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sVectorDisplacementFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sVectorDisplacementFactor_get___")]
   public static extern string FbxSurfaceMaterial_sVectorDisplacementFactor_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_ShadingModel_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_ShadingModel_get___")]
   public static extern global::System.IntPtr FbxSurfaceMaterial_ShadingModel_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_MultiLayer_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_MultiLayer_get___")]
   public static extern global::System.IntPtr FbxSurfaceMaterial_MultiLayer_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sMultiLayerDefault_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sMultiLayerDefault_get___")]
   public static extern bool FbxSurfaceMaterial_sMultiLayerDefault_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sShadingModelDefault_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_sShadingModelDefault_get___")]
   public static extern string FbxSurfaceMaterial_sShadingModelDefault_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Emissive_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Emissive_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_Emissive_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_EmissiveFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_EmissiveFactor_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_EmissiveFactor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Ambient_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Ambient_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_Ambient_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_AmbientFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_AmbientFactor_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_AmbientFactor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Diffuse_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Diffuse_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_Diffuse_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_DiffuseFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_DiffuseFactor_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_DiffuseFactor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_NormalMap_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_NormalMap_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_NormalMap_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Bump_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_Bump_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_Bump_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_BumpFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_BumpFactor_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_BumpFactor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_TransparentColor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_TransparentColor_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_TransparentColor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_TransparencyFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_TransparencyFactor_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_TransparencyFactor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_DisplacementColor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_DisplacementColor_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_DisplacementColor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_DisplacementFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_DisplacementFactor_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_DisplacementFactor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_VectorDisplacementColor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_VectorDisplacementColor_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_VectorDisplacementColor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_VectorDisplacementFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_VectorDisplacementFactor_get___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_VectorDisplacementFactor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxSurfacePhong_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxSurfacePhong_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_Specular_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_Specular_get___")]
   public static extern global::System.IntPtr FbxSurfacePhong_Specular_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_SpecularFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_SpecularFactor_get___")]
   public static extern global::System.IntPtr FbxSurfacePhong_SpecularFactor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_Shininess_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_Shininess_get___")]
   public static extern global::System.IntPtr FbxSurfacePhong_Shininess_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_Reflection_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_Reflection_get___")]
   public static extern global::System.IntPtr FbxSurfacePhong_Reflection_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_ReflectionFactor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_ReflectionFactor_get___")]
   public static extern global::System.IntPtr FbxSurfacePhong_ReflectionFactor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxTexture_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxTexture_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Alpha_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Alpha_get___")]
   public static extern global::System.IntPtr FbxTexture_Alpha_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_WrapModeU_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_WrapModeU_get___")]
   public static extern global::System.IntPtr FbxTexture_WrapModeU_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_WrapModeV_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_WrapModeV_get___")]
   public static extern global::System.IntPtr FbxTexture_WrapModeV_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_UVSwap_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_UVSwap_get___")]
   public static extern global::System.IntPtr FbxTexture_UVSwap_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_PremultiplyAlpha_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_PremultiplyAlpha_get___")]
   public static extern global::System.IntPtr FbxTexture_PremultiplyAlpha_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Translation_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Translation_get___")]
   public static extern global::System.IntPtr FbxTexture_Translation_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Rotation_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Rotation_get___")]
   public static extern global::System.IntPtr FbxTexture_Rotation_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Scaling_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Scaling_get___")]
   public static extern global::System.IntPtr FbxTexture_Scaling_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_RotationPivot_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_RotationPivot_get___")]
   public static extern global::System.IntPtr FbxTexture_RotationPivot_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_ScalingPivot_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_ScalingPivot_get___")]
   public static extern global::System.IntPtr FbxTexture_ScalingPivot_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_CurrentTextureBlendMode_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_CurrentTextureBlendMode_get___")]
   public static extern global::System.IntPtr FbxTexture_CurrentTextureBlendMode_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_UVSet_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_UVSet_get___")]
   public static extern global::System.IntPtr FbxTexture_UVSet_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorSpace_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorSpace_get___")]
   public static extern string FbxTexture_sVectorSpace_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorSpaceWorld_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorSpaceWorld_get___")]
   public static extern string FbxTexture_sVectorSpaceWorld_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorSpaceObject_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorSpaceObject_get___")]
   public static extern string FbxTexture_sVectorSpaceObject_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorSpaceTangent_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorSpaceTangent_get___")]
   public static extern string FbxTexture_sVectorSpaceTangent_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorEncoding_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorEncoding_get___")]
   public static extern string FbxTexture_sVectorEncoding_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorEncodingFP_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorEncodingFP_get___")]
   public static extern string FbxTexture_sVectorEncodingFP_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorEncodingSE_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_sVectorEncodingSE_get___")]
   public static extern string FbxTexture_sVectorEncodingSE_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Reset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_Reset___")]
   public static extern void FbxTexture_Reset(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetSwapUV___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetSwapUV___")]
   public static extern void FbxTexture_SetSwapUV(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetSwapUV___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetSwapUV___")]
   public static extern bool FbxTexture_GetSwapUV(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetPremultiplyAlpha___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetPremultiplyAlpha___")]
   public static extern void FbxTexture_SetPremultiplyAlpha(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetPremultiplyAlpha___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetPremultiplyAlpha___")]
   public static extern bool FbxTexture_GetPremultiplyAlpha(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetAlphaSource___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetAlphaSource___")]
   public static extern void FbxTexture_SetAlphaSource(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetAlphaSource___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetAlphaSource___")]
   public static extern int FbxTexture_GetAlphaSource(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetCropping___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetCropping___")]
   public static extern void FbxTexture_SetCropping(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3, int jarg4, int jarg5);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetCroppingLeft___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetCroppingLeft___")]
   public static extern int FbxTexture_GetCroppingLeft(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetCroppingTop___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetCroppingTop___")]
   public static extern int FbxTexture_GetCroppingTop(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetCroppingRight___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetCroppingRight___")]
   public static extern int FbxTexture_GetCroppingRight(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetCroppingBottom___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetCroppingBottom___")]
   public static extern int FbxTexture_GetCroppingBottom(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetMappingType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetMappingType___")]
   public static extern void FbxTexture_SetMappingType(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetMappingType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetMappingType___")]
   public static extern int FbxTexture_GetMappingType(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetPlanarMappingNormal___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetPlanarMappingNormal___")]
   public static extern void FbxTexture_SetPlanarMappingNormal(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetPlanarMappingNormal___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetPlanarMappingNormal___")]
   public static extern int FbxTexture_GetPlanarMappingNormal(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetTextureUse___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetTextureUse___")]
   public static extern void FbxTexture_SetTextureUse(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetTextureUse___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetTextureUse___")]
   public static extern int FbxTexture_GetTextureUse(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetWrapMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetWrapMode___")]
   public static extern void FbxTexture_SetWrapMode(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetWrapModeU___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetWrapModeU___")]
   public static extern int FbxTexture_GetWrapModeU(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetWrapModeV___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetWrapModeV___")]
   public static extern int FbxTexture_GetWrapModeV(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetBlendMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetBlendMode___")]
   public static extern void FbxTexture_SetBlendMode(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetBlendMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetBlendMode___")]
   public static extern int FbxTexture_GetBlendMode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetDefaultAlpha___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetDefaultAlpha___")]
   public static extern void FbxTexture_SetDefaultAlpha(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetDefaultAlpha___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetDefaultAlpha___")]
   public static extern double FbxTexture_GetDefaultAlpha(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetTranslation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetTranslation___")]
   public static extern void FbxTexture_SetTranslation(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetTranslationU___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetTranslationU___")]
   public static extern double FbxTexture_GetTranslationU(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetTranslationV___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetTranslationV___")]
   public static extern double FbxTexture_GetTranslationV(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetRotation__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetRotation__SWIG_0___")]
   public static extern void FbxTexture_SetRotation__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2, double jarg3, double jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetRotation__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetRotation__SWIG_1___")]
   public static extern void FbxTexture_SetRotation__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetRotationU___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetRotationU___")]
   public static extern double FbxTexture_GetRotationU(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetRotationV___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetRotationV___")]
   public static extern double FbxTexture_GetRotationV(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetRotationW___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetRotationW___")]
   public static extern double FbxTexture_GetRotationW(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetScale___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SetScale___")]
   public static extern void FbxTexture_SetScale(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetScaleU___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetScaleU___")]
   public static extern double FbxTexture_GetScaleU(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetScaleV___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_GetScaleV___")]
   public static extern double FbxTexture_GetScaleV(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxFileTexture_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxFileTexture_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_UseMaterial_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_UseMaterial_get___")]
   public static extern global::System.IntPtr FbxFileTexture_UseMaterial_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_UseMipMap_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_UseMipMap_get___")]
   public static extern global::System.IntPtr FbxFileTexture_UseMipMap_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_SetFileName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_SetFileName___")]
   public static extern bool FbxFileTexture_SetFileName(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_SetRelativeFileName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_SetRelativeFileName___")]
   public static extern bool FbxFileTexture_SetRelativeFileName(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_GetFileName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_GetFileName___")]
   public static extern string FbxFileTexture_GetFileName(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_GetRelativeFileName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_GetRelativeFileName___")]
   public static extern string FbxFileTexture_GetRelativeFileName(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_SetMaterialUse___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_SetMaterialUse___")]
   public static extern void FbxFileTexture_SetMaterialUse(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_GetMaterialUse___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_GetMaterialUse___")]
   public static extern int FbxFileTexture_GetMaterialUse(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTableBase_AddNewEntry___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTableBase_AddNewEntry___")]
   public static extern global::System.IntPtr FbxBindingTableBase_AddNewEntry(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxBindingTable_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxBindingTable_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_DescRelativeURL_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_DescRelativeURL_get___")]
   public static extern global::System.IntPtr FbxBindingTable_DescRelativeURL_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_DescAbsoluteURL_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_DescAbsoluteURL_get___")]
   public static extern global::System.IntPtr FbxBindingTable_DescAbsoluteURL_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_DescTAG_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_DescTAG_get___")]
   public static extern global::System.IntPtr FbxBindingTable_DescTAG_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxEntryView_IsValid___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxEntryView_IsValid___")]
   public static extern bool FbxEntryView_IsValid(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxEntryView_EntryType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxEntryView_EntryType___")]
   public static extern string FbxEntryView_EntryType(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxPropertyEntryView__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxPropertyEntryView__SWIG_0___")]
   public static extern global::System.IntPtr new_FbxPropertyEntryView__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxPropertyEntryView__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxPropertyEntryView__SWIG_1___")]
   public static extern global::System.IntPtr new_FbxPropertyEntryView__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxPropertyEntryView___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxPropertyEntryView___")]
   public static extern void delete_FbxPropertyEntryView(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEntryView_GetProperty___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEntryView_GetProperty___")]
   public static extern string FbxPropertyEntryView_GetProperty(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEntryView_SetProperty___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEntryView_SetProperty___")]
   public static extern void FbxPropertyEntryView_SetProperty(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxSemanticEntryView__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxSemanticEntryView__SWIG_0___")]
   public static extern global::System.IntPtr new_FbxSemanticEntryView__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2, bool jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxSemanticEntryView__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxSemanticEntryView__SWIG_1___")]
   public static extern global::System.IntPtr new_FbxSemanticEntryView__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxSemanticEntryView___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxSemanticEntryView___")]
   public static extern void delete_FbxSemanticEntryView(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSemanticEntryView_SetSemantic___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSemanticEntryView_SetSemantic___")]
   public static extern void FbxSemanticEntryView_SetSemantic(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSemanticEntryView_GetSemantic__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSemanticEntryView_GetSemantic__SWIG_0___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxSemanticEntryView_GetSemantic__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSemanticEntryView_GetSemantic__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSemanticEntryView_GetSemantic__SWIG_1___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxSemanticEntryView_GetSemantic__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSemanticEntryView_GetIndex___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSemanticEntryView_GetIndex___")]
   public static extern int FbxSemanticEntryView_GetIndex(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPose_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPose_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxPose_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPose_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPose_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxPose_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPose_SetIsBindPose___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPose_SetIsBindPose___")]
   public static extern void FbxPose_SetIsBindPose(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPose_IsBindPose___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPose_IsBindPose___")]
   public static extern bool FbxPose_IsBindPose(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPose_GetCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPose_GetCount___")]
   public static extern int FbxPose_GetCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPose_Add__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPose_Add__SWIG_0___")]
   public static extern int FbxPose_Add__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, bool jarg4, bool jarg5);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPose_Add__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPose_Add__SWIG_1___")]
   public static extern int FbxPose_Add__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, bool jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPose_Add__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPose_Add__SWIG_2___")]
   public static extern int FbxPose_Add__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPose_GetNode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPose_GetNode___")]
   public static extern global::System.IntPtr FbxPose_GetNode(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPose_GetMatrix___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPose_GetMatrix___")]
   public static extern global::System.IntPtr FbxPose_GetMatrix(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDeformer_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDeformer_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxDeformer_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDeformer_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDeformer_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxDeformer_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDeformer_GetDeformerType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDeformer_GetDeformerType___")]
   public static extern int FbxDeformer_GetDeformerType(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSubDeformer_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSubDeformer_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxSubDeformer_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSubDeformer_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSubDeformer_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxSubDeformer_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxCluster_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxCluster_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SetLinkMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SetLinkMode___")]
   public static extern void FbxCluster_SetLinkMode(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetLinkMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetLinkMode___")]
   public static extern int FbxCluster_GetLinkMode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SetLink___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SetLink___")]
   public static extern void FbxCluster_SetLink(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetLink___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetLink___")]
   public static extern global::System.IntPtr FbxCluster_GetLink(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_AddControlPointIndex___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_AddControlPointIndex___")]
   public static extern void FbxCluster_AddControlPointIndex(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetControlPointIndicesCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetControlPointIndicesCount___")]
   public static extern int FbxCluster_GetControlPointIndicesCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SetControlPointIWCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SetControlPointIWCount___")]
   public static extern void FbxCluster_SetControlPointIWCount(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SetTransformMatrix___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SetTransformMatrix___")]
   public static extern void FbxCluster_SetTransformMatrix(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetTransformMatrix___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetTransformMatrix___")]
   public static extern global::System.IntPtr FbxCluster_GetTransformMatrix(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SetTransformLinkMatrix___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SetTransformLinkMatrix___")]
   public static extern void FbxCluster_SetTransformLinkMatrix(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetTransformLinkMatrix___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetTransformLinkMatrix___")]
   public static extern global::System.IntPtr FbxCluster_GetTransformLinkMatrix(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetControlPointIndexAt___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetControlPointIndexAt___")]
   public static extern int FbxCluster_GetControlPointIndexAt(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetControlPointWeightAt___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_GetControlPointWeightAt___")]
   public static extern double FbxCluster_GetControlPointWeightAt(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkin_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkin_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxSkin_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkin_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkin_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxSkin_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkin_AddCluster___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkin_AddCluster___")]
   public static extern bool FbxSkin_AddCluster(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkin_GetCluster___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkin_GetCluster___")]
   public static extern global::System.IntPtr FbxSkin_GetCluster(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxSkeleton_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxSkeleton_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_Reset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_Reset___")]
   public static extern void FbxSkeleton_Reset(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_SetSkeletonType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_SetSkeletonType___")]
   public static extern void FbxSkeleton_SetSkeletonType(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetSkeletonType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetSkeletonType___")]
   public static extern int FbxSkeleton_GetSkeletonType(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetSkeletonTypeIsSet___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetSkeletonTypeIsSet___")]
   public static extern bool FbxSkeleton_GetSkeletonTypeIsSet(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetSkeletonTypeDefaultValue___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetSkeletonTypeDefaultValue___")]
   public static extern int FbxSkeleton_GetSkeletonTypeDefaultValue(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetLimbLengthDefaultValue___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetLimbLengthDefaultValue___")]
   public static extern double FbxSkeleton_GetLimbLengthDefaultValue(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetLimbNodeSizeDefaultValue___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetLimbNodeSizeDefaultValue___")]
   public static extern double FbxSkeleton_GetLimbNodeSizeDefaultValue(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_SetLimbNodeColor___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_SetLimbNodeColor___")]
   public static extern bool FbxSkeleton_SetLimbNodeColor(global::System.Runtime.InteropServices.HandleRef jarg1, FbxColor jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetLimbNodeColor___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetLimbNodeColor___")]
   public static extern FbxColor FbxSkeleton_GetLimbNodeColor(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetLimbNodeColorIsSet___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetLimbNodeColorIsSet___")]
   public static extern bool FbxSkeleton_GetLimbNodeColorIsSet(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetLimbNodeColorDefaultValue___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_GetLimbNodeColorDefaultValue___")]
   public static extern FbxColor FbxSkeleton_GetLimbNodeColorDefaultValue(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_IsSkeletonRoot___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_IsSkeletonRoot___")]
   public static extern bool FbxSkeleton_IsSkeletonRoot(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_sSize_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_sSize_get___")]
   public static extern string FbxSkeleton_sSize_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_sLimbLength_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_sLimbLength_get___")]
   public static extern string FbxSkeleton_sLimbLength_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_sDefaultSize_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_sDefaultSize_get___")]
   public static extern double FbxSkeleton_sDefaultSize_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_sDefaultLimbLength_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_sDefaultLimbLength_get___")]
   public static extern double FbxSkeleton_sDefaultLimbLength_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_Size_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_Size_get___")]
   public static extern global::System.IntPtr FbxSkeleton_Size_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_LimbLength_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_LimbLength_get___")]
   public static extern global::System.IntPtr FbxSkeleton_LimbLength_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOPluginRegistry_FindWriterIDByDescription___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOPluginRegistry_FindWriterIDByDescription___")]
   public static extern int FbxIOPluginRegistry_FindWriterIDByDescription(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimLayer_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimLayer_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxAnimLayer_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimLayer_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimLayer_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxAnimLayer_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxAnimStack_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxAnimStack_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_Description_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_Description_get___")]
   public static extern global::System.IntPtr FbxAnimStack_Description_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_GetLocalTimeSpan___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_GetLocalTimeSpan___")]
   public static extern global::System.IntPtr FbxAnimStack_GetLocalTimeSpan(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_SetLocalTimeSpan___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_SetLocalTimeSpan___")]
   public static extern void FbxAnimStack_SetLocalTimeSpan(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveBase_KeyGetCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveBase_KeyGetCount___")]
   public static extern int FbxAnimCurveBase_KeyGetCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveBase_KeyGetTime___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveBase_KeyGetTime___")]
   public static extern global::System.IntPtr FbxAnimCurveBase_KeyGetTime(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveDef_sDEFAULT_WEIGHT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveDef_sDEFAULT_WEIGHT_get___")]
   public static extern float FbxAnimCurveDef_sDEFAULT_WEIGHT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveDef_sMIN_WEIGHT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveDef_sMIN_WEIGHT_get___")]
   public static extern float FbxAnimCurveDef_sMIN_WEIGHT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveDef_sMAX_WEIGHT_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveDef_sMAX_WEIGHT_get___")]
   public static extern float FbxAnimCurveDef_sMAX_WEIGHT_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveDef_sDEFAULT_VELOCITY_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveDef_sDEFAULT_VELOCITY_get___")]
   public static extern float FbxAnimCurveDef_sDEFAULT_VELOCITY_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_Create___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_Create___")]
   public static extern global::System.IntPtr FbxAnimCurve_Create(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeyModifyBegin___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeyModifyBegin___")]
   public static extern void FbxAnimCurve_KeyModifyBegin(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeyModifyEnd___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeyModifyEnd___")]
   public static extern void FbxAnimCurve_KeyModifyEnd(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeyAdd__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeyAdd__SWIG_0___")]
   public static extern int FbxAnimCurve_KeyAdd__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, ref int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeyAdd__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeyAdd__SWIG_1___")]
   public static extern int FbxAnimCurve_KeyAdd__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_0___")]
   public static extern void FbxAnimCurve_KeySet__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, float jarg4, int jarg5, int jarg6, float jarg7, float jarg8, int jarg9, float jarg10, float jarg11, float jarg12, float jarg13);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_1___")]
   public static extern void FbxAnimCurve_KeySet__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, float jarg4, int jarg5, int jarg6, float jarg7, float jarg8, int jarg9, float jarg10, float jarg11, float jarg12);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_2___")]
   public static extern void FbxAnimCurve_KeySet__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, float jarg4, int jarg5, int jarg6, float jarg7, float jarg8, int jarg9, float jarg10, float jarg11);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_3___")]
   public static extern void FbxAnimCurve_KeySet__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, float jarg4, int jarg5, int jarg6, float jarg7, float jarg8, int jarg9, float jarg10);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_4___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_4___")]
   public static extern void FbxAnimCurve_KeySet__SWIG_4(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, float jarg4, int jarg5, int jarg6, float jarg7, float jarg8, int jarg9);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_5___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_5___")]
   public static extern void FbxAnimCurve_KeySet__SWIG_5(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, float jarg4, int jarg5, int jarg6, float jarg7, float jarg8);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_6___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_6___")]
   public static extern void FbxAnimCurve_KeySet__SWIG_6(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, float jarg4, int jarg5, int jarg6, float jarg7);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_7___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_7___")]
   public static extern void FbxAnimCurve_KeySet__SWIG_7(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, float jarg4, int jarg5, int jarg6);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_8___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_8___")]
   public static extern void FbxAnimCurve_KeySet__SWIG_8(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, float jarg4, int jarg5);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_9___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeySet__SWIG_9___")]
   public static extern void FbxAnimCurve_KeySet__SWIG_9(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3, float jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeyGetValue___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_KeyGetValue___")]
   public static extern float FbxAnimCurve_KeyGetValue(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxAnimCurveFilterUnroll___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxAnimCurveFilterUnroll___")]
   public static extern global::System.IntPtr new_FbxAnimCurveFilterUnroll();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxAnimCurveFilterUnroll___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxAnimCurveFilterUnroll___")]
   public static extern void delete_FbxAnimCurveFilterUnroll(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveFilterUnroll_NeedApply__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveFilterUnroll_NeedApply__SWIG_0___")]
   public static extern bool FbxAnimCurveFilterUnroll_NeedApply__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveFilterUnroll_NeedApply__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveFilterUnroll_NeedApply__SWIG_1___")]
   public static extern bool FbxAnimCurveFilterUnroll_NeedApply__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveFilterUnroll_Apply__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveFilterUnroll_Apply__SWIG_0___")]
   public static extern bool FbxAnimCurveFilterUnroll_Apply__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveFilterUnroll_Apply__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveFilterUnroll_Apply__SWIG_1___")]
   public static extern bool FbxAnimCurveFilterUnroll_Apply__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveFilterUnroll_Reset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveFilterUnroll_Reset___")]
   public static extern void FbxAnimCurveFilterUnroll_Reset(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_TRANSFORM_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_TRANSFORM_get___")]
   public static extern string FBXSDK_CURVENODE_TRANSFORM_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_TRANSLATION_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_TRANSLATION_get___")]
   public static extern string FBXSDK_CURVENODE_TRANSLATION_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_ROTATION_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_ROTATION_get___")]
   public static extern string FBXSDK_CURVENODE_ROTATION_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_SCALING_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_SCALING_get___")]
   public static extern string FBXSDK_CURVENODE_SCALING_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COMPONENT_X_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COMPONENT_X_get___")]
   public static extern string FBXSDK_CURVENODE_COMPONENT_X_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COMPONENT_Y_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COMPONENT_Y_get___")]
   public static extern string FBXSDK_CURVENODE_COMPONENT_Y_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COMPONENT_Z_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COMPONENT_Z_get___")]
   public static extern string FBXSDK_CURVENODE_COMPONENT_Z_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COLOR_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COLOR_get___")]
   public static extern string FBXSDK_CURVENODE_COLOR_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COLOR_RED_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COLOR_RED_get___")]
   public static extern string FBXSDK_CURVENODE_COLOR_RED_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COLOR_GREEN_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COLOR_GREEN_get___")]
   public static extern string FBXSDK_CURVENODE_COLOR_GREEN_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COLOR_BLUE_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CURVENODE_COLOR_BLUE_get___")]
   public static extern string FBXSDK_CURVENODE_COLOR_BLUE_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxAnimCurveNode_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxAnimCurveNode_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_IsAnimated__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_IsAnimated__SWIG_0___")]
   public static extern bool FbxAnimCurveNode_IsAnimated__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_IsAnimated__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_IsAnimated__SWIG_1___")]
   public static extern bool FbxAnimCurveNode_IsAnimated__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetAnimationInterval___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetAnimationInterval___")]
   public static extern bool FbxAnimCurveNode_GetAnimationInterval(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_IsComposite___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_IsComposite___")]
   public static extern bool FbxAnimCurveNode_IsComposite(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_CreateTypedCurveNode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_CreateTypedCurveNode___")]
   public static extern global::System.IntPtr FbxAnimCurveNode_CreateTypedCurveNode(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetChannelsCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetChannelsCount___")]
   public static extern uint FbxAnimCurveNode_GetChannelsCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetChannelIndex___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetChannelIndex___")]
   public static extern int FbxAnimCurveNode_GetChannelIndex(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetChannelName___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetChannelName___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxAnimCurveNode_GetChannelName(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_CreateCurve__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_CreateCurve__SWIG_0___")]
   public static extern global::System.IntPtr FbxAnimCurveNode_CreateCurve__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, string jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_CreateCurve__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_CreateCurve__SWIG_1___")]
   public static extern global::System.IntPtr FbxAnimCurveNode_CreateCurve__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, uint jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_CreateCurve__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_CreateCurve__SWIG_2___")]
   public static extern global::System.IntPtr FbxAnimCurveNode_CreateCurve__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetCurveCount__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetCurveCount__SWIG_0___")]
   public static extern int FbxAnimCurveNode_GetCurveCount__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2, string jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetCurveCount__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetCurveCount__SWIG_1___")]
   public static extern int FbxAnimCurveNode_GetCurveCount__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetCurve__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetCurve__SWIG_0___")]
   public static extern global::System.IntPtr FbxAnimCurveNode_GetCurve__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2, uint jarg3, string jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetCurve__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetCurve__SWIG_1___")]
   public static extern global::System.IntPtr FbxAnimCurveNode_GetCurve__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2, uint jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetCurve__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetCurve__SWIG_2___")]
   public static extern global::System.IntPtr FbxAnimCurveNode_GetCurve__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_AddChannel___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_AddChannel___")]
   public static extern bool FbxAnimCurveNode_AddChannel(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, float jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_SetChannelValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_SetChannelValue__SWIG_2___")]
   public static extern void FbxAnimCurveNode_SetChannelValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, float jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_SetChannelValue__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_SetChannelValue__SWIG_3___")]
   public static extern void FbxAnimCurveNode_SetChannelValue__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2, float jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetChannelValue__SWIG_2___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetChannelValue__SWIG_2___")]
   public static extern float FbxAnimCurveNode_GetChannelValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2, float jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetChannelValue__SWIG_3___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_GetChannelValue__SWIG_3___")]
   public static extern float FbxAnimCurveNode_GetChannelValue__SWIG_3(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2, float jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxCamera_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxCamera_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetAspect___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetAspect___")]
   public static extern void FbxCamera_SetAspect(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, double jarg3, double jarg4);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetAspectRatioMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetAspectRatioMode___")]
   public static extern int FbxCamera_GetAspectRatioMode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetNearPlane___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetNearPlane___")]
   public static extern void FbxCamera_SetNearPlane(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetNearPlane___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetNearPlane___")]
   public static extern double FbxCamera_GetNearPlane(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetFarPlane___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetFarPlane___")]
   public static extern void FbxCamera_SetFarPlane(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetFarPlane___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetFarPlane___")]
   public static extern double FbxCamera_GetFarPlane(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetApertureMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetApertureMode___")]
   public static extern void FbxCamera_SetApertureMode(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetApertureMode___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetApertureMode___")]
   public static extern int FbxCamera_GetApertureMode(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetApertureWidth___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetApertureWidth___")]
   public static extern void FbxCamera_SetApertureWidth(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetApertureWidth___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetApertureWidth___")]
   public static extern double FbxCamera_GetApertureWidth(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetApertureHeight___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SetApertureHeight___")]
   public static extern void FbxCamera_SetApertureHeight(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetApertureHeight___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GetApertureHeight___")]
   public static extern double FbxCamera_GetApertureHeight(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_ComputeFocalLength___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_ComputeFocalLength___")]
   public static extern double FbxCamera_ComputeFocalLength(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_AspectWidth_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_AspectWidth_get___")]
   public static extern global::System.IntPtr FbxCamera_AspectWidth_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_AspectHeight_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_AspectHeight_get___")]
   public static extern global::System.IntPtr FbxCamera_AspectHeight_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FieldOfView_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GateFit_get___")]
+  public static extern global::System.IntPtr FbxCamera_GateFit_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FieldOfView_get___")]
   public static extern global::System.IntPtr FbxCamera_FieldOfView_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FocalLength_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FocalLength_get___")]
   public static extern global::System.IntPtr FbxCamera_FocalLength_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_NearPlane_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_NearPlane_get___")]
   public static extern global::System.IntPtr FbxCamera_NearPlane_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FilmAspectRatio_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FilmAspectRatio_get___")]
   public static extern global::System.IntPtr FbxCamera_FilmAspectRatio_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_ProjectionType_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FilmOffsetX_get___")]
+  public static extern global::System.IntPtr FbxCamera_FilmOffsetX_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FilmOffsetY_get___")]
+  public static extern global::System.IntPtr FbxCamera_FilmOffsetY_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_ProjectionType_get___")]
   public static extern global::System.IntPtr FbxCamera_ProjectionType_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CAMERA_PERSPECTIVE_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBXSDK_CAMERA_PERSPECTIVE_get___")]
   public static extern string FBXSDK_CAMERA_PERSPECTIVE_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxMarker_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxMarker_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_Reset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_Reset___")]
   public static extern void FbxMarker_Reset(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetMarkerType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetMarkerType___")]
   public static extern void FbxMarker_SetMarkerType(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetMarkerType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetMarkerType___")]
   public static extern int FbxMarker_GetMarkerType(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetDefaultOcclusion___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetDefaultOcclusion___")]
   public static extern double FbxMarker_GetDefaultOcclusion(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetDefaultOcclusion___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetDefaultOcclusion___")]
   public static extern void FbxMarker_SetDefaultOcclusion(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetDefaultIKReachTranslation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetDefaultIKReachTranslation___")]
   public static extern double FbxMarker_GetDefaultIKReachTranslation(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetDefaultIKReachTranslation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetDefaultIKReachTranslation___")]
   public static extern void FbxMarker_SetDefaultIKReachTranslation(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetDefaultIKReachRotation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetDefaultIKReachRotation___")]
   public static extern double FbxMarker_GetDefaultIKReachRotation(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetDefaultIKReachRotation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetDefaultIKReachRotation___")]
   public static extern void FbxMarker_SetDefaultIKReachRotation(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetDefaultIKPull___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetDefaultIKPull___")]
   public static extern double FbxMarker_GetDefaultIKPull(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetDefaultIKPull___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetDefaultIKPull___")]
   public static extern void FbxMarker_SetDefaultIKPull(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetDefaultIKPullHips___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetDefaultIKPullHips___")]
   public static extern double FbxMarker_GetDefaultIKPullHips(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetDefaultIKPullHips___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SetDefaultIKPullHips___")]
   public static extern void FbxMarker_SetDefaultIKPullHips(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_Look_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_Look_get___")]
   public static extern global::System.IntPtr FbxMarker_Look_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_DrawLink_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_DrawLink_get___")]
   public static extern global::System.IntPtr FbxMarker_DrawLink_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_Size_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_Size_get___")]
   public static extern global::System.IntPtr FbxMarker_Size_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_ShowLabel_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_ShowLabel_get___")]
   public static extern global::System.IntPtr FbxMarker_ShowLabel_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_IKPivot_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_IKPivot_get___")]
   public static extern global::System.IntPtr FbxMarker_IKPivot_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetOcclusion___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetOcclusion___")]
   public static extern global::System.IntPtr FbxMarker_GetOcclusion(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetIKReachTranslation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetIKReachTranslation___")]
   public static extern global::System.IntPtr FbxMarker_GetIKReachTranslation(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetIKReachRotation___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetIKReachRotation___")]
   public static extern global::System.IntPtr FbxMarker_GetIKReachRotation(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetIKPull___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetIKPull___")]
   public static extern global::System.IntPtr FbxMarker_GetIKPull(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetIKPullHips___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_GetIKPullHips___")]
   public static extern global::System.IntPtr FbxMarker_GetIKPullHips(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxLight_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxLight_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_SetShadowTexture___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_SetShadowTexture___")]
   public static extern void FbxLight_SetShadowTexture(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_GetShadowTexture___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_GetShadowTexture___")]
   public static extern global::System.IntPtr FbxLight_GetShadowTexture(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_LightType_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_LightType_get___")]
   public static extern global::System.IntPtr FbxLight_LightType_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_CastLight_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_CastLight_get___")]
   public static extern global::System.IntPtr FbxLight_CastLight_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_DrawVolumetricLight_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_DrawVolumetricLight_get___")]
   public static extern global::System.IntPtr FbxLight_DrawVolumetricLight_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_DrawGroundProjection_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_DrawGroundProjection_get___")]
   public static extern global::System.IntPtr FbxLight_DrawGroundProjection_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_DrawFrontFacingVolumetricLight_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_DrawFrontFacingVolumetricLight_get___")]
   public static extern global::System.IntPtr FbxLight_DrawFrontFacingVolumetricLight_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_Color_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_Color_get___")]
   public static extern global::System.IntPtr FbxLight_Color_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_Intensity_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_Intensity_get___")]
   public static extern global::System.IntPtr FbxLight_Intensity_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_InnerAngle_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_InnerAngle_get___")]
   public static extern global::System.IntPtr FbxLight_InnerAngle_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_OuterAngle_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_OuterAngle_get___")]
   public static extern global::System.IntPtr FbxLight_OuterAngle_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_Fog_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_Fog_get___")]
   public static extern global::System.IntPtr FbxLight_Fog_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_DecayType_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_DecayType_get___")]
   public static extern global::System.IntPtr FbxLight_DecayType_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_DecayStart_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_DecayStart_get___")]
   public static extern global::System.IntPtr FbxLight_DecayStart_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_FileName_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_FileName_get___")]
   public static extern global::System.IntPtr FbxLight_FileName_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_EnableNearAttenuation_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_EnableNearAttenuation_get___")]
   public static extern global::System.IntPtr FbxLight_EnableNearAttenuation_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_NearAttenuationStart_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_NearAttenuationStart_get___")]
   public static extern global::System.IntPtr FbxLight_NearAttenuationStart_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_NearAttenuationEnd_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_NearAttenuationEnd_get___")]
   public static extern global::System.IntPtr FbxLight_NearAttenuationEnd_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_EnableFarAttenuation_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_EnableFarAttenuation_get___")]
   public static extern global::System.IntPtr FbxLight_EnableFarAttenuation_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_FarAttenuationStart_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_FarAttenuationStart_get___")]
   public static extern global::System.IntPtr FbxLight_FarAttenuationStart_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_FarAttenuationEnd_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_FarAttenuationEnd_get___")]
   public static extern global::System.IntPtr FbxLight_FarAttenuationEnd_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_CastShadows_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_CastShadows_get___")]
   public static extern global::System.IntPtr FbxLight_CastShadows_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_ShadowColor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_ShadowColor_get___")]
   public static extern global::System.IntPtr FbxLight_ShadowColor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_AreaLightShape_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_AreaLightShape_get___")]
   public static extern global::System.IntPtr FbxLight_AreaLightShape_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_LeftBarnDoor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_LeftBarnDoor_get___")]
   public static extern global::System.IntPtr FbxLight_LeftBarnDoor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_RightBarnDoor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_RightBarnDoor_get___")]
   public static extern global::System.IntPtr FbxLight_RightBarnDoor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_TopBarnDoor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_TopBarnDoor_get___")]
   public static extern global::System.IntPtr FbxLight_TopBarnDoor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_BottomBarnDoor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_BottomBarnDoor_get___")]
   public static extern global::System.IntPtr FbxLight_BottomBarnDoor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_EnableBarnDoor_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_EnableBarnDoor_get___")]
   public static extern global::System.IntPtr FbxLight_EnableBarnDoor_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxBlendShape_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxBlendShape_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_SetGeometry___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_SetGeometry___")]
   public static extern bool FbxBlendShape_SetGeometry(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_GetGeometry___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_GetGeometry___")]
   public static extern global::System.IntPtr FbxBlendShape_GetGeometry(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_AddBlendShapeChannel___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_AddBlendShapeChannel___")]
   public static extern bool FbxBlendShape_AddBlendShapeChannel(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_RemoveBlendShapeChannel___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_RemoveBlendShapeChannel___")]
   public static extern global::System.IntPtr FbxBlendShape_RemoveBlendShapeChannel(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_GetBlendShapeChannelCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_GetBlendShapeChannelCount___")]
   public static extern int FbxBlendShape_GetBlendShapeChannelCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_GetBlendShapeChannel___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_GetBlendShapeChannel___")]
   public static extern global::System.IntPtr FbxBlendShape_GetBlendShapeChannel(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxBlendShapeChannel_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxBlendShapeChannel_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_DeformPercent_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_DeformPercent_get___")]
   public static extern global::System.IntPtr FbxBlendShapeChannel_DeformPercent_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_SetBlendShapeDeformer___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_SetBlendShapeDeformer___")]
   public static extern bool FbxBlendShapeChannel_SetBlendShapeDeformer(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_GetBlendShapeDeformer___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_GetBlendShapeDeformer___")]
   public static extern global::System.IntPtr FbxBlendShapeChannel_GetBlendShapeDeformer(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_AddTargetShape__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_AddTargetShape__SWIG_0___")]
   public static extern bool FbxBlendShapeChannel_AddTargetShape__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_AddTargetShape__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_AddTargetShape__SWIG_1___")]
   public static extern bool FbxBlendShapeChannel_AddTargetShape__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_RemoveTargetShape___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_RemoveTargetShape___")]
   public static extern global::System.IntPtr FbxBlendShapeChannel_RemoveTargetShape(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_GetTargetShapeCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_GetTargetShapeCount___")]
   public static extern int FbxBlendShapeChannel_GetTargetShapeCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_GetTargetShape___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_GetTargetShape___")]
   public static extern global::System.IntPtr FbxBlendShapeChannel_GetTargetShape(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_GetTargetShapeIndex___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_GetTargetShapeIndex___")]
   public static extern int FbxBlendShapeChannel_GetTargetShapeIndex(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxShape_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxShape_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxShape_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxShape_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxShape_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxShape_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBX_NO_SECTION_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBX_NO_SECTION_get___")]
   public static extern int FBX_NO_SECTION_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBX_MAIN_SECTION_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBX_MAIN_SECTION_get___")]
   public static extern int FBX_MAIN_SECTION_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FBX_EXTENSION_SECTION_0_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FBX_EXTENSION_SECTION_0_get___")]
   public static extern int FBX_EXTENSION_SECTION_0_get();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_new_FbxIOFileHeaderInfo___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_new_FbxIOFileHeaderInfo___")]
   public static extern global::System.IntPtr new_FbxIOFileHeaderInfo();
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_delete_FbxIOFileHeaderInfo___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_delete_FbxIOFileHeaderInfo___")]
   public static extern void delete_FbxIOFileHeaderInfo(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOFileHeaderInfo_mFileVersion_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOFileHeaderInfo_mFileVersion_get___")]
   public static extern int FbxIOFileHeaderInfo_mFileVersion_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOFileHeaderInfo_mCreator_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOFileHeaderInfo_mCreator_get___")]
   [return: global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
   public static extern string FbxIOFileHeaderInfo_mCreator_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxConstraint_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxConstraint_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_Weight_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_Weight_get___")]
   public static extern global::System.IntPtr FbxConstraint_Weight_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_Active_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_Active_get___")]
   public static extern global::System.IntPtr FbxConstraint_Active_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_Lock_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_Lock_get___")]
   public static extern global::System.IntPtr FbxConstraint_Lock_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_GetConstraintType___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_GetConstraintType___")]
   public static extern int FbxConstraint_GetConstraintType(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_GetConstrainedObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_GetConstrainedObject___")]
   public static extern global::System.IntPtr FbxConstraint_GetConstrainedObject(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_GetConstraintSourceCount___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_GetConstraintSourceCount___")]
   public static extern int FbxConstraint_GetConstraintSourceCount(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_GetConstraintSource___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_GetConstraintSource___")]
   public static extern global::System.IntPtr FbxConstraint_GetConstraintSource(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_GetSourceWeight___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_GetSourceWeight___")]
   public static extern double FbxConstraint_GetSourceWeight(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxConstraintAim_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxConstraintAim_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_RotationOffset_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_RotationOffset_get___")]
   public static extern global::System.IntPtr FbxConstraintAim_RotationOffset_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_WorldUpType_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_WorldUpType_get___")]
   public static extern global::System.IntPtr FbxConstraintAim_WorldUpType_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_WorldUpVector_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_WorldUpVector_get___")]
   public static extern global::System.IntPtr FbxConstraintAim_WorldUpVector_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_UpVector_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_UpVector_get___")]
   public static extern global::System.IntPtr FbxConstraintAim_UpVector_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AimVector_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AimVector_get___")]
   public static extern global::System.IntPtr FbxConstraintAim_AimVector_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AffectX_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AffectX_get___")]
   public static extern global::System.IntPtr FbxConstraintAim_AffectX_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AffectY_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AffectY_get___")]
   public static extern global::System.IntPtr FbxConstraintAim_AffectY_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AffectZ_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AffectZ_get___")]
   public static extern global::System.IntPtr FbxConstraintAim_AffectZ_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AddConstraintSource__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AddConstraintSource__SWIG_0___")]
   public static extern void FbxConstraintAim_AddConstraintSource__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AddConstraintSource__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_AddConstraintSource__SWIG_1___")]
   public static extern void FbxConstraintAim_AddConstraintSource__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_SetConstrainedObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_SetConstrainedObject___")]
   public static extern void FbxConstraintAim_SetConstrainedObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_SetWorldUpObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_SetWorldUpObject___")]
   public static extern void FbxConstraintAim_SetWorldUpObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_GetWorldUpObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_GetWorldUpObject___")]
   public static extern global::System.IntPtr FbxConstraintAim_GetWorldUpObject(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxConstraintParent_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxConstraintParent_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectTranslationX_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectTranslationX_get___")]
   public static extern global::System.IntPtr FbxConstraintParent_AffectTranslationX_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectTranslationY_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectTranslationY_get___")]
   public static extern global::System.IntPtr FbxConstraintParent_AffectTranslationY_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectTranslationZ_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectTranslationZ_get___")]
   public static extern global::System.IntPtr FbxConstraintParent_AffectTranslationZ_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectRotationX_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectRotationX_get___")]
   public static extern global::System.IntPtr FbxConstraintParent_AffectRotationX_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectRotationY_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectRotationY_get___")]
   public static extern global::System.IntPtr FbxConstraintParent_AffectRotationY_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectRotationZ_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectRotationZ_get___")]
   public static extern global::System.IntPtr FbxConstraintParent_AffectRotationZ_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectScalingX_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectScalingX_get___")]
   public static extern global::System.IntPtr FbxConstraintParent_AffectScalingX_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectScalingY_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectScalingY_get___")]
   public static extern global::System.IntPtr FbxConstraintParent_AffectScalingY_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectScalingZ_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AffectScalingZ_get___")]
   public static extern global::System.IntPtr FbxConstraintParent_AffectScalingZ_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_SetTranslationOffset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_SetTranslationOffset___")]
   public static extern void FbxConstraintParent_SetTranslationOffset(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_GetTranslationOffset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_GetTranslationOffset___")]
   public static extern FbxVector4 FbxConstraintParent_GetTranslationOffset(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_SetRotationOffset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_SetRotationOffset___")]
   public static extern void FbxConstraintParent_SetRotationOffset(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, FbxVector4 jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_GetRotationOffset___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_GetRotationOffset___")]
   public static extern FbxVector4 FbxConstraintParent_GetRotationOffset(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AddConstraintSource__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AddConstraintSource__SWIG_0___")]
   public static extern void FbxConstraintParent_AddConstraintSource__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AddConstraintSource__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_AddConstraintSource__SWIG_1___")]
   public static extern void FbxConstraintParent_AddConstraintSource__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_SetConstrainedObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_SetConstrainedObject___")]
   public static extern void FbxConstraintParent_SetConstrainedObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxConstraintPosition_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxConstraintPosition_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_AffectX_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_AffectX_get___")]
   public static extern global::System.IntPtr FbxConstraintPosition_AffectX_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_AffectY_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_AffectY_get___")]
   public static extern global::System.IntPtr FbxConstraintPosition_AffectY_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_AffectZ_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_AffectZ_get___")]
   public static extern global::System.IntPtr FbxConstraintPosition_AffectZ_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_Translation_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_Translation_get___")]
   public static extern global::System.IntPtr FbxConstraintPosition_Translation_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_AddConstraintSource__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_AddConstraintSource__SWIG_0___")]
   public static extern void FbxConstraintPosition_AddConstraintSource__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_AddConstraintSource__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_AddConstraintSource__SWIG_1___")]
   public static extern void FbxConstraintPosition_AddConstraintSource__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_RemoveConstraintSource___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_RemoveConstraintSource___")]
   public static extern bool FbxConstraintPosition_RemoveConstraintSource(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_SetConstrainedObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_SetConstrainedObject___")]
   public static extern void FbxConstraintPosition_SetConstrainedObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxConstraintRotation_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxConstraintRotation_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_AffectX_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_AffectX_get___")]
   public static extern global::System.IntPtr FbxConstraintRotation_AffectX_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_AffectY_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_AffectY_get___")]
   public static extern global::System.IntPtr FbxConstraintRotation_AffectY_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_AffectZ_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_AffectZ_get___")]
   public static extern global::System.IntPtr FbxConstraintRotation_AffectZ_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_Rotation_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_Rotation_get___")]
   public static extern global::System.IntPtr FbxConstraintRotation_Rotation_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_AddConstraintSource__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_AddConstraintSource__SWIG_0___")]
   public static extern void FbxConstraintRotation_AddConstraintSource__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_AddConstraintSource__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_AddConstraintSource__SWIG_1___")]
   public static extern void FbxConstraintRotation_AddConstraintSource__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_SetConstrainedObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_SetConstrainedObject___")]
   public static extern void FbxConstraintRotation_SetConstrainedObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_Create__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_Create__SWIG_0___")]
   public static extern global::System.IntPtr FbxConstraintScale_Create__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_Create__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_Create__SWIG_1___")]
   public static extern global::System.IntPtr FbxConstraintScale_Create__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_AffectX_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_AffectX_get___")]
   public static extern global::System.IntPtr FbxConstraintScale_AffectX_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_AffectY_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_AffectY_get___")]
   public static extern global::System.IntPtr FbxConstraintScale_AffectY_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_AffectZ_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_AffectZ_get___")]
   public static extern global::System.IntPtr FbxConstraintScale_AffectZ_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_Scaling_get___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_Scaling_get___")]
   public static extern global::System.IntPtr FbxConstraintScale_Scaling_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_AddConstraintSource__SWIG_0___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_AddConstraintSource__SWIG_0___")]
   public static extern void FbxConstraintScale_AddConstraintSource__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_AddConstraintSource__SWIG_1___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_AddConstraintSource__SWIG_1___")]
   public static extern void FbxConstraintScale_AddConstraintSource__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_SetConstrainedObject___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_SetConstrainedObject___")]
   public static extern void FbxConstraintScale_SetConstrainedObject(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyBool_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyBool_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyDouble_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyDouble3_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyDouble3_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyString_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyString_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyInt_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyInt_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyFloat_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyFloat_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEProjectionType_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyEProjectionType_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyELightType_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyELightType_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEAreaLightShape_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyEAreaLightShape_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEDecayType_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyEDecayType_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyMarkerELook_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyMarkerELook_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyNullELook_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyNullELook_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEInheritType_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyEInheritType_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEBlendMode_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyEBlendMode_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyEWrapMode_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector4_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_SWIGUpcast___")]
+  public static extern global::System.IntPtr FbxPropertyEGateFit_SWIGUpcast(global::System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector4_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxVector4_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector2_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector2_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxVector2_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxColor_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxColor_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxColor_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxSurfaceMaterial_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxSurfaceMaterial_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxSurfaceMaterial_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxSurfaceMaterial_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxSurfaceMaterial_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementArrayTemplateFbxSurfaceMaterial_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementNormal_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementNormal_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementNormal_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementBinormal_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementBinormal_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementBinormal_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTangent_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTangent_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementTangent_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementMaterial_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementMaterial_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementMaterial_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementUV_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementUV_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementUV_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementVertexColor_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementVertexColor_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementVertexColor_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxColor_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxColor_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementArrayTemplateFbxColor_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxVector2_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxVector2_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementArrayTemplateFbxVector2_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxVector4_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateFbxVector4_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementArrayTemplateFbxVector4_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateInt_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementArrayTemplateInt_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementArrayTemplateInt_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMatrix_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxMatrix_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAMatrix_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxAMatrix_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxObject_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxObject_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCollection_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxCollection_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocumentInfo_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxDocumentInfo_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDocument_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDocument_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxDocument_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxScene_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxScene_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxScene_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOBase_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxIOBase_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxExporter_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxExporter_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImporter_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxImporter_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxIOSettings_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxIOSettings_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxIOSettings_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNode_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxNode_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNodeAttribute_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxNodeAttribute_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxNull_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxNull_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxNull_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLayerContainer_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerContainer_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometryBase_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxGeometryBase_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGeometry_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxGeometry_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMesh_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxMesh_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxGlobalSettings_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxGlobalSettings_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxImplementation_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxImplementation_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceMaterial_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxSurfaceMaterial_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfaceLambert_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxSurfaceLambert_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSurfacePhong_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxSurfacePhong_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxTexture_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxTexture_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxFileTexture_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxFileTexture_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTableBase_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTableBase_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxBindingTableBase_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBindingTable_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxBindingTable_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEntryView_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEntryView_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyEntryView_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSemanticEntryView_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSemanticEntryView_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxSemanticEntryView_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPose_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxPose_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPose_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxDeformer_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxDeformer_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxDeformer_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSubDeformer_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSubDeformer_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxSubDeformer_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCluster_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxCluster_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkin_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkin_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxSkin_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxSkeleton_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxSkeleton_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimLayer_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimLayer_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxAnimLayer_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimStack_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxAnimStack_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveBase_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveBase_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxAnimCurveBase_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurve_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxAnimCurve_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxAnimCurveNode_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxAnimCurveNode_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxCamera_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxMarker_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxMarker_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLight_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxLight_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLight_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShape_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxBlendShape_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxBlendShapeChannel_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxBlendShapeChannel_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxShape_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxShape_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxShape_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraint_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxConstraint_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintAim_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxConstraintAim_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintParent_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxConstraintParent_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintPosition_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxConstraintPosition_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintRotation_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxConstraintRotation_SWIGUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_SWIGUpcast___")]
+  [global::System.Runtime.InteropServices.DllImport("UnityFbxSdkNative", EntryPoint="CSharp_UnityfFbxSdk_FbxConstraintScale_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxConstraintScale_SWIGUpcast(global::System.IntPtr jarg1);
 }
 

@@ -3,113 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEditor;
-using Unity.FbxSdk;
 using System.Linq;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;	
+using Unity.FbxSdk;
 using FbxExporters.EditorTools;
+using FbxExporters.Visitors;
+using FbxExporters.CustomExtensions;
 
 namespace FbxExporters
 {
-    namespace CustomExtensions
-    {
-        public class MetricDistance {
-
-            public static readonly MetricDistance Millimeter = new MetricDistance(0.001f);
-            public static readonly MetricDistance Centimeter = new MetricDistance(0.01f);
-            public static readonly MetricDistance Meter = new MetricDistance(1.0f);
-
-            private float _meters;
-
-            public MetricDistance(float m) {
-                this._meters = m;
-            }
-
-            public float ToMeters() {
-                return this._meters;
-            }
-            public float ToCentimeters() {
-                return this._meters * Centimeter.ToMeters();
-            }
-
-            public float ToInches() {
-                return _meters * 39.3701f;
-            }
-        }
-
-        //Extension methods must be defined in a static class
-        public static class FloatExtension
-        {
-            public static MetricDistance Meters(this float that) {
-                return new MetricDistance(that);
-            }
-            public static MetricDistance Millimeters(this float that) {
-                return new MetricDistance(MetricDistance.Millimeter.ToMeters() * that);
-            }
-            public static MetricDistance Centimeters(this float that) {
-                return new MetricDistance(MetricDistance.Centimeter.ToMeters() * that);
-            }
-        }
-
-        //Extension methods must be defined in a static class
-        public static class Vector3Extension
-        {
-            public static Vector3 RightHanded (this Vector3 leftHandedVector)
-            {
-            	// negating the x component of the vector converts it from left to right handed coordinates
-            	return new Vector3 (
-            		-leftHandedVector [0],
-            		leftHandedVector [1],
-            		leftHandedVector [2]);
-            }
-
-            public static FbxVector4 FbxVector4 (this Vector3 uniVector)
-            {
-            	return new FbxVector4 (
-            		uniVector [0],
-            		uniVector [1],
-            		uniVector [2]);
-            }
-        }
-
-        //Extension methods must be defined in a static class
-        public static class AnimationCurveExtension
-        {
-            // This is an extension method for the AnimationCurve class
-            // The first parameter takes the "this" modifier
-            // and specifies the type for which the method is defined.
-            public static void Dump (this AnimationCurve animCurve, string message, float[] keyTimesExpected = null, float[] keyValuesExpected = null)
-            {
-                int idx = 0;
-                foreach (var key in animCurve.keys) {
-                    if (keyTimesExpected != null && keyValuesExpected != null) {
-                        Debug.Log (string.Format ("{5} keys[{0}] {1}({3}) {2} ({4})",
-                            idx, key.time, key.value,
-                            keyTimesExpected [idx], keyValuesExpected [idx],
-                            message));
-                    } else {
-                        Debug.Log (string.Format ("{3} keys[{0}] {1} {2}", idx, key.time, key.value, message));
-                    }
-                    idx++;
-                }
-            }
-        }
-    }
-
     namespace Editor
     {
-        using CustomExtensions;
-
         public class ModelExporter : System.IDisposable
         {
             const string Title =
-                "exports static meshes with materials and textures";
+                "Created by FBX Exporter from UNITY TECHNOLOGIES";
 
-            const string Subject = 
+            const string Subject =
                 "";
 
             const string Keywords =
-                "export mesh materials textures uvs";
+                "Nodes Meshes Materials Textures Cameras Lights Skins Animation";
 
             const string Comments =
                 @"";
@@ -1361,99 +1276,7 @@ namespace FbxExporters
                 return true;
             }
 
-            /// <summary>
-            /// Configure FbxCameras from GameCamera 
-            /// </summary>
-            protected FbxCamera ConfigureGameCamera (FbxCamera fbxCamera, Camera uniCamera)
-            {
-                // Configure FilmBack settings as a 35mm TV Projection (0.816 x 0.612)
-                float aspectRatio = uniCamera.aspect;
-
-                float apertureHeightInInches = 0.612f;
-                float apertureWidthInInches = aspectRatio * apertureHeightInInches;
-
-                FbxCamera.EProjectionType projectionType =
-                    uniCamera.orthographic ? FbxCamera.EProjectionType.eOrthogonal : FbxCamera.EProjectionType.ePerspective;
-
-                fbxCamera.ProjectionType.Set(projectionType);
-                fbxCamera.FilmAspectRatio.Set(aspectRatio);
-                fbxCamera.SetApertureWidth (apertureWidthInInches);
-                fbxCamera.SetApertureHeight (apertureHeightInInches);
-                fbxCamera.SetApertureMode (FbxCamera.EApertureMode.eVertical);
-
-                // Focal Length
-                double focalLength = fbxCamera.ComputeFocalLength (uniCamera.fieldOfView);
-
-                fbxCamera.FocalLength.Set(focalLength);
-
-                // Field of View
-                fbxCamera.FieldOfView.Set (uniCamera.fieldOfView);
-
-                // NearPlane
-                fbxCamera.SetNearPlane (uniCamera.nearClipPlane.Meters().ToCentimeters());
-
-                // FarPlane
-                fbxCamera.SetFarPlane (uniCamera.farClipPlane.Meters().ToCentimeters());
-
-                return fbxCamera;
-            }
-
-            /// <summary>
-            /// Configure FbxCameras from a Physical Camera 
-            /// </summary>
-            protected FbxCamera ConfigurePhysicalCamera (FbxCamera fbxCamera, Camera uniCamera)
-            {
-                #if UNITY_2018_2_OR_NEWER
-                Debug.Assert(uniCamera.usePhysicalProperties);
-
-                // Configure FilmBack settings
-                float apertureHeightInInches = uniCamera.sensorSize.y.Millimeters().ToInches();
-                float apertureWidthInInches = uniCamera.sensorSize.x.Millimeters().ToInches();
-                float aspectRatio = apertureWidthInInches / apertureHeightInInches;
-
-                FbxCamera.EProjectionType projectionType = uniCamera.orthographic 
-                    ? FbxCamera.EProjectionType.eOrthogonal 
-                    : FbxCamera.EProjectionType.ePerspective;
-
-                // NOTE: it is possible to match some of the sensor sizes to the  
-                // predefined EApertureFormats : e16mmTheatrical, eSuper16mm, 
-                // e35mmFullAperture, eIMAX. However the round in the sizes is not
-                // consistent between Unity and FBX so we choose
-                // to leave the values as a eCustomAperture setting.
-
-                fbxCamera.ProjectionType.Set(projectionType);
-                fbxCamera.FilmAspectRatio.Set(aspectRatio);
-                fbxCamera.SetApertureWidth (apertureWidthInInches);
-                fbxCamera.SetApertureHeight (apertureHeightInInches);
-
-                // Fit the resolution gate horizontally within the film gate.
-                fbxCamera.GateFit.Set(FbxCamera.EGateFit.eFitHorizontal);
-
-                // Lens Shift ( Film Offset ) as a percentage 0..1
-                Debug.Assert(uniCamera.lensShift.x >= 0f && uniCamera.lensShift.x <= 1f);
-                Debug.Assert(uniCamera.lensShift.y >= 0f && uniCamera.lensShift.y <= 1f);
-                fbxCamera.FilmOffsetX.Set(uniCamera.lensShift.x);
-                fbxCamera.FilmOffsetY.Set(uniCamera.lensShift.y);
-
-                // Focal Length
-                fbxCamera.SetApertureMode (FbxCamera.EApertureMode.eFocalLength); 
-
-                double focalLength = (double)uniCamera.focalLength;
-                fbxCamera.FocalLength.Set(focalLength); /* in millimeters */
-
-                // NearPlane
-                fbxCamera.SetNearPlane (uniCamera.nearClipPlane.Meters().ToCentimeters());
-
-                // FarPlane
-                fbxCamera.SetFarPlane (uniCamera.farClipPlane.Meters().ToCentimeters());
-                #else
-                throw System.NotImplementedException;
-                #endif
-
-                return fbxCamera;
-            }
-
-            /// <summary>
+           /// <summary>
             /// Exports camera component
             /// </summary>
             protected bool ExportCamera (GameObject unityGO, FbxScene fbxScene, FbxNode fbxNode)
@@ -1468,15 +1291,7 @@ namespace FbxExporters
                     return false;
                 }
 
-                fbxNode.SetNodeAttribute (
-                    #if UNITY_2018_2_OR_NEWER
-                    unityCamera.usePhysicalProperties 
-                    ? ConfigurePhysicalCamera(fbxCamera, unityCamera) 
-                    : ConfigureGameCamera(fbxCamera, unityCamera)
-                    #else
-                    ConfigureGameCamera(fbxCamera, unityCamera)
-                    #endif
-                );
+                fbxNode.SetNodeAttribute (CameraVisitor.VisitNodeAttribute(unityCamera, fbxCamera));
 
                 // set +90 post rotation to counteract for FBX camera's facing +X direction by default
                 fbxNode.SetPostRotation(FbxNode.EPivotSet.eSourcePivot, new FbxVector4(0,90,0));
