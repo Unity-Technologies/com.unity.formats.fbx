@@ -39,7 +39,6 @@ namespace FbxExporters.UnitTests
                 var mayaIntegration = new Editor.MayaIntegration ();
 
                 LogNonEmptyString ("display name", mayaIntegration.DccDisplayName);
-                LogNonEmptyString ("integration zip path", mayaIntegration.IntegrationZipPath);
 
                 Assert.IsTrue (Editor.MayaIntegration.IsHeadlessInstall () == 0);
 
@@ -48,12 +47,7 @@ namespace FbxExporters.UnitTests
 
                 LogNonEmptyString ("export settings path", mayaIntegration.GetExportSettingsPath ());
                 LogNonEmptyString ("package version", Editor.MayaIntegration.GetPackageVersion ());
-
-                // check if folder is unzipped at invalid paths
-                Assert.IsFalse (mayaIntegration.FolderAlreadyUnzippedAtPath (null));
-                Assert.IsFalse (mayaIntegration.FolderAlreadyUnzippedAtPath (""));
-                Assert.IsFalse (mayaIntegration.FolderAlreadyUnzippedAtPath ("X:/a/b/a/c"));
-
+                
                 // test that the paths don't contain backslashes
                 Assert.IsFalse (Editor.MayaIntegration.GetProjectPath ().Contains ("\\"));
                 Assert.IsFalse (mayaIntegration.GetExportSettingsPath ().Contains ("\\"));
@@ -72,17 +66,11 @@ namespace FbxExporters.UnitTests
                 var maxIntegration = new Editor.MaxIntegration ();
 
                 LogNonEmptyString ("display name", maxIntegration.DccDisplayName);
-                LogNonEmptyString ("integration zip path", maxIntegration.IntegrationZipPath);
 
                 // check getting absolute path
                 var absPath = Editor.MaxIntegration.GetAbsPath ("foo");
                 Assert.IsTrue (System.IO.Path.IsPathRooted (absPath));
                 Assert.IsFalse (absPath.Contains ("\\"));
-
-                // check if folder is unzipped at invalid paths
-                Assert.IsFalse (maxIntegration.FolderAlreadyUnzippedAtPath (null));
-                Assert.IsFalse (maxIntegration.FolderAlreadyUnzippedAtPath (""));
-                Assert.IsFalse (maxIntegration.FolderAlreadyUnzippedAtPath ("X:/a/b/a/c"));
             }
         }
     }

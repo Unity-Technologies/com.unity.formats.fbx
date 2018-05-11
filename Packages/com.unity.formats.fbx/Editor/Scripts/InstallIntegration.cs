@@ -8,37 +8,12 @@ namespace FbxExporters.Editor
     public abstract class DCCIntegration
     {
         public abstract string DccDisplayName { get; }
-        public abstract string IntegrationZipPath { get; }
-
-        private static string m_integrationFolderPath = null;
+        
         public static string INTEGRATION_FOLDER_PATH
         {
             get{
-                if (string.IsNullOrEmpty (m_integrationFolderPath)) {
-                    m_integrationFolderPath = Application.dataPath;
-                }
-                return m_integrationFolderPath;
+                return System.IO.Path.GetFullPath("Packages/com.unity.formats.fbx/Editor").Replace("\\", "/");
             }
-            set{
-                if (!string.IsNullOrEmpty (value) && System.IO.Directory.Exists (value)) {
-                    m_integrationFolderPath = value;
-                } else {
-                    Debug.LogError (string.Format("Failed to set integration folder path, invalid directory \"{0}\"", value));
-                }
-            }
-        }
-
-        public void SetIntegrationFolderPath(string path){
-            INTEGRATION_FOLDER_PATH = path;
-        }
-
-        /// <summary>
-        /// Gets the integration zip full path as an absolute Unity-style path.
-        /// </summary>
-        /// <returns>The integration zip full path.</returns>
-        public string GetIntegrationZipFullPath()
-        {
-            return Application.dataPath + "/" + IntegrationZipPath;
         }
 
         /// <summary>
@@ -56,13 +31,6 @@ namespace FbxExporters.Editor
         /// <returns>The integration.</returns>
         /// <param name="exe">Exe.</param>
         public abstract int InstallIntegration(string exe);
-
-        /// <summary>
-        /// Determines if folder is already unzipped at the specified path.
-        /// </summary>
-        /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
-        /// <param name="path">Path.</param>
-        public abstract bool FolderAlreadyUnzippedAtPath (string path);
 
         /// <summary>
         /// Launches application at given path
@@ -85,8 +53,6 @@ namespace FbxExporters.Editor
     public class MayaIntegration : DCCIntegration
     {
         public override string DccDisplayName { get { return "Maya"; } }
-
-        public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMaya.zip"; } }
 
         private string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel"; } }
 
@@ -221,38 +187,7 @@ namespace FbxExporters.Editor
 
         public static string GetPackageVersion()
         {
-            string result = null;
-
-            try {
-                string FileName = System.IO.Path.Combine(GetPackagePath(), VERSION_FILENAME);
-
-                System.IO.StreamReader sr = new System.IO.StreamReader(FileName);
-
-                // Read the first line of text
-                string line = sr.ReadLine();
-
-                // Continue to read until you reach end of file
-                while (line != null)
-                {
-                    if (line.StartsWith(VERSION_FIELD, StringComparison.CurrentCulture))
-                    {
-                        string[] fields = line.Split(FIELD_SEPARATORS);
-
-                        if (fields.Length>1)
-                        {
-                            result = fields[1];
-                        }
-                        break;
-                    }
-                    line = sr.ReadLine();
-                }
-            }
-            catch(Exception e)
-            {
-                Debug.LogError(string.Format("Exception failed to read file containing package version ({0})", e.Message));
-            }
-
-            return result;
+            return ModelExporter.GetVersionFromReadme();
         }
 
         private static List<string> ParseTemplateFile(string FileName, Dictionary<string,string> Tokens )
@@ -544,20 +479,6 @@ namespace FbxExporters.Editor
 
             return ConfigureMaya (mayaExe);
         }
-
-        /// <summary>
-        /// Determines if folder is already unzipped at the specified path
-        /// by checking if UnityFbxForMaya.txt exists at expected location.
-        /// </summary>
-        /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
-        /// <param name="path">Path.</param>
-        public override bool FolderAlreadyUnzippedAtPath(string path)
-        {
-            if (string.IsNullOrEmpty (path)) {
-                return false;
-            }
-            return System.IO.File.Exists (System.IO.Path.Combine (path, MODULE_TEMPLATE_PATH));
-        }
     }
 
     public class MayaLTIntegration : MayaIntegration 
@@ -584,8 +505,6 @@ namespace FbxExporters.Editor
         private const string ProjectTag = "UnityProject";
         private const string ExportSettingsTag = "UnityFbxExportSettings";
         private const string ImportSettingsTag = "UnityFbxImportSettings";
-
-        public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMax.zip"; } }
 
         /// <summary>
         /// Gets the absolute Unity path for relative path in Integrations folder.
@@ -679,20 +598,6 @@ namespace FbxExporters.Editor
         public override int InstallIntegration(string maxExe){
             return MaxIntegration.InstallMaxPlugin (maxExe);
         }
-
-        /// <summary>
-        /// Determines if folder is already unzipped at the specified path
-        /// by checking if plugin exists at expected location.
-        /// </summary>
-        /// <returns><c>true</c> if folder is already unzipped at the specified path; otherwise, <c>false</c>.</returns>
-        /// <param name="path">Path.</param>
-        public override bool FolderAlreadyUnzippedAtPath(string path)
-        {
-            if (string.IsNullOrEmpty (path)) {
-                return false;
-            }
-            return System.IO.File.Exists (System.IO.Path.Combine (path, MaxIntegration.PluginPath));
-        }
     }
 
     class IntegrationsUI
@@ -758,7 +663,7 @@ namespace FbxExporters.Editor
                 throw new System.NotImplementedException ();
             }
 
-            if (!GetIntegrationFolder (dccIntegration)) {
+            if (!GetIntegrationFolder ()) {
                 // failed to get integration folder
                 return;
             }
@@ -766,121 +671,9 @@ namespace FbxExporters.Editor
             ShowSuccessDialog (dccIntegration.DccDisplayName, exitCode);
         }
 
-        private static bool GetIntegrationFolder(DCCIntegration dcc){
-            // decompress zip file if it exists, otherwise try using default location
-            var zipPath = dcc.GetIntegrationZipFullPath();
-            if (System.IO.File.Exists (zipPath)) {
-                return DecompressIntegrationZipFile (zipPath, dcc);
-            }
-            dcc.SetIntegrationFolderPath (EditorTools.ExportSettings.GetIntegrationSavePath());
-            return true;
-        }
-
-        private static bool DecompressIntegrationZipFile(string zipPath, DCCIntegration dcc)
-        {
-            // prompt user to enter location to unzip file
-            var unzipFolder = EditorUtility.OpenFolderPanel(string.Format("Select Location to Save {0} Integration", dcc.DccDisplayName), EditorTools.ExportSettings.GetIntegrationSavePath(), "");
-            if (string.IsNullOrEmpty(unzipFolder))
-            {
-                // user has cancelled, do nothing
-                return false;
-            }
-
-            EditorTools.ExportSettings.instance.IntegrationSavePath = unzipFolder;
-
-            // check that this is a valid location to unzip the file
-            if (!DirectoryHasWritePermission (unzipFolder)) {
-                // display dialog to try again or cancel
-                var result = UnityEditor.EditorUtility.DisplayDialog ("No Write Permission",
-                    string.Format("Directory \"{0}\" does not have write access", unzipFolder),
-                    "Select another Directory", 
-                    "Cancel"
-                );
-
-                if (result) {
-                    InstallDCCIntegration ();
-                } else {
-                    return false;
-                }
-            }
-
-            // if file already unzipped in this location, then prompt user
-            // if they would like to continue unzipping or use what is there
-            if (dcc.FolderAlreadyUnzippedAtPath (unzipFolder)) {
-                var result = UnityEditor.EditorUtility.DisplayDialogComplex ("Integrations Exist at Path",
-                    string.Format ("Directory \"{0}\" already contains the decompressed integration", unzipFolder),
-                    "Overwrite", 
-                    "Use Existing",
-                    "Cancel"
-                );
-
-                if (result == 0) {
-                    DecompressZip (zipPath, unzipFolder);
-                } else if (result == 2) {
-                    return false;
-                }
-            } else {
-                // unzip Integration folder
-                DecompressZip (zipPath, unzipFolder);
-            }
-
-            dcc.SetIntegrationFolderPath(unzipFolder);
-
-            return true;
-        }
-
-        /// <summary>
-        /// Make sure we can write to this directory.
-        /// Try creating a file in path directory, if it raises an error, then we can't
-        /// write here.
-        /// TODO: find a more reliable way to check this
-        /// </summary>
-        /// <returns><c>true</c>, if possible to write to path, <c>false</c> otherwise.</returns>
-        /// <param name="path">Path.</param>
-        public static bool DirectoryHasWritePermission(string path)
-        {
-            try
-            {
-                using (System.IO.FileStream fs = System.IO.File.Create(
-                    System.IO.Path.Combine(
-                        path, 
-                        System.IO.Path.GetRandomFileName()
-                    ), 
-                    1,
-                    System.IO.FileOptions.DeleteOnClose)
-                )
-                { }
-                return true;
-            }
-            catch(Exception)
-            {
-                return false;
-            }
-        }
-
-        public static void DecompressZip(string zipPath, string destPath){
-            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
-            var ZIPAPP = "7z.exe";
-            if (Application.platform == RuntimePlatform.OSXEditor) {
-                ZIPAPP = "7za";
-            }
-            myProcess.StartInfo.FileName = EditorApplication.applicationContentsPath + "/Tools/" + ZIPAPP;
-            myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-            myProcess.StartInfo.CreateNoWindow = true;
-            myProcess.StartInfo.UseShellExecute = false;
-
-            // Command line flags used:
-            // x : extract the zip contents so that they maintain the file hierarchy
-            // -o : specify where to extract contents
-            // -r : recurse subdirectories
-            // -y : auto yes to all questions (without this Unity freezes as the process waits for a response)
-            myProcess.StartInfo.Arguments = string.Format("x \"{0}\" -o\"{1}\" -r -y", zipPath, destPath);
-            myProcess.EnableRaisingEvents = true;
-            myProcess.Start();
-            myProcess.WaitForExit();
-
-            // in case we unzip inside the Assets folder, make sure it updates
-            AssetDatabase.Refresh ();
+        private static bool GetIntegrationFolder(){
+            var integrationPath = DCCIntegration.INTEGRATION_FOLDER_PATH;
+            return System.IO.Directory.Exists(integrationPath);
         }
     }
 }
