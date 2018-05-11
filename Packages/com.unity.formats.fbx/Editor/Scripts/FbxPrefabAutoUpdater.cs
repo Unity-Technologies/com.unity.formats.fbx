@@ -26,7 +26,7 @@ namespace FbxExporters
     {
         #if COM_UNITY_FORMATS_FBX_AS_ASSET
         public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
-        #elif UNITY_2018_2_OR_LATER
+        #elif UNITY_2018_2_OR_NEWER
         public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
         #else // Unity 2018.1 and fbx installed as a package
         public const string FBX_PREFAB_FILE = "Packages/com.unity.formats.fbx/Runtime/FbxPrefab.cs";
@@ -39,7 +39,7 @@ namespace FbxExporters
 
         public static string FindFbxPrefabAssetPath()
         {
-        #if COM_UNITY_FORMATS_FBX_AS_ASSET || UNITY_2018_2_OR_LATER
+        #if COM_UNITY_FORMATS_FBX_AS_ASSET || UNITY_2018_2_OR_NEWER
             // Find guids that are scripts that look like FbxPrefab.
             // That catches FbxPrefabTest too, so we have to make sure.
             var allGuids = AssetDatabase.FindAssets("FbxPrefab t:MonoScript");
@@ -47,7 +47,7 @@ namespace FbxExporters
             foreach (var guid in allGuids) {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
                 if (path.EndsWith(FBX_PREFAB_FILE)) {
-                    if (!string.IsNullOrEmpty(foundPath)) {
+                    if (foundPath != "") {
                         // How did this happen? Anyway, just don't try.
                         Debug.LogWarning(string.Format("{0} found in multiple places; did you forget to delete one of these?\n{1}\n{2}",
                                 FBX_PREFAB_FILE.Substring(1), foundPath, path));
@@ -56,8 +56,10 @@ namespace FbxExporters
                     foundPath = path;
                 }
             }
-            Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
-            return "";
+            if (foundPath == "") {
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
+            }
+            return foundPath;
         #else
             // In Unity 2018.1, FindAssets can't find FbxPrefab.cs in a package.
             // So we hardcode the path.
