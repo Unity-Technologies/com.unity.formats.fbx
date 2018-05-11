@@ -718,7 +718,7 @@ proc unityExport(int $exportType){
                 "Continue", "Cancel"
                    )){
                     // cancelled, don't export this fbx
-                    print ("Export to "  + $exportFilePath + " cancelled");
+                    print ("Cancelled export to "  + $exportFilePath);
                     return;
             }
         }
