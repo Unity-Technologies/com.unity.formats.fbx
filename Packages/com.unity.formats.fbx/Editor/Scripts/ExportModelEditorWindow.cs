@@ -407,7 +407,7 @@ namespace FbxExporters
             protected override GameObject GetGameObject()
             {
                 return (IsTimelineAnim)
-                    ? ModelExporter.AnimationOnlyExportData.GetGameObjectAndAnimationClip(ToExport [0]).Key
+                    ? ModelExporter.GetGameObjectAndAnimationClip(ToExport [0]).Key
                     :  ModelExporter.GetGameObject ( ToExport [0] );
             }
 
