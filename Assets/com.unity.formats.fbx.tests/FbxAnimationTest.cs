@@ -32,7 +32,7 @@ namespace FbxExporters.UnitTests
         public static IEnumerable<System.Type> m_componentTypes = 
             typeof (Component).Assembly.GetTypes ().
             Where (t => typeof (Component).IsAssignableFrom (t) && 
-                   ModelExporter.MapsToFbxObject.ContainsKey(t)).Except(m_exceptionTypes);
+                   ModelExporterReflection.MapsToFbxObject.ContainsKey(t)).Except(m_exceptionTypes);
 
         public static string [] m_rotationQuaternionNames = new string [4] { "m_LocalRotation.x", "m_LocalRotation.y", "m_LocalRotation.z", "m_LocalRotation.w" };
         public static string [] m_rotationEulerNames = new string [3] { "localEulerAnglesRaw.x", "localEulerAnglesRaw.y", "localEulerAnglesRaw.z" };
@@ -785,7 +785,7 @@ namespace FbxExporters.UnitTests
             Debug.Log (string.Format ("ComponentAnimTest {0}", componentType.ToString()));
             #endif 
 
-            if (!ModelExporter.MapsToFbxObject.ContainsKey(componentType))
+            if (!ModelExporterReflection.MapsToFbxObject.ContainsKey(componentType))
             {
                 #if DEBUG_UNITTEST
                 Debug.Log (string.Format ("skipping {0}; fbx export not supported", componentType.ToString()));

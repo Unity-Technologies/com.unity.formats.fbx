@@ -132,7 +132,7 @@ namespace FbxExporters
             /// <summary>
             /// Which components map from Unity Object to Fbx Object
             /// </summary>
-            internal enum FbxNodeRelationType
+            public enum FbxNodeRelationType
             {
                 NodeAttribute,
                 Property,
@@ -4048,7 +4048,7 @@ namespace FbxExporters
             /// provide. But it's less efficient because you'll get a callback
             /// on every single GameObject.
             /// </summary>
-            internal delegate bool GetMeshForObject(ModelExporter exporter, GameObject gameObject, FbxNode fbxNode);
+            public delegate bool GetMeshForObject(ModelExporter exporter, GameObject gameObject, FbxNode fbxNode);
 
             static List<GetMeshForObject> MeshForObjectCallbacks = new List<GetMeshForObject>();
 

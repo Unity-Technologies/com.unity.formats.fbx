@@ -27,6 +27,9 @@ namespace FbxExporters.UnitTests
             }
         }
 
+        /////////////
+        // Fields
+        /////////////
         public static float UnitScaleFactor
         {
             get
@@ -34,7 +37,13 @@ namespace FbxExporters.UnitTests
                 return (float)GetStaticField("UnitScaleFactor");
             }
         }
-
+        public static Dictionary<System.Type, KeyValuePair<System.Type,ModelExporter.FbxNodeRelationType>> MapsToFbxObject
+        {
+            get
+            {
+                return (Dictionary<System.Type, KeyValuePair<System.Type,ModelExporter.FbxNodeRelationType>>) GetStaticField("MapsToFbxObject");
+            }
+        }
 
         /////////////
         // Methods
@@ -156,7 +165,7 @@ namespace FbxExporters.UnitTests
                                               new Type[] {typeof(Mesh), typeof(FbxNode), typeof(Material [])},
                                               instance);
   
-  }
+        }
 
         private static object InvokeMethod(string methodName, object[] argsToPass, ModelExporter instance = null)
         {
