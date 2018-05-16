@@ -98,9 +98,9 @@ namespace FbxExporters
             const string RegexCharStart = "[";
             const string RegexCharEnd = "]";
 
-            public const float UnitScaleFactor = 100f;
+            internal const float UnitScaleFactor = 100f;
 
-            public const string PACKAGE_UI_NAME = "FBX Exporter";
+            internal const string PACKAGE_UI_NAME = "FBX Exporter";
 
             /// <summary>
             /// name of the scene's default camera
@@ -139,7 +139,7 @@ namespace FbxExporters
                 Material
             }
 
-            public static Dictionary<System.Type, KeyValuePair<System.Type,FbxNodeRelationType>> MapsToFbxObject = new Dictionary<System.Type, KeyValuePair<System.Type,FbxNodeRelationType>> ()
+            internal static Dictionary<System.Type, KeyValuePair<System.Type,FbxNodeRelationType>> MapsToFbxObject = new Dictionary<System.Type, KeyValuePair<System.Type,FbxNodeRelationType>> ()
             {
                 { typeof(Transform),            new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxProperty), FbxNodeRelationType.Property) },
                 { typeof(MeshFilter),           new KeyValuePair<System.Type, FbxNodeRelationType>(typeof(FbxMesh), FbxNodeRelationType.NodeAttribute) },
@@ -195,17 +195,20 @@ namespace FbxExporters
             /// <summary>
             /// Gets the export settings.
             /// </summary>
-            public static EditorTools.ExportSettings ExportSettings {
+            internal static EditorTools.ExportSettings ExportSettings {
                 get { return EditorTools.ExportSettings.instance; }
             }
 
+            internal static EditorTools.IExportOptions DefaultOptions {
+                get { return new ExportModelSettingsSerialize(); }
+            }
 
             private EditorTools.IExportOptions m_exportOptions;
             private EditorTools.IExportOptions ExportOptions {
                 get {
                     if (m_exportOptions == null) {
                         // get default settings;
-                        m_exportOptions = new ExportModelSettingsSerialize();
+                        m_exportOptions = DefaultOptions;
                     }
                     return m_exportOptions;
                 }
@@ -215,7 +218,7 @@ namespace FbxExporters
             /// <summary>
             /// Gets the Unity default material.
             /// </summary>
-            public static Material DefaultMaterial {
+            internal static Material DefaultMaterial {
                 get {
                     if (!s_defaultMaterial) {
                         var obj = GameObject.CreatePrimitive (PrimitiveType.Quad);
@@ -238,7 +241,7 @@ namespace FbxExporters
             /// <summary>
             /// Gets the version number of the FbxExporters plugin from the readme.
             /// </summary>
-            public static string GetVersionFromReadme()
+            internal static string GetVersionFromReadme()
             {
                 if (!File.Exists (ChangeLogPath)) {
                     Debug.LogWarning (string.Format("Could not find version number, the ChangeLog file is missing from: {0}", ChangeLogPath));
@@ -274,7 +277,7 @@ namespace FbxExporters
             /// Get a layer (to store UVs, normals, etc) on the mesh.
             /// If it doesn't exist yet, create it.
             /// </summary>
-            public static FbxLayer GetOrCreateLayer(FbxMesh fbxMesh, int layer = 0 /* default layer */)
+            internal static FbxLayer GetOrCreateLayer(FbxMesh fbxMesh, int layer = 0 /* default layer */)
             {
                 int maxLayerIndex = fbxMesh.GetLayerCount() - 1;
                 while (layer > maxLayerIndex) {
@@ -541,7 +544,7 @@ namespace FbxExporters
             ///
             /// Remember you also need to flip the winding order on your polygons.
             /// </summary>
-            public static FbxVector4 ConvertToRightHanded(Vector3 leftHandedVector, float unitScale = 1f)
+            internal static FbxVector4 ConvertToRightHanded(Vector3 leftHandedVector, float unitScale = 1f)
             {
                 // negating the x component of the vector converts it from left to right handed coordinates
                 return unitScale * new FbxVector4 (
@@ -561,7 +564,7 @@ namespace FbxExporters
             /// <param name="unityPropName">Unity property name, e.g. "_MainTex".</param>
             /// <param name="fbxMaterial">Fbx material.</param>
             /// <param name="fbxPropName">Fbx property name, e.g. <c>FbxSurfaceMaterial.sDiffuse</c>.</param>
-            public bool ExportTexture (Material unityMaterial, string unityPropName,
+            internal bool ExportTexture (Material unityMaterial, string unityPropName,
                                        FbxSurfaceMaterial fbxMaterial, string fbxPropName)
             {
                 if (!unityMaterial) {
@@ -613,7 +616,7 @@ namespace FbxExporters
             /// <summary>
             /// Get the color of a material, or grey if we can't find it.
             /// </summary>
-            public FbxDouble3 GetMaterialColor (Material unityMaterial, string unityPropName, float defaultValue = 1)
+            internal FbxDouble3 GetMaterialColor (Material unityMaterial, string unityPropName, float defaultValue = 1)
             {
                 if (!unityMaterial) {
                     return new FbxDouble3(defaultValue);
@@ -628,7 +631,7 @@ namespace FbxExporters
             /// <summary>
             /// Export (and map) a Unity PBS material to FBX classic material
             /// </summary>
-            public bool ExportMaterial (Material unityMaterial, FbxScene fbxScene, FbxNode fbxNode)
+            internal bool ExportMaterial (Material unityMaterial, FbxScene fbxScene, FbxNode fbxNode)
             {
                 if (!unityMaterial) {
                     unityMaterial = DefaultMaterial;
@@ -757,7 +760,7 @@ namespace FbxExporters
             ///
             /// Use fbxNode.GetMesh() to access the exported mesh.
             /// </summary>
-            public bool ExportMesh (Mesh mesh, FbxNode fbxNode, Material[] materials = null)
+            internal bool ExportMesh (Mesh mesh, FbxNode fbxNode, Material[] materials = null)
             {
                 var meshInfo = new MeshInfo(mesh, materials);
                 return ExportMesh(meshInfo, fbxNode);
@@ -1157,7 +1160,7 @@ namespace FbxExporters
             ///       instead of Euler angles, which Maya does not import properly. 
             /// </summary>
             /// <returns>Euler with XYZ rotation order.</returns>
-            public static FbxDouble3 ConvertQuaternionToXYZEuler(Quaternion q)
+            internal static FbxDouble3 ConvertQuaternionToXYZEuler(Quaternion q)
             {
                 FbxQuaternion quat = new FbxQuaternion (q.x, q.y, q.z, q.w);
                 FbxAMatrix m = new FbxAMatrix ();
@@ -1169,7 +1172,7 @@ namespace FbxExporters
                 return new FbxDouble3 (vector4.X, -vector4.Y, -vector4.Z);
             }
 
-            public static FbxVector4 ConvertQuaternionToXYZEuler (FbxQuaternion quat)
+            internal static FbxVector4 ConvertQuaternionToXYZEuler (FbxQuaternion quat)
             {
                 FbxAMatrix m = new FbxAMatrix ();
                 m.SetQ (quat);
@@ -1180,22 +1183,22 @@ namespace FbxExporters
                 return new FbxVector4 (vector4.X, -vector4.Y, -vector4.Z, vector4.W);
             }
 
-            public static FbxDouble3 ToFbxDouble3(Vector3 v)
+            internal static FbxDouble3 ToFbxDouble3(Vector3 v)
             {
                 return new FbxDouble3(v.x, v.y, v.z);
             }
 
-            public static FbxDouble3 ToFbxDouble3(FbxVector4 v)
+            internal static FbxDouble3 ToFbxDouble3(FbxVector4 v)
             {
                 return new FbxDouble3(v.X, v.Y, v.Z);
             }
 
-            public static FbxVector4 ToFbxVector4(FbxDouble3 v)
+            internal static FbxVector4 ToFbxVector4(FbxDouble3 v)
             {
                 return new FbxVector4(v.X, v.Y, v.Z);
             }
 
-            public static FbxDouble3 ConvertToRightHandedEuler(Vector3 rot)
+            internal static FbxDouble3 ConvertToRightHandedEuler(Vector3 rot)
             {
                 rot.y *= -1;
                 rot.z *= -1;
@@ -1207,7 +1210,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns>a quaternion.</returns>
             /// <param name="euler">Euler.</param>
-            public static FbxQuaternion EulerToQuaternion(FbxVector4 euler)
+            internal static FbxQuaternion EulerToQuaternion(FbxVector4 euler)
             {
                 FbxAMatrix m = new FbxAMatrix ();
                 m.SetR (euler);
@@ -1219,7 +1222,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns>a euler.</returns>
             /// <param name="quat">Quaternion.</param>
-            public static FbxVector4 QuaternionToEuler(FbxQuaternion quat)
+            internal static FbxVector4 QuaternionToEuler(FbxQuaternion quat)
             {
                 FbxAMatrix m = new FbxAMatrix ();
                 m.SetQ (quat);
@@ -1227,7 +1230,7 @@ namespace FbxExporters
             }
 
             // get a fbxNode's global default position.
-            protected bool ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, Vector3 newCenter, TransformExportType exportType)
+            internal bool ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, Vector3 newCenter, TransformExportType exportType)
             {
                 // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
                 // This causes issues when converting euler to quaternion, causing the final
@@ -1725,7 +1728,7 @@ namespace FbxExporters
             /// <summary>
             /// Return set of sample times to cover all keys on animation curves
             /// </summary>
-            public static HashSet<float> GetSampleTimes(AnimationCurve[] animCurves, double sampleRate)
+            internal static HashSet<float> GetSampleTimes(AnimationCurve[] animCurves, double sampleRate)
             {
                 var keyTimes = new HashSet<float>();
                 double fs = 1.0/sampleRate;
@@ -1752,7 +1755,7 @@ namespace FbxExporters
             /// <summary>
             /// Return set of all keys times on animation curves
             /// </summary>
-            public static HashSet<float> GetKeyTimes(AnimationCurve[] animCurves)
+            internal static HashSet<float> GetKeyTimes(AnimationCurve[] animCurves)
             {
                 var keyTimes = new HashSet<float>();
 
@@ -1769,7 +1772,7 @@ namespace FbxExporters
             /// NOTE : This is a work in progress (WIP). We only export the key time and value on
             /// a Cubic curve using the default tangents.
             /// </summary>
-            protected void ExportAnimationKeys (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve, 
+            internal void ExportAnimationKeys (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve, 
                 UnityToMayaConvertSceneHelper convertSceneHelper)
             {
                 // TODO: complete the mapping between key tangents modes Unity and FBX
@@ -1822,7 +1825,7 @@ namespace FbxExporters
             /// <summary>
             /// Export animation curve key samples
             /// </summary>
-            protected void ExportAnimationSamples (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve,
+            internal void ExportAnimationSamples (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve,
                 double sampleRate,
                 UnityToMayaConvertSceneHelper convertSceneHelper)
             {
@@ -1958,7 +1961,7 @@ namespace FbxExporters
                 }
             }
 
-            public class UnityToMayaConvertSceneHelper
+            internal class UnityToMayaConvertSceneHelper
             {
                 bool convertDistance = false;
                 bool convertLtoR = false;
@@ -2331,7 +2334,7 @@ namespace FbxExporters
                 return Matrix4x4.TRS(sourcePos, sourceRot, sourceScale); 
             }
 
-            struct UnityCurve {
+            internal struct UnityCurve {
                 public string propertyName;
                 public AnimationCurve uniAnimCurve;
                 public System.Type propertyType;
@@ -2484,7 +2487,7 @@ namespace FbxExporters
             /// Creates an FbxNode for each GameObject.
             /// </summary>
             /// <returns>The number of nodes exported.</returns>
-            protected int ExportTransformHierarchy(
+            internal int ExportTransformHierarchy(
                 GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
                 int exportProgress, int objectCount, Vector3 newCenter,
                 TransformExportType exportType = TransformExportType.Local,
@@ -2574,16 +2577,54 @@ namespace FbxExporters
             }
 
             /// <summary>
+            /// Checks if the transform should be reset.
+            /// Transform should be reset if animation is being transferred, and this transform
+            /// is either the animation source, destination, or between these nodes.
+            /// </summary>
+            /// <returns><c>true</c>, if transform should be reset, <c>false</c> otherwise.</returns>
+            /// <param name="t">Transform.</param>
+            private bool TransformShouldBeReset(Transform t){
+                var source = ExportOptions.AnimationSource;
+                var dest = ExportOptions.AnimationDest;
+
+                if (!source || !dest || source == dest) {
+                    return false;
+                }
+
+                // don't want to reset destination, if it's a bone this could cause issues with the skinning
+                var curr = dest.parent;
+                while (curr != source && curr != null) {
+                    if (t == curr) {
+                        return true;
+                    }
+                    curr = curr.parent;
+                }
+                if (t == source) {
+                    return true;
+                }
+                return false;
+            }
+
+            /// <summary>
+            /// Export data containing extra information required to export
+            /// </summary>
+            public interface IExportData 
+            {
+                HashSet<GameObject> Objects { get; }
+            }
+
+            /// <summary>
             /// Export data containing what to export when
             /// exporting animation only.
             /// </summary>
-            public struct AnimationOnlyExportData {
+            internal struct AnimationOnlyExportData : IExportData {
                 // map from animation clip to GameObject that has Animation/Animator
                 // component containing clip
                 public Dictionary<AnimationClip, GameObject> animationClips;
 
                 // set of all GameObjects to export
                 public HashSet<GameObject> goExportSet;
+                public HashSet<GameObject> Objects { get { return goExportSet; } }
 
                 // map from GameObject to component type to export
                 public Dictionary<GameObject, System.Type> exportComponent;
@@ -2602,13 +2643,31 @@ namespace FbxExporters
                     this.defaultClip = null;
                 }
 
-                public void ComputeObjectsInAnimationClips(
+                /// <summary>
+                /// collect all objects dependencies for animation clips.
+                /// </summary>
+                public void CollectDependencies(
                     AnimationClip[] animClips, 
-                    GameObject animationRootObject,
-                    bool exportSkinnedMeshAnim = true
+                    GameObject rootObject,
+                    IExportOptions exportOptions
                 ){
-                    // NOTE: the object (animationRootObject) containing the animation is not necessarily animated
-                    // when driven by an animator or animation component.
+                    Debug.Assert(rootObject!=null);
+                    Debug.Assert(exportOptions!=null);
+
+                    // if we're exporting animation-only and the root is a Camera or Light then we also
+                    // to export the static values so that these are pointing the right way 
+                    if (exportOptions.ModelAnimIncludeOption == ExportSettings.Include.Anim)
+                    {
+                        if (rootObject.GetComponent<Light>())
+                        {
+                            this.exportComponent[rootObject] = typeof(Light);
+                        }
+                        else if (rootObject.GetComponent<Camera>())
+                        {
+                            this.exportComponent[rootObject] = typeof(Camera);
+                        }
+                        this.goExportSet.Add (rootObject);
+                    }
 
                     foreach (var animClip in animClips) {
                         if (this.animationClips.ContainsKey(animClip)) {
@@ -2616,10 +2675,10 @@ namespace FbxExporters
                             continue;
                         }
 
-                        this.animationClips.Add (animClip, animationRootObject);
+                        this.animationClips.Add (animClip, rootObject);
 
                         foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings (animClip)) {
-                            Object uniObj = AnimationUtility.GetAnimatedObject (animationRootObject, uniCurveBinding);
+                            Object uniObj = AnimationUtility.GetAnimatedObject (rootObject, uniCurveBinding);
                             if (!uniObj) {
                                 continue;
                             }
@@ -2629,19 +2688,63 @@ namespace FbxExporters
                                 continue;
                             }
 
-                            if (!exportSkinnedMeshAnim && unityGo.GetComponent<SkinnedMeshRenderer>()) {
+                            if (!exportOptions.AnimateSkinnedMesh && unityGo.GetComponent<SkinnedMeshRenderer>()) {
                                 continue;
                             }
 
-                            // If we have a clip driving a camera or light then force the export of FbxNodeAttribute
-                            // so that they point the right way when imported into Maya.
-                            if (unityGo.GetComponent<Light>())
+                            if (unityGo.GetComponent<Light>()) {
                                 this.exportComponent[unityGo] = typeof(Light);
-                            else if (unityGo.GetComponent<Camera>())
+                            } else if (unityGo.GetComponent<Camera>()) {
                                 this.exportComponent[unityGo] = typeof(Camera);
+                            }
 
                             this.goExportSet.Add (unityGo);
                         }
+                    }
+                }
+
+                public static KeyValuePair<GameObject, AnimationClip> GetGameObjectAndAnimationClip(Object obj)
+                {
+                    if (!obj.GetType().Name.Contains("EditorClip"))
+                        return new KeyValuePair<GameObject, AnimationClip>();
+                    
+                    object clip = obj.GetType().GetProperty("clip").GetValue(obj, null);
+                    TimelineClip timeLineClip = clip as TimelineClip;
+
+                    object clipItem = obj.GetType().GetProperty("item").GetValue(obj, null);
+                    object parentTrack = clipItem.GetType().GetProperty("parentTrack").GetValue(clipItem, null);
+                    AnimationTrack animTrack = parentTrack as AnimationTrack;
+
+                    var goBound = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (animTrack) as GameObject;
+
+                    return new KeyValuePair<GameObject, AnimationClip>(goBound, timeLineClip.animationClip);
+                }
+
+                public static string GetFileName(Object obj)
+                {
+                    if (obj.GetType().Name.Contains("EditorClip"))
+                    {
+                        object clip = obj.GetType().GetProperty("clip").GetValue(obj, null);
+                        TimelineClip timeLineClip = clip as TimelineClip;
+
+                        if (timeLineClip.displayName.Contains("@"))
+                        {
+                            return timeLineClip.displayName;
+                        }
+                        else
+                        {
+                            object clipItem = obj.GetType().GetProperty("item").GetValue(obj, null);
+                            object parentTrack = clipItem.GetType().GetProperty("parentTrack").GetValue(clipItem, null);
+                            AnimationTrack animTrack = parentTrack as AnimationTrack;
+
+                            var goBound = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (animTrack) as GameObject;
+
+                            return string.Format ("{0}@{1}", goBound.name, timeLineClip.displayName);
+                        }
+                    }
+                    else
+                    {
+                        return obj.name;
                     }
                 }
             }
@@ -2653,15 +2756,17 @@ namespace FbxExporters
             ///     but components are only exported if explicitly animated. Meshes are not exported.
             /// </summary>
             /// <returns>The number of nodes exported.</returns>
-            protected int ExportAnimationOnly(
+            internal int ExportAnimationOnly(
                 GameObject unityGO,
                 FbxScene fbxScene,
                 int exportProgress,
                 int objectCount,
                 Vector3 newCenter,
-                AnimationOnlyExportData exportData,
+                IExportData data,
                 TransformExportType exportType = TransformExportType.Local
             ){
+                AnimationOnlyExportData exportData = (AnimationOnlyExportData)data;
+
                 // export any bones
                 var skinnedMeshRenderers = unityGO.GetComponentsInChildren<SkinnedMeshRenderer> ();
                 int numObjectsExported = exportProgress;
@@ -2677,10 +2782,10 @@ namespace FbxExporters
                     }
 
                     // get the bones that are also in the export set
-                    bones.IntersectWith (exportData.goExportSet);
+                    bones.IntersectWith (exportData.Objects);
 
                     // remove the exported bones from the export set
-                    exportData.goExportSet.ExceptWith (bones);
+                    exportData.Objects.ExceptWith (bones);
 
                     var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, boneDict);
                     foreach (var bone in bones) {
@@ -2697,7 +2802,7 @@ namespace FbxExporters
                 }
 
                 // make sure anim destination node is exported as well
-                var exportSet = exportData.goExportSet;
+                var exportSet = exportData.Objects;
                 if (ExportOptions.AnimationDest && ExportOptions.AnimationSource) {
                     exportSet.Add (ExportOptions.AnimationDest.gameObject);
                 }
@@ -2739,7 +2844,7 @@ namespace FbxExporters
                 return numObjectsExported;
             }
 
-            class SkinnedMeshBoneInfo {
+            internal class SkinnedMeshBoneInfo {
                 public SkinnedMeshRenderer skinnedMesh;
                 public Dictionary<Transform, int> boneDict;
                 public Dictionary<Transform, Matrix4x4> boneToBindPose;
@@ -2927,7 +3032,7 @@ namespace FbxExporters
             /// <returns>The object to root count.</returns>
             /// <param name="startObject">Start object.</param>
             /// <param name="root">Root object.</param>
-            private int GetObjectToRootDepth(Transform startObject, Transform root){
+            private static int GetObjectToRootDepth(Transform startObject, Transform root){
                 if (startObject == null) {
                     return 0;
                 }
@@ -2952,12 +3057,12 @@ namespace FbxExporters
             /// <returns>The animation only hierarchy count.</returns>
             /// <param name="exportSet">GameObject hierarchies selected for export.</param>
             /// <param name="hierarchyToExportData">Map from GameObject hierarchy to animation export data.</param>
-            protected int GetAnimOnlyHierarchyCount(Dictionary<GameObject, AnimationOnlyExportData> hierarchyToExportData)
+            protected int GetAnimOnlyHierarchyCount(Dictionary<GameObject, IExportData> hierarchyToExportData)
             {
                 // including any parents of animated objects that are exported
                 var completeExpSet = new HashSet<GameObject>();
                 foreach (var data in hierarchyToExportData.Values) {
-                    foreach (var go in data.goExportSet) {
+                    foreach (var go in data.Objects) {
                         completeExpSet.Add(go);
 
                         var parent = go.transform.parent;
@@ -2970,8 +3075,61 @@ namespace FbxExporters
                 return completeExpSet.Count;
             }
 
-            protected Dictionary<GameObject, AnimationOnlyExportData> GetAnimationExportDataFromAnimationTrack(GameObject rootObject, AnimationTrack animationTrack)
+            internal static Dictionary<GameObject, IExportData> GetExportData(Object[] objects, IExportOptions exportOptions = null)
             {
+                if (exportOptions==null)
+                    exportOptions = DefaultOptions;
+                Debug.Assert(exportOptions!=null);
+
+                Dictionary<GameObject, IExportData>  exportData = new Dictionary<GameObject, IExportData>();
+
+                if (exportOptions.ModelAnimIncludeOption == ExportSettings.Include.Anim)
+                {
+                    foreach (var obj in objects) 
+                    {
+                        GameObject go = ModelExporter.GetGameObject (obj);
+
+                        if (go)
+                        {
+                            exportData[go] = GetExportData(go, exportOptions);
+                        }
+                        else if (obj.GetType().Name.Contains("EditorClip")) 
+                        {
+                            KeyValuePair<GameObject, AnimationClip> pair = AnimationOnlyExportData.GetGameObjectAndAnimationClip(obj);
+
+                            exportData[pair.Key] = GetExportData (pair.Key, pair.Value, exportOptions);
+                        }
+                    }
+                }
+
+                return exportData.Count == 0 ? null : exportData;
+            }
+
+            internal static IExportData GetExportData(GameObject rootObject, AnimationClip animationClip, IExportOptions exportOptions = null)
+            {
+                if (exportOptions==null)
+                    exportOptions = DefaultOptions;
+                Debug.Assert(exportOptions!=null);
+
+                // get animation clips for root object from animation track
+                List<AnimationClip> clips = new List<AnimationClip>(){animationClip};
+
+                var goToExport = new HashSet<GameObject>();
+                var animationClips = new Dictionary<AnimationClip, GameObject>();
+                var exportComponent = new Dictionary<GameObject, System.Type>();
+
+                var exportData = new AnimationOnlyExportData(animationClips, goToExport, exportComponent);
+                exportData.CollectDependencies(clips.ToArray(), rootObject, exportOptions);
+
+                return exportData;
+            }
+
+            protected static IExportData GetExportData(GameObject rootObject, AnimationTrack animationTrack, IExportOptions exportOptions = null)
+            {
+                if (exportOptions==null)
+                    exportOptions = DefaultOptions;
+                Debug.Assert(exportOptions!=null);
+                        
                 // get animation clips for root object from animation track
                 List<AnimationClip> clips = new List<AnimationClip>();
 
@@ -2980,107 +3138,96 @@ namespace FbxExporters
                     clips.Add(myclip.animationClip);
                 }
 
-                return GetTimelineAnimationExportData(rootObject, clips);
-            }
-
-
-            protected Dictionary<GameObject, AnimationOnlyExportData> GetTimelineAnimationExportData(GameObject rootObject, List<AnimationClip> animationClipsList)
-            {
                 var goToExport = new HashSet<GameObject>();
                 var animationClips = new Dictionary<AnimationClip, GameObject>();
                 var exportComponent = new Dictionary<GameObject, System.Type>();
 
                 var exportData = new AnimationOnlyExportData(animationClips, goToExport, exportComponent);
-                exportData.ComputeObjectsInAnimationClips(animationClipsList.ToArray(), rootObject, ExportOptions.AnimateSkinnedMesh);
+                exportData.CollectDependencies(clips.ToArray(), rootObject, exportOptions);
 
-                Dictionary<GameObject, AnimationOnlyExportData> data = new Dictionary<GameObject, AnimationOnlyExportData>();
-                data.Add(rootObject, exportData);
-                return data;
+                return exportData;
             }
 
-            protected Dictionary<GameObject, AnimationOnlyExportData> GetAnimationExportData(HashSet<GameObject> exportSet)
+            protected static IExportData GetExportData(GameObject go, IExportOptions exportOptions = null)
             {
-                Dictionary<GameObject, AnimationOnlyExportData>  hierarchyToExportData = new Dictionary<GameObject, AnimationOnlyExportData>();
+                if (exportOptions==null)
+                    exportOptions = DefaultOptions;
+                Debug.Assert(exportOptions!=null);
 
-                foreach (var go in exportSet)
+                // gather all animation clips
+                var legacyAnim = go.GetComponentsInChildren<Animation>();
+                var genericAnim = go.GetComponentsInChildren<Animator>();
+
+                var goToExport = new HashSet<GameObject>();
+                var animationClips = new Dictionary<AnimationClip, GameObject>();
+                var exportComponent = new Dictionary<GameObject, System.Type>();
+
+                var exportData = new AnimationOnlyExportData(animationClips, goToExport, exportComponent);
+
+                int depthFromRootAnimation = int.MaxValue;
+                Animation rootAnimation = null;
+                foreach (var anim in legacyAnim)
                 {
-                    // gather all animation clips
-                    var legacyAnim = go.GetComponentsInChildren<Animation>();
-                    var genericAnim = go.GetComponentsInChildren<Animator>();
+                    int count = GetObjectToRootDepth(anim.transform, go.transform);
 
-                    var goToExport = new HashSet<GameObject>();
-                    var animationClips = new Dictionary<AnimationClip, GameObject>();
-                    var exportComponent = new Dictionary<GameObject, System.Type>();
-
-                    var exportData = new AnimationOnlyExportData(animationClips, goToExport, exportComponent);
-
-                    hierarchyToExportData.Add(go, exportData);
-
-                    int depthFromRootAnimation = int.MaxValue;
-                    Animation rootAnimation = null;
-                    foreach (var anim in legacyAnim)
+                    if (count < depthFromRootAnimation)
                     {
-                        int count = GetObjectToRootDepth(anim.transform, go.transform);
-
-                        if (count < depthFromRootAnimation)
-                        {
-                            depthFromRootAnimation = count;
-                            rootAnimation = anim;
-                        }
-
-                        var animClips = AnimationUtility.GetAnimationClips(anim.gameObject);
-                        exportData.ComputeObjectsInAnimationClips(animClips, anim.gameObject, ExportOptions.AnimateSkinnedMesh);
+                        depthFromRootAnimation = count;
+                        rootAnimation = anim;
                     }
 
-                    int depthFromRootAnimator = int.MaxValue;
-                    Animator rootAnimator = null;
-                    foreach (var anim in genericAnim)
+                    var animClips = AnimationUtility.GetAnimationClips(anim.gameObject);
+                    exportData.CollectDependencies(animClips, anim.gameObject, exportOptions);
+                }
+
+                int depthFromRootAnimator = int.MaxValue;
+                Animator rootAnimator = null;
+                foreach (var anim in genericAnim)
+                {
+                    int count = GetObjectToRootDepth(anim.transform, go.transform);
+
+                    if (count < depthFromRootAnimator)
                     {
-                        int count = GetObjectToRootDepth(anim.transform, go.transform);
-
-                        if (count < depthFromRootAnimator)
-                        {
-                            depthFromRootAnimator = count;
-                            rootAnimator = anim;
-                        }
-
-                        // Try the animator controller (mecanim)
-                        var controller = anim.runtimeAnimatorController;
-                        if (controller)
-                        {
-                            exportData.ComputeObjectsInAnimationClips(controller.animationClips, anim.gameObject, ExportOptions.AnimateSkinnedMesh);
-                        }
+                        depthFromRootAnimator = count;
+                        rootAnimator = anim;
                     }
 
-                    // set the first clip to export
-                    if (depthFromRootAnimation < depthFromRootAnimator)
+                    // Try the animator controller (mecanim)
+                    var controller = anim.runtimeAnimatorController;
+                    if (controller)
                     {
-                        exportData.defaultClip = rootAnimation.clip;
+                        exportData.CollectDependencies(controller.animationClips, anim.gameObject, exportOptions);
                     }
-                    else if(rootAnimator)
+                }
+
+                // set the first clip to export
+                if (depthFromRootAnimation < depthFromRootAnimator)
+                {
+                    exportData.defaultClip = rootAnimation.clip;
+                }
+                else if(rootAnimator)
+                {
+                    // Try the animator controller (mecanim)
+                    var controller = rootAnimator.runtimeAnimatorController;
+                    if (controller)
                     {
-                        // Try the animator controller (mecanim)
-                        var controller = rootAnimator.runtimeAnimatorController;
-                        if (controller)
+                        var dController = controller as UnityEditor.Animations.AnimatorController;
+                        if (dController && dController.layers.Count() > 0)
                         {
-                            var dController = controller as UnityEditor.Animations.AnimatorController;
-                            if (dController && dController.layers.Count() > 0)
+                            var motion = dController.layers[0].stateMachine.defaultState.motion;
+                            var defaultClip = motion as AnimationClip;
+                            if (defaultClip)
                             {
-                                var motion = dController.layers[0].stateMachine.defaultState.motion;
-                                var defaultClip = motion as AnimationClip;
-                                if (defaultClip)
-                                {
-                                    exportData.defaultClip = defaultClip;
-                                }
-                                else
-                                {
-                                    Debug.LogWarningFormat("Couldn't export motion {0}", motion.name);
-                                }
+                                exportData.defaultClip = defaultClip;
+                            }
+                            else
+                            {
+                                Debug.LogWarningFormat("Couldn't export motion {0}", motion.name);
                             }
                         }
                     }
                 }
-                return hierarchyToExportData;
+                return exportData;
             }
 
             /// <summary>
@@ -3162,7 +3309,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns>The hierarchy count.</returns>
             /// <param name="exportSet">Export set.</param>
-            public int GetHierarchyCount (HashSet<GameObject> exportSet)
+            internal int GetHierarchyCount (HashSet<GameObject> exportSet)
             {
                 int count = 0;
                 Queue<GameObject> queue = new Queue<GameObject> (exportSet);
@@ -3184,7 +3331,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns>The revised export set</returns>
             /// <param name="unityExportSet">Unity export set.</param>
-            public static HashSet<GameObject> RemoveRedundantObjects(IEnumerable<UnityEngine.Object> unityExportSet)
+            internal static HashSet<GameObject> RemoveRedundantObjects(IEnumerable<UnityEngine.Object> unityExportSet)
             {
                 // basically just remove the descendents from the unity export set
                 HashSet<GameObject> toExport = new HashSet<GameObject> ();
@@ -3259,7 +3406,7 @@ namespace FbxExporters
             /// </summary>
             /// <returns>Center of gameObjects.</returns>
             /// <param name="gameObjects">Game objects.</param>
-            public static Vector3 FindCenter(IEnumerable<GameObject> gameObjects)
+            internal static Vector3 FindCenter(IEnumerable<GameObject> gameObjects)
             {
                 Bounds bounds = new Bounds();
                 // Assign the initial bounds to first GameObject's bounds
@@ -3281,12 +3428,12 @@ namespace FbxExporters
             /// <returns>The recentered translation.</returns>
             /// <param name="t">Transform.</param>
             /// <param name="center">Center point.</param>
-            public static Vector3 GetRecenteredTranslation(Transform t, Vector3 center)
+            internal static Vector3 GetRecenteredTranslation(Transform t, Vector3 center)
             {
                 return t.position - center;
             }
 
-            public enum TransformExportType { Local, Global, Reset };
+            internal enum TransformExportType { Local, Global, Reset };
 
             /// <summary>
             /// Export all the objects in the set.
@@ -3294,9 +3441,9 @@ namespace FbxExporters
             ///
             /// This refreshes the asset database.
             /// </summary>
-            public int ExportAll (
+            internal int ExportAll (
                 IEnumerable<UnityEngine.Object> unityExportSet, 
-                Dictionary<GameObject, AnimationOnlyExportData> animationExportData)
+                Dictionary<GameObject, IExportData> exportData)
             {
                 exportCancelled = false;
 
@@ -3316,7 +3463,7 @@ namespace FbxExporters
                 }
 
                 try {
-                    bool animOnly = animationExportData != null ;
+                    bool animOnly = exportData != null ;
                     bool status = false;
                     // Create the FBX manager
                     using (var fbxManager = FbxManager.Create ()) {
@@ -3383,14 +3530,16 @@ namespace FbxExporters
                         FbxNode fbxRootNode = fbxScene.GetRootNode ();
                         // stores how many objects we have exported, -1 if export was cancelled
                         int exportProgress = 0;
-                        var revisedExportSet = RemoveRedundantObjects(unityExportSet);
+                        IEnumerable<GameObject> revisedExportSet = null;
 
                         int count = 0;
                         if(animOnly){
-                            count = GetAnimOnlyHierarchyCount(animationExportData);
+                            count = GetAnimOnlyHierarchyCount(exportData);
+                            revisedExportSet = from entry in exportData select entry.Key;
                         } else {
-                            count = GetHierarchyCount (revisedExportSet);
-                           
+                            var revisedGOSet = RemoveRedundantObjects(unityExportSet);
+                            count = GetHierarchyCount (revisedGOSet);
+                            revisedExportSet = revisedGOSet;
                         }
 
                         if(count <= 0){
@@ -3404,7 +3553,7 @@ namespace FbxExporters
                         switch(ExportOptions.ObjectPosition){
                         case ExportSettings.ObjectPosition.LocalCentered:
                             // one object to export -> move to (0,0,0)
-                            if(revisedExportSet.Count == 1){
+                            if(count == 1){
                                 var tempList = new List<GameObject>(revisedExportSet);
                                 center = tempList[0].transform.position;
                                 break;
@@ -3422,8 +3571,8 @@ namespace FbxExporters
                         }
 
                         foreach (var unityGo in revisedExportSet) {
-                            AnimationOnlyExportData data;
-                            if(animOnly && animationExportData.TryGetValue(unityGo, out data)){
+                            IExportData data;
+                            if(animOnly && exportData.TryGetValue(unityGo, out data)){
                                 exportProgress = this.ExportAnimationOnly(unityGo, fbxScene, exportProgress, count, center, data, transformExportType);
                             }
                             else {
@@ -3556,7 +3705,8 @@ namespace FbxExporters
                 foreach (Object editorClipSelected in selectedObjects)
                 {
                     // export first selected editor clip.
-                    if (ExportSingleEditorClip (editorClipSelected)) {
+                    if (editorClipSelected.GetType().Name.Contains("EditorClip")) {
+                        ExportSingleTimelineClip(editorClipSelected);
                         return;
                     }
                 }
@@ -3580,90 +3730,16 @@ namespace FbxExporters
                 return false;
             }
 
-            protected static bool ExportSingleEditorClip(Object editorClipSelected)
+            internal static void ExportSingleTimelineClip(Object editorClipSelected, string filePath = null)
             {
-                if (editorClipSelected.GetType().Name.Contains("EditorClip"))
-                {
-                    object selClip = editorClipSelected.GetType().GetProperty("clip").GetValue(editorClipSelected, null);
-					UnityEngine.Timeline.TimelineClip timeLineClip = selClip as UnityEngine.Timeline.TimelineClip;
-
-					object selClipItem = editorClipSelected.GetType().GetProperty("item").GetValue(editorClipSelected, null);
-					object selClipItemParentTrack = selClipItem.GetType().GetProperty("parentTrack").GetValue(selClipItem, null);
-					AnimationTrack editorClipAnimationTrack = selClipItemParentTrack as AnimationTrack;
-
-#if UNITY_2018_2_OR_NEWER
-                    Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.inspectedDirector.GetGenericBinding(editorClipAnimationTrack);
-#else // UNITY_2018_2_OR_NEWER
-                    Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding(editorClipAnimationTrack);
-#endif // UNITY_2018_2_OR_NEWER
-
-                    GameObject animationTrackGO = null;
-                    if (animationTrackObject is GameObject)
-                    {
-                        animationTrackGO = animationTrackObject as GameObject;
-                    }
-                    else if (animationTrackObject is Animator)
-                    {
-                        animationTrackGO = (animationTrackObject as Animator).gameObject;
-                    }
-                    
-                    if(animationTrackGO == null) 
-                    {
-                        Debug.LogErrorFormat("Could not export animation track object of type {0}", animationTrackObject.GetType().Name);
-                        return false;
-                    }
-
-                    ExportSingleTimelineClip(timeLineClip, animationTrackGO);
-                    return true;
-                } 
-                return false;
-            }
-
-            public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, GameObject animationTrackGObject, string filePath = null)
-            {
-
-                UnityEngine.Object[] exportArray = new UnityEngine.Object[] {
-                    animationTrackGObject,
-                    timelineClipSelected.animationClip
-                };
+                UnityEngine.Object[] exportArray = new UnityEngine.Object[] { editorClipSelected };
 
                 if (!string.IsNullOrEmpty (filePath)) {
                     ExportObjects (filePath, exportArray);
                     return;
                 }
 
-                string AnimFbxFormat = "{0}@{1}";
-                if (timelineClipSelected.displayName.Contains("@"))
-                {
-                    AnimFbxFormat = "{1}";
-                }
-                ExportModelEditorWindow.Init (exportArray, string.Format (AnimFbxFormat, animationTrackGObject.name, timelineClipSelected.displayName), isTimelineAnim: true);
-            }
-
-            public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath, IExportOptions exportOptions = null)
-            {
-                PlayableDirector pd = objectWithPlayableDirector.GetComponent<PlayableDirector>();
-                if (pd == null)
-                {
-                    return;
-                }
-                foreach (PlayableBinding output in pd.playableAsset.outputs)
-                {
-                    AnimationTrack at = output.sourceObject as AnimationTrack;
-
-                    GameObject atObject = pd.GetGenericBinding(output.sourceObject) as GameObject;
-                    // One file by animation clip
-                    foreach (TimelineClip timelineClip in at.GetClips()) {
-                        string AnimFbxFormat = AnimFbxFileFormat;
-                        if (timelineClip.displayName.Contains("@"))
-                        {
-                            AnimFbxFormat = "{0}/{2}.fbx";
-                        }
-                        string filePath = string.Format(AnimFbxFormat, folderPath, atObject.name, timelineClip.displayName);
-                        UnityEngine.Object[] myArray = new UnityEngine.Object[] { atObject, timelineClip.animationClip };
-                        ExportObjects (filePath, myArray, exportOptions);
-                    }
-                }
+                ExportModelEditorWindow.Init (exportArray, AnimationOnlyExportData.GetFileName(editorClipSelected), isTimelineAnim: true);
             }
 
             /// <summary>
@@ -3684,12 +3760,12 @@ namespace FbxExporters
             /// Validate the menu item defined by the function OnContextItem.
             /// </summary>
             [MenuItem (MenuItemName, true, 30)]
-            public static bool OnValidateMenuItem ()
+            internal static bool OnValidateMenuItem ()
             {
                 return true;
             }
 
-            public static void DisplayNoSelectionDialog()
+            internal static void DisplayNoSelectionDialog()
             {
                 UnityEditor.EditorUtility.DisplayDialog (
                     string.Format("{0} Warning", PACKAGE_UI_NAME), 
@@ -3703,7 +3779,7 @@ namespace FbxExporters
             ///<summary>
             ///Information about the mesh that is important for exporting.
             ///</summary>
-            class MeshInfo
+            internal class MeshInfo
             {
                 public Mesh mesh;
 
@@ -3883,7 +3959,7 @@ namespace FbxExporters
             /// <summary>
             /// Get the GameObject
             /// </summary>
-            public static GameObject GetGameObject (Object obj)
+            internal static GameObject GetGameObject (Object obj)
             {
                 if (obj is UnityEngine.Transform) {
                     var xform = obj as UnityEngine.Transform;
@@ -3932,7 +4008,7 @@ namespace FbxExporters
             /// It's an error to register a callback for a component that
             /// already has one, unless 'replace' is set to true.
             /// </summary>
-            public static void RegisterMeshCallback<T>(GetMeshForComponent<T> callback, bool replace = false)
+            internal static void RegisterMeshCallback<T>(GetMeshForComponent<T> callback, bool replace = false)
                 where T: UnityEngine.MonoBehaviour
             {
                 // Under the hood we lose type safety, but don't let the user notice!
@@ -3951,7 +4027,7 @@ namespace FbxExporters
             /// Normally you'll want to use the generic form, but this one is
             /// easier to use with reflection.
             /// </summary>
-            public static void RegisterMeshCallback(System.Type t,
+            internal static void RegisterMeshCallback(System.Type t,
                     GetMeshForComponent callback,
                     bool replace = false)
             {
@@ -3987,7 +4063,7 @@ namespace FbxExporters
             /// Multiple GameObject-based callbacks can be registered; they are
             /// checked in order of registration.
             /// </summary>
-            public static void RegisterMeshObjectCallback(GetMeshForObject callback)
+            internal static void RegisterMeshObjectCallback(GetMeshForObject callback)
             {
                 MeshForObjectCallbacks.Add(callback);
             }
@@ -3995,7 +4071,7 @@ namespace FbxExporters
             /// <summary>
             /// Forget the callback linked to a component of type T.
             /// </summary>
-            public static void UnRegisterMeshCallback<T>()
+            internal static void UnRegisterMeshCallback<T>()
             {
                 MeshForComponentCallbacks.Remove(typeof(T));
             }
@@ -4003,7 +4079,7 @@ namespace FbxExporters
             /// <summary>
             /// Forget the callback linked to a component of type T.
             /// </summary>
-            public static void UnRegisterMeshCallback(System.Type t)
+            internal static void UnRegisterMeshCallback(System.Type t)
             {
                 MeshForComponentCallbacks.Remove(t);
             }
@@ -4011,7 +4087,7 @@ namespace FbxExporters
             /// <summary>
             /// Forget a GameObject-based callback.
             /// </summary>
-            public static void UnRegisterMeshCallback(GetMeshForObject callback)
+            internal static void UnRegisterMeshCallback(GetMeshForObject callback)
             {
                 MeshForObjectCallbacks.Remove(callback);
             }
@@ -4105,17 +4181,17 @@ namespace FbxExporters
             /// <summary>
             /// Number of nodes exported including siblings and decendents
             /// </summary>
-            public int NumNodes { get { return MapUnityObjectToFbxNode.Count; } }
+            internal int NumNodes { get { return MapUnityObjectToFbxNode.Count; } }
 
             /// <summary>
             /// Number of meshes exported
             /// </summary>
-            public int NumMeshes { private set; get; }
+            internal int NumMeshes { set; get; }
 
             /// <summary>
             /// Number of triangles exported
             /// </summary>
-            public int NumTriangles { private set; get; }
+            internal int NumTriangles { set; get; }
 
             /// <summary>
             /// Clean up this class on garbage collection
@@ -4124,7 +4200,7 @@ namespace FbxExporters
             {
             }
 
-            public bool Verbose { private set {;} get { return EditorTools.ExportSettings.instance.Verbose; } }
+            internal bool Verbose { set {;} get { return EditorTools.ExportSettings.instance.Verbose; } }
 
             /// <summary>
             /// manage the selection of a filename
@@ -4155,7 +4231,9 @@ namespace FbxExporters
             public static string ExportObjects (
                 string filePath,
                 UnityEngine.Object[] objects = null,
-                IExportOptions exportOptions = null)
+                IExportOptions exportOptions = null,
+                Dictionary<GameObject, IExportData> exportData = null
+            )
             {
                 LastFilePath = filePath;
 
@@ -4168,25 +4246,10 @@ namespace FbxExporters
                         objects = Selection.objects;
                     }
 
-                    Dictionary<GameObject, AnimationOnlyExportData> animationExportData = null;
-                    // if there are only two objects for export and the second is an animation clip, then we are exporting from the timeline
-                    if (objects.Length == 2 && objects[1] is AnimationClip) {
-                        // We expect the first argument in the list to be the GameObject, the second one is the Animation Clip/Track we are exporting from the timeline
-                        GameObject rootObject = ModelExporter.GetGameObject (objects [0]);
-                        AnimationClip timelineClip = objects [1] as AnimationClip;
-                        List<AnimationClip> clipList = new List<AnimationClip> ();
-                        clipList.Add (timelineClip);
-                        animationExportData = fbxExporter.GetTimelineAnimationExportData (rootObject, clipList);
-                    }
-                    else if (fbxExporter.ExportOptions.ModelAnimIncludeOption == ExportSettings.Include.Anim) {
-                        HashSet<GameObject> gos = new HashSet<GameObject> ();
-                        foreach (var obj in objects) {
-                            gos.Add (ModelExporter.GetGameObject (obj));
-                        }
-                        animationExportData = fbxExporter.GetAnimationExportData (gos);
-                    }
+                    if (exportData==null)
+                        exportData = ModelExporter.GetExportData (objects, exportOptions);
 
-                    if (fbxExporter.ExportAll (objects, animationExportData) > 0) {
+                    if (fbxExporter.ExportAll (objects, exportData) > 0) {
                         string message = string.Format ("Successfully exported: {0}", filePath);
                         UnityEngine.Debug.Log (message);
 
@@ -4197,7 +4260,8 @@ namespace FbxExporters
             }
 
             public static string ExportObject (
-                string filePath, UnityEngine.Object root,
+                string filePath, 
+                UnityEngine.Object root,
                 IExportOptions exportOptions = null)
             {
                 return ExportObjects(filePath, new Object[] { root }, exportOptions);
@@ -4256,7 +4320,7 @@ namespace FbxExporters
                 return newName;
             }
 
-            public static string ConvertToValidFilename(string filename)
+            internal static string ConvertToValidFilename(string filename)
             {
                 return System.Text.RegularExpressions.Regex.Replace (filename, 
                     RegexCharStart + new string(Path.GetInvalidFileNameChars()) + RegexCharEnd,
