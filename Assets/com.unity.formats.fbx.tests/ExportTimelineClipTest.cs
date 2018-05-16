@@ -39,7 +39,7 @@ namespace FbxExporters.UnitTests
                         Assert.That (timeLineClip.animationClip, Is.Not.Null);
 
                         filePath = string.Format ("{0}/{1}@{2}", folderPath, atObject.name, "Recorded.fbx");
-                        exportData[atObject] = ModelExporter.GetExportData(atObject, timeLineClip.animationClip);
+                        exportData[atObject] = ModelExporterReflection.GetExportData(atObject, timeLineClip.animationClip);
                         break;
                     }
                 }

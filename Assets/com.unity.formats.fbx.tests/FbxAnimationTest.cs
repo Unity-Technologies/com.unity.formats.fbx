@@ -883,7 +883,7 @@ namespace FbxExporters.UnitTests
                         continue;
                     }
 
-                    GameObject unityGo = ModelExporter.GetGameObject (uniObj);
+                    GameObject unityGo = ModelExporterReflection.GetGameObject(uniObj);
                     if (!unityGo) {
                         continue;
                     }
