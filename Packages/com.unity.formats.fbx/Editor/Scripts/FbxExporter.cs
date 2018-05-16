@@ -627,8 +627,8 @@ namespace FbxExporters
             /// Return true and output a null mesh if you don't want the
             /// exporter to output anything.
             /// </summary>
-            internal delegate bool GetMeshForComponent<T>(ModelExporter exporter, T component, FbxNode fbxNode) where T : MonoBehaviour;
-            private delegate bool GetMeshForComponent(ModelExporter exporter, MonoBehaviour component, FbxNode fbxNode);
+            public delegate bool GetMeshForComponent<T>(ModelExporter exporter, T component, FbxNode fbxNode) where T : MonoBehaviour;
+            public delegate bool GetMeshForComponent(ModelExporter exporter, MonoBehaviour component, FbxNode fbxNode);
             /// <summary>
             /// Delegate used to convert a GameObject into a mesh.
             ///
@@ -637,7 +637,7 @@ namespace FbxExporters
             /// provide. But it's less efficient because you'll get a callback
             /// on every single GameObject.
             /// </summary>
-            internal delegate bool GetMeshForObject(ModelExporter exporter, GameObject gameObject, FbxNode fbxNode);
+            public delegate bool GetMeshForObject(ModelExporter exporter, GameObject gameObject, FbxNode fbxNode);
             /*****************************************
             *      END OF Required by other scripts
             *****************************************/
@@ -3983,7 +3983,7 @@ namespace FbxExporters
             ///<summary>
             ///Information about the mesh that is important for exporting.
             ///</summary>
-            class MeshInfo
+            internal class MeshInfo
             {
                 public Mesh mesh;
 

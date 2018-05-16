@@ -1,6 +1,7 @@
 ﻿using FbxExporters.Editor;
 using FbxExporters.EditorTools;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using Unity.FbxSdk;
@@ -30,7 +31,7 @@ namespace FbxExporters.UnitTests
         {
             get
             {
-                return (float)GetStaticProperty("UnitScaleFactor");
+                return (float)GetStaticField("UnitScaleFactor");
             }
         }
 
@@ -65,12 +66,14 @@ namespace FbxExporters.UnitTests
 
         public static Vector3 GetRecenteredTranslation(Transform t, Vector3 center)
         {
-            return (Vector3)InvokeMethod("GetRecenteredTranslation", new object[] {center});
+            return (Vector3)InvokeMethod("GetRecenteredTranslation", new object[] {t, center});
         }
 
         public static ModelExporter.IExportData GetExportData(GameObject rootObject, AnimationClip animationClip, IExportOptions exportOptions = null)
         {
-            return (ModelExporter.IExportData)InvokeMethod("GetExportData", new object[] {rootObject, animationClip, exportOptions});
+            return (ModelExporter.IExportData)InvokeMethodOverload("GetExportData", 
+                                                                   new object[] {rootObject, animationClip, exportOptions}, 
+                                                                   new Type[] {typeof(GameObject), typeof(AnimationClip), typeof(IExportOptions) } );
         }
 
         public static FbxLayer GetOrCreateLayer(FbxMesh fbxMesh, int layer = 0 /* default layer */)
@@ -89,43 +92,45 @@ namespace FbxExporters.UnitTests
         }
 
         // Redefinition of the internal delegate. There might be a way to re-use the one in ModelExporter
-        public delegate bool GetMeshForObject(ModelExporter exporter, GameObject gameObject, FbxNode fbxNode);
-        public static void RegisterMeshObjectCallback(GetMeshForObject callback)
+        public static void RegisterMeshObjectCallback(ModelExporter.GetMeshForObject callback)
         {
             InvokeMethod("RegisterMeshObjectCallback", new object[] {callback});
         }
 
-        public delegate bool GetMeshForComponent<T>(ModelExporter exporter, T component, FbxNode fbxNode) where T : MonoBehaviour;
-        public static void RegisterMeshCallback<T>(GetMeshForComponent<T> callback, bool replace = false)
+        public static void RegisterMeshCallback<T>(ModelExporter.GetMeshForComponent<T> callback, bool replace = false)
                 where T : UnityEngine.MonoBehaviour
         {
-            // Get the template method first
-            MethodInfo templateMethod = typeof(ModelExporter).GetMethod("RegisterMeshCallback",
-                                                                        BindingFlags.Static | BindingFlags.NonPublic,
-                                                                        null,
-                                                                        new Type[] {typeof(GetMeshForComponent<T>),typeof(bool)},
-                                                                        null);
-            MethodInfo genericMethod = templateMethod.MakeGenericMethod(new Type[]{T});
+            // Get the template method first (we assume there is only one 
+            // templated RegisterMeshCallback method in ModelExporter
+            var methods = from methodInfo in typeof(ModelExporter).GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
+                where methodInfo.Name == "RegisterMeshCallback"
+                    && methodInfo.IsGenericMethodDefinition
+                select methodInfo;
+            
+            MethodInfo templateMethod = methods.Single();
+            MethodInfo genericMethod = templateMethod.MakeGenericMethod(new Type[]{typeof(T)});
             genericMethod.Invoke(null, new object[]{callback, replace});
         }
         
         public static void UnRegisterMeshCallback<T>()
         {
-            // Get the template method first
-            MethodInfo templateMethod = typeof(ModelExporter).GetMethod("UnRegisterMeshCallback",
-                                                                        BindingFlags.Static | BindingFlags.NonPublic,
-                                                                        null,
-                                                                        null,
-                                                                        null);
-            MethodInfo genericMethod = templateMethod.MakeGenericMethod(new Type[]{T});
+            // Get the template method first (we assume there is only one 
+            // templated RegisterMeshCallback method in ModelExporter
+            var methods = from methodInfo in typeof(ModelExporter).GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
+                where methodInfo.Name == "UnRegisterMeshCallback"
+                    && methodInfo.IsGenericMethodDefinition
+                select methodInfo;
+            
+            MethodInfo templateMethod = methods.Single();
+            MethodInfo genericMethod = templateMethod.MakeGenericMethod(new Type[]{typeof(T)});
             genericMethod.Invoke(null, null);
         }
 
-        public static void UnRegisterMeshCallback(GetMeshForObject callback)
+        public static void UnRegisterMeshCallback(ModelExporter.GetMeshForObject callback)
         {
             InvokeMethodOverload("UnRegisterMeshCallback", 
                                  new object[] {callback},
-                                 new Type[] {typeof(GetMeshForObject)});
+                                 new Type[] {typeof(ModelExporter.GetMeshForObject)});
         }
 
 
@@ -148,15 +153,16 @@ namespace FbxExporters.UnitTests
         {
             return (bool)InvokeMethodOverload("ExportMesh",
                                               new object[] {mesh, fbxNode, materials},
-                                              new Type[] {typeof(Mesh), typeof(FbxNode), typeof(Material)},
+                                              new Type[] {typeof(Mesh), typeof(FbxNode), typeof(Material [])},
                                               instance);
-        }
+  
+  }
 
         private static object InvokeMethod(string methodName, object[] argsToPass, ModelExporter instance = null)
         {
             // Use reflection to call the internal ModelExporter.GetGameObject static method
-            MethodInfo internalMethod = typeof(ModelExporter).GetMethod(methodName,
-                                                                        BindingFlags.Static | BindingFlags.NonPublic);
+            var internalMethod = typeof(ModelExporter).GetMethod(methodName,
+                                                                 (instance == null ? BindingFlags.Static : BindingFlags.Instance) | BindingFlags.NonPublic);
             return internalMethod.Invoke(instance, argsToPass);
         }
 
@@ -166,21 +172,28 @@ namespace FbxExporters.UnitTests
                                                    Type[] overloadArgTypes, 
                                                    ModelExporter instance = null)
         {
-            MethodInfo internalMethod = typeof(ModelExporter).GetMethod(methodName,
-                                                                        BindingFlags.Static | BindingFlags.NonPublic,
-                                                                        null,
-                                                                        overloadArgTypes,
-                                                                        null);
+            var internalMethod = typeof(ModelExporter).GetMethod(methodName,
+                                                                 (instance == null ? BindingFlags.Static : BindingFlags.Instance) | BindingFlags.NonPublic,
+                                                                 null,
+                                                                 overloadArgTypes,
+                                                                 null);
             return internalMethod.Invoke(instance, argsToPass);
         }
 
-        // Also works for const properties
-        private static object GetStaticProperty( string propertyName)
+        private static object GetStaticProperty(string propertyName)
         {
             // Use reflection to get the internal property
-            PropertyInfo internalProperty = typeof(ModelExporter).GetProperty(propertyName, 
-                                                   BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+            var internalProperty = typeof(ModelExporter).GetProperty(propertyName, 
+                                          BindingFlags.NonPublic | BindingFlags.Static);
             return internalProperty.GetValue(null,null);
+        }
+
+        private static object GetStaticField(string fieldName)
+        {
+            // Use reflection to get the internal property
+            var internalField = typeof(ModelExporter).GetField(fieldName, 
+                                                               BindingFlags.NonPublic | BindingFlags.Static);
+            return internalField.GetValue(null);
         }
     }
 }
