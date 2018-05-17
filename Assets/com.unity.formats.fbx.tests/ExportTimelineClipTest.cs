@@ -32,7 +32,7 @@ namespace FbxExporters.UnitTests
                     // One file by animation clip
                     foreach (TimelineClip timeLineClip in at.GetClips()) {
                         var filePath = string.Format ("{0}/{1}@{2}", folderPath, atObject.name, "Recorded.fbx");
-                        ModelExporter.ExportSingleTimelineClip (timeLineClip, atObject, filePath);
+                        ModelExporterReflection.ExportSingleTimelineClip (timeLineClip, atObject, filePath);
                         FileAssert.Exists (filePath);
                     }
                 }
@@ -48,7 +48,7 @@ namespace FbxExporters.UnitTests
 
             foreach(GameObject obj in Selection.objects)
             {
-                ModelExporter.ExportAllTimelineClips(obj, folderPath);
+                ModelExporterReflection.ExportAllTimelineClips(obj, folderPath);
                 FileAssert.Exists(string.Format("{0}/{1}@{2}", folderPath, obj.name, "Recorded.fbx"));
             }
         }
