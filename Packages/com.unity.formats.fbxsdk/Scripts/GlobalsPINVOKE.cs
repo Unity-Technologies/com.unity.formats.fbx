@@ -694,6 +694,21 @@ class GlobalsPINVOKE {
   [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_EvaluateValue__SWIG_2___")]
   public static extern int FbxPropertyEWrapMode_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_Set___")]
+  public static extern global::System.IntPtr FbxPropertyEGateFit_Set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_Get___")]
+  public static extern int FbxPropertyEGateFit_Get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_EvaluateValue__SWIG_0___")]
+  public static extern int FbxPropertyEGateFit_EvaluateValue__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, bool jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_EvaluateValue__SWIG_1___")]
+  public static extern int FbxPropertyEGateFit_EvaluateValue__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_EvaluateValue__SWIG_2___")]
+  public static extern int FbxPropertyEGateFit_EvaluateValue__SWIG_2(global::System.Runtime.InteropServices.HandleRef jarg1);
+
   [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElement_SetMappingMode___")]
   public static extern void FbxLayerElement_SetMappingMode(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
@@ -3657,6 +3672,9 @@ class GlobalsPINVOKE {
   [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_AspectHeight_get___")]
   public static extern global::System.IntPtr FbxCamera_AspectHeight_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_GateFit_get___")]
+  public static extern global::System.IntPtr FbxCamera_GateFit_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
   [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FieldOfView_get___")]
   public static extern global::System.IntPtr FbxCamera_FieldOfView_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
@@ -3668,6 +3686,12 @@ class GlobalsPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FilmAspectRatio_get___")]
   public static extern global::System.IntPtr FbxCamera_FilmAspectRatio_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FilmOffsetX_get___")]
+  public static extern global::System.IntPtr FbxCamera_FilmOffsetX_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_FilmOffsetY_get___")]
+  public static extern global::System.IntPtr FbxCamera_FilmOffsetY_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxCamera_ProjectionType_get___")]
   public static extern global::System.IntPtr FbxCamera_ProjectionType_get(global::System.Runtime.InteropServices.HandleRef jarg1);
@@ -4185,6 +4209,9 @@ class GlobalsPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEWrapMode_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxPropertyEWrapMode_SWIGUpcast(global::System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxPropertyEGateFit_SWIGUpcast___")]
+  public static extern global::System.IntPtr FbxPropertyEGateFit_SWIGUpcast(global::System.IntPtr jarg1);
 
   [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_UnityfFbxSdk_FbxLayerElementTemplateFbxVector4_SWIGUpcast___")]
   public static extern global::System.IntPtr FbxLayerElementTemplateFbxVector4_SWIGUpcast(global::System.IntPtr jarg1);
