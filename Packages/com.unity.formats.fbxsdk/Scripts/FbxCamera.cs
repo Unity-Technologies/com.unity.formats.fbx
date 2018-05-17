@@ -117,6 +117,14 @@ public class FbxCamera : FbxNodeAttribute {
     } 
   }
 
+  public FbxPropertyEGateFit GateFit {
+    get {
+      FbxPropertyEGateFit ret = new FbxPropertyEGateFit(GlobalsPINVOKE.FbxCamera_GateFit_get(swigCPtr), false);
+      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
   public FbxPropertyDouble FieldOfView {
     get {
       FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxCamera_FieldOfView_get(swigCPtr), false);
@@ -144,6 +152,22 @@ public class FbxCamera : FbxNodeAttribute {
   public FbxPropertyDouble FilmAspectRatio {
     get {
       FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxCamera_FilmAspectRatio_get(swigCPtr), false);
+      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public FbxPropertyDouble FilmOffsetX {
+    get {
+      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxCamera_FilmOffsetX_get(swigCPtr), false);
+      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public FbxPropertyDouble FilmOffsetY {
+    get {
+      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxCamera_FilmOffsetY_get(swigCPtr), false);
       if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
       return ret;
     } 
@@ -209,6 +233,15 @@ public class FbxCamera : FbxNodeAttribute {
     eHorizontal,
     eVertical,
     eFocalLength
+  }
+
+  public enum EGateFit {
+    eFitNone,
+    eFitVertical,
+    eFitHorizontal,
+    eFitFill,
+    eFitOverscan,
+    eFitStretch
   }
 
 }
