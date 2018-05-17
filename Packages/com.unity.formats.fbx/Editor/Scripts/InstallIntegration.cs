@@ -38,7 +38,7 @@ namespace FbxExporters.Editor
         /// <returns>The integration zip full path.</returns>
         public string GetIntegrationZipFullPath()
         {
-            return Application.dataPath + "/" + IntegrationZipPath;
+            return System.IO.Path.GetFullPath("Packages/com.unity.formats.fbx/Editor/Integrations").Replace("\\", "/") + "/" + IntegrationZipPath;
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace FbxExporters.Editor
     {
         public override string DccDisplayName { get { return "Maya"; } }
 
-        public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMaya.zip"; } }
+        public override string IntegrationZipPath { get { return "UnityFbxForMaya.zip"; } }
 
         private string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel"; } }
 
@@ -585,7 +585,7 @@ namespace FbxExporters.Editor
         private const string ExportSettingsTag = "UnityFbxExportSettings";
         private const string ImportSettingsTag = "UnityFbxImportSettings";
 
-        public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMax.zip"; } }
+        public override string IntegrationZipPath { get { return "UnityFbxForMax.zip"; } }
 
         /// <summary>
         /// Gets the absolute Unity path for relative path in Integrations folder.
