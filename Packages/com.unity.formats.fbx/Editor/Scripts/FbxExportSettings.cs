@@ -225,12 +225,6 @@ namespace FbxExporters.EditorTools {
 
         public bool Verbose = false;
 
-        private static string DefaultIntegrationSavePath {
-            get{
-                return Path.GetDirectoryName(Application.dataPath);
-            }
-        }
-
         private static string GetMayaLocationFromEnvironmentVariable(string env)
         {
             string result = null;
@@ -283,12 +277,13 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         private static HashSet<string> GetCustomVendorLocations()
         {
-            HashSet<string> result = new HashSet<string>();
+            HashSet<string> result = null;
 
             var environmentVariable = Environment.GetEnvironmentVariable("UNITY_3DAPP_VENDOR_LOCATIONS");
 
             if (!string.IsNullOrEmpty(environmentVariable))
             {
+                result = new HashSet<string>();
                 string[] locations = environmentVariable.Split(';');
                 foreach (var location in locations)
                 {
@@ -298,8 +293,6 @@ namespace FbxExporters.EditorTools {
                     }
                 }
             }
-            
-
             return result;
         }
 
@@ -347,7 +340,7 @@ namespace FbxExporters.EditorTools {
             {
                 HashSet<string> result = GetCustomVendorLocations();
 
-                if (result == null || result.Count < 1)
+                if (result == null)
                 {
                     result = GetDefaultVendorLocations();
                 }
@@ -368,8 +361,6 @@ namespace FbxExporters.EditorTools {
         public bool launchAfterInstallation = true;
         public bool HideSendToUnityMenu = true;
         public bool BakeAnimation = true;
-
-        public string IntegrationSavePath;
 
         public int selectedDCCApp = 0;
 
@@ -425,7 +416,6 @@ namespace FbxExporters.EditorTools {
             HideSendToUnityMenu = true;
             prefabSavePaths = new List<string>(){ kDefaultSavePath };
             fbxSavePaths = new List<string> (){ kDefaultSavePath };
-            IntegrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
             BakeAnimation = true;
@@ -1006,23 +996,6 @@ namespace FbxExporters.EditorTools {
                 instance.prefabSavePaths.Add (kDefaultSavePath);
             }
             return GetAbsoluteSavePath (instance.prefabSavePaths [instance.selectedPrefabPath]);
-        }
-
-        public static string GetIntegrationSavePath()
-        {
-            //If the save path gets messed up and ends up not being valid, just use the project folder as the default
-            if (string.IsNullOrEmpty(instance.IntegrationSavePath) ||
-                !Directory.Exists(instance.IntegrationSavePath))
-            {
-                //The project folder, above the asset folder
-                instance.IntegrationSavePath = DefaultIntegrationSavePath;
-            }
-            return instance.IntegrationSavePath;
-        }
-
-        public static void SetIntegrationSavePath(string newPath)
-        {
-            instance.IntegrationSavePath = newPath;
         }
 
         /// <summary>
