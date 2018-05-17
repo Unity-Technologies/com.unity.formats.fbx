@@ -1,5 +1,9 @@
 # Changes in FBX SDK C# Bindings
 
+**Version**: 1.5.0-preview
+
+* Added support for physical camera attributes
+
 **Version**: 1.4.0-preview
 
 * First version accessible via Package Manager
