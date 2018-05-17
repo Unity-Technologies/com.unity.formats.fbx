@@ -9,6 +9,7 @@ NEW FEATURES
 * The roundtrip of assets can now be started from Maya from assets that have not been exported from Unity
 * DCC integration plug-in sources have been moved away from the package
 * Windows version is now using the FBX SDK version 2018.1.1
+* Streamlined public interface for the ModelExporter class
 
 FIXES:
 
