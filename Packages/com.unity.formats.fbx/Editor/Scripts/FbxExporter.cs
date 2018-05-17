@@ -246,15 +246,23 @@ namespace FbxExporters
                 }
 
                 try {
-                    // The format is:
-                    // ## [a.b.c-whatever] - yyyy-mm-dd
-                    // we extract the first bit.
+                    // The standard format is:
+                    //   ## [a.b.c-whatever] - yyyy-mm-dd
+                    // Another format is:
+                    //   **Version**: a.b.c-whatever
+                    // we handle either one and read out the version
                     var lines = File.ReadAllLines (ChangeLogPath);
+                    var regexes = new string [] {
+                        @"^\s*##\s*\[(.*)\]",
+                        @"^\s*\*\*Version\*\*:\s*(.*)\s*"
+                    };
                     foreach (var line in lines) {
-                        var match = System.Text.RegularExpressions.Regex.Match(line, @"^\s*##\s*\[(.*)\]");
-                        if (match.Success) {
-                            var version = match.Groups[1].Value;
-                            return version.Trim ();
+                        foreach (var regex in regexes) {
+                            var match = System.Text.RegularExpressions.Regex.Match(line, regex);
+                            if (match.Success) {
+                                var version = match.Groups[1].Value;
+                                return version.Trim ();
+                            }
                         }
                     }
 
