@@ -482,7 +482,7 @@ namespace FbxExporters.UnitTests
             ExportSettings.instance.ClearDCCOptions();
 
             GUIContent[] options = ExportSettings.GetDCCOptions();
-            Assert.AreEqual(options.Length, expectedResult);
+            Assert.AreEqual(expectedResult, options.Length);
 
             if (data.ContainsKey("expected3DApp"))
             {

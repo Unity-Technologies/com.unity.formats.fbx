@@ -107,7 +107,7 @@ namespace FbxExporters.UnitTests
 
             // test with centered objects
             m_centerObjectsSetting.SetObjectPosition(ExportSettings.ObjectPosition.LocalCentered);
-            var newCenter = FbxExporters.Editor.ModelExporter.FindCenter (goExportSet);
+            var newCenter = ModelExporterReflection.FindCenter (goExportSet);
 
             exportedRoot = ExportSelection (exportSet, m_centerObjectsSetting);
             children = new List<GameObject> ();
@@ -146,7 +146,7 @@ namespace FbxExporters.UnitTests
         /// <param name="center">New center for global transform.</param>
         private FbxAMatrix ConstructTRSMatrix (Transform t, bool local = true, Vector3 center = default(Vector3))
         {
-            var translation = local ? t.localPosition : FbxExporters.Editor.ModelExporter.GetRecenteredTranslation (t, center);
+            var translation = local ? t.localPosition : ModelExporterReflection.GetRecenteredTranslation (t, center);
             var rotation = local ? t.localEulerAngles : t.eulerAngles;
             var scale = local ? t.localScale : t.lossyScale;
             return new FbxAMatrix (

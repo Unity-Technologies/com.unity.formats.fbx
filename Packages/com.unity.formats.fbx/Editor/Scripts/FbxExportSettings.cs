@@ -283,12 +283,13 @@ namespace FbxExporters.EditorTools {
         /// </summary>
         private static HashSet<string> GetCustomVendorLocations()
         {
-            HashSet<string> result = new HashSet<string>();
+            HashSet<string> result = null;
 
             var environmentVariable = Environment.GetEnvironmentVariable("UNITY_3DAPP_VENDOR_LOCATIONS");
 
             if (!string.IsNullOrEmpty(environmentVariable))
             {
+                result = new HashSet<string>();
                 string[] locations = environmentVariable.Split(';');
                 foreach (var location in locations)
                 {
@@ -298,8 +299,6 @@ namespace FbxExporters.EditorTools {
                     }
                 }
             }
-            
-
             return result;
         }
 
@@ -347,7 +346,7 @@ namespace FbxExporters.EditorTools {
             {
                 HashSet<string> result = GetCustomVendorLocations();
 
-                if (result == null || result.Count < 1)
+                if (result == null)
                 {
                     result = GetDefaultVendorLocations();
                 }
