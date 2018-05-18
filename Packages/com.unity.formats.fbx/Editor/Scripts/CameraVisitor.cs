@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 using Unity.FbxSdk;
 using FbxExporters.CustomExtensions;
@@ -62,7 +61,7 @@ namespace FbxExporters
                 return fbxCamera;
             }
 
-            #if UNITY_2018_2_OR_NEWER || UNITY_2018_2_OR_LATER
+            #if UNITY_2018_2_OR_NEWER
             /// <summary>
             /// Configure FbxCameras from a Physical Camera 
             /// </summary>

@@ -1,4 +1,4 @@
-﻿// NOTE: uncomment the next line to leave temporary FBX files on disk
+// NOTE: uncomment the next line to leave temporary FBX files on disk
 // and create a imported object in the scene.
 //#define DEBUG_UNITTEST
 
@@ -73,7 +73,7 @@ namespace FbxExporters.UnitTests
             Assert.That( srcCam.nearClipPlane, Is.EqualTo(origCam.nearClipPlane));
         }
 
-        #if UNITY_2018_2_OR_NEWER || UNITY_2018_2_OR_LATER
+        #if UNITY_2018_2_OR_NEWER
         [Test]
         public void PhysicalCameraTest()
         {
