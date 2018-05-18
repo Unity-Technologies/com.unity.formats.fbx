@@ -38,7 +38,7 @@ namespace FbxExporters.Editor
         /// <returns>The integration zip full path.</returns>
         public string GetIntegrationZipFullPath()
         {
-            return Application.dataPath + "/" + IntegrationZipPath;
+            return System.IO.Path.GetFullPath("Packages/com.unity.formats.fbx/Editor/Integrations").Replace("\\", "/") + "/" + IntegrationZipPath;
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace FbxExporters.Editor
     {
         public override string DccDisplayName { get { return "Maya"; } }
 
-        public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMaya.zip"; } }
+        public override string IntegrationZipPath { get { return "UnityFbxForMaya.zip"; } }
 
         private string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel"; } }
 
@@ -96,7 +96,6 @@ namespace FbxExporters.Editor
         private string MODULE_FILENAME { get { return "UnityFbxForMaya"; } }
 
         private const string PACKAGE_NAME = "com.unity.formats.fbx";
-        private const string VERSION_FILENAME = "README.txt";
         private const string VERSION_FIELD = "VERSION";
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
@@ -155,7 +154,6 @@ namespace FbxExporters.Editor
         private string MAYA_CLOSE_COMMAND { get {
                 return string.Format("scriptJob -idleEvent quit;");
         }}
-        private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
         protected static string GetUserFolder()
         {
@@ -221,38 +219,7 @@ namespace FbxExporters.Editor
 
         public static string GetPackageVersion()
         {
-            string result = null;
-
-            try {
-                string FileName = System.IO.Path.Combine(GetPackagePath(), VERSION_FILENAME);
-
-                System.IO.StreamReader sr = new System.IO.StreamReader(FileName);
-
-                // Read the first line of text
-                string line = sr.ReadLine();
-
-                // Continue to read until you reach end of file
-                while (line != null)
-                {
-                    if (line.StartsWith(VERSION_FIELD, StringComparison.CurrentCulture))
-                    {
-                        string[] fields = line.Split(FIELD_SEPARATORS);
-
-                        if (fields.Length>1)
-                        {
-                            result = fields[1];
-                        }
-                        break;
-                    }
-                    line = sr.ReadLine();
-                }
-            }
-            catch(Exception e)
-            {
-                Debug.LogError(string.Format("Exception failed to read file containing package version ({0})", e.Message));
-            }
-
-            return result;
+            return ModelExporter.GetVersionFromReadme();
         }
 
         private static List<string> ParseTemplateFile(string FileName, Dictionary<string,string> Tokens )
@@ -585,7 +552,7 @@ namespace FbxExporters.Editor
         private const string ExportSettingsTag = "UnityFbxExportSettings";
         private const string ImportSettingsTag = "UnityFbxImportSettings";
 
-        public override string IntegrationZipPath { get { return "FbxExporters/UnityFbxForMax.zip"; } }
+        public override string IntegrationZipPath { get { return "UnityFbxForMax.zip"; } }
 
         /// <summary>
         /// Gets the absolute Unity path for relative path in Integrations folder.

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -46,7 +46,7 @@ namespace FbxExporters.Editor
             var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxExporters.FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
             string searchID = null;
             string guid;
-#if UNITY_2018_2_OR_LATER || UNITY_2018_2_OR_NEWER
+#if UNITY_2018_2_OR_NEWER
             long fileId;
 #else
             int fileId;

@@ -1,5 +1,18 @@
 ﻿RELEASE NOTES
 
+**Version**: 1.4.0-preview
+
+NEW FEATURES
+
+* FBX Exporter is now distributed via the Package Manager
+* Constraints: we now export Unity constraints to FBX
+
+FIXES:
+
+* Now compatible with Unity 2018.2.0b3
+* Last frame was sometimes not exported
+* FBX export dialog hard to read in Unity Pro's dark theme
+
 **Version**: sprint55
 
 NEW FEATURES
