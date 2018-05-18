@@ -300,8 +300,8 @@ namespace FbxExporters
             private static void SubscribeToEvents ()
             {
                 // ensure we only subscribe once
-                UnityEditor.EditorApplication.hierarchyWindowChanged -= UpdateLastSavedModel;
-                UnityEditor.EditorApplication.hierarchyWindowChanged += UpdateLastSavedModel;
+                UnityEditor.EditorApplication.hierarchyChanged -= UpdateLastSavedModel;
+                UnityEditor.EditorApplication.hierarchyChanged += UpdateLastSavedModel;
             }
 
             private static void UnsubscribeFromEvents ()
@@ -311,7 +311,7 @@ namespace FbxExporters
                 LastModel = null;
                 LastFilePath = null;
 
-                UnityEditor.EditorApplication.hierarchyWindowChanged -= UpdateLastSavedModel;
+                UnityEditor.EditorApplication.hierarchyChanged -= UpdateLastSavedModel;
             }
 
             private static bool AutoUpdateEnabled ()
