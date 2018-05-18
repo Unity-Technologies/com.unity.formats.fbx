@@ -303,72 +303,6 @@ namespace FbxExporters.UnitTests
             }
         }
 
-        public class KeyTangentComparer : IComparer<Keyframe>
-        {
-            AnimationCurve curveA = null;
-            AnimationCurve curveB = null;
-            Dictionary<Keyframe,int> keyFrameToIndexA;
-            Dictionary<Keyframe,int> keyFrameToIndexB;
-
-            public int CompareKeyTangents(Keyframe a, Keyframe b)
-            {
-                bool result = true;
-
-                result &= a.time.Equals(b.time);
-                #if DEBUG_UNITTEST
-                Debug.Log(string.Format("{2} a.time: {0}, b.time: {1}", a.time, b.time,result));
-                #endif
-
-                result &= (AnimationUtility.GetKeyLeftTangentMode(curveA,keyFrameToIndexA[a]) ==  AnimationUtility.GetKeyLeftTangentMode(curveB,keyFrameToIndexB[b]));
-                result &= (AnimationUtility.GetKeyRightTangentMode(curveA,keyFrameToIndexA[a]) ==  AnimationUtility.GetKeyRightTangentMode(curveB,keyFrameToIndexB[b]));
-                #if DEBUG_UNITTEST
-                Debug.Log(string.Format("comparison result = {0}\n" +
-                                        "keyframe a left tangent mode = {1}\n" +
-                                        "keyframe b left tangent mode = {2}\n" +
-                                        "keyframe a right tangent mode = {3}\n" +
-                                        "keyframe b right tangent mode = {4}\n",
-                                        result,
-                                        ((AnimationUtility.TangentMode) AnimationUtility.GetKeyLeftTangentMode(curveA,keyFrameToIndexA[a])).ToString(),
-                                        ((AnimationUtility.TangentMode) AnimationUtility.GetKeyLeftTangentMode(curveB,keyFrameToIndexB[b])).ToString(),
-                                        ((AnimationUtility.TangentMode) AnimationUtility.GetKeyRightTangentMode(curveA,keyFrameToIndexA[a])).ToString(),
-                                        ((AnimationUtility.TangentMode) AnimationUtility.GetKeyRightTangentMode(curveB,keyFrameToIndexB[b])).ToString()));
-                #endif
-                return result ? 0 : 1;
-            }
-
-            public int Compare(Keyframe a, Keyframe b)
-            {
-                if (curveA == null || curveB == null)
-                {
-                    #if DEBUG_UNITTEST
-                    Debug.Log(string.Format("The animation curves were not set for this KeyTangentComparer});
-                    #endif
-
-                    return 1;
-                }
-                return CompareKeyTangents(a,b);
-            }
-
-            public void SetAnimationCurves(AnimationCurve a, AnimationCurve b)
-            {
-                curveA = a;
-                curveB = b;
-
-                // Keep a dictionary of Keyframe->index for both curves
-                keyFrameToIndexA = new Dictionary<Keyframe,int>();
-                foreach (int index in Enumerable.Range(0,a.keys.Length))
-                {
-                    keyFrameToIndexA[a.keys[index]] = index;
-                }
-
-                keyFrameToIndexB = new Dictionary<Keyframe,int>();
-                foreach (int index in Enumerable.Range(0,b.keys.Length))
-                {
-                    keyFrameToIndexB[b.keys[index]] = index;
-                }
-            }
-        }
-
         public class AnimTester
         {
             public FbxAnimationTest.KeyData keyData;
@@ -591,13 +525,6 @@ namespace FbxExporters.UnitTests
                 Assert.That (actualAnimCurve.length, Is.EqualTo(expectedAnimCurve.length), string.Format("{0} number of keys doesn't match", message));
 
                 Assert.That(actualAnimCurve.keys, Is.EqualTo(expectedAnimCurve.keys).Using<Keyframe>(keyComparer), string.Format("{0} key doesn't match", message));
-
-                // Setup our tangent comparer if it is the one we are using
-                var tangentComparer = keyComparer as KeyTangentComparer;
-                if (tangentComparer != null)
-                {
-                    tangentComparer.SetAnimationCurves(actualAnimCurve, expectedAnimCurve);
-                }
             }
 
             public static void KeysTest (float [] expectedKeyTimes, float [] expectedKeyValues, AnimationCurve actualAnimCurve, string message, IComparer<Keyframe> keyComparer=null)
@@ -820,7 +747,7 @@ namespace FbxExporters.UnitTests
 
             KeyData keyData = new TransformKeyData { RotationType = rotCurveType, propertyNames = propertyNames, componentType = componentType, keyTimes = keyTimesInSeconds, keyPosValues = keyPosValues, keyEulerValues = keyRotValues };
 
-            var tester = new AnimTester {keyData=keyData, testName=testName, path=GetRandomFbxFilePath (), keyComparer=new KeyTangentComparer()};
+            var tester = new AnimTester {keyData=keyData, testName=testName, path=GetRandomFbxFilePath ()};
             return tester.DoIt();
         }
 
