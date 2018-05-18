@@ -186,7 +186,7 @@ namespace FbxExporters.Editor
 
         public static string GetPackagePath()
         {
-            return System.IO.Path.Combine(Application.dataPath, PACKAGE_NAME);
+            return System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Path.Combine(Application.dataPath, "../Packages"), PACKAGE_NAME));
         }
 
         /// <summary>

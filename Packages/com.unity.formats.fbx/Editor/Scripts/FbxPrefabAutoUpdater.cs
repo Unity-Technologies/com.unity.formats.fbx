@@ -61,10 +61,13 @@ namespace FbxExporters
             }
             return foundPath;
         #else
-            // In Unity 2018.1, FindAssets can't find FbxPrefab.cs in a package.
+            // In Unity 2018.1 (or 2018.2.0b3), FindAssets can't find FbxPrefab.cs in a package.
             // So we hardcode the path.
+            var folder = System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, ".."));
             var path = FBX_PREFAB_FILE;
-            if (System.IO.File.Exists(System.IO.Path.GetFullPath(path))) {
+            var filename = System.IO.Path.Combine(folder, path);
+            Debug.Log(filename);
+            if (System.IO.File.Exists(filename)) {
                 return path;
             } else {
                 Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE, FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
