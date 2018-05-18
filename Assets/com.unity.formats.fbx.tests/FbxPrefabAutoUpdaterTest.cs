@@ -57,7 +57,7 @@ namespace FbxExporters.UnitTests
 
             // Create an empty (and duplicate) FbxPrefab.cs to confuse the auto-updater. Make sure it's properly confused.
             // This test only works in 2018.2 or later; 2018.1 hard-codes the path.
-#if UNITY_2018_2_OR_NEWER || UNITY_2018_2_OR_LATER
+#if UNITY_2018_2_OR_NEWER
             System.IO.File.WriteAllText(this.filePath + '/' + System.IO.Path.GetFileName(FbxPrefabAutoUpdater.FBX_PREFAB_FILE), "class CeciNestPasUnFbxPrefab : UnityEngine.MonoBehaviour {}\n");
             AssetDatabase.Refresh(); // force refresh
             // TODO: assert that we're getting a log warning, but this still works

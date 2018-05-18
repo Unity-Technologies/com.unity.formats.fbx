@@ -20,7 +20,7 @@ namespace FbxExporters.UnitTests
 
         public static Object PrefabUtility_GetCorrespondingObjectFromSource(UnityEngine.Object o)
         {
-            #if UNITY_2018_2_OR_NEWER || UNITY_2018_2_OR_LATER            
+            #if UNITY_2018_2_OR_NEWER            
             return PrefabUtility.GetCorrespondingObjectFromSource(o);
             #else
             return PrefabUtility.GetPrefabParent(o);
