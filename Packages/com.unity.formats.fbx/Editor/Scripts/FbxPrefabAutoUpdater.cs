@@ -257,7 +257,7 @@ namespace FbxExporters
             bool containsLinkedPrefab = false;
             foreach (GameObject selectedObject in selection)
             {
-                GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(selectedObject) as GameObject;
+                GameObject prefab = UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(selectedObject) as GameObject;
                 if (prefab && prefab.GetComponentInChildren<FbxPrefab>())
                 {
                     containsLinkedPrefab = true;
@@ -281,7 +281,7 @@ namespace FbxExporters
                 prefab = prefabOrInstance;
                 break;
             case PrefabType.PrefabInstance:
-                prefab = PrefabUtility.GetPrefabParent(prefabOrInstance) as GameObject;
+                prefab = PrefabUtility.GetCorrespondingObjectFromSource(prefabOrInstance) as GameObject;
                 break;
             default:
                 return;
@@ -1407,7 +1407,7 @@ namespace FbxExporters
                         m_fbxPrefab.gameObject));
                 }
                 var fbxPrefabInstance = prefabInstanceRoot.GetComponentsInChildren<FbxPrefab>().FirstOrDefault(
-                    fbxPrefab => UnityEditor.PrefabUtility.GetPrefabParent(fbxPrefab) == m_fbxPrefab);
+                    fbxPrefab => UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(fbxPrefab) == m_fbxPrefab);
                 if (!fbxPrefabInstance) {
                     throw new System.Exception(string.Format("Internal error: couldn't find the right FbxPrefab after instantiating."));
                 }
