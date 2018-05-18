@@ -96,7 +96,6 @@ namespace FbxExporters.Editor
         private string MODULE_FILENAME { get { return "UnityFbxForMaya"; } }
 
         private const string PACKAGE_NAME = "com.unity.formats.fbx";
-        private const string VERSION_FILENAME = "README.txt";
         private const string VERSION_FIELD = "VERSION";
         private const string VERSION_TAG = "{Version}";
         private const string PROJECT_TAG = "{UnityProject}";
@@ -155,7 +154,6 @@ namespace FbxExporters.Editor
         private string MAYA_CLOSE_COMMAND { get {
                 return string.Format("scriptJob -idleEvent quit;");
         }}
-        private static Char[] FIELD_SEPARATORS = new Char[] {':'};
 
         protected static string GetUserFolder()
         {
@@ -221,38 +219,7 @@ namespace FbxExporters.Editor
 
         public static string GetPackageVersion()
         {
-            string result = null;
-
-            try {
-                string FileName = System.IO.Path.Combine(GetPackagePath(), VERSION_FILENAME);
-
-                System.IO.StreamReader sr = new System.IO.StreamReader(FileName);
-
-                // Read the first line of text
-                string line = sr.ReadLine();
-
-                // Continue to read until you reach end of file
-                while (line != null)
-                {
-                    if (line.StartsWith(VERSION_FIELD, StringComparison.CurrentCulture))
-                    {
-                        string[] fields = line.Split(FIELD_SEPARATORS);
-
-                        if (fields.Length>1)
-                        {
-                            result = fields[1];
-                        }
-                        break;
-                    }
-                    line = sr.ReadLine();
-                }
-            }
-            catch(Exception e)
-            {
-                Debug.LogError(string.Format("Exception failed to read file containing package version ({0})", e.Message));
-            }
-
-            return result;
+            return ModelExporter.GetVersionFromReadme();
         }
 
         private static List<string> ParseTemplateFile(string FileName, Dictionary<string,string> Tokens )
