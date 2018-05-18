@@ -91,6 +91,7 @@ namespace FbxExporters
         public class ImperialDistance {
 
             public static readonly ImperialDistance Inch = new ImperialDistance(1.0f);
+            public static readonly ImperialDistance Foot = new ImperialDistance(12.0f);
 
             private float _inches;
 
@@ -174,6 +175,9 @@ namespace FbxExporters
             public static ImperialDistance Inches(this float that) {
                 return new ImperialDistance(that);
             }
+            public static ImperialDistance Feet(this float that) {
+                return new ImperialDistance(ImperialDistance.Foot.ToInches() * that);
+            }
         }
 
         //Extension methods must be defined in a static class
@@ -203,11 +207,11 @@ namespace FbxExporters
             // This is an extension method for the AnimationCurve class
             // The first parameter takes the "this" modifier
             // and specifies the type for which the method is defined.
-            public static void Dump (this AnimationCurve animCurve, string message, float[] keyTimesExpected = null, float[] keyValuesExpected = null)
+            public static void Dump (this AnimationCurve animCurve, string message="", float[] keyTimesExpected = null, float[] keyValuesExpected = null)
             {
                 int idx = 0;
                 foreach (var key in animCurve.keys) {
-                    if (keyTimesExpected != null && keyValuesExpected != null) {
+                    if (keyTimesExpected != null && keyValuesExpected != null && keyTimesExpected.Length==keyValuesExpected.Length) {
                         Debug.Log (string.Format ("{5} keys[{0}] {1}({3}) {2} ({4})",
                             idx, key.time, key.value,
                             keyTimesExpected [idx], keyValuesExpected [idx],
