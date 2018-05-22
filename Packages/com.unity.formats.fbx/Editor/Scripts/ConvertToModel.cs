@@ -87,8 +87,24 @@ namespace FbxExporters
                 GameObject [] unityGameObjectsToConvert)
             {
                 var toExport = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
-                ConvertToPrefabEditorWindow.Init (toExport);
-                return toExport.ToArray();
+
+                if (!EditorTools.ExportSettings.instance.hideConvertToPrefabDialog)
+                {
+                    ConvertToPrefabEditorWindow.Init(toExport);
+                    return toExport.ToArray();
+                }
+
+                var converted = new List<GameObject>();
+                var exportOptions = EditorTools.ExportSettings.instance.convertToPrefabSettings.info;
+                foreach (var go in toExport)
+                {
+                    var convertedGO = Convert(go, exportOptions: exportOptions);
+                    if(convertedGO != null)
+                    {
+                        converted.Add(convertedGO);
+                    }
+                }
+                return converted.ToArray();
             }
 
             /// <summary>
