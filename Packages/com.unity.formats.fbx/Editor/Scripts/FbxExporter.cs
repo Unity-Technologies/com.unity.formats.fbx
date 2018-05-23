@@ -3539,7 +3539,7 @@ namespace FbxExporters
                 return false;
             }
 
-            public static void ExportSingleTimelineClip(Object editorClipSelected, string filePath = null)
+            internal static void ExportSingleTimelineClip(Object editorClipSelected, string filePath = null)
             {
                 UnityEngine.Object[] exportArray = new UnityEngine.Object[] { editorClipSelected };
 
