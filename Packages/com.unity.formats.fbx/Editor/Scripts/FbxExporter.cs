@@ -3079,22 +3079,22 @@ namespace FbxExporters
 
                 Dictionary<GameObject, IExportData>  exportData = new Dictionary<GameObject, IExportData>();
 
-                if (exportOptions.ModelAnimIncludeOption == ExportSettings.Include.Anim)
+                if (exportOptions.ModelAnimIncludeOption != ExportSettings.Include.Anim)
                 {
-                    foreach (var obj in objects) 
+                    return null;
+                }
+
+                foreach (var obj in objects) 
+                {
+                    GameObject go = ModelExporter.GetGameObject (obj);
+                    if (go)
                     {
-                        GameObject go = ModelExporter.GetGameObject (obj);
-
-                        if (go)
-                        {
-                            exportData[go] = GetExportData(go, exportOptions);
-                        }
-                        else if (obj.GetType().Name.Contains("EditorClip")) 
-                        {
-                            KeyValuePair<GameObject, AnimationClip> pair = AnimationOnlyExportData.GetGameObjectAndAnimationClip(obj);
-
-                            exportData[pair.Key] = GetExportData (pair.Key, pair.Value, exportOptions);
-                        }
+                        exportData[go] = GetExportData(go, exportOptions);
+                    }
+                    else if (obj.GetType().Name.Contains("EditorClip")) 
+                    {
+                        KeyValuePair<GameObject, AnimationClip> pair = AnimationOnlyExportData.GetGameObjectAndAnimationClip(obj);
+                        exportData[pair.Key] = GetExportData (pair.Key, pair.Value, exportOptions);
                     }
                 }
 
@@ -3120,31 +3120,7 @@ namespace FbxExporters
                 return exportData;
             }
 
-            internal static IExportData GetExportData(GameObject rootObject, AnimationTrack animationTrack, IExportOptions exportOptions = null)
-            {
-                if (exportOptions==null)
-                    exportOptions = DefaultOptions;
-                Debug.Assert(exportOptions!=null);
-                        
-                // get animation clips for root object from animation track
-                List<AnimationClip> clips = new List<AnimationClip>();
-
-                foreach (TimelineClip myclip in animationTrack.GetClips())
-                {
-                    clips.Add(myclip.animationClip);
-                }
-
-                var goToExport = new HashSet<GameObject>();
-                var animationClips = new Dictionary<AnimationClip, GameObject>();
-                var exportComponent = new Dictionary<GameObject, System.Type>();
-
-                var exportData = new AnimationOnlyExportData(animationClips, goToExport, exportComponent);
-                exportData.CollectDependencies(clips.ToArray(), rootObject, exportOptions);
-
-                return exportData;
-            }
-
-            protected static IExportData GetExportData(GameObject go, IExportOptions exportOptions = null)
+            internal static IExportData GetExportData(GameObject go, IExportOptions exportOptions = null)
             {
                 if (exportOptions==null)
                     exportOptions = DefaultOptions;
