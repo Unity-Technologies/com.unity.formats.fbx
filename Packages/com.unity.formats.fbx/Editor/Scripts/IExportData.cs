@@ -47,6 +47,58 @@ namespace FbxExporters.Editor
         }
 
         /// <summary>
+        /// collect all object dependencies for given animation clip
+        /// </summary>
+        public void CollectDependencies(
+            AnimationClip animClip,
+            GameObject rootObject,
+            IExportOptions exportOptions
+        )
+        {
+            Debug.Assert(rootObject != null);
+            Debug.Assert(exportOptions != null);
+
+            if (this.animationClips.ContainsKey(animClip))
+            {
+                // we have already exported gameobjects for this clip
+                return;
+            }
+
+            // NOTE: the object (animationRootObject) containing the animation is not necessarily animated
+            // when driven by an animator or animation component.
+            this.animationClips.Add(animClip, rootObject);
+
+            foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings(animClip))
+            {
+                Object uniObj = AnimationUtility.GetAnimatedObject(rootObject, uniCurveBinding);
+                if (!uniObj)
+                {
+                    return;
+                }
+
+                GameObject unityGo = ModelExporter.GetGameObject(uniObj);
+                if (!unityGo)
+                {
+                    return;
+                }
+
+                if (!exportOptions.AnimateSkinnedMesh && unityGo.GetComponent<SkinnedMeshRenderer>())
+                {
+                    return;
+                }
+
+                // If we have a clip driving a camera or light then force the export of FbxNodeAttribute
+                // so that they point the right way when imported into Maya.
+                if (unityGo.GetComponent<Light>())
+                    this.exportComponent[unityGo] = typeof(Light);
+                else if (unityGo.GetComponent<Camera>())
+                    this.exportComponent[unityGo] = typeof(Camera);
+
+                this.goExportSet.Add(unityGo);
+            }
+        }
+
+        /// <summary>
         /// collect all objects dependencies for animation clips.
         /// </summary>
         public void CollectDependencies(
@@ -57,47 +109,10 @@ namespace FbxExporters.Editor
         {
             Debug.Assert(rootObject != null);
             Debug.Assert(exportOptions != null);
-
-            // NOTE: the object (animationRootObject) containing the animation is not necessarily animated
-            // when driven by an animator or animation component.
+            
             foreach (var animClip in animClips)
             {
-                if (this.animationClips.ContainsKey(animClip))
-                {
-                    // we have already exported gameobjects for this clip
-                    continue;
-                }
-
-                this.animationClips.Add(animClip, rootObject);
-
-                foreach (EditorCurveBinding uniCurveBinding in AnimationUtility.GetCurveBindings(animClip))
-                {
-                    Object uniObj = AnimationUtility.GetAnimatedObject(rootObject, uniCurveBinding);
-                    if (!uniObj)
-                    {
-                        continue;
-                    }
-
-                    GameObject unityGo = ModelExporter.GetGameObject(uniObj);
-                    if (!unityGo)
-                    {
-                        continue;
-                    }
-
-                    if (!exportOptions.AnimateSkinnedMesh && unityGo.GetComponent<SkinnedMeshRenderer>())
-                    {
-                        continue;
-                    }
-
-                    // If we have a clip driving a camera or light then force the export of FbxNodeAttribute
-                    // so that they point the right way when imported into Maya.
-                    if (unityGo.GetComponent<Light>())
-                        this.exportComponent[unityGo] = typeof(Light);
-                    else if (unityGo.GetComponent<Camera>())
-                        this.exportComponent[unityGo] = typeof(Camera);
-
-                    this.goExportSet.Add(unityGo);
-                }
+                CollectDependencies(animClip, rootObject, exportOptions);
             }
         }
 

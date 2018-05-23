@@ -2944,15 +2944,12 @@ namespace FbxExporters
                     exportOptions = DefaultOptions;
                 Debug.Assert(exportOptions!=null);
 
-                // get animation clips for root object from animation track
-                List<AnimationClip> clips = new List<AnimationClip>(){animationClip};
-
                 var goToExport = new HashSet<GameObject>();
                 var animationClips = new Dictionary<AnimationClip, GameObject>();
                 var exportComponent = new Dictionary<GameObject, System.Type>();
 
                 var exportData = new AnimationOnlyExportData(animationClips, goToExport, exportComponent);
-                exportData.CollectDependencies(clips.ToArray(), rootObject, exportOptions);
+                exportData.CollectDependencies(animationClip, rootObject, exportOptions);
 
                 return exportData;
             }
