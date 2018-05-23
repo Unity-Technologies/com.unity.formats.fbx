@@ -1,12 +1,10 @@
 ﻿using FbxExporters.Editor;
-using FbxExporters.EditorTools;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using Unity.FbxSdk;
 using UnityEngine;
-using UnityEngine.Timeline;	
 
 namespace FbxExporters.UnitTests
 {
@@ -159,18 +157,6 @@ namespace FbxExporters.UnitTests
                                               new Type[] {typeof(Mesh), typeof(FbxNode), typeof(Material [])},
                                               instance);
   
-        }
-
-        public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, GameObject animationTrackGObject, string filePath = null)
-        {
-            InvokeMethod("ExportSingleTimelineClip", 
-                         new object[] {timelineClipSelected, animationTrackGObject, filePath});
-        }
-
-        public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath, IExportOptions exportOptions = null)
-        {
-            InvokeMethod("ExportAllTimelineClips", 
-                         new object[] {objectWithPlayableDirector, folderPath, exportOptions});
         }
 
         /////////// Helpers ///////////
