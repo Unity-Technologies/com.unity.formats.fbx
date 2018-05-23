@@ -2661,6 +2661,36 @@ namespace FbxExporters
                     }
                 }
 
+                internal static GameObject GetGameObjectBoundToEditorClip(object editorClip)
+                {
+                    object clipItem = editorClip.GetType().GetProperty("item").GetValue(editorClip, null);
+                    object parentTrack = clipItem.GetType().GetProperty("parentTrack").GetValue(clipItem, null);
+                    AnimationTrack animTrack = parentTrack as AnimationTrack;
+
+#if UNITY_2018_2_OR_NEWER
+                    Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.inspectedDirector.GetGenericBinding(animTrack);
+#else // UNITY_2018_2_OR_NEWER
+                    Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding(animTrack);
+#endif // UNITY_2018_2_OR_NEWER
+
+                    GameObject animationTrackGO = null;
+                    if (animationTrackObject is GameObject)
+                    {
+                        animationTrackGO = animationTrackObject as GameObject;
+                    }
+                    else if (animationTrackObject is Animator)
+                    {
+                        animationTrackGO = (animationTrackObject as Animator).gameObject;
+                    }
+
+                    if (animationTrackGO == null)
+                    {
+                        Debug.LogErrorFormat("Could not export animation track object of type {0}", animationTrackObject.GetType().Name);
+                        return null;
+                    }
+                    return animationTrackGO;
+                }
+
                 public static KeyValuePair<GameObject, AnimationClip> GetGameObjectAndAnimationClip(Object obj)
                 {
                     if (!obj.GetType().Name.Contains("EditorClip"))
@@ -2669,13 +2699,13 @@ namespace FbxExporters
                     object clip = obj.GetType().GetProperty("clip").GetValue(obj, null);
                     TimelineClip timeLineClip = clip as TimelineClip;
 
-                    object clipItem = obj.GetType().GetProperty("item").GetValue(obj, null);
-                    object parentTrack = clipItem.GetType().GetProperty("parentTrack").GetValue(clipItem, null);
-                    AnimationTrack animTrack = parentTrack as AnimationTrack;
+                    var animationTrackGO = GetGameObjectBoundToEditorClip(obj);
+                    if (animationTrackGO == null)
+                    {
+                        return new KeyValuePair<GameObject, AnimationClip>();
+                    }
 
-                    var goBound = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (animTrack) as GameObject;
-
-                    return new KeyValuePair<GameObject, AnimationClip>(goBound, timeLineClip.animationClip);
+                    return new KeyValuePair<GameObject, AnimationClip>(animationTrackGO, timeLineClip.animationClip);
                 }
 
                 public static string GetFileName(Object obj)
@@ -2691,12 +2721,11 @@ namespace FbxExporters
                         }
                         else
                         {
-                            object clipItem = obj.GetType().GetProperty("item").GetValue(obj, null);
-                            object parentTrack = clipItem.GetType().GetProperty("parentTrack").GetValue(clipItem, null);
-                            AnimationTrack animTrack = parentTrack as AnimationTrack;
-
-                            var goBound = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding (animTrack) as GameObject;
-
+                            var goBound = GetGameObjectBoundToEditorClip(obj);
+                            if(goBound == null)
+                            {
+                                return null;
+                            }
                             return string.Format ("{0}@{1}", goBound.name, timeLineClip.displayName);
                         }
                     }
@@ -3033,7 +3062,7 @@ namespace FbxExporters
                 return completeExpSet.Count;
             }
 
-            internal Dictionary<GameObject, IExportData> GetExportData(Object[] objects, IExportOptions exportOptions = null)
+            internal static Dictionary<GameObject, IExportData> GetExportData(Object[] objects, IExportOptions exportOptions = null)
             {
                 ExportSettings.Include includeOptions = (exportOptions!=null) ? exportOptions.ModelAnimIncludeOption : ExportSettings.Include.ModelAndAnim;
 
