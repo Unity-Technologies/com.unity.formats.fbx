@@ -6,28 +6,23 @@ namespace FbxExporters
 {
     namespace Visitors
     {
-        public static class CameraVisitor
+        internal static class CameraVisitor
         {
             /// <summary>
             /// Visit Object and configure FbxCamera
             /// </summary>
-            public static FbxNodeAttribute VisitNodeAttribute (UnityEngine.Object unityGo, FbxNodeAttribute fbxNodeAttr)
+            public static void ConfigureCamera (Camera unityCamera, FbxCamera fbxCamera)
             {
-                #if UNITY_2018_2_OR_NEWER
-                Camera unityCamera = unityGo as Camera;
-
-                return unityCamera.usePhysicalProperties 
-                    ? ConfigurePhysicalCamera(fbxNodeAttr as FbxCamera, unityCamera) 
-                        : ConfigureGameCamera(fbxNodeAttr as FbxCamera, unityCamera);
-                #else
-                return ConfigureGameCamera(fbxCamera as FbxCamera, unityGo as Camera);
-                #endif
+                if (unityCamera.usePhysicalProperties) 
+                    ConfigurePhysicalCamera(fbxCamera, unityCamera);
+                else 
+                    ConfigureGameCamera(fbxCamera, unityCamera);
             }
 
             /// <summary>
             /// Configure FbxCameras from GameCamera 
             /// </summary>
-            private static FbxCamera ConfigureGameCamera (FbxCamera fbxCamera, Camera unityCamera)
+            private static void ConfigureGameCamera (FbxCamera fbxCamera, Camera unityCamera)
             {
                 // Configure FilmBack settings as a 35mm TV Projection (0.816 x 0.612)
                 float aspectRatio = unityCamera.aspect;
@@ -58,14 +53,13 @@ namespace FbxExporters
                 // FarPlane
                 fbxCamera.SetFarPlane (unityCamera.farClipPlane.Meters().ToCentimeters());
 
-                return fbxCamera;
+                return ;
             }
 
-            #if UNITY_2018_2_OR_NEWER
             /// <summary>
             /// Configure FbxCameras from a Physical Camera 
             /// </summary>
-            private static FbxCamera ConfigurePhysicalCamera (FbxCamera fbxCamera, Camera unityCamera)
+            private static void ConfigurePhysicalCamera (FbxCamera fbxCamera, Camera unityCamera)
             {
                 Debug.Assert(unityCamera.usePhysicalProperties);
 
@@ -109,9 +103,8 @@ namespace FbxExporters
                 // FarPlane
                 fbxCamera.SetFarPlane ((float)unityCamera.farClipPlane.Meters().ToCentimeters());
 
-                return fbxCamera;
+                return ;
             }
-            #endif
         }
     }
 }

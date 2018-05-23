@@ -73,7 +73,6 @@ namespace FbxExporters.UnitTests
             Assert.That( srcCam.nearClipPlane, Is.EqualTo(origCam.nearClipPlane));
         }
 
-        #if UNITY_2018_2_OR_NEWER
         [Test]
         public void PhysicalCameraTest()
         {
@@ -114,7 +113,5 @@ namespace FbxExporters.UnitTests
             Assert.That( srcCam.nearClipPlane, Is.EqualTo(origCam.nearClipPlane));
             Assert.That( srcCam.farClipPlane, Is.EqualTo(origCam.farClipPlane));
         }
-
-        #endif
     }
 }

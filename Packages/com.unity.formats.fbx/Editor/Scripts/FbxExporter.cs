@@ -18,7 +18,7 @@ namespace FbxExporters
         public class ModelExporter : System.IDisposable
         {
             const string Title =
-                "Created by FBX Exporter from UNITY TECHNOLOGIES";
+                "Created by FBX Exporter from Unity Technologies";
 
             const string Subject =
                 "";
@@ -1283,7 +1283,7 @@ namespace FbxExporters
                 return true;
             }
 
-           /// <summary>
+            /// <summary>
             /// Exports camera component
             /// </summary>
             protected bool ExportCamera (GameObject unityGO, FbxScene fbxScene, FbxNode fbxNode)
@@ -1298,7 +1298,9 @@ namespace FbxExporters
                     return false;
                 }
 
-                fbxNode.SetNodeAttribute (CameraVisitor.VisitNodeAttribute(unityCamera, fbxCamera));
+                CameraVisitor.ConfigureCamera(unityCamera, fbxCamera);
+                
+                fbxNode.SetNodeAttribute (fbxCamera);
 
                 // set +90 post rotation to counteract for FBX camera's facing +X direction by default
                 fbxNode.SetPostRotation(FbxNode.EPivotSet.eSourcePivot, new FbxVector4(0,90,0));
