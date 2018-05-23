@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEditor;
 using NUnit.Framework;
 using FbxExporters.Editor;
 using UnityEngine.Timeline;
@@ -24,7 +23,7 @@ namespace FbxExporters.UnitTests
             GameObject myCube = GameObject.Find("CubeSpecial");
             string folderPath = GetRandomFileNamePath(extName: "");
             string filePath = null;
-            var exportData = new Dictionary<GameObject, ModelExporter.IExportData>();
+            var exportData = new Dictionary<GameObject, IExportData>();
 
             PlayableDirector pd = myCube.GetComponent<PlayableDirector> ();
             if (pd != null) {
