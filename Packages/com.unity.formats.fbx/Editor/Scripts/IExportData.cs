@@ -133,7 +133,7 @@ namespace FbxExporters.Editor
 
         public static KeyValuePair<GameObject, AnimationClip> GetGameObjectAndAnimationClip(Object obj)
         {
-            if (!obj.GetType().Name.Contains("EditorClip"))
+            if (!ModelExporter.IsEditorClip(obj))
                 return new KeyValuePair<GameObject, AnimationClip>();
 
             object clip = obj.GetType().GetProperty("clip").GetValue(obj, null);
@@ -150,7 +150,7 @@ namespace FbxExporters.Editor
 
         public static string GetFileName(Object obj)
         {
-            if (obj.GetType().Name.Contains("EditorClip"))
+            if (ModelExporter.IsEditorClip(obj))
             {
                 object clip = obj.GetType().GetProperty("clip").GetValue(obj, null);
                 TimelineClip timeLineClip = clip as TimelineClip;

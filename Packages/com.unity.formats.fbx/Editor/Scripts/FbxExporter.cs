@@ -2928,7 +2928,7 @@ namespace FbxExporters
                     {
                         exportData[go] = GetExportData(go, exportOptions);
                     }
-                    else if (obj.GetType().Name.Contains("EditorClip")) 
+                    else if (IsEditorClip(obj)) 
                     {
                         KeyValuePair<GameObject, AnimationClip> pair = AnimationOnlyExportData.GetGameObjectAndAnimationClip(obj);
                         exportData[pair.Key] = GetExportData (pair.Key, pair.Value, exportOptions);
@@ -3514,7 +3514,7 @@ namespace FbxExporters
                 foreach (Object editorClipSelected in selectedObjects)
                 {
                     // export first selected editor clip.
-                    if (editorClipSelected.GetType().Name.Contains("EditorClip")) {
+                    if (IsEditorClip(editorClipSelected)) {
                         ExportSingleTimelineClip(editorClipSelected);
                         return;
                     }
@@ -3531,12 +3531,17 @@ namespace FbxExporters
 
                 foreach (Object editorClipSelected in selectedObjects)
                 {
-                    if (editorClipSelected.GetType().Name.Contains("EditorClip"))
+                    if (IsEditorClip(editorClipSelected))
                     {         
                         return true;
                     }
                 }
                 return false;
+            }
+
+            internal static bool IsEditorClip(object obj)
+            {
+                return obj.GetType().Name.Contains("EditorClip");
             }
 
             internal static void ExportSingleTimelineClip(Object editorClipSelected, string filePath = null)
