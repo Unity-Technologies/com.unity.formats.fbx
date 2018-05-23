@@ -18,7 +18,7 @@ namespace FbxExporters.Editor
     /// Export data containing what to export when
     /// exporting animation only.
     /// </summary>
-    internal struct AnimationOnlyExportData : IExportData
+    internal class AnimationOnlyExportData : IExportData
     {
         // map from animation clip to GameObject that has Animation/Animator
         // component containing clip
@@ -43,6 +43,14 @@ namespace FbxExporters.Editor
             this.animationClips = animClips;
             this.goExportSet = exportSet;
             this.exportComponent = exportComponent;
+            this.defaultClip = null;
+        }
+
+        public AnimationOnlyExportData()
+        {
+            this.animationClips = new Dictionary<AnimationClip, GameObject>();
+            this.goExportSet = new HashSet<GameObject>();
+            this.exportComponent = new Dictionary<GameObject, System.Type>();
             this.defaultClip = null;
         }
 

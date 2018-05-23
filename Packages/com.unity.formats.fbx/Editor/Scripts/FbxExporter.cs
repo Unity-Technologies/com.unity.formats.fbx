@@ -2943,14 +2943,15 @@ namespace FbxExporters
                 if (exportOptions==null)
                     exportOptions = DefaultOptions;
                 Debug.Assert(exportOptions!=null);
-
-                var goToExport = new HashSet<GameObject>();
-                var animationClips = new Dictionary<AnimationClip, GameObject>();
-                var exportComponent = new Dictionary<GameObject, System.Type>();
-
-                var exportData = new AnimationOnlyExportData(animationClips, goToExport, exportComponent);
+                
+                var exportData = new AnimationOnlyExportData();
                 exportData.CollectDependencies(animationClip, rootObject, exportOptions);
-
+                
+                // could not find any dependencies, return null
+                if(exportData.Objects.Count <= 0)
+                {
+                    return null;
+                }
                 return exportData;
             }
 
@@ -2964,11 +2965,7 @@ namespace FbxExporters
                 var legacyAnim = go.GetComponentsInChildren<Animation>();
                 var genericAnim = go.GetComponentsInChildren<Animator>();
 
-                var goToExport = new HashSet<GameObject>();
-                var animationClips = new Dictionary<AnimationClip, GameObject>();
-                var exportComponent = new Dictionary<GameObject, System.Type>();
-
-                var exportData = new AnimationOnlyExportData(animationClips, goToExport, exportComponent);
+                var exportData = new AnimationOnlyExportData();
 
                 int depthFromRootAnimation = int.MaxValue;
                 Animation rootAnimation = null;
