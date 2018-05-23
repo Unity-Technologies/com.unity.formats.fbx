@@ -101,10 +101,37 @@ namespace FbxExporters.Editor
             }
         }
 
-        public static GameObject GetGameObjectBoundToEditorClip(object editorClip)
+        /// <summary>
+        /// Get the property propertyName from object obj using reflection.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="propertyName"></param>
+        /// <returns>property propertyName as an object</returns>
+        private static object GetPropertyReflection(object obj, string propertyName)
         {
-            object clipItem = editorClip.GetType().GetProperty("item").GetValue(editorClip, null);
-            object parentTrack = clipItem.GetType().GetProperty("parentTrack").GetValue(clipItem, null);
+            return obj.GetType().GetProperty(propertyName).GetValue(obj, null);
+        }
+
+        /// <summary>
+        /// Get the timeline clip from the given editor clip using reflection.
+        /// </summary>
+        /// <param name="editorClip"></param>
+        /// <returns>the timeline clip or null if none</returns>
+        private static TimelineClip GetTimelineClipFromEditorClip(object editorClip)
+        {
+            object clip = GetPropertyReflection(editorClip, "clip");
+            return clip as TimelineClip;
+        }
+
+        /// <summary>
+        /// Get the GameObject that the editor clip is bound to in the timeline using reflection.
+        /// </summary>
+        /// <param name="editorClip"></param>
+        /// <returns>The GameObject bound to the editor clip or null if none.</returns>
+        private static GameObject GetGameObjectBoundToEditorClip(object editorClip)
+        {
+            object clipItem = GetPropertyReflection(editorClip, "item");
+            object parentTrack = GetPropertyReflection(clipItem, "parentTrack");
             AnimationTrack animTrack = parentTrack as AnimationTrack;
 
 #if UNITY_2018_2_OR_NEWER
@@ -131,15 +158,19 @@ namespace FbxExporters.Editor
             return animationTrackGO;
         }
 
-        public static KeyValuePair<GameObject, AnimationClip> GetGameObjectAndAnimationClip(Object obj)
+        /// <summary>
+        /// Get the GameObject and it's corresponding animation clip from the given editor clip.
+        /// </summary>
+        /// <param name="editorClip"></param>
+        /// <returns>KeyValuePair containing GameObject and corresponding AnimationClip</returns>
+        public static KeyValuePair<GameObject, AnimationClip> GetGameObjectAndAnimationClip(Object editorClip)
         {
-            if (!ModelExporter.IsEditorClip(obj))
+            if (!ModelExporter.IsEditorClip(editorClip))
                 return new KeyValuePair<GameObject, AnimationClip>();
+            
+            TimelineClip timeLineClip = GetTimelineClipFromEditorClip(editorClip);
 
-            object clip = obj.GetType().GetProperty("clip").GetValue(obj, null);
-            TimelineClip timeLineClip = clip as TimelineClip;
-
-            var animationTrackGO = GetGameObjectBoundToEditorClip(obj);
+            var animationTrackGO = GetGameObjectBoundToEditorClip(editorClip);
             if (animationTrackGO == null)
             {
                 return new KeyValuePair<GameObject, AnimationClip>();
@@ -148,31 +179,34 @@ namespace FbxExporters.Editor
             return new KeyValuePair<GameObject, AnimationClip>(animationTrackGO, timeLineClip.animationClip);
         }
 
+        /// <summary>
+        /// Get the filename of the format {model}@{anim}.fbx from the given object
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns>filename for use for exporting animation clip</returns>
         public static string GetFileName(Object obj)
         {
-            if (ModelExporter.IsEditorClip(obj))
+            if (!ModelExporter.IsEditorClip(obj))
             {
-                object clip = obj.GetType().GetProperty("clip").GetValue(obj, null);
-                TimelineClip timeLineClip = clip as TimelineClip;
-
-                if (timeLineClip.displayName.Contains("@"))
-                {
-                    return timeLineClip.displayName;
-                }
-                else
-                {
-                    var goBound = GetGameObjectBoundToEditorClip(obj);
-                    if (goBound == null)
-                    {
-                        return null;
-                    }
-                    return string.Format("{0}@{1}", goBound.name, timeLineClip.displayName);
-                }
+                // not an editor clip so just return the name of the object
+                return obj.name;
             }
-            else
+
+            TimelineClip timeLineClip = GetTimelineClipFromEditorClip(obj);
+
+            // if the timeline clip name already contains an @, then take this as the
+            // filename to avoid duplicate @
+            if (timeLineClip.displayName.Contains("@"))
+            {
+                return timeLineClip.displayName;
+            }
+
+            var goBound = GetGameObjectBoundToEditorClip(obj);
+            if (goBound == null)
             {
                 return obj.name;
             }
+            return string.Format("{0}@{1}", goBound.name, timeLineClip.displayName);
         }
     }
 }
