@@ -1,6 +1,6 @@
 # About the FBX SDK C# Bindings package 
 
-__Version__: 0.0.6-preview
+__Version__: 1.5.0-preview
 
 The FBX SDK C# Bindings provide access from Unity C# scripts to a subset of the Autodesk FBX SDK, version 2018.1.
 

@@ -74,13 +74,6 @@ namespace FbxExporters.UnitTests
             }
         }
 
-        // test key tangents
-        public static IEnumerable KeyTangentsTestCases {
-            get {
-                yield return new TestCaseData (new float [3] { 0f, 4f, 5f }, new Vector3 [3] { new Vector3 (-100, 100, 0), new Vector3 (0f, 0.0f, 0f), new Vector3 (25f, 0f, 0f) }, new Vector3 [3] { new Vector3 (0, 0, 0), new Vector3 (0f, 0f, 16.9f), new Vector3 (0f, 0f, 0f) }).Returns (6);
-            }
-        }
-
         public static IEnumerable SkinnedMeshTestCases {
             get {
                 yield return "Models/DefaultMale/Male_DyingHitFromBack_Blend_T3_Cut01_James.fbx";
@@ -300,33 +293,6 @@ namespace FbxExporters.UnitTests
             public virtual int Compare(Keyframe a, Keyframe b)
             {
                 return CompareKeyValue(a,b);
-            }
-        }
-
-        public class KeyTangentComparer : IComparer<Keyframe>
-        {
-            public int CompareKeyTangents(Keyframe a, Keyframe b)
-            {
-                bool result = true;
-
-                result &= a.time.Equals(b.time);
-                #if DEBUG_UNITTEST
-                Debug.Log(string.Format("{2} a.time: {0}, b.time: {1}", a.time, b.time,result));
-                #endif
-                // TODO : use AnimationUtility.GetLeftTangentMode 
-                // requires reference to AnimationCurve and keyindex
-                result &= (a.tangentMode == b.tangentMode);
-                #if DEBUG_UNITTEST
-                Debug.Log(string.Format("{2} a.tangentMode={0} b.tangentMode={1}", 
-                    ((AnimationUtility.TangentMode)a.tangentMode).ToString(),
-                    ((AnimationUtility.TangentMode)b.tangentMode).ToString(),result));
-                #endif
-                return result ? 0 : 1;
-            }
-
-            public int Compare(Keyframe a, Keyframe b)
-            {
-                return CompareKeyTangents(a,b);
             }
         }
 
@@ -751,30 +717,6 @@ namespace FbxExporters.UnitTests
                 compareOriginalKeys=compareOriginalKeys, RotationType = rotCurveType, propertyNames = propertyNames, componentType = componentType, keyTimes = keyTimesInSeconds, keyEulerValues = keyEulerValues };
 
             var tester = new AnimTester {keyData=keyData, testName=testName, path=GetRandomFbxFilePath ()};
-            return tester.DoIt();
-        }
-
-        [Description("Uni-35935 key tangents")]
-        [Test, TestCaseSource (typeof (AnimationTestDataClass), "KeyTangentsTestCases")]
-        public int KeyTangentsAnimTest (float [] keyTimesInSeconds, Vector3 [] keyPosValues, Vector3 [] keyRotValues)
-        {
-            System.Type componentType = typeof(Transform);
-
-            if (keyRotValues == null)
-            {
-                keyRotValues = new Vector3[keyPosValues.Length];
-            }
-                
-            string[] propertyNames = null;
-            string testName = componentType.ToString () + "_KeyTangents";
-            RotationCurveType rotCurveType = RotationCurveType.kEuler;
-                
-            testName += "_Euler";
-            propertyNames = AnimationTestDataClass.m_rotationEulerNames.Concat(AnimationTestDataClass.m_translationNames).ToArray();
-
-            KeyData keyData = new TransformKeyData { RotationType = rotCurveType, propertyNames = propertyNames, componentType = componentType, keyTimes = keyTimesInSeconds, keyPosValues = keyPosValues, keyEulerValues = keyRotValues };
-
-            var tester = new AnimTester {keyData=keyData, testName=testName, path=GetRandomFbxFilePath (), keyComparer=new KeyTangentComparer()};
             return tester.DoIt();
         }
 

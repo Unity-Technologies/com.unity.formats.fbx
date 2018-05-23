@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+//#define DEBUG_UNITTEST
+using UnityEngine;
 using UnityEditor;
 using UnityEngine.TestTools;
 using NUnit.Framework;
@@ -10,6 +11,14 @@ namespace FbxExporters.UnitTests
 {
     public class ModelExporterTest : ExporterTestBase
     {
+        [TearDown]
+        public override void Term ()
+        {
+            #if (!DEBUG_UNITTEST)
+            base.Term ();
+            #endif
+        }
+        
         [Test]
         public void TestBasics ()
         {
@@ -322,7 +331,31 @@ namespace FbxExporters.UnitTests
         }
 
         [Test]
-        public void TestExportCamera(){
+        [Ignore("Ignore a camera orthographic test (Uni-48092)")]        
+        public void TestExportCamera2(){
+            // NOTE: even though the aspect ratio is exported,
+            //       it does not get imported back into Unity.
+            //       Therefore don't modify or check if camera.aspect is the same
+            //       after export.
+
+            // create a Unity camera
+            GameObject cameraObj = new GameObject("TestCamera");
+            Camera camera = cameraObj.AddComponent<Camera> ();
+
+            // test export orthographic camera
+            camera.orthographic = true;
+            camera.fieldOfView = 78;
+            camera.nearClipPlane = 19;
+            camera.farClipPlane = 500.6f;
+
+            var filename = GetRandomFbxFilePath (); // export to a different file
+            var fbxCamera = ExportCamera (filename, cameraObj);
+            CompareCameraValues (camera, fbxCamera);
+            Assert.AreEqual (camera.orthographicSize, fbxCamera.orthographicSize);
+        }
+
+        [Test]
+        public void TestExportCamera1(){
             // NOTE: even though the aspect ratio is exported,
             //       it does not get imported back into Unity.
             //       Therefore don't modify or check if camera.aspect is the same
@@ -342,17 +375,6 @@ namespace FbxExporters.UnitTests
             string filename = GetRandomFbxFilePath();
             var fbxCamera = ExportCamera (filename, cameraObj);
             CompareCameraValues (camera, fbxCamera);
-
-            // test export orthographic camera
-            camera.orthographic = true;
-            camera.fieldOfView = 78;
-            camera.nearClipPlane = 19;
-            camera.farClipPlane = 500.6f;
-
-            filename = GetRandomFbxFilePath (); // export to a different file
-            fbxCamera = ExportCamera (filename, cameraObj);
-            CompareCameraValues (camera, fbxCamera);
-            Assert.AreEqual (camera.orthographicSize, fbxCamera.orthographicSize);
         }
 
         /// <summary>

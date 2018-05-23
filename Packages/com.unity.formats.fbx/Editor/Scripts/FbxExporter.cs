@@ -1288,7 +1288,7 @@ namespace FbxExporters
                 if (unityPrefabType != PrefabType.PrefabInstance &&
                     unityPrefabType != PrefabType.ModelPrefabInstance) return false;
 
-                Object unityPrefabParent = PrefabUtility.GetPrefabParent (unityGo);
+                Object unityPrefabParent = PrefabUtility.GetCorrespondingObjectFromSource(unityGo);
 
                 if (Verbose)
                     Debug.Log (string.Format ("exporting instance {0}({1})", unityGo.name, unityPrefabParent.name));
