@@ -3544,14 +3544,9 @@ namespace FbxExporters
                 return obj.GetType().Name.Contains("EditorClip");
             }
 
-            internal static void ExportSingleTimelineClip(Object editorClipSelected, string filePath = null)
+            internal static void ExportSingleTimelineClip(Object editorClipSelected)
             {
                 UnityEngine.Object[] exportArray = new UnityEngine.Object[] { editorClipSelected };
-
-                if (!string.IsNullOrEmpty (filePath)) {
-                    ExportObjects (filePath, exportArray);
-                    return;
-                }
 
                 ExportModelEditorWindow.Init (exportArray, AnimationOnlyExportData.GetFileName(editorClipSelected), isTimelineAnim: true);
             }
