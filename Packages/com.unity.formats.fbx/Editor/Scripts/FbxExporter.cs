@@ -2633,23 +2633,8 @@ namespace FbxExporters
                     Debug.Assert(rootObject!=null);
                     Debug.Assert(exportOptions!=null);
 
-                    // if we're exporting animation-only and the root is a Camera or Light then we also
-                    // to export the static values so that these are pointing the right way 
-                    if (exportOptions.ModelAnimIncludeOption == ExportSettings.Include.Anim)
-                    {
-                        if (rootObject.GetComponent<Light>())
-                        {
-                            this.exportComponent.Add (rootObject, typeof(Light));
-                        }
-                        else if (rootObject.GetComponent<Camera>())
-                        {
-                            this.exportComponent.Add (rootObject, typeof(Camera));
-                        }
-                        this.goExportSet.Add (rootObject);
-                    }
                     // NOTE: the object (animationRootObject) containing the animation is not necessarily animated
                     // when driven by an animator or animation component.
-
                     foreach (var animClip in animClips) {
                         if (this.animationClips.ContainsKey(animClip)) {
                             // we have already exported gameobjects for this clip
@@ -2685,7 +2670,7 @@ namespace FbxExporters
                     }
                 }
 
-                internal static GameObject GetGameObjectBoundToEditorClip(object editorClip)
+                public static GameObject GetGameObjectBoundToEditorClip(object editorClip)
                 {
                     object clipItem = editorClip.GetType().GetProperty("item").GetValue(editorClip, null);
                     object parentTrack = clipItem.GetType().GetProperty("parentTrack").GetValue(clipItem, null);

@@ -482,14 +482,16 @@ namespace FbxExporters
                 TransferAnimationDest = null;
 
                 // if only one object selected, set transfer source/dest to this object
-                GameObject go = GetGameObject();                
-
-                if (go) {
-                    TransferAnimationSource = go.transform;
-                    TransferAnimationDest = go.transform;
+                if (ToExport.Length == 1 || (IsTimelineAnim && ToExport.Length > 0))
+                {
+                    GameObject go = GetGameObject();
+                    if (go)
+                    {
+                        TransferAnimationSource = go.transform;
+                        TransferAnimationDest = go.transform;
+                    }
                 }
-
-                return 1;
+                return ToExport.Length;
             }
 
             /// <summary>
