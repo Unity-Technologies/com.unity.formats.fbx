@@ -7,7 +7,7 @@ namespace FbxExporters.Editor
 {
     public class PackageUpdater : AssetPostprocessor
     {
-        internal static readonly string[] AssetStoreFbxPrefabDLLGuids = new string[]
+        public static readonly string[] AssetStoreFbxPrefabDLLGuids = new string[]
         {
             "628ffbda3fdf4df4588770785d91a698", // FbxPrefab asset store package GUID
             "2d81c55c4d9d85146b1d2de96e084b63" // FbxPrefab forum package (1.1.0b1) GUID
@@ -27,21 +27,23 @@ namespace FbxExporters.Editor
         private static readonly Dictionary<string, string> AssetStoreFiles = new Dictionary<string, string>
         {
             /* FBX Exporter */
-            { "", "FBX_Exporter_User_Guide.pdf" },
-            { "", "LICENSE.txt" },
-            { "", "README.txt" },
-            { "", "RELEASE_NOTES.txt" },
-            { "", "UnityFbxForMax.zip" },
-            { "", "UnityFbxForMaya.zip" },
+            { "6de62c7df48192d4bb557c86ee2e69d3", "FBX_Exporter_User_Guide.pdf" },
+            { "670c8ffd945c65246ae9ed0224ddf970", "LICENSE.txt" },
+            { "fa5e8bc9da963d949955cf16217de64f", "README.txt" },
+            { "34004d94a3eaab7499e7ae9e76253702", "RELEASE_NOTES.txt" },
+            { "2ad26927eb7fa4a4485048b20fac7dff", "UnityFbxForMax.zip" },
+            { "bd3a79df710fe68418617efeba366df4", "UnityFbxForMaya.zip" },
             { "628ffbda3fdf4df4588770785d91a698", "UnityFbxPrefab.dll" },
+            { "2d81c55c4d9d85146b1d2de96e084b63", "UnityFbxPrefab.dll" }, // v1.1.0b1
             { "660c183247865bf46a724b508ed5c1a3", "Editor/UnityFbxExporterEditor.dll" },
+            { "8404f30404326e44dbf6d079450dc047", "Editor/UnityFbxExporterEditor.dll" }, // v1.1.0b1
             /* FBX SDK */
-            { "", "Editor/FbxSdk/docs.zip" },
-            { "", "Editor/FbxSdk/LICENSE.txt" },
-            { "", "Editor/FbxSdk/README.txt" },
-            { "", "Editor/FbxSdk/Plugins/UnityFbxSdk.dll" },
-            { "", "Editor/FbxSdk/Plugins/x64/Windows/UnityFbxSdkNative.dll" },
-            { "", "Editor/FbxSdk/Plugins/x64/MacOS/UnityFbxSdkNative.bundle" }
+            { "f864a67b9ccc5d5448cd7298bb5d13ba", "Editor/FbxSdk/docs.zip" },
+            { "070080e279910ff42ad2e323bcb2a737", "Editor/FbxSdk/LICENSE.txt" },
+            { "479a3739c785a11469f3ee1f463994f7", "Editor/FbxSdk/README.txt" },
+            { "1fbcb7a1c49a9ac449ee7443e2202cfe", "Editor/FbxSdk/Plugins/UnityFbxSdk.dll" },
+            { "b7db48465611e8542b7bc6bd41743306", "Editor/FbxSdk/Plugins/x64/Windows/UnityFbxSdkNative.dll" },
+            { "d0d661670bd3fc34d8b876b0f3dd9091", "Editor/FbxSdk/Plugins/x64/MacOS/UnityFbxSdkNative.bundle" }
         };
 
         static bool ProjectContainsAssetStorePackage()
@@ -83,7 +85,7 @@ namespace FbxExporters.Editor
             return EditorUtility.DisplayDialog(
                 "FBX Exporter Asset Store Package Detected",
                 "It is recommended to delete any previous package versions before installing the Package Manager package. Delete Asset Store Package?",
-                "Ok");
+                "Ok", "Cancel");
         }
 
         static void DeleteAssetStoreAssets()
@@ -101,13 +103,31 @@ namespace FbxExporters.Editor
 
                 if (!assetPath.Contains(path))
                 {
-                    Debug.LogWarningFormat("FBXUpgrade: Found asset at unexpected path {0}, won't delete", assetPath);
+                    Debug.LogWarningFormat("FBX Upgrade: Found asset at unexpected path {0}, won't delete", assetPath);
                     continue;
                 }
 
                 if (!AssetDatabase.DeleteAsset(assetPath))
                 {
-                    Debug.LogWarningFormat("FBXUpgrade: Failed to delete asset at path {0}", assetPath);
+                    Debug.LogWarningFormat("FBX Upgrade: Failed to delete asset at path {0}", assetPath);
+                    continue;
+                }
+
+                // check if containing folder is empty, delete if it is
+                var fullPath = System.IO.Path.GetDirectoryName(Application.dataPath) + "/" + System.IO.Path.GetDirectoryName(assetPath);
+                var dir = new System.IO.DirectoryInfo(fullPath);
+                while(dir.Exists && dir.Name != "Assets" && dir.GetFiles().Length == 0 && dir.GetDirectories().Length == 0)
+                {
+                    dir.Delete();
+
+                    // also delete meta file for folder
+                    var metaFile = dir.FullName + ".meta";
+                    if (System.IO.File.Exists(metaFile))
+                    {
+                        System.IO.File.Delete(metaFile);
+                    }
+
+                    dir = dir.Parent;
                 }
             }
         }
@@ -116,7 +136,8 @@ namespace FbxExporters.Editor
         {
             if (ProjectContainsAssetStorePackage() && UserWantsToUpgrade())
             {
-                // give popup asking user if they want to delete the old package
+                DeleteAssetStoreAssets();
+                RepairMissingScripts.RunRepairMissingScripts();
             }
         }
     }

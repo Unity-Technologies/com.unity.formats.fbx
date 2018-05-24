@@ -193,5 +193,35 @@ namespace FbxExporters.Editor
 
             return false;
         }
+
+        public static void RunRepairMissingScripts()
+        {
+            var componentUpdater = new FbxExporters.Editor.RepairMissingScripts();
+            var filesToRepairCount = componentUpdater.GetAssetsToRepairCount();
+            var dialogTitle = "FBX Prefab Component Updater";
+            if (filesToRepairCount > 0)
+            {
+                bool result = UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
+                    string.Format("Found {0} prefab(s) and/or scene(s) with components requiring update.\n\n" +
+                    "If you choose 'Go Ahead', the FbxPrefab components in these assets " +
+                    "will be automatically updated to work with the latest FBX exporter.\n" +
+                        "You should make a backup before proceeding.", filesToRepairCount),
+                    "I Made a Backup. Go Ahead!", "No Thanks");
+                if (result)
+                {
+                    componentUpdater.ReplaceGUIDInTextAssets();
+                }
+                else
+                {
+                    var assetsToRepair = componentUpdater.GetAssetsToRepair();
+                    Debug.LogFormat("Failed to update the FbxPrefab components in the following files:\n{0}", string.Join("\n", assetsToRepair));
+                }
+            }
+            else
+            {
+                UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
+                    "Couldn't find any prefabs or scenes that require updating", "Ok");
+            }
+        }
     }
 }
