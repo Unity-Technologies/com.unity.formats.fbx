@@ -12,6 +12,14 @@ namespace FbxExporters.Editor
 
         private const string m_idFormat = "{{fileID: {0}, guid: {1}, type:";
 
+#if COM_UNITY_FORMATS_FBX_AS_ASSET
+        public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
+#elif UNITY_2018_2_OR_NEWER
+        public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
+#else // Unity 2018.1 and fbx installed as a package
+        public const string FBX_PREFAB_FILE = "Packages/com.unity.formats.fbx/Runtime/FbxPrefab.cs";
+#endif
+
         private static List<string> m_searchIDsToReplace;
         private static List<string> SearchIDsToReplace
         {
@@ -42,16 +50,40 @@ namespace FbxExporters.Editor
             }
         }
 
+        public static string FindFbxPrefabAssetPath()
+        {
+            // Find guids that are scripts that look like FbxPrefab.
+            // That catches FbxPrefabTest too, so we have to make sure.
+            var allGuids = AssetDatabase.FindAssets("FbxPrefab t:MonoScript");
+            string foundPath = "";
+            foreach (var guid in allGuids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.EndsWith(FBX_PREFAB_FILE))
+                {
+                    if (foundPath != "")
+                    {
+                        // How did this happen? Anyway, just don't try.
+                        Debug.LogWarning(string.Format("{0} found in multiple places; did you forget to delete one of these?\n{1}\n{2}",
+                                FBX_PREFAB_FILE.Substring(1), foundPath, path));
+                        return "";
+                    }
+                    foundPath = path;
+                }
+            }
+            if (foundPath == "")
+            {
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), "FBX Exporter"));
+            }
+            return foundPath;
+        }
+
         public static string GetSourceCodeSearchID()
         {
-            var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxExporters.FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
+            var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FindFbxPrefabAssetPath());
             string searchID = null;
             string guid;
-#if UNITY_2018_2_OR_NEWER
             long fileId;
-#else
-            int fileId;
-#endif
             if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(fbxPrefabObj, out guid, out fileId))
             {
                 searchID = string.Format(m_idFormat, fileId, guid);
