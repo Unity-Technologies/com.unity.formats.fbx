@@ -128,7 +128,7 @@ namespace FbxExporters.EditorTools {
                                         "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
 
             if (GUILayout.Button (repairMissingScripts)) {
-                Editor.RepairMissingScripts.RunRepairMissingScripts();
+                Editor.PackageUpdater.UpgradeToPackmanPackage();
             }
 
             GUILayout.FlexibleSpace ();

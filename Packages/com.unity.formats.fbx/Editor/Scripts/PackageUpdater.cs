@@ -7,7 +7,7 @@ namespace FbxExporters.Editor
 {
     public class PackageUpdater : AssetPostprocessor
     {
-        public static readonly string[] AssetStoreFbxPrefabDLLGuids = new string[]
+        public static string[] AssetStoreFbxPrefabDLLGuids = new string[]
         {
             "628ffbda3fdf4df4588770785d91a698", // FbxPrefab asset store package GUID
             "2d81c55c4d9d85146b1d2de96e084b63" // FbxPrefab forum package (1.1.0b1) GUID
@@ -126,19 +126,53 @@ namespace FbxExporters.Editor
                     {
                         System.IO.File.Delete(metaFile);
                     }
-
                     dir = dir.Parent;
                 }
             }
         }
 
-        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+        static void RunRepairMissingScripts()
+        {
+            var componentUpdater = new FbxExporters.Editor.RepairMissingScripts();
+            var filesToRepairCount = componentUpdater.GetAssetsToRepairCount();
+            var dialogTitle = "FBX Prefab Component Updater";
+            if (filesToRepairCount > 0)
+            {
+                bool result = UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
+                    string.Format("Found {0} prefab(s) and/or scene(s) with components requiring update.\n\n" +
+                    "If you choose 'Go Ahead', the FbxPrefab components in these assets " +
+                    "will be automatically updated to work with the latest FBX exporter.\n" +
+                        "You should make a backup before proceeding.", filesToRepairCount),
+                    "I Made a Backup. Go Ahead!", "No Thanks");
+                if (result)
+                {
+                    componentUpdater.ReplaceGUIDInTextAssets();
+                }
+                else
+                {
+                    var assetsToRepair = componentUpdater.GetAssetsToRepair();
+                    Debug.LogFormat("Failed to update the FbxPrefab components in the following files:\n{0}", string.Join("\n", assetsToRepair));
+                }
+            }
+            else
+            {
+                UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
+                    "Couldn't find any prefabs or scenes that require updating", "Ok");
+            }
+        }
+
+        public static void UpgradeToPackmanPackage()
         {
             if (ProjectContainsAssetStorePackage() && UserWantsToUpgrade())
             {
                 DeleteAssetStoreAssets();
-                RepairMissingScripts.RunRepairMissingScripts();
+                RunRepairMissingScripts();
             }
+        }
+
+        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+        {
+            UpgradeToPackmanPackage();
         }
     }
 }
