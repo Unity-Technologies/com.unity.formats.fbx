@@ -83,8 +83,8 @@ namespace FbxExporters.Editor
         static bool UserWantsToUpgrade()
         {
             return EditorUtility.DisplayDialog(
-                "FBX Exporter Asset Store Package Detected",
-                "It is recommended to delete any previous package versions before installing the Package Manager package. Delete Asset Store Package?",
+                "Conflicting FBX Exporter Package Detected",
+                "The Asset Store version of the FBX Exporter is incompatible with Package Manager. Would you like to convert your project to the Package Manager version of the FBX Exporter?",
                 "Ok", "Cancel");
         }
 
@@ -129,6 +129,7 @@ namespace FbxExporters.Editor
                     dir = dir.Parent;
                 }
             }
+            AssetDatabase.Refresh();
         }
 
         static void RunRepairMissingScripts()
