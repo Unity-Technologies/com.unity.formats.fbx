@@ -1,9 +1,8 @@
 {
     "name": "com.unity.formats.fbxsdk",
-    "references": [
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
-    "excludePlatforms": []
+    "references": [],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
 }
