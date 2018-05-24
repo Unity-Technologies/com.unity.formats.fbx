@@ -38,14 +38,14 @@ namespace FbxExporters.UnitTests
                         Assert.That (timeLineClip.animationClip, Is.Not.Null);
 
                         filePath = string.Format ("{0}/{1}@{2}", folderPath, atObject.name, "Recorded.fbx");
-                        exportData[atObject] = ModelExporter.GetExportData(atObject, timeLineClip.animationClip);
+                        exportData[atObject] = ModelExporterReflection.GetExportData(atObject, timeLineClip.animationClip);
                         break;
                     }
                 }
             }
             Assert.That (filePath, Is.Not.Null);
             Assert.That (exportData, Is.Not.Null);
-            ModelExporter.ExportObjects(filePath, new Object[1]{myCube}, null, exportData);
+            ModelExporterReflection.ExportObjects(filePath, new Object[1]{myCube}, null, exportData);
             FileAssert.Exists (filePath);
         }
     }

@@ -2938,7 +2938,7 @@ namespace FbxExporters
                 return exportData.Count == 0 ? null : exportData;
             }
 
-            public static IExportData GetExportData(GameObject rootObject, AnimationClip animationClip, IExportOptions exportOptions = null)
+            internal static IExportData GetExportData(GameObject rootObject, AnimationClip animationClip, IExportOptions exportOptions = null)
             {
                 if (exportOptions==null)
                     exportOptions = DefaultOptions;
@@ -4027,11 +4027,21 @@ namespace FbxExporters
                 ExportModelEditorWindow.Init (System.Linq.Enumerable.Cast<UnityEngine.Object> (toExport), isTimelineAnim: false);
             }
 
+
+            public static string ExportObjects(
+                string filePath,
+                UnityEngine.Object[] objects = null,
+                IExportOptions exportOptions = null
+            )
+            {
+                return ExportObjects(filePath, objects, exportOptions, exportData: null);
+            }
+
             /// <summary>
             /// Export a list of (Game) objects to FBX file. 
             /// Use the SaveFile panel to allow user to enter a file name.
             /// <summary>
-            public static string ExportObjects (
+            internal static string ExportObjects (
                 string filePath,
                 UnityEngine.Object[] objects = null,
                 IExportOptions exportOptions = null,
