@@ -8,9 +8,6 @@ namespace FbxExporters.Editor
 {
     public class RepairMissingScripts
     {
-        private const string m_forumPackageGUID = "2d81c55c4d9d85146b1d2de96e084b63";
-        private const string m_assetStorePackageGUID = "628ffbda3fdf4df4588770785d91a698";
-
         private const string m_fbxPrefabDLLFileId = "69888640";
 
         private const string m_idFormat = "{{fileID: {0}, guid: {1}, type:";
@@ -22,10 +19,11 @@ namespace FbxExporters.Editor
             {
                 if (m_searchIDsToReplace == null || m_searchIDsToReplace.Count <= 0)
                 {
-                    m_searchIDsToReplace = new List<string>() {
-                        string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_forumPackageGUID),
-                        string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_assetStorePackageGUID)
-                    };
+                    m_searchIDsToReplace = new List<string>();
+                    foreach(var guid in PackageUpdater.AssetStoreFbxPrefabDLLGuids)
+                    {
+                        m_searchIDsToReplace.Add(string.Format(m_idFormat, m_fbxPrefabDLLFileId, guid));
+                    }
                 }
                 return m_searchIDsToReplace;
             }
