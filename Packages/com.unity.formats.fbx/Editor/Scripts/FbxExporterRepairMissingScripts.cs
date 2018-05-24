@@ -8,12 +8,17 @@ namespace FbxExporters.Editor
 {
     public class RepairMissingScripts
     {
-        private const string m_forumPackageGUID = "2d81c55c4d9d85146b1d2de96e084b63";
-        private const string m_assetStorePackageGUID = "628ffbda3fdf4df4588770785d91a698";
-
         private const string m_fbxPrefabDLLFileId = "69888640";
 
         private const string m_idFormat = "{{fileID: {0}, guid: {1}, type:";
+
+#if COM_UNITY_FORMATS_FBX_AS_ASSET
+        public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
+#elif UNITY_2018_2_OR_NEWER
+        public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
+#else // Unity 2018.1 and fbx installed as a package
+        public const string FBX_PREFAB_FILE = "Packages/com.unity.formats.fbx/Runtime/FbxPrefab.cs";
+#endif
 
         private static List<string> m_searchIDsToReplace;
         private static List<string> SearchIDsToReplace
@@ -22,47 +27,77 @@ namespace FbxExporters.Editor
             {
                 if (m_searchIDsToReplace == null || m_searchIDsToReplace.Count <= 0)
                 {
-                    m_searchIDsToReplace = new List<string>() {
-                        string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_forumPackageGUID),
-                        string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_assetStorePackageGUID)
-                    };
+                    m_searchIDsToReplace = new List<string>();
+                    foreach (var guid in PackageUpdater.AssetStoreFbxPrefabDLLGuids)
+                    {
+                        m_searchIDsToReplace.Add(string.Format(m_idFormat, m_fbxPrefabDLLFileId, guid));
+                    }
                 }
                 return m_searchIDsToReplace;
             }
         }
 
         private string[] m_assetsToRepair;
-        private string[] AssetsToRepair{
-            get{
-                if (m_assetsToRepair == null) {
-                    m_assetsToRepair = FindAssetsToRepair ();
+        private string[] AssetsToRepair
+        {
+            get
+            {
+                if (m_assetsToRepair == null)
+                {
+                    m_assetsToRepair = FindAssetsToRepair();
                 }
                 return m_assetsToRepair;
             }
         }
 
+        public static string FindFbxPrefabAssetPath()
+        {
+            // Find guids that are scripts that look like FbxPrefab.
+            // That catches FbxPrefabTest too, so we have to make sure.
+            var allGuids = AssetDatabase.FindAssets("FbxPrefab t:MonoScript");
+            string foundPath = "";
+            foreach (var guid in allGuids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.EndsWith(FBX_PREFAB_FILE))
+                {
+                    if (foundPath != "")
+                    {
+                        // How did this happen? Anyway, just don't try.
+                        Debug.LogWarning(string.Format("{0} found in multiple places; did you forget to delete one of these?\n{1}\n{2}",
+                                FBX_PREFAB_FILE.Substring(1), foundPath, path));
+                        return "";
+                    }
+                    foundPath = path;
+                }
+            }
+            if (foundPath == "")
+            {
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), "FBX Exporter"));
+            }
+            return foundPath;
+        }
+
         public static string GetSourceCodeSearchID()
         {
-            var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxExporters.FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
+            var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FindFbxPrefabAssetPath());
             string searchID = null;
             string guid;
-#if UNITY_2018_2_OR_NEWER
             long fileId;
-#else
-            int fileId;
-#endif
-            if(AssetDatabase.TryGetGUIDAndLocalFileIdentifier(fbxPrefabObj, out guid, out fileId))
+            if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(fbxPrefabObj, out guid, out fileId))
             {
                 searchID = string.Format(m_idFormat, fileId, guid);
             }
             return searchID;
         }
 
-        public int GetAssetsToRepairCount(){
+        public int GetAssetsToRepairCount()
+        {
             return AssetsToRepair.Length;
         }
 
-        public string[] GetAssetsToRepair(){
+        public string[] GetAssetsToRepair()
+        {
             return AssetsToRepair;
         }
 
@@ -71,31 +106,39 @@ namespace FbxExporters.Editor
             // search project for assets containing old GUID
 
             // ignore if forced binary
-            if (UnityEditor.EditorSettings.serializationMode == SerializationMode.ForceBinary) {
-                return new string[]{};
+            if (UnityEditor.EditorSettings.serializationMode == SerializationMode.ForceBinary)
+            {
+                return new string[] { };
             }
 
             // check all scenes and prefabs
-            string[] searchFilePatterns = new string[]{ "*.prefab", "*.unity" };
+            string[] searchFilePatterns = new string[] { "*.prefab", "*.unity" };
 
-            List<string> assetsToRepair = new List<string> ();
-            foreach (string searchPattern in searchFilePatterns) {
-                foreach (string file in Directory.GetFiles(Application.dataPath, searchPattern, SearchOption.AllDirectories)) {
-                    if (AssetNeedsRepair (file)) {
-                        assetsToRepair.Add (file);
+            List<string> assetsToRepair = new List<string>();
+            foreach (string searchPattern in searchFilePatterns)
+            {
+                foreach (string file in Directory.GetFiles(Application.dataPath, searchPattern, SearchOption.AllDirectories))
+                {
+                    if (AssetNeedsRepair(file))
+                    {
+                        assetsToRepair.Add(file);
                     }
                 }
             }
-            return assetsToRepair.ToArray ();
+            return assetsToRepair.ToArray();
         }
 
         private static bool AssetNeedsRepair(string filePath)
         {
-            try{
-                using(var sr = new StreamReader (filePath)){
-                    if(sr.Peek() > -1){
+            try
+            {
+                using (var sr = new StreamReader(filePath))
+                {
+                    if (sr.Peek() > -1)
+                    {
                         var firstLine = sr.ReadLine();
-                        if(!firstLine.StartsWith("%YAML")){
+                        if (!firstLine.StartsWith("%YAML"))
+                        {
                             sr.Close();
                             return false;
                         }
@@ -109,25 +152,28 @@ namespace FbxExporters.Editor
                     }
                 }
             }
-            catch(IOException e){
-                Debug.LogError (string.Format ("Failed to check file for component update: {0} (error={1})", filePath, e));
+            catch (IOException e)
+            {
+                Debug.LogError(string.Format("Failed to check file for component update: {0} (error={1})", filePath, e));
             }
             return false;
         }
 
-        public bool ReplaceGUIDInTextAssets ()
+        public bool ReplaceGUIDInTextAssets()
         {
             string sourceCodeSearchID = GetSourceCodeSearchID();
-            if(string.IsNullOrEmpty(sourceCodeSearchID))
+            if (string.IsNullOrEmpty(sourceCodeSearchID))
             {
                 return false;
             }
             bool replacedGUID = false;
-            foreach (string file in AssetsToRepair) {
-                replacedGUID |= ReplaceGUIDInFile (file, sourceCodeSearchID);
+            foreach (string file in AssetsToRepair)
+            {
+                replacedGUID |= ReplaceGUIDInFile(file, sourceCodeSearchID);
             }
-            if (replacedGUID) {
-                AssetDatabase.Refresh ();
+            if (replacedGUID)
+            {
+                AssetDatabase.Refresh();
             }
             return replacedGUID;
         }
@@ -142,55 +188,68 @@ namespace FbxExporters.Editor
             return false;
         }
 
-        private static bool ReplaceGUIDInFile (string path, string replacementSearchID)
+        private static bool ReplaceGUIDInFile(string path, string replacementSearchID)
         {
             // try to read file, assume it's a text file for now
             bool modified = false;
 
-            try {
+            try
+            {
                 var tmpFile = Path.GetTempFileName();
-                if(string.IsNullOrEmpty(tmpFile)){
+                if (string.IsNullOrEmpty(tmpFile))
+                {
                     return false;
                 }
 
-                using(var sr = new StreamReader (path)){
+                using (var sr = new StreamReader(path))
+                {
                     // verify that this is a text file
                     var firstLine = "";
-                    if (sr.Peek () > -1) {
-                        firstLine = sr.ReadLine ();
-                        if (!firstLine.StartsWith ("%YAML")) {
-                            sr.Close ();
+                    if (sr.Peek() > -1)
+                    {
+                        firstLine = sr.ReadLine();
+                        if (!firstLine.StartsWith("%YAML"))
+                        {
+                            sr.Close();
                             return false;
                         }
                     }
 
-                    using(var sw = new StreamWriter (tmpFile, false)){
-                        if (!string.IsNullOrEmpty (firstLine)) {
-                            sw.WriteLine (firstLine);
+                    using (var sw = new StreamWriter(tmpFile, false))
+                    {
+                        if (!string.IsNullOrEmpty(firstLine))
+                        {
+                            sw.WriteLine(firstLine);
                         }
 
-                        while (sr.Peek () > -1) {
-                            var line = sr.ReadLine ();
+                        while (sr.Peek() > -1)
+                        {
+                            var line = sr.ReadLine();
                             SearchIDsToReplace.ForEach(searchId =>
                                 modified |= ReplaceID(searchId, replacementSearchID, ref line)
                             );
 
-                            sw.WriteLine (line);
+                            sw.WriteLine(line);
                         }
                     }
                 }
 
-                if (modified) {
-                    File.Delete (path);
-                    File.Move (tmpFile, path);
+                if (modified)
+                {
+                    File.Delete(path);
+                    File.Move(tmpFile, path);
 
                     Debug.LogFormat("Updated FbxPrefab components in file {0}", path);
                     return true;
-                } else {
-                    File.Delete (tmpFile);
                 }
-            } catch (IOException e) {
-                Debug.LogError (string.Format ("Failed to replace GUID in file {0} (error={1})", path, e));
+                else
+                {
+                    File.Delete(tmpFile);
+                }
+            }
+            catch (IOException e)
+            {
+                Debug.LogError(string.Format("Failed to replace GUID in file {0} (error={1})", path, e));
             }
 
             return false;
