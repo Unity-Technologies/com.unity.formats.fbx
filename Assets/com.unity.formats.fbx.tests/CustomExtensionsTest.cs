@@ -8,7 +8,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Collections;
 using FbxExporters.CustomExtensions;
-using Unity.FbxSdk;
+using UnityEngine.Formats.FbxSdk;
 
 namespace FbxExporters.UnitTests
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor;
-using Unity.FbxSdk;
+using UnityEngine.Formats.FbxSdk;
 using System.Linq;
 
 namespace FbxExporters

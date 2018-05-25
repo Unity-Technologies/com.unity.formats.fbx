@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.IO;
-using Unity.FbxSdk;
+using UnityEngine.Formats.FbxSdk;
 
 namespace FbxExporters.UnitTests
 {

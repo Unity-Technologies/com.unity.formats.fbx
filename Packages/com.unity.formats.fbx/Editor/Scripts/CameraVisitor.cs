@@ -1,5 +1,5 @@
 using UnityEngine;
-using Unity.FbxSdk;
+using UnityEngine.Formats.FbxSdk;
 using FbxExporters.CustomExtensions;
 
 namespace FbxExporters

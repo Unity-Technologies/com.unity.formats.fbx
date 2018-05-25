@@ -1,4 +1,4 @@
-﻿using Unity.FbxSdk;
+﻿using UnityEngine.Formats.FbxSdk;
 using System.Collections.Generic;
 
 namespace FbxExporters

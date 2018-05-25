@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-using Unity.FbxSdk;
+using UnityEngine.Formats.FbxSdk;
 
 namespace FbxExporters
 { 
