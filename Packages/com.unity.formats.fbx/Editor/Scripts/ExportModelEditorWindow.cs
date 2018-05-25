@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using FbxExporters.EditorTools;
+using UnityEditor.Formats.Fbx.Exporter;
 #if UNITY_2018_1_OR_NEWER
 using UnityEditor.Presets;
 #endif

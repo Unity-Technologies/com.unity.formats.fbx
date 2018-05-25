@@ -7,7 +7,7 @@ using System.Linq;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;	
 using UnityEngine.Formats.FbxSdk;
-using FbxExporters.EditorTools;
+using UnityEditor.Formats.Fbx.Exporter;
 using FbxExporters.Visitors;
 using FbxExporters.CustomExtensions;
 

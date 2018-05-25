@@ -215,7 +215,7 @@ namespace FbxExporters
                 if (string.IsNullOrEmpty(fbxFullPath)) {
                     // Generate a unique filename.
                     if (string.IsNullOrEmpty (fbxDirectoryFullPath)) {
-                        fbxDirectoryFullPath = FbxExporters.EditorTools.ExportSettings.GetFbxAbsoluteSavePath();
+                        fbxDirectoryFullPath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.GetFbxAbsoluteSavePath();
                     } else {
                         fbxDirectoryFullPath = Path.GetFullPath (fbxDirectoryFullPath);
                     }
@@ -323,7 +323,7 @@ namespace FbxExporters
                 if (string.IsNullOrEmpty(prefabFullPath)) {
                     // Generate a unique filename.
                     if (string.IsNullOrEmpty (prefabDirectoryFullPath)) {
-                        prefabDirectoryFullPath = FbxExporters.EditorTools.ExportSettings.GetPrefabAbsoluteSavePath();
+                        prefabDirectoryFullPath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.GetPrefabAbsoluteSavePath();
                     } else {
                         prefabDirectoryFullPath = Path.GetFullPath (prefabDirectoryFullPath);
                     }

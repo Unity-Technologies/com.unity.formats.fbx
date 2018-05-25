@@ -26,7 +26,7 @@ namespace FbxExporters
                 foreach (var assetPath in importedAssets) {
                     if (assetPath.StartsWith(tempSavePath) && assetPath.EndsWith(".fbx")) {
                         // if the instruction file exists, then run the turntable and delete the file
-                        string instructionFile = "";//FbxExporters.Editor.MayaIntegration.GetFullMayaInstructionPath ();
+                        string instructionFile = "";//UnityEditor.Formats.Fbx.Exporter.MayaIntegration.GetFullMayaInstructionPath ();
                         if(System.IO.File.Exists(instructionFile)){
                             LastSavedModel ();
                             System.IO.File.Delete (instructionFile);
@@ -93,7 +93,7 @@ namespace FbxExporters
                 GameObject modelGO = null;
 
                 // make relative to UnityProject folder.
-                string relFileName = System.IO.Path.Combine ("Assets", FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath (fbxFileName));
+                string relFileName = System.IO.Path.Combine ("Assets", UnityEditor.Formats.Fbx.Exporter.ExportSettings.ConvertToAssetRelativePath (fbxFileName));
 
                 Object unityMainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath (relFileName);
 

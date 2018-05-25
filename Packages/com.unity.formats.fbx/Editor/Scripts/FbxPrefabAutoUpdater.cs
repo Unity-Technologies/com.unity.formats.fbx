@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 using System;
-using FbxExporters.Editor;
+using UnityEditor.Formats.Fbx.Exporter;
 
 namespace FbxExporters
 {
@@ -57,7 +57,7 @@ namespace FbxExporters
                 }
             }
             if (foundPath == "") {
-                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), UnityEditor.Formats.Fbx.Exporter.ModelExporter.PACKAGE_UI_NAME));
             }
             return foundPath;
         #else
@@ -67,7 +67,7 @@ namespace FbxExporters
             if (System.IO.File.Exists(System.IO.Path.GetFullPath(path))) {
                 return path;
             } else {
-                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE, FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE, UnityEditor.Formats.Fbx.Exporter.ModelExporter.PACKAGE_UI_NAME));
                 return "";
             }
         #endif
@@ -113,7 +113,7 @@ namespace FbxExporters
         static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
         {
             // Do not start if Auto Updater is disabled in FBX Exporter Settings
-            if (!FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled)
+            if (!UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.autoUpdaterEnabled)
             {
                 return;
             }
@@ -293,7 +293,7 @@ namespace FbxExporters
                 // renamed nodes (or auto-update if there's nothing to rename).
                 var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
 
-                if (FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled || runningUnitTest)
+                if (UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.autoUpdaterEnabled || runningUnitTest)
                 {
                     fbxPrefabUtility.SyncPrefab();
                 }

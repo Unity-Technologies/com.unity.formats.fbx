@@ -3,7 +3,7 @@ using UnityEditor;
 using System;
 using System.Collections.Generic;
 
-namespace FbxExporters.Editor
+namespace UnityEditor.Formats.Fbx.Exporter
 {
     public abstract class DCCIntegration
     {
@@ -668,7 +668,7 @@ namespace FbxExporters.Editor
         /// The path of the DCC executable.
         /// </summary>
         public static string GetDCCExe () {
-            return FbxExporters.EditorTools.ExportSettings.GetSelectedDCCPath ();
+            return UnityEditor.Formats.Fbx.Exporter.ExportSettings.GetSelectedDCCPath ();
         }
 
         /// <summary>
@@ -676,7 +676,7 @@ namespace FbxExporters.Editor
         /// </summary>
         /// <returns>The DCC name.</returns>
         public static string GetDCCName() {
-            return FbxExporters.EditorTools.ExportSettings.GetSelectedDCCName ();
+            return UnityEditor.Formats.Fbx.Exporter.ExportSettings.GetSelectedDCCName ();
         }
 
         /// <summary>

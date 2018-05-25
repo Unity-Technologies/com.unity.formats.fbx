@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 
-namespace FbxExporters.Editor
+namespace UnityEditor.Formats.Fbx.Exporter
 {
     public class RepairMissingScripts
     {

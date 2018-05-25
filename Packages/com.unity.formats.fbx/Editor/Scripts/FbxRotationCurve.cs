@@ -41,7 +41,7 @@ namespace FbxExporters
 
                 // Find when we have keys set.
                 var keyTimes = 
-                    (FbxExporters.Editor.ModelExporter.ExportSettings.BakeAnimation) 
+                    (UnityEditor.Formats.Fbx.Exporter.ModelExporter.ExportSettings.BakeAnimation) 
                     ? ModelExporter.GetSampleTimes(m_curves, sampleRate) 
                     : ModelExporter.GetKeyTimes(m_curves);
 
