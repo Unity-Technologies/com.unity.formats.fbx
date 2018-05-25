@@ -3,73 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEditor;
-using Unity.FbxSdk;
 using System.Linq;
+using Unity.FbxSdk;
 using FbxExporters.EditorTools;
+using FbxExporters.Visitors;
+using FbxExporters.CustomExtensions;
 
 namespace FbxExporters
 {
-    namespace CustomExtensions
-    {
-        //Extension methods must be defined in a static class
-        public static class Vector3Extension
-        {
-            public static Vector3 RightHanded (this Vector3 leftHandedVector)
-            {
-            	// negating the x component of the vector converts it from left to right handed coordinates
-            	return new Vector3 (
-            		-leftHandedVector [0],
-            		leftHandedVector [1],
-            		leftHandedVector [2]);
-            }
-
-            public static FbxVector4 FbxVector4 (this Vector3 uniVector)
-            {
-            	return new FbxVector4 (
-            		uniVector [0],
-            		uniVector [1],
-            		uniVector [2]);
-            }
-        }
-
-        //Extension methods must be defined in a static class
-        public static class AnimationCurveExtension
-        {
-            // This is an extension method for the AnimationCurve class
-            // The first parameter takes the "this" modifier
-            // and specifies the type for which the method is defined.
-            public static void Dump (this AnimationCurve animCurve, string message, float[] keyTimesExpected = null, float[] keyValuesExpected = null)
-            {
-                int idx = 0;
-                foreach (var key in animCurve.keys) {
-                    if (keyTimesExpected != null && keyValuesExpected != null) {
-                        Debug.Log (string.Format ("{5} keys[{0}] {1}({3}) {2} ({4})",
-                            idx, key.time, key.value,
-                            keyTimesExpected [idx], keyValuesExpected [idx],
-                            message));
-                    } else {
-                        Debug.Log (string.Format ("{3} keys[{0}] {1} {2}", idx, key.time, key.value, message));
-                    }
-                    idx++;
-                }
-            }
-        }
-    }
-
     namespace Editor
     {
-        using CustomExtensions;
-
         public class ModelExporter : System.IDisposable
         {
             const string Title =
-                "exports static meshes with materials and textures";
+                "Created by FBX Exporter from Unity Technologies";
 
-            const string Subject = 
+            const string Subject =
                 "";
 
             const string Keywords =
-                "export mesh materials textures uvs";
+                "Nodes Meshes Materials Textures Cameras Lights Skins Animation";
 
             const string Comments =
                 @"";
@@ -1343,35 +1296,8 @@ namespace FbxExporters
                     return false;
                 }
 
-                float aspectRatio = unityCamera.aspect;
-
-                #region Configure Film Camera from Game Camera
-                // Configure FilmBack settings: 35mm TV Projection (0.816 x 0.612)
-                float apertureHeightInInches = 0.612f;
-                float apertureWidthInInches = aspectRatio * apertureHeightInInches;
-
-                FbxCamera.EProjectionType projectionType =
-                    unityCamera.orthographic ? FbxCamera.EProjectionType.eOrthogonal : FbxCamera.EProjectionType.ePerspective;
-
-                fbxCamera.ProjectionType.Set(projectionType);
-                fbxCamera.FilmAspectRatio.Set(aspectRatio);
-                fbxCamera.SetApertureWidth (apertureWidthInInches);
-                fbxCamera.SetApertureHeight (apertureHeightInInches);
-                fbxCamera.SetApertureMode (FbxCamera.EApertureMode.eVertical);
-
-                // Focal Length
-                fbxCamera.FocalLength.Set(fbxCamera.ComputeFocalLength (unityCamera.fieldOfView));
-
-                // Field of View
-                fbxCamera.FieldOfView.Set (unityCamera.fieldOfView);
-
-                // NearPlane
-                fbxCamera.SetNearPlane (unityCamera.nearClipPlane*UnitScaleFactor);
-
-                // FarPlane
-                fbxCamera.SetFarPlane (unityCamera.farClipPlane*UnitScaleFactor);
-                #endregion
-
+                CameraVisitor.ConfigureCamera(unityCamera, fbxCamera);
+                
                 fbxNode.SetNodeAttribute (fbxCamera);
 
                 // set +90 post rotation to counteract for FBX camera's facing +X direction by default
