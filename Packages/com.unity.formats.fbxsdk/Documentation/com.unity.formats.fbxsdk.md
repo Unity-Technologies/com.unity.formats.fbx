@@ -33,7 +33,7 @@ There is no API documentation in the preview package. Refer to the <a href="http
 The bindings are in the `Unity.FbxSdk` namespace:
 
 ```
-using Unity.FbxSdk;
+using UnityEngine.Formats.FbxSdk;
 using UnityEngine;
 
 public class HelloFbx {
