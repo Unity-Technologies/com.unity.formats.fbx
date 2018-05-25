@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace Unity.FbxSdk {
+namespace UnityEngine.Formats.FbxSdk {
 
 public class FbxLayerElementArrayTemplateFbxVector2 : FbxLayerElementArray {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;

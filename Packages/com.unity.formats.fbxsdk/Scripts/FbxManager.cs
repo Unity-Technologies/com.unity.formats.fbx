@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace Unity.FbxSdk {
+namespace UnityEngine.Formats.FbxSdk {
 
 public class FbxManager : System.IDisposable, System.IEquatable<FbxManager> {
   protected global::System.Runtime.InteropServices.HandleRef swigCPtr { get ; private set; }

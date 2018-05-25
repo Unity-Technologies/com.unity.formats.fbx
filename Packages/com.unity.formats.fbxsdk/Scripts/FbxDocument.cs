@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace Unity.FbxSdk {
+namespace UnityEngine.Formats.FbxSdk {
 
 public class FbxDocument : FbxCollection {
   internal FbxDocument(global::System.IntPtr cPtr, bool ignored) : base(cPtr, ignored) { }

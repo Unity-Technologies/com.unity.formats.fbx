@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace Unity.FbxSdk {
+namespace UnityEngine.Formats.FbxSdk {
 
 public abstract class FbxEmitter : System.IDisposable, System.IEquatable<FbxEmitter> {
   protected global::System.Runtime.InteropServices.HandleRef swigCPtr { get ; private set; }
