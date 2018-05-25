@@ -196,9 +196,7 @@ class GlobalsPINVOKE {
   {
       int result = -1;
       bool verbose = UnityEngine.Debug.unityLogger.logEnabled;
-      UnityEditor.EditorApplication.LockReloadAssemblies();
       result = _InitFbxAllocators();
-      UnityEditor.EditorApplication.UnlockReloadAssemblies();
 
       if (result!=1 && verbose)
       {
@@ -225,13 +223,13 @@ class GlobalsPINVOKE {
   /// When deploying with Unity Package Manager, do not add defines: the
   /// default platform defines suffice.
   /// </summary>
-#if COM_UNITY_FORMATS_FBX_AS_ASSET
+#if COM_UNITY_FORMATS_FBX_AS_ASSET || UNITY_STANDALONE 
   const string DllImportName = "UnityFbxSdkNative";
-#elif UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+#elif UNITY_EDITOR_OSX
   const string DllImportName = "Packages/com.unity.formats.fbxsdk/MacOS/UnityFbxSdkNative.bundle/Contents/MacOS/UnityFbxSdkNative";
-#elif UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_LINUX
   const string DllImportName = "Packages/com.unity.formats.fbxsdk/Linux/UnityFbxSdkNative.so";
-#elif UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+#elif UNITY_EDITOR_WIN
   const string DllImportName = "Packages/com.unity.formats.fbxsdk/Windows/UnityFbxSdkNative.dll";
 #else
   #error "FbxSdk: C# bindings for this platform haven't been implemented yet, sorry."
