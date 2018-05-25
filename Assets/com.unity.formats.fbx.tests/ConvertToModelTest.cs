@@ -1,12 +1,11 @@
 using UnityEngine;
 using UnityEditor;
-using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
-using FbxExporters.Editor;
+using UnityEditor.Formats.Fbx.Exporter;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class ConvertToModelTest : ExporterTestBase
     {

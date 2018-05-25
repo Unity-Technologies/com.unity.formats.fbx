@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using FbxExporters.Editor;
 using System.Linq;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     using CustomExtensions;
 

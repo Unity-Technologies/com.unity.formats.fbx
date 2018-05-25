@@ -7,7 +7,7 @@ using UnityEngine.Formats.FbxSdk;
 using UnityEngine;
 using UnityEngine.Timeline;	
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public static class ModelExporterReflection
     {

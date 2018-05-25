@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FbxExporters.Editor;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class FbxPrefabTest : ExporterTestBase
     {

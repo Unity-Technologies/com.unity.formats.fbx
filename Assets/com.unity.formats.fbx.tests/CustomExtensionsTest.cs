@@ -10,7 +10,7 @@ using System.Collections;
 using FbxExporters.CustomExtensions;
 using UnityEngine.Formats.FbxSdk;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class CustomExtensionsTest : ExporterTestBase
     {

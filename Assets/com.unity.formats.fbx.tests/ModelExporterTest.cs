@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine.Formats.FbxSdk;
 using FbxExporters.Editor;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class ModelExporterTest : ExporterTestBase
     {

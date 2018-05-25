@@ -5,7 +5,7 @@ using NUnit.Framework;
 using System.Collections;
 using System.Diagnostics;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class ExportPerformanceTest : ExporterTestBase
     {

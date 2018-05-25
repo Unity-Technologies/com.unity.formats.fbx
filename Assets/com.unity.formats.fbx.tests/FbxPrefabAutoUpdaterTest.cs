@@ -5,7 +5,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEditor.Formats.Fbx.Exporter;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     /// <summary>
     /// Test that the post-import prefab updater works properly,
@@ -347,7 +347,7 @@ namespace FbxExporters.UnitTests
 
 namespace FbxExporters.PerformanceTests {
 
-    class FbxPrefabAutoUpdaterTestPerformance : FbxExporters.UnitTests.ExporterTestBase {
+    class FbxPrefabAutoUpdaterTestPerformance : UnityEditor.Formats.Fbx.Exporter.UnitTests.ExporterTestBase {
         [Test]
         public void ExpensivePerformanceTest ()
         {

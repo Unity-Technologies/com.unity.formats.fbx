@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Collections;
 using FbxExporters.CustomExtensions;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class FbxCameraTest : ExporterTestBase
     {

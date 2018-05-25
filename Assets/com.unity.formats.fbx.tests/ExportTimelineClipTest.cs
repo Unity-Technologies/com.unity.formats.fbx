@@ -5,7 +5,7 @@ using UnityEngine.Timeline;
 using UnityEngine.Playables;
 using UnityEditor.SceneManagement;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class ExportTimelineClipTest : ExporterTestBase
     {
