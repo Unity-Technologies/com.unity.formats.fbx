@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.Formats.Fbx.Exporter;
 
 namespace UnityEditor.Formats.Fbx.Exporter {
 

@@ -6,10 +6,8 @@
 // ***********************************************************************
 
 using UnityEngine;
-using UnityEditor;
-using System.IO;
-using System.Collections.Generic;
 using NUnit.Framework;
+using UnityEditor.Formats.Fbx.Exporter;
 
 namespace FbxExporters.UnitTests
 {
@@ -36,18 +34,18 @@ namespace FbxExporters.UnitTests
         public void BasicTest() {
             // test Maya integration
            {
-                var mayaIntegration = new Editor.MayaIntegration ();
+                var mayaIntegration = new MayaIntegration ();
 
                 LogNonEmptyString ("display name", mayaIntegration.DccDisplayName);
                 LogNonEmptyString ("integration zip path", mayaIntegration.IntegrationZipPath);
 
-                Assert.IsTrue (Editor.MayaIntegration.IsHeadlessInstall () == 0);
+                Assert.IsTrue (MayaIntegration.IsHeadlessInstall () == 0);
 
                 LogNonEmptyString ("module template path", mayaIntegration.GetModuleTemplatePath ());
-                LogNonEmptyString ("package path", Editor.MayaIntegration.GetPackagePath ());
+                LogNonEmptyString ("package path", MayaIntegration.GetPackagePath ());
 
                 LogNonEmptyString ("export settings path", mayaIntegration.GetExportSettingsPath ());
-                LogNonEmptyString ("package version", Editor.MayaIntegration.GetPackageVersion ());
+                LogNonEmptyString ("package version", MayaIntegration.GetPackageVersion ());
 
                 // check if folder is unzipped at invalid paths
                 Assert.IsFalse (mayaIntegration.FolderAlreadyUnzippedAtPath (null));
@@ -55,13 +53,13 @@ namespace FbxExporters.UnitTests
                 Assert.IsFalse (mayaIntegration.FolderAlreadyUnzippedAtPath ("X:/a/b/a/c"));
 
                 // test that the paths don't contain backslashes
-                Assert.IsFalse (Editor.MayaIntegration.GetProjectPath ().Contains ("\\"));
+                Assert.IsFalse (MayaIntegration.GetProjectPath ().Contains ("\\"));
                 Assert.IsFalse (mayaIntegration.GetExportSettingsPath ().Contains ("\\"));
             }
 
             // test Maya LT integration
             {
-                var mayaLTIntegration = new Editor.MayaLTIntegration ();
+                var mayaLTIntegration = new MayaLTIntegration ();
 
                 // make sure that the values we get are for Maya LT since it inherits a lot from Maya Integration
                 Assert.AreEqual ("Maya LT", mayaLTIntegration.DccDisplayName);
@@ -69,13 +67,13 @@ namespace FbxExporters.UnitTests
 
             // test 3ds Max integration
             {
-                var maxIntegration = new Editor.MaxIntegration ();
+                var maxIntegration = new MaxIntegration ();
 
                 LogNonEmptyString ("display name", maxIntegration.DccDisplayName);
                 LogNonEmptyString ("integration zip path", maxIntegration.IntegrationZipPath);
 
                 // check getting absolute path
-                var absPath = Editor.MaxIntegration.GetAbsPath ("foo");
+                var absPath = MaxIntegration.GetAbsPath ("foo");
                 Assert.IsTrue (System.IO.Path.IsPathRooted (absPath));
                 Assert.IsFalse (absPath.Contains ("\\"));
 

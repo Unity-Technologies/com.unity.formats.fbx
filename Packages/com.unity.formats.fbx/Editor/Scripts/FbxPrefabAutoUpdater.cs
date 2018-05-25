@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.Linq;
 using System;
-using UnityEditor.Formats.Fbx.Exporter;
+using UnityEngine.Formats.Fbx.Exporter;
 
-namespace FbxExporters
+namespace UnityEditor.Formats.Fbx.Exporter
 {
     /// <summary>
     /// This class handles updating prefabs that are linked to an FBX source file.
@@ -35,7 +34,7 @@ namespace FbxExporters
         const string MenuItemName = "GameObject/Update from FBX";
         public static bool runningUnitTest = false;
 
-        public static bool Verbose { private set {;} get { return EditorTools.ExportSettings.instance.Verbose; } }
+        public static bool Verbose { private set {;} get { return ExportSettings.instance.Verbose; } }
 
         public static string FindFbxPrefabAssetPath()
         {
@@ -57,7 +56,7 @@ namespace FbxExporters
                 }
             }
             if (foundPath == "") {
-                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), UnityEditor.Formats.Fbx.Exporter.ModelExporter.PACKAGE_UI_NAME));
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), ModelExporter.PACKAGE_UI_NAME));
             }
             return foundPath;
         #else

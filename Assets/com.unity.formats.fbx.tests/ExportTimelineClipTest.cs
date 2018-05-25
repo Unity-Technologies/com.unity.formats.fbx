@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
-using FbxExporters.Editor;
 using UnityEngine.Timeline;
 using UnityEngine.Playables;
 using UnityEditor.SceneManagement;

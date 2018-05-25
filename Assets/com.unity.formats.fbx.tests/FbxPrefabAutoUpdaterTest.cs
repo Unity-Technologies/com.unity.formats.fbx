@@ -3,7 +3,7 @@ using UnityEditor;
 using NUnit.Framework;
 using System.IO;
 using System.Collections.Generic;
-using FbxExporters.Editor;
+using UnityEditor.Formats.Fbx.Exporter;
 
 namespace FbxExporters.UnitTests
 {

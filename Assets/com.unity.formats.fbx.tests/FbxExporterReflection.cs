@@ -1,5 +1,4 @@
-﻿using FbxExporters.Editor;
-using FbxExporters.EditorTools;
+﻿using UnityEditor.Formats.Fbx.Exporter;
 using System;
 using System.Linq;
 using System.Collections.Generic;

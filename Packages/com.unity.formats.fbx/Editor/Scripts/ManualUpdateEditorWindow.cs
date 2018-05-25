@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
-using FbxExporters;
+using UnityEditor.Formats.Fbx.Exporter;
+using UnityEngine.Formats.Fbx.Exporter;
 using System.Linq;
 
 public class ManualUpdateEditorWindow : EditorWindow

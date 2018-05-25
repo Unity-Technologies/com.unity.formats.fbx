@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.Formats.FbxSdk;
-using FbxExporters.CustomExtensions;
+using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 
-namespace FbxExporters
+namespace UnityEditor.Formats.Fbx.Exporter
 {
     namespace Visitors
     {
