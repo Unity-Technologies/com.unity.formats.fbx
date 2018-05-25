@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEditor;
 using NUnit.Framework;
 using UnityEngine.Timeline;
 using UnityEngine.Playables;

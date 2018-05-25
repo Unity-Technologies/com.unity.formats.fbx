@@ -1,11 +1,7 @@
 ﻿using UnityEngine;
-using UnityEditor;
-using UnityEngine.TestTools;
 using NUnit.Framework;
-using System.IO;
 using System.Collections.Generic;
 using UnityEngine.Formats.FbxSdk;
-using FbxExporters.EditorTools;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {

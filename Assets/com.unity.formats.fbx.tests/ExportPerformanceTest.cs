@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
-using UnityEditor;
-using UnityEngine.TestTools;
 using NUnit.Framework;
-using System.Collections;
 using System.Diagnostics;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
@@ -69,7 +66,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
             m_stopwatch.Reset ();
             m_stopwatch.Start ();
-            var fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects (filename, new Object[]{m_toExport}) as string;
+            var fbxFileName = ModelExporter.ExportObjects (filename, new Object[]{m_toExport}) as string;
             m_stopwatch.Stop ();
 
             UnityEngine.Debug.unityLogger.logEnabled = true;

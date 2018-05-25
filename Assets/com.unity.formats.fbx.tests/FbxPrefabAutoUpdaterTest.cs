@@ -4,6 +4,7 @@ using NUnit.Framework;
 using System.IO;
 using System.Collections.Generic;
 using UnityEditor.Formats.Fbx.Exporter;
+using UnityEngine.Formats.Fbx.Exporter;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
@@ -117,7 +118,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 #endif
             //export our updated hierarchy to the same file path as the original
             SleepForFileTimestamp();
-            FbxExporters.Editor.ModelExporter.ExportObject(filePath1, cube2);
+            ModelExporter.ExportObject(filePath1, cube2);
             AssetDatabase.Refresh();
 
             rectTransform = oldPrefab.transform.GetChild (0).GetComponent<RectTransform> ();
@@ -143,7 +144,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             // that its timestamp differs enough for Unity to notice it
             // changed.
             SleepForFileTimestamp();
-            FbxExporters.Editor.ModelExporter.ExportObject(m_fbxPath, newHierarchy);
+            ModelExporter.ExportObject(m_fbxPath, newHierarchy);
             AssetDatabase.Refresh();
 
             // Verify that a new instance of the prefab got updated.
@@ -239,8 +240,8 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         {
             base.Init();
             // Save the initial setting for the auto updater toggle and disable it for the unit test
-            isAutoUpdaterOn = FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled;
-            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = false;
+            isAutoUpdaterOn = ExportSettings.instance.autoUpdaterEnabled;
+            ExportSettings.instance.autoUpdaterEnabled = false;
             FbxPrefabAutoUpdater.runningUnitTest = true;
         }
 
@@ -339,7 +340,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         public void stopTest()
         {
             // Put back the initial setting for the auto-updater toggle
-            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
+            ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
             FbxPrefabAutoUpdater.runningUnitTest = false;
         }
     }
@@ -364,7 +365,7 @@ namespace FbxExporters.PerformanceTests {
             // Then modify one fbx model. Shouldn't take longer than 1s.
             var hierarchy = CreateGameObject("the_root");
             var baseName = GetRandomFbxFilePath();
-            FbxExporters.Editor.ModelExporter.ExportObject(baseName, hierarchy);
+            ModelExporter.ExportObject(baseName, hierarchy);
 
             // Create N fbx models by copying files. Import them all at once.
             var names = new string[n];
@@ -410,7 +411,7 @@ namespace FbxExporters.PerformanceTests {
             // creating a file and then copying it, and not the FbxExporter.
             var newHierarchy = CreateHierarchy();
             var newHierarchyName = GetRandomFbxFilePath();
-            FbxExporters.Editor.ModelExporter.ExportObject(newHierarchyName, newHierarchy);
+            ModelExporter.ExportObject(newHierarchyName, newHierarchy);
             try {
                 UnityEngine.Debug.unityLogger.logEnabled = false;
                 stopwatch.Reset ();

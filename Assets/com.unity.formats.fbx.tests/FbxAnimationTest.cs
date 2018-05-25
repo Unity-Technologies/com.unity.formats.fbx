@@ -3,11 +3,9 @@
 //#define DEBUG_UNITTEST
 
 using UnityEngine;
-using UnityEditor;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using FbxExporters.Editor;
 using System.Linq;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
