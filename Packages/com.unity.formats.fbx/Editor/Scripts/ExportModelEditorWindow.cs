@@ -239,6 +239,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
+        /// <summary>
+        /// Add UI to turn the dialog off next time the user exports
+        /// </summary>
+        protected virtual void DontShowDialogUI() { }
+
         // -------------------------------------------------------------------------------------
 
         protected void OnGUI ()
@@ -351,6 +356,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.FlexibleSpace ();
 
             GUILayout.BeginHorizontal ();
+            DontShowDialogUI();
             GUILayout.FlexibleSpace ();
             if (GUILayout.Button ("Cancel", GUILayout.Width(ExportButtonWidth))) {
                 this.Close ();

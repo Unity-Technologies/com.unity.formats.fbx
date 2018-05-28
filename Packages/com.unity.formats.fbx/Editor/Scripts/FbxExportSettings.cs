@@ -37,6 +37,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     "Automatically updates prefabs with new fbx data that was imported."),
                 exportSettings.autoUpdaterEnabled
             );
+
+            exportSettings.showConvertToPrefabDialog = EditorGUILayout.Toggle(
+                new GUIContent("Show Convert UI:", "Enable Convert dialog when converting to a Linked Prefab"),
+                exportSettings.showConvertToPrefabDialog
+            );
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             EditorGUI.indentLevel--;
@@ -366,6 +371,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         public bool launchAfterInstallation = true;
         public bool HideSendToUnityMenu = true;
         public bool BakeAnimation = true;
+        public bool showConvertToPrefabDialog = true;
 
         public string IntegrationSavePath;
 
@@ -419,6 +425,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         protected override void LoadDefaults()
         {
             autoUpdaterEnabled = true;
+            showConvertToPrefabDialog = true;
             launchAfterInstallation = true;
             HideSendToUnityMenu = true;
             prefabSavePaths = new List<string>(){ kDefaultSavePath };

@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine.Formats.Fbx.Exporter;
 
 namespace UnityEditor.Formats.Fbx.Exporter
-{ 
+{
     public static class ConvertToModel
     {
         const string GameObjectMenuItemName = "GameObject/Convert To Linked Prefab Instance...";
@@ -83,8 +83,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GameObject [] unityGameObjectsToConvert)
         {
             var toExport = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
-            ConvertToPrefabEditorWindow.Init (toExport);
-            return toExport.ToArray();
+
+            if (ExportSettings.instance.showConvertToPrefabDialog)
+            {
+                ConvertToPrefabEditorWindow.Init(toExport);
+                return toExport.ToArray();
+            }
+
+            var converted = new List<GameObject>();
+            var exportOptions = ExportSettings.instance.convertToPrefabSettings.info;
+            foreach (var go in toExport)
+            {
+                var convertedGO = Convert(go, exportOptions: exportOptions);
+                if(convertedGO != null)
+                {
+                    converted.Add(convertedGO);
+                }
+            }
+            return converted.ToArray();
         }
 
         /// <summary>
