@@ -84,7 +84,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var toExport = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
 
-            if (!ExportSettings.instance.hideConvertToPrefabDialog)
+            if (ExportSettings.instance.showConvertToPrefabDialog)
             {
                 ConvertToPrefabEditorWindow.Init(toExport);
                 return toExport.ToArray();

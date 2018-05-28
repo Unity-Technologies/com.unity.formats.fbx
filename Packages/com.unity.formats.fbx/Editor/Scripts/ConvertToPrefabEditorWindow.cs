@@ -269,9 +269,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected override void DontShowDialogUI()
         {
-            ExportSettings.instance.hideConvertToPrefabDialog = EditorGUILayout.Toggle(
-                new GUIContent("Don't Ask Me Again", "Last used Convert paths and options will be used"),
-                ExportSettings.instance.hideConvertToPrefabDialog
+            EditorGUI.indentLevel--;
+            ExportSettings.instance.showConvertToPrefabDialog = !EditorGUILayout.Toggle(
+                new GUIContent("Don't ask me again", "Don't ask me again, use the last used paths and options instead"),
+                !ExportSettings.instance.showConvertToPrefabDialog
             );
         }
     }
