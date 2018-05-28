@@ -39,9 +39,9 @@ namespace FbxExporters.EditorTools {
                 exportSettings.autoUpdaterEnabled
             );
 
-            exportSettings.hideConvertToPrefabDialog = EditorGUILayout.Toggle(
-                new GUIContent("Hide Convert Dialog:", "Hide the Convert Options dialog when converting to a linked prefab"),
-                exportSettings.hideConvertToPrefabDialog
+            exportSettings.showConvertToPrefabDialog = EditorGUILayout.Toggle(
+                new GUIContent("Show Convert UI:", "Enable Convert dialog when converting to a Linked Prefab"),
+                exportSettings.showConvertToPrefabDialog
             );
             EditorGUILayout.Space();
             EditorGUILayout.Space();
@@ -372,7 +372,7 @@ namespace FbxExporters.EditorTools {
         public bool launchAfterInstallation = true;
         public bool HideSendToUnityMenu = true;
         public bool BakeAnimation = true;
-        public bool hideConvertToPrefabDialog = false;
+        public bool showConvertToPrefabDialog = true;
 
         public string IntegrationSavePath;
 
@@ -426,7 +426,7 @@ namespace FbxExporters.EditorTools {
         protected override void LoadDefaults()
         {
             autoUpdaterEnabled = true;
-            hideConvertToPrefabDialog = false;
+            showConvertToPrefabDialog = true;
             launchAfterInstallation = true;
             HideSendToUnityMenu = true;
             prefabSavePaths = new List<string>(){ kDefaultSavePath };

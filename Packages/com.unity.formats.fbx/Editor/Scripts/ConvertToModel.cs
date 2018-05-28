@@ -88,7 +88,7 @@ namespace FbxExporters
             {
                 var toExport = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
 
-                if (!EditorTools.ExportSettings.instance.hideConvertToPrefabDialog)
+                if (EditorTools.ExportSettings.instance.showConvertToPrefabDialog)
                 {
                     ConvertToPrefabEditorWindow.Init(toExport);
                     return toExport.ToArray();
