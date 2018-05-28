@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Animations;
 using UnityEditor;
 using System.Linq;
-using Unity.FbxSdk;
+using UnityEngine.Formats.FbxSdk;
 using FbxExporters.EditorTools;
 using FbxExporters.Visitors;
 using FbxExporters.CustomExtensions;
@@ -1263,7 +1263,7 @@ namespace FbxExporters
                 var renderer = unityGo.GetComponent<Renderer>();
                 var materials = renderer ? renderer.sharedMaterials : null;
 
-                Unity.FbxSdk.FbxSurfaceMaterial newMaterial = null;
+                UnityEngine.Formats.FbxSdk.FbxSurfaceMaterial newMaterial = null;
                 if (materials != null)
                 {
                     foreach (var mat in materials) {

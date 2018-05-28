@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace Unity.FbxSdk {
+namespace UnityEngine.Formats.FbxSdk {
 
 public class FbxImporter : FbxIOBase {
   internal FbxImporter(global::System.IntPtr cPtr, bool ignored) : base(cPtr, ignored) { }

@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace Unity.FbxSdk {
+namespace UnityEngine.Formats.FbxSdk {
 
 public class FbxAMatrix : FbxDouble4x4 {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;

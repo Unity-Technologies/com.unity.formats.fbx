@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace Unity.FbxSdk {
+namespace UnityEngine.Formats.FbxSdk {
 
 public class FbxSemanticEntryView : FbxEntryView {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;

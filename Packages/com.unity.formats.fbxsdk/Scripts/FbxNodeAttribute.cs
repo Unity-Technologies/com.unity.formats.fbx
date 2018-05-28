@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace Unity.FbxSdk {
+namespace UnityEngine.Formats.FbxSdk {
 
 public class FbxNodeAttribute : FbxObject {
   internal FbxNodeAttribute(global::System.IntPtr cPtr, bool ignored) : base(cPtr, ignored) { }
