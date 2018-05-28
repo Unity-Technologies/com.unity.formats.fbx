@@ -1,12 +1,10 @@
 ﻿using FbxExporters.Editor;
-using FbxExporters.EditorTools;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine.Formats.FbxSdk;
 using UnityEngine;
-using UnityEngine.Timeline;	
 
 namespace FbxExporters.UnitTests
 {
@@ -94,6 +92,23 @@ namespace FbxExporters.UnitTests
             return (bool)InvokeMethod("ExportMaterial", new object[] {unityMaterial,fbxScene,fbxNode},instance);
         }
 
+        public static string ExportObjects(string filePath,
+                UnityEngine.Object[] objects = null,
+                EditorTools.IExportOptions exportOptions = null,
+                Dictionary<GameObject, IExportData> exportData = null)
+        {
+            return (string)InvokeMethodOverload("ExportObjects",
+                                              new object[] { filePath, objects, exportOptions, exportData },
+                                              new Type[] { typeof(string), typeof(UnityEngine.Object[]), typeof(EditorTools.IExportOptions), typeof(Dictionary<GameObject, IExportData>) });
+        }
+
+        public static IExportData GetExportData(GameObject rootObject, AnimationClip animationClip, EditorTools.IExportOptions exportOptions = null)
+        {
+            return (IExportData)InvokeMethodOverload("GetExportData",
+                                                    new object[] { rootObject, animationClip, exportOptions },
+                                                    new Type[] { typeof(GameObject), typeof(AnimationClip), typeof(EditorTools.IExportOptions) });
+        }
+
         // Redefinition of the internal delegate. There might be a way to re-use the one in ModelExporter
         public static void RegisterMeshObjectCallback(ModelExporter.GetMeshForObject callback)
         {
@@ -159,18 +174,6 @@ namespace FbxExporters.UnitTests
                                               new Type[] {typeof(Mesh), typeof(FbxNode), typeof(Material [])},
                                               instance);
   
-        }
-
-        public static void ExportSingleTimelineClip(TimelineClip timelineClipSelected, GameObject animationTrackGObject, string filePath = null)
-        {
-            InvokeMethod("ExportSingleTimelineClip", 
-                         new object[] {timelineClipSelected, animationTrackGObject, filePath});
-        }
-
-        public static void ExportAllTimelineClips(GameObject objectWithPlayableDirector, string folderPath, IExportOptions exportOptions = null)
-        {
-            InvokeMethod("ExportAllTimelineClips", 
-                         new object[] {objectWithPlayableDirector, folderPath, exportOptions});
         }
 
         /////////// Helpers ///////////
