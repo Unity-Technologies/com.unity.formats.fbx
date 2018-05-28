@@ -404,7 +404,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             return (IsTimelineAnim)
                 ? AnimationOnlyExportData.GetGameObjectAndAnimationClip(ToExport [0]).Key
-                :  GetGameObject ();
+                : ModelExporter.GetGameObject(ToExport[0]);
         }
 
         protected override bool DisableTransferAnim {
