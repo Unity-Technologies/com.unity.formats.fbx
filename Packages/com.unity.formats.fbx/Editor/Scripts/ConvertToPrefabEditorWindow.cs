@@ -249,6 +249,14 @@ namespace FbxExporters
                 }
                 GUILayout.EndHorizontal();
             }
+
+            protected override void DontShowDialogUI()
+            {
+                ExportSettings.instance.hideConvertToPrefabDialog = EditorGUILayout.Toggle(
+                    new GUIContent("Don't Ask Me Again", "Last used Convert paths and options will be used"),
+                    ExportSettings.instance.hideConvertToPrefabDialog
+                );
+            }
         }	
 	}
 }
