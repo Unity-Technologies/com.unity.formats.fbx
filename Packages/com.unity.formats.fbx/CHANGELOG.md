@@ -2,6 +2,16 @@
 
 RELEASE NOTES
 
+**Version**: 1.6.0-preview
+
+NEW FEATURES
+
+* Added support for physical cameras
+
+FIXES
+
+* Fixed skinned mesh bone update
+
 **Version**: 1.5.0-preview
 
 NEW FEATURES
