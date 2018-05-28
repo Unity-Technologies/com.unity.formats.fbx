@@ -1,8 +1,8 @@
 {
-    "name": "com.unity.formats.fbx.editor",
+    "name": "Unity.Formats.Fbx.Editor",
     "references": [
-      "com.unity.formats.fbx.runtime",
-      "com.unity.formats.fbxsdk"
+      "Unity.Formats.Fbx.Runtime",
+      "Unity.Formats.FbxSdk"
     ],
     "includePlatforms": [
         "Editor"

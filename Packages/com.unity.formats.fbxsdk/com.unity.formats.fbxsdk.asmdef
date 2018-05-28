@@ -1,9 +1,12 @@
 {
-    "name": "com.unity.formats.fbxsdk",
-    "references": [
-    ],
+    "name": "Unity.Formats.FbxSdk",
+    "references": [],
+    "optionalUnityReferences": [],
     "includePlatforms": [
-        "Editor"
+        "Editor",
+        "macOSStandalone",
+        "WindowsStandalone64"
     ],
-    "excludePlatforms": []
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
 }

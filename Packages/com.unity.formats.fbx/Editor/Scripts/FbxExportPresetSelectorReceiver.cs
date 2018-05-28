@@ -1,50 +1,54 @@
 ﻿#if UNITY_2018_1_OR_NEWER
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor.Presets;
 
-public class FbxExportPresetSelectorReceiver : PresetSelectorReceiver
+namespace UnityEditor.Formats.Fbx.Exporter
 {
-    UnityEngine.Object m_Target;
-    Preset m_InitialValue;
-
-    public delegate void SelectionChangedDelegate();
-    public event SelectionChangedDelegate SelectionChanged;
-
-    public delegate void DialogClosedDelegate();
-    public event DialogClosedDelegate DialogClosed;
-
-    public override void OnSelectionClosed(Preset selection)
+    public class FbxExportPresetSelectorReceiver : PresetSelectorReceiver
     {
-        OnSelectionChanged(selection);
-        if (DialogClosed != null) {
-            DialogClosed ();
-        }
-        DestroyImmediate(this);
-    }
+        UnityEngine.Object m_Target;
+        Preset m_InitialValue;
 
-    public override void OnSelectionChanged(Preset selection)
-    {
-        if (selection != null)
+        public delegate void SelectionChangedDelegate();
+        public event SelectionChangedDelegate SelectionChanged;
+
+        public delegate void DialogClosedDelegate();
+        public event DialogClosedDelegate DialogClosed;
+
+        public override void OnSelectionClosed(Preset selection)
         {
-            selection.ApplyTo(m_Target);
+            OnSelectionChanged(selection);
+            if (DialogClosed != null)
+            {
+                DialogClosed();
+            }
+            DestroyImmediate(this);
         }
-        else
+
+        public override void OnSelectionChanged(Preset selection)
         {
-            m_InitialValue.ApplyTo(m_Target);
+            if (selection != null)
+            {
+                selection.ApplyTo(m_Target);
+            }
+            else
+            {
+                m_InitialValue.ApplyTo(m_Target);
+            }
+            if (SelectionChanged != null)
+            {
+                SelectionChanged();
+            }
         }
-        if (SelectionChanged != null) {
-            SelectionChanged ();
+
+        public void SetTarget(UnityEngine.Object target)
+        {
+            m_Target = target;
         }
-    }
 
-    public void SetTarget(UnityEngine.Object target){
-        m_Target = target;
-    }
-
-    public void SetInitialValue(Preset initialValue){
-        m_InitialValue = initialValue;
+        public void SetInitialValue(Preset initialValue)
+        {
+            m_InitialValue = initialValue;
+        }
     }
 }
 #endif

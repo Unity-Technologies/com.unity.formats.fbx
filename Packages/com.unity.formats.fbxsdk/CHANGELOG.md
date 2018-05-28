@@ -1,4 +1,11 @@
 # Changes in FBX SDK C# Bindings
+**Version**: 1.6.0-preview
+
+* The fbxsdk package can now be used in standalone builds (runtime)
+
+**Version**: 1.5.0-preview
+
+* Added support for physical camera attributes
 
 **Version**: 1.4.0-preview
 

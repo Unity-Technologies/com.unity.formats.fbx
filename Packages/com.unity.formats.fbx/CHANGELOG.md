@@ -2,6 +2,29 @@
 
 RELEASE NOTES
 
+**Version**: 1.6.0-preview
+
+NEW FEATURES
+
+* Added support for physical cameras
+
+FIXES
+
+* Fixed skinned mesh bone update
+
+**Version**: 1.5.0-preview
+
+NEW FEATURES
+
+* The roundtrip of assets can now be started from Maya from assets that have not been exported from Unity
+* DCC integration plug-in sources have been moved away from the package
+* Windows version is now using the FBX SDK version 2018.1.1
+* Streamlined public interface for the ModelExporter class
+
+FIXES:
+
+* DCC integration plug-ins now work with packman
+
 **Version**: 1.4.0-preview
 
 NEW FEATURES

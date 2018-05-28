@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace Unity.FbxSdk {
+namespace UnityEngine.Formats.FbxSdk {
 
 public class FbxFileTexture : FbxTexture {
   internal FbxFileTexture(global::System.IntPtr cPtr, bool ignored) : base(cPtr, ignored) { }

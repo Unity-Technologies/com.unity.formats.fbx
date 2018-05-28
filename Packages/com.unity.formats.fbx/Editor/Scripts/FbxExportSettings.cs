@@ -2,11 +2,10 @@ using System;
 using System.IO;
 using UnityEditorInternal;
 using UnityEngine;
-using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FbxExporters.EditorTools {
+namespace UnityEditor.Formats.Fbx.Exporter {
 
     [CustomEditor(typeof(ExportSettings))]
     public class ExportSettingsEditor : UnityEditor.Editor {
@@ -25,7 +24,7 @@ namespace FbxExporters.EditorTools {
 
             scrollPos = GUILayout.BeginScrollView (scrollPos);
 
-            var version = FbxExporters.Editor.ModelExporter.GetVersionFromReadme ();
+            var version = UnityEditor.Formats.Fbx.Exporter.ModelExporter.GetVersionFromReadme ();
             if (!string.IsNullOrEmpty(version)) {
                 GUILayout.Label ("Version: " + version, EditorStyles.centeredGreyMiniLabel);
                 EditorGUILayout.Space ();
@@ -115,7 +114,7 @@ namespace FbxExporters.EditorTools {
                     "Install Unity Integration",
                     "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
             if (GUILayout.Button (installIntegrationContent)) {
-                EditorApplication.delayCall += FbxExporters.Editor.IntegrationsUI.InstallDCCIntegration;
+                EditorApplication.delayCall += UnityEditor.Formats.Fbx.Exporter.IntegrationsUI.InstallDCCIntegration;
             }
             EditorGUI.EndDisabledGroup ();
 
@@ -133,7 +132,7 @@ namespace FbxExporters.EditorTools {
                                         "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
 
             if (GUILayout.Button (repairMissingScripts)) {
-                var componentUpdater = new FbxExporters.Editor.RepairMissingScripts ();
+                var componentUpdater = new UnityEditor.Formats.Fbx.Exporter.RepairMissingScripts ();
                 var filesToRepairCount = componentUpdater.GetAssetsToRepairCount ();
                 var dialogTitle = "FBX Prefab Component Updater";
                 if (filesToRepairCount > 0) {
@@ -916,7 +915,7 @@ namespace FbxExporters.EditorTools {
         }
 
         public static string GetProjectRelativePath(string fullPath){
-            var assetRelativePath = FbxExporters.EditorTools.ExportSettings.ConvertToAssetRelativePath(fullPath);
+            var assetRelativePath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.ConvertToAssetRelativePath(fullPath);
             var projectRelativePath = "Assets/" + assetRelativePath;
             if (string.IsNullOrEmpty(assetRelativePath)) {
                 throw new System.Exception("Path " + fullPath + " must be in the Assets folder.");

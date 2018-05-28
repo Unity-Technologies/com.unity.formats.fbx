@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.Linq;
 using System;
-using FbxExporters.Editor;
+using UnityEngine.Formats.Fbx.Exporter;
 
-namespace FbxExporters
+namespace UnityEditor.Formats.Fbx.Exporter
 {
     /// <summary>
     /// This class handles updating prefabs that are linked to an FBX source file.
@@ -35,7 +34,7 @@ namespace FbxExporters
         const string MenuItemName = "GameObject/Update from FBX";
         public static bool runningUnitTest = false;
 
-        public static bool Verbose { private set {;} get { return EditorTools.ExportSettings.instance.Verbose; } }
+        public static bool Verbose { private set {;} get { return ExportSettings.instance.Verbose; } }
 
         public static string FindFbxPrefabAssetPath()
         {
@@ -57,7 +56,7 @@ namespace FbxExporters
                 }
             }
             if (foundPath == "") {
-                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), ModelExporter.PACKAGE_UI_NAME));
             }
             return foundPath;
         #else
@@ -67,7 +66,7 @@ namespace FbxExporters
             if (System.IO.File.Exists(System.IO.Path.GetFullPath(path))) {
                 return path;
             } else {
-                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE, FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE, UnityEditor.Formats.Fbx.Exporter.ModelExporter.PACKAGE_UI_NAME));
                 return "";
             }
         #endif
@@ -113,7 +112,7 @@ namespace FbxExporters
         static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
         {
             // Do not start if Auto Updater is disabled in FBX Exporter Settings
-            if (!FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled)
+            if (!UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.autoUpdaterEnabled)
             {
                 return;
             }
@@ -257,7 +256,7 @@ namespace FbxExporters
             bool containsLinkedPrefab = false;
             foreach (GameObject selectedObject in selection)
             {
-                GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(selectedObject) as GameObject;
+                GameObject prefab = UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(selectedObject) as GameObject;
                 if (prefab && prefab.GetComponentInChildren<FbxPrefab>())
                 {
                     containsLinkedPrefab = true;
@@ -281,7 +280,7 @@ namespace FbxExporters
                 prefab = prefabOrInstance;
                 break;
             case PrefabType.PrefabInstance:
-                prefab = PrefabUtility.GetPrefabParent(prefabOrInstance) as GameObject;
+                prefab = PrefabUtility.GetCorrespondingObjectFromSource(prefabOrInstance) as GameObject;
                 break;
             default:
                 return;
@@ -293,7 +292,7 @@ namespace FbxExporters
                 // renamed nodes (or auto-update if there's nothing to rename).
                 var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
 
-                if (FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled || runningUnitTest)
+                if (UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.autoUpdaterEnabled || runningUnitTest)
                 {
                     fbxPrefabUtility.SyncPrefab();
                 }
@@ -1165,6 +1164,17 @@ namespace FbxExporters
                 }
 
                 /// <summary>
+                /// Get the equivalent transform on the linked prefab for the given fbx transform.
+                /// e.g. if there is a transform called Bone1 in the fbx, find the transform called Bone1 in the prefab.
+                /// </summary>
+                /// <returns>The linked prefab transform that matches the given fbx transform or null if not found</returns>
+                private Transform GetMatchingPrefabTransform(Transform fbxTransform, Transform fbxAssetRoot, Transform prefabAssetRoot)
+                {
+                    var transformPath = AnimationUtility.CalculateTransformPath(fbxTransform, fbxAssetRoot);
+                    return prefabAssetRoot.Find(transformPath);
+                }
+
+                /// <summary>
                 /// Then we act -- in a slightly different order:
                 /// 1. Create all the new nodes we need to create.
                 /// 2. Reparent as needed.
@@ -1355,6 +1365,42 @@ namespace FbxExporters
                             }
                             // Now set the values.
                             UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponent.jsonValue, prefabComponent);
+
+                            // if the prefab component is a skinned mesh renderer, then make sure to update the bone list so that
+                            // the bones are in the prefab, and not the fbx
+                            if (prefabComponent is SkinnedMeshRenderer)
+                            {
+                                var skinnedMeshComponent = prefabComponent as SkinnedMeshRenderer;
+                                var rootBone = skinnedMeshComponent.rootBone;
+                                var bones = skinnedMeshComponent.bones;
+
+                                var fbxAssetTransform = m_fbxPrefabUtility.GetFbxAsset().transform;
+                                
+                                var rootPrefabTransform = GetMatchingPrefabTransform(rootBone, fbxAssetTransform, prefabRoot);
+                                if (rootPrefabTransform == null)
+                                {
+                                    Debug.LogWarningFormat("FbxPrefabAutoUpdater: Could not find root bone {0} for {1} skinned mesh in linked prefab", rootBone.name, skinnedMeshComponent.name);
+                                }
+                                skinnedMeshComponent.rootBone = rootPrefabTransform;
+
+                                var prefabBones = new Transform[bones.Length];
+                                for (int i = 0; i < bones.Length; i++)
+                                {
+                                    var bone = bones[i];
+
+                                    var prefabTransform = GetMatchingPrefabTransform(bone, fbxAssetTransform, prefabRoot);
+                                    if (prefabTransform == null)
+                                    {
+                                        Debug.LogWarningFormat("FbxPrefabAutoUpdater: Could not find bone {0} for {1} skinned mesh", bone.name, skinnedMeshComponent.name);
+                                        continue;
+                                    }
+
+                                    prefabBones[i] = prefabTransform;
+                                }
+                                skinnedMeshComponent.bones = prefabBones;
+
+                                continue;
+                            }
                         }
                     }
                     return updatedNodes;
@@ -1407,7 +1453,7 @@ namespace FbxExporters
                         m_fbxPrefab.gameObject));
                 }
                 var fbxPrefabInstance = prefabInstanceRoot.GetComponentsInChildren<FbxPrefab>().FirstOrDefault(
-                    fbxPrefab => UnityEditor.PrefabUtility.GetPrefabParent(fbxPrefab) == m_fbxPrefab);
+                    fbxPrefab => UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(fbxPrefab) == m_fbxPrefab);
                 if (!fbxPrefabInstance) {
                     throw new System.Exception(string.Format("Internal error: couldn't find the right FbxPrefab after instantiating."));
                 }

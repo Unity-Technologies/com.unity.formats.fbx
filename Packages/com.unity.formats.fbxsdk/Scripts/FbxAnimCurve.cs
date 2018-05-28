@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace Unity.FbxSdk {
+namespace UnityEngine.Formats.FbxSdk {
 
 public class FbxAnimCurve : FbxAnimCurveBase {
   internal FbxAnimCurve(global::System.IntPtr cPtr, bool ignored) : base(cPtr, ignored) { }

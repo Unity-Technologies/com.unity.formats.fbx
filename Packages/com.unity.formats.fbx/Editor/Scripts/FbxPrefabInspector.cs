@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.Formats.Fbx.Exporter;
 
-namespace FbxExporters.EditorTools {
+namespace UnityEditor.Formats.Fbx.Exporter {
 
     [CustomEditor(typeof(FbxPrefab))]
     public class FbxPrefabInspector : UnityEditor.Editor {

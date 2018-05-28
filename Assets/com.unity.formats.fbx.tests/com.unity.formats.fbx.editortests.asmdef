@@ -1,9 +1,9 @@
 {
-    "name": "com.unity.formats.fbx.editortests",
+    "name": "Unity.Formats.Fbx.Editortests",
     "references": [
-        "com.unity.formats.fbx.editor",
-        "com.unity.formats.fbxsdk",
-        "com.unity.formats.fbx.runtime"
+        "Unity.Formats.Fbx.Editor",
+        "Unity.Formats.FbxSdk",
+        "Unity.Formats.Fbx.Runtime"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

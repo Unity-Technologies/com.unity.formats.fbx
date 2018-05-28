@@ -1,13 +1,9 @@
 ﻿using UnityEngine;
-using UnityEditor;
-using UnityEngine.TestTools;
 using NUnit.Framework;
-using System.IO;
 using System.Collections.Generic;
-using Unity.FbxSdk;
-using FbxExporters.EditorTools;
+using UnityEngine.Formats.FbxSdk;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     /// <summary>
     /// Tests the default selection export behavior.

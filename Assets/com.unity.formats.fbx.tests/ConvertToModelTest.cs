@@ -1,12 +1,10 @@
 using UnityEngine;
-using UnityEditor;
-using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
-using FbxExporters.Editor;
+using UnityEngine.Formats.Fbx.Exporter;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class ConvertToModelTest : ExporterTestBase
     {
@@ -93,13 +91,13 @@ namespace FbxExporters.UnitTests
                 var aFbx = ConvertToModel.GetOrCreateFbxAsset(a, fbxFullPath: GetRandomFbxFilePath());
                 var bFbx = ConvertToModel.GetOrCreateInstance(aFbx);
                 Assert.AreNotEqual(aFbx, bFbx);
-                Assert.AreEqual(aFbx, PrefabUtility.GetPrefabParent(bFbx));
+                Assert.AreEqual(aFbx, PrefabUtility.GetCorrespondingObjectFromSource(bFbx));
 
                 // Test on an prefab asset
                 var aPrefab = PrefabUtility.CreatePrefab(GetRandomPrefabAssetPath(), a);
                 var bPrefab = ConvertToModel.GetOrCreateInstance(aPrefab);
                 Assert.AreNotEqual(aPrefab, bPrefab);
-                Assert.AreEqual(aPrefab, PrefabUtility.GetPrefabParent(bPrefab));
+                Assert.AreEqual(aPrefab, PrefabUtility.GetCorrespondingObjectFromSource(bPrefab));
             }
 
             // Test SetupFbxPrefab
@@ -122,13 +120,13 @@ namespace FbxExporters.UnitTests
 
                 var aPath = GetRandomPrefabAssetPath();
                 var aPrefab = ConvertToModel.ApplyOrCreatePrefab(a, prefabFullPath: aPath);
-                Assert.AreEqual(aPrefab, PrefabUtility.GetPrefabParent(a));
+                Assert.AreEqual(aPrefab, PrefabUtility.GetCorrespondingObjectFromSource(a));
 
                 // Now apply it again (replacing aPrefab). Make sure we use the
                 // same file rather than creating a new one.
                 var bPath = GetRandomPrefabAssetPath();
                 var bPrefab = ConvertToModel.ApplyOrCreatePrefab(a, prefabFullPath: bPath);
-                Assert.AreEqual(bPrefab, PrefabUtility.GetPrefabParent(a));
+                Assert.AreEqual(bPrefab, PrefabUtility.GetCorrespondingObjectFromSource(a));
                 Assert.AreEqual(aPath, AssetDatabase.GetAssetPath(bPrefab));
             }
 
@@ -227,7 +225,7 @@ namespace FbxExporters.UnitTests
             Assert.That(cube); // we kept the original
             Assert.That(cubePrefab); // we got the new
             Assert.AreEqual("Cube", cubePrefab.name); // it has the right name
-            Assert.AreSame(PrefabUtility.GetPrefabParent(cube), cubePrefab); // the original and new are the same
+            Assert.AreSame(PrefabUtility.GetCorrespondingObjectFromSource(cube), cubePrefab); // the original and new are the same
             Assert.That(!EditorUtility.IsPersistent(cube));
             Assert.That(EditorUtility.IsPersistent(cubePrefab));
 
@@ -265,7 +263,7 @@ namespace FbxExporters.UnitTests
             {
                 var a = CreateHierarchy();
                 var aConvert = ConvertToModel.Convert(a, fbxFullPath: GetRandomFbxFilePath(), prefabFullPath: GetRandomPrefabAssetPath());
-                Assert.AreEqual(aConvert, PrefabUtility.GetPrefabParent(a));
+                Assert.AreEqual(aConvert, PrefabUtility.GetCorrespondingObjectFromSource(a));
             }
 
             // Test Convert on a prefab asset.
@@ -295,7 +293,7 @@ namespace FbxExporters.UnitTests
                 var aPrefab = PrefabUtility.CreatePrefab(aPrefabPath, a);
                 var bPrefabPath = GetRandomPrefabAssetPath();
                 var aConvert = ConvertToModel.Convert(a, fbxFullPath: GetRandomFbxFilePath(), prefabFullPath: bPrefabPath);
-                Assert.AreEqual(aConvert, PrefabUtility.GetPrefabParent(a));
+                Assert.AreEqual(aConvert, PrefabUtility.GetCorrespondingObjectFromSource(a));
                 Assert.AreEqual(bPrefabPath, AssetDatabase.GetAssetPath(aConvert));
                 Assert.AreEqual(aPrefabPath, AssetDatabase.GetAssetPath(aPrefab));
                 Assert.AreNotEqual(aPrefabPath, AssetDatabase.GetAssetPath(aConvert));
@@ -437,7 +435,7 @@ namespace FbxExporters.UnitTests
 
             Assert.That (cube);
             Assert.That (cubePrefab);
-            Assert.AreSame (cubePrefab, PrefabUtility.GetPrefabParent(cube));
+            Assert.AreSame (cubePrefab, PrefabUtility.GetCorrespondingObjectFromSource(cube));
 
             Assert.AreEqual (Path.GetFileNameWithoutExtension (path), cube.name);
         }
@@ -476,7 +474,7 @@ namespace FbxExporters.UnitTests
             GameObject converted = ConvertToModel.Convert (fbxInstance,
                     fbxFullPath: GetRandomFbxFilePath(),
                     prefabFullPath: GetRandomPrefabAssetPath());
-            Assert.That (converted, Is.EqualTo (PrefabUtility.GetPrefabParent(fbxInstance)));
+            Assert.That (converted, Is.EqualTo (PrefabUtility.GetCorrespondingObjectFromSource(fbxInstance)));
 
             // check meshes link to original fbx
             var prefabCubeMesh = fbxInstance.GetComponent<MeshFilter>().sharedMesh;
