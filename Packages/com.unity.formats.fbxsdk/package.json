@@ -1,8 +1,8 @@
 {
 "name": "com.unity.formats.fbxsdk",
 "displayName" : "FBX SDK C# bindings",
-"version" : "1.5.0-preview",
-"unity": "2018.1",
+"version" : "1.6.0-preview",
+"unity": "2018.2",
 "description" : "This package provides C# bindings to the Autodesk FBX SDK.",
 "keywords" : [ "fbx", "animation", "modeling", "maya", "max" ]
 }
