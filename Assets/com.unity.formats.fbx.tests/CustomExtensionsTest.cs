@@ -3,14 +3,11 @@
 //#define DEBUG_UNITTEST
 
 using UnityEngine;
-using UnityEditor;
 using NUnit.Framework;
-using System.Collections.Generic;
-using System.Collections;
-using FbxExporters.CustomExtensions;
+using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 using UnityEngine.Formats.FbxSdk;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class CustomExtensionsTest : ExporterTestBase
     {

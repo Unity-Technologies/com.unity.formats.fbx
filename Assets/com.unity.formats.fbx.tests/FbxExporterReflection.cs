@@ -1,4 +1,4 @@
-﻿using FbxExporters.Editor;
+using UnityEditor.Formats.Fbx.Exporter;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Reflection;
 using UnityEngine.Formats.FbxSdk;
 using UnityEngine;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public static class ModelExporterReflection
     {
@@ -94,19 +94,19 @@ namespace FbxExporters.UnitTests
 
         public static string ExportObjects(string filePath,
                 UnityEngine.Object[] objects = null,
-                EditorTools.IExportOptions exportOptions = null,
+                IExportOptions exportOptions = null,
                 Dictionary<GameObject, IExportData> exportData = null)
         {
             return (string)InvokeMethodOverload("ExportObjects",
                                               new object[] { filePath, objects, exportOptions, exportData },
-                                              new Type[] { typeof(string), typeof(UnityEngine.Object[]), typeof(EditorTools.IExportOptions), typeof(Dictionary<GameObject, IExportData>) });
+                                              new Type[] { typeof(string), typeof(UnityEngine.Object[]), typeof(IExportOptions), typeof(Dictionary<GameObject, IExportData>) });
         }
 
-        public static IExportData GetExportData(GameObject rootObject, AnimationClip animationClip, EditorTools.IExportOptions exportOptions = null)
+        public static IExportData GetExportData(GameObject rootObject, AnimationClip animationClip, IExportOptions exportOptions = null)
         {
             return (IExportData)InvokeMethodOverload("GetExportData",
                                                     new object[] { rootObject, animationClip, exportOptions },
-                                                    new Type[] { typeof(GameObject), typeof(AnimationClip), typeof(EditorTools.IExportOptions) });
+                                                    new Type[] { typeof(GameObject), typeof(AnimationClip), typeof(IExportOptions) });
         }
 
         // Redefinition of the internal delegate. There might be a way to re-use the one in ModelExporter

@@ -1,11 +1,10 @@
 using UnityEngine;
-using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
-using FbxExporters.EditorTools;
+using UnityEditor.Formats.Fbx.Exporter;
 using NUnit.Framework;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class FbxExportSettingsTest : ExporterTestBase
     {

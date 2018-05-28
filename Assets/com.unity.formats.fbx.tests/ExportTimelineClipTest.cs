@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using NUnit.Framework;
-using FbxExporters.Editor;
 using UnityEngine.Timeline;
 using UnityEngine.Playables;
 using UnityEditor.SceneManagement;
 using System.Collections.Generic;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class ExportTimelineClipTest : ExporterTestBase
     {

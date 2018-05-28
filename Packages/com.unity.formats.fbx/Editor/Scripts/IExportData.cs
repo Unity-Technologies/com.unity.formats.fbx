@@ -2,9 +2,8 @@
 using UnityEngine;
 using UnityEngine.Timeline;
 using System.Collections.Generic;
-using FbxExporters.EditorTools;
 
-namespace FbxExporters.Editor
+namespace UnityEditor.Formats.Fbx.Exporter
 {
     /// <summary>
     /// Export data containing extra information required to export

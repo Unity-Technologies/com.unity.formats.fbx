@@ -1,11 +1,8 @@
 ﻿using UnityEngine;
-using UnityEditor;
-using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.IO;
-using UnityEngine.Formats.FbxSdk;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public abstract class ExporterTestBase
     {
@@ -212,14 +209,14 @@ namespace FbxExporters.UnitTests
             EditorApplication.update += DeleteOnNextUpdate;
 
             // Put back the initial setting for the auto-updater toggle
-            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
+            ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
         }
 
         [SetUp]
         public virtual void Init()
         {
-            isAutoUpdaterOn = FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled;
-            FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled = true;
+            isAutoUpdaterOn = ExportSettings.instance.autoUpdaterEnabled;
+            ExportSettings.instance.autoUpdaterEnabled = true;
         }
 
 
@@ -228,27 +225,27 @@ namespace FbxExporters.UnitTests
         /// </summary>
         /// <returns>Root of Model Prefab.</returns>
         /// <param name="selected">Objects to export.</param>
-        protected virtual GameObject ExportSelection(Object selected, EditorTools.IExportOptions exportOptions = null)
+        protected virtual GameObject ExportSelection(Object selected, IExportOptions exportOptions = null)
         {
             // export selected to a file, then return the root
             var filename = GetRandomFileNamePath();
             return ExportSelection (filename, selected, exportOptions);
         }
 
-        protected virtual GameObject ExportSelection(Object[] selected, EditorTools.IExportOptions exportOptions = null){
+        protected virtual GameObject ExportSelection(Object[] selected, IExportOptions exportOptions = null){
             var filename = GetRandomFileNamePath();
             return ExportSelection (filename, selected, exportOptions);
         }
 
-        protected virtual GameObject ExportSelection(string filename, Object selected, EditorTools.IExportOptions exportOptions = null)
+        protected virtual GameObject ExportSelection(string filename, Object selected, IExportOptions exportOptions = null)
         {
             // export selected to a file, then return the root
             return ExportSelection (filename, new Object[]{selected}, exportOptions);
         }
 
-        protected virtual GameObject ExportSelection(string filename, Object[] selected, EditorTools.IExportOptions exportOptions = null){
+        protected virtual GameObject ExportSelection(string filename, Object[] selected, IExportOptions exportOptions = null){
             Debug.unityLogger.logEnabled = false;
-            var fbxFileName = FbxExporters.Editor.ModelExporter.ExportObjects (filename, selected, exportOptions) as string;
+            var fbxFileName = ModelExporter.ExportObjects (filename, selected, exportOptions) as string;
             Debug.unityLogger.logEnabled = true;
 
             Assert.IsNotNull (fbxFileName);
@@ -276,15 +273,15 @@ namespace FbxExporters.UnitTests
         /// <param name="animOnly">If set to <c>true</c> export animation only.</param>
         protected GameObject ExportToFbx (
             GameObject hierarchy, bool animOnly = false,
-            EditorTools.ExportSettings.LODExportType lodExportType = EditorTools.ExportSettings.LODExportType.All
+            ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All
         ){
             string filename = GetRandomFbxFilePath ();
-            var exportOptions = new EditorTools.ExportModelSettingsSerialize ();
+            var exportOptions = new ExportModelSettingsSerialize ();
             exportOptions.SetLODExportType(lodExportType);
             if (animOnly) {
-                exportOptions.SetModelAnimIncludeOption(FbxExporters.EditorTools.ExportSettings.Include.Anim);
+                exportOptions.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
             }
-            var exportedFilePath = FbxExporters.Editor.ModelExporter.ExportObject (
+            var exportedFilePath = ModelExporter.ExportObject (
                 filename, hierarchy, exportOptions
             );
             Assert.That (exportedFilePath, Is.EqualTo (filename));

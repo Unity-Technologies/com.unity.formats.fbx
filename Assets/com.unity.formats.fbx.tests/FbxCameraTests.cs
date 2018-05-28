@@ -3,13 +3,10 @@
 //#define DEBUG_UNITTEST
 
 using UnityEngine;
-using UnityEditor;
 using NUnit.Framework;
-using System.Collections.Generic;
-using System.Collections;
-using FbxExporters.CustomExtensions;
+using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class FbxCameraTest : ExporterTestBase
     {
@@ -58,7 +55,7 @@ namespace FbxExporters.UnitTests
 
             // Convert it to FBX. The asset file will be deleted automatically
             // on termination.
-            var fbxAsset = FbxExporters.Editor.ModelExporter.ExportObject(
+            var fbxAsset = ModelExporter.ExportObject(
                 filename, original);
 
             // refresh the assetdata base so that we can query for the model
@@ -96,7 +93,7 @@ namespace FbxExporters.UnitTests
 
             // Convert it to FBX. The asset file will be deleted automatically
             // on termination.
-            var fbxAsset = FbxExporters.Editor.ModelExporter.ExportObject(
+            var fbxAsset = ModelExporter.ExportObject(
                 filename, original);
             
             var source = AssetDatabase.LoadMainAssetAtPath(fbxAsset) as GameObject;

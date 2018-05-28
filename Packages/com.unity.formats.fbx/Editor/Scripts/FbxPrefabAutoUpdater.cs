@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.Linq;
 using System;
-using FbxExporters.Editor;
+using UnityEngine.Formats.Fbx.Exporter;
 
-namespace FbxExporters
+namespace UnityEditor.Formats.Fbx.Exporter
 {
     /// <summary>
     /// This class handles updating prefabs that are linked to an FBX source file.
@@ -35,7 +34,7 @@ namespace FbxExporters
         const string MenuItemName = "GameObject/Update from FBX";
         public static bool runningUnitTest = false;
 
-        public static bool Verbose { private set {;} get { return EditorTools.ExportSettings.instance.Verbose; } }
+        public static bool Verbose { private set {;} get { return ExportSettings.instance.Verbose; } }
 
         public static string FindFbxPrefabAssetPath()
         {
@@ -57,7 +56,7 @@ namespace FbxExporters
                 }
             }
             if (foundPath == "") {
-                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), ModelExporter.PACKAGE_UI_NAME));
             }
             return foundPath;
         #else
@@ -67,7 +66,7 @@ namespace FbxExporters
             if (System.IO.File.Exists(System.IO.Path.GetFullPath(path))) {
                 return path;
             } else {
-                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE, FbxExporters.Editor.ModelExporter.PACKAGE_UI_NAME));
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE, UnityEditor.Formats.Fbx.Exporter.ModelExporter.PACKAGE_UI_NAME));
                 return "";
             }
         #endif
@@ -113,7 +112,7 @@ namespace FbxExporters
         static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
         {
             // Do not start if Auto Updater is disabled in FBX Exporter Settings
-            if (!FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled)
+            if (!UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.autoUpdaterEnabled)
             {
                 return;
             }
@@ -293,7 +292,7 @@ namespace FbxExporters
                 // renamed nodes (or auto-update if there's nothing to rename).
                 var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
 
-                if (FbxExporters.EditorTools.ExportSettings.instance.autoUpdaterEnabled || runningUnitTest)
+                if (UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.autoUpdaterEnabled || runningUnitTest)
                 {
                     fbxPrefabUtility.SyncPrefab();
                 }

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Formats.FbxSdk;
 
-namespace FbxExporters
+namespace UnityEditor.Formats.Fbx.Exporter
 { 
     namespace CustomExtensions
     {

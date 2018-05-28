@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace FbxExporters
+namespace UnityEngine.Formats.Fbx.Exporter
 {
     /// <summary>
     /// This component is applied to a prefab. It keeps the prefab sync'd up

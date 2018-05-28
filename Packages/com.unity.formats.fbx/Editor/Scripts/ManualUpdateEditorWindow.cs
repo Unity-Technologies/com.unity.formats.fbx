@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
-using FbxExporters;
+using UnityEditor.Formats.Fbx.Exporter;
+using UnityEngine.Formats.Fbx.Exporter;
 using System.Linq;
 
 public class ManualUpdateEditorWindow : EditorWindow
@@ -18,7 +19,7 @@ public class ManualUpdateEditorWindow : EditorWindow
 
     List<string> m_nodeNameToSuggest;
 
-    public bool Verbose { private set {;} get { return FbxExporters.EditorTools.ExportSettings.instance.Verbose; } }
+    public bool Verbose { private set {;} get { return UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.Verbose; } }
 
     public void Init(FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility, FbxPrefab fbxPrefab)
     {

@@ -1,10 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.IO;
 
-namespace FbxExporters.Editor
+namespace UnityEditor.Formats.Fbx.Exporter
 {
     public class RepairMissingScripts
     {
@@ -43,7 +42,7 @@ namespace FbxExporters.Editor
 
         public static string GetSourceCodeSearchID()
         {
-            var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxExporters.FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
+            var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
             string searchID = null;
             string guid;
 #if UNITY_2018_2_OR_NEWER

@@ -1,12 +1,9 @@
 using UnityEngine;
-using UnityEditor;
-using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections.Generic;
-using System.Linq;
-using FbxExporters.Editor;
+using UnityEngine.Formats.Fbx.Exporter;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class FbxPrefabTest : ExporterTestBase
     {

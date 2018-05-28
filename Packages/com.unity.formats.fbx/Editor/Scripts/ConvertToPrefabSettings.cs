@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace FbxExporters.EditorTools
+namespace UnityEditor.Formats.Fbx.Exporter
 {
     [CustomEditor (typeof(ConvertToPrefabSettings))]
     public class ConvertToPrefabSettingsEditor : UnityEditor.Editor

@@ -1,13 +1,11 @@
 //#define DEBUG_UNITTEST
 using UnityEngine;
-using UnityEditor;
-using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine.Formats.FbxSdk;
-using FbxExporters.Editor;
+using UnityEngine.Formats.Fbx.Exporter;
 
-namespace FbxExporters.UnitTests
+namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
     public class ModelExporterTest : ExporterTestBase
     {
@@ -218,7 +216,7 @@ namespace FbxExporters.UnitTests
                 objectCalls = 0;
                 this.objectResult = objectResult;
 
-                FbxExporters.Editor.ModelExporter.ExportObject(filename, tree);
+                ModelExporter.ExportObject(filename, tree);
 
                 Assert.AreEqual(cCalls, componentCalls);
                 Assert.AreEqual(goCalls, objectCalls);
@@ -297,7 +295,7 @@ namespace FbxExporters.UnitTests
                 };
             ModelExporterReflection.RegisterMeshCallback(prefabCallback);
             filename = GetRandomFbxFilePath();
-            FbxExporters.Editor.ModelExporter.ExportObject(filename, tree);
+            ModelExporter.ExportObject(filename, tree);
             ModelExporterReflection.UnRegisterMeshCallback<FbxPrefab>();
 
             asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
@@ -320,7 +318,7 @@ namespace FbxExporters.UnitTests
                     }
                 };
             ModelExporterReflection.RegisterMeshObjectCallback(callback);
-            FbxExporters.Editor.ModelExporter.ExportObject(filename, tree);
+            ModelExporter.ExportObject(filename, tree);
             ModelExporterReflection.UnRegisterMeshCallback(callback);
 
             asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
@@ -801,7 +799,7 @@ namespace FbxExporters.UnitTests
 
             // test export all
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
-            GameObject fbxObj = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.All);
+            GameObject fbxObj = ExportToFbx(lodGroup, lodExportType:ExportSettings.LODExportType.All);
             Assert.IsTrue (fbxObj);
 
             HashSet<string> expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
@@ -809,7 +807,7 @@ namespace FbxExporters.UnitTests
 
             // test export highest
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0
-            fbxObj = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.Highest);
+            fbxObj = ExportToFbx(lodGroup, lodExportType:ExportSettings.LODExportType.Highest);
             Assert.IsTrue (fbxObj);
 
             expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name };
@@ -817,7 +815,7 @@ namespace FbxExporters.UnitTests
 
             // test export lowest
             // expected LODs exported: Cube_LOD2
-            fbxObj = ExportToFbx(lodGroup, lodExportType:EditorTools.ExportSettings.LODExportType.Lowest);
+            fbxObj = ExportToFbx(lodGroup, lodExportType:ExportSettings.LODExportType.Lowest);
             Assert.IsTrue (fbxObj);
 
             expectedChildren = new HashSet<string> () { cubeLOD2.name };
