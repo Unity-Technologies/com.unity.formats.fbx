@@ -82,11 +82,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public static GameObject[] CreateInstantiatedModelPrefab (
             GameObject [] unityGameObjectsToConvert)
         {
-            var toExport = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
-            ConvertToPrefabEditorWindow.Init (toExport);
-            return toExport.ToArray();
-        }
+            var toExport = ModelExporter.RemoveRedundantObjects(unityGameObjectsToConvert);
 
+            if (ExportSettings.instance.showConvertToPrefabDialog)
+            {
+                ConvertToPrefabEditorWindow.Init(toExport);
+                return toExport.ToArray();
+            }
+
+            var converted = new List<GameObject>();
+            var exportOptions = ExportSettings.instance.convertToPrefabSettings.info;
+            foreach (var go in toExport)
+            {
+                var convertedGO = Convert(go, exportOptions: exportOptions);
+                if (convertedGO != null)
+                {
+                    converted.Add(convertedGO);
+                }
+            }
+            return converted.ToArray();
+        }
+        
         /// <summary>
         /// Convert one object (and the hierarchy below it) to an auto-updating prefab.
         ///
@@ -177,40 +193,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public static bool WillExportFbx(GameObject toConvert) {
             return GetFbxAssetOrNull(toConvert) == null;
         }
-
-            /// <summary>
-            /// Create instantiated model prefabs from a selection of objects.
-            ///
-            /// Every hierarchy in the selection will be exported, under the name of the root.
-            ///
-            /// If an object and one of its descendents are both selected, the descendent is not promoted to be a prefab -- we only export the root.
-            /// </summary>
-            /// <returns>list of instanced Model Prefabs</returns>
-            /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
-            /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
-            public static GameObject[] CreateInstantiatedModelPrefab (
-                GameObject [] unityGameObjectsToConvert)
-            {
-                var toExport = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
-
-                if (EditorTools.ExportSettings.instance.showConvertToPrefabDialog)
-                {
-                    ConvertToPrefabEditorWindow.Init(toExport);
-                    return toExport.ToArray();
-                }
-
-                var converted = new List<GameObject>();
-                var exportOptions = EditorTools.ExportSettings.instance.convertToPrefabSettings.info;
-                foreach (var go in toExport)
-                {
-                    var convertedGO = Convert(go, exportOptions: exportOptions);
-                    if(convertedGO != null)
-                    {
-                        converted.Add(convertedGO);
-                    }
-                }
-                return converted.ToArray();
-            }
 
         /// <summary>
         /// Return an FBX asset that corresponds to 'toConvert'.
