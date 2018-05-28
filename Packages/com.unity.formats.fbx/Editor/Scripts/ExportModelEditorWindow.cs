@@ -404,16 +404,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             return (IsTimelineAnim)
                 ? AnimationOnlyExportData.GetGameObjectAndAnimationClip(ToExport [0]).Key
-                :  ModelExporter.GetGameObject ( ToExport [0] );
+                :  GetGameObject ();
         }
+
         protected override bool DisableTransferAnim {
             get {
                 // don't transfer animation if we are exporting more than one hierarchy, the timeline clips from
                 // a playable director, or if only the model is being exported
                 // if we are on the timeline then export length can be more than 1
                 return ToExport == null || ToExport.Length == 0 || (!IsTimelineAnim && ToExport.Length > 1) || SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model;
-            }
-
             }
         }
 
