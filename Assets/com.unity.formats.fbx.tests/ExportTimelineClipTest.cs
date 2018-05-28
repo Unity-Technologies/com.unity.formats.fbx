@@ -3,6 +3,7 @@ using NUnit.Framework;
 using UnityEngine.Timeline;
 using UnityEngine.Playables;
 using UnityEditor.SceneManagement;
+using System.Collections.Generic;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
@@ -20,6 +21,8 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         {
             GameObject myCube = GameObject.Find("CubeSpecial");
             string folderPath = GetRandomFileNamePath(extName: "");
+            string filePath = null;
+            var exportData = new Dictionary<GameObject, IExportData>();
 
             PlayableDirector pd = myCube.GetComponent<PlayableDirector> ();
             if (pd != null) {
@@ -27,28 +30,22 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                     AnimationTrack at = output.sourceObject as AnimationTrack;
 
                     GameObject atObject = pd.GetGenericBinding (output.sourceObject) as GameObject;
+                    Assert.That (atObject, Is.Not.Null);
+
                     // One file by animation clip
                     foreach (TimelineClip timeLineClip in at.GetClips()) {
-                        var filePath = string.Format ("{0}/{1}@{2}", folderPath, atObject.name, "Recorded.fbx");
-                        ModelExporterReflection.ExportSingleTimelineClip (timeLineClip, atObject, filePath);
-                        FileAssert.Exists (filePath);
+                        Assert.That (timeLineClip.animationClip, Is.Not.Null);
+
+                        filePath = string.Format ("{0}/{1}@{2}", folderPath, atObject.name, "Recorded.fbx");
+                        exportData[atObject] = ModelExporterReflection.GetExportData(atObject, timeLineClip.animationClip);
+                        break;
                     }
                 }
             }
-        }
-
-        [Test]
-        public void ExportAllTimelineClipTest()
-        {
-            GameObject myCube = GameObject.Find("CubeSpecial");
-            Selection.objects = new UnityEngine.GameObject[] { myCube };
-            string folderPath = GetRandomFileNamePath(extName: "");
-
-            foreach(GameObject obj in Selection.objects)
-            {
-                ModelExporterReflection.ExportAllTimelineClips(obj, folderPath);
-                FileAssert.Exists(string.Format("{0}/{1}@{2}", folderPath, obj.name, "Recorded.fbx"));
-            }
+            Assert.That (filePath, Is.Not.Null);
+            Assert.That (exportData, Is.Not.Null);
+            ModelExporterReflection.ExportObjects(filePath, new Object[1]{myCube}, null, exportData);
+            FileAssert.Exists (filePath);
         }
     }
 }
