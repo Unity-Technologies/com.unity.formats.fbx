@@ -504,6 +504,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// <summary>
             /// Exception that denotes a likely programming error.
             /// </summary>
+            [System.Serializable]
             public class FbxPrefabException : System.Exception
             {
                 public FbxPrefabException() { }

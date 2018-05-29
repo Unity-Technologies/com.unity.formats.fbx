@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
+    [System.Serializable]
     public class ConvertToLinkedPrefabException : System.Exception
     {
         public ConvertToLinkedPrefabException()
