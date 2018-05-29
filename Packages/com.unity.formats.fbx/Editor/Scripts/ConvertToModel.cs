@@ -3,9 +3,32 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.Formats.Fbx.Exporter;
+using System.Runtime.Serialization;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
+    public class ConvertToLinkedPrefabException : System.Exception
+    {
+        public ConvertToLinkedPrefabException()
+        {
+        }
+
+        public ConvertToLinkedPrefabException(string message)
+            : base(message)
+        {
+        }
+
+        public ConvertToLinkedPrefabException(string message, System.Exception inner)
+            : base(message, inner)
+        {
+        }
+
+        protected ConvertToLinkedPrefabException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+    }
+
     public static class ConvertToModel
     {
         const string GameObjectMenuItemName = "GameObject/Convert To Linked Prefab Instance...";
@@ -149,6 +172,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             string prefabFullPath = null, 
             ConvertToPrefabSettingsSerialize exportOptions = null)
         {
+            if (toConvert == null)
+            {
+                throw new System.ArgumentNullException("toConvert");
+            }
+
             // If we selected the something that's already backed by an
             // FBX, don't export.
             var mainAsset = GetOrCreateFbxAsset (toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
@@ -214,11 +242,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// file. Overrides fbxDirectoryFullPath. Ignored if toConvert is an
         /// fbx asset or an instance of an fbx.</param>
         /// <returns>The root of a model prefab asset.</returns>
-        public static GameObject GetOrCreateFbxAsset(GameObject toConvert,
+        internal static GameObject GetOrCreateFbxAsset(GameObject toConvert,
                 string fbxDirectoryFullPath = null,
                 string fbxFullPath = null,
                 ConvertToPrefabSettingsSerialize exportOptions = null)
         {
+            if(toConvert == null)
+            {
+                throw new System.ArgumentNullException("toConvert");
+            }
+
             var mainAsset = GetFbxAssetOrNull(toConvert);
             if (mainAsset) {
                 return mainAsset;
@@ -253,7 +286,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                                         exportOptions != null ? exportOptions : new ConvertToPrefabSettingsSerialize()
                                     );
                 if (fbxActualPath != fbxFullPath) {
-                    throw new System.Exception ("Failed to convert " + toConvert.name);
+                    throw new ConvertToLinkedPrefabException("Failed to convert " + toConvert.name);
                 }
             }
 
@@ -261,7 +294,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // relative to the project, not relative to the assets folder.
             var unityMainAsset = AssetDatabase.LoadMainAssetAtPath (projectRelativePath) as GameObject;
             if (!unityMainAsset) {
-                throw new System.Exception ("Failed to convert " + toConvert.name);
+                throw new ConvertToLinkedPrefabException ("Failed to convert " + toConvert.name);
             }
 
             // Copy the mesh/materials from the FBX
@@ -327,6 +360,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             string prefabDirectoryFullPath = null,
             string prefabFullPath = null)
         {
+            if(instance == null)
+            {
+                throw new System.ArgumentNullException("instance");
+            }
+
             if(PrefabUtility.GetPrefabType(instance) == PrefabType.PrefabInstance) {
                 return PrefabUtility.ReplacePrefab(instance, PrefabUtility.GetCorrespondingObjectFromSource(instance));
             }
@@ -351,7 +389,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             var prefab = PrefabUtility.CreatePrefab(prefabFileName, instance, ReplacePrefabOptions.ConnectToPrefab);
             if (!prefab) {
-                throw new System.Exception(string.Format("Failed to create prefab asset in [{0}]", prefabFileName));
+                throw new ConvertToLinkedPrefabException(string.Format("Failed to create prefab asset in [{0}]", prefabFileName));
             }
             return prefab;
         }
@@ -365,6 +403,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="unityMainAsset">Main asset in the FBX.</param>
         public static void SetupFbxPrefab(GameObject toSetUp, GameObject unityMainAsset)
         {
+            if(toSetUp == null)
+            {
+                throw new System.ArgumentNullException("toSetUp");
+            }
+
             // Set up the FbxPrefab component so it will auto-update.
             // Make sure to delete whatever FbxPrefab history we had.
             var fbxPrefab = toSetUp.GetComponent<FbxPrefab>();
@@ -385,7 +428,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns>The root of a model prefab asset, or null.</returns>
         /// <param name="go">A gameobject either in the scene or in the assets folder.</param>
-        public static GameObject GetFbxAssetOrNull(GameObject go) {
+        internal static GameObject GetFbxAssetOrNull(GameObject go) {
             // Children of model prefab instances will also have "model prefab instance"
             // as their prefab type, so it is important that it is the root that is selected.
             //
@@ -497,7 +540,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <param name="dest">GameObject to update.</param>
         /// <param name="source">Source to update from.</param>
-        public static void UpdateFromSourceRecursive(GameObject dest, GameObject source)
+        internal static void UpdateFromSourceRecursive(GameObject dest, GameObject source)
         {
             // recurse over orig, for each transform finding the corresponding transform in the FBX
             // and copying the meshes and materials over from the FBX
@@ -524,7 +567,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>Dictionary containing the name to source game object.</returns>
         /// <param name="dest">Destination GameObject.</param>
         /// <param name="source">Source GameObject.</param>
-        public static Dictionary<string,GameObject> MapNameToSourceRecursive(GameObject dest, GameObject source){
+        internal static Dictionary<string,GameObject> MapNameToSourceRecursive(GameObject dest, GameObject source){
             var nameToGO = new Dictionary<string,GameObject> ();
 
             var q = new Queue<Transform> ();
@@ -569,7 +612,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         ///
         /// The 'from' hierarchy is not modified.
         /// </summary>
-        public static void CopyComponents(GameObject to, GameObject from){
+        internal static void CopyComponents(GameObject to, GameObject from){
             var originalComponents = new List<Component>(to.GetComponents<Component> ());
 
             // UNI-27534: This fixes the issue where the mesh collider would not update to point to the mesh in the fbx after export
