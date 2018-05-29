@@ -68,10 +68,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return new MetricDistance(a._meters + b._meters);
             }
 
+            public static MetricDistance Add(MetricDistance a, MetricDistance b)
+            {
+                return a + b;
+            }
+
             public static MetricDistance operator -(MetricDistance a, MetricDistance b) {
                 if (a == null) throw new ArgumentNullException("a");
                 if (b == null) throw new ArgumentNullException("b");
                 return new MetricDistance(a._meters - b._meters);
+            }
+
+            public static MetricDistance Subtract(MetricDistance a, MetricDistance b)
+            {
+                return a - b;
             }
 
             public static MetricDistance operator *(MetricDistance a, MetricDistance b) {
@@ -80,10 +90,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return new MetricDistance(a._meters * b._meters);
             }
 
+            public static MetricDistance Multiply(MetricDistance a, MetricDistance b)
+            {
+                return a * b;
+            }
+
             public static MetricDistance operator /(MetricDistance a, MetricDistance b) {
                 if (a == null) throw new ArgumentNullException("a");
                 if (b == null) throw new ArgumentNullException("b");
                 return new MetricDistance(a._meters / b._meters);
+            }
+
+            public static MetricDistance Divide(MetricDistance a, MetricDistance b)
+            {
+                return a / b;
             }
 
         }
