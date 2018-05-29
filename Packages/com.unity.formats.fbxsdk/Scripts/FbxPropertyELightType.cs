@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyELightType : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyELightType(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyELightType_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyELightType(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyELightType_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyELightType : FbxProperty {
   }
 
   public FbxPropertyELightType Set(FbxLight.EType pValue) {
-    FbxPropertyELightType ret = new FbxPropertyELightType(GlobalsPINVOKE.FbxPropertyELightType_Set(swigCPtr, (int)pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyELightType ret = new FbxPropertyELightType(NativeMethods.FbxPropertyELightType_Set(swigCPtr, (int)pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EType Get() {
-    FbxLight.EType ret = (FbxLight.EType)GlobalsPINVOKE.FbxPropertyELightType_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EType ret = (FbxLight.EType)NativeMethods.FbxPropertyELightType_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EType EvaluateValue(FbxTime pTime, bool pForceEval) {
-    FbxLight.EType ret = (FbxLight.EType)GlobalsPINVOKE.FbxPropertyELightType_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EType ret = (FbxLight.EType)NativeMethods.FbxPropertyELightType_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EType EvaluateValue(FbxTime pTime) {
-    FbxLight.EType ret = (FbxLight.EType)GlobalsPINVOKE.FbxPropertyELightType_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EType ret = (FbxLight.EType)NativeMethods.FbxPropertyELightType_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EType EvaluateValue() {
-    FbxLight.EType ret = (FbxLight.EType)GlobalsPINVOKE.FbxPropertyELightType_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EType ret = (FbxLight.EType)NativeMethods.FbxPropertyELightType_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

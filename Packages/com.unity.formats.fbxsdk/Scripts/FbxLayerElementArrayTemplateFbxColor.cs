@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxLayerElementArrayTemplateFbxColor : FbxLayerElementArray {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxLayerElementArrayTemplateFbxColor(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxLayerElementArrayTemplateFbxColor_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxLayerElementArrayTemplateFbxColor(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxLayerElementArrayTemplateFbxColor_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -30,7 +30,7 @@ public class FbxLayerElementArrayTemplateFbxColor : FbxLayerElementArray {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxLayerElementArrayTemplateFbxColor(swigCPtr);
+          NativeMethods.delete_FbxLayerElementArrayTemplateFbxColor(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,8 +40,8 @@ public class FbxLayerElementArrayTemplateFbxColor : FbxLayerElementArray {
   }
 
   private FbxColor GetAtUnchecked(int pIndex) {
-    var ret = GlobalsPINVOKE.FbxLayerElementArrayTemplateFbxColor_GetAtUnchecked(swigCPtr, pIndex);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxLayerElementArrayTemplateFbxColor_GetAtUnchecked(swigCPtr, pIndex);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -52,7 +52,7 @@ public class FbxLayerElementArrayTemplateFbxColor : FbxLayerElementArray {
       return GetAtUnchecked(pIndex);
     }
 
-  public FbxLayerElementArrayTemplateFbxColor() : this(GlobalsPINVOKE.new_FbxLayerElementArrayTemplateFbxColor(), true) {
+  public FbxLayerElementArrayTemplateFbxColor() : this(NativeMethods.new_FbxLayerElementArrayTemplateFbxColor(), true) {
   }
 
 }

@@ -16,35 +16,35 @@ public class FbxExporter : FbxIOBase {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxExporter Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxExporter_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxExporter_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxExporter ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxExporter(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxExporter Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxExporter_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxExporter_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxExporter ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxExporter(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool Export(FbxDocument pDocument) {
-    bool ret = GlobalsPINVOKE.FbxExporter_Export(swigCPtr, FbxDocument.getCPtr(pDocument));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxExporter_Export(swigCPtr, FbxDocument.getCPtr(pDocument));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool SetFileExportVersion(string pVersion) {
-    bool ret = GlobalsPINVOKE.FbxExporter_SetFileExportVersion(swigCPtr, pVersion);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxExporter_SetFileExportVersion(swigCPtr, pVersion);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxIOFileHeaderInfo GetFileHeaderInfo() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxExporter_GetFileHeaderInfo(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxExporter_GetFileHeaderInfo(swigCPtr);
     FbxIOFileHeaderInfo ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxIOFileHeaderInfo(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -83,8 +83,8 @@ public class FbxExporter : FbxIOBase {
   }
 
   private void SetFbxSharpProgressCallback(FbxSharpProgressCallback callback) {
-    GlobalsPINVOKE.FbxExporter_SetFbxSharpProgressCallback(swigCPtr, FbxSharpProgressCallback.getCPtr(callback));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxExporter_SetFbxSharpProgressCallback(swigCPtr, FbxSharpProgressCallback.getCPtr(callback));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   FbxSharpProgressCallback m_progressCallback;
@@ -95,14 +95,14 @@ public class FbxExporter : FbxIOBase {
     SetFbxSharpProgressCallback(m_progressCallback);
   } 
   private int _getCurrentWritableVersionsLength() {
-    int ret = GlobalsPINVOKE.FbxExporter__getCurrentWritableVersionsLength(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxExporter__getCurrentWritableVersionsLength(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private string _getCurrentWritableVersionByIndex(int i) {
-    string ret = GlobalsPINVOKE.FbxExporter__getCurrentWritableVersionByIndex(swigCPtr, i);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxExporter__getCurrentWritableVersionByIndex(swigCPtr, i);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

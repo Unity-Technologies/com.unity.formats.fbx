@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxLayerElementArrayTemplateFbxVector4 : FbxLayerElementArray {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxLayerElementArrayTemplateFbxVector4(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxLayerElementArrayTemplateFbxVector4_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxLayerElementArrayTemplateFbxVector4(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxLayerElementArrayTemplateFbxVector4_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -30,7 +30,7 @@ public class FbxLayerElementArrayTemplateFbxVector4 : FbxLayerElementArray {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxLayerElementArrayTemplateFbxVector4(swigCPtr);
+          NativeMethods.delete_FbxLayerElementArrayTemplateFbxVector4(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,8 +40,8 @@ public class FbxLayerElementArrayTemplateFbxVector4 : FbxLayerElementArray {
   }
 
   private FbxVector4 GetAtUnchecked(int pIndex) {
-    var ret = GlobalsPINVOKE.FbxLayerElementArrayTemplateFbxVector4_GetAtUnchecked(swigCPtr, pIndex);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxLayerElementArrayTemplateFbxVector4_GetAtUnchecked(swigCPtr, pIndex);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -52,7 +52,7 @@ public class FbxLayerElementArrayTemplateFbxVector4 : FbxLayerElementArray {
       return GetAtUnchecked(pIndex);
     }
 
-  public FbxLayerElementArrayTemplateFbxVector4() : this(GlobalsPINVOKE.new_FbxLayerElementArrayTemplateFbxVector4(), true) {
+  public FbxLayerElementArrayTemplateFbxVector4() : this(NativeMethods.new_FbxLayerElementArrayTemplateFbxVector4(), true) {
   }
 
 }

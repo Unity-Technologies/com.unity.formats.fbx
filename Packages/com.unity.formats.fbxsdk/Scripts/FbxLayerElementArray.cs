@@ -32,7 +32,7 @@ public class FbxLayerElementArray : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxLayerElementArray(swigCPtr);
+          NativeMethods.delete_FbxLayerElementArray(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,62 +40,62 @@ public class FbxLayerElementArray : global::System.IDisposable {
     }
   }
 
-  public FbxLayerElementArray(EFbxType pDataType) : this(GlobalsPINVOKE.new_FbxLayerElementArray((int)pDataType), true) {
+  public FbxLayerElementArray(EFbxType pDataType) : this(NativeMethods.new_FbxLayerElementArray((int)pDataType), true) {
   }
 
   public int GetCount() {
-    int ret = GlobalsPINVOKE.FbxLayerElementArray_GetCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxLayerElementArray_GetCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetCount(int pCount) {
-    GlobalsPINVOKE.FbxLayerElementArray_SetCount(swigCPtr, pCount);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayerElementArray_SetCount(swigCPtr, pCount);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public int Add(int pItem) {
-    int ret = GlobalsPINVOKE.FbxLayerElementArray_Add__SWIG_1(swigCPtr, pItem);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxLayerElementArray_Add__SWIG_1(swigCPtr, pItem);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int Add(FbxColor pItem) {
-    int ret = GlobalsPINVOKE.FbxLayerElementArray_Add__SWIG_2(swigCPtr, pItem);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxLayerElementArray_Add__SWIG_2(swigCPtr, pItem);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int Add(FbxVector2 pItem) {
-    int ret = GlobalsPINVOKE.FbxLayerElementArray_Add__SWIG_3(swigCPtr, pItem);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxLayerElementArray_Add__SWIG_3(swigCPtr, pItem);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int Add(FbxVector4 pItem) {
-    int ret = GlobalsPINVOKE.FbxLayerElementArray_Add__SWIG_4(swigCPtr, pItem);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxLayerElementArray_Add__SWIG_4(swigCPtr, pItem);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetAt(int pIndex, int pItem) {
-    GlobalsPINVOKE.FbxLayerElementArray_SetAt__SWIG_1(swigCPtr, pIndex, pItem);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayerElementArray_SetAt__SWIG_1(swigCPtr, pIndex, pItem);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetAt(int pIndex, FbxColor pItem) {
-    GlobalsPINVOKE.FbxLayerElementArray_SetAt__SWIG_2(swigCPtr, pIndex, pItem);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayerElementArray_SetAt__SWIG_2(swigCPtr, pIndex, pItem);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetAt(int pIndex, FbxVector2 pItem) {
-    GlobalsPINVOKE.FbxLayerElementArray_SetAt__SWIG_3(swigCPtr, pIndex, pItem);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayerElementArray_SetAt__SWIG_3(swigCPtr, pIndex, pItem);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetAt(int pIndex, FbxVector4 pItem) {
-    GlobalsPINVOKE.FbxLayerElementArray_SetAt__SWIG_4(swigCPtr, pIndex, pItem);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayerElementArray_SetAt__SWIG_4(swigCPtr, pIndex, pItem);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
 }

@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxLayerElementTemplateFbxVector4 : FbxLayerElement {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxLayerElementTemplateFbxVector4(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxLayerElementTemplateFbxVector4_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxLayerElementTemplateFbxVector4(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxLayerElementTemplateFbxVector4_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,14 +36,14 @@ public class FbxLayerElementTemplateFbxVector4 : FbxLayerElement {
   }
 
   public FbxLayerElementArrayTemplateFbxVector4 GetDirectArray() {
-    FbxLayerElementArrayTemplateFbxVector4 ret = new FbxLayerElementArrayTemplateFbxVector4(GlobalsPINVOKE.FbxLayerElementTemplateFbxVector4_GetDirectArray(swigCPtr), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLayerElementArrayTemplateFbxVector4 ret = new FbxLayerElementArrayTemplateFbxVector4(NativeMethods.FbxLayerElementTemplateFbxVector4_GetDirectArray(swigCPtr), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayerElementArrayTemplateInt GetIndexArray() {
-    FbxLayerElementArrayTemplateInt ret = new FbxLayerElementArrayTemplateInt(GlobalsPINVOKE.FbxLayerElementTemplateFbxVector4_GetIndexArray(swigCPtr), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLayerElementArrayTemplateInt ret = new FbxLayerElementArrayTemplateInt(NativeMethods.FbxLayerElementTemplateFbxVector4_GetIndexArray(swigCPtr), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

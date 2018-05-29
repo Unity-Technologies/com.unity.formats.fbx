@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyEAreaLightShape : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyEAreaLightShape(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyEAreaLightShape_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyEAreaLightShape(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyEAreaLightShape_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyEAreaLightShape : FbxProperty {
   }
 
   public FbxPropertyEAreaLightShape Set(FbxLight.EAreaLightShape pValue) {
-    FbxPropertyEAreaLightShape ret = new FbxPropertyEAreaLightShape(GlobalsPINVOKE.FbxPropertyEAreaLightShape_Set(swigCPtr, (int)pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyEAreaLightShape ret = new FbxPropertyEAreaLightShape(NativeMethods.FbxPropertyEAreaLightShape_Set(swigCPtr, (int)pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EAreaLightShape Get() {
-    FbxLight.EAreaLightShape ret = (FbxLight.EAreaLightShape)GlobalsPINVOKE.FbxPropertyEAreaLightShape_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EAreaLightShape ret = (FbxLight.EAreaLightShape)NativeMethods.FbxPropertyEAreaLightShape_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EAreaLightShape EvaluateValue(FbxTime pTime, bool pForceEval) {
-    FbxLight.EAreaLightShape ret = (FbxLight.EAreaLightShape)GlobalsPINVOKE.FbxPropertyEAreaLightShape_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EAreaLightShape ret = (FbxLight.EAreaLightShape)NativeMethods.FbxPropertyEAreaLightShape_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EAreaLightShape EvaluateValue(FbxTime pTime) {
-    FbxLight.EAreaLightShape ret = (FbxLight.EAreaLightShape)GlobalsPINVOKE.FbxPropertyEAreaLightShape_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EAreaLightShape ret = (FbxLight.EAreaLightShape)NativeMethods.FbxPropertyEAreaLightShape_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EAreaLightShape EvaluateValue() {
-    FbxLight.EAreaLightShape ret = (FbxLight.EAreaLightShape)GlobalsPINVOKE.FbxPropertyEAreaLightShape_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EAreaLightShape ret = (FbxLight.EAreaLightShape)NativeMethods.FbxPropertyEAreaLightShape_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

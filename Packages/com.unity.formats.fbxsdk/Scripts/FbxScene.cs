@@ -16,72 +16,72 @@ public class FbxScene : FbxDocument {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxScene Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxScene_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxScene_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxScene ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxScene(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxScene Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxScene_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxScene_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxScene ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxScene(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxNode GetRootNode() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxScene_GetRootNode(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxScene_GetRootNode(swigCPtr);
     FbxNode ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxNode(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxPose GetPose(int pIndex) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxScene_GetPose(swigCPtr, pIndex);
+    global::System.IntPtr cPtr = NativeMethods.FbxScene_GetPose(swigCPtr, pIndex);
     FbxPose ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxPose(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool AddPose(FbxPose pPose) {
-    bool ret = GlobalsPINVOKE.FbxScene_AddPose(swigCPtr, FbxPose.getCPtr(pPose));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxScene_AddPose(swigCPtr, FbxPose.getCPtr(pPose));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxDocumentInfo GetSceneInfo() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxScene_GetSceneInfo(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxScene_GetSceneInfo(swigCPtr);
     FbxDocumentInfo ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDocumentInfo(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetSceneInfo(FbxDocumentInfo pSceneInfo) {
-    GlobalsPINVOKE.FbxScene_SetSceneInfo(swigCPtr, FbxDocumentInfo.getCPtr(pSceneInfo));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxScene_SetSceneInfo(swigCPtr, FbxDocumentInfo.getCPtr(pSceneInfo));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxGlobalSettings GetGlobalSettings() {
-    FbxGlobalSettings ret = new FbxGlobalSettings(GlobalsPINVOKE.FbxScene_GetGlobalSettings(swigCPtr), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxGlobalSettings ret = new FbxGlobalSettings(NativeMethods.FbxScene_GetGlobalSettings(swigCPtr), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetCurrentAnimationStack(FbxAnimStack pAnimStack) {
-    GlobalsPINVOKE.FbxScene_SetCurrentAnimationStack(swigCPtr, FbxAnimStack.getCPtr(pAnimStack));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxScene_SetCurrentAnimationStack(swigCPtr, FbxAnimStack.getCPtr(pAnimStack));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxAnimStack GetCurrentAnimationStack() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxScene_GetCurrentAnimationStack(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxScene_GetCurrentAnimationStack(swigCPtr);
     FbxAnimStack ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimStack(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetNodeCount() {
-    int ret = GlobalsPINVOKE.FbxScene_GetNodeCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxScene_GetNodeCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

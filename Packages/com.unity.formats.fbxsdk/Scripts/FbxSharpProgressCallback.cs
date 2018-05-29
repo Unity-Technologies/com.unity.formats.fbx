@@ -32,7 +32,7 @@ internal abstract class FbxSharpProgressCallback : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxSharpProgressCallback(swigCPtr);
+          NativeMethods.delete_FbxSharpProgressCallback(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,13 +40,13 @@ internal abstract class FbxSharpProgressCallback : global::System.IDisposable {
     }
   }
 
-  public FbxSharpProgressCallback() : this(GlobalsPINVOKE.new_FbxSharpProgressCallback(), true) {
+  public FbxSharpProgressCallback() : this(NativeMethods.new_FbxSharpProgressCallback(), true) {
     SwigDirectorConnect();
   }
 
   public virtual bool Progress(float percentage, string status) {
-    bool ret = GlobalsPINVOKE.FbxSharpProgressCallback_Progress(swigCPtr, percentage, status);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxSharpProgressCallback_Progress(swigCPtr, percentage, status);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -63,7 +63,7 @@ internal abstract class FbxSharpProgressCallback : global::System.IDisposable {
   private void SwigDirectorConnect() {
     if (SwigDerivedClassHasMethod("Progress", swigMethodTypes0))
       swigDelegate0 = new SwigDelegateFbxSharpProgressCallback_0(SwigDirectorProgress);
-    GlobalsPINVOKE.FbxSharpProgressCallback_director_connect(swigCPtr, swigDelegate0);
+    NativeMethods.FbxSharpProgressCallback_director_connect(swigCPtr, swigDelegate0);
   }
 
   private bool SwigDerivedClassHasMethod(string methodName, global::System.Type[] methodTypes) {

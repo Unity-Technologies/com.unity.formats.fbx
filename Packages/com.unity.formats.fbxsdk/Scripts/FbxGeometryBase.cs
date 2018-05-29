@@ -16,47 +16,47 @@ public class FbxGeometryBase : FbxLayerContainer {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxGeometryBase Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometryBase_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometryBase_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxGeometryBase ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxGeometryBase(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxGeometryBase Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometryBase_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometryBase_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxGeometryBase ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxGeometryBase(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual void InitControlPoints(int pCount) {
-    GlobalsPINVOKE.FbxGeometryBase_InitControlPoints(swigCPtr, pCount);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxGeometryBase_InitControlPoints(swigCPtr, pCount);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual FbxVector4 GetControlPointAt(int pIndex) {
-    var ret = GlobalsPINVOKE.FbxGeometryBase_GetControlPointAt(swigCPtr, pIndex);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxGeometryBase_GetControlPointAt(swigCPtr, pIndex);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual int GetControlPointsCount() {
-    int ret = GlobalsPINVOKE.FbxGeometryBase_GetControlPointsCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxGeometryBase_GetControlPointsCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayerElementNormal CreateElementNormal() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometryBase_CreateElementNormal(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometryBase_CreateElementNormal(swigCPtr);
     FbxLayerElementNormal ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerElementNormal(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayerElementTangent CreateElementTangent() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometryBase_CreateElementTangent(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometryBase_CreateElementTangent(swigCPtr);
     FbxLayerElementTangent ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerElementTangent(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -95,8 +95,8 @@ public class FbxGeometryBase : FbxLayerContainer {
   }
 
   public void SetControlPointAt(FbxVector4 pCtrlPoint, int pIndex) {
-    GlobalsPINVOKE.FbxGeometryBase_SetControlPointAt(swigCPtr, pCtrlPoint, pIndex);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxGeometryBase_SetControlPointAt(swigCPtr, pCtrlPoint, pIndex);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
 }

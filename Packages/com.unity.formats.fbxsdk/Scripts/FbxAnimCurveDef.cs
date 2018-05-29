@@ -15,28 +15,28 @@ public static class FbxAnimCurveDef {
 
   public static float sDEFAULT_WEIGHT {
     get {
-      float ret = GlobalsPINVOKE.FbxAnimCurveDef_sDEFAULT_WEIGHT_get();
+      float ret = NativeMethods.FbxAnimCurveDef_sDEFAULT_WEIGHT_get();
       return ret;
     } 
   }
 
   public static float sMIN_WEIGHT {
     get {
-      float ret = GlobalsPINVOKE.FbxAnimCurveDef_sMIN_WEIGHT_get();
+      float ret = NativeMethods.FbxAnimCurveDef_sMIN_WEIGHT_get();
       return ret;
     } 
   }
 
   public static float sMAX_WEIGHT {
     get {
-      float ret = GlobalsPINVOKE.FbxAnimCurveDef_sMAX_WEIGHT_get();
+      float ret = NativeMethods.FbxAnimCurveDef_sMAX_WEIGHT_get();
       return ret;
     } 
   }
 
   public static float sDEFAULT_VELOCITY {
     get {
-      float ret = GlobalsPINVOKE.FbxAnimCurveDef_sDEFAULT_VELOCITY_get();
+      float ret = NativeMethods.FbxAnimCurveDef_sDEFAULT_VELOCITY_get();
       return ret;
     } 
   }

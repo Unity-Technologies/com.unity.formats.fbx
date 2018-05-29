@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyEProjectionType : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyEProjectionType(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyEProjectionType_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyEProjectionType(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyEProjectionType_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyEProjectionType : FbxProperty {
   }
 
   public FbxPropertyEProjectionType Set(FbxCamera.EProjectionType pValue) {
-    FbxPropertyEProjectionType ret = new FbxPropertyEProjectionType(GlobalsPINVOKE.FbxPropertyEProjectionType_Set(swigCPtr, (int)pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyEProjectionType ret = new FbxPropertyEProjectionType(NativeMethods.FbxPropertyEProjectionType_Set(swigCPtr, (int)pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxCamera.EProjectionType Get() {
-    FbxCamera.EProjectionType ret = (FbxCamera.EProjectionType)GlobalsPINVOKE.FbxPropertyEProjectionType_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxCamera.EProjectionType ret = (FbxCamera.EProjectionType)NativeMethods.FbxPropertyEProjectionType_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxCamera.EProjectionType EvaluateValue(FbxTime pTime, bool pForceEval) {
-    FbxCamera.EProjectionType ret = (FbxCamera.EProjectionType)GlobalsPINVOKE.FbxPropertyEProjectionType_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxCamera.EProjectionType ret = (FbxCamera.EProjectionType)NativeMethods.FbxPropertyEProjectionType_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxCamera.EProjectionType EvaluateValue(FbxTime pTime) {
-    FbxCamera.EProjectionType ret = (FbxCamera.EProjectionType)GlobalsPINVOKE.FbxPropertyEProjectionType_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxCamera.EProjectionType ret = (FbxCamera.EProjectionType)NativeMethods.FbxPropertyEProjectionType_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxCamera.EProjectionType EvaluateValue() {
-    FbxCamera.EProjectionType ret = (FbxCamera.EProjectionType)GlobalsPINVOKE.FbxPropertyEProjectionType_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxCamera.EProjectionType ret = (FbxCamera.EProjectionType)NativeMethods.FbxPropertyEProjectionType_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

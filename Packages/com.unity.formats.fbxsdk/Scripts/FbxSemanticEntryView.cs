@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxSemanticEntryView : FbxEntryView {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxSemanticEntryView(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxSemanticEntryView_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxSemanticEntryView(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxSemanticEntryView_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -30,7 +30,7 @@ public class FbxSemanticEntryView : FbxEntryView {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxSemanticEntryView(swigCPtr);
+          NativeMethods.delete_FbxSemanticEntryView(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -39,32 +39,32 @@ public class FbxSemanticEntryView : FbxEntryView {
     }
   }
 
-  public FbxSemanticEntryView(FbxBindingTableEntry pEntry, bool pAsSource, bool pCreate) : this(GlobalsPINVOKE.new_FbxSemanticEntryView__SWIG_0(FbxBindingTableEntry.getCPtr(pEntry), pAsSource, pCreate), true) {
+  public FbxSemanticEntryView(FbxBindingTableEntry pEntry, bool pAsSource, bool pCreate) : this(NativeMethods.new_FbxSemanticEntryView__SWIG_0(FbxBindingTableEntry.getCPtr(pEntry), pAsSource, pCreate), true) {
   }
 
-  public FbxSemanticEntryView(FbxBindingTableEntry pEntry, bool pAsSource) : this(GlobalsPINVOKE.new_FbxSemanticEntryView__SWIG_1(FbxBindingTableEntry.getCPtr(pEntry), pAsSource), true) {
+  public FbxSemanticEntryView(FbxBindingTableEntry pEntry, bool pAsSource) : this(NativeMethods.new_FbxSemanticEntryView__SWIG_1(FbxBindingTableEntry.getCPtr(pEntry), pAsSource), true) {
   }
 
   public void SetSemantic(string pSemantic) {
-    GlobalsPINVOKE.FbxSemanticEntryView_SetSemantic(swigCPtr, pSemantic);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxSemanticEntryView_SetSemantic(swigCPtr, pSemantic);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public string GetSemantic(bool pAppendIndex) {
-    string ret = GlobalsPINVOKE.FbxSemanticEntryView_GetSemantic__SWIG_0(swigCPtr, pAppendIndex);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxSemanticEntryView_GetSemantic__SWIG_0(swigCPtr, pAppendIndex);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string GetSemantic() {
-    string ret = GlobalsPINVOKE.FbxSemanticEntryView_GetSemantic__SWIG_1(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxSemanticEntryView_GetSemantic__SWIG_1(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetIndex() {
-    int ret = GlobalsPINVOKE.FbxSemanticEntryView_GetIndex(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxSemanticEntryView_GetIndex(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

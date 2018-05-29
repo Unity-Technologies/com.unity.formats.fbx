@@ -16,36 +16,36 @@ public class FbxAnimStack : FbxCollection {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxAnimStack Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimStack_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimStack_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxAnimStack ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimStack(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxAnimStack Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimStack_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimStack_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxAnimStack ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimStack(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxPropertyString Description {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxAnimStack_Description_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxAnimStack_Description_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxTimeSpan GetLocalTimeSpan() {
-    FbxTimeSpan ret = new FbxTimeSpan(GlobalsPINVOKE.FbxAnimStack_GetLocalTimeSpan(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTimeSpan ret = new FbxTimeSpan(NativeMethods.FbxAnimStack_GetLocalTimeSpan(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetLocalTimeSpan(FbxTimeSpan pTimeSpan) {
-    GlobalsPINVOKE.FbxAnimStack_SetLocalTimeSpan(swigCPtr, FbxTimeSpan.getCPtr(pTimeSpan));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimStack_SetLocalTimeSpan(swigCPtr, FbxTimeSpan.getCPtr(pTimeSpan));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public override int GetHashCode(){

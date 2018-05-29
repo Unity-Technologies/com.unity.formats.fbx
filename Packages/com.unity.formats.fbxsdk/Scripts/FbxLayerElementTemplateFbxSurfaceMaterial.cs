@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxLayerElementTemplateFbxSurfaceMaterial : FbxLayerElement {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxLayerElementTemplateFbxSurfaceMaterial(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxLayerElementTemplateFbxSurfaceMaterial_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxLayerElementTemplateFbxSurfaceMaterial(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxLayerElementTemplateFbxSurfaceMaterial_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,14 +36,14 @@ public class FbxLayerElementTemplateFbxSurfaceMaterial : FbxLayerElement {
   }
 
   public FbxLayerElementArrayTemplateFbxSurfaceMaterial GetDirectArray() {
-    FbxLayerElementArrayTemplateFbxSurfaceMaterial ret = new FbxLayerElementArrayTemplateFbxSurfaceMaterial(GlobalsPINVOKE.FbxLayerElementTemplateFbxSurfaceMaterial_GetDirectArray(swigCPtr), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLayerElementArrayTemplateFbxSurfaceMaterial ret = new FbxLayerElementArrayTemplateFbxSurfaceMaterial(NativeMethods.FbxLayerElementTemplateFbxSurfaceMaterial_GetDirectArray(swigCPtr), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayerElementArrayTemplateInt GetIndexArray() {
-    FbxLayerElementArrayTemplateInt ret = new FbxLayerElementArrayTemplateInt(GlobalsPINVOKE.FbxLayerElementTemplateFbxSurfaceMaterial_GetIndexArray(swigCPtr), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLayerElementArrayTemplateInt ret = new FbxLayerElementArrayTemplateInt(NativeMethods.FbxLayerElementTemplateFbxSurfaceMaterial_GetIndexArray(swigCPtr), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

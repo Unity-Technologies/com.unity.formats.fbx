@@ -16,46 +16,46 @@ public class FbxIOBase : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxIOBase Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxIOBase_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxIOBase_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxIOBase ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxIOBase(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxIOBase Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxIOBase_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxIOBase_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxIOBase ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxIOBase(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual bool Initialize(string pFileName, int pFileFormat, FbxIOSettings pIOSettings) {
-    bool ret = GlobalsPINVOKE.FbxIOBase_Initialize__SWIG_0(swigCPtr, pFileName, pFileFormat, FbxIOSettings.getCPtr(pIOSettings));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxIOBase_Initialize__SWIG_0(swigCPtr, pFileName, pFileFormat, FbxIOSettings.getCPtr(pIOSettings));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual bool Initialize(string pFileName, int pFileFormat) {
-    bool ret = GlobalsPINVOKE.FbxIOBase_Initialize__SWIG_1(swigCPtr, pFileName, pFileFormat);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxIOBase_Initialize__SWIG_1(swigCPtr, pFileName, pFileFormat);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual bool Initialize(string pFileName) {
-    bool ret = GlobalsPINVOKE.FbxIOBase_Initialize__SWIG_2(swigCPtr, pFileName);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxIOBase_Initialize__SWIG_2(swigCPtr, pFileName);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual string GetFileName() {
-    string ret = GlobalsPINVOKE.FbxIOBase_GetFileName(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxIOBase_GetFileName(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxStatus GetStatus() {
-    FbxStatus ret = new FbxStatus(GlobalsPINVOKE.FbxIOBase_GetStatus(swigCPtr), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxStatus ret = new FbxStatus(NativeMethods.FbxIOBase_GetStatus(swigCPtr), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

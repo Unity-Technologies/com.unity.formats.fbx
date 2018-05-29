@@ -32,7 +32,7 @@ public class FbxTimeSpan : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxTimeSpan(swigCPtr);
+          NativeMethods.delete_FbxTimeSpan(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,84 +40,84 @@ public class FbxTimeSpan : global::System.IDisposable {
     }
   }
 
-  public FbxTimeSpan() : this(GlobalsPINVOKE.new_FbxTimeSpan__SWIG_0(), true) {
+  public FbxTimeSpan() : this(NativeMethods.new_FbxTimeSpan__SWIG_0(), true) {
   }
 
-  public FbxTimeSpan(FbxTime pStart, FbxTime pStop) : this(GlobalsPINVOKE.new_FbxTimeSpan__SWIG_1(FbxTime.getCPtr(pStart), FbxTime.getCPtr(pStop)), true) {
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+  public FbxTimeSpan(FbxTime pStart, FbxTime pStop) : this(NativeMethods.new_FbxTimeSpan__SWIG_1(FbxTime.getCPtr(pStart), FbxTime.getCPtr(pStop)), true) {
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void Set(FbxTime pStart, FbxTime pStop) {
-    GlobalsPINVOKE.FbxTimeSpan_Set(swigCPtr, FbxTime.getCPtr(pStart), FbxTime.getCPtr(pStop));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTimeSpan_Set(swigCPtr, FbxTime.getCPtr(pStart), FbxTime.getCPtr(pStop));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetStart(FbxTime pStart) {
-    GlobalsPINVOKE.FbxTimeSpan_SetStart(swigCPtr, FbxTime.getCPtr(pStart));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTimeSpan_SetStart(swigCPtr, FbxTime.getCPtr(pStart));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetStop(FbxTime pStop) {
-    GlobalsPINVOKE.FbxTimeSpan_SetStop(swigCPtr, FbxTime.getCPtr(pStop));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTimeSpan_SetStop(swigCPtr, FbxTime.getCPtr(pStop));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxTime GetStart() {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTimeSpan_GetStart(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTime ret = new FbxTime(NativeMethods.FbxTimeSpan_GetStart(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTime GetStop() {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTimeSpan_GetStop(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTime ret = new FbxTime(NativeMethods.FbxTimeSpan_GetStop(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTime GetDuration() {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTimeSpan_GetDuration(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTime ret = new FbxTime(NativeMethods.FbxTimeSpan_GetDuration(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTime GetSignedDuration() {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTimeSpan_GetSignedDuration(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTime ret = new FbxTime(NativeMethods.FbxTimeSpan_GetSignedDuration(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetDirection() {
-    int ret = GlobalsPINVOKE.FbxTimeSpan_GetDirection(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxTimeSpan_GetDirection(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool IsInside(FbxTime pTime) {
-    bool ret = GlobalsPINVOKE.FbxTimeSpan_IsInside(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxTimeSpan_IsInside(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTimeSpan Intersect(FbxTimeSpan pTime) {
-    FbxTimeSpan ret = new FbxTimeSpan(GlobalsPINVOKE.FbxTimeSpan_Intersect(swigCPtr, FbxTimeSpan.getCPtr(pTime)), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTimeSpan ret = new FbxTimeSpan(NativeMethods.FbxTimeSpan_Intersect(swigCPtr, FbxTimeSpan.getCPtr(pTime)), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private bool _equals(FbxTimeSpan pTime) {
-    bool ret = GlobalsPINVOKE.FbxTimeSpan__equals(swigCPtr, FbxTimeSpan.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxTimeSpan__equals(swigCPtr, FbxTimeSpan.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void UnionAssignment(FbxTimeSpan pSpan, int pDirection) {
-    GlobalsPINVOKE.FbxTimeSpan_UnionAssignment__SWIG_0(swigCPtr, FbxTimeSpan.getCPtr(pSpan), pDirection);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTimeSpan_UnionAssignment__SWIG_0(swigCPtr, FbxTimeSpan.getCPtr(pSpan), pDirection);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void UnionAssignment(FbxTimeSpan pSpan) {
-    GlobalsPINVOKE.FbxTimeSpan_UnionAssignment__SWIG_1(swigCPtr, FbxTimeSpan.getCPtr(pSpan));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTimeSpan_UnionAssignment__SWIG_1(swigCPtr, FbxTimeSpan.getCPtr(pSpan));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public bool Equals(FbxTimeSpan other) {

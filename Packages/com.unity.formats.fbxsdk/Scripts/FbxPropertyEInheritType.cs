@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyEInheritType : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyEInheritType(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyEInheritType_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyEInheritType(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyEInheritType_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyEInheritType : FbxProperty {
   }
 
   public FbxPropertyEInheritType Set(FbxTransform.EInheritType pValue) {
-    FbxPropertyEInheritType ret = new FbxPropertyEInheritType(GlobalsPINVOKE.FbxPropertyEInheritType_Set(swigCPtr, (int)pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyEInheritType ret = new FbxPropertyEInheritType(NativeMethods.FbxPropertyEInheritType_Set(swigCPtr, (int)pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTransform.EInheritType Get() {
-    FbxTransform.EInheritType ret = (FbxTransform.EInheritType)GlobalsPINVOKE.FbxPropertyEInheritType_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTransform.EInheritType ret = (FbxTransform.EInheritType)NativeMethods.FbxPropertyEInheritType_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTransform.EInheritType EvaluateValue(FbxTime pTime, bool pForceEval) {
-    FbxTransform.EInheritType ret = (FbxTransform.EInheritType)GlobalsPINVOKE.FbxPropertyEInheritType_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTransform.EInheritType ret = (FbxTransform.EInheritType)NativeMethods.FbxPropertyEInheritType_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTransform.EInheritType EvaluateValue(FbxTime pTime) {
-    FbxTransform.EInheritType ret = (FbxTransform.EInheritType)GlobalsPINVOKE.FbxPropertyEInheritType_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTransform.EInheritType ret = (FbxTransform.EInheritType)NativeMethods.FbxPropertyEInheritType_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTransform.EInheritType EvaluateValue() {
-    FbxTransform.EInheritType ret = (FbxTransform.EInheritType)GlobalsPINVOKE.FbxPropertyEInheritType_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTransform.EInheritType ret = (FbxTransform.EInheritType)NativeMethods.FbxPropertyEInheritType_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

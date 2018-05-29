@@ -32,7 +32,7 @@ public class FbxDataType : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxDataType(swigCPtr);
+          NativeMethods.delete_FbxDataType(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,51 +40,51 @@ public class FbxDataType : global::System.IDisposable {
     }
   }
 
-  public FbxDataType() : this(GlobalsPINVOKE.new_FbxDataType__SWIG_0(), true) {
+  public FbxDataType() : this(NativeMethods.new_FbxDataType__SWIG_0(), true) {
   }
 
-  public FbxDataType(FbxDataType pDataType) : this(GlobalsPINVOKE.new_FbxDataType__SWIG_1(FbxDataType.getCPtr(pDataType)), true) {
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+  public FbxDataType(FbxDataType pDataType) : this(NativeMethods.new_FbxDataType__SWIG_1(FbxDataType.getCPtr(pDataType)), true) {
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   private bool _equals(FbxDataType pDataType) {
-    bool ret = GlobalsPINVOKE.FbxDataType__equals(swigCPtr, FbxDataType.getCPtr(pDataType));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxDataType__equals(swigCPtr, FbxDataType.getCPtr(pDataType));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool Valid() {
-    bool ret = GlobalsPINVOKE.FbxDataType_Valid(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxDataType_Valid(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool Is(FbxDataType pDataType) {
-    bool ret = GlobalsPINVOKE.FbxDataType_Is(swigCPtr, FbxDataType.getCPtr(pDataType));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxDataType_Is(swigCPtr, FbxDataType.getCPtr(pDataType));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public EFbxType ToEnum() {
-    EFbxType ret = (EFbxType)GlobalsPINVOKE.FbxDataType_ToEnum(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    EFbxType ret = (EFbxType)NativeMethods.FbxDataType_ToEnum(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string GetName() {
-    string ret = GlobalsPINVOKE.FbxDataType_GetName(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxDataType_GetName(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public FbxDataType(string pName, EFbxType pType) : this(GlobalsPINVOKE.new_FbxDataType__SWIG_2(pName, (int)pType), true) {
+  public FbxDataType(string pName, EFbxType pType) : this(NativeMethods.new_FbxDataType__SWIG_2(pName, (int)pType), true) {
   }
 
-  public FbxDataType(string pName, FbxDataType pDataType) : this(GlobalsPINVOKE.new_FbxDataType__SWIG_3(pName, FbxDataType.getCPtr(pDataType)), true) {
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+  public FbxDataType(string pName, FbxDataType pDataType) : this(NativeMethods.new_FbxDataType__SWIG_3(pName, FbxDataType.getCPtr(pDataType)), true) {
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
-  public FbxDataType(EFbxType pType) : this(GlobalsPINVOKE.new_FbxDataType__SWIG_4((int)pType), true) {
+  public FbxDataType(EFbxType pType) : this(NativeMethods.new_FbxDataType__SWIG_4((int)pType), true) {
   }
 
   public bool Equals(FbxDataType other) {
@@ -120,8 +120,8 @@ public class FbxDataType : global::System.IDisposable {
   public override int GetHashCode() { return GetName().GetHashCode(); }
 
   public string GetNameForIO() {
-    string ret = GlobalsPINVOKE.FbxDataType_GetNameForIO(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxDataType_GetNameForIO(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

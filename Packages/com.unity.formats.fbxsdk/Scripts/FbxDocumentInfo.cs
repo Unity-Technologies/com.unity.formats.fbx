@@ -16,190 +16,190 @@ public class FbxDocumentInfo : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxDocumentInfo Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxDocumentInfo_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxDocumentInfo_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxDocumentInfo ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDocumentInfo(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxDocumentInfo Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxDocumentInfo_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxDocumentInfo_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxDocumentInfo ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDocumentInfo(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxPropertyString LastSavedUrl {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxDocumentInfo_LastSavedUrl_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxDocumentInfo_LastSavedUrl_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString Url {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxDocumentInfo_Url_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxDocumentInfo_Url_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxProperty Original {
     get {
-      FbxProperty ret = new FbxProperty(GlobalsPINVOKE.FbxDocumentInfo_Original_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxProperty ret = new FbxProperty(NativeMethods.FbxDocumentInfo_Original_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString Original_ApplicationVendor {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxDocumentInfo_Original_ApplicationVendor_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxDocumentInfo_Original_ApplicationVendor_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString Original_ApplicationName {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxDocumentInfo_Original_ApplicationName_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxDocumentInfo_Original_ApplicationName_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString Original_ApplicationVersion {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxDocumentInfo_Original_ApplicationVersion_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxDocumentInfo_Original_ApplicationVersion_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString Original_FileName {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxDocumentInfo_Original_FileName_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxDocumentInfo_Original_FileName_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxProperty LastSaved {
     get {
-      FbxProperty ret = new FbxProperty(GlobalsPINVOKE.FbxDocumentInfo_LastSaved_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxProperty ret = new FbxProperty(NativeMethods.FbxDocumentInfo_LastSaved_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString LastSaved_ApplicationVendor {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxDocumentInfo_LastSaved_ApplicationVendor_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxDocumentInfo_LastSaved_ApplicationVendor_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString LastSaved_ApplicationName {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxDocumentInfo_LastSaved_ApplicationName_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxDocumentInfo_LastSaved_ApplicationName_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString LastSaved_ApplicationVersion {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxDocumentInfo_LastSaved_ApplicationVersion_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxDocumentInfo_LastSaved_ApplicationVersion_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString EmbeddedUrl {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxDocumentInfo_EmbeddedUrl_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxDocumentInfo_EmbeddedUrl_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public string mTitle {
     set {
-      GlobalsPINVOKE.FbxDocumentInfo_mTitle_set(swigCPtr, value);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      NativeMethods.FbxDocumentInfo_mTitle_set(swigCPtr, value);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     } 
     get {
-      string ret = GlobalsPINVOKE.FbxDocumentInfo_mTitle_get(swigCPtr);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      string ret = NativeMethods.FbxDocumentInfo_mTitle_get(swigCPtr);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public string mSubject {
     set {
-      GlobalsPINVOKE.FbxDocumentInfo_mSubject_set(swigCPtr, value);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      NativeMethods.FbxDocumentInfo_mSubject_set(swigCPtr, value);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     } 
     get {
-      string ret = GlobalsPINVOKE.FbxDocumentInfo_mSubject_get(swigCPtr);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      string ret = NativeMethods.FbxDocumentInfo_mSubject_get(swigCPtr);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public string mAuthor {
     set {
-      GlobalsPINVOKE.FbxDocumentInfo_mAuthor_set(swigCPtr, value);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      NativeMethods.FbxDocumentInfo_mAuthor_set(swigCPtr, value);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     } 
     get {
-      string ret = GlobalsPINVOKE.FbxDocumentInfo_mAuthor_get(swigCPtr);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      string ret = NativeMethods.FbxDocumentInfo_mAuthor_get(swigCPtr);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public string mKeywords {
     set {
-      GlobalsPINVOKE.FbxDocumentInfo_mKeywords_set(swigCPtr, value);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      NativeMethods.FbxDocumentInfo_mKeywords_set(swigCPtr, value);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     } 
     get {
-      string ret = GlobalsPINVOKE.FbxDocumentInfo_mKeywords_get(swigCPtr);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      string ret = NativeMethods.FbxDocumentInfo_mKeywords_get(swigCPtr);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public string mRevision {
     set {
-      GlobalsPINVOKE.FbxDocumentInfo_mRevision_set(swigCPtr, value);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      NativeMethods.FbxDocumentInfo_mRevision_set(swigCPtr, value);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     } 
     get {
-      string ret = GlobalsPINVOKE.FbxDocumentInfo_mRevision_get(swigCPtr);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      string ret = NativeMethods.FbxDocumentInfo_mRevision_get(swigCPtr);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public string mComment {
     set {
-      GlobalsPINVOKE.FbxDocumentInfo_mComment_set(swigCPtr, value);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      NativeMethods.FbxDocumentInfo_mComment_set(swigCPtr, value);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     } 
     get {
-      string ret = GlobalsPINVOKE.FbxDocumentInfo_mComment_get(swigCPtr);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      string ret = NativeMethods.FbxDocumentInfo_mComment_get(swigCPtr);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public void Clear() {
-    GlobalsPINVOKE.FbxDocumentInfo_Clear(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxDocumentInfo_Clear(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public override int GetHashCode(){

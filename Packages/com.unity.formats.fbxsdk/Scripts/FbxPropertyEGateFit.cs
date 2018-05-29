@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyEGateFit : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyEGateFit(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyEGateFit_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyEGateFit(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyEGateFit_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyEGateFit : FbxProperty {
   }
 
   public FbxPropertyEGateFit Set(FbxCamera.EGateFit pValue) {
-    FbxPropertyEGateFit ret = new FbxPropertyEGateFit(GlobalsPINVOKE.FbxPropertyEGateFit_Set(swigCPtr, (int)pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyEGateFit ret = new FbxPropertyEGateFit(NativeMethods.FbxPropertyEGateFit_Set(swigCPtr, (int)pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxCamera.EGateFit Get() {
-    FbxCamera.EGateFit ret = (FbxCamera.EGateFit)GlobalsPINVOKE.FbxPropertyEGateFit_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxCamera.EGateFit ret = (FbxCamera.EGateFit)NativeMethods.FbxPropertyEGateFit_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxCamera.EGateFit EvaluateValue(FbxTime pTime, bool pForceEval) {
-    FbxCamera.EGateFit ret = (FbxCamera.EGateFit)GlobalsPINVOKE.FbxPropertyEGateFit_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxCamera.EGateFit ret = (FbxCamera.EGateFit)NativeMethods.FbxPropertyEGateFit_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxCamera.EGateFit EvaluateValue(FbxTime pTime) {
-    FbxCamera.EGateFit ret = (FbxCamera.EGateFit)GlobalsPINVOKE.FbxPropertyEGateFit_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxCamera.EGateFit ret = (FbxCamera.EGateFit)NativeMethods.FbxPropertyEGateFit_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxCamera.EGateFit EvaluateValue() {
-    FbxCamera.EGateFit ret = (FbxCamera.EGateFit)GlobalsPINVOKE.FbxPropertyEGateFit_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxCamera.EGateFit ret = (FbxCamera.EGateFit)NativeMethods.FbxPropertyEGateFit_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

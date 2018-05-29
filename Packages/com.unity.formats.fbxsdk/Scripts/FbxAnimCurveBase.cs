@@ -16,14 +16,14 @@ public class FbxAnimCurveBase : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public virtual int KeyGetCount() {
-    int ret = GlobalsPINVOKE.FbxAnimCurveBase_KeyGetCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxAnimCurveBase_KeyGetCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual FbxTime KeyGetTime(int arg0) {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxAnimCurveBase_KeyGetTime(swigCPtr, arg0), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTime ret = new FbxTime(NativeMethods.FbxAnimCurveBase_KeyGetTime(swigCPtr, arg0), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

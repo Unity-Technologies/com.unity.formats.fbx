@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyEWrapMode : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyEWrapMode(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyEWrapMode_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyEWrapMode(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyEWrapMode_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyEWrapMode : FbxProperty {
   }
 
   public FbxPropertyEWrapMode Set(FbxTexture.EWrapMode pValue) {
-    FbxPropertyEWrapMode ret = new FbxPropertyEWrapMode(GlobalsPINVOKE.FbxPropertyEWrapMode_Set(swigCPtr, (int)pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyEWrapMode ret = new FbxPropertyEWrapMode(NativeMethods.FbxPropertyEWrapMode_Set(swigCPtr, (int)pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTexture.EWrapMode Get() {
-    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)GlobalsPINVOKE.FbxPropertyEWrapMode_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)NativeMethods.FbxPropertyEWrapMode_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTexture.EWrapMode EvaluateValue(FbxTime pTime, bool pForceEval) {
-    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)GlobalsPINVOKE.FbxPropertyEWrapMode_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)NativeMethods.FbxPropertyEWrapMode_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTexture.EWrapMode EvaluateValue(FbxTime pTime) {
-    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)GlobalsPINVOKE.FbxPropertyEWrapMode_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)NativeMethods.FbxPropertyEWrapMode_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTexture.EWrapMode EvaluateValue() {
-    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)GlobalsPINVOKE.FbxPropertyEWrapMode_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)NativeMethods.FbxPropertyEWrapMode_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

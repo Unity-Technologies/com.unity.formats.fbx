@@ -37,14 +37,14 @@ public class FbxEntryView : global::System.IDisposable {
   }
 
   public virtual bool IsValid() {
-    bool ret = GlobalsPINVOKE.FbxEntryView_IsValid(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxEntryView_IsValid(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual string EntryType() {
-    string ret = GlobalsPINVOKE.FbxEntryView_EntryType(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxEntryView_EntryType(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

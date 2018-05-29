@@ -16,16 +16,16 @@ public class FbxShape : FbxGeometryBase {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxShape Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxShape_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxShape_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxShape ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxShape(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxShape Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxShape_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxShape_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxShape ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxShape(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

@@ -16,72 +16,72 @@ public class FbxGlobalSettings : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxGlobalSettings Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGlobalSettings_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxGlobalSettings_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxGlobalSettings ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxGlobalSettings(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxGlobalSettings Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGlobalSettings_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxGlobalSettings_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxGlobalSettings ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxGlobalSettings(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetAxisSystem(FbxAxisSystem pAxisSystem) {
-    GlobalsPINVOKE.FbxGlobalSettings_SetAxisSystem(swigCPtr, FbxAxisSystem.getCPtr(pAxisSystem));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxGlobalSettings_SetAxisSystem(swigCPtr, FbxAxisSystem.getCPtr(pAxisSystem));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxAxisSystem GetAxisSystem() {
-    FbxAxisSystem ret = new FbxAxisSystem(GlobalsPINVOKE.FbxGlobalSettings_GetAxisSystem(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxAxisSystem ret = new FbxAxisSystem(NativeMethods.FbxGlobalSettings_GetAxisSystem(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetSystemUnit(FbxSystemUnit pOther) {
-    GlobalsPINVOKE.FbxGlobalSettings_SetSystemUnit(swigCPtr, FbxSystemUnit.getCPtr(pOther));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxGlobalSettings_SetSystemUnit(swigCPtr, FbxSystemUnit.getCPtr(pOther));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxSystemUnit GetSystemUnit() {
-    FbxSystemUnit ret = new FbxSystemUnit(GlobalsPINVOKE.FbxGlobalSettings_GetSystemUnit(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxSystemUnit ret = new FbxSystemUnit(NativeMethods.FbxGlobalSettings_GetSystemUnit(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetAmbientColor(FbxColor pAmbientColor) {
-    GlobalsPINVOKE.FbxGlobalSettings_SetAmbientColor(swigCPtr, pAmbientColor);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxGlobalSettings_SetAmbientColor(swigCPtr, pAmbientColor);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxColor GetAmbientColor() {
-    var ret = GlobalsPINVOKE.FbxGlobalSettings_GetAmbientColor(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxGlobalSettings_GetAmbientColor(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool SetDefaultCamera(string pCameraName) {
-    bool ret = GlobalsPINVOKE.FbxGlobalSettings_SetDefaultCamera(swigCPtr, pCameraName);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxGlobalSettings_SetDefaultCamera(swigCPtr, pCameraName);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string GetDefaultCamera() {
-    string ret = GlobalsPINVOKE.FbxGlobalSettings_GetDefaultCamera(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxGlobalSettings_GetDefaultCamera(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetTimeMode(FbxTime.EMode pTimeMode) {
-    GlobalsPINVOKE.FbxGlobalSettings_SetTimeMode(swigCPtr, (int)pTimeMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxGlobalSettings_SetTimeMode(swigCPtr, (int)pTimeMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxTime.EMode GetTimeMode() {
-    FbxTime.EMode ret = (FbxTime.EMode)GlobalsPINVOKE.FbxGlobalSettings_GetTimeMode(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTime.EMode ret = (FbxTime.EMode)NativeMethods.FbxGlobalSettings_GetTimeMode(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

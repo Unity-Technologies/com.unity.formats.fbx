@@ -16,70 +16,70 @@ public class FbxImplementation : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxImplementation Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxImplementation_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxImplementation_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxImplementation ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxImplementation(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxImplementation Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxImplementation_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxImplementation_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxImplementation ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxImplementation(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxPropertyString Language {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxImplementation_Language_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxImplementation_Language_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString LanguageVersion {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxImplementation_LanguageVersion_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxImplementation_LanguageVersion_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString RenderAPI {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxImplementation_RenderAPI_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxImplementation_RenderAPI_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString RenderAPIVersion {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxImplementation_RenderAPIVersion_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxImplementation_RenderAPIVersion_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString RootBindingName {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxImplementation_RootBindingName_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxImplementation_RootBindingName_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxBindingTable AddNewTable(string pTargetName, string pTargetType) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxImplementation_AddNewTable(swigCPtr, pTargetName, pTargetType);
+    global::System.IntPtr cPtr = NativeMethods.FbxImplementation_AddNewTable(swigCPtr, pTargetName, pTargetType);
     FbxBindingTable ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxBindingTable(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxBindingTable GetRootTable() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxImplementation_GetRootTable(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxImplementation_GetRootTable(swigCPtr);
     FbxBindingTable ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxBindingTable(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

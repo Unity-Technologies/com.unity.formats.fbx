@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyEBlendMode : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyEBlendMode(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyEBlendMode_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyEBlendMode(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyEBlendMode_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyEBlendMode : FbxProperty {
   }
 
   public FbxPropertyEBlendMode Set(FbxTexture.EBlendMode pValue) {
-    FbxPropertyEBlendMode ret = new FbxPropertyEBlendMode(GlobalsPINVOKE.FbxPropertyEBlendMode_Set(swigCPtr, (int)pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyEBlendMode ret = new FbxPropertyEBlendMode(NativeMethods.FbxPropertyEBlendMode_Set(swigCPtr, (int)pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTexture.EBlendMode Get() {
-    FbxTexture.EBlendMode ret = (FbxTexture.EBlendMode)GlobalsPINVOKE.FbxPropertyEBlendMode_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EBlendMode ret = (FbxTexture.EBlendMode)NativeMethods.FbxPropertyEBlendMode_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTexture.EBlendMode EvaluateValue(FbxTime pTime, bool pForceEval) {
-    FbxTexture.EBlendMode ret = (FbxTexture.EBlendMode)GlobalsPINVOKE.FbxPropertyEBlendMode_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EBlendMode ret = (FbxTexture.EBlendMode)NativeMethods.FbxPropertyEBlendMode_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTexture.EBlendMode EvaluateValue(FbxTime pTime) {
-    FbxTexture.EBlendMode ret = (FbxTexture.EBlendMode)GlobalsPINVOKE.FbxPropertyEBlendMode_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EBlendMode ret = (FbxTexture.EBlendMode)NativeMethods.FbxPropertyEBlendMode_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTexture.EBlendMode EvaluateValue() {
-    FbxTexture.EBlendMode ret = (FbxTexture.EBlendMode)GlobalsPINVOKE.FbxPropertyEBlendMode_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EBlendMode ret = (FbxTexture.EBlendMode)NativeMethods.FbxPropertyEBlendMode_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

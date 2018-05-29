@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxLayerElementArrayTemplateFbxSurfaceMaterial : FbxLayerElementArray {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxLayerElementArrayTemplateFbxSurfaceMaterial(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxLayerElementArrayTemplateFbxSurfaceMaterial_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxLayerElementArrayTemplateFbxSurfaceMaterial(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxLayerElementArrayTemplateFbxSurfaceMaterial_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -30,7 +30,7 @@ public class FbxLayerElementArrayTemplateFbxSurfaceMaterial : FbxLayerElementArr
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxLayerElementArrayTemplateFbxSurfaceMaterial(swigCPtr);
+          NativeMethods.delete_FbxLayerElementArrayTemplateFbxSurfaceMaterial(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,9 +40,9 @@ public class FbxLayerElementArrayTemplateFbxSurfaceMaterial : FbxLayerElementArr
   }
 
   private FbxSurfaceMaterial GetAtUnchecked(int pIndex) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayerElementArrayTemplateFbxSurfaceMaterial_GetAtUnchecked(swigCPtr, pIndex);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayerElementArrayTemplateFbxSurfaceMaterial_GetAtUnchecked(swigCPtr, pIndex);
     FbxSurfaceMaterial ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxSurfaceMaterial(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -53,7 +53,7 @@ public class FbxLayerElementArrayTemplateFbxSurfaceMaterial : FbxLayerElementArr
       return GetAtUnchecked(pIndex);
     }
 
-  public FbxLayerElementArrayTemplateFbxSurfaceMaterial() : this(GlobalsPINVOKE.new_FbxLayerElementArrayTemplateFbxSurfaceMaterial(), true) {
+  public FbxLayerElementArrayTemplateFbxSurfaceMaterial() : this(NativeMethods.new_FbxLayerElementArrayTemplateFbxSurfaceMaterial(), true) {
   }
 
 }

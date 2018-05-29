@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyNullELook : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyNullELook(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyNullELook_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyNullELook(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyNullELook_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyNullELook : FbxProperty {
   }
 
   public FbxPropertyNullELook Set(FbxNull.ELook pValue) {
-    FbxPropertyNullELook ret = new FbxPropertyNullELook(GlobalsPINVOKE.FbxPropertyNullELook_Set(swigCPtr, (int)pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyNullELook ret = new FbxPropertyNullELook(NativeMethods.FbxPropertyNullELook_Set(swigCPtr, (int)pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxNull.ELook Get() {
-    FbxNull.ELook ret = (FbxNull.ELook)GlobalsPINVOKE.FbxPropertyNullELook_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxNull.ELook ret = (FbxNull.ELook)NativeMethods.FbxPropertyNullELook_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxNull.ELook EvaluateValue(FbxTime pTime, bool pForceEval) {
-    FbxNull.ELook ret = (FbxNull.ELook)GlobalsPINVOKE.FbxPropertyNullELook_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxNull.ELook ret = (FbxNull.ELook)NativeMethods.FbxPropertyNullELook_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxNull.ELook EvaluateValue(FbxTime pTime) {
-    FbxNull.ELook ret = (FbxNull.ELook)GlobalsPINVOKE.FbxPropertyNullELook_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxNull.ELook ret = (FbxNull.ELook)NativeMethods.FbxPropertyNullELook_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxNull.ELook EvaluateValue() {
-    FbxNull.ELook ret = (FbxNull.ELook)GlobalsPINVOKE.FbxPropertyNullELook_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxNull.ELook ret = (FbxNull.ELook)NativeMethods.FbxPropertyNullELook_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

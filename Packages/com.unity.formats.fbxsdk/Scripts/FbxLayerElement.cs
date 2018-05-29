@@ -37,24 +37,24 @@ public class FbxLayerElement : global::System.IDisposable {
   }
 
   public void SetMappingMode(FbxLayerElement.EMappingMode pMappingMode) {
-    GlobalsPINVOKE.FbxLayerElement_SetMappingMode(swigCPtr, (int)pMappingMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayerElement_SetMappingMode(swigCPtr, (int)pMappingMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetReferenceMode(FbxLayerElement.EReferenceMode pReferenceMode) {
-    GlobalsPINVOKE.FbxLayerElement_SetReferenceMode(swigCPtr, (int)pReferenceMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayerElement_SetReferenceMode(swigCPtr, (int)pReferenceMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxLayerElement.EMappingMode GetMappingMode() {
-    FbxLayerElement.EMappingMode ret = (FbxLayerElement.EMappingMode)GlobalsPINVOKE.FbxLayerElement_GetMappingMode(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLayerElement.EMappingMode ret = (FbxLayerElement.EMappingMode)NativeMethods.FbxLayerElement_GetMappingMode(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayerElement.EReferenceMode GetReferenceMode() {
-    FbxLayerElement.EReferenceMode ret = (FbxLayerElement.EReferenceMode)GlobalsPINVOKE.FbxLayerElement_GetReferenceMode(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLayerElement.EReferenceMode ret = (FbxLayerElement.EReferenceMode)NativeMethods.FbxLayerElement_GetReferenceMode(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

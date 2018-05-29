@@ -33,53 +33,53 @@ public class FbxManager : System.IDisposable, System.IEquatable<FbxManager> {
         Destroy();
       }
       lock(this) {
-        GlobalsPINVOKE.ReleaseWeakPointerHandle(swigCPtr);
+        NativeMethods.ReleaseWeakPointerHandle(swigCPtr);
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
     }
   }
 
   public static FbxManager Create() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxManager_Create();
+    global::System.IntPtr cPtr = NativeMethods.FbxManager_Create();
     FbxManager ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxManager(cPtr, false);
     return ret;
   }
 
   public virtual void Destroy() {
-    GlobalsPINVOKE.FbxManager_Destroy(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxManager_Destroy(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public static string GetVersion(bool pFull) {
-    string ret = GlobalsPINVOKE.FbxManager_GetVersion__SWIG_0(pFull);
+    string ret = NativeMethods.FbxManager_GetVersion__SWIG_0(pFull);
     return ret;
   }
 
   public static string GetVersion() {
-    string ret = GlobalsPINVOKE.FbxManager_GetVersion__SWIG_1();
+    string ret = NativeMethods.FbxManager_GetVersion__SWIG_1();
     return ret;
   }
 
   public static void GetFileFormatVersion(out int pMajor, out int pMinor, out int pRevision) {
-    GlobalsPINVOKE.FbxManager_GetFileFormatVersion(out pMajor, out pMinor, out pRevision);
+    NativeMethods.FbxManager_GetFileFormatVersion(out pMajor, out pMinor, out pRevision);
   }
 
   public virtual FbxIOSettings GetIOSettings() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxManager_GetIOSettings(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxManager_GetIOSettings(swigCPtr);
     FbxIOSettings ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxIOSettings(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual void SetIOSettings(FbxIOSettings pIOSettings) {
-    GlobalsPINVOKE.FbxManager_SetIOSettings(swigCPtr, FbxIOSettings.getCPtr(pIOSettings));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxManager_SetIOSettings(swigCPtr, FbxIOSettings.getCPtr(pIOSettings));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxIOPluginRegistry GetIOPluginRegistry() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxManager_GetIOPluginRegistry(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxManager_GetIOPluginRegistry(swigCPtr);
     FbxIOPluginRegistry ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxIOPluginRegistry(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

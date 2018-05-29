@@ -32,7 +32,7 @@ public class FbxQuaternion : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxQuaternion(swigCPtr);
+          NativeMethods.delete_FbxQuaternion(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,167 +40,167 @@ public class FbxQuaternion : global::System.IDisposable {
     }
   }
 
-  public FbxQuaternion() : this(GlobalsPINVOKE.new_FbxQuaternion__SWIG_0(), true) {
+  public FbxQuaternion() : this(NativeMethods.new_FbxQuaternion__SWIG_0(), true) {
   }
 
-  public FbxQuaternion(FbxQuaternion pV) : this(GlobalsPINVOKE.new_FbxQuaternion__SWIG_1(FbxQuaternion.getCPtr(pV)), true) {
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+  public FbxQuaternion(FbxQuaternion pV) : this(NativeMethods.new_FbxQuaternion__SWIG_1(FbxQuaternion.getCPtr(pV)), true) {
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
-  public FbxQuaternion(double pX, double pY, double pZ, double pW) : this(GlobalsPINVOKE.new_FbxQuaternion__SWIG_2(pX, pY, pZ, pW), true) {
+  public FbxQuaternion(double pX, double pY, double pZ, double pW) : this(NativeMethods.new_FbxQuaternion__SWIG_2(pX, pY, pZ, pW), true) {
   }
 
-  public FbxQuaternion(double pX, double pY, double pZ) : this(GlobalsPINVOKE.new_FbxQuaternion__SWIG_3(pX, pY, pZ), true) {
+  public FbxQuaternion(double pX, double pY, double pZ) : this(NativeMethods.new_FbxQuaternion__SWIG_3(pX, pY, pZ), true) {
   }
 
-  public FbxQuaternion(FbxVector4 pAxis, double pDegree) : this(GlobalsPINVOKE.new_FbxQuaternion__SWIG_4(pAxis, pDegree), true) {
+  public FbxQuaternion(FbxVector4 pAxis, double pDegree) : this(NativeMethods.new_FbxQuaternion__SWIG_4(pAxis, pDegree), true) {
   }
 
   private double GetAtUnchecked(int pIndex) {
-    double ret = GlobalsPINVOKE.FbxQuaternion_GetAtUnchecked(swigCPtr, pIndex);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxQuaternion_GetAtUnchecked(swigCPtr, pIndex);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private void SetAtUnchecked(int pIndex, double pValue) {
-    GlobalsPINVOKE.FbxQuaternion_SetAtUnchecked(swigCPtr, pIndex, pValue);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxQuaternion_SetAtUnchecked(swigCPtr, pIndex, pValue);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void Set(double pX, double pY, double pZ, double pW) {
-    GlobalsPINVOKE.FbxQuaternion_Set__SWIG_0(swigCPtr, pX, pY, pZ, pW);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxQuaternion_Set__SWIG_0(swigCPtr, pX, pY, pZ, pW);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void Set(double pX, double pY, double pZ) {
-    GlobalsPINVOKE.FbxQuaternion_Set__SWIG_1(swigCPtr, pX, pY, pZ);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxQuaternion_Set__SWIG_1(swigCPtr, pX, pY, pZ);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   private FbxQuaternion operator_Add(double pValue) {
-    FbxQuaternion ret = new FbxQuaternion(GlobalsPINVOKE.FbxQuaternion_operator_Add__SWIG_0(swigCPtr, pValue), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxQuaternion ret = new FbxQuaternion(NativeMethods.FbxQuaternion_operator_Add__SWIG_0(swigCPtr, pValue), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private FbxQuaternion operator_Sub(double pValue) {
-    FbxQuaternion ret = new FbxQuaternion(GlobalsPINVOKE.FbxQuaternion_operator_Sub__SWIG_0(swigCPtr, pValue), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxQuaternion ret = new FbxQuaternion(NativeMethods.FbxQuaternion_operator_Sub__SWIG_0(swigCPtr, pValue), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private FbxQuaternion operator_Mul(double pValue) {
-    FbxQuaternion ret = new FbxQuaternion(GlobalsPINVOKE.FbxQuaternion_operator_Mul__SWIG_0(swigCPtr, pValue), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxQuaternion ret = new FbxQuaternion(NativeMethods.FbxQuaternion_operator_Mul__SWIG_0(swigCPtr, pValue), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private FbxQuaternion operator_Div(double pValue) {
-    FbxQuaternion ret = new FbxQuaternion(GlobalsPINVOKE.FbxQuaternion_operator_Div__SWIG_0(swigCPtr, pValue), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxQuaternion ret = new FbxQuaternion(NativeMethods.FbxQuaternion_operator_Div__SWIG_0(swigCPtr, pValue), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private FbxQuaternion operator_Negate() {
-    FbxQuaternion ret = new FbxQuaternion(GlobalsPINVOKE.FbxQuaternion_operator_Negate(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxQuaternion ret = new FbxQuaternion(NativeMethods.FbxQuaternion_operator_Negate(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private FbxQuaternion operator_Add(FbxQuaternion pQuaternion) {
-    FbxQuaternion ret = new FbxQuaternion(GlobalsPINVOKE.FbxQuaternion_operator_Add__SWIG_1(swigCPtr, FbxQuaternion.getCPtr(pQuaternion)), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxQuaternion ret = new FbxQuaternion(NativeMethods.FbxQuaternion_operator_Add__SWIG_1(swigCPtr, FbxQuaternion.getCPtr(pQuaternion)), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private FbxQuaternion operator_Sub(FbxQuaternion pQuaternion) {
-    FbxQuaternion ret = new FbxQuaternion(GlobalsPINVOKE.FbxQuaternion_operator_Sub__SWIG_1(swigCPtr, FbxQuaternion.getCPtr(pQuaternion)), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxQuaternion ret = new FbxQuaternion(NativeMethods.FbxQuaternion_operator_Sub__SWIG_1(swigCPtr, FbxQuaternion.getCPtr(pQuaternion)), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private FbxQuaternion operator_Mul(FbxQuaternion pOther) {
-    FbxQuaternion ret = new FbxQuaternion(GlobalsPINVOKE.FbxQuaternion_operator_Mul__SWIG_1(swigCPtr, FbxQuaternion.getCPtr(pOther)), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxQuaternion ret = new FbxQuaternion(NativeMethods.FbxQuaternion_operator_Mul__SWIG_1(swigCPtr, FbxQuaternion.getCPtr(pOther)), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private FbxQuaternion operator_Div(FbxQuaternion pOther) {
-    FbxQuaternion ret = new FbxQuaternion(GlobalsPINVOKE.FbxQuaternion_operator_Div__SWIG_1(swigCPtr, FbxQuaternion.getCPtr(pOther)), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxQuaternion ret = new FbxQuaternion(NativeMethods.FbxQuaternion_operator_Div__SWIG_1(swigCPtr, FbxQuaternion.getCPtr(pOther)), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxQuaternion Product(FbxQuaternion pOther) {
-    FbxQuaternion ret = new FbxQuaternion(GlobalsPINVOKE.FbxQuaternion_Product(swigCPtr, FbxQuaternion.getCPtr(pOther)), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxQuaternion ret = new FbxQuaternion(NativeMethods.FbxQuaternion_Product(swigCPtr, FbxQuaternion.getCPtr(pOther)), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double DotProduct(FbxQuaternion pQuaternion) {
-    double ret = GlobalsPINVOKE.FbxQuaternion_DotProduct(swigCPtr, FbxQuaternion.getCPtr(pQuaternion));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxQuaternion_DotProduct(swigCPtr, FbxQuaternion.getCPtr(pQuaternion));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void Normalize() {
-    GlobalsPINVOKE.FbxQuaternion_Normalize(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxQuaternion_Normalize(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void Conjugate() {
-    GlobalsPINVOKE.FbxQuaternion_Conjugate(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxQuaternion_Conjugate(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public double Length() {
-    double ret = GlobalsPINVOKE.FbxQuaternion_Length(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxQuaternion_Length(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void Inverse() {
-    GlobalsPINVOKE.FbxQuaternion_Inverse(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxQuaternion_Inverse(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetAxisAngle(FbxVector4 pAxis, double pDegree) {
-    GlobalsPINVOKE.FbxQuaternion_SetAxisAngle(swigCPtr, pAxis, pDegree);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxQuaternion_SetAxisAngle(swigCPtr, pAxis, pDegree);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxQuaternion Slerp(FbxQuaternion pOther, double pWeight) {
-    FbxQuaternion ret = new FbxQuaternion(GlobalsPINVOKE.FbxQuaternion_Slerp(swigCPtr, FbxQuaternion.getCPtr(pOther), pWeight), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxQuaternion ret = new FbxQuaternion(NativeMethods.FbxQuaternion_Slerp(swigCPtr, FbxQuaternion.getCPtr(pOther), pWeight), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void ComposeSphericalXYZ(FbxVector4 pEuler) {
-    GlobalsPINVOKE.FbxQuaternion_ComposeSphericalXYZ(swigCPtr, pEuler);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxQuaternion_ComposeSphericalXYZ(swigCPtr, pEuler);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxVector4 DecomposeSphericalXYZ() {
-    var ret = GlobalsPINVOKE.FbxQuaternion_DecomposeSphericalXYZ(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxQuaternion_DecomposeSphericalXYZ(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private bool _equals(FbxQuaternion pV) {
-    bool ret = GlobalsPINVOKE.FbxQuaternion__equals(swigCPtr, FbxQuaternion.getCPtr(pV));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxQuaternion__equals(swigCPtr, FbxQuaternion.getCPtr(pV));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int Compare(FbxQuaternion pQ2, double pThreshold) {
-    int ret = GlobalsPINVOKE.FbxQuaternion_Compare__SWIG_0(swigCPtr, FbxQuaternion.getCPtr(pQ2), pThreshold);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxQuaternion_Compare__SWIG_0(swigCPtr, FbxQuaternion.getCPtr(pQ2), pThreshold);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int Compare(FbxQuaternion pQ2) {
-    int ret = GlobalsPINVOKE.FbxQuaternion_Compare__SWIG_1(swigCPtr, FbxQuaternion.getCPtr(pQ2));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxQuaternion_Compare__SWIG_1(swigCPtr, FbxQuaternion.getCPtr(pQ2));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -291,8 +291,8 @@ public class FbxQuaternion : global::System.IDisposable {
   }
 
   public override int GetHashCode() {
-    int ret = GlobalsPINVOKE.FbxQuaternion_GetHashCode(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxQuaternion_GetHashCode(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

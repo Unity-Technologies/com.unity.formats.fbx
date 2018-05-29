@@ -32,7 +32,7 @@ public class FbxAnimCurveFilterUnroll : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxAnimCurveFilterUnroll(swigCPtr);
+          NativeMethods.delete_FbxAnimCurveFilterUnroll(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,36 +40,36 @@ public class FbxAnimCurveFilterUnroll : global::System.IDisposable {
     }
   }
 
-  public FbxAnimCurveFilterUnroll() : this(GlobalsPINVOKE.new_FbxAnimCurveFilterUnroll(), true) {
+  public FbxAnimCurveFilterUnroll() : this(NativeMethods.new_FbxAnimCurveFilterUnroll(), true) {
   }
 
   public virtual bool NeedApply(FbxAnimCurveNode pCurveNode, FbxStatus pStatus) {
-    bool ret = GlobalsPINVOKE.FbxAnimCurveFilterUnroll_NeedApply__SWIG_0(swigCPtr, FbxAnimCurveNode.getCPtr(pCurveNode), FbxStatus.getCPtr(pStatus));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxAnimCurveFilterUnroll_NeedApply__SWIG_0(swigCPtr, FbxAnimCurveNode.getCPtr(pCurveNode), FbxStatus.getCPtr(pStatus));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual bool NeedApply(FbxAnimCurveNode pCurveNode) {
-    bool ret = GlobalsPINVOKE.FbxAnimCurveFilterUnroll_NeedApply__SWIG_1(swigCPtr, FbxAnimCurveNode.getCPtr(pCurveNode));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxAnimCurveFilterUnroll_NeedApply__SWIG_1(swigCPtr, FbxAnimCurveNode.getCPtr(pCurveNode));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual bool Apply(FbxAnimCurveNode pCurveNode, FbxStatus pStatus) {
-    bool ret = GlobalsPINVOKE.FbxAnimCurveFilterUnroll_Apply__SWIG_0(swigCPtr, FbxAnimCurveNode.getCPtr(pCurveNode), FbxStatus.getCPtr(pStatus));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxAnimCurveFilterUnroll_Apply__SWIG_0(swigCPtr, FbxAnimCurveNode.getCPtr(pCurveNode), FbxStatus.getCPtr(pStatus));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual bool Apply(FbxAnimCurveNode pCurveNode) {
-    bool ret = GlobalsPINVOKE.FbxAnimCurveFilterUnroll_Apply__SWIG_1(swigCPtr, FbxAnimCurveNode.getCPtr(pCurveNode));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxAnimCurveFilterUnroll_Apply__SWIG_1(swigCPtr, FbxAnimCurveNode.getCPtr(pCurveNode));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual void Reset() {
-    GlobalsPINVOKE.FbxAnimCurveFilterUnroll_Reset(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurveFilterUnroll_Reset(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
 }

@@ -16,55 +16,55 @@ public class FbxMesh : FbxGeometry {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxMesh Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxMesh_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxMesh_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxMesh ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxMesh(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxMesh Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxMesh_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxMesh_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxMesh ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxMesh(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private void BeginPolygonUnchecked(int pMaterial, int pTexture, int pGroup, bool pLegacy) {
-    GlobalsPINVOKE.FbxMesh_BeginPolygonUnchecked(swigCPtr, pMaterial, pTexture, pGroup, pLegacy);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxMesh_BeginPolygonUnchecked(swigCPtr, pMaterial, pTexture, pGroup, pLegacy);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   private void AddPolygonUnchecked(int pIndex, int pTextureUVIndex) {
-    GlobalsPINVOKE.FbxMesh_AddPolygonUnchecked(swigCPtr, pIndex, pTextureUVIndex);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxMesh_AddPolygonUnchecked(swigCPtr, pIndex, pTextureUVIndex);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   private void EndPolygonUnchecked() {
-    GlobalsPINVOKE.FbxMesh_EndPolygonUnchecked(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxMesh_EndPolygonUnchecked(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public int GetPolygonCount() {
-    int ret = GlobalsPINVOKE.FbxMesh_GetPolygonCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxMesh_GetPolygonCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetPolygonSize(int pPolygonIndex) {
-    int ret = GlobalsPINVOKE.FbxMesh_GetPolygonSize(swigCPtr, pPolygonIndex);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxMesh_GetPolygonSize(swigCPtr, pPolygonIndex);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetPolygonVertex(int pPolygonIndex, int pPositionInPolygon) {
-    int ret = GlobalsPINVOKE.FbxMesh_GetPolygonVertex(swigCPtr, pPolygonIndex, pPositionInPolygon);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxMesh_GetPolygonVertex(swigCPtr, pPolygonIndex, pPositionInPolygon);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetPolygonVertexCount() {
-    int ret = GlobalsPINVOKE.FbxMesh_GetPolygonVertexCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxMesh_GetPolygonVertexCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

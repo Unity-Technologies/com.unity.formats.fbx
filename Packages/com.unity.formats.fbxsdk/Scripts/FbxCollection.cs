@@ -16,33 +16,33 @@ public class FbxCollection : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxCollection Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxCollection_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxCollection_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxCollection ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxCollection(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxCollection Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxCollection_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxCollection_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxCollection ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxCollection(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual void Clear() {
-    GlobalsPINVOKE.FbxCollection_Clear(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxCollection_Clear(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual bool AddMember(FbxObject pMember) {
-    bool ret = GlobalsPINVOKE.FbxCollection_AddMember(swigCPtr, FbxObject.getCPtr(pMember));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxCollection_AddMember(swigCPtr, FbxObject.getCPtr(pMember));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetMemberCount() {
-    int ret = GlobalsPINVOKE.FbxCollection_GetMemberCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxCollection_GetMemberCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -81,16 +81,16 @@ public class FbxCollection : FbxObject {
   }
 
   public FbxAnimLayer GetAnimLayerMember(int pIndex) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxCollection_GetAnimLayerMember__SWIG_0(swigCPtr, pIndex);
+    global::System.IntPtr cPtr = NativeMethods.FbxCollection_GetAnimLayerMember__SWIG_0(swigCPtr, pIndex);
     FbxAnimLayer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimLayer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxAnimLayer GetAnimLayerMember() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxCollection_GetAnimLayerMember__SWIG_1(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxCollection_GetAnimLayerMember__SWIG_1(swigCPtr);
     FbxAnimLayer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimLayer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

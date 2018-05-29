@@ -16,47 +16,47 @@ public class FbxLayerContainer : FbxNodeAttribute {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxLayerContainer Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayerContainer_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayerContainer_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxLayerContainer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerContainer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxLayerContainer Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayerContainer_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayerContainer_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxLayerContainer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerContainer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int CreateLayer() {
-    int ret = GlobalsPINVOKE.FbxLayerContainer_CreateLayer(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxLayerContainer_CreateLayer(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetLayerCount() {
-    int ret = GlobalsPINVOKE.FbxLayerContainer_GetLayerCount__SWIG_0(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxLayerContainer_GetLayerCount__SWIG_0(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetLayerCount(FbxLayerElement.EType pType, bool pUVCount) {
-    int ret = GlobalsPINVOKE.FbxLayerContainer_GetLayerCount__SWIG_1(swigCPtr, (int)pType, pUVCount);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxLayerContainer_GetLayerCount__SWIG_1(swigCPtr, (int)pType, pUVCount);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetLayerCount(FbxLayerElement.EType pType) {
-    int ret = GlobalsPINVOKE.FbxLayerContainer_GetLayerCount__SWIG_2(swigCPtr, (int)pType);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxLayerContainer_GetLayerCount__SWIG_2(swigCPtr, (int)pType);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayer GetLayer(int pIndex) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayerContainer_GetLayer(swigCPtr, pIndex);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayerContainer_GetLayer(swigCPtr, pIndex);
     FbxLayer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

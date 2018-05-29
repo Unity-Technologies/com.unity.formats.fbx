@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyEDecayType : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyEDecayType(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyEDecayType_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyEDecayType(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyEDecayType_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyEDecayType : FbxProperty {
   }
 
   public FbxPropertyEDecayType Set(FbxLight.EDecayType pValue) {
-    FbxPropertyEDecayType ret = new FbxPropertyEDecayType(GlobalsPINVOKE.FbxPropertyEDecayType_Set(swigCPtr, (int)pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyEDecayType ret = new FbxPropertyEDecayType(NativeMethods.FbxPropertyEDecayType_Set(swigCPtr, (int)pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EDecayType Get() {
-    FbxLight.EDecayType ret = (FbxLight.EDecayType)GlobalsPINVOKE.FbxPropertyEDecayType_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EDecayType ret = (FbxLight.EDecayType)NativeMethods.FbxPropertyEDecayType_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EDecayType EvaluateValue(FbxTime pTime, bool pForceEval) {
-    FbxLight.EDecayType ret = (FbxLight.EDecayType)GlobalsPINVOKE.FbxPropertyEDecayType_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EDecayType ret = (FbxLight.EDecayType)NativeMethods.FbxPropertyEDecayType_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EDecayType EvaluateValue(FbxTime pTime) {
-    FbxLight.EDecayType ret = (FbxLight.EDecayType)GlobalsPINVOKE.FbxPropertyEDecayType_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EDecayType ret = (FbxLight.EDecayType)NativeMethods.FbxPropertyEDecayType_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLight.EDecayType EvaluateValue() {
-    FbxLight.EDecayType ret = (FbxLight.EDecayType)GlobalsPINVOKE.FbxPropertyEDecayType_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxLight.EDecayType ret = (FbxLight.EDecayType)NativeMethods.FbxPropertyEDecayType_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

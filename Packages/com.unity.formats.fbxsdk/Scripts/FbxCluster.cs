@@ -16,77 +16,77 @@ public class FbxCluster : FbxSubDeformer {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxCluster Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxCluster_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxCluster_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxCluster ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxCluster(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxCluster Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxCluster_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxCluster_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxCluster ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxCluster(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetLinkMode(FbxCluster.ELinkMode pMode) {
-    GlobalsPINVOKE.FbxCluster_SetLinkMode(swigCPtr, (int)pMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxCluster_SetLinkMode(swigCPtr, (int)pMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxCluster.ELinkMode GetLinkMode() {
-    FbxCluster.ELinkMode ret = (FbxCluster.ELinkMode)GlobalsPINVOKE.FbxCluster_GetLinkMode(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxCluster.ELinkMode ret = (FbxCluster.ELinkMode)NativeMethods.FbxCluster_GetLinkMode(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetLink(FbxNode pNode) {
-    GlobalsPINVOKE.FbxCluster_SetLink(swigCPtr, FbxNode.getCPtr(pNode));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxCluster_SetLink(swigCPtr, FbxNode.getCPtr(pNode));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxNode GetLink() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxCluster_GetLink(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxCluster_GetLink(swigCPtr);
     FbxNode ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxNode(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void AddControlPointIndex(int pIndex, double pWeight) {
-    GlobalsPINVOKE.FbxCluster_AddControlPointIndex(swigCPtr, pIndex, pWeight);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxCluster_AddControlPointIndex(swigCPtr, pIndex, pWeight);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public int GetControlPointIndicesCount() {
-    int ret = GlobalsPINVOKE.FbxCluster_GetControlPointIndicesCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxCluster_GetControlPointIndicesCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetControlPointIWCount(int pCount) {
-    GlobalsPINVOKE.FbxCluster_SetControlPointIWCount(swigCPtr, pCount);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxCluster_SetControlPointIWCount(swigCPtr, pCount);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetTransformMatrix(FbxAMatrix pMatrix) {
-    GlobalsPINVOKE.FbxCluster_SetTransformMatrix(swigCPtr, FbxAMatrix.getCPtr(pMatrix));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxCluster_SetTransformMatrix(swigCPtr, FbxAMatrix.getCPtr(pMatrix));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxAMatrix GetTransformMatrix(FbxAMatrix pMatrix) {
-    FbxAMatrix ret = new FbxAMatrix(GlobalsPINVOKE.FbxCluster_GetTransformMatrix(swigCPtr, FbxAMatrix.getCPtr(pMatrix)), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxAMatrix ret = new FbxAMatrix(NativeMethods.FbxCluster_GetTransformMatrix(swigCPtr, FbxAMatrix.getCPtr(pMatrix)), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetTransformLinkMatrix(FbxAMatrix pMatrix) {
-    GlobalsPINVOKE.FbxCluster_SetTransformLinkMatrix(swigCPtr, FbxAMatrix.getCPtr(pMatrix));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxCluster_SetTransformLinkMatrix(swigCPtr, FbxAMatrix.getCPtr(pMatrix));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxAMatrix GetTransformLinkMatrix(FbxAMatrix pMatrix) {
-    FbxAMatrix ret = new FbxAMatrix(GlobalsPINVOKE.FbxCluster_GetTransformLinkMatrix(swigCPtr, FbxAMatrix.getCPtr(pMatrix)), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxAMatrix ret = new FbxAMatrix(NativeMethods.FbxCluster_GetTransformLinkMatrix(swigCPtr, FbxAMatrix.getCPtr(pMatrix)), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -125,14 +125,14 @@ public class FbxCluster : FbxSubDeformer {
   }
 
   public int GetControlPointIndexAt(int index) {
-    int ret = GlobalsPINVOKE.FbxCluster_GetControlPointIndexAt(swigCPtr, index);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxCluster_GetControlPointIndexAt(swigCPtr, index);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetControlPointWeightAt(int index) {
-    double ret = GlobalsPINVOKE.FbxCluster_GetControlPointWeightAt(swigCPtr, index);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxCluster_GetControlPointWeightAt(swigCPtr, index);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

@@ -16,67 +16,67 @@ public class FbxFileTexture : FbxTexture {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxFileTexture Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxFileTexture_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxFileTexture_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxFileTexture ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxFileTexture(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxFileTexture Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxFileTexture_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxFileTexture_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxFileTexture ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxFileTexture(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxPropertyBool UseMaterial {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxFileTexture_UseMaterial_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxFileTexture_UseMaterial_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool UseMipMap {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxFileTexture_UseMipMap_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxFileTexture_UseMipMap_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public bool SetFileName(string pName) {
-    bool ret = GlobalsPINVOKE.FbxFileTexture_SetFileName(swigCPtr, pName);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxFileTexture_SetFileName(swigCPtr, pName);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool SetRelativeFileName(string pName) {
-    bool ret = GlobalsPINVOKE.FbxFileTexture_SetRelativeFileName(swigCPtr, pName);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxFileTexture_SetRelativeFileName(swigCPtr, pName);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string GetFileName() {
-    string ret = GlobalsPINVOKE.FbxFileTexture_GetFileName(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxFileTexture_GetFileName(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string GetRelativeFileName() {
-    string ret = GlobalsPINVOKE.FbxFileTexture_GetRelativeFileName(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxFileTexture_GetRelativeFileName(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetMaterialUse(FbxFileTexture.EMaterialUse pMaterialUse) {
-    GlobalsPINVOKE.FbxFileTexture_SetMaterialUse(swigCPtr, (int)pMaterialUse);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxFileTexture_SetMaterialUse(swigCPtr, (int)pMaterialUse);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxFileTexture.EMaterialUse GetMaterialUse() {
-    FbxFileTexture.EMaterialUse ret = (FbxFileTexture.EMaterialUse)GlobalsPINVOKE.FbxFileTexture_GetMaterialUse(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxFileTexture.EMaterialUse ret = (FbxFileTexture.EMaterialUse)NativeMethods.FbxFileTexture_GetMaterialUse(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

@@ -16,64 +16,64 @@ public class FbxNodeAttribute : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxNodeAttribute Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxNodeAttribute_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxNodeAttribute_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxNodeAttribute ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxNodeAttribute(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxNodeAttribute Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxNodeAttribute_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxNodeAttribute_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxNodeAttribute ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxNodeAttribute(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static string sColor {
     get {
-      string ret = GlobalsPINVOKE.FbxNodeAttribute_sColor_get();
+      string ret = NativeMethods.FbxNodeAttribute_sColor_get();
       return ret;
     } 
   }
 
   public static FbxDouble3 sDefaultColor {
     get {
-      var ret = GlobalsPINVOKE.FbxNodeAttribute_sDefaultColor_get();
+      var ret = NativeMethods.FbxNodeAttribute_sDefaultColor_get();
       return ret;
     } 
   }
 
   public FbxPropertyDouble3 Color {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxNodeAttribute_Color_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxNodeAttribute_Color_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public virtual FbxNodeAttribute.EType GetAttributeType() {
-    FbxNodeAttribute.EType ret = (FbxNodeAttribute.EType)GlobalsPINVOKE.FbxNodeAttribute_GetAttributeType(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxNodeAttribute.EType ret = (FbxNodeAttribute.EType)NativeMethods.FbxNodeAttribute_GetAttributeType(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetNodeCount() {
-    int ret = GlobalsPINVOKE.FbxNodeAttribute_GetNodeCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxNodeAttribute_GetNodeCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxNode GetNode(int pIndex) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxNodeAttribute_GetNode__SWIG_0(swigCPtr, pIndex);
+    global::System.IntPtr cPtr = NativeMethods.FbxNodeAttribute_GetNode__SWIG_0(swigCPtr, pIndex);
     FbxNode ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxNode(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxNode GetNode() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxNodeAttribute_GetNode__SWIG_1(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxNodeAttribute_GetNode__SWIG_1(swigCPtr);
     FbxNode ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxNode(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
