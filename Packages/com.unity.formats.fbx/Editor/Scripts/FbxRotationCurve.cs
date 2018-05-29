@@ -224,10 +224,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         ~FbxAnimCurveModifyHelper() {
-            Dispose();
+            Dispose(false);
         }
 
         public void Dispose() 
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        public virtual void Dispose(bool cleanUpManaged)
         {
             foreach (var curve in Curves)
                 curve.KeyModifyEnd();

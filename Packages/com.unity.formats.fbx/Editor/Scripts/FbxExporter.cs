@@ -3924,6 +3924,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         public void Dispose ()
         {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool cleanUpManaged)
+        {
         }
 
         internal bool Verbose { set {;} get { return ExportSettings.instance.Verbose; } }
