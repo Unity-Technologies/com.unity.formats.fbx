@@ -28,7 +28,7 @@ namespace UnityEngine.Formats.Fbx.Exporter
         public struct StringPair { public string FBXObjectName; public string UnityObjectName; }
 
         [SerializeField]
-        List<StringPair> m_nameMapping;
+        List<StringPair> m_nameMapping = new List<StringPair>();
 
         /// <summary>
         /// Which FBX file does this refer to?
