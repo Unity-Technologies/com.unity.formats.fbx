@@ -95,7 +95,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     if(sr.Peek() > -1){
                         var firstLine = sr.ReadLine();
                         if(!firstLine.StartsWith("%YAML")){
-                            sr.Close();
                             return false;
                         }
                     }
@@ -103,7 +102,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     var contents = sr.ReadToEnd();
                     if (SearchIDsToReplace.Exists(searchId => contents.Contains(searchId)))
                     {
-                        sr.Close();
                         return true;
                     }
                 }
@@ -158,7 +156,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     if (sr.Peek () > -1) {
                         firstLine = sr.ReadLine ();
                         if (!firstLine.StartsWith ("%YAML")) {
-                            sr.Close ();
                             return false;
                         }
                     }
