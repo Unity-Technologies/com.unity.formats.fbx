@@ -28,9 +28,9 @@ public class ManualUpdateEditorWindow : EditorWindow
         m_fbxPrefabUtility = fbxPrefabUtility;
         m_fbxPrefab = fbxPrefab;
         // Convert Hashset into List
-        m_nodesToCreate = updates.GetNodesToCreate().ToList();
-        m_nodesToDestroy = updates.GetNodesToDestroy().ToList();
-        m_nodesToRename = updates.GetNodesToRename().ToList();
+        m_nodesToCreate = updates.NodesToCreate.ToList();
+        m_nodesToDestroy = updates.NodesToDestroy.ToList();
+        m_nodesToRename = updates.NodesToRename.ToList();
         // Create the dropdown list
         m_nodeNameToSuggest = new List<string>();
         m_nodeNameToSuggest.AddRange(m_nodesToCreate);

@@ -13,7 +13,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             FbxPrefab fbxPrefab = (FbxPrefab)target;
 
             // We can only change these settings when applied to a prefab.
-            bool isDisabled = AssetDatabase.GetAssetPath(fbxPrefab) == "";
+            bool isDisabled = string.IsNullOrEmpty(AssetDatabase.GetAssetPath(fbxPrefab));
             if (isDisabled) {
                 EditorGUILayout.HelpBox("Please select a prefab. You can't edit an instance in the scene.",
                         MessageType.Info);
@@ -21,7 +21,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             EditorGUI.BeginDisabledGroup(isDisabled);
             FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
-            var oldFbxAsset = fbxPrefabUtility.GetFbxAsset();
+            var oldFbxAsset = fbxPrefabUtility.FbxAsset;
             var newFbxAsset = EditorGUILayout.ObjectField(new GUIContent("Source Fbx Asset", "The FBX file that is linked to this Prefab"), oldFbxAsset,
                     typeof(GameObject), allowSceneObjects: false) as GameObject;
             if (newFbxAsset && !FbxPrefabAutoUpdater.IsFbxAsset(UnityEditor.AssetDatabase.GetAssetPath(newFbxAsset))) {

@@ -43,7 +43,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         {
             var fbxPrefabPath = FbxPrefabAutoUpdater.FindFbxPrefabAssetPath ();
             Assert.IsFalse (string.IsNullOrEmpty (fbxPrefabPath));
-            Assert.IsTrue (fbxPrefabPath.EndsWith (FbxPrefabAutoUpdater.FBX_PREFAB_FILE));
+            Assert.IsTrue (fbxPrefabPath.EndsWith (FbxPrefabAutoUpdater.FbxPrefabFile));
 
             Assert.IsTrue (FbxPrefabAutoUpdater.IsFbxAsset ("Assets/path/to/foo.fbx"));
             Assert.IsFalse (FbxPrefabAutoUpdater.IsFbxAsset ("Assets/path/to/foo.png"));
