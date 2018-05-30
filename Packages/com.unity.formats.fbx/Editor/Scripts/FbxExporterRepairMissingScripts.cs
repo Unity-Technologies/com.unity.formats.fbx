@@ -7,26 +7,26 @@ namespace UnityEditor.Formats.Fbx.Exporter
 {
     public class RepairMissingScripts
     {
-        private const string m_forumPackageGUID = "2d81c55c4d9d85146b1d2de96e084b63";
-        private const string m_assetStorePackageGUID = "628ffbda3fdf4df4588770785d91a698";
+        private const string ForumPackageGUID = "2d81c55c4d9d85146b1d2de96e084b63";
+        private const string AssetStorePackageGUID = "628ffbda3fdf4df4588770785d91a698";
 
-        private const string m_fbxPrefabDLLFileId = "69888640";
+        private const string FbxPrefabDLLFileId = "69888640";
 
-        private const string m_idFormat = "{{fileID: {0}, guid: {1}, type:";
+        private const string IdFormat = "{{fileID: {0}, guid: {1}, type:";
 
-        private static List<string> m_searchIDsToReplace;
+        private static List<string> s_searchIDsToReplace;
         private static List<string> SearchIDsToReplace
         {
             get
             {
-                if (m_searchIDsToReplace == null || m_searchIDsToReplace.Count <= 0)
+                if (s_searchIDsToReplace == null || s_searchIDsToReplace.Count <= 0)
                 {
-                    m_searchIDsToReplace = new List<string>() {
-                        string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_forumPackageGUID),
-                        string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_assetStorePackageGUID)
+                    s_searchIDsToReplace = new List<string>() {
+                        string.Format(IdFormat, FbxPrefabDLLFileId, ForumPackageGUID),
+                        string.Format(IdFormat, FbxPrefabDLLFileId, AssetStorePackageGUID)
                     };
                 }
-                return m_searchIDsToReplace;
+                return s_searchIDsToReplace;
             }
         }
 
@@ -52,7 +52,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 #endif
             if(AssetDatabase.TryGetGUIDAndLocalFileIdentifier(fbxPrefabObj, out guid, out fileId))
             {
-                searchID = string.Format(m_idFormat, fileId, guid);
+                searchID = string.Format(IdFormat, fileId, guid);
             }
             return searchID;
         }
