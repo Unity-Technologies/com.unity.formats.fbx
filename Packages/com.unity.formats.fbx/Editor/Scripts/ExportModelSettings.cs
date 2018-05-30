@@ -126,8 +126,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
     [System.Serializable]
     public abstract class ExportOptionsSettingsSerializeBase : IExportOptions
     {
+        [SerializeField]
         private ExportSettings.ExportFormat exportFormat = ExportSettings.ExportFormat.ASCII;
+        [SerializeField]
         private bool animatedSkinnedMesh = false;
+        [SerializeField]
         private bool mayaCompatibleNaming = true;
 
         [System.NonSerialized]
@@ -155,9 +158,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
     [System.Serializable]
     public class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
+        [SerializeField]
         private ExportSettings.Include include = ExportSettings.Include.ModelAndAnim;
+        [SerializeField]
         private ExportSettings.LODExportType lodLevel = ExportSettings.LODExportType.All;
+        [SerializeField]
         private ExportSettings.ObjectPosition objectPosition = ExportSettings.ObjectPosition.LocalCentered;
+        [SerializeField]
         private bool exportUnrendered = true;
 
         public override ExportSettings.Include ModelAnimIncludeOption { get { return include; } }
