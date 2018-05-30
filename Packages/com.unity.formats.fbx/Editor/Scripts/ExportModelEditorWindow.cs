@@ -23,20 +23,77 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected virtual GUIContent WindowTitle { get { return new GUIContent (DefaultWindowTitle); } }
 
-        protected string m_exportFileName = "";
+        private string m_exportFileName = "";
+        protected string ExportFileName
+        {
+            get { return m_exportFileName; }
+            set { m_exportFileName = value; }
+        }
 
-        protected UnityEditor.Editor m_innerEditor;
-        #if UNITY_2018_1_OR_NEWER
-        protected FbxExportPresetSelectorReceiver m_receiver;
+        private UnityEditor.Editor m_innerEditor;
+        protected UnityEditor.Editor InnerEditor
+        {
+            get { return m_innerEditor; }
+            set { m_innerEditor = value; }
+        }
+#if UNITY_2018_1_OR_NEWER
+        private FbxExportPresetSelectorReceiver m_receiver;
+        protected FbxExportPresetSelectorReceiver Receiver
+        {
+            get { return m_receiver; }
+            set { m_receiver = value; }
+        }
         #endif
         private static GUIContent presetIcon { get { return EditorGUIUtility.IconContent ("Preset.Context"); }}
         private static GUIStyle presetIconButton { get { return new GUIStyle("IconButton"); }}
 
         private bool m_showOptions;
 
-        protected GUIStyle m_nameTextFieldStyle;
-        protected GUIStyle m_fbxExtLabelStyle;
-        protected float m_fbxExtLabelWidth;
+        private GUIStyle m_nameTextFieldStyle;
+        protected GUIStyle NameTextFieldStyle
+        {
+            get {
+                if (m_nameTextFieldStyle == null)
+                {
+                    m_nameTextFieldStyle = new GUIStyle(GUIStyle.none);
+                    m_nameTextFieldStyle.alignment = TextAnchor.LowerCenter;
+                    m_nameTextFieldStyle.clipping = TextClipping.Clip;
+                    m_nameTextFieldStyle.normal.textColor = EditorStyles.textField.normal.textColor;
+                }
+                return m_nameTextFieldStyle;
+            }
+            set { m_nameTextFieldStyle = value;  }
+        }
+
+        private GUIStyle m_fbxExtLabelStyle;
+        protected GUIStyle FbxExtLabelStyle
+        {
+            get {
+                if (m_fbxExtLabelStyle == null)
+                {
+                    m_fbxExtLabelStyle = new GUIStyle(GUIStyle.none);
+                    m_fbxExtLabelStyle.alignment = TextAnchor.MiddleLeft;
+                    m_fbxExtLabelStyle.richText = true;
+                    m_fbxExtLabelStyle.contentOffset = new Vector2(FbxExtOffset, 0);
+                }
+                return m_fbxExtLabelStyle;
+            }
+            set { m_fbxExtLabelStyle = value; }
+        }
+
+        private float m_fbxExtLabelWidth = -1;
+        protected float FbxExtLabelWidth
+        {
+            get
+            {
+                if(m_fbxExtLabelWidth < 0)
+                {
+                    m_fbxExtLabelWidth = FbxExtLabelStyle.CalcSize(new GUIContent(".fbx")).x;
+                }
+                return m_fbxExtLabelWidth;
+            }
+            set { m_fbxExtLabelWidth = value; }
+        }
 
         protected abstract bool DisableTransferAnim { get; }
         protected abstract bool DisableNameSelection { get; }
@@ -55,18 +112,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             #endif
             m_showOptions = true;
             this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, MinWindowHeight);
-
-            m_nameTextFieldStyle = new GUIStyle(GUIStyle.none);
-            m_nameTextFieldStyle.alignment = TextAnchor.LowerCenter;
-            m_nameTextFieldStyle.clipping = TextClipping.Clip;
-            m_nameTextFieldStyle.normal.textColor = EditorStyles.textField.normal.textColor;
-
-            m_fbxExtLabelStyle = new GUIStyle (GUIStyle.none);
-            m_fbxExtLabelStyle.alignment = TextAnchor.MiddleLeft;
-            m_fbxExtLabelStyle.richText = true;
-            m_fbxExtLabelStyle.contentOffset = new Vector2 (FbxExtOffset, 0);
-
-            m_fbxExtLabelWidth = m_fbxExtLabelStyle.CalcSize (new GUIContent (".fbx")).x;
         }
 
         protected static T CreateWindow<T>() where T : EditorWindow {
@@ -80,24 +125,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         #if UNITY_2018_1_OR_NEWER
         protected void InitializeReceiver(){
-            if (!m_receiver) {
-                m_receiver = ScriptableObject.CreateInstance<FbxExportPresetSelectorReceiver> () as FbxExportPresetSelectorReceiver;
-                m_receiver.SelectionChanged -= OnPresetSelectionChanged;
-                m_receiver.SelectionChanged += OnPresetSelectionChanged;
-                m_receiver.DialogClosed -= SaveExportSettings;
-                m_receiver.DialogClosed += SaveExportSettings;
+            if (!Receiver) {
+                Receiver = ScriptableObject.CreateInstance<FbxExportPresetSelectorReceiver> () as FbxExportPresetSelectorReceiver;
+                Receiver.SelectionChanged -= OnPresetSelectionChanged;
+                Receiver.SelectionChanged += OnPresetSelectionChanged;
+                Receiver.DialogClosed -= SaveExportSettings;
+                Receiver.DialogClosed += SaveExportSettings;
             }
         }
         #endif
 
-        public void SetFilename(string filename){
+        internal void SetFilename(string filename){
             // remove .fbx from end of filename
             int extIndex = filename.LastIndexOf(".fbx");
             if (extIndex < 0) {
-                m_exportFileName = filename;
+                ExportFileName = filename;
                 return;
             }
-            m_exportFileName = filename.Remove(extIndex);
+            ExportFileName = filename.Remove(extIndex);
         }
 
         public void SaveExportSettings()
@@ -124,9 +169,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected void ShowPresetReceiver(UnityEngine.Object target){
             InitializeReceiver ();
-            m_receiver.SetTarget(target);
-            m_receiver.SetInitialValue (new Preset (target));
-            UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, m_receiver);
+            Receiver.SetTarget(target);
+            Receiver.SetInitialValue (new Preset (target));
+            UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, Receiver);
         }
         #endif
 
@@ -184,9 +229,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
 
-        protected virtual GameObject GetGameObject()
+        protected virtual GameObject FirstGameObjectToExport
         {
-            return ModelExporter.GetGameObject ( ToExport [0] );
+            get { 
+                return ModelExporter.GetGameObject(ToExport[0]);
+            }
         }
 
         protected bool TransferAnimationSourceIsValid(Transform newValue){
@@ -199,7 +246,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            var selectedGO = GetGameObject();
+            var selectedGO = FirstGameObjectToExport;
 
             // source must be ancestor to dest
             if (TransferAnimationDest && !IsAncestor(newValue, TransferAnimationDest)) {
@@ -224,7 +271,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            var selectedGO = GetGameObject();
+            var selectedGO = FirstGameObjectToExport;
 
             // source must be ancestor to dest
             if (TransferAnimationSource && !IsAncestor(TransferAnimationSource, newValue)) {
@@ -242,7 +289,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Add UI to turn the dialog off next time the user exports
         /// </summary>
-        protected virtual void DontShowDialogUI() { }
+        protected virtual void DoNotShowDialogUI() { }
 
         // -------------------------------------------------------------------------------------
 
@@ -277,11 +324,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUILayout.BeginHorizontal(EditorStyles.textField, GUILayout.Height(EditorGUIUtility.singleLineHeight));
             EditorGUI.indentLevel--;
             // continually resize to contents
-            var textFieldSize = m_nameTextFieldStyle.CalcSize (new GUIContent(m_exportFileName));
-            m_exportFileName = EditorGUILayout.TextField (m_exportFileName, m_nameTextFieldStyle, GUILayout.Width(textFieldSize.x + 5), GUILayout.MinWidth(5));
-            m_exportFileName = ModelExporter.ConvertToValidFilename (m_exportFileName);
+            var textFieldSize = NameTextFieldStyle.CalcSize (new GUIContent(ExportFileName));
+            ExportFileName = EditorGUILayout.TextField (ExportFileName, NameTextFieldStyle, GUILayout.Width(textFieldSize.x + 5), GUILayout.MinWidth(5));
+            ExportFileName = ModelExporter.ConvertToValidFilename (ExportFileName);
 
-            EditorGUILayout.LabelField ("<color=#808080ff>.fbx</color>", m_fbxExtLabelStyle, GUILayout.Width(m_fbxExtLabelWidth));
+            EditorGUILayout.LabelField ("<color=#808080ff>.fbx</color>", FbxExtLabelStyle, GUILayout.Width(FbxExtLabelWidth));
             EditorGUI.indentLevel++;
 
             EditorGUILayout.EndHorizontal();
@@ -350,13 +397,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             m_showOptions = EditorGUILayout.Foldout (m_showOptions, "Options");
             EditorGUI.indentLevel++;
             if (m_showOptions) {
-                m_innerEditor.OnInspectorGUI ();
+                InnerEditor.OnInspectorGUI ();
             }
 
             GUILayout.FlexibleSpace ();
 
             GUILayout.BeginHorizontal ();
-            DontShowDialogUI();
+            DoNotShowDialogUI();
             GUILayout.FlexibleSpace ();
             if (GUILayout.Button ("Cancel", GUILayout.Width(ExportButtonWidth))) {
                 this.Close ();
@@ -406,11 +453,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
        }
 
-        protected override GameObject GetGameObject()
+        protected override GameObject FirstGameObjectToExport
         {
-            return (IsTimelineAnim)
-                ? AnimationOnlyExportData.GetGameObjectAndAnimationClip(ToExport [0]).Key
-                : ModelExporter.GetGameObject(ToExport[0]);
+            get
+            {
+                return (IsTimelineAnim)
+                    ? AnimationOnlyExportData.GetGameObjectAndAnimationClip(ToExport[0]).Key
+                    : ModelExporter.GetGameObject(ToExport[0]);
+            }
         }
 
         protected override bool DisableTransferAnim {
@@ -431,8 +481,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     m_previousInclude = ExportSettings.instance.exportModelSettings.info.ModelAnimIncludeOption;
                     ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
                 }
-                if (m_innerEditor) {
-                    var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
+                if (InnerEditor) {
+                    var exportModelSettingsEditor = InnerEditor as ExportModelSettingsEditor;
                     if (exportModelSettingsEditor) {
                         exportModelSettingsEditor.DisableIncludeDropdown(m_isTimelineAnim);
                     }
@@ -446,8 +496,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             set {
                 m_singleHierarchyExport = value;
 
-                if (m_innerEditor) {
-                    var exportModelSettingsEditor = m_innerEditor as ExportModelSettingsEditor;
+                if (InnerEditor) {
+                    var exportModelSettingsEditor = InnerEditor as ExportModelSettingsEditor;
                     if (exportModelSettingsEditor) {
                         exportModelSettingsEditor.SetIsSingleHierarchy (m_singleHierarchyExport);
                     }
@@ -469,7 +519,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             int numObjects = window.SetGameObjectsToExport (toExport);
             if (string.IsNullOrEmpty (filename)) {
-                filename = window.GetFilenameFromObjects ();
+                filename = window.DefaultFilename;
             }
             window.InitializeWindow (filename);
             window.SingleHierarchyExport = (numObjects == 1);
@@ -486,7 +536,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // if only one object selected, set transfer source/dest to this object
             if (ToExport.Length == 1 || (IsTimelineAnim && ToExport.Length > 0))
             {
-                GameObject go = GetGameObject();
+                GameObject go = FirstGameObjectToExport;
                 if (go)
                 {
                     TransferAnimationSource = go.transform;
@@ -502,21 +552,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns>The object's name if one object selected, "Untitled" if multiple
         /// objects selected for export.</returns>
-        protected string GetFilenameFromObjects(){
-            var filename = "";
-            if (ToExport.Length == 1) {
-                filename = ToExport [0].name;
-            } else {
-                filename = "Untitled";
+        protected string DefaultFilename {
+            get
+            {
+                var filename = "";
+                if (ToExport.Length == 1)
+                {
+                    filename = ToExport[0].name;
+                }
+                else
+                {
+                    filename = "Untitled";
+                }
+                return filename;
             }
-            return filename;
         }
 
         protected override void OnEnable ()
         {
             base.OnEnable ();
-            if (!m_innerEditor) {
-                m_innerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.exportModelSettings);
+            if (!InnerEditor) {
+                InnerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.exportModelSettings);
                 this.SingleHierarchyExport = m_singleHierarchyExport;
                 this.IsTimelineAnim = m_isTimelineAnim;
             }
@@ -540,12 +596,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
 
         protected override bool Export(){
-            if (string.IsNullOrEmpty (m_exportFileName)) {
+            if (string.IsNullOrEmpty (ExportFileName)) {
                 Debug.LogError ("FbxExporter: Please specify an fbx filename");
                 return false;
             }
             var folderPath = ExportSettings.GetFbxAbsoluteSavePath ();
-            var filePath = System.IO.Path.Combine (folderPath, m_exportFileName + ".fbx");
+            var filePath = System.IO.Path.Combine (folderPath, ExportFileName + ".fbx");
 
             if (!OverwriteExistingFile (filePath)) {
                 return false;
