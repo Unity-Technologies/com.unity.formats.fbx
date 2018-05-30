@@ -667,7 +667,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// The path of the DCC executable.
         /// </summary>
         public static string GetDCCExe () {
-            return ExportSettings.GetSelectedDCCPath ();
+            return ExportSettings.SelectedDCCPath;
         }
 
         /// <summary>
@@ -675,7 +675,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns>The DCC name.</returns>
         public static string GetDCCName() {
-            return ExportSettings.GetSelectedDCCName ();
+            return ExportSettings.SelectedDCCName;
         }
 
         /// <summary>
@@ -738,21 +738,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (System.IO.File.Exists (zipPath)) {
                 return DecompressIntegrationZipFile (zipPath, dcc);
             }
-            dcc.SetIntegrationFolderPath (ExportSettings.GetIntegrationSavePath());
+            dcc.SetIntegrationFolderPath (ExportSettings.IntegrationSavePath);
             return true;
         }
 
         private static bool DecompressIntegrationZipFile(string zipPath, DCCIntegration dcc)
         {
             // prompt user to enter location to unzip file
-            var unzipFolder = EditorUtility.OpenFolderPanel(string.Format("Select Location to Save {0} Integration", dcc.DccDisplayName), ExportSettings.GetIntegrationSavePath(), "");
+            var unzipFolder = EditorUtility.OpenFolderPanel(string.Format("Select Location to Save {0} Integration", dcc.DccDisplayName), ExportSettings.IntegrationSavePath, "");
             if (string.IsNullOrEmpty(unzipFolder))
             {
                 // user has cancelled, do nothing
                 return false;
             }
 
-            ExportSettings.instance.IntegrationSavePath = unzipFolder;
+            ExportSettings.IntegrationSavePath = unzipFolder;
 
             // check that this is a valid location to unzip the file
             if (!DirectoryHasWritePermission (unzipFolder)) {

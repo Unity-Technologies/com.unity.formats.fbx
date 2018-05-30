@@ -478,8 +478,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             set{
                 m_isTimelineAnim = value;
                 if (m_isTimelineAnim) {
-                    m_previousInclude = ExportSettings.instance.exportModelSettings.info.ModelAnimIncludeOption;
-                    ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+                    m_previousInclude = ExportSettings.instance.ExportModelSettings.info.ModelAnimIncludeOption;
+                    ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
                 }
                 if (InnerEditor) {
                     var exportModelSettingsEditor = InnerEditor as ExportModelSettingsEditor;
@@ -507,7 +507,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected override ExportOptionsSettingsSerializeBase SettingsObject
         {
-            get { return ExportSettings.instance.exportModelSettings.info; }
+            get { return ExportSettings.instance.ExportModelSettings.info; }
         }
 
         private ExportSettings.Include m_previousInclude = ExportSettings.Include.ModelAndAnim;
@@ -572,7 +572,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             base.OnEnable ();
             if (!InnerEditor) {
-                InnerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.exportModelSettings);
+                InnerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.ExportModelSettings);
                 this.SingleHierarchyExport = m_singleHierarchyExport;
                 this.IsTimelineAnim = m_isTimelineAnim;
             }
@@ -589,7 +589,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected virtual void RestoreSettings()
         {
             if (IsTimelineAnim) {
-                ExportSettings.instance.exportModelSettings.info.SetModelAnimIncludeOption(m_previousInclude);
+                ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(m_previousInclude);
                 SaveExportSettings ();
             }
         }
@@ -600,7 +600,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Debug.LogError ("FbxExporter: Please specify an fbx filename");
                 return false;
             }
-            var folderPath = ExportSettings.GetFbxAbsoluteSavePath ();
+            var folderPath = ExportSettings.FbxAbsoluteSavePath;
             var filePath = System.IO.Path.Combine (folderPath, ExportFileName + ".fbx");
 
             if (!OverwriteExistingFile (filePath)) {
@@ -618,7 +618,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         #if UNITY_2018_1_OR_NEWER  
         protected override void ShowPresetReceiver ()
         {
-            ShowPresetReceiver (ExportSettings.instance.exportModelSettings);
+            ShowPresetReceiver (ExportSettings.instance.ExportModelSettings);
         }
         #endif
     }

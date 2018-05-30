@@ -4,8 +4,23 @@ using UnityEditorInternal;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace UnityEditor.Formats.Fbx.Exporter {
+    [System.Serializable]
+    public class FbxExportSettingsException : System.Exception
+    {
+        public FbxExportSettingsException() { }
+
+        public FbxExportSettingsException(string message)
+            : base(message) { }
+
+        public FbxExportSettingsException(string message, System.Exception inner)
+            : base(message, inner) { }
+
+        protected FbxExportSettingsException(SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
+    }
 
     [CustomEditor(typeof(ExportSettings))]
     public class ExportSettingsEditor : UnityEditor.Editor {
@@ -71,7 +86,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     throw new System.NotImplementedException ();
                 }
 
-                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.GetFirstValidVendorLocation(), ext);
+                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.FirstValidVendorLocation, ext);
 
                 // check that the path is valid and references the maya executable
                 if (!string.IsNullOrEmpty (dccPath)) {
@@ -373,7 +388,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         public bool BakeAnimation = true;
         public bool showConvertToPrefabDialog = true;
 
-        public string IntegrationSavePath;
+        public string integrationSavePath;
 
         public int selectedDCCApp = 0;
 
@@ -410,14 +425,24 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         // don't serialize as ScriptableObject does not get properly serialized on export
         [System.NonSerialized]
-        public ExportModelSettings exportModelSettings;
+        private ExportModelSettings m_exportModelSettings;
+        public ExportModelSettings ExportModelSettings
+        {
+            get { return m_exportModelSettings; }
+            set { m_exportModelSettings = value; }
+        }
 
         // store contents of export model settings for serialization
         [SerializeField]
         private ExportModelSettingsSerialize exportModelSettingsSerialize;
 
         [System.NonSerialized]
-        public ConvertToPrefabSettings convertToPrefabSettings;
+        private ConvertToPrefabSettings m_convertToPrefabSettings;
+        public ConvertToPrefabSettings ConvertToPrefabSettings
+        {
+            get { return m_convertToPrefabSettings; }
+            set { m_convertToPrefabSettings = value; }
+        }
 
         [SerializeField]
         private ConvertToPrefabSettingsSerialize convertToPrefabSettingsSerialize;
@@ -430,14 +455,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             HideSendToUnityMenu = true;
             prefabSavePaths = new List<string>(){ kDefaultSavePath };
             fbxSavePaths = new List<string> (){ kDefaultSavePath };
-            IntegrationSavePath = DefaultIntegrationSavePath;
+            integrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
             BakeAnimation = true;
-            exportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
-            exportModelSettingsSerialize = exportModelSettings.info;
-            convertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
-            convertToPrefabSettingsSerialize = convertToPrefabSettings.info;
+            ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
+            exportModelSettingsSerialize = ExportModelSettings.info;
+            ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
+            convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
         }
 
         /// <summary>
@@ -506,43 +531,46 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// Returns the index of the most recent program in the list of dccOptionNames
         /// Returns -1 on error.
         /// </summary>
-        public int GetPreferredDCCApp()
+        public int PreferredDCCApp
         {
-            if (dccOptionNames == null)
+            get
             {
-                return -1;
-            }
+                if (dccOptionNames == null)
+                {
+                    return -1;
+                }
 
-            int result = -1;
-            int newestDCCVersionNumber = -1;
-            
-            for (int i = 0; i < dccOptionNames.Count; i++)
-            {
-                int versionToCheck = FindDCCVersion(dccOptionNames[i]);
-                if (versionToCheck == -1)
+                int result = -1;
+                int newestDCCVersionNumber = -1;
+
+                for (int i = 0; i < dccOptionNames.Count; i++)
                 {
-                    if (dccOptionNames[i]=="MAYA_LOCATION")
-                        return i;
-                    
-                    continue;
-                }
-                if (versionToCheck > newestDCCVersionNumber)
-                {
-                    result = i;
-                    newestDCCVersionNumber = versionToCheck;
-                }
-                else if (versionToCheck == newestDCCVersionNumber)
-                {
-                    int selection = ChoosePreferredDCCApp(result, i);
-                    if (selection == i)
+                    int versionToCheck = FindDCCVersion(dccOptionNames[i]);
+                    if (versionToCheck == -1)
+                    {
+                        if (dccOptionNames[i] == "MAYA_LOCATION")
+                            return i;
+
+                        continue;
+                    }
+                    if (versionToCheck > newestDCCVersionNumber)
                     {
                         result = i;
-                        newestDCCVersionNumber = FindDCCVersion(dccOptionNames[i]);
+                        newestDCCVersionNumber = versionToCheck;
+                    }
+                    else if (versionToCheck == newestDCCVersionNumber)
+                    {
+                        int selection = ChoosePreferredDCCApp(result, i);
+                        if (selection == i)
+                        {
+                            result = i;
+                            newestDCCVersionNumber = FindDCCVersion(dccOptionNames[i]);
+                        }
                     }
                 }
-            }
 
-            return result;
+                return result;
+            }
         }
         /// <summary>
         /// Takes the index of two program names from dccOptionNames and chooses our preferred one based on the preference list
@@ -690,26 +718,29 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 dccOptionNames.Add("MAYA_LOCATION");
             }
 
-            instance.selectedDCCApp = instance.GetPreferredDCCApp();
+            instance.selectedDCCApp = instance.PreferredDCCApp;
         }
 
         /// <summary>
         /// Returns the first valid folder in our list of vendor locations
         /// </summary>
         /// <returns>The first valid vendor location</returns>
-        public static string GetFirstValidVendorLocation()
+        public static string FirstValidVendorLocation
         {
-            string[] locations = DCCVendorLocations;
-            for (int i = 0; i < locations.Length; i++)
+            get
             {
-                //Look through the list of locations we have and take the first valid one
-                if (Directory.Exists(locations[i]))
+                string[] locations = DCCVendorLocations;
+                for (int i = 0; i < locations.Length; i++)
                 {
-                    return locations[i];
+                    //Look through the list of locations we have and take the first valid one
+                    if (Directory.Exists(locations[i]))
+                    {
+                        return locations[i];
+                    }
                 }
+                //if no valid locations exist, just take us to the project folder
+                return Directory.GetCurrentDirectory();
             }
-            //if no valid locations exist, just take us to the project folder
-            return Directory.GetCurrentDirectory();
         }
 
         /// <summary>
@@ -749,7 +780,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 FindDCCInstalls ();
             }
             // store the selected app if any
-            string prevSelection = GetSelectedDCCPath();
+            string prevSelection = SelectedDCCPath;
 
             // remove options that no longer exist
             List<string> pathsToDelete = new List<string>();
@@ -772,7 +803,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             instance.selectedDCCApp = instance.dccOptionPaths.IndexOf (prevSelection);
             if (instance.selectedDCCApp < 0) {
                 // find preferred app if previous selection no longer exists
-                instance.selectedDCCApp = instance.GetPreferredDCCApp ();
+                instance.selectedDCCApp = instance.PreferredDCCApp;
             }
 
             if (instance.dccOptionPaths.Count <= 0) {
@@ -844,7 +875,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// <summary>
         /// Ask the version number by running maya.
         /// </summary>
-        static string AskMayaVersion(string exePath) {
+        internal static string AskMayaVersion(string exePath) {
             System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
             myProcess.StartInfo.FileName = exePath;
             myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
@@ -895,18 +926,24 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             return version != -1 && version < 2017;
         }
 
-        public static string GetSelectedDCCPath()
+        public static string SelectedDCCPath
         {
-            return (instance.dccOptionPaths.Count>0 &&
-                instance.selectedDCCApp >= 0 &&
-                instance.selectedDCCApp < instance.dccOptionPaths.Count) ? instance.dccOptionPaths [instance.selectedDCCApp] : "";
+            get
+            {
+                return (instance.dccOptionPaths.Count > 0 &&
+                    instance.selectedDCCApp >= 0 &&
+                    instance.selectedDCCApp < instance.dccOptionPaths.Count) ? instance.dccOptionPaths[instance.selectedDCCApp] : "";
+            }
         }
 
-        public static string GetSelectedDCCName()
+        public static string SelectedDCCName
         {
-            return (instance.dccOptionNames.Count>0 &&
-                instance.selectedDCCApp >= 0 &&
-                instance.selectedDCCApp < instance.dccOptionNames.Count) ? instance.dccOptionNames [instance.selectedDCCApp] : "";
+            get
+            {
+                return (instance.dccOptionNames.Count > 0 &&
+                    instance.selectedDCCApp >= 0 &&
+                    instance.selectedDCCApp < instance.dccOptionNames.Count) ? instance.dccOptionNames[instance.selectedDCCApp] : "";
+            }
         }
 
         public static bool CanInstall()
@@ -918,7 +955,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             var assetRelativePath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.ConvertToAssetRelativePath(fullPath);
             var projectRelativePath = "Assets/" + assetRelativePath;
             if (string.IsNullOrEmpty(assetRelativePath)) {
-                throw new System.Exception("Path " + fullPath + " must be in the Assets folder.");
+                throw new FbxExportSettingsException("Path " + fullPath + " must be in the Assets folder.");
             }
             return projectRelativePath;
         }
@@ -929,6 +966,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// separator on all platforms.
         /// </summary>
         public static string[] GetRelativeSavePaths(List<string> exportSavePaths){
+            if(exportSavePaths == null)
+            {
+                return null;
+            }
+
             if (exportSavePaths.Count == 0) {
                 exportSavePaths.Add (kDefaultSavePath);
             }
@@ -965,7 +1007,12 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         /// <param name="savePath">Save path.</param>
         /// <param name="exportSavePaths">Export save paths.</param>
-        public static void AddSavePath(string savePath, ref List<string> exportSavePaths){
+        private static void AddSavePath(string savePath, ref List<string> exportSavePaths){
+            if(exportSavePaths == null)
+            {
+                return;
+            }
+
             savePath = NormalizePath (savePath, isRelative: true);
             if (exportSavePaths.Contains (savePath)) {
                 // move to first place if it isn't already
@@ -999,35 +1046,45 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 separator: Path.DirectorySeparatorChar);
         }
 
-        public static string GetFbxAbsoluteSavePath(){
-            if (instance.fbxSavePaths.Count <= 0) {
-                instance.fbxSavePaths.Add (kDefaultSavePath);
-            }
-            return GetAbsoluteSavePath (instance.fbxSavePaths [instance.selectedFbxPath]);
-        }
-
-        public static string GetPrefabAbsoluteSavePath(){
-            if (instance.prefabSavePaths.Count <= 0) {
-                instance.prefabSavePaths.Add (kDefaultSavePath);
-            }
-            return GetAbsoluteSavePath (instance.prefabSavePaths [instance.selectedPrefabPath]);
-        }
-
-        public static string GetIntegrationSavePath()
-        {
-            //If the save path gets messed up and ends up not being valid, just use the project folder as the default
-            if (string.IsNullOrEmpty(instance.IntegrationSavePath) ||
-                !Directory.Exists(instance.IntegrationSavePath))
+        public static string FbxAbsoluteSavePath{
+            get
             {
-                //The project folder, above the asset folder
-                instance.IntegrationSavePath = DefaultIntegrationSavePath;
+                if (instance.fbxSavePaths.Count <= 0)
+                {
+                    instance.fbxSavePaths.Add(kDefaultSavePath);
+                }
+                return GetAbsoluteSavePath(instance.fbxSavePaths[instance.selectedFbxPath]);
             }
-            return instance.IntegrationSavePath;
         }
 
-        public static void SetIntegrationSavePath(string newPath)
+        public static string PrefabAbsoluteSavePath{
+            get
+            {
+                if (instance.prefabSavePaths.Count <= 0)
+                {
+                    instance.prefabSavePaths.Add(kDefaultSavePath);
+                }
+                return GetAbsoluteSavePath(instance.prefabSavePaths[instance.selectedPrefabPath]);
+            }
+        }
+
+        public static string IntegrationSavePath
         {
-            instance.IntegrationSavePath = newPath;
+            get
+            {
+                //If the save path gets messed up and ends up not being valid, just use the project folder as the default
+                if (string.IsNullOrEmpty(instance.integrationSavePath) ||
+                    !Directory.Exists(instance.integrationSavePath))
+                {
+                    //The project folder, above the asset folder
+                    instance.integrationSavePath = DefaultIntegrationSavePath;
+                }
+                return instance.integrationSavePath;
+            }
+            set
+            {
+                instance.integrationSavePath = value;
+            }
         }
 
         /// <summary>
@@ -1116,6 +1173,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         public static string NormalizePath(string path, bool isRelative,
                 char separator = '/')
         {
+            if(path == null)
+            {
+                return null;
+            }
+
             // Use slashes to simplify the code (we're going to clobber them all anyway).
             path = path.Replace('\\', '/');
 
@@ -1135,7 +1197,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 var dir = dirs[readIndex];
 
                 // Skip duplicate path separators.
-                if (dir == "") {
+                if (string.IsNullOrEmpty(dir)) {
                     // Skip if it's not a leading path separator.
                    if (lastWriteIndex >= 0) {
                        continue; }
@@ -1174,7 +1236,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 dirs[lastWriteIndex] = dirs[readIndex];
             }
 
-            if (lastWriteIndex == -1 || (lastWriteIndex == 0 && dirs[lastWriteIndex] == "")) {
+            if (lastWriteIndex == -1 || (lastWriteIndex == 0 && string.IsNullOrEmpty(dirs[lastWriteIndex]))) {
                 // If we didn't keep anything, we have the empty path.
                 // For an absolute path that's / ; for a relative path it's .
                 if (isRelative) {
@@ -1199,22 +1261,22 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         protected override void Load ()
         {
             base.Load ();
-            if (!instance.exportModelSettings) {
-                instance.exportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
+            if (!instance.ExportModelSettings) {
+                instance.ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             }
-            instance.exportModelSettings.info = instance.exportModelSettingsSerialize;
+            instance.ExportModelSettings.info = instance.exportModelSettingsSerialize;
 
-            if (!instance.convertToPrefabSettings) {
-                instance.convertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
+            if (!instance.ConvertToPrefabSettings) {
+                instance.ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
             }
-            instance.convertToPrefabSettings.info = instance.convertToPrefabSettingsSerialize;
+            instance.ConvertToPrefabSettings.info = instance.convertToPrefabSettingsSerialize;
 
         }
 
         public void Save()
         {
-            exportModelSettingsSerialize = exportModelSettings.info;
-            convertToPrefabSettingsSerialize = convertToPrefabSettings.info;
+            exportModelSettingsSerialize = ExportModelSettings.info;
+            convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
             instance.Save (true);
         }
     }
@@ -1296,7 +1358,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
 
     [AttributeUsage(AttributeTargets.Class)]
-    public class FilePathAttribute : Attribute
+    public sealed class FilePathAttribute : Attribute
     {
         public enum Location
         {

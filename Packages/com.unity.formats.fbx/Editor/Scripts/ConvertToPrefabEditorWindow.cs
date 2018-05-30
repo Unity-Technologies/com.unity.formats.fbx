@@ -86,7 +86,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             base.OnEnable();
             if (!InnerEditor)
             {
-                InnerEditor = UnityEditor.Editor.CreateEditor(ExportSettings.instance.convertToPrefabSettings);
+                InnerEditor = UnityEditor.Editor.CreateEditor(ExportSettings.instance.ConvertToPrefabSettings);
             }
             m_prefabExtLabelWidth = FbxExtLabelStyle.CalcSize(new GUIContent(".prefab")).x;
         }
@@ -118,10 +118,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            var fbxDirPath = ExportSettings.GetFbxAbsoluteSavePath();
+            var fbxDirPath = ExportSettings.FbxAbsoluteSavePath;
             var fbxPath = System.IO.Path.Combine(fbxDirPath, ExportFileName + ".fbx");
 
-            var prefabDirPath = ExportSettings.GetPrefabAbsoluteSavePath();
+            var prefabDirPath = ExportSettings.PrefabAbsoluteSavePath;
             var prefabPath = System.IO.Path.Combine(prefabDirPath, m_prefabFileName + ".prefab");
 
             if (ToExport == null)
@@ -175,7 +175,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 ConvertToModel.Convert(
-                    go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
+                    go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
                 );
                 return true;
             }
@@ -185,7 +185,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // Convert, automatically choosing a file path that won't clobber any existing files.
                 var go = ModelExporter.GetGameObject(obj);
                 ConvertToModel.Convert(
-                    go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
+                    go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
                 );
             }
             return true;
@@ -193,12 +193,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected override ExportOptionsSettingsSerializeBase SettingsObject
         {
-            get { return ExportSettings.instance.convertToPrefabSettings.info; }
+            get { return ExportSettings.instance.ConvertToPrefabSettings.info; }
         }
 #if UNITY_2018_1_OR_NEWER
         protected override void ShowPresetReceiver()
         {
-            ShowPresetReceiver(ExportSettings.instance.convertToPrefabSettings);
+            ShowPresetReceiver(ExportSettings.instance.ConvertToPrefabSettings);
         }
 #endif
         protected override void CreateCustomUI()

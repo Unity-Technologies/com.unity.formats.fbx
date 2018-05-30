@@ -166,11 +166,11 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             var appDataPath = Application.dataPath.Replace (Path.AltDirectorySeparatorChar,
                     Path.DirectorySeparatorChar);
 
-            var defaultAbsolutePath = ExportSettings.GetFbxAbsoluteSavePath ();
+            var defaultAbsolutePath = ExportSettings.FbxAbsoluteSavePath;
             var dataPath = Path.GetFullPath (Path.Combine (appDataPath, ExportSettings.kDefaultSavePath));
             Assert.AreEqual (dataPath, defaultAbsolutePath);
 
-            var prefabDefaultAbsPath = ExportSettings.GetPrefabAbsoluteSavePath ();
+            var prefabDefaultAbsPath = ExportSettings.PrefabAbsoluteSavePath;
             Assert.AreEqual (dataPath, prefabDefaultAbsPath);
 
             // set; check that the saved value is platform-independent,
@@ -184,8 +184,8 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             Assert.That (ExportSettings.GetRelativePrefabSavePaths () [0], Is.EqualTo (string.Format("Assets{0}a{0}b{0}c", forwardSlash)));
 
             var platformPath = Path.Combine ("a", Path.Combine ("b", "c"));
-            Assert.AreEqual (Path.Combine (appDataPath, platformPath), ExportSettings.GetFbxAbsoluteSavePath ());
-            Assert.AreEqual (Path.Combine (appDataPath, platformPath), ExportSettings.GetPrefabAbsoluteSavePath ());
+            Assert.AreEqual (Path.Combine (appDataPath, platformPath), ExportSettings.FbxAbsoluteSavePath);
+            Assert.AreEqual (Path.Combine (appDataPath, platformPath), ExportSettings.PrefabAbsoluteSavePath);
 
             ExportSettings.AddFbxSavePath ("test");
             ExportSettings.AddPrefabSavePath ("test2");
@@ -212,43 +212,43 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
             ExportSettings.instance.SetDCCOptionNames (testList);
 
-            int preferred = ExportSettings.instance.GetPreferredDCCApp ();
+            int preferred = ExportSettings.instance.PreferredDCCApp;
             //While Maya 2017 and 3ds Max 2017 are tied for most recent, Maya 2017 (index 8) should win because we prefer Maya.
             Assert.AreEqual (preferred, 8);
 
             ExportSettings.instance.ClearDCCOptionNames ();
             //Try running it with an empty list
-            preferred = ExportSettings.instance.GetPreferredDCCApp ();
+            preferred = ExportSettings.instance.PreferredDCCApp;
 
             Assert.AreEqual (preferred, -1);
 
             ExportSettings.instance.SetDCCOptionNames (null);
             //Try running it with a null list
-            preferred = ExportSettings.instance.GetPreferredDCCApp ();
+            preferred = ExportSettings.instance.PreferredDCCApp;
 
             Assert.AreEqual(preferred, -1);
 
             //Testing the results of only having a mayaLT install
             ExportSettings.instance.SetDCCOptionNames(new List<string> { ExportSettings.kMayaLtOptionName + "2018" }); //hardcoded because the constant is changed in another branch but not this one at this time
-            preferred = ExportSettings.instance.GetPreferredDCCApp();
+            preferred = ExportSettings.instance.PreferredDCCApp;
 
             Assert.AreEqual(preferred, 0);
 
             //Testing the results of only having a maya install
             ExportSettings.instance.SetDCCOptionNames(new List<string> { ExportSettings.kMayaOptionName + "2018" });
-            preferred = ExportSettings.instance.GetPreferredDCCApp();
+            preferred = ExportSettings.instance.PreferredDCCApp;
 
             Assert.AreEqual(preferred, 0);
 
             //Testing the results of only having a max install
             ExportSettings.instance.SetDCCOptionNames(new List<string> { ExportSettings.kMaxOptionName + "2018" });
-            preferred = ExportSettings.instance.GetPreferredDCCApp();
+            preferred = ExportSettings.instance.PreferredDCCApp;
 
             Assert.AreEqual(preferred, 0);
 
             //Testing the preference priority
             ExportSettings.instance.SetDCCOptionNames(new List<string> { ExportSettings.kMaxOptionName + "2018", ExportSettings.kMayaOptionName + "2018", ExportSettings.kMayaLtOptionName + "2018" });
-            preferred = ExportSettings.instance.GetPreferredDCCApp();
+            preferred = ExportSettings.instance.PreferredDCCApp;
 
             Assert.AreEqual(preferred, 1);
         }
@@ -485,7 +485,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
             if (data.ContainsKey("expected3DApp"))
             {
-                int preferred = ExportSettings.instance.GetPreferredDCCApp ();
+                int preferred = ExportSettings.instance.PreferredDCCApp;
                 Assert.AreEqual(preferred, int.Parse(data["expected3DApp"][0]) );
             }
         }

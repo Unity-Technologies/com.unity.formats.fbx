@@ -115,7 +115,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             var converted = new List<GameObject>();
-            var exportOptions = ExportSettings.instance.convertToPrefabSettings.info;
+            var exportOptions = ExportSettings.instance.ConvertToPrefabSettings.info;
             foreach (var go in toExport)
             {
                 var convertedGO = Convert(go, exportOptions: exportOptions);
@@ -261,7 +261,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (string.IsNullOrEmpty(fbxFullPath)) {
                 // Generate a unique filename.
                 if (string.IsNullOrEmpty (fbxDirectoryFullPath)) {
-                    fbxDirectoryFullPath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.GetFbxAbsoluteSavePath();
+                    fbxDirectoryFullPath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.FbxAbsoluteSavePath;
                 } else {
                     fbxDirectoryFullPath = Path.GetFullPath (fbxDirectoryFullPath);
                 }
@@ -374,7 +374,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (string.IsNullOrEmpty(prefabFullPath)) {
                 // Generate a unique filename.
                 if (string.IsNullOrEmpty (prefabDirectoryFullPath)) {
-                    prefabDirectoryFullPath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.GetPrefabAbsoluteSavePath();
+                    prefabDirectoryFullPath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.PrefabAbsoluteSavePath;
                 } else {
                     prefabDirectoryFullPath = Path.GetFullPath (prefabDirectoryFullPath);
                 }
