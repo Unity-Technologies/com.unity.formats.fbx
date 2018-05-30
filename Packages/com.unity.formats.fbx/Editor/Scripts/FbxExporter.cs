@@ -849,6 +849,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         protected bool ExportSkinnedMesh (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
         {
+            if(!unityGo || fbxNode == null)
+            {
+                return false;
+            }
+
             SkinnedMeshRenderer unitySkin
             = unityGo.GetComponent<SkinnedMeshRenderer> ();
 
