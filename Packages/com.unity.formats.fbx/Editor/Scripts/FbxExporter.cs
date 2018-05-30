@@ -4,12 +4,28 @@ using UnityEngine;
 using UnityEngine.Animations;
 using UnityEditor;
 using System.Linq;
+using System.Runtime.Serialization;
 using UnityEngine.Formats.FbxSdk;
 using UnityEditor.Formats.Fbx.Exporter.Visitors;
 using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
+    [System.Serializable]
+    public class ModelExportException : System.Exception
+    {
+        public ModelExportException(){}
+
+        public ModelExportException(string message)
+            : base(message){}
+
+        public ModelExportException(string message, System.Exception inner)
+            : base(message, inner){}
+
+        protected ModelExportException(SerializationInfo info, StreamingContext context)
+            : base(info, context){}
+    }
+
     public class ModelExporter : System.IDisposable
     {
         const string Title =
@@ -243,7 +259,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 int newLayerIndex = fbxMesh.CreateLayer();
                 if (newLayerIndex <= maxLayerIndex) {
                     // Error!
-                    throw new System.Exception (
+                    throw new ModelExportException(
                         "Internal error: Unable to create mesh layer "
                         + (maxLayerIndex + 1)
                         + " on mesh " + fbxMesh.GetName ());
@@ -537,8 +553,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             // Find its filename
-            var textureSourceFullPath = AssetDatabase.GetAssetPath (unityTexture);
-            if (textureSourceFullPath == "") {
+            var textureSourceFullPath = AssetDatabase.GetAssetPath(unityTexture);
+            if (string.IsNullOrEmpty(textureSourceFullPath)) {
                 return false;
             }
 
@@ -681,27 +697,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         int polySize;
 
                         switch (topology) {
-                        case MeshTopology.Triangles:
-                            polySize = 3;
-                            break;
-                        case MeshTopology.Quads:
-                            polySize = 4;
-                            break;
-                        case MeshTopology.Lines:
-                            throw new System.NotImplementedException();
-                        case MeshTopology.Points:
-                            throw new System.NotImplementedException();
-                        case MeshTopology.LineStrip:
-                            throw new System.NotImplementedException();
-                        default:
-                            throw new System.NotImplementedException ();
+                            case MeshTopology.Triangles:
+                                polySize = 3;
+                                break;
+                            case MeshTopology.Quads:
+                                polySize = 4;
+                                break;
+                            case MeshTopology.Lines:
+                                throw new System.NotImplementedException();
+                            case MeshTopology.Points:
+                                throw new System.NotImplementedException();
+                            case MeshTopology.LineStrip:
+                                throw new System.NotImplementedException();
+                            default:
+                                throw new System.NotImplementedException();
                         }
 
                         // Specify the material index for each polygon.
                         // Material index should match subMeshIndex.
-                        var indices = mesh.GetIndices (subMeshIndex);
-                        for(int j = 0, n = indices.Length / polySize; j < n; j++){
-                            fbxElementArray.Add (subMeshIndex);
+                        var indices = mesh.GetIndices(subMeshIndex);
+                        for (int j = 0, n = indices.Length / polySize; j < n; j++) {
+                            fbxElementArray.Add(subMeshIndex);
                         }
                     }
                 }
@@ -772,24 +788,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 int[] vertOrder;
 
                 switch (topology) {
-                case MeshTopology.Triangles:
-                    polySize = 3;
-                    // flip winding order so that Maya and Unity import it properly
-                    vertOrder = new int[]{ 0, 2, 1 };
-                    break;
-                case MeshTopology.Quads:
-                    polySize = 4;
-                    // flip winding order so that Maya and Unity import it properly
-                    vertOrder = new int[]{ 0, 3, 2, 1 };
-                    break;
-                case MeshTopology.Lines:
-                    throw new System.NotImplementedException();
-                case MeshTopology.Points:
-                    throw new System.NotImplementedException();
-                case MeshTopology.LineStrip:
-                    throw new System.NotImplementedException();
-                default: 
-                    throw new System.NotImplementedException ();
+                    case MeshTopology.Triangles:
+                        polySize = 3;
+                        // flip winding order so that Maya and Unity import it properly
+                        vertOrder = new int[] { 0, 2, 1 };
+                        break;
+                    case MeshTopology.Quads:
+                        polySize = 4;
+                        // flip winding order so that Maya and Unity import it properly
+                        vertOrder = new int[] { 0, 3, 2, 1 };
+                        break;
+                    case MeshTopology.Lines:
+                        throw new System.NotImplementedException();
+                    case MeshTopology.Points:
+                        throw new System.NotImplementedException();
+                    case MeshTopology.LineStrip:
+                        throw new System.NotImplementedException();
+                    default:
+                        throw new System.NotImplementedException();
                 }
 
                 for (int f = 0; f < indices.Length / polySize; f++) {
@@ -1071,7 +1087,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected bool ExportBindPose (SkinnedMeshRenderer skinnedMesh, FbxNode fbxMeshNode,
                                 FbxScene fbxScene, Dictionary<SkinnedMeshRenderer, Transform[]> skinnedMeshToBonesMap)
         {
-            FbxPose fbxPose = FbxPose.Create (fbxScene, fbxMeshNode.GetName());
+            if (fbxMeshNode == null || skinnedMeshToBonesMap == null || fbxScene == null)
+            {
+                return false;
+            }
+
+            FbxPose fbxPose = FbxPose.Create(fbxScene, fbxMeshNode.GetName());
 
             // set as bind pose
             fbxPose.SetIsBindPose (true);
@@ -1201,21 +1222,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
             UnityEngine.Vector3 unityScale;
 
             switch (exportType) {
-            case TransformExportType.Reset:
-                unityTranslate = Vector3.zero;
-                fbxRotate = new FbxDouble3 (0);
-                unityScale = Vector3.one;
-                break;
-            case TransformExportType.Global:
-                unityTranslate = GetRecenteredTranslation(unityTransform, newCenter);
-                fbxRotate = ConvertQuaternionToXYZEuler(unityTransform.rotation);
-                unityScale = unityTransform.lossyScale;
-                break;
-            default: /*case TransformExportType.Local*/
-                unityTranslate = unityTransform.localPosition;
-                fbxRotate = ConvertQuaternionToXYZEuler(unityTransform.localRotation);
-                unityScale = unityTransform.localScale;
-                break;
+                case TransformExportType.Reset:
+                    unityTranslate = Vector3.zero;
+                    fbxRotate = new FbxDouble3(0);
+                    unityScale = Vector3.one;
+                    break;
+                case TransformExportType.Global:
+                    unityTranslate = GetRecenteredTranslation(unityTransform, newCenter);
+                    fbxRotate = ConvertQuaternionToXYZEuler(unityTransform.rotation);
+                    unityScale = unityTransform.lossyScale;
+                    break;
+                default: /*case TransformExportType.Local*/
+                    unityTranslate = unityTransform.localPosition;
+                    fbxRotate = ConvertQuaternionToXYZEuler(unityTransform.localRotation);
+                    unityScale = unityTransform.localScale;
+                    break;
             }
 
             // Transfer transform data from Unity to Fbx
@@ -1233,8 +1254,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// if this game object is a model prefab then export with shared components
         /// </summary>
-        protected bool ExportInstance (GameObject unityGo, FbxNode fbxNode, FbxScene fbxScene)
+        protected bool ExportInstance(GameObject unityGo, FbxNode fbxNode)
         {
+            if (!unityGo || fbxNode == null)
+            {
+                return false;
+            }
+
             PrefabType unityPrefabType = PrefabUtility.GetPrefabType(unityGo);
 
             if (unityPrefabType != PrefabType.PrefabInstance &&
@@ -1255,7 +1281,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
                 return false;
             }
-                
+
             // We don't export the mesh because we already have it from the parent, but we still need to assign the material
             var renderer = unityGo.GetComponent<Renderer>();
             var materials = renderer ? renderer.sharedMaterials : null;
@@ -1283,6 +1309,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         protected bool ExportCamera (GameObject unityGO, FbxScene fbxScene, FbxNode fbxNode)
         {
+            if (!unityGO || fbxScene == null || fbxNode == null)
+            {
+                return false;
+            }
+
             Camera unityCamera = unityGO.GetComponent<Camera> ();
             if (unityCamera == null) {
                 return false;
@@ -1315,6 +1346,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         protected bool ExportLight (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
         {
+            if(!unityGo || fbxScene == null || fbxNode == null)
+            {
+                return false;
+            }
+
             Light unityLight = unityGo.GetComponent<Light> ();
 
             if (unityLight == null)
@@ -1378,13 +1414,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        protected bool ExportCommonConstraintProperties<T,U>(T uniConstraint, U fbxConstraint, FbxNode fbxNode) where T : IConstraint where U : FbxConstraint
+        protected bool ExportCommonConstraintProperties<TUnityConstraint,TFbxConstraint>(TUnityConstraint uniConstraint, TFbxConstraint fbxConstraint, FbxNode fbxNode)
+            where TUnityConstraint : IConstraint where TFbxConstraint : FbxConstraint
         {
             fbxConstraint.Active.Set(uniConstraint.constraintActive);
             fbxConstraint.Lock.Set(uniConstraint.locked);
             fbxConstraint.Weight.Set(uniConstraint.weight * UnitScaleFactor);
 
-            AddFbxNodeToConstraintsMapping(fbxNode, fbxConstraint, typeof(T));
+            AddFbxNodeToConstraintsMapping(fbxNode, fbxConstraint, typeof(TUnityConstraint));
             return true;
         }
 
@@ -1402,6 +1439,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected List<ExpConstraintSource> GetConstraintSources(IConstraint unityConstraint)
         {
+            if(unityConstraint == null)
+            {
+                return null;
+            }
+
             var fbxSources = new List<ExpConstraintSource>();
             var sources = new List<ConstraintSource>();
             unityConstraint.GetSources(sources);
@@ -1431,6 +1473,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected bool ExportPositionConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
         {
+            if(fbxNode == null)
+            {
+                return false;
+            }
+
             var uniPosConstraint = uniConstraint as PositionConstraint;
             Debug.Assert (uniPosConstraint != null);
 
@@ -1457,6 +1504,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected bool ExportRotationConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
         {
+            if(fbxNode == null)
+            {
+                return false;
+            }
+
             var uniRotConstraint = uniConstraint as RotationConstraint;
             Debug.Assert(uniRotConstraint != null);
 
@@ -1487,6 +1539,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected bool ExportScaleConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
         {
+            if(fbxNode == null)
+            {
+                return false;
+            }
+
             var uniScaleConstraint = uniConstraint as ScaleConstraint;
             Debug.Assert(uniScaleConstraint != null);
 
@@ -1515,6 +1572,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected bool ExportAimConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
         {
+            if(fbxNode == null)
+            {
+                return false;
+            }
+
             var uniAimConstraint = uniConstraint as AimConstraint;
             Debug.Assert(uniAimConstraint != null);
 
@@ -1576,6 +1638,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected bool ExportParentConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
         {
+            if(fbxNode == null)
+            {
+                return false;
+            }
+
             var uniParentConstraint = uniConstraint as ParentConstraint;
             Debug.Assert(uniParentConstraint != null);
 
@@ -1627,6 +1694,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected bool ExportConstraints (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
         {
+            if (!unityGo)
+            {
+                return false;
+            }
+
             var mapConstraintTypeToExportFunction = new Dictionary<System.Type, ExportConstraintDelegate>()
             {
                 { typeof(PositionConstraint), ExportPositionConstraint },
@@ -1785,7 +1857,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns></returns>
         protected FbxConstraint GetFbxConstraint(FbxNode constrainedNode, System.Type uniConstraintType)
         {
-            if (!uniConstraintType.GetInterfaces().Contains(typeof(IConstraint)))
+            if (uniConstraintType == null || !uniConstraintType.GetInterfaces().Contains(typeof(IConstraint)))
             {
                 // not actually a constraint
                 return null;
@@ -1812,6 +1884,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType)
         {
+            if(fbxNode == null)
+            {
+                return null;
+            }
+
             // check if property maps to a constraint
             // check this first because both constraints and FbxNodes can contain a RotationOffset property,
             // but only the constraint one is animatable.
@@ -1850,9 +1927,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                                                 float frameRate,
                                                 string uniPropertyName,
                                                 System.Type uniPropertyType,
-                                                FbxScene fbxScene,
                                                 FbxAnimLayer fbxAnimLayer)
         {
+            if(fbxNode == null)
+            {
+                return;
+            }
+
             if (Verbose) {
                 Debug.Log ("Exporting animation for " + fbxNode.GetName() + " (" + uniPropertyName + ")");
             }
@@ -1942,7 +2023,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         protected void ExportAnimationClip (AnimationClip uniAnimClip, GameObject uniRoot, FbxScene fbxScene)
         {
-            if (!uniAnimClip) return;
+            if (!uniAnimClip || !uniRoot || fbxScene == null) return;
 
             if (Verbose)
                 Debug.Log (string.Format ("Exporting animation clip ({1}) for {0}", uniRoot.name, uniAnimClip.name));
@@ -2080,7 +2161,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // simple property (e.g. intensity), export right away
                     ExportAnimationCurve (fbxNode, uniAnimCurve, uniAnimClip.frameRate, 
                         propertyName, uniCurve.propertyType,
-                        fbxScene, 
                         fbxAnimLayer);
                 }
             }
@@ -2337,6 +2417,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         protected void ExportAnimation (GameObject uniRoot, FbxScene fbxScene)
         {
+            if (!uniRoot)
+            {
+                return;
+            }
+
             var exportedClips = new HashSet<AnimationClip> ();
 
             var uniAnimator = uniRoot.GetComponent<Animator> ();
@@ -2387,7 +2472,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         protected void SetDefaultCamera (FbxScene fbxScene)
         {
-            if (DefaultCamera == "")
+            if(fbxScene == null) { return; }
+
+            if (string.IsNullOrEmpty(DefaultCamera))
                 DefaultCamera = Globals.FBXSDK_CAMERA_PERSPECTIVE;
 
             fbxScene.GetGlobalSettings ().SetDefaultCamera (DefaultCamera);
@@ -2981,7 +3068,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var fbxNode = entry.Value;
 
                 // try export mesh
-                bool exportedMesh = ExportInstance (unityGo, fbxNode, fbxScene);
+                bool exportedMesh = ExportInstance (unityGo, fbxNode);
 
                 if (!exportedMesh) {
                     exportedMesh = ExportMesh (unityGo, fbxNode);
@@ -3024,9 +3111,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="go">Go.</param>
         protected bool GameObjectHasAnimation(GameObject go){
             return go != null &&
-                go.GetComponent<Animator> () ||
+                (go.GetComponent<Animator> () ||
                 go.GetComponent<Animation> () ||
-                go.GetComponent<UnityEngine.Playables.PlayableDirector> ();
+                go.GetComponent<UnityEngine.Playables.PlayableDirector> ());
         }
 
         /// <summary>
@@ -3758,10 +3845,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 bool replace = false)
         {
             if (!t.IsSubclassOf(typeof(MonoBehaviour))) {
-                throw new System.Exception("Registering a callback for a type that isn't derived from MonoBehaviour: " + t);
+                throw new ModelExportException("Registering a callback for a type that isn't derived from MonoBehaviour: " + t);
             }
             if (!replace && MeshForComponentCallbacks.ContainsKey(t)) {
-                throw new System.Exception("Replacing a callback for type " + t);
+                throw new ModelExportException("Replacing a callback for type " + t);
             }
             MeshForComponentCallbacks[t] = callback;
         }
@@ -3932,7 +4019,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
         }
 
-        internal bool Verbose { set {;} get { return ExportSettings.instance.Verbose; } }
+        internal bool Verbose { get { return ExportSettings.instance.Verbose; } }
 
         /// <summary>
         /// manage the selection of a filename
