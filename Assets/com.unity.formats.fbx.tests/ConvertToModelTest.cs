@@ -62,20 +62,20 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
                 // Test on an object in the scene
                 Assert.That(ConvertToModel.WillExportFbx(a));
-                var aAsset = ConvertToModel.GetOrCreateFbxAsset(a, fbxFullPath: GetRandomFbxFilePath());
+                var aAsset = ConvertToModelReflection.GetOrCreateFbxAsset(a, fbxFullPath: GetRandomFbxFilePath());
                 Assert.AreNotEqual(a, aAsset);
                 AssertSameHierarchy(a, aAsset, ignoreRootName: true);
                 Assert.AreEqual(PrefabType.ModelPrefab, PrefabUtility.GetPrefabType(aAsset));
 
                 // Test on an fbx asset
                 Assert.That(!ConvertToModel.WillExportFbx(aAsset));
-                var aAssetAsset = ConvertToModel.GetOrCreateFbxAsset(aAsset, fbxFullPath: GetRandomFbxFilePath());
+                var aAssetAsset = ConvertToModelReflection.GetOrCreateFbxAsset(aAsset, fbxFullPath: GetRandomFbxFilePath());
                 Assert.AreEqual(aAsset, aAssetAsset);
 
                 // Test on an fbx instance
                 var aAssetInstance = PrefabUtility.InstantiatePrefab(aAsset) as GameObject;
                 Assert.That(!ConvertToModel.WillExportFbx(aAssetInstance));
-                var aAssetInstanceAsset = ConvertToModel.GetOrCreateFbxAsset(aAssetInstance, fbxFullPath: GetRandomFbxFilePath());
+                var aAssetInstanceAsset = ConvertToModelReflection.GetOrCreateFbxAsset(aAssetInstance, fbxFullPath: GetRandomFbxFilePath());
                 Assert.AreEqual(aAsset, aAssetInstanceAsset);
             }
 
@@ -88,7 +88,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 Assert.AreEqual(a, b);
 
                 // Test on an fbx asset
-                var aFbx = ConvertToModel.GetOrCreateFbxAsset(a, fbxFullPath: GetRandomFbxFilePath());
+                var aFbx = ConvertToModelReflection.GetOrCreateFbxAsset(a, fbxFullPath: GetRandomFbxFilePath());
                 var bFbx = ConvertToModel.GetOrCreateInstance(aFbx);
                 Assert.AreNotEqual(aFbx, bFbx);
                 Assert.AreEqual(aFbx, PrefabUtility.GetCorrespondingObjectFromSource(bFbx));
@@ -103,7 +103,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             // Test SetupFbxPrefab
             {
                 var a = CreateHierarchy();
-                var aFbx = ConvertToModel.GetOrCreateFbxAsset(a, fbxFullPath: GetRandomFbxFilePath());
+                var aFbx = ConvertToModelReflection.GetOrCreateFbxAsset(a, fbxFullPath: GetRandomFbxFilePath());
 
                 // We don't have an FbxPrefab; after setup we do; after a second setup we still only have one.
                 Assert.AreEqual(0, a.GetComponents<FbxPrefab>().Length);
@@ -166,7 +166,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 Assert.IsFalse(b.GetComponent<BoxCollider>());
                 Assert.AreEqual(Vector3.zero, b.transform.localPosition);
                 Assert.AreNotEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
-                ConvertToModel.CopyComponents(b, a);
+                ConvertToModelReflection.CopyComponents(b, a);
                 Assert.IsFalse(b.GetComponent<BoxCollider>());
                 Assert.AreEqual(Vector3.zero, b.transform.localPosition);
                 Assert.AreEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
@@ -198,7 +198,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 Assert.AreEqual ("BB", b.transform.GetChild (1).name);
                 Assert.AreEqual (Vector3.zero, b1.transform.localPosition);
 
-                ConvertToModel.UpdateFromSourceRecursive (b, a);
+                ConvertToModelReflection.UpdateFromSourceRecursive (b, a);
 
                 // only the mesh + materials should change
                 Assert.AreEqual(b.GetComponent<MeshFilter>().sharedMesh, a.GetComponent<MeshFilter>().sharedMesh);
@@ -391,7 +391,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             quad2.transform.parent = cube2.transform;
             capsule.transform.SetSiblingIndex(1);
 
-            var dictionary = ConvertToModel.MapNameToSourceRecursive(cube, cube2);
+            var dictionary = ConvertToModelReflection.MapNameToSourceRecursive(cube, cube2);
 
             //We expect these to pass because we've given it an identical game object, as it would have after a normal export.
             Assert.AreSame(capsule2, dictionary[capsule.name]);
@@ -407,7 +407,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             capsule3.transform.parent = cube3.transform;
             sphere3.transform.parent = cube3.transform;
 
-            var dictionaryBroken = ConvertToModel.MapNameToSourceRecursive(cube, cube3);
+            var dictionaryBroken = ConvertToModelReflection.MapNameToSourceRecursive(cube, cube3);
 
             //the dictionary size should be equal to the amount of children + the parent
             Assert.True(dictionaryBroken.Count == 4);
