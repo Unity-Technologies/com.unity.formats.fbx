@@ -21,7 +21,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         List<string> m_nodeNameToSuggest;
 
-        public bool Verbose { get { return UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.Verbose; } }
+        public bool Verbose { get { return UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.VerboseProperty; } }
 
         public void Init(FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility, FbxPrefab fbxPrefab)
         {

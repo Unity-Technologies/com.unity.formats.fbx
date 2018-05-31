@@ -240,8 +240,8 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         {
             base.Init();
             // Save the initial setting for the auto updater toggle and disable it for the unit test
-            isAutoUpdaterOn = ExportSettings.instance.autoUpdaterEnabled;
-            ExportSettings.instance.autoUpdaterEnabled = false;
+            isAutoUpdaterOn = ExportSettings.instance.AutoUpdaterEnabled;
+            ExportSettings.instance.AutoUpdaterEnabled = false;
             FbxPrefabAutoUpdater.runningUnitTest = true;
         }
 
@@ -340,7 +340,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         public void stopTest()
         {
             // Put back the initial setting for the auto-updater toggle
-            ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
+            ExportSettings.instance.AutoUpdaterEnabled = isAutoUpdaterOn;
             FbxPrefabAutoUpdater.runningUnitTest = false;
         }
     }

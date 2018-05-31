@@ -209,14 +209,14 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             EditorApplication.update += DeleteOnNextUpdate;
 
             // Put back the initial setting for the auto-updater toggle
-            ExportSettings.instance.autoUpdaterEnabled = isAutoUpdaterOn;
+            ExportSettings.instance.AutoUpdaterEnabled = isAutoUpdaterOn;
         }
 
         [SetUp]
         public virtual void Init()
         {
-            isAutoUpdaterOn = ExportSettings.instance.autoUpdaterEnabled;
-            ExportSettings.instance.autoUpdaterEnabled = true;
+            isAutoUpdaterOn = ExportSettings.instance.AutoUpdaterEnabled;
+            ExportSettings.instance.AutoUpdaterEnabled = true;
         }
 
 
