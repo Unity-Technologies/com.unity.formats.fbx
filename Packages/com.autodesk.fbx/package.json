@@ -1,5 +1,5 @@
 {
-"name": "com.unity.formats.fbxsdk",
+"name": "com.autodesk.fbx",
 "version" : "0.0.0-master",
 "displayName" : "FBX SDK CSharp bindings",
 "unity": "2018.2",
