@@ -110,12 +110,12 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         }
 
         // Redefinition of the internal delegate. There might be a way to re-use the one in ModelExporter
-        public static void RegisterMeshObjectCallback(ModelExporter.GetMeshForObject callback)
+        public static void RegisterMeshObjectCallback(GetMeshForObject callback)
         {
             InvokeMethod("RegisterMeshObjectCallback", new object[] {callback});
         }
 
-        public static void RegisterMeshCallback<T>(ModelExporter.GetMeshForComponent<T> callback, bool replace = false)
+        public static void RegisterMeshCallback<T>(GetMeshForComponent<T> callback, bool replace = false)
                 where T : UnityEngine.MonoBehaviour
         {
             // Get the template method first (we assume there is only one 
@@ -144,11 +144,11 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             genericMethod.Invoke(null, null);
         }
 
-        public static void UnRegisterMeshCallback(ModelExporter.GetMeshForObject callback)
+        public static void UnRegisterMeshCallback(GetMeshForObject callback)
         {
             InvokeMethodOverload("UnRegisterMeshCallback", 
                                  new object[] {callback},
-                                 new Type[] {typeof(ModelExporter.GetMeshForObject)});
+                                 new Type[] {typeof(GetMeshForObject)});
         }
 
 
