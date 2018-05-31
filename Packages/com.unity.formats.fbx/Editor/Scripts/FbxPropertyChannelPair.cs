@@ -1,4 +1,4 @@
-﻿using UnityEngine.Formats.FbxSdk;
+﻿using Autodesk.Fbx;
 using System.Collections.Generic;
 
 namespace UnityEditor.Formats.Fbx.Exporter

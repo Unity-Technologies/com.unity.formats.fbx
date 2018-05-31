@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace UnityEngine.Formats.FbxSdk {
+namespace Autodesk.Fbx {
 
 public class FbxAnimStack : FbxCollection {
   internal FbxAnimStack(global::System.IntPtr cPtr, bool ignored) : base(cPtr, ignored) { }

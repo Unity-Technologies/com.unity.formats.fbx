@@ -5,7 +5,7 @@
 // See LICENSE.md file in the project root for full license information.
 // ***********************************************************************
 
-namespace UnityEngine.Formats.FbxSdk
+namespace Autodesk.Fbx
 {
     /**
      * The structs in this file are for optimized transfer. Their layout must

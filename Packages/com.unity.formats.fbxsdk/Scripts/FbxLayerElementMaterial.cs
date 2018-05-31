@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace UnityEngine.Formats.FbxSdk {
+namespace Autodesk.Fbx {
 
 public class FbxLayerElementMaterial : FbxLayerElementTemplateFbxSurfaceMaterial {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;

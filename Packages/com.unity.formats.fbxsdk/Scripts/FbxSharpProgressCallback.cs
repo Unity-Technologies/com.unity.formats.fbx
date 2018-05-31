@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace UnityEngine.Formats.FbxSdk {
+namespace Autodesk.Fbx {
 
 internal abstract class FbxSharpProgressCallback : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;

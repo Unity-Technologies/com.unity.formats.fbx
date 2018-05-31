@@ -8,7 +8,7 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
-namespace UnityEngine.Formats.FbxSdk {
+namespace Autodesk.Fbx {
 
 public class FbxPropertyEGateFit : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
