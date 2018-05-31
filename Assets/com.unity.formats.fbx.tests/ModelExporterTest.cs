@@ -288,7 +288,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             GameObject asset;
             Mesh assetMesh;
 
-            ModelExporter.GetMeshForComponent<FbxPrefab> prefabCallback =
+            GetMeshForComponent<FbxPrefab> prefabCallback =
                 (ModelExporter exporter, FbxPrefab component, FbxNode node) => {
                     ModelExporterReflection.ExportMesh(exporter,sphereMesh, node);
                     return true;
@@ -308,7 +308,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             // to make sure we don't pass if the previous pass didn't
             // actually unregister).
             filename = GetRandomFbxFilePath();
-            ModelExporter.GetMeshForObject callback =
+            GetMeshForObject callback =
                 (ModelExporter exporter, GameObject gameObject, FbxNode node) => {
                     if (gameObject.name == "Parent2") {
                         ModelExporterReflection.ExportMesh(exporter,sphereMesh, node);
