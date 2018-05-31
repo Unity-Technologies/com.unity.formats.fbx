@@ -25,7 +25,20 @@ namespace UnityEngine.Formats.Fbx.Exporter
         string m_fbxHistory;
 
         [System.Serializable]
-        public struct StringPair { public string FBXObjectName; public string UnityObjectName; }
+        public struct StringPair {
+            private string m_fbxObjectName;
+            public string FBXObjectName
+            {
+                get { return m_fbxObjectName; }
+                set { m_fbxObjectName = value; }
+            }
+            private string m_unityObjectName;
+            public string UnityObjectName
+            {
+                get { return m_unityObjectName; }
+                set { m_unityObjectName = value; }
+            }
+        }
 
         [SerializeField]
         List<StringPair> m_nameMapping = new List<StringPair>();
