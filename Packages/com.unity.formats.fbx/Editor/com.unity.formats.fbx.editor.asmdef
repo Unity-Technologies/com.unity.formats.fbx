@@ -2,7 +2,7 @@
     "name": "Unity.Formats.Fbx.Editor",
     "references": [
       "Unity.Formats.Fbx.Runtime",
-      "Unity.Formats.FbxSdk"
+      "Autodesk.Fbx"
     ],
     "includePlatforms": [
         "Editor"

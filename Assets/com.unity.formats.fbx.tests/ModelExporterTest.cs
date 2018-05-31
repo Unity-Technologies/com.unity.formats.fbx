@@ -2,7 +2,7 @@
 using UnityEngine;
 using NUnit.Framework;
 using System.Collections.Generic;
-using UnityEngine.Formats.FbxSdk;
+using Autodesk.Fbx;
 using UnityEngine.Formats.Fbx.Exporter;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
