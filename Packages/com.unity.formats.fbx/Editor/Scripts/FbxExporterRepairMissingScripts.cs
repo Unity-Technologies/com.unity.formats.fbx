@@ -40,25 +40,32 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        public static string GetSourceCodeSearchID()
+        public static string SourceCodeSearchID
         {
-            var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
-            string searchID = null;
-            string guid;
+            get
+            {
+                var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
+                string searchID = null;
+                string guid;
 #if UNITY_2018_2_OR_NEWER
-            long fileId;
+                long fileId;
 #else
             int fileId;
 #endif
-            if(AssetDatabase.TryGetGUIDAndLocalFileIdentifier(fbxPrefabObj, out guid, out fileId))
-            {
-                searchID = string.Format(IdFormat, fileId, guid);
+                if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(fbxPrefabObj, out guid, out fileId))
+                {
+                    searchID = string.Format(IdFormat, fileId, guid);
+                }
+                return searchID;
             }
-            return searchID;
         }
 
-        public int GetAssetsToRepairCount(){
-            return AssetsToRepair.Length;
+        public int AssetsToRepairCount
+        {
+            get
+            {
+                return AssetsToRepair.Length;
+            }
         }
 
         public string[] GetAssetsToRepair(){
@@ -114,7 +121,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public bool ReplaceGUIDInTextAssets ()
         {
-            string sourceCodeSearchID = GetSourceCodeSearchID();
+            string sourceCodeSearchID = SourceCodeSearchID;
             if(string.IsNullOrEmpty(sourceCodeSearchID))
             {
                 return false;

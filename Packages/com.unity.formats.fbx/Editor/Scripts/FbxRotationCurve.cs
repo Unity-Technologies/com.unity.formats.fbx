@@ -26,8 +26,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
 
         protected struct Key {
-            public FbxTime time;
-            public FbxVector4 euler;
+            private FbxTime m_time;
+            public FbxTime time
+            {
+                get { return m_time; }
+                set { m_time = value; }
+            }
+            private FbxVector4 m_euler;
+            public FbxVector4 euler
+            {
+                get { return m_euler; }
+                set { m_euler = value; }
+            }
         }
 
         protected RotationCurve() { }
@@ -69,7 +79,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var fbxFinalQuat = fbxPreRotationInverse * fbxFinalAnimation;
 
                 // Store the key so we can sort them later.
-                Key key;
+                Key key = new Key();
                 key.time = FbxTime.FromSecondDouble(seconds);
                 key.euler = ModelExporter.QuaternionToEuler (fbxFinalQuat);
                 keys[i++] = key;

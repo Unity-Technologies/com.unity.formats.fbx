@@ -148,7 +148,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             if (GUILayout.Button (repairMissingScripts)) {
                 var componentUpdater = new UnityEditor.Formats.Fbx.Exporter.RepairMissingScripts ();
-                var filesToRepairCount = componentUpdater.GetAssetsToRepairCount ();
+                var filesToRepairCount = componentUpdater.AssetsToRepairCount;
                 var dialogTitle = "FBX Prefab Component Updater";
                 if (filesToRepairCount > 0) {
                     bool result = UnityEditor.EditorUtility.DisplayDialog (dialogTitle,

@@ -8,6 +8,18 @@ using UnityEngine.Formats.Fbx.Exporter;
 namespace UnityEditor.Formats.Fbx.Exporter
 {
     /// <summary>
+    /// Exception that denotes a likely programming error.
+    /// </summary>
+    [System.Serializable]
+    public class FbxPrefabException : System.Exception
+    {
+        public FbxPrefabException() { }
+        public FbxPrefabException(string message) : base(message) { }
+        public FbxPrefabException(string message, System.Exception inner) : base(message, inner) { }
+        protected FbxPrefabException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
+    /// <summary>
     /// This class handles updating prefabs that are linked to an FBX source file.
     ///
     /// Whenever the Unity asset database imports (or reimports) assets, this
@@ -510,18 +522,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
                 var thesubmap = GetOrCreate(thedict, key1);
                 Append(thesubmap, key2, item);
-            }
-
-            /// <summary>
-            /// Exception that denotes a likely programming error.
-            /// </summary>
-            [System.Serializable]
-            public class FbxPrefabException : System.Exception
-            {
-                public FbxPrefabException() { }
-                public FbxPrefabException(string message) : base(message) { }
-                public FbxPrefabException(string message, System.Exception inner) : base(message, inner) { }
-                protected FbxPrefabException(SerializationInfo info, StreamingContext context) : base(info, context) { }
             }
 
             /// <summary>

@@ -1432,13 +1432,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected struct ExpConstraintSource
         {
-            public FbxNode node;
-            public float weight;
+            private FbxNode m_node;
+            public FbxNode node
+            {
+                get { return m_node; }
+                set { m_node = value; }
+            }
+
+            private float m_weight;
+            public float weight
+            {
+                get { return m_weight; }
+                set { m_weight = value; }
+            }
 
             public ExpConstraintSource(FbxNode node, float weight)
             {
-                this.node = node;
-                this.weight = weight;
+                this.m_node = node;
+                this.m_weight = weight;
             }
         }
 
