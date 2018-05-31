@@ -2,7 +2,7 @@
     "name": "Unity.Formats.Fbx.Editortests",
     "references": [
         "Unity.Formats.Fbx.Editor",
-        "Unity.Formats.FbxSdk",
+        "Autodesk.Fbx",
         "Unity.Formats.Fbx.Runtime"
     ],
     "optionalUnityReferences": [

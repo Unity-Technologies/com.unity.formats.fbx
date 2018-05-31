@@ -1,5 +1,5 @@
 {
-    "name": "Unity.Formats.FbxSdk",
+    "name": "Autodesk.Fbx",
     "references": [],
     "optionalUnityReferences": [],
     "includePlatforms": [
