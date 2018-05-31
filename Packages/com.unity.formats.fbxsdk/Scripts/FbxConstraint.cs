@@ -16,72 +16,72 @@ public class FbxConstraint : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxConstraint Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxConstraint_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxConstraint_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxConstraint ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxConstraint(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxConstraint Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxConstraint_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxConstraint_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxConstraint ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxConstraint(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxPropertyDouble Weight {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxConstraint_Weight_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxConstraint_Weight_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool Active {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxConstraint_Active_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxConstraint_Active_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool Lock {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxConstraint_Lock_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxConstraint_Lock_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public virtual FbxConstraint.EType GetConstraintType() {
-    FbxConstraint.EType ret = (FbxConstraint.EType)GlobalsPINVOKE.FbxConstraint_GetConstraintType(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxConstraint.EType ret = (FbxConstraint.EType)NativeMethods.FbxConstraint_GetConstraintType(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual FbxObject GetConstrainedObject() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxConstraint_GetConstrainedObject(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxConstraint_GetConstrainedObject(swigCPtr);
     FbxObject ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxObject(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual int GetConstraintSourceCount() {
-    int ret = GlobalsPINVOKE.FbxConstraint_GetConstraintSourceCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxConstraint_GetConstraintSourceCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual FbxObject GetConstraintSource(int arg0) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxConstraint_GetConstraintSource(swigCPtr, arg0);
+    global::System.IntPtr cPtr = NativeMethods.FbxConstraint_GetConstraintSource(swigCPtr, arg0);
     FbxObject ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxObject(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetSourceWeight(FbxObject pObject) {
-    double ret = GlobalsPINVOKE.FbxConstraint_GetSourceWeight(swigCPtr, FbxObject.getCPtr(pObject));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxConstraint_GetSourceWeight(swigCPtr, FbxObject.getCPtr(pObject));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

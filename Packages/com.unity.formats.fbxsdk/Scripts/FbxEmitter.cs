@@ -33,7 +33,7 @@ public abstract class FbxEmitter : System.IDisposable, System.IEquatable<FbxEmit
         Destroy();
       }
       lock(this) {
-        GlobalsPINVOKE.ReleaseWeakPointerHandle(swigCPtr);
+        NativeMethods.ReleaseWeakPointerHandle(swigCPtr);
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
     }

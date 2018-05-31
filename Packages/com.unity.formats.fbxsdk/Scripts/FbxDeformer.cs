@@ -16,22 +16,22 @@ public class FbxDeformer : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxDeformer Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxDeformer_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxDeformer_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxDeformer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDeformer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxDeformer Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxDeformer_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxDeformer_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxDeformer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDeformer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual FbxDeformer.EDeformerType GetDeformerType() {
-    FbxDeformer.EDeformerType ret = (FbxDeformer.EDeformerType)GlobalsPINVOKE.FbxDeformer_GetDeformerType(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxDeformer.EDeformerType ret = (FbxDeformer.EDeformerType)NativeMethods.FbxDeformer_GetDeformerType(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

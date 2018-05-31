@@ -16,199 +16,199 @@ public class FbxSurfaceMaterial : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxSurfaceMaterial Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxSurfaceMaterial_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxSurfaceMaterial_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxSurfaceMaterial ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxSurfaceMaterial(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxSurfaceMaterial Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxSurfaceMaterial_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxSurfaceMaterial_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxSurfaceMaterial ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxSurfaceMaterial(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static string sShadingModel {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sShadingModel_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sShadingModel_get();
       return ret;
     } 
   }
 
   public static string sMultiLayer {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sMultiLayer_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sMultiLayer_get();
       return ret;
     } 
   }
 
   public static string sEmissive {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sEmissive_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sEmissive_get();
       return ret;
     } 
   }
 
   public static string sEmissiveFactor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sEmissiveFactor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sEmissiveFactor_get();
       return ret;
     } 
   }
 
   public static string sAmbient {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sAmbient_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sAmbient_get();
       return ret;
     } 
   }
 
   public static string sAmbientFactor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sAmbientFactor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sAmbientFactor_get();
       return ret;
     } 
   }
 
   public static string sDiffuse {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sDiffuse_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sDiffuse_get();
       return ret;
     } 
   }
 
   public static string sDiffuseFactor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sDiffuseFactor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sDiffuseFactor_get();
       return ret;
     } 
   }
 
   public static string sSpecular {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sSpecular_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sSpecular_get();
       return ret;
     } 
   }
 
   public static string sSpecularFactor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sSpecularFactor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sSpecularFactor_get();
       return ret;
     } 
   }
 
   public static string sShininess {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sShininess_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sShininess_get();
       return ret;
     } 
   }
 
   public static string sBump {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sBump_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sBump_get();
       return ret;
     } 
   }
 
   public static string sNormalMap {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sNormalMap_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sNormalMap_get();
       return ret;
     } 
   }
 
   public static string sBumpFactor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sBumpFactor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sBumpFactor_get();
       return ret;
     } 
   }
 
   public static string sTransparentColor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sTransparentColor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sTransparentColor_get();
       return ret;
     } 
   }
 
   public static string sTransparencyFactor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sTransparencyFactor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sTransparencyFactor_get();
       return ret;
     } 
   }
 
   public static string sReflection {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sReflection_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sReflection_get();
       return ret;
     } 
   }
 
   public static string sReflectionFactor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sReflectionFactor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sReflectionFactor_get();
       return ret;
     } 
   }
 
   public static string sDisplacementColor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sDisplacementColor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sDisplacementColor_get();
       return ret;
     } 
   }
 
   public static string sDisplacementFactor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sDisplacementFactor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sDisplacementFactor_get();
       return ret;
     } 
   }
 
   public static string sVectorDisplacementColor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sVectorDisplacementColor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sVectorDisplacementColor_get();
       return ret;
     } 
   }
 
   public static string sVectorDisplacementFactor {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sVectorDisplacementFactor_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sVectorDisplacementFactor_get();
       return ret;
     } 
   }
 
   public FbxPropertyString ShadingModel {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxSurfaceMaterial_ShadingModel_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxSurfaceMaterial_ShadingModel_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool MultiLayer {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxSurfaceMaterial_MultiLayer_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxSurfaceMaterial_MultiLayer_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public static bool sMultiLayerDefault {
     get {
-      bool ret = GlobalsPINVOKE.FbxSurfaceMaterial_sMultiLayerDefault_get();
+      bool ret = NativeMethods.FbxSurfaceMaterial_sMultiLayerDefault_get();
       return ret;
     } 
   }
 
   public static string sShadingModelDefault {
     get {
-      string ret = GlobalsPINVOKE.FbxSurfaceMaterial_sShadingModelDefault_get();
+      string ret = NativeMethods.FbxSurfaceMaterial_sShadingModelDefault_get();
       return ret;
     } 
   }

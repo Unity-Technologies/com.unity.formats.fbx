@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyMarkerELook : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyMarkerELook(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyMarkerELook_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyMarkerELook(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyMarkerELook_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyMarkerELook : FbxProperty {
   }
 
   public FbxPropertyMarkerELook Set(FbxMarker.ELook pValue) {
-    FbxPropertyMarkerELook ret = new FbxPropertyMarkerELook(GlobalsPINVOKE.FbxPropertyMarkerELook_Set(swigCPtr, (int)pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyMarkerELook ret = new FbxPropertyMarkerELook(NativeMethods.FbxPropertyMarkerELook_Set(swigCPtr, (int)pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxMarker.ELook Get() {
-    FbxMarker.ELook ret = (FbxMarker.ELook)GlobalsPINVOKE.FbxPropertyMarkerELook_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxMarker.ELook ret = (FbxMarker.ELook)NativeMethods.FbxPropertyMarkerELook_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxMarker.ELook EvaluateValue(FbxTime pTime, bool pForceEval) {
-    FbxMarker.ELook ret = (FbxMarker.ELook)GlobalsPINVOKE.FbxPropertyMarkerELook_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxMarker.ELook ret = (FbxMarker.ELook)NativeMethods.FbxPropertyMarkerELook_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxMarker.ELook EvaluateValue(FbxTime pTime) {
-    FbxMarker.ELook ret = (FbxMarker.ELook)GlobalsPINVOKE.FbxPropertyMarkerELook_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxMarker.ELook ret = (FbxMarker.ELook)NativeMethods.FbxPropertyMarkerELook_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxMarker.ELook EvaluateValue() {
-    FbxMarker.ELook ret = (FbxMarker.ELook)GlobalsPINVOKE.FbxPropertyMarkerELook_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxMarker.ELook ret = (FbxMarker.ELook)NativeMethods.FbxPropertyMarkerELook_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

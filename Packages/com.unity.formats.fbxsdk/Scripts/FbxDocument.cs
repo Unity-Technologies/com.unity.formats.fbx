@@ -16,29 +16,29 @@ public class FbxDocument : FbxCollection {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxDocument Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxDocument_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxDocument_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxDocument ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDocument(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxDocument Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxDocument_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxDocument_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxDocument ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDocument(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxDocumentInfo GetDocumentInfo() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxDocument_GetDocumentInfo(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxDocument_GetDocumentInfo(swigCPtr);
     FbxDocumentInfo ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDocumentInfo(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetDocumentInfo(FbxDocumentInfo pSceneInfo) {
-    GlobalsPINVOKE.FbxDocument_SetDocumentInfo(swigCPtr, FbxDocumentInfo.getCPtr(pSceneInfo));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxDocument_SetDocumentInfo(swigCPtr, FbxDocumentInfo.getCPtr(pSceneInfo));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public override int GetHashCode(){

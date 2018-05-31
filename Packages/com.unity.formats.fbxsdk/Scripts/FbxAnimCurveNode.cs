@@ -16,119 +16,119 @@ public class FbxAnimCurveNode : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxAnimCurveNode Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimCurveNode_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimCurveNode_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxAnimCurveNode ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimCurveNode(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxAnimCurveNode Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimCurveNode_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimCurveNode_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxAnimCurveNode ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimCurveNode(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool IsAnimated(bool pRecurse) {
-    bool ret = GlobalsPINVOKE.FbxAnimCurveNode_IsAnimated__SWIG_0(swigCPtr, pRecurse);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxAnimCurveNode_IsAnimated__SWIG_0(swigCPtr, pRecurse);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool IsAnimated() {
-    bool ret = GlobalsPINVOKE.FbxAnimCurveNode_IsAnimated__SWIG_1(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxAnimCurveNode_IsAnimated__SWIG_1(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool GetAnimationInterval(FbxTimeSpan pTimeInterval) {
-    bool ret = GlobalsPINVOKE.FbxAnimCurveNode_GetAnimationInterval(swigCPtr, FbxTimeSpan.getCPtr(pTimeInterval));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxAnimCurveNode_GetAnimationInterval(swigCPtr, FbxTimeSpan.getCPtr(pTimeInterval));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool IsComposite() {
-    bool ret = GlobalsPINVOKE.FbxAnimCurveNode_IsComposite(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxAnimCurveNode_IsComposite(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static FbxAnimCurveNode CreateTypedCurveNode(FbxProperty pProperty, FbxScene pScene) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimCurveNode_CreateTypedCurveNode(FbxProperty.getCPtr(pProperty), FbxScene.getCPtr(pScene));
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimCurveNode_CreateTypedCurveNode(FbxProperty.getCPtr(pProperty), FbxScene.getCPtr(pScene));
     FbxAnimCurveNode ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimCurveNode(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public uint GetChannelsCount() {
-    uint ret = GlobalsPINVOKE.FbxAnimCurveNode_GetChannelsCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    uint ret = NativeMethods.FbxAnimCurveNode_GetChannelsCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetChannelIndex(string pChannelName) {
-    int ret = GlobalsPINVOKE.FbxAnimCurveNode_GetChannelIndex(swigCPtr, pChannelName);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxAnimCurveNode_GetChannelIndex(swigCPtr, pChannelName);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string GetChannelName(int pChannelId) {
-    string ret = GlobalsPINVOKE.FbxAnimCurveNode_GetChannelName(swigCPtr, pChannelId);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxAnimCurveNode_GetChannelName(swigCPtr, pChannelId);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxAnimCurve CreateCurve(string pCurveNodeName, string pChannel) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimCurveNode_CreateCurve__SWIG_0(swigCPtr, pCurveNodeName, pChannel);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimCurveNode_CreateCurve__SWIG_0(swigCPtr, pCurveNodeName, pChannel);
     FbxAnimCurve ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimCurve(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxAnimCurve CreateCurve(string pCurveNodeName, uint pChannelId) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimCurveNode_CreateCurve__SWIG_1(swigCPtr, pCurveNodeName, pChannelId);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimCurveNode_CreateCurve__SWIG_1(swigCPtr, pCurveNodeName, pChannelId);
     FbxAnimCurve ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimCurve(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxAnimCurve CreateCurve(string pCurveNodeName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimCurveNode_CreateCurve__SWIG_2(swigCPtr, pCurveNodeName);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimCurveNode_CreateCurve__SWIG_2(swigCPtr, pCurveNodeName);
     FbxAnimCurve ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimCurve(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetCurveCount(uint pChannelId, string pCurveNodeName) {
-    int ret = GlobalsPINVOKE.FbxAnimCurveNode_GetCurveCount__SWIG_0(swigCPtr, pChannelId, pCurveNodeName);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxAnimCurveNode_GetCurveCount__SWIG_0(swigCPtr, pChannelId, pCurveNodeName);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetCurveCount(uint pChannelId) {
-    int ret = GlobalsPINVOKE.FbxAnimCurveNode_GetCurveCount__SWIG_1(swigCPtr, pChannelId);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxAnimCurveNode_GetCurveCount__SWIG_1(swigCPtr, pChannelId);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxAnimCurve GetCurve(uint pChannelId, uint pId, string pCurveNodeName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimCurveNode_GetCurve__SWIG_0(swigCPtr, pChannelId, pId, pCurveNodeName);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimCurveNode_GetCurve__SWIG_0(swigCPtr, pChannelId, pId, pCurveNodeName);
     FbxAnimCurve ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimCurve(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxAnimCurve GetCurve(uint pChannelId, uint pId) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimCurveNode_GetCurve__SWIG_1(swigCPtr, pChannelId, pId);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimCurveNode_GetCurve__SWIG_1(swigCPtr, pChannelId, pId);
     FbxAnimCurve ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimCurve(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxAnimCurve GetCurve(uint pChannelId) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimCurveNode_GetCurve__SWIG_2(swigCPtr, pChannelId);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimCurveNode_GetCurve__SWIG_2(swigCPtr, pChannelId);
     FbxAnimCurve ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimCurve(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -167,30 +167,30 @@ public class FbxAnimCurveNode : FbxObject {
   }
 
   public bool AddChannel(string pChnlName, float pValue) {
-    bool ret = GlobalsPINVOKE.FbxAnimCurveNode_AddChannel(swigCPtr, pChnlName, pValue);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxAnimCurveNode_AddChannel(swigCPtr, pChnlName, pValue);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetChannelValue(string pChnlName, float pValue) {
-    GlobalsPINVOKE.FbxAnimCurveNode_SetChannelValue__SWIG_2(swigCPtr, pChnlName, pValue);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurveNode_SetChannelValue__SWIG_2(swigCPtr, pChnlName, pValue);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetChannelValue(uint pChnlId, float pValue) {
-    GlobalsPINVOKE.FbxAnimCurveNode_SetChannelValue__SWIG_3(swigCPtr, pChnlId, pValue);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurveNode_SetChannelValue__SWIG_3(swigCPtr, pChnlId, pValue);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public float GetChannelValue(string pChnlName, float pInitVal) {
-    float ret = GlobalsPINVOKE.FbxAnimCurveNode_GetChannelValue__SWIG_2(swigCPtr, pChnlName, pInitVal);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    float ret = NativeMethods.FbxAnimCurveNode_GetChannelValue__SWIG_2(swigCPtr, pChnlName, pInitVal);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public float GetChannelValue(uint pChnlId, float pInitVal) {
-    float ret = GlobalsPINVOKE.FbxAnimCurveNode_GetChannelValue__SWIG_3(swigCPtr, pChnlId, pInitVal);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    float ret = NativeMethods.FbxAnimCurveNode_GetChannelValue__SWIG_3(swigCPtr, pChnlId, pInitVal);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

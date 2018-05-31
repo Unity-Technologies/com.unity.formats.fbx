@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxLayerElementArrayTemplateFbxVector2 : FbxLayerElementArray {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxLayerElementArrayTemplateFbxVector2(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxLayerElementArrayTemplateFbxVector2_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxLayerElementArrayTemplateFbxVector2(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxLayerElementArrayTemplateFbxVector2_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -30,7 +30,7 @@ public class FbxLayerElementArrayTemplateFbxVector2 : FbxLayerElementArray {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxLayerElementArrayTemplateFbxVector2(swigCPtr);
+          NativeMethods.delete_FbxLayerElementArrayTemplateFbxVector2(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,19 +40,19 @@ public class FbxLayerElementArrayTemplateFbxVector2 : FbxLayerElementArray {
   }
 
   private FbxVector2 GetAtUnchecked(int pIndex) {
-    var ret = GlobalsPINVOKE.FbxLayerElementArrayTemplateFbxVector2_GetAtUnchecked(swigCPtr, pIndex);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxLayerElementArrayTemplateFbxVector2_GetAtUnchecked(swigCPtr, pIndex);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
    public FbxVector2 GetAt(int pIndex) { 
       if (pIndex < 0 || pIndex >= GetCount()) { 
-        throw new System.IndexOutOfRangeException();
+        throw new System.ArgumentOutOfRangeException("pIndex");
       }
       return GetAtUnchecked(pIndex);
     }
 
-  public FbxLayerElementArrayTemplateFbxVector2() : this(GlobalsPINVOKE.new_FbxLayerElementArrayTemplateFbxVector2(), true) {
+  public FbxLayerElementArrayTemplateFbxVector2() : this(NativeMethods.new_FbxLayerElementArrayTemplateFbxVector2(), true) {
   }
 
 }

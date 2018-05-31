@@ -16,70 +16,70 @@ public class FbxNull : FbxNodeAttribute {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxNull Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxNull_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxNull_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxNull ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxNull(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxNull Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxNull_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxNull_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxNull ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxNull(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void Reset() {
-    GlobalsPINVOKE.FbxNull_Reset(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxNull_Reset(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public double GetSizeDefaultValue() {
-    double ret = GlobalsPINVOKE.FbxNull_GetSizeDefaultValue(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxNull_GetSizeDefaultValue(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static string sSize {
     get {
-      string ret = GlobalsPINVOKE.FbxNull_sSize_get();
+      string ret = NativeMethods.FbxNull_sSize_get();
       return ret;
     } 
   }
 
   public static string sLook {
     get {
-      string ret = GlobalsPINVOKE.FbxNull_sLook_get();
+      string ret = NativeMethods.FbxNull_sLook_get();
       return ret;
     } 
   }
 
   public static double sDefaultSize {
     get {
-      double ret = GlobalsPINVOKE.FbxNull_sDefaultSize_get();
+      double ret = NativeMethods.FbxNull_sDefaultSize_get();
       return ret;
     } 
   }
 
   public static FbxNull.ELook sDefaultLook {
     get {
-      FbxNull.ELook ret = (FbxNull.ELook)GlobalsPINVOKE.FbxNull_sDefaultLook_get();
+      FbxNull.ELook ret = (FbxNull.ELook)NativeMethods.FbxNull_sDefaultLook_get();
       return ret;
     } 
   }
 
   public FbxPropertyDouble Size {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxNull_Size_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxNull_Size_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyNullELook Look {
     get {
-      FbxPropertyNullELook ret = new FbxPropertyNullELook(GlobalsPINVOKE.FbxNull_Look_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyNullELook ret = new FbxPropertyNullELook(NativeMethods.FbxNull_Look_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }

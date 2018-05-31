@@ -16,107 +16,107 @@ public class FbxConstraintAim : FbxConstraint {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxConstraintAim Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxConstraintAim_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxConstraintAim_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxConstraintAim ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxConstraintAim(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxConstraintAim Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxConstraintAim_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxConstraintAim_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxConstraintAim ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxConstraintAim(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxPropertyDouble3 RotationOffset {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxConstraintAim_RotationOffset_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxConstraintAim_RotationOffset_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyInt WorldUpType {
     get {
-      FbxPropertyInt ret = new FbxPropertyInt(GlobalsPINVOKE.FbxConstraintAim_WorldUpType_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyInt ret = new FbxPropertyInt(NativeMethods.FbxConstraintAim_WorldUpType_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble3 WorldUpVector {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxConstraintAim_WorldUpVector_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxConstraintAim_WorldUpVector_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble3 UpVector {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxConstraintAim_UpVector_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxConstraintAim_UpVector_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble3 AimVector {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxConstraintAim_AimVector_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxConstraintAim_AimVector_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool AffectX {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxConstraintAim_AffectX_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxConstraintAim_AffectX_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool AffectY {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxConstraintAim_AffectY_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxConstraintAim_AffectY_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool AffectZ {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxConstraintAim_AffectZ_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxConstraintAim_AffectZ_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public void AddConstraintSource(FbxObject pObject, double pWeight) {
-    GlobalsPINVOKE.FbxConstraintAim_AddConstraintSource__SWIG_0(swigCPtr, FbxObject.getCPtr(pObject), pWeight);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxConstraintAim_AddConstraintSource__SWIG_0(swigCPtr, FbxObject.getCPtr(pObject), pWeight);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void AddConstraintSource(FbxObject pObject) {
-    GlobalsPINVOKE.FbxConstraintAim_AddConstraintSource__SWIG_1(swigCPtr, FbxObject.getCPtr(pObject));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxConstraintAim_AddConstraintSource__SWIG_1(swigCPtr, FbxObject.getCPtr(pObject));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetConstrainedObject(FbxObject pObject) {
-    GlobalsPINVOKE.FbxConstraintAim_SetConstrainedObject(swigCPtr, FbxObject.getCPtr(pObject));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxConstraintAim_SetConstrainedObject(swigCPtr, FbxObject.getCPtr(pObject));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetWorldUpObject(FbxObject pObject) {
-    GlobalsPINVOKE.FbxConstraintAim_SetWorldUpObject(swigCPtr, FbxObject.getCPtr(pObject));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxConstraintAim_SetWorldUpObject(swigCPtr, FbxObject.getCPtr(pObject));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxObject GetWorldUpObject() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxConstraintAim_GetWorldUpObject(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxConstraintAim_GetWorldUpObject(swigCPtr);
     FbxObject ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxObject(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

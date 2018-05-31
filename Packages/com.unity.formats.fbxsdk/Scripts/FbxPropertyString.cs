@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyString : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyString(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyString_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyString(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyString_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyString : FbxProperty {
   }
 
   public FbxPropertyString Set(string pValue) {
-    FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxPropertyString_Set(swigCPtr, pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxPropertyString_Set(swigCPtr, pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string Get() {
-    string ret = GlobalsPINVOKE.FbxPropertyString_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxPropertyString_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string EvaluateValue(FbxTime pTime, bool pForceEval) {
-    string ret = GlobalsPINVOKE.FbxPropertyString_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxPropertyString_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string EvaluateValue(FbxTime pTime) {
-    string ret = GlobalsPINVOKE.FbxPropertyString_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxPropertyString_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string EvaluateValue() {
-    string ret = GlobalsPINVOKE.FbxPropertyString_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxPropertyString_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

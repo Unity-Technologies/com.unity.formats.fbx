@@ -32,7 +32,7 @@ public class FbxDouble4x4 : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxDouble4x4(swigCPtr);
+          NativeMethods.delete_FbxDouble4x4(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,23 +40,23 @@ public class FbxDouble4x4 : global::System.IDisposable {
     }
   }
 
-  public FbxDouble4x4() : this(GlobalsPINVOKE.new_FbxDouble4x4__SWIG_0(), true) {
+  public FbxDouble4x4() : this(NativeMethods.new_FbxDouble4x4__SWIG_0(), true) {
   }
 
-  public FbxDouble4x4(FbxDouble4 pValue) : this(GlobalsPINVOKE.new_FbxDouble4x4__SWIG_1(pValue), true) {
+  public FbxDouble4x4(FbxDouble4 pValue) : this(NativeMethods.new_FbxDouble4x4__SWIG_1(pValue), true) {
   }
 
-  public FbxDouble4x4(FbxDouble4 pData0, FbxDouble4 pData1, FbxDouble4 pData2, FbxDouble4 pData3) : this(GlobalsPINVOKE.new_FbxDouble4x4__SWIG_2(pData0, pData1, pData2, pData3), true) {
+  public FbxDouble4x4(FbxDouble4 pData0, FbxDouble4 pData1, FbxDouble4 pData2, FbxDouble4 pData3) : this(NativeMethods.new_FbxDouble4x4__SWIG_2(pData0, pData1, pData2, pData3), true) {
   }
 
   private bool _equals(FbxDouble4x4 pVector) {
-    bool ret = GlobalsPINVOKE.FbxDouble4x4__equals(swigCPtr, FbxDouble4x4.getCPtr(pVector));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxDouble4x4__equals(swigCPtr, FbxDouble4x4.getCPtr(pVector));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public FbxDouble4x4(FbxDouble4x4 other) : this(GlobalsPINVOKE.new_FbxDouble4x4__SWIG_3(FbxDouble4x4.getCPtr(other)), true) {
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+  public FbxDouble4x4(FbxDouble4x4 other) : this(NativeMethods.new_FbxDouble4x4__SWIG_3(FbxDouble4x4.getCPtr(other)), true) {
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public bool Equals(FbxDouble4x4 other) {
@@ -109,27 +109,27 @@ public class FbxDouble4x4 : global::System.IDisposable {
   }
   
   private FbxDouble4 _get(int i) {
-    var ret = GlobalsPINVOKE.FbxDouble4x4__get(swigCPtr, i);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxDouble4x4__get(swigCPtr, i);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private void _set(int i, FbxDouble4 v) {
-    GlobalsPINVOKE.FbxDouble4x4__set(swigCPtr, i, v);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxDouble4x4__set(swigCPtr, i, v);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxDouble4 this[int index] {
     get {
       if (index < 0 || index >= 4) {
-        throw new System.IndexOutOfRangeException();
+        throw new System.ArgumentOutOfRangeException("index");
       } else {
         return this._get(index);
       }
     }
     set {
       if (index < 0 || index >= 4) {
-        throw new System.IndexOutOfRangeException();
+        throw new System.ArgumentOutOfRangeException("index");
       } else {
         this._set(index, value);
       }

@@ -32,7 +32,7 @@ public class FbxSystemUnit : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxSystemUnit(swigCPtr);
+          NativeMethods.delete_FbxSystemUnit(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -62,7 +62,7 @@ public class FbxSystemUnit : global::System.IDisposable {
         if (swigCPtr.Handle != global::System.IntPtr.Zero) {
           if (swigCMemOwn) {
             swigCMemOwn = false;
-            GlobalsPINVOKE.delete_FbxSystemUnit_ConversionOptions(swigCPtr);
+            NativeMethods.delete_FbxSystemUnit_ConversionOptions(swigCPtr);
           }
           swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
         }
@@ -70,122 +70,122 @@ public class FbxSystemUnit : global::System.IDisposable {
       }
     }
   
-    public ConversionOptions() : this(GlobalsPINVOKE.new_FbxSystemUnit_ConversionOptions(), true) {
+    public ConversionOptions() : this(NativeMethods.new_FbxSystemUnit_ConversionOptions(), true) {
     }
   
   }
 
-  public FbxSystemUnit(double pScaleFactor, double pMultiplier) : this(GlobalsPINVOKE.new_FbxSystemUnit__SWIG_0(pScaleFactor, pMultiplier), true) {
+  public FbxSystemUnit(double pScaleFactor, double pMultiplier) : this(NativeMethods.new_FbxSystemUnit__SWIG_0(pScaleFactor, pMultiplier), true) {
   }
 
-  public FbxSystemUnit(double pScaleFactor) : this(GlobalsPINVOKE.new_FbxSystemUnit__SWIG_1(pScaleFactor), true) {
+  public FbxSystemUnit(double pScaleFactor) : this(NativeMethods.new_FbxSystemUnit__SWIG_1(pScaleFactor), true) {
   }
 
   public static FbxSystemUnit mm {
     get {
-      FbxSystemUnit ret = new FbxSystemUnit(GlobalsPINVOKE.FbxSystemUnit_mm_get(), false);
+      FbxSystemUnit ret = new FbxSystemUnit(NativeMethods.FbxSystemUnit_mm_get(), false);
       return ret;
     } 
   }
 
   public static FbxSystemUnit dm {
     get {
-      FbxSystemUnit ret = new FbxSystemUnit(GlobalsPINVOKE.FbxSystemUnit_dm_get(), false);
+      FbxSystemUnit ret = new FbxSystemUnit(NativeMethods.FbxSystemUnit_dm_get(), false);
       return ret;
     } 
   }
 
   public static FbxSystemUnit cm {
     get {
-      FbxSystemUnit ret = new FbxSystemUnit(GlobalsPINVOKE.FbxSystemUnit_cm_get(), false);
+      FbxSystemUnit ret = new FbxSystemUnit(NativeMethods.FbxSystemUnit_cm_get(), false);
       return ret;
     } 
   }
 
   public static FbxSystemUnit m {
     get {
-      FbxSystemUnit ret = new FbxSystemUnit(GlobalsPINVOKE.FbxSystemUnit_m_get(), false);
+      FbxSystemUnit ret = new FbxSystemUnit(NativeMethods.FbxSystemUnit_m_get(), false);
       return ret;
     } 
   }
 
   public static FbxSystemUnit km {
     get {
-      FbxSystemUnit ret = new FbxSystemUnit(GlobalsPINVOKE.FbxSystemUnit_km_get(), false);
+      FbxSystemUnit ret = new FbxSystemUnit(NativeMethods.FbxSystemUnit_km_get(), false);
       return ret;
     } 
   }
 
   public static FbxSystemUnit Inch {
     get {
-      FbxSystemUnit ret = new FbxSystemUnit(GlobalsPINVOKE.FbxSystemUnit_Inch_get(), false);
+      FbxSystemUnit ret = new FbxSystemUnit(NativeMethods.FbxSystemUnit_Inch_get(), false);
       return ret;
     } 
   }
 
   public static FbxSystemUnit Foot {
     get {
-      FbxSystemUnit ret = new FbxSystemUnit(GlobalsPINVOKE.FbxSystemUnit_Foot_get(), false);
+      FbxSystemUnit ret = new FbxSystemUnit(NativeMethods.FbxSystemUnit_Foot_get(), false);
       return ret;
     } 
   }
 
   public static FbxSystemUnit Yard {
     get {
-      FbxSystemUnit ret = new FbxSystemUnit(GlobalsPINVOKE.FbxSystemUnit_Yard_get(), false);
+      FbxSystemUnit ret = new FbxSystemUnit(NativeMethods.FbxSystemUnit_Yard_get(), false);
       return ret;
     } 
   }
 
   public void ConvertScene(FbxScene pScene, FbxSystemUnit.ConversionOptions pOptions) {
-    GlobalsPINVOKE.FbxSystemUnit_ConvertScene__SWIG_0(swigCPtr, FbxScene.getCPtr(pScene), FbxSystemUnit.ConversionOptions.getCPtr(pOptions));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxSystemUnit_ConvertScene__SWIG_0(swigCPtr, FbxScene.getCPtr(pScene), FbxSystemUnit.ConversionOptions.getCPtr(pOptions));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void ConvertScene(FbxScene pScene) {
-    GlobalsPINVOKE.FbxSystemUnit_ConvertScene__SWIG_1(swigCPtr, FbxScene.getCPtr(pScene));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxSystemUnit_ConvertScene__SWIG_1(swigCPtr, FbxScene.getCPtr(pScene));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public double GetScaleFactor() {
-    double ret = GlobalsPINVOKE.FbxSystemUnit_GetScaleFactor(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxSystemUnit_GetScaleFactor(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string GetScaleFactorAsString(bool pAbbreviated) {
-    string ret = GlobalsPINVOKE.FbxSystemUnit_GetScaleFactorAsString__SWIG_0(swigCPtr, pAbbreviated);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxSystemUnit_GetScaleFactorAsString__SWIG_0(swigCPtr, pAbbreviated);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public string GetScaleFactorAsString() {
-    string ret = GlobalsPINVOKE.FbxSystemUnit_GetScaleFactorAsString__SWIG_1(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxSystemUnit_GetScaleFactorAsString__SWIG_1(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetMultiplier() {
-    double ret = GlobalsPINVOKE.FbxSystemUnit_GetMultiplier(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxSystemUnit_GetMultiplier(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private bool _equals(FbxSystemUnit pOther) {
-    bool ret = GlobalsPINVOKE.FbxSystemUnit__equals(swigCPtr, FbxSystemUnit.getCPtr(pOther));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxSystemUnit__equals(swigCPtr, FbxSystemUnit.getCPtr(pOther));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetConversionFactorTo(FbxSystemUnit pTarget) {
-    double ret = GlobalsPINVOKE.FbxSystemUnit_GetConversionFactorTo(swigCPtr, FbxSystemUnit.getCPtr(pTarget));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxSystemUnit_GetConversionFactorTo(swigCPtr, FbxSystemUnit.getCPtr(pTarget));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetConversionFactorFrom(FbxSystemUnit pSource) {
-    double ret = GlobalsPINVOKE.FbxSystemUnit_GetConversionFactorFrom(swigCPtr, FbxSystemUnit.getCPtr(pSource));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxSystemUnit_GetConversionFactorFrom(swigCPtr, FbxSystemUnit.getCPtr(pSource));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -220,8 +220,8 @@ public class FbxSystemUnit : global::System.IDisposable {
   }
 
   public override int GetHashCode() {
-    int ret = GlobalsPINVOKE.FbxSystemUnit_GetHashCode(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxSystemUnit_GetHashCode(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

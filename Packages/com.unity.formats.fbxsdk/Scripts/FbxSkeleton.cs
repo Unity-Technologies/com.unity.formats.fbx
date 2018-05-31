@@ -16,129 +16,129 @@ public class FbxSkeleton : FbxNodeAttribute {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxSkeleton Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxSkeleton_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxSkeleton_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxSkeleton ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxSkeleton(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxSkeleton Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxSkeleton_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxSkeleton_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxSkeleton ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxSkeleton(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void Reset() {
-    GlobalsPINVOKE.FbxSkeleton_Reset(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxSkeleton_Reset(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetSkeletonType(FbxSkeleton.EType pSkeletonType) {
-    GlobalsPINVOKE.FbxSkeleton_SetSkeletonType(swigCPtr, (int)pSkeletonType);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxSkeleton_SetSkeletonType(swigCPtr, (int)pSkeletonType);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxSkeleton.EType GetSkeletonType() {
-    FbxSkeleton.EType ret = (FbxSkeleton.EType)GlobalsPINVOKE.FbxSkeleton_GetSkeletonType(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxSkeleton.EType ret = (FbxSkeleton.EType)NativeMethods.FbxSkeleton_GetSkeletonType(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool GetSkeletonTypeIsSet() {
-    bool ret = GlobalsPINVOKE.FbxSkeleton_GetSkeletonTypeIsSet(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxSkeleton_GetSkeletonTypeIsSet(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxSkeleton.EType GetSkeletonTypeDefaultValue() {
-    FbxSkeleton.EType ret = (FbxSkeleton.EType)GlobalsPINVOKE.FbxSkeleton_GetSkeletonTypeDefaultValue(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxSkeleton.EType ret = (FbxSkeleton.EType)NativeMethods.FbxSkeleton_GetSkeletonTypeDefaultValue(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetLimbLengthDefaultValue() {
-    double ret = GlobalsPINVOKE.FbxSkeleton_GetLimbLengthDefaultValue(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxSkeleton_GetLimbLengthDefaultValue(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetLimbNodeSizeDefaultValue() {
-    double ret = GlobalsPINVOKE.FbxSkeleton_GetLimbNodeSizeDefaultValue(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxSkeleton_GetLimbNodeSizeDefaultValue(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool SetLimbNodeColor(FbxColor pColor) {
-    bool ret = GlobalsPINVOKE.FbxSkeleton_SetLimbNodeColor(swigCPtr, pColor);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxSkeleton_SetLimbNodeColor(swigCPtr, pColor);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxColor GetLimbNodeColor() {
-    var ret = GlobalsPINVOKE.FbxSkeleton_GetLimbNodeColor(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxSkeleton_GetLimbNodeColor(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool GetLimbNodeColorIsSet() {
-    bool ret = GlobalsPINVOKE.FbxSkeleton_GetLimbNodeColorIsSet(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxSkeleton_GetLimbNodeColorIsSet(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxColor GetLimbNodeColorDefaultValue() {
-    var ret = GlobalsPINVOKE.FbxSkeleton_GetLimbNodeColorDefaultValue(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxSkeleton_GetLimbNodeColorDefaultValue(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool IsSkeletonRoot() {
-    bool ret = GlobalsPINVOKE.FbxSkeleton_IsSkeletonRoot(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxSkeleton_IsSkeletonRoot(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static string sSize {
     get {
-      string ret = GlobalsPINVOKE.FbxSkeleton_sSize_get();
+      string ret = NativeMethods.FbxSkeleton_sSize_get();
       return ret;
     } 
   }
 
   public static string sLimbLength {
     get {
-      string ret = GlobalsPINVOKE.FbxSkeleton_sLimbLength_get();
+      string ret = NativeMethods.FbxSkeleton_sLimbLength_get();
       return ret;
     } 
   }
 
   public static double sDefaultSize {
     get {
-      double ret = GlobalsPINVOKE.FbxSkeleton_sDefaultSize_get();
+      double ret = NativeMethods.FbxSkeleton_sDefaultSize_get();
       return ret;
     } 
   }
 
   public static double sDefaultLimbLength {
     get {
-      double ret = GlobalsPINVOKE.FbxSkeleton_sDefaultLimbLength_get();
+      double ret = NativeMethods.FbxSkeleton_sDefaultLimbLength_get();
       return ret;
     } 
   }
 
   public FbxPropertyDouble Size {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxSkeleton_Size_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxSkeleton_Size_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble LimbLength {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxSkeleton_LimbLength_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxSkeleton_LimbLength_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }

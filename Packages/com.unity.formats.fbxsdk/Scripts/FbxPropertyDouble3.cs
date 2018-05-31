@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyDouble3 : FbxProperty {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyDouble3(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyDouble3_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyDouble3(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyDouble3_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,32 +36,32 @@ public class FbxPropertyDouble3 : FbxProperty {
   }
 
   public FbxPropertyDouble3 Set(FbxDouble3 pValue) {
-    FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxPropertyDouble3_Set(swigCPtr, pValue), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxPropertyDouble3_Set(swigCPtr, pValue), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxDouble3 Get() {
-    var ret = GlobalsPINVOKE.FbxPropertyDouble3_Get(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxPropertyDouble3_Get(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxDouble3 EvaluateValue(FbxTime pTime, bool pForceEval) {
-    var ret = GlobalsPINVOKE.FbxPropertyDouble3_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxPropertyDouble3_EvaluateValue__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), pForceEval);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxDouble3 EvaluateValue(FbxTime pTime) {
-    var ret = GlobalsPINVOKE.FbxPropertyDouble3_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxPropertyDouble3_EvaluateValue__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxDouble3 EvaluateValue() {
-    var ret = GlobalsPINVOKE.FbxPropertyDouble3_EvaluateValue__SWIG_2(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    var ret = NativeMethods.FbxPropertyDouble3_EvaluateValue__SWIG_2(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

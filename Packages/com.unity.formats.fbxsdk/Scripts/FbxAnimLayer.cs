@@ -16,16 +16,16 @@ public class FbxAnimLayer : FbxCollection {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxAnimLayer Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimLayer_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimLayer_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxAnimLayer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimLayer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxAnimLayer Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimLayer_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimLayer_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxAnimLayer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimLayer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

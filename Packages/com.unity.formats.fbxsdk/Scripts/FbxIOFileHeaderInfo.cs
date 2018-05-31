@@ -32,7 +32,7 @@ public class FbxIOFileHeaderInfo : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxIOFileHeaderInfo(swigCPtr);
+          NativeMethods.delete_FbxIOFileHeaderInfo(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,21 +40,21 @@ public class FbxIOFileHeaderInfo : global::System.IDisposable {
     }
   }
 
-  public FbxIOFileHeaderInfo() : this(GlobalsPINVOKE.new_FbxIOFileHeaderInfo(), true) {
+  public FbxIOFileHeaderInfo() : this(NativeMethods.new_FbxIOFileHeaderInfo(), true) {
   }
 
   public int mFileVersion {
     get {
-      int ret = GlobalsPINVOKE.FbxIOFileHeaderInfo_mFileVersion_get(swigCPtr);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      int ret = NativeMethods.FbxIOFileHeaderInfo_mFileVersion_get(swigCPtr);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public string mCreator {
     get {
-      string ret = GlobalsPINVOKE.FbxIOFileHeaderInfo_mCreator_get(swigCPtr);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      string ret = NativeMethods.FbxIOFileHeaderInfo_mCreator_get(swigCPtr);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }

@@ -16,39 +16,39 @@ public class FbxBindingTable : FbxBindingTableBase {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxBindingTable Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxBindingTable_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxBindingTable_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxBindingTable ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxBindingTable(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxBindingTable Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxBindingTable_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxBindingTable_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxBindingTable ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxBindingTable(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxPropertyString DescRelativeURL {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxBindingTable_DescRelativeURL_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxBindingTable_DescRelativeURL_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString DescAbsoluteURL {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxBindingTable_DescAbsoluteURL_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxBindingTable_DescAbsoluteURL_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString DescTAG {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxBindingTable_DescTAG_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxBindingTable_DescTAG_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }

@@ -16,8 +16,8 @@ public class FbxBindingTableBase : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public FbxBindingTableEntry AddNewEntry() {
-    FbxBindingTableEntry ret = new FbxBindingTableEntry(GlobalsPINVOKE.FbxBindingTableBase_AddNewEntry(swigCPtr), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxBindingTableEntry ret = new FbxBindingTableEntry(NativeMethods.FbxBindingTableBase_AddNewEntry(swigCPtr), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

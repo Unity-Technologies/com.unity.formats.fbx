@@ -16,29 +16,29 @@ public class FbxSkin : FbxDeformer {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxSkin Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxSkin_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxSkin_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxSkin ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxSkin(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxSkin Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxSkin_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxSkin_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxSkin ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxSkin(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool AddCluster(FbxCluster pCluster) {
-    bool ret = GlobalsPINVOKE.FbxSkin_AddCluster(swigCPtr, FbxCluster.getCPtr(pCluster));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxSkin_AddCluster(swigCPtr, FbxCluster.getCPtr(pCluster));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxCluster GetCluster(int pIndex) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxSkin_GetCluster(swigCPtr, pIndex);
+    global::System.IntPtr cPtr = NativeMethods.FbxSkin_GetCluster(swigCPtr, pIndex);
     FbxCluster ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxCluster(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

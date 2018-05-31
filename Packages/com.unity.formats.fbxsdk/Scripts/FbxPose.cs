@@ -16,64 +16,64 @@ public class FbxPose : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxPose Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxPose_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxPose_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxPose ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxPose(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxPose Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxPose_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxPose_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxPose ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxPose(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetIsBindPose(bool pIsBindPose) {
-    GlobalsPINVOKE.FbxPose_SetIsBindPose(swigCPtr, pIsBindPose);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxPose_SetIsBindPose(swigCPtr, pIsBindPose);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public bool IsBindPose() {
-    bool ret = GlobalsPINVOKE.FbxPose_IsBindPose(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxPose_IsBindPose(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetCount() {
-    int ret = GlobalsPINVOKE.FbxPose_GetCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxPose_GetCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int Add(FbxNode pNode, FbxMatrix pMatrix, bool pLocalMatrix, bool pMultipleBindPose) {
-    int ret = GlobalsPINVOKE.FbxPose_Add__SWIG_0(swigCPtr, FbxNode.getCPtr(pNode), FbxMatrix.getCPtr(pMatrix), pLocalMatrix, pMultipleBindPose);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxPose_Add__SWIG_0(swigCPtr, FbxNode.getCPtr(pNode), FbxMatrix.getCPtr(pMatrix), pLocalMatrix, pMultipleBindPose);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int Add(FbxNode pNode, FbxMatrix pMatrix, bool pLocalMatrix) {
-    int ret = GlobalsPINVOKE.FbxPose_Add__SWIG_1(swigCPtr, FbxNode.getCPtr(pNode), FbxMatrix.getCPtr(pMatrix), pLocalMatrix);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxPose_Add__SWIG_1(swigCPtr, FbxNode.getCPtr(pNode), FbxMatrix.getCPtr(pMatrix), pLocalMatrix);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int Add(FbxNode pNode, FbxMatrix pMatrix) {
-    int ret = GlobalsPINVOKE.FbxPose_Add__SWIG_2(swigCPtr, FbxNode.getCPtr(pNode), FbxMatrix.getCPtr(pMatrix));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxPose_Add__SWIG_2(swigCPtr, FbxNode.getCPtr(pNode), FbxMatrix.getCPtr(pMatrix));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxNode GetNode(int pIndex) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxPose_GetNode(swigCPtr, pIndex);
+    global::System.IntPtr cPtr = NativeMethods.FbxPose_GetNode(swigCPtr, pIndex);
     FbxNode ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxNode(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxMatrix GetMatrix(int pIndex) {
-    FbxMatrix ret = new FbxMatrix(GlobalsPINVOKE.FbxPose_GetMatrix(swigCPtr, pIndex), false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxMatrix ret = new FbxMatrix(NativeMethods.FbxPose_GetMatrix(swigCPtr, pIndex), false);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

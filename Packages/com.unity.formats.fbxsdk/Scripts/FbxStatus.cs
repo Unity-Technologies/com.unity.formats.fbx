@@ -32,7 +32,7 @@ public class FbxStatus : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxStatus(swigCPtr);
+          NativeMethods.delete_FbxStatus(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,47 +40,47 @@ public class FbxStatus : global::System.IDisposable {
     }
   }
 
-  public FbxStatus() : this(GlobalsPINVOKE.new_FbxStatus__SWIG_0(), true) {
+  public FbxStatus() : this(NativeMethods.new_FbxStatus__SWIG_0(), true) {
   }
 
-  public FbxStatus(FbxStatus.EStatusCode pCode) : this(GlobalsPINVOKE.new_FbxStatus__SWIG_1((int)pCode), true) {
+  public FbxStatus(FbxStatus.EStatusCode pCode) : this(NativeMethods.new_FbxStatus__SWIG_1((int)pCode), true) {
   }
 
-  public FbxStatus(FbxStatus rhs) : this(GlobalsPINVOKE.new_FbxStatus__SWIG_2(FbxStatus.getCPtr(rhs)), true) {
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+  public FbxStatus(FbxStatus rhs) : this(NativeMethods.new_FbxStatus__SWIG_2(FbxStatus.getCPtr(rhs)), true) {
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   private bool _equals(FbxStatus rhs) {
-    bool ret = GlobalsPINVOKE.FbxStatus__equals(swigCPtr, FbxStatus.getCPtr(rhs));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxStatus__equals(swigCPtr, FbxStatus.getCPtr(rhs));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool Error() {
-    bool ret = GlobalsPINVOKE.FbxStatus_Error(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxStatus_Error(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void Clear() {
-    GlobalsPINVOKE.FbxStatus_Clear(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxStatus_Clear(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxStatus.EStatusCode GetCode() {
-    FbxStatus.EStatusCode ret = (FbxStatus.EStatusCode)GlobalsPINVOKE.FbxStatus_GetCode(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxStatus.EStatusCode ret = (FbxStatus.EStatusCode)NativeMethods.FbxStatus_GetCode(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetCode(FbxStatus.EStatusCode rhs) {
-    GlobalsPINVOKE.FbxStatus_SetCode__SWIG_0(swigCPtr, (int)rhs);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxStatus_SetCode__SWIG_0(swigCPtr, (int)rhs);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public string GetErrorString() {
-    string ret = GlobalsPINVOKE.FbxStatus_GetErrorString(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxStatus_GetErrorString(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -115,17 +115,17 @@ public class FbxStatus : global::System.IDisposable {
   }
 
   public override int GetHashCode() { return (int)GetCode(); }
-  public static bool operator == (EStatusCode a, FbxStatus b) { return a == b.GetCode(); }
-  public static bool operator != (EStatusCode a, FbxStatus b) { return a != b.GetCode(); }
-  public static bool operator == (FbxStatus a, EStatusCode b) { return a.GetCode() == b; }
-  public static bool operator != (FbxStatus a, EStatusCode b) { return a.GetCode() != b; }
+  public static bool operator == (EStatusCode a, FbxStatus b) { return (b != null ? a == b.GetCode() : false); }
+  public static bool operator != (EStatusCode a, FbxStatus b) { return (b != null ? a != b.GetCode() : false); }
+  public static bool operator == (FbxStatus a, EStatusCode b) { return (a != null ? a.GetCode() == b : false); }
+  public static bool operator != (FbxStatus a, EStatusCode b) { return (a != null ? a.GetCode() != b : false); }
 
   public override string ToString() {
     return GetCode().ToString() + ": " + GetErrorString();
   } 
   public void SetCode(FbxStatus.EStatusCode rhs, string pErrorMsg) {
-    GlobalsPINVOKE.FbxStatus_SetCode__SWIG_1(swigCPtr, (int)rhs, pErrorMsg);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxStatus_SetCode__SWIG_1(swigCPtr, (int)rhs, pErrorMsg);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public enum EStatusCode {

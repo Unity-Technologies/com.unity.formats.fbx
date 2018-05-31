@@ -16,362 +16,362 @@ public class FbxTexture : FbxObject {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxTexture Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxTexture_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxTexture_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxTexture ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxTexture(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxTexture Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxTexture_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxTexture_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxTexture ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxTexture(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxPropertyDouble Alpha {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxTexture_Alpha_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxTexture_Alpha_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyEWrapMode WrapModeU {
     get {
-      FbxPropertyEWrapMode ret = new FbxPropertyEWrapMode(GlobalsPINVOKE.FbxTexture_WrapModeU_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyEWrapMode ret = new FbxPropertyEWrapMode(NativeMethods.FbxTexture_WrapModeU_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyEWrapMode WrapModeV {
     get {
-      FbxPropertyEWrapMode ret = new FbxPropertyEWrapMode(GlobalsPINVOKE.FbxTexture_WrapModeV_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyEWrapMode ret = new FbxPropertyEWrapMode(NativeMethods.FbxTexture_WrapModeV_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool UVSwap {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxTexture_UVSwap_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxTexture_UVSwap_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool PremultiplyAlpha {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxTexture_PremultiplyAlpha_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxTexture_PremultiplyAlpha_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble3 Translation {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxTexture_Translation_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxTexture_Translation_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble3 Rotation {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxTexture_Rotation_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxTexture_Rotation_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble3 Scaling {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxTexture_Scaling_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxTexture_Scaling_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble3 RotationPivot {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxTexture_RotationPivot_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxTexture_RotationPivot_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble3 ScalingPivot {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxTexture_ScalingPivot_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxTexture_ScalingPivot_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyEBlendMode CurrentTextureBlendMode {
     get {
-      FbxPropertyEBlendMode ret = new FbxPropertyEBlendMode(GlobalsPINVOKE.FbxTexture_CurrentTextureBlendMode_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyEBlendMode ret = new FbxPropertyEBlendMode(NativeMethods.FbxTexture_CurrentTextureBlendMode_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString UVSet {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxTexture_UVSet_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxTexture_UVSet_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public static string sVectorSpace {
     get {
-      string ret = GlobalsPINVOKE.FbxTexture_sVectorSpace_get();
+      string ret = NativeMethods.FbxTexture_sVectorSpace_get();
       return ret;
     } 
   }
 
   public static string sVectorSpaceWorld {
     get {
-      string ret = GlobalsPINVOKE.FbxTexture_sVectorSpaceWorld_get();
+      string ret = NativeMethods.FbxTexture_sVectorSpaceWorld_get();
       return ret;
     } 
   }
 
   public static string sVectorSpaceObject {
     get {
-      string ret = GlobalsPINVOKE.FbxTexture_sVectorSpaceObject_get();
+      string ret = NativeMethods.FbxTexture_sVectorSpaceObject_get();
       return ret;
     } 
   }
 
   public static string sVectorSpaceTangent {
     get {
-      string ret = GlobalsPINVOKE.FbxTexture_sVectorSpaceTangent_get();
+      string ret = NativeMethods.FbxTexture_sVectorSpaceTangent_get();
       return ret;
     } 
   }
 
   public static string sVectorEncoding {
     get {
-      string ret = GlobalsPINVOKE.FbxTexture_sVectorEncoding_get();
+      string ret = NativeMethods.FbxTexture_sVectorEncoding_get();
       return ret;
     } 
   }
 
   public static string sVectorEncodingFP {
     get {
-      string ret = GlobalsPINVOKE.FbxTexture_sVectorEncodingFP_get();
+      string ret = NativeMethods.FbxTexture_sVectorEncodingFP_get();
       return ret;
     } 
   }
 
   public static string sVectorEncodingSE {
     get {
-      string ret = GlobalsPINVOKE.FbxTexture_sVectorEncodingSE_get();
+      string ret = NativeMethods.FbxTexture_sVectorEncodingSE_get();
       return ret;
     } 
   }
 
   public virtual void Reset() {
-    GlobalsPINVOKE.FbxTexture_Reset(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_Reset(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetSwapUV(bool pSwapUV) {
-    GlobalsPINVOKE.FbxTexture_SetSwapUV(swigCPtr, pSwapUV);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetSwapUV(swigCPtr, pSwapUV);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public bool GetSwapUV() {
-    bool ret = GlobalsPINVOKE.FbxTexture_GetSwapUV(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxTexture_GetSwapUV(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetPremultiplyAlpha(bool pPremultiplyAlpha) {
-    GlobalsPINVOKE.FbxTexture_SetPremultiplyAlpha(swigCPtr, pPremultiplyAlpha);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetPremultiplyAlpha(swigCPtr, pPremultiplyAlpha);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public bool GetPremultiplyAlpha() {
-    bool ret = GlobalsPINVOKE.FbxTexture_GetPremultiplyAlpha(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxTexture_GetPremultiplyAlpha(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetAlphaSource(FbxTexture.EAlphaSource pAlphaSource) {
-    GlobalsPINVOKE.FbxTexture_SetAlphaSource(swigCPtr, (int)pAlphaSource);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetAlphaSource(swigCPtr, (int)pAlphaSource);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxTexture.EAlphaSource GetAlphaSource() {
-    FbxTexture.EAlphaSource ret = (FbxTexture.EAlphaSource)GlobalsPINVOKE.FbxTexture_GetAlphaSource(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EAlphaSource ret = (FbxTexture.EAlphaSource)NativeMethods.FbxTexture_GetAlphaSource(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetCropping(int pLeft, int pTop, int pRight, int pBottom) {
-    GlobalsPINVOKE.FbxTexture_SetCropping(swigCPtr, pLeft, pTop, pRight, pBottom);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetCropping(swigCPtr, pLeft, pTop, pRight, pBottom);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public int GetCroppingLeft() {
-    int ret = GlobalsPINVOKE.FbxTexture_GetCroppingLeft(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxTexture_GetCroppingLeft(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetCroppingTop() {
-    int ret = GlobalsPINVOKE.FbxTexture_GetCroppingTop(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxTexture_GetCroppingTop(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetCroppingRight() {
-    int ret = GlobalsPINVOKE.FbxTexture_GetCroppingRight(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxTexture_GetCroppingRight(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetCroppingBottom() {
-    int ret = GlobalsPINVOKE.FbxTexture_GetCroppingBottom(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxTexture_GetCroppingBottom(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetMappingType(FbxTexture.EMappingType pMappingType) {
-    GlobalsPINVOKE.FbxTexture_SetMappingType(swigCPtr, (int)pMappingType);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetMappingType(swigCPtr, (int)pMappingType);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxTexture.EMappingType GetMappingType() {
-    FbxTexture.EMappingType ret = (FbxTexture.EMappingType)GlobalsPINVOKE.FbxTexture_GetMappingType(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EMappingType ret = (FbxTexture.EMappingType)NativeMethods.FbxTexture_GetMappingType(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetPlanarMappingNormal(FbxTexture.EPlanarMappingNormal pPlanarMappingNormal) {
-    GlobalsPINVOKE.FbxTexture_SetPlanarMappingNormal(swigCPtr, (int)pPlanarMappingNormal);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetPlanarMappingNormal(swigCPtr, (int)pPlanarMappingNormal);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxTexture.EPlanarMappingNormal GetPlanarMappingNormal() {
-    FbxTexture.EPlanarMappingNormal ret = (FbxTexture.EPlanarMappingNormal)GlobalsPINVOKE.FbxTexture_GetPlanarMappingNormal(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EPlanarMappingNormal ret = (FbxTexture.EPlanarMappingNormal)NativeMethods.FbxTexture_GetPlanarMappingNormal(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetTextureUse(FbxTexture.ETextureUse pTextureUse) {
-    GlobalsPINVOKE.FbxTexture_SetTextureUse(swigCPtr, (int)pTextureUse);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetTextureUse(swigCPtr, (int)pTextureUse);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxTexture.ETextureUse GetTextureUse() {
-    FbxTexture.ETextureUse ret = (FbxTexture.ETextureUse)GlobalsPINVOKE.FbxTexture_GetTextureUse(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.ETextureUse ret = (FbxTexture.ETextureUse)NativeMethods.FbxTexture_GetTextureUse(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetWrapMode(FbxTexture.EWrapMode pWrapU, FbxTexture.EWrapMode pWrapV) {
-    GlobalsPINVOKE.FbxTexture_SetWrapMode(swigCPtr, (int)pWrapU, (int)pWrapV);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetWrapMode(swigCPtr, (int)pWrapU, (int)pWrapV);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxTexture.EWrapMode GetWrapModeU() {
-    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)GlobalsPINVOKE.FbxTexture_GetWrapModeU(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)NativeMethods.FbxTexture_GetWrapModeU(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTexture.EWrapMode GetWrapModeV() {
-    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)GlobalsPINVOKE.FbxTexture_GetWrapModeV(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EWrapMode ret = (FbxTexture.EWrapMode)NativeMethods.FbxTexture_GetWrapModeV(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetBlendMode(FbxTexture.EBlendMode pBlendMode) {
-    GlobalsPINVOKE.FbxTexture_SetBlendMode(swigCPtr, (int)pBlendMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetBlendMode(swigCPtr, (int)pBlendMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxTexture.EBlendMode GetBlendMode() {
-    FbxTexture.EBlendMode ret = (FbxTexture.EBlendMode)GlobalsPINVOKE.FbxTexture_GetBlendMode(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTexture.EBlendMode ret = (FbxTexture.EBlendMode)NativeMethods.FbxTexture_GetBlendMode(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetDefaultAlpha(double pAlpha) {
-    GlobalsPINVOKE.FbxTexture_SetDefaultAlpha(swigCPtr, pAlpha);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetDefaultAlpha(swigCPtr, pAlpha);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public double GetDefaultAlpha() {
-    double ret = GlobalsPINVOKE.FbxTexture_GetDefaultAlpha(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxTexture_GetDefaultAlpha(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetTranslation(double pU, double pV) {
-    GlobalsPINVOKE.FbxTexture_SetTranslation(swigCPtr, pU, pV);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetTranslation(swigCPtr, pU, pV);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public double GetTranslationU() {
-    double ret = GlobalsPINVOKE.FbxTexture_GetTranslationU(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxTexture_GetTranslationU(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetTranslationV() {
-    double ret = GlobalsPINVOKE.FbxTexture_GetTranslationV(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxTexture_GetTranslationV(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetRotation(double pU, double pV, double pW) {
-    GlobalsPINVOKE.FbxTexture_SetRotation__SWIG_0(swigCPtr, pU, pV, pW);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetRotation__SWIG_0(swigCPtr, pU, pV, pW);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetRotation(double pU, double pV) {
-    GlobalsPINVOKE.FbxTexture_SetRotation__SWIG_1(swigCPtr, pU, pV);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetRotation__SWIG_1(swigCPtr, pU, pV);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public double GetRotationU() {
-    double ret = GlobalsPINVOKE.FbxTexture_GetRotationU(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxTexture_GetRotationU(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetRotationV() {
-    double ret = GlobalsPINVOKE.FbxTexture_GetRotationV(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxTexture_GetRotationV(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetRotationW() {
-    double ret = GlobalsPINVOKE.FbxTexture_GetRotationW(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxTexture_GetRotationW(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetScale(double pU, double pV) {
-    GlobalsPINVOKE.FbxTexture_SetScale(swigCPtr, pU, pV);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxTexture_SetScale(swigCPtr, pU, pV);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public double GetScaleU() {
-    double ret = GlobalsPINVOKE.FbxTexture_GetScaleU(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxTexture_GetScaleU(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetScaleV() {
-    double ret = GlobalsPINVOKE.FbxTexture_GetScaleV(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxTexture_GetScaleV(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

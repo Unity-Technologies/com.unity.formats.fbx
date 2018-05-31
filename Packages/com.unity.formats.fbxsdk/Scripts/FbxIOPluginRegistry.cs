@@ -37,8 +37,8 @@ public class FbxIOPluginRegistry : global::System.IDisposable {
   }
 
   public int FindWriterIDByDescription(string pDesc) {
-    int ret = GlobalsPINVOKE.FbxIOPluginRegistry_FindWriterIDByDescription(swigCPtr, pDesc);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxIOPluginRegistry_FindWriterIDByDescription(swigCPtr, pDesc);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

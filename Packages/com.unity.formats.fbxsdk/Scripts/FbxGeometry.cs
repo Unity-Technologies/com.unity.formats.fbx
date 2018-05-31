@@ -16,62 +16,62 @@ public class FbxGeometry : FbxGeometryBase {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxGeometry Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometry_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometry_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxGeometry ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxGeometry(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxGeometry Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometry_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometry_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxGeometry ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxGeometry(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int AddDeformer(FbxDeformer pDeformer) {
-    int ret = GlobalsPINVOKE.FbxGeometry_AddDeformer(swigCPtr, FbxDeformer.getCPtr(pDeformer));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxGeometry_AddDeformer(swigCPtr, FbxDeformer.getCPtr(pDeformer));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetDeformerCount() {
-    int ret = GlobalsPINVOKE.FbxGeometry_GetDeformerCount__SWIG_0(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxGeometry_GetDeformerCount__SWIG_0(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxDeformer GetDeformer(int pIndex, FbxStatus pStatus) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometry_GetDeformer__SWIG_0(swigCPtr, pIndex, FbxStatus.getCPtr(pStatus));
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometry_GetDeformer__SWIG_0(swigCPtr, pIndex, FbxStatus.getCPtr(pStatus));
     FbxDeformer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDeformer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxDeformer GetDeformer(int pIndex) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometry_GetDeformer__SWIG_1(swigCPtr, pIndex);
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometry_GetDeformer__SWIG_1(swigCPtr, pIndex);
     FbxDeformer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDeformer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetDeformerCount(FbxDeformer.EDeformerType pType) {
-    int ret = GlobalsPINVOKE.FbxGeometry_GetDeformerCount__SWIG_1(swigCPtr, (int)pType);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxGeometry_GetDeformerCount__SWIG_1(swigCPtr, (int)pType);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxDeformer GetDeformer(int pIndex, FbxDeformer.EDeformerType pType, FbxStatus pStatus) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometry_GetDeformer__SWIG_2(swigCPtr, pIndex, (int)pType, FbxStatus.getCPtr(pStatus));
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometry_GetDeformer__SWIG_2(swigCPtr, pIndex, (int)pType, FbxStatus.getCPtr(pStatus));
     FbxDeformer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDeformer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxDeformer GetDeformer(int pIndex, FbxDeformer.EDeformerType pType) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometry_GetDeformer__SWIG_3(swigCPtr, pIndex, (int)pType);
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometry_GetDeformer__SWIG_3(swigCPtr, pIndex, (int)pType);
     FbxDeformer ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxDeformer(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -110,16 +110,16 @@ public class FbxGeometry : FbxGeometryBase {
   }
 
   public FbxBlendShape GetBlendShapeDeformer(int pIndex, FbxStatus pStatus) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometry_GetBlendShapeDeformer__SWIG_0(swigCPtr, pIndex, FbxStatus.getCPtr(pStatus));
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometry_GetBlendShapeDeformer__SWIG_0(swigCPtr, pIndex, FbxStatus.getCPtr(pStatus));
     FbxBlendShape ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxBlendShape(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxBlendShape GetBlendShapeDeformer(int pIndex) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxGeometry_GetBlendShapeDeformer__SWIG_1(swigCPtr, pIndex);
+    global::System.IntPtr cPtr = NativeMethods.FbxGeometry_GetBlendShapeDeformer__SWIG_1(swigCPtr, pIndex);
     FbxBlendShape ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxBlendShape(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

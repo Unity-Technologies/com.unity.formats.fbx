@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxPropertyEntryView : FbxEntryView {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxPropertyEntryView(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxPropertyEntryView_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxPropertyEntryView(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxPropertyEntryView_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -30,7 +30,7 @@ public class FbxPropertyEntryView : FbxEntryView {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxPropertyEntryView(swigCPtr);
+          NativeMethods.delete_FbxPropertyEntryView(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -39,21 +39,21 @@ public class FbxPropertyEntryView : FbxEntryView {
     }
   }
 
-  public FbxPropertyEntryView(FbxBindingTableEntry pEntry, bool pAsSource, bool pCreate) : this(GlobalsPINVOKE.new_FbxPropertyEntryView__SWIG_0(FbxBindingTableEntry.getCPtr(pEntry), pAsSource, pCreate), true) {
+  public FbxPropertyEntryView(FbxBindingTableEntry pEntry, bool pAsSource, bool pCreate) : this(NativeMethods.new_FbxPropertyEntryView__SWIG_0(FbxBindingTableEntry.getCPtr(pEntry), pAsSource, pCreate), true) {
   }
 
-  public FbxPropertyEntryView(FbxBindingTableEntry pEntry, bool pAsSource) : this(GlobalsPINVOKE.new_FbxPropertyEntryView__SWIG_1(FbxBindingTableEntry.getCPtr(pEntry), pAsSource), true) {
+  public FbxPropertyEntryView(FbxBindingTableEntry pEntry, bool pAsSource) : this(NativeMethods.new_FbxPropertyEntryView__SWIG_1(FbxBindingTableEntry.getCPtr(pEntry), pAsSource), true) {
   }
 
   public string GetProperty() {
-    string ret = GlobalsPINVOKE.FbxPropertyEntryView_GetProperty(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxPropertyEntryView_GetProperty(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetProperty(string pPropertyName) {
-    GlobalsPINVOKE.FbxPropertyEntryView_SetProperty(swigCPtr, pPropertyName);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxPropertyEntryView_SetProperty(swigCPtr, pPropertyName);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
 }

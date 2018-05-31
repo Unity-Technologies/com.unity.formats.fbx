@@ -32,7 +32,7 @@ public class FbxAxisSystem : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxAxisSystem(swigCPtr);
+          NativeMethods.delete_FbxAxisSystem(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,82 +40,82 @@ public class FbxAxisSystem : global::System.IDisposable {
     }
   }
 
-  public FbxAxisSystem() : this(GlobalsPINVOKE.new_FbxAxisSystem__SWIG_0(), true) {
+  public FbxAxisSystem() : this(NativeMethods.new_FbxAxisSystem__SWIG_0(), true) {
   }
 
-  public FbxAxisSystem(EUpVector pUpVector, EFrontVector pFrontVector, FbxAxisSystem.ECoordSystem pCoorSystem) : this(GlobalsPINVOKE.new_FbxAxisSystem__SWIG_1((int)pUpVector, (int)pFrontVector, (int)pCoorSystem), true) {
+  public FbxAxisSystem(EUpVector pUpVector, EFrontVector pFrontVector, FbxAxisSystem.ECoordSystem pCoorSystem) : this(NativeMethods.new_FbxAxisSystem__SWIG_1((int)pUpVector, (int)pFrontVector, (int)pCoorSystem), true) {
   }
 
-  public FbxAxisSystem(FbxAxisSystem pAxisSystem) : this(GlobalsPINVOKE.new_FbxAxisSystem__SWIG_2(FbxAxisSystem.getCPtr(pAxisSystem)), true) {
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+  public FbxAxisSystem(FbxAxisSystem pAxisSystem) : this(NativeMethods.new_FbxAxisSystem__SWIG_2(FbxAxisSystem.getCPtr(pAxisSystem)), true) {
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
-  public FbxAxisSystem(FbxAxisSystem.EPreDefinedAxisSystem pAxisSystem) : this(GlobalsPINVOKE.new_FbxAxisSystem__SWIG_3((int)pAxisSystem), true) {
+  public FbxAxisSystem(FbxAxisSystem.EPreDefinedAxisSystem pAxisSystem) : this(NativeMethods.new_FbxAxisSystem__SWIG_3((int)pAxisSystem), true) {
   }
 
   private bool _equals(FbxAxisSystem pAxisSystem) {
-    bool ret = GlobalsPINVOKE.FbxAxisSystem__equals(swigCPtr, FbxAxisSystem.getCPtr(pAxisSystem));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxAxisSystem__equals(swigCPtr, FbxAxisSystem.getCPtr(pAxisSystem));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static FbxAxisSystem MayaZUp {
     get {
-      FbxAxisSystem ret = new FbxAxisSystem(GlobalsPINVOKE.FbxAxisSystem_MayaZUp_get(), false);
+      FbxAxisSystem ret = new FbxAxisSystem(NativeMethods.FbxAxisSystem_MayaZUp_get(), false);
       return ret;
     } 
   }
 
   public static FbxAxisSystem MayaYUp {
     get {
-      FbxAxisSystem ret = new FbxAxisSystem(GlobalsPINVOKE.FbxAxisSystem_MayaYUp_get(), false);
+      FbxAxisSystem ret = new FbxAxisSystem(NativeMethods.FbxAxisSystem_MayaYUp_get(), false);
       return ret;
     } 
   }
 
   public static FbxAxisSystem Max {
     get {
-      FbxAxisSystem ret = new FbxAxisSystem(GlobalsPINVOKE.FbxAxisSystem_Max_get(), false);
+      FbxAxisSystem ret = new FbxAxisSystem(NativeMethods.FbxAxisSystem_Max_get(), false);
       return ret;
     } 
   }
 
   public static FbxAxisSystem Motionbuilder {
     get {
-      FbxAxisSystem ret = new FbxAxisSystem(GlobalsPINVOKE.FbxAxisSystem_Motionbuilder_get(), false);
+      FbxAxisSystem ret = new FbxAxisSystem(NativeMethods.FbxAxisSystem_Motionbuilder_get(), false);
       return ret;
     } 
   }
 
   public static FbxAxisSystem OpenGL {
     get {
-      FbxAxisSystem ret = new FbxAxisSystem(GlobalsPINVOKE.FbxAxisSystem_OpenGL_get(), false);
+      FbxAxisSystem ret = new FbxAxisSystem(NativeMethods.FbxAxisSystem_OpenGL_get(), false);
       return ret;
     } 
   }
 
   public static FbxAxisSystem DirectX {
     get {
-      FbxAxisSystem ret = new FbxAxisSystem(GlobalsPINVOKE.FbxAxisSystem_DirectX_get(), false);
+      FbxAxisSystem ret = new FbxAxisSystem(NativeMethods.FbxAxisSystem_DirectX_get(), false);
       return ret;
     } 
   }
 
   public static FbxAxisSystem Lightwave {
     get {
-      FbxAxisSystem ret = new FbxAxisSystem(GlobalsPINVOKE.FbxAxisSystem_Lightwave_get(), false);
+      FbxAxisSystem ret = new FbxAxisSystem(NativeMethods.FbxAxisSystem_Lightwave_get(), false);
       return ret;
     } 
   }
 
   public void ConvertScene(FbxScene pScene) {
-    GlobalsPINVOKE.FbxAxisSystem_ConvertScene(swigCPtr, FbxScene.getCPtr(pScene));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAxisSystem_ConvertScene(swigCPtr, FbxScene.getCPtr(pScene));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxAxisSystem.ECoordSystem GetCoorSystem() {
-    FbxAxisSystem.ECoordSystem ret = (FbxAxisSystem.ECoordSystem)GlobalsPINVOKE.FbxAxisSystem_GetCoorSystem(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxAxisSystem.ECoordSystem ret = (FbxAxisSystem.ECoordSystem)NativeMethods.FbxAxisSystem_GetCoorSystem(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
@@ -130,14 +130,14 @@ public class FbxAxisSystem : global::System.IDisposable {
   };
   
   public EUpVector GetUpVector() {
-    EUpVector result = (EUpVector)GlobalsPINVOKE.FbxAxisSystem_GetUpVector(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();;
+    EUpVector result = (EUpVector)NativeMethods.FbxAxisSystem_GetUpVector(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();;
     return result;
   }
 
   public EFrontVector GetFrontVector() {
-    EFrontVector result = (EFrontVector)GlobalsPINVOKE.FbxAxisSystem_GetFrontVector(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();;
+    EFrontVector result = (EFrontVector)NativeMethods.FbxAxisSystem_GetFrontVector(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();;
     return result;
   }
 
@@ -172,8 +172,8 @@ public class FbxAxisSystem : global::System.IDisposable {
   }
 
   public override int GetHashCode() {
-    int ret = GlobalsPINVOKE.FbxAxisSystem_GetHashCode(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxAxisSystem_GetHashCode(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

@@ -16,243 +16,243 @@ public class FbxLight : FbxNodeAttribute {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxLight Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLight_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxLight_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxLight ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLight(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxLight Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLight_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxLight_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxLight ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLight(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetShadowTexture(FbxTexture pTexture) {
-    GlobalsPINVOKE.FbxLight_SetShadowTexture(swigCPtr, FbxTexture.getCPtr(pTexture));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLight_SetShadowTexture(swigCPtr, FbxTexture.getCPtr(pTexture));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxTexture GetShadowTexture() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLight_GetShadowTexture(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxLight_GetShadowTexture(swigCPtr);
     FbxTexture ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxTexture(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxPropertyELightType LightType {
     get {
-      FbxPropertyELightType ret = new FbxPropertyELightType(GlobalsPINVOKE.FbxLight_LightType_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyELightType ret = new FbxPropertyELightType(NativeMethods.FbxLight_LightType_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool CastLight {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxLight_CastLight_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxLight_CastLight_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool DrawVolumetricLight {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxLight_DrawVolumetricLight_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxLight_DrawVolumetricLight_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool DrawGroundProjection {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxLight_DrawGroundProjection_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxLight_DrawGroundProjection_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool DrawFrontFacingVolumetricLight {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxLight_DrawFrontFacingVolumetricLight_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxLight_DrawFrontFacingVolumetricLight_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public new FbxPropertyDouble3 Color {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxLight_Color_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxLight_Color_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble Intensity {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxLight_Intensity_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxLight_Intensity_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble InnerAngle {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxLight_InnerAngle_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxLight_InnerAngle_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble OuterAngle {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxLight_OuterAngle_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxLight_OuterAngle_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble Fog {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxLight_Fog_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxLight_Fog_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyEDecayType DecayType {
     get {
-      FbxPropertyEDecayType ret = new FbxPropertyEDecayType(GlobalsPINVOKE.FbxLight_DecayType_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyEDecayType ret = new FbxPropertyEDecayType(NativeMethods.FbxLight_DecayType_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble DecayStart {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxLight_DecayStart_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxLight_DecayStart_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyString FileName {
     get {
-      FbxPropertyString ret = new FbxPropertyString(GlobalsPINVOKE.FbxLight_FileName_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyString ret = new FbxPropertyString(NativeMethods.FbxLight_FileName_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool EnableNearAttenuation {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxLight_EnableNearAttenuation_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxLight_EnableNearAttenuation_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble NearAttenuationStart {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxLight_NearAttenuationStart_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxLight_NearAttenuationStart_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble NearAttenuationEnd {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxLight_NearAttenuationEnd_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxLight_NearAttenuationEnd_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool EnableFarAttenuation {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxLight_EnableFarAttenuation_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxLight_EnableFarAttenuation_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble FarAttenuationStart {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxLight_FarAttenuationStart_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxLight_FarAttenuationStart_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble FarAttenuationEnd {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxLight_FarAttenuationEnd_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxLight_FarAttenuationEnd_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool CastShadows {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxLight_CastShadows_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxLight_CastShadows_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble3 ShadowColor {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxLight_ShadowColor_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxLight_ShadowColor_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyEAreaLightShape AreaLightShape {
     get {
-      FbxPropertyEAreaLightShape ret = new FbxPropertyEAreaLightShape(GlobalsPINVOKE.FbxLight_AreaLightShape_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyEAreaLightShape ret = new FbxPropertyEAreaLightShape(NativeMethods.FbxLight_AreaLightShape_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyFloat LeftBarnDoor {
     get {
-      FbxPropertyFloat ret = new FbxPropertyFloat(GlobalsPINVOKE.FbxLight_LeftBarnDoor_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyFloat ret = new FbxPropertyFloat(NativeMethods.FbxLight_LeftBarnDoor_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyFloat RightBarnDoor {
     get {
-      FbxPropertyFloat ret = new FbxPropertyFloat(GlobalsPINVOKE.FbxLight_RightBarnDoor_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyFloat ret = new FbxPropertyFloat(NativeMethods.FbxLight_RightBarnDoor_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyFloat TopBarnDoor {
     get {
-      FbxPropertyFloat ret = new FbxPropertyFloat(GlobalsPINVOKE.FbxLight_TopBarnDoor_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyFloat ret = new FbxPropertyFloat(NativeMethods.FbxLight_TopBarnDoor_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyFloat BottomBarnDoor {
     get {
-      FbxPropertyFloat ret = new FbxPropertyFloat(GlobalsPINVOKE.FbxLight_BottomBarnDoor_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyFloat ret = new FbxPropertyFloat(NativeMethods.FbxLight_BottomBarnDoor_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool EnableBarnDoor {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxLight_EnableBarnDoor_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxLight_EnableBarnDoor_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }

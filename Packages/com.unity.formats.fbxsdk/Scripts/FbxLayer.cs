@@ -37,87 +37,87 @@ public class FbxLayer : global::System.IDisposable {
   }
 
   public FbxLayerElementNormal GetNormals() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayer_GetNormals(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayer_GetNormals(swigCPtr);
     FbxLayerElementNormal ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerElementNormal(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayerElementTangent GetTangents() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayer_GetTangents(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayer_GetTangents(swigCPtr);
     FbxLayerElementTangent ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerElementTangent(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayerElementBinormal GetBinormals() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayer_GetBinormals(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayer_GetBinormals(swigCPtr);
     FbxLayerElementBinormal ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerElementBinormal(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayerElementMaterial GetMaterials() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayer_GetMaterials(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayer_GetMaterials(swigCPtr);
     FbxLayerElementMaterial ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerElementMaterial(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayerElementUV GetUVs(FbxLayerElement.EType pTypeIdentifier) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayer_GetUVs__SWIG_0(swigCPtr, (int)pTypeIdentifier);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayer_GetUVs__SWIG_0(swigCPtr, (int)pTypeIdentifier);
     FbxLayerElementUV ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerElementUV(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayerElementUV GetUVs() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayer_GetUVs__SWIG_1(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayer_GetUVs__SWIG_1(swigCPtr);
     FbxLayerElementUV ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerElementUV(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxLayerElementVertexColor GetVertexColors() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayer_GetVertexColors(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayer_GetVertexColors(swigCPtr);
     FbxLayerElementVertexColor ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerElementVertexColor(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetNormals(FbxLayerElementNormal pNormals) {
-    GlobalsPINVOKE.FbxLayer_SetNormals(swigCPtr, FbxLayerElementNormal.getCPtr(pNormals));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayer_SetNormals(swigCPtr, FbxLayerElementNormal.getCPtr(pNormals));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetBinormals(FbxLayerElementBinormal pBinormals) {
-    GlobalsPINVOKE.FbxLayer_SetBinormals(swigCPtr, FbxLayerElementBinormal.getCPtr(pBinormals));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayer_SetBinormals(swigCPtr, FbxLayerElementBinormal.getCPtr(pBinormals));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetTangents(FbxLayerElementTangent pTangents) {
-    GlobalsPINVOKE.FbxLayer_SetTangents(swigCPtr, FbxLayerElementTangent.getCPtr(pTangents));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayer_SetTangents(swigCPtr, FbxLayerElementTangent.getCPtr(pTangents));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetMaterials(FbxLayerElementMaterial pMaterials) {
-    GlobalsPINVOKE.FbxLayer_SetMaterials(swigCPtr, FbxLayerElementMaterial.getCPtr(pMaterials));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayer_SetMaterials(swigCPtr, FbxLayerElementMaterial.getCPtr(pMaterials));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetUVs(FbxLayerElementUV pUVs, FbxLayerElement.EType pTypeIdentifier) {
-    GlobalsPINVOKE.FbxLayer_SetUVs__SWIG_0(swigCPtr, FbxLayerElementUV.getCPtr(pUVs), (int)pTypeIdentifier);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayer_SetUVs__SWIG_0(swigCPtr, FbxLayerElementUV.getCPtr(pUVs), (int)pTypeIdentifier);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetUVs(FbxLayerElementUV pUVs) {
-    GlobalsPINVOKE.FbxLayer_SetUVs__SWIG_1(swigCPtr, FbxLayerElementUV.getCPtr(pUVs));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayer_SetUVs__SWIG_1(swigCPtr, FbxLayerElementUV.getCPtr(pUVs));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetVertexColors(FbxLayerElementVertexColor pVertexColors) {
-    GlobalsPINVOKE.FbxLayer_SetVertexColors(swigCPtr, FbxLayerElementVertexColor.getCPtr(pVertexColors));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxLayer_SetVertexColors(swigCPtr, FbxLayerElementVertexColor.getCPtr(pVertexColors));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public override int GetHashCode(){

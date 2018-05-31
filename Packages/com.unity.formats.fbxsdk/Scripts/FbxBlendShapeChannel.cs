@@ -16,75 +16,75 @@ public class FbxBlendShapeChannel : FbxSubDeformer {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxBlendShapeChannel Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxBlendShapeChannel_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxBlendShapeChannel_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxBlendShapeChannel ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxBlendShapeChannel(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxBlendShapeChannel Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxBlendShapeChannel_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxBlendShapeChannel_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxBlendShapeChannel ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxBlendShapeChannel(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxPropertyDouble DeformPercent {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxBlendShapeChannel_DeformPercent_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxBlendShapeChannel_DeformPercent_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public bool SetBlendShapeDeformer(FbxBlendShape pBlendShape) {
-    bool ret = GlobalsPINVOKE.FbxBlendShapeChannel_SetBlendShapeDeformer(swigCPtr, FbxBlendShape.getCPtr(pBlendShape));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxBlendShapeChannel_SetBlendShapeDeformer(swigCPtr, FbxBlendShape.getCPtr(pBlendShape));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxBlendShape GetBlendShapeDeformer() {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxBlendShapeChannel_GetBlendShapeDeformer(swigCPtr);
+    global::System.IntPtr cPtr = NativeMethods.FbxBlendShapeChannel_GetBlendShapeDeformer(swigCPtr);
     FbxBlendShape ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxBlendShape(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool AddTargetShape(FbxShape pShape, double pFullDeformPercent) {
-    bool ret = GlobalsPINVOKE.FbxBlendShapeChannel_AddTargetShape__SWIG_0(swigCPtr, FbxShape.getCPtr(pShape), pFullDeformPercent);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxBlendShapeChannel_AddTargetShape__SWIG_0(swigCPtr, FbxShape.getCPtr(pShape), pFullDeformPercent);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool AddTargetShape(FbxShape pShape) {
-    bool ret = GlobalsPINVOKE.FbxBlendShapeChannel_AddTargetShape__SWIG_1(swigCPtr, FbxShape.getCPtr(pShape));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxBlendShapeChannel_AddTargetShape__SWIG_1(swigCPtr, FbxShape.getCPtr(pShape));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxShape RemoveTargetShape(FbxShape pShape) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxBlendShapeChannel_RemoveTargetShape(swigCPtr, FbxShape.getCPtr(pShape));
+    global::System.IntPtr cPtr = NativeMethods.FbxBlendShapeChannel_RemoveTargetShape(swigCPtr, FbxShape.getCPtr(pShape));
     FbxShape ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxShape(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetTargetShapeCount() {
-    int ret = GlobalsPINVOKE.FbxBlendShapeChannel_GetTargetShapeCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxBlendShapeChannel_GetTargetShapeCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxShape GetTargetShape(int pIndex) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxBlendShapeChannel_GetTargetShape(swigCPtr, pIndex);
+    global::System.IntPtr cPtr = NativeMethods.FbxBlendShapeChannel_GetTargetShape(swigCPtr, pIndex);
     FbxShape ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxShape(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetTargetShapeIndex(FbxShape pShape) {
-    int ret = GlobalsPINVOKE.FbxBlendShapeChannel_GetTargetShapeIndex(swigCPtr, FbxShape.getCPtr(pShape));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxBlendShapeChannel_GetTargetShapeIndex(swigCPtr, FbxShape.getCPtr(pShape));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

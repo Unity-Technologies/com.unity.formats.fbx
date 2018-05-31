@@ -16,87 +16,87 @@ public class FbxAnimCurve : FbxAnimCurveBase {
   // override void Dispose() {base.Dispose();}
 
   public static FbxAnimCurve Create(FbxScene pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxAnimCurve_Create(FbxScene.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxAnimCurve_Create(FbxScene.getCPtr(pContainer), pName);
     FbxAnimCurve ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxAnimCurve(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual void KeyModifyBegin() {
-    GlobalsPINVOKE.FbxAnimCurve_KeyModifyBegin(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeyModifyBegin(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual void KeyModifyEnd() {
-    GlobalsPINVOKE.FbxAnimCurve_KeyModifyEnd(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeyModifyEnd(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual int KeyAdd(FbxTime pTime, ref int pLast) {
-    int ret = GlobalsPINVOKE.FbxAnimCurve_KeyAdd__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), ref pLast);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxAnimCurve_KeyAdd__SWIG_0(swigCPtr, FbxTime.getCPtr(pTime), ref pLast);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual int KeyAdd(FbxTime pTime) {
-    int ret = GlobalsPINVOKE.FbxAnimCurve_KeyAdd__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxAnimCurve_KeyAdd__SWIG_1(swigCPtr, FbxTime.getCPtr(pTime));
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public virtual void KeySet(int pKeyIndex, FbxTime pTime, float pValue, FbxAnimCurveDef.EInterpolationType pInterpolation, FbxAnimCurveDef.ETangentMode pTangentMode, float pData0, float pData1, FbxAnimCurveDef.EWeightedMode pTangentWeightMode, float pWeight0, float pWeight1, float pVelocity0, float pVelocity1) {
-    GlobalsPINVOKE.FbxAnimCurve_KeySet__SWIG_0(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1, (int)pTangentWeightMode, pWeight0, pWeight1, pVelocity0, pVelocity1);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeySet__SWIG_0(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1, (int)pTangentWeightMode, pWeight0, pWeight1, pVelocity0, pVelocity1);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual void KeySet(int pKeyIndex, FbxTime pTime, float pValue, FbxAnimCurveDef.EInterpolationType pInterpolation, FbxAnimCurveDef.ETangentMode pTangentMode, float pData0, float pData1, FbxAnimCurveDef.EWeightedMode pTangentWeightMode, float pWeight0, float pWeight1, float pVelocity0) {
-    GlobalsPINVOKE.FbxAnimCurve_KeySet__SWIG_1(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1, (int)pTangentWeightMode, pWeight0, pWeight1, pVelocity0);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeySet__SWIG_1(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1, (int)pTangentWeightMode, pWeight0, pWeight1, pVelocity0);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual void KeySet(int pKeyIndex, FbxTime pTime, float pValue, FbxAnimCurveDef.EInterpolationType pInterpolation, FbxAnimCurveDef.ETangentMode pTangentMode, float pData0, float pData1, FbxAnimCurveDef.EWeightedMode pTangentWeightMode, float pWeight0, float pWeight1) {
-    GlobalsPINVOKE.FbxAnimCurve_KeySet__SWIG_2(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1, (int)pTangentWeightMode, pWeight0, pWeight1);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeySet__SWIG_2(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1, (int)pTangentWeightMode, pWeight0, pWeight1);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual void KeySet(int pKeyIndex, FbxTime pTime, float pValue, FbxAnimCurveDef.EInterpolationType pInterpolation, FbxAnimCurveDef.ETangentMode pTangentMode, float pData0, float pData1, FbxAnimCurveDef.EWeightedMode pTangentWeightMode, float pWeight0) {
-    GlobalsPINVOKE.FbxAnimCurve_KeySet__SWIG_3(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1, (int)pTangentWeightMode, pWeight0);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeySet__SWIG_3(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1, (int)pTangentWeightMode, pWeight0);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual void KeySet(int pKeyIndex, FbxTime pTime, float pValue, FbxAnimCurveDef.EInterpolationType pInterpolation, FbxAnimCurveDef.ETangentMode pTangentMode, float pData0, float pData1, FbxAnimCurveDef.EWeightedMode pTangentWeightMode) {
-    GlobalsPINVOKE.FbxAnimCurve_KeySet__SWIG_4(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1, (int)pTangentWeightMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeySet__SWIG_4(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1, (int)pTangentWeightMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual void KeySet(int pKeyIndex, FbxTime pTime, float pValue, FbxAnimCurveDef.EInterpolationType pInterpolation, FbxAnimCurveDef.ETangentMode pTangentMode, float pData0, float pData1) {
-    GlobalsPINVOKE.FbxAnimCurve_KeySet__SWIG_5(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeySet__SWIG_5(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0, pData1);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual void KeySet(int pKeyIndex, FbxTime pTime, float pValue, FbxAnimCurveDef.EInterpolationType pInterpolation, FbxAnimCurveDef.ETangentMode pTangentMode, float pData0) {
-    GlobalsPINVOKE.FbxAnimCurve_KeySet__SWIG_6(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeySet__SWIG_6(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode, pData0);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual void KeySet(int pKeyIndex, FbxTime pTime, float pValue, FbxAnimCurveDef.EInterpolationType pInterpolation, FbxAnimCurveDef.ETangentMode pTangentMode) {
-    GlobalsPINVOKE.FbxAnimCurve_KeySet__SWIG_7(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeySet__SWIG_7(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation, (int)pTangentMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual void KeySet(int pKeyIndex, FbxTime pTime, float pValue, FbxAnimCurveDef.EInterpolationType pInterpolation) {
-    GlobalsPINVOKE.FbxAnimCurve_KeySet__SWIG_8(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeySet__SWIG_8(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue, (int)pInterpolation);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual void KeySet(int pKeyIndex, FbxTime pTime, float pValue) {
-    GlobalsPINVOKE.FbxAnimCurve_KeySet__SWIG_9(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxAnimCurve_KeySet__SWIG_9(swigCPtr, pKeyIndex, FbxTime.getCPtr(pTime), pValue);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public virtual float KeyGetValue(int pKeyIndex) {
-    float ret = GlobalsPINVOKE.FbxAnimCurve_KeyGetValue(swigCPtr, pKeyIndex);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    float ret = NativeMethods.FbxAnimCurve_KeyGetValue(swigCPtr, pKeyIndex);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

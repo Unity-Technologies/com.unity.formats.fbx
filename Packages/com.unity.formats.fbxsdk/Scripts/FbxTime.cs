@@ -32,7 +32,7 @@ public class FbxTime : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxTime(swigCPtr);
+          NativeMethods.delete_FbxTime(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,192 +40,192 @@ public class FbxTime : global::System.IDisposable {
     }
   }
 
-  public FbxTime() : this(GlobalsPINVOKE.new_FbxTime(), true) {
+  public FbxTime() : this(NativeMethods.new_FbxTime(), true) {
   }
 
   public static void SetGlobalTimeMode(FbxTime.EMode pTimeMode) {
-    GlobalsPINVOKE.FbxTime_SetGlobalTimeMode((int)pTimeMode);
+    NativeMethods.FbxTime_SetGlobalTimeMode((int)pTimeMode);
   }
 
   public static FbxTime.EMode GetGlobalTimeMode() {
-    FbxTime.EMode ret = (FbxTime.EMode)GlobalsPINVOKE.FbxTime_GetGlobalTimeMode();
+    FbxTime.EMode ret = (FbxTime.EMode)NativeMethods.FbxTime_GetGlobalTimeMode();
     return ret;
   }
 
   public static void SetGlobalTimeProtocol(FbxTime.EProtocol pTimeProtocol) {
-    GlobalsPINVOKE.FbxTime_SetGlobalTimeProtocol((int)pTimeProtocol);
+    NativeMethods.FbxTime_SetGlobalTimeProtocol((int)pTimeProtocol);
   }
 
   public static FbxTime.EProtocol GetGlobalTimeProtocol() {
-    FbxTime.EProtocol ret = (FbxTime.EProtocol)GlobalsPINVOKE.FbxTime_GetGlobalTimeProtocol();
+    FbxTime.EProtocol ret = (FbxTime.EProtocol)NativeMethods.FbxTime_GetGlobalTimeProtocol();
     return ret;
   }
 
   public static double GetFrameRate(FbxTime.EMode pTimeMode) {
-    double ret = GlobalsPINVOKE.FbxTime_GetFrameRate((int)pTimeMode);
+    double ret = NativeMethods.FbxTime_GetFrameRate((int)pTimeMode);
     return ret;
   }
 
   public static FbxTime.EMode ConvertFrameRateToTimeMode(double pFrameRate, double pPrecision) {
-    FbxTime.EMode ret = (FbxTime.EMode)GlobalsPINVOKE.FbxTime_ConvertFrameRateToTimeMode__SWIG_0(pFrameRate, pPrecision);
+    FbxTime.EMode ret = (FbxTime.EMode)NativeMethods.FbxTime_ConvertFrameRateToTimeMode__SWIG_0(pFrameRate, pPrecision);
     return ret;
   }
 
   public static FbxTime.EMode ConvertFrameRateToTimeMode(double pFrameRate) {
-    FbxTime.EMode ret = (FbxTime.EMode)GlobalsPINVOKE.FbxTime_ConvertFrameRateToTimeMode__SWIG_1(pFrameRate);
+    FbxTime.EMode ret = (FbxTime.EMode)NativeMethods.FbxTime_ConvertFrameRateToTimeMode__SWIG_1(pFrameRate);
     return ret;
   }
 
   public long GetRaw() {
-    long ret = GlobalsPINVOKE.FbxTime_GetRaw(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    long ret = NativeMethods.FbxTime_GetRaw(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public long GetMilliSeconds() {
-    long ret = GlobalsPINVOKE.FbxTime_GetMilliSeconds(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    long ret = NativeMethods.FbxTime_GetMilliSeconds(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetSecondDouble() {
-    double ret = GlobalsPINVOKE.FbxTime_GetSecondDouble(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxTime_GetSecondDouble(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool GetTime(out int pHour, out int pMinute, out int pSecond, out int pFrame, out int pField, out int pResidual, FbxTime.EMode pTimeMode) {
-    bool ret = GlobalsPINVOKE.FbxTime_GetTime__SWIG_0(swigCPtr, out pHour, out pMinute, out pSecond, out pFrame, out pField, out pResidual, (int)pTimeMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxTime_GetTime__SWIG_0(swigCPtr, out pHour, out pMinute, out pSecond, out pFrame, out pField, out pResidual, (int)pTimeMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public bool GetTime(out int pHour, out int pMinute, out int pSecond, out int pFrame, out int pField, out int pResidual) {
-    bool ret = GlobalsPINVOKE.FbxTime_GetTime__SWIG_1(swigCPtr, out pHour, out pMinute, out pSecond, out pFrame, out pField, out pResidual);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    bool ret = NativeMethods.FbxTime_GetTime__SWIG_1(swigCPtr, out pHour, out pMinute, out pSecond, out pFrame, out pField, out pResidual);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTime GetFramedTime(bool pRound) {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTime_GetFramedTime__SWIG_0(swigCPtr, pRound), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTime ret = new FbxTime(NativeMethods.FbxTime_GetFramedTime__SWIG_0(swigCPtr, pRound), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxTime GetFramedTime() {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTime_GetFramedTime__SWIG_1(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxTime ret = new FbxTime(NativeMethods.FbxTime_GetFramedTime__SWIG_1(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetHourCount() {
-    int ret = GlobalsPINVOKE.FbxTime_GetHourCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxTime_GetHourCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetMinuteCount() {
-    int ret = GlobalsPINVOKE.FbxTime_GetMinuteCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxTime_GetMinuteCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetSecondCount() {
-    int ret = GlobalsPINVOKE.FbxTime_GetSecondCount(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxTime_GetSecondCount(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public long GetFrameCount(FbxTime.EMode pTimeMode) {
-    long ret = GlobalsPINVOKE.FbxTime_GetFrameCount__SWIG_0(swigCPtr, (int)pTimeMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    long ret = NativeMethods.FbxTime_GetFrameCount__SWIG_0(swigCPtr, (int)pTimeMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public long GetFrameCount() {
-    long ret = GlobalsPINVOKE.FbxTime_GetFrameCount__SWIG_1(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    long ret = NativeMethods.FbxTime_GetFrameCount__SWIG_1(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetFrameCountPrecise(FbxTime.EMode pTimeMode) {
-    double ret = GlobalsPINVOKE.FbxTime_GetFrameCountPrecise__SWIG_0(swigCPtr, (int)pTimeMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxTime_GetFrameCountPrecise__SWIG_0(swigCPtr, (int)pTimeMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetFrameCountPrecise() {
-    double ret = GlobalsPINVOKE.FbxTime_GetFrameCountPrecise__SWIG_1(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxTime_GetFrameCountPrecise__SWIG_1(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public long GetFieldCount(FbxTime.EMode pTimeMode) {
-    long ret = GlobalsPINVOKE.FbxTime_GetFieldCount__SWIG_0(swigCPtr, (int)pTimeMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    long ret = NativeMethods.FbxTime_GetFieldCount__SWIG_0(swigCPtr, (int)pTimeMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public long GetFieldCount() {
-    long ret = GlobalsPINVOKE.FbxTime_GetFieldCount__SWIG_1(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    long ret = NativeMethods.FbxTime_GetFieldCount__SWIG_1(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetResidual(FbxTime.EMode pTimeMode) {
-    int ret = GlobalsPINVOKE.FbxTime_GetResidual__SWIG_0(swigCPtr, (int)pTimeMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxTime_GetResidual__SWIG_0(swigCPtr, (int)pTimeMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public int GetResidual() {
-    int ret = GlobalsPINVOKE.FbxTime_GetResidual__SWIG_1(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxTime_GetResidual__SWIG_1(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static bool IsDropFrame(FbxTime.EMode pTimeMode) {
-    bool ret = GlobalsPINVOKE.FbxTime_IsDropFrame__SWIG_0((int)pTimeMode);
+    bool ret = NativeMethods.FbxTime_IsDropFrame__SWIG_0((int)pTimeMode);
     return ret;
   }
 
   public static bool IsDropFrame() {
-    bool ret = GlobalsPINVOKE.FbxTime_IsDropFrame__SWIG_1();
+    bool ret = NativeMethods.FbxTime_IsDropFrame__SWIG_1();
     return ret;
   }
 
   public char GetFrameSeparator(FbxTime.EMode pTimeMode) {
-    byte ret = GlobalsPINVOKE.FbxTime_GetFrameSeparator__SWIG_0(swigCPtr, (int)pTimeMode);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    byte ret = NativeMethods.FbxTime_GetFrameSeparator__SWIG_0(swigCPtr, (int)pTimeMode);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return System.Convert.ToChar(ret);
   }
 
   public char GetFrameSeparator() {
-    byte ret = GlobalsPINVOKE.FbxTime_GetFrameSeparator__SWIG_1(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    byte ret = NativeMethods.FbxTime_GetFrameSeparator__SWIG_1(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return System.Convert.ToChar(ret);
   }
 
   private string GetTimeStringNoOptionalArgs(FbxTime.EElement pStart, FbxTime.EElement pEnd, FbxTime.EMode pTimeMode, FbxTime.EProtocol pTimeFormat) {
-    string ret = GlobalsPINVOKE.FbxTime_GetTimeStringNoOptionalArgs(swigCPtr, (int)pStart, (int)pEnd, (int)pTimeMode, (int)pTimeFormat);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    string ret = NativeMethods.FbxTime_GetTimeStringNoOptionalArgs(swigCPtr, (int)pStart, (int)pEnd, (int)pTimeMode, (int)pTimeFormat);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static long GetOneFrameValue(FbxTime.EMode pTimeMode) {
-    long ret = GlobalsPINVOKE.FbxTime_GetOneFrameValue__SWIG_0((int)pTimeMode);
+    long ret = NativeMethods.FbxTime_GetOneFrameValue__SWIG_0((int)pTimeMode);
     return ret;
   }
 
   public static long GetOneFrameValue() {
-    long ret = GlobalsPINVOKE.FbxTime_GetOneFrameValue__SWIG_1();
+    long ret = NativeMethods.FbxTime_GetOneFrameValue__SWIG_1();
     return ret;
   }
 
-  public override bool Equals(object other) {
-    if (object.ReferenceEquals(other, null)) { return false; }
-    if (! (other is FbxTime)) { return false; }
-    return CompareTo((FbxTime)other) == 0;
+  public override bool Equals(object obj) {
+    if (object.ReferenceEquals(obj, null)) { return false; }
+    if (! (obj is FbxTime)) { return false; }
+    return CompareTo((FbxTime)obj) == 0;
   }
   public int CompareTo(object other) {
     if (object.ReferenceEquals(other, null)) { return 1; }
@@ -253,22 +253,22 @@ public class FbxTime : global::System.IDisposable {
   }
 
   public static FbxTime FromRaw(long pTime) {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTime_FromRaw(pTime), true);
+    FbxTime ret = new FbxTime(NativeMethods.FbxTime_FromRaw(pTime), true);
     return ret;
   }
 
   public static FbxTime FromMilliSeconds(long pMilliSeconds) {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTime_FromMilliSeconds(pMilliSeconds), true);
+    FbxTime ret = new FbxTime(NativeMethods.FbxTime_FromMilliSeconds(pMilliSeconds), true);
     return ret;
   }
 
   public static FbxTime FromSecondDouble(double pTime) {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTime_FromSecondDouble(pTime), true);
+    FbxTime ret = new FbxTime(NativeMethods.FbxTime_FromSecondDouble(pTime), true);
     return ret;
   }
 
   private static FbxTime FromTimeNoOptionalArgs(int pHour, int pMinute, int pSecond, int pFrame, int pField, int pResidual, FbxTime.EMode pTimeMode) {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTime_FromTimeNoOptionalArgs(pHour, pMinute, pSecond, pFrame, pField, pResidual, (int)pTimeMode), true);
+    FbxTime ret = new FbxTime(NativeMethods.FbxTime_FromTimeNoOptionalArgs(pHour, pMinute, pSecond, pFrame, pField, pResidual, (int)pTimeMode), true);
     return ret;
   }
 
@@ -277,27 +277,27 @@ public class FbxTime : global::System.IDisposable {
   }
   
   public static FbxTime FromFrame(long pFrames, FbxTime.EMode pTimeMode) {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTime_FromFrame__SWIG_0(pFrames, (int)pTimeMode), true);
+    FbxTime ret = new FbxTime(NativeMethods.FbxTime_FromFrame__SWIG_0(pFrames, (int)pTimeMode), true);
     return ret;
   }
 
   public static FbxTime FromFrame(long pFrames) {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTime_FromFrame__SWIG_1(pFrames), true);
+    FbxTime ret = new FbxTime(NativeMethods.FbxTime_FromFrame__SWIG_1(pFrames), true);
     return ret;
   }
 
   public static FbxTime FromFramePrecise(double pFrames, FbxTime.EMode pTimeMode) {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTime_FromFramePrecise__SWIG_0(pFrames, (int)pTimeMode), true);
+    FbxTime ret = new FbxTime(NativeMethods.FbxTime_FromFramePrecise__SWIG_0(pFrames, (int)pTimeMode), true);
     return ret;
   }
 
   public static FbxTime FromFramePrecise(double pFrames) {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTime_FromFramePrecise__SWIG_1(pFrames), true);
+    FbxTime ret = new FbxTime(NativeMethods.FbxTime_FromFramePrecise__SWIG_1(pFrames), true);
     return ret;
   }
 
   private static FbxTime FromTimeStringNoOptionalArgs(string pTime, FbxTime.EMode pTimeMode, FbxTime.EProtocol pTimeFormat) {
-    FbxTime ret = new FbxTime(GlobalsPINVOKE.FbxTime_FromTimeStringNoOptionalArgs(pTime, (int)pTimeMode, (int)pTimeFormat), true);
+    FbxTime ret = new FbxTime(NativeMethods.FbxTime_FromTimeStringNoOptionalArgs(pTime, (int)pTimeMode, (int)pTimeFormat), true);
     return ret;
   }
 

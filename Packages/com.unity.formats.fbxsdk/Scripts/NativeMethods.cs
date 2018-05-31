@@ -10,7 +10,7 @@
 
 namespace UnityEngine.Formats.FbxSdk {
 
-class GlobalsPINVOKE {
+class NativeMethods {
 
   protected class SWIGExceptionHelper {
 
@@ -143,7 +143,7 @@ class GlobalsPINVOKE {
       if (pendingException != null)
         throw new global::System.ApplicationException("FATAL: An earlier pending exception from unmanaged code was missed and thus not thrown (" + pendingException.ToString() + ")", e);
       pendingException = e;
-      lock(typeof(GlobalsPINVOKE)) {
+      lock(typeof(NativeMethods)) {
         numExceptionsPending++;
       }
     }
@@ -154,7 +154,7 @@ class GlobalsPINVOKE {
         if (pendingException != null) {
           e = pendingException;
           pendingException = null;
-          lock(typeof(GlobalsPINVOKE)) {
+          lock(typeof(NativeMethods)) {
             numExceptionsPending--;
           }
         }
@@ -184,7 +184,7 @@ class GlobalsPINVOKE {
   static protected SWIGStringHelper swigStringHelper = new SWIGStringHelper();
 
 
-  static GlobalsPINVOKE() {
+  static NativeMethods() {
   }
 
 

@@ -16,157 +16,157 @@ public class FbxMarker : FbxNodeAttribute {
   // override void Dispose() {base.Dispose();}
 
   public new static FbxMarker Create(FbxManager pManager, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxMarker_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxMarker_Create__SWIG_0(FbxManager.getCPtr(pManager), pName);
     FbxMarker ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxMarker(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public new static FbxMarker Create(FbxObject pContainer, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxMarker_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxMarker_Create__SWIG_1(FbxObject.getCPtr(pContainer), pName);
     FbxMarker ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxMarker(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void Reset() {
-    GlobalsPINVOKE.FbxMarker_Reset(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxMarker_Reset(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public void SetMarkerType(FbxMarker.EType pType) {
-    GlobalsPINVOKE.FbxMarker_SetMarkerType(swigCPtr, (int)pType);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxMarker_SetMarkerType(swigCPtr, (int)pType);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxMarker.EType GetMarkerType() {
-    FbxMarker.EType ret = (FbxMarker.EType)GlobalsPINVOKE.FbxMarker_GetMarkerType(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxMarker.EType ret = (FbxMarker.EType)NativeMethods.FbxMarker_GetMarkerType(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public double GetDefaultOcclusion() {
-    double ret = GlobalsPINVOKE.FbxMarker_GetDefaultOcclusion(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxMarker_GetDefaultOcclusion(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetDefaultOcclusion(double pOcclusion) {
-    GlobalsPINVOKE.FbxMarker_SetDefaultOcclusion(swigCPtr, pOcclusion);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxMarker_SetDefaultOcclusion(swigCPtr, pOcclusion);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public double GetDefaultIKReachTranslation() {
-    double ret = GlobalsPINVOKE.FbxMarker_GetDefaultIKReachTranslation(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxMarker_GetDefaultIKReachTranslation(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetDefaultIKReachTranslation(double pIKReachTranslation) {
-    GlobalsPINVOKE.FbxMarker_SetDefaultIKReachTranslation(swigCPtr, pIKReachTranslation);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxMarker_SetDefaultIKReachTranslation(swigCPtr, pIKReachTranslation);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public double GetDefaultIKReachRotation() {
-    double ret = GlobalsPINVOKE.FbxMarker_GetDefaultIKReachRotation(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxMarker_GetDefaultIKReachRotation(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetDefaultIKReachRotation(double pIKReachRotation) {
-    GlobalsPINVOKE.FbxMarker_SetDefaultIKReachRotation(swigCPtr, pIKReachRotation);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxMarker_SetDefaultIKReachRotation(swigCPtr, pIKReachRotation);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public double GetDefaultIKPull() {
-    double ret = GlobalsPINVOKE.FbxMarker_GetDefaultIKPull(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxMarker_GetDefaultIKPull(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetDefaultIKPull(double pIKPull) {
-    GlobalsPINVOKE.FbxMarker_SetDefaultIKPull(swigCPtr, pIKPull);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxMarker_SetDefaultIKPull(swigCPtr, pIKPull);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public double GetDefaultIKPullHips() {
-    double ret = GlobalsPINVOKE.FbxMarker_GetDefaultIKPullHips(swigCPtr);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    double ret = NativeMethods.FbxMarker_GetDefaultIKPullHips(swigCPtr);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void SetDefaultIKPullHips(double pIKPullHips) {
-    GlobalsPINVOKE.FbxMarker_SetDefaultIKPullHips(swigCPtr, pIKPullHips);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    NativeMethods.FbxMarker_SetDefaultIKPullHips(swigCPtr, pIKPullHips);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
   }
 
   public FbxPropertyMarkerELook Look {
     get {
-      FbxPropertyMarkerELook ret = new FbxPropertyMarkerELook(GlobalsPINVOKE.FbxMarker_Look_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyMarkerELook ret = new FbxPropertyMarkerELook(NativeMethods.FbxMarker_Look_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool DrawLink {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxMarker_DrawLink_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxMarker_DrawLink_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble Size {
     get {
-      FbxPropertyDouble ret = new FbxPropertyDouble(GlobalsPINVOKE.FbxMarker_Size_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble ret = new FbxPropertyDouble(NativeMethods.FbxMarker_Size_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyBool ShowLabel {
     get {
-      FbxPropertyBool ret = new FbxPropertyBool(GlobalsPINVOKE.FbxMarker_ShowLabel_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyBool ret = new FbxPropertyBool(NativeMethods.FbxMarker_ShowLabel_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxPropertyDouble3 IKPivot {
     get {
-      FbxPropertyDouble3 ret = new FbxPropertyDouble3(GlobalsPINVOKE.FbxMarker_IKPivot_get(swigCPtr), false);
-      if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+      FbxPropertyDouble3 ret = new FbxPropertyDouble3(NativeMethods.FbxMarker_IKPivot_get(swigCPtr), false);
+      if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
       return ret;
     } 
   }
 
   public FbxProperty GetOcclusion() {
-    FbxProperty ret = new FbxProperty(GlobalsPINVOKE.FbxMarker_GetOcclusion(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxProperty ret = new FbxProperty(NativeMethods.FbxMarker_GetOcclusion(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxProperty GetIKReachTranslation() {
-    FbxProperty ret = new FbxProperty(GlobalsPINVOKE.FbxMarker_GetIKReachTranslation(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxProperty ret = new FbxProperty(NativeMethods.FbxMarker_GetIKReachTranslation(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxProperty GetIKReachRotation() {
-    FbxProperty ret = new FbxProperty(GlobalsPINVOKE.FbxMarker_GetIKReachRotation(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxProperty ret = new FbxProperty(NativeMethods.FbxMarker_GetIKReachRotation(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxProperty GetIKPull() {
-    FbxProperty ret = new FbxProperty(GlobalsPINVOKE.FbxMarker_GetIKPull(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxProperty ret = new FbxProperty(NativeMethods.FbxMarker_GetIKPull(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public FbxProperty GetIKPullHips() {
-    FbxProperty ret = new FbxProperty(GlobalsPINVOKE.FbxMarker_GetIKPullHips(swigCPtr), true);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    FbxProperty ret = new FbxProperty(NativeMethods.FbxMarker_GetIKPullHips(swigCPtr), true);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

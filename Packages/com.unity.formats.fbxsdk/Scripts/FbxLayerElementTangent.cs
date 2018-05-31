@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxLayerElementTangent : FbxLayerElementTemplateFbxVector4 {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxLayerElementTangent(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxLayerElementTangent_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxLayerElementTangent(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxLayerElementTangent_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,9 +36,9 @@ public class FbxLayerElementTangent : FbxLayerElementTemplateFbxVector4 {
   }
 
   public static FbxLayerElementTangent Create(FbxLayerContainer pOwner, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayerElementTangent_Create(FbxLayerContainer.getCPtr(pOwner), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayerElementTangent_Create(FbxLayerContainer.getCPtr(pOwner), pName);
     FbxLayerElementTangent ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerElementTangent(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxLayerElementVertexColor : FbxLayerElementTemplateFbxColor {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxLayerElementVertexColor(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxLayerElementVertexColor_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxLayerElementVertexColor(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxLayerElementVertexColor_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -36,9 +36,9 @@ public class FbxLayerElementVertexColor : FbxLayerElementTemplateFbxColor {
   }
 
   public static FbxLayerElementVertexColor Create(FbxLayerContainer pOwner, string pName) {
-    global::System.IntPtr cPtr = GlobalsPINVOKE.FbxLayerElementVertexColor_Create(FbxLayerContainer.getCPtr(pOwner), pName);
+    global::System.IntPtr cPtr = NativeMethods.FbxLayerElementVertexColor_Create(FbxLayerContainer.getCPtr(pOwner), pName);
     FbxLayerElementVertexColor ret = (cPtr == global::System.IntPtr.Zero) ? null : new FbxLayerElementVertexColor(cPtr, false);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 

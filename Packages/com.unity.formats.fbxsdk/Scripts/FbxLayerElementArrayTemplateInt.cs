@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.FbxSdk {
 public class FbxLayerElementArrayTemplateInt : FbxLayerElementArray {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
-  internal FbxLayerElementArrayTemplateInt(global::System.IntPtr cPtr, bool cMemoryOwn) : base(GlobalsPINVOKE.FbxLayerElementArrayTemplateInt_SWIGUpcast(cPtr), cMemoryOwn) {
+  internal FbxLayerElementArrayTemplateInt(global::System.IntPtr cPtr, bool cMemoryOwn) : base(NativeMethods.FbxLayerElementArrayTemplateInt_SWIGUpcast(cPtr), cMemoryOwn) {
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -30,7 +30,7 @@ public class FbxLayerElementArrayTemplateInt : FbxLayerElementArray {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          GlobalsPINVOKE.delete_FbxLayerElementArrayTemplateInt(swigCPtr);
+          NativeMethods.delete_FbxLayerElementArrayTemplateInt(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
@@ -40,19 +40,19 @@ public class FbxLayerElementArrayTemplateInt : FbxLayerElementArray {
   }
 
   private int GetAtUnchecked(int pIndex) {
-    int ret = GlobalsPINVOKE.FbxLayerElementArrayTemplateInt_GetAtUnchecked(swigCPtr, pIndex);
-    if (GlobalsPINVOKE.SWIGPendingException.Pending) throw GlobalsPINVOKE.SWIGPendingException.Retrieve();
+    int ret = NativeMethods.FbxLayerElementArrayTemplateInt_GetAtUnchecked(swigCPtr, pIndex);
+    if (NativeMethods.SWIGPendingException.Pending) throw NativeMethods.SWIGPendingException.Retrieve();
     return ret;
   }
 
    public int GetAt(int pIndex) { 
       if (pIndex < 0 || pIndex >= GetCount()) { 
-        throw new System.IndexOutOfRangeException();
+        throw new System.ArgumentOutOfRangeException("pIndex");
       }
       return GetAtUnchecked(pIndex);
     }
 
-  public FbxLayerElementArrayTemplateInt() : this(GlobalsPINVOKE.new_FbxLayerElementArrayTemplateInt(), true) {
+  public FbxLayerElementArrayTemplateInt() : this(NativeMethods.new_FbxLayerElementArrayTemplateInt(), true) {
   }
 
 }
