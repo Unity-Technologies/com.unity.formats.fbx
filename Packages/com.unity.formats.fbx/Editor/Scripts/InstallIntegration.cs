@@ -9,18 +9,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public abstract string DccDisplayName { get; }
         public abstract string IntegrationZipPath { get; }
 
-        private static string m_integrationFolderPath = null;
-        public static string INTEGRATION_FOLDER_PATH
+        private static string s_integrationFolderPath = null;
+        public static string IntegrationFolderPath
         {
             get{
-                if (string.IsNullOrEmpty (m_integrationFolderPath)) {
-                    m_integrationFolderPath = Application.dataPath;
+                if (string.IsNullOrEmpty (s_integrationFolderPath)) {
+                    s_integrationFolderPath = Application.dataPath;
                 }
-                return m_integrationFolderPath;
+                return s_integrationFolderPath;
             }
             set{
                 if (!string.IsNullOrEmpty (value) && System.IO.Directory.Exists (value)) {
-                    m_integrationFolderPath = value;
+                    s_integrationFolderPath = value;
                 } else {
                     Debug.LogError (string.Format("Failed to set integration folder path, invalid directory \"{0}\"", value));
                 }
@@ -28,25 +28,31 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         public void SetIntegrationFolderPath(string path){
-            INTEGRATION_FOLDER_PATH = path;
+            IntegrationFolderPath = path;
         }
 
         /// <summary>
         /// Gets the integration zip full path as an absolute Unity-style path.
         /// </summary>
         /// <returns>The integration zip full path.</returns>
-        public string GetIntegrationZipFullPath()
+        public string IntegrationZipFullPath
         {
-            return System.IO.Path.GetFullPath("Packages/com.unity.formats.fbx/Editor/Integrations").Replace("\\", "/") + "/" + IntegrationZipPath;
+            get
+            {
+                return System.IO.Path.GetFullPath("Packages/com.unity.formats.fbx/Editor/Integrations").Replace("\\", "/") + "/" + IntegrationZipPath;
+            }
         }
 
         /// <summary>
         /// Gets the project path.
         /// </summary>
         /// <returns>The project path.</returns>
-        public static string GetProjectPath()
+        public static string ProjectPath
         {
-            return System.IO.Directory.GetParent(Application.dataPath).FullName.Replace("\\","/");
+            get
+            {
+                return System.IO.Directory.GetParent(Application.dataPath).FullName.Replace("\\", "/");
+            }
         }
 
         /// <summary>
@@ -120,19 +126,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private static string MAYA_MODULES_PATH {
             get {
-                return System.IO.Path.Combine(GetUserFolder(), MAYA_DOCUMENTS_PATH + "/modules");
+                return System.IO.Path.Combine(UserFolder, MAYA_DOCUMENTS_PATH + "/modules");
             }
         }
 
         private static string MAYA_SCRIPTS_PATH {
             get {
-                return System.IO.Path.Combine(GetUserFolder(), MAYA_DOCUMENTS_PATH + "/scripts");
+                return System.IO.Path.Combine(UserFolder, MAYA_DOCUMENTS_PATH + "/scripts");
             }
         }
 
         // Use string to define escaped quote
         // Windows needs the backslash
-        protected static string ESCAPED_QUOTE {
+        protected static string EscapedQuote {
             get {
                 switch (Application.platform) {
                 case RuntimePlatform.WindowsEditor:
@@ -145,24 +151,28 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        protected string MAYA_CONFIG_COMMAND { get {
+        protected string MayaConfigCommand { get {
                 return string.Format("unityConfigure {0}{1}{0} {0}{2}{0} {0}{3}{0} {4} {5};",
-                    ESCAPED_QUOTE, GetProjectPath(), GetExportSettingsPath(), GetImportSettingsPath(), (IsHeadlessInstall()), (HideSendToUnityMenu));
+                    EscapedQuote, ProjectPath, ExportSettingsPath, ImportSettingsPath, (IsHeadlessInstall()), (HideSendToUnityMenu));
             }}
 
         private string MAYA_CLOSE_COMMAND { get {
                 return string.Format("scriptJob -idleEvent quit;");
         }}
 
-        protected static string GetUserFolder()
+        protected static string UserFolder
         {
-            switch (Application.platform) {
-            case RuntimePlatform.WindowsEditor:
-                return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
-            case RuntimePlatform.OSXEditor:
-                return System.Environment.GetEnvironmentVariable("HOME");
-            default:
-                throw new NotImplementedException ();
+            get
+            {
+                switch (Application.platform)
+                {
+                    case RuntimePlatform.WindowsEditor:
+                        return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+                    case RuntimePlatform.OSXEditor:
+                        return System.Environment.GetEnvironmentVariable("HOME");
+                    default:
+                        throw new NotImplementedException();
+                }
             }
         }
 
@@ -178,14 +188,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        public string GetModuleTemplatePath()
+        public string ModuleTemplatePath
         {
-            return System.IO.Path.Combine(INTEGRATION_FOLDER_PATH, MODULE_TEMPLATE_PATH);
+            get
+            {
+                return System.IO.Path.Combine(IntegrationFolderPath, MODULE_TEMPLATE_PATH);
+            }
         }
 
-        public static string GetPackagePath()
+        public static string PackagePath
         {
-            return System.IO.Path.Combine(Application.dataPath, PACKAGE_NAME);
+            get
+            {
+                return System.IO.Path.Combine(Application.dataPath, PACKAGE_NAME);
+            }
         }
 
         /// <summary>
@@ -193,9 +209,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Returns a relative path with forward slashes as path separators.
         /// </summary>
         /// <returns>The export settings path.</returns>
-        public string GetExportSettingsPath()
+        public string ExportSettingsPath
         {
-            return INTEGRATION_FOLDER_PATH + FBX_EXPORT_SETTINGS_PATH;
+            get
+            {
+                return IntegrationFolderPath + FBX_EXPORT_SETTINGS_PATH;
+            }
         }
 
         /// <summary>
@@ -203,8 +222,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Returns a relative path with forward slashes as path separators.
         /// </summary>
         /// <returns>The import settings path.</returns>
-        public string GetImportSettingsPath(){
-            return INTEGRATION_FOLDER_PATH + FBX_IMPORT_SETTINGS_PATH;
+        public string ImportSettingsPath{
+            get
+            {
+                return IntegrationFolderPath + FBX_IMPORT_SETTINGS_PATH;
+            }
         }
 
         /// <summary>
@@ -216,9 +238,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return MAYA_SCRIPTS_PATH + "/" + MAYA_USER_STARTUP_SCRIPT;
         }
 
-        public static string GetPackageVersion()
+        public static string PackageVersion
         {
-            return ModelExporter.GetVersionFromReadme();
+            get
+            {
+                return ModelExporter.GetVersionFromReadme();
+            }
         }
 
         private static List<string> ParseTemplateFile(string FileName, Dictionary<string,string> Tokens )
@@ -337,11 +362,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
                     myProcess.StartInfo.CreateNoWindow = false;
-                    myProcess.StartInfo.Arguments = string.Format(commandString, MAYA_CONFIG_COMMAND);
+                    myProcess.StartInfo.Arguments = string.Format(commandString, MayaConfigCommand);
                 }
                 else
                 {
-                    myProcess.StartInfo.Arguments = string.Format(commandString, MAYA_CONFIG_COMMAND + MAYA_CLOSE_COMMAND);
+                    myProcess.StartInfo.Arguments = string.Format(commandString, MayaConfigCommand + MAYA_CLOSE_COMMAND);
                 }
 
                 myProcess.EnableRaisingEvents = true;
@@ -384,7 +409,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // - done.
             // But it's complicated because we can't trust any files actually exist.
 
-            string moduleTemplatePath = GetModuleTemplatePath();
+            string moduleTemplatePath = ModuleTemplatePath;
             if (!System.IO.File.Exists(moduleTemplatePath))
             {
                 Debug.LogError(string.Format("Missing Maya module file at: \"{0}\"", moduleTemplatePath));
@@ -432,9 +457,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 Dictionary<string,string> Tokens = new Dictionary<string,string>()
                 {
-                    {VERSION_TAG, GetPackageVersion() },
-                    {PROJECT_TAG, GetProjectPath() },
-                    {INTEGRATION_TAG, INTEGRATION_FOLDER_PATH },
+                    {VERSION_TAG, PackageVersion },
+                    {PROJECT_TAG, ProjectPath },
+                    {INTEGRATION_TAG, IntegrationFolderPath },
                  };
 
                 // parse template, replace "{UnityProject}" with project path
@@ -502,13 +527,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        public override int InstallIntegration (string mayaExe)
+        public override int InstallIntegration (string exe)
         {
             if (!InstallMaya(verbose: true)) {
                 return -1;
             }
 
-            return ConfigureMaya (mayaExe);
+            return ConfigureMaya (exe);
         }
 
         /// <summary>
@@ -559,7 +584,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>The absolute path.</returns>
         /// <param name="relPath">Relative path.</param>
         public static string GetAbsPath(string relPath){
-            return MayaIntegration.INTEGRATION_FOLDER_PATH + "/" + relPath;
+            return MayaIntegration.IntegrationFolderPath + "/" + relPath;
         }
 
         private static string GetInstallScript(){
@@ -567,7 +592,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 {PluginSourceTag, GetAbsPath(PluginPath) },
                 {PluginNameTag,  PluginName },
-                {ProjectTag, GetProjectPath() },
+                {ProjectTag, ProjectPath },
                 {ExportSettingsTag, GetAbsPath(ExportSettingsFile) },
                 {ImportSettingsTag, GetAbsPath(ImportSettingsFile) }
             };
@@ -642,8 +667,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return ExitCode;
         }
 
-        public override int InstallIntegration(string maxExe){
-            return MaxIntegration.InstallMaxPlugin (maxExe);
+        public override int InstallIntegration(string exe){
+            return MaxIntegration.InstallMaxPlugin (exe);
         }
 
         /// <summary>
@@ -661,7 +686,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
-    class IntegrationsUI
+    static class IntegrationsUI
     {
         /// <summary>
         /// The path of the DCC executable.
@@ -734,7 +759,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private static bool GetIntegrationFolder(DCCIntegration dcc){
             // decompress zip file if it exists, otherwise try using default location
-            var zipPath = dcc.GetIntegrationZipFullPath();
+            var zipPath = dcc.IntegrationZipFullPath;
             if (System.IO.File.Exists (zipPath)) {
                 return DecompressIntegrationZipFile (zipPath, dcc);
             }

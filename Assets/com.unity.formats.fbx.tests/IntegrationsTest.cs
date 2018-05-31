@@ -41,11 +41,11 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
                 Assert.IsTrue (MayaIntegration.IsHeadlessInstall () == 0);
 
-                LogNonEmptyString ("module template path", mayaIntegration.GetModuleTemplatePath ());
-                LogNonEmptyString ("package path", MayaIntegration.GetPackagePath ());
+                LogNonEmptyString ("module template path", mayaIntegration.ModuleTemplatePath);
+                LogNonEmptyString ("package path", MayaIntegration.PackagePath);
 
-                LogNonEmptyString ("export settings path", mayaIntegration.GetExportSettingsPath ());
-                LogNonEmptyString ("package version", MayaIntegration.GetPackageVersion ());
+                LogNonEmptyString ("export settings path", mayaIntegration.ExportSettingsPath);
+                LogNonEmptyString ("package version", MayaIntegration.PackageVersion);
 
                 // check if folder is unzipped at invalid paths
                 Assert.IsFalse (mayaIntegration.FolderAlreadyUnzippedAtPath (null));
@@ -53,8 +53,8 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 Assert.IsFalse (mayaIntegration.FolderAlreadyUnzippedAtPath ("X:/a/b/a/c"));
 
                 // test that the paths don't contain backslashes
-                Assert.IsFalse (MayaIntegration.GetProjectPath ().Contains ("\\"));
-                Assert.IsFalse (mayaIntegration.GetExportSettingsPath ().Contains ("\\"));
+                Assert.IsFalse (MayaIntegration.ProjectPath.Contains ("\\"));
+                Assert.IsFalse (mayaIntegration.ExportSettingsPath.Contains ("\\"));
             }
 
             // test Maya LT integration
