@@ -2,7 +2,7 @@
 
 RELEASE NOTES
 
-**Version**: 1.6.0-preview
+## [1.6.0] - 2018-05-29
 
 NEW FEATURES
 
@@ -12,7 +12,7 @@ FIXES
 
 * Fixed skinned mesh bone update
 
-**Version**: 1.5.0-preview
+## [1.5.0]
 
 NEW FEATURES
 
@@ -25,7 +25,7 @@ FIXES:
 
 * DCC integration plug-ins now work with packman
 
-**Version**: 1.4.0-preview
+## [1.4.0]
 
 NEW FEATURES
 
@@ -38,7 +38,7 @@ FIXES:
 * Last frame was sometimes not exported
 * FBX export dialog hard to read in Unity Pro's dark theme
 
-**Version**: sprint55
+## [sprint55]
 
 NEW FEATURES
 
@@ -56,13 +56,13 @@ KNOWN ISSUES
 When converting an existing FBX file, the fbx filename and fbx export options are ignored (but not greyed out).
 When converting an existing prefab, the prefab filename is ignored (but not greyed out)
 
-**Version**: 1.3.0f1
+## [1.3.0f1]
 
 NEW FEATURES
 
 * Updated documentation
 
-**Version**: 1.3.0b3
+## [1.3.0b3]
 
 NEW FEATURES
 
@@ -74,7 +74,7 @@ FIXES
 * FbxExporter: fix so "Compatible Naming" doesn't modify scene on export
 * ConvertToPrefab: warn that hierarchy might change and animations could break when "Compatible Naming" is enabled
 
-**Version**: 1.3.0b2
+## [1.3.0b2]
 
 NEW FEATURES
 
@@ -90,7 +90,7 @@ KNOWN ISSUES
 
 * Cannot export animation only from 3ds Max
 
-**Version**: 1.3.0b1
+## [1.3.0b1]
 
 FIXES
 
@@ -106,7 +106,7 @@ KNOWN ISSUES
 * 3DIntegration: fbx containing rig must have file units in cm in order for animation exported from Unity to be properly applied
 * ConvertToPrefab: converting model instance that has been modified in the scene won't reexport fbx
 
-**Version**: sprint50
+## [sprint50]
 
 NEW FEATURES
 
@@ -138,7 +138,7 @@ FIXES
 * ExportModelUI: restore "Include" setting from "Animation Only" after exporting timeline clip
 * FbxExporter: if export unrendered turned off, don't export meshes that have disabled mesh renderers
 
-**Version**: sprint49
+## [sprint49]
 
 NEW FEATURES
 
@@ -165,7 +165,7 @@ KNOWN ISSUES
 
 * Requires Unity 2018.1.0
 
-**Version**: sprint48
+## [sprint48]
 
 NEW FEATURES
 
@@ -181,7 +181,7 @@ FIXES
 * FbxExporter: fix so animating spot angle in Unity animates cone angle in Maya (not penumbra)
 * MayaIntegration: fix so export set names don't contain invalid chars from filenames (e.g. spaces)
 
-**Version**: sprint47
+## [sprint47]
 
 NEW FEATURES
 
@@ -207,7 +207,7 @@ FIXES
 If the object being exported in the scene is an fbx model instance, then create the prefab with the FbxPrefab component,
 and attach it to the existing fbx without re-exporting the fbx.
 
-**Version**: sprint46
+## [sprint46]
 
 NEW FEATURES
 
@@ -241,7 +241,7 @@ FIXES
 * NameRemapping: fix IndexOutOfRangeException when imported object count doesn't match original object count
 * PrefabAutoUpdater: fix so unit tests don't fail if auto update is turned off
 
-**Version**: sprint45
+## [sprint45]
 
 NEW FEATURES
 
@@ -254,7 +254,7 @@ Use GameObject menu or context menu to select "Export Animation Only". Animation
 Animation and Animator components. All animation clips will be saved to the same fbx.
 The first clip exported will be the default clip from the root Animator or Animation component.
 
-**Version**: 1.3.0a1
+## [1.3.0a1]
 
 FIXES
 * FbxExporter: fixed so last keyframe is exported
@@ -262,7 +262,7 @@ FIXES
 
 Error caused by UnityFbxSdk.dll being set as compatible with any platform instead of editor only.
 
-**Version**: sprint43
+## [sprint43]
 
 NEW FEATURES
 * FbxExporter: Added support for exporting Blendshapes
@@ -271,7 +271,7 @@ FIXES
 * FbxExporter: Added unroll filter to support continuous rotations
 * FbxExporter: Fixed issue where exported animations always operated at 30 FPS, regardless of what they were originally
 
-**Version**: sprint42
+## [sprint42]
 
 NEW FEATURES
 * FbxExporter: Added support for exporting SkinnedMeshes with legacy animation
@@ -288,7 +288,7 @@ KNOWN ISSUES
 * Animated continuous rotations are not maintained
 * Animated rotations with Euler Angles (Quaternion) or Quaternion interpolation are not converted to the correct Euler equivalent.
 
-**Version**: sprint41
+## [sprint41]
 
 NEW FEATURES
 * Added support for exporting lights
@@ -305,7 +305,7 @@ FIXES
 * FbxPrefabAutoUpdater: fixed so RectTransforms update correctly in Unity 2017.3
 * ConvertToPrefab: fixed null reference exception when converting missing components
 
-**Version**: 1.2.0b1
+## [1.2.0b1]
 
 NEW FEATURES
 
@@ -327,7 +327,7 @@ A "Run Component Updater" button will appear in the FBX export settings inspecto
 Clicking the button will repair all prefabs and scene files serialized as text.
 To repair binary files, first convert asset serialization mode to "Force Text" in Editor Settings (Edit->Project Settings->Editor).
 
-**Version**: sprint36
+## [sprint36]
 
 NEW FEATURES
 *FbxExporter: Don't export visibility
@@ -342,7 +342,7 @@ FIXES
 *FbxExportSettings: Fix vendor location environmnet variable pointing to empty folder
 *MaxIntegration: Reset export path on new scene
 
-**Version**: sprint35
+## [sprint35]
 
 NEW FEATURES
 
@@ -386,7 +386,7 @@ FIXES
 * Export Settings: Fix empty dropdown selection when uninstalling 3D applications
 * Convert to Linked Prefab: fix prefab instance name differing from prefab file name when filename is incremented
 
-**Version**: sprint34
+## [sprint34]
 
 NEW FEATURES
 
@@ -414,7 +414,7 @@ FIXES
 * Fbx Prefab: Add tooltip to "Source Fbx Asset" field
 * Export Settings: Search for 3D applicaitons in multiple vendor locations (e.g. C:/ and D:/ drive)
 
-**Version**: 1.1.0b1
+## [1.1.0b1]
 
 NEW FEATURES
 
@@ -429,7 +429,7 @@ FIXES
 * Exporter: Fix FBX exported from Unity causing crash when imported in 3ds Max.
 * Export Settings: Fix hang when adding multiple installations of the same version of a 3D application to the dropdown
 
-**Version**: sprint32
+## [sprint32]
 
 NEW FEATURES
 
@@ -446,7 +446,7 @@ FIXES
                             e.g. a 3 meter cube in Max will export as a 300 cm cube in Unity
 
 
-**Version**: sprint31
+## [sprint31]
 
 NEW FEATURES
 
@@ -460,7 +460,7 @@ FIXES
 *Unity 3ds Max integration: Fix model rotated by 90 degrees along x when importing into Unity
 
 
-**Version**: sprint30
+## [sprint30]
 
 NEW FEATURES
 
@@ -478,7 +478,7 @@ FIXES
 * Convert to Prefab: Fix so convert to prefab doesn't lose Object references in scripts
 * Export Settings: Fix so MayaLT cannot be selected using "Browse" on Mac
 
-**Version**: 1.0.0b1
+## [1.0.0b1]
 
 NEW FEATURES
 
@@ -494,7 +494,7 @@ FIXES
 * Convert to Prefab: fix particle system component causing convert to fail 
 * Fbx Prefab: Properly handle updating Linked Prefab Instances that get nested inside other Prefabs.
 
-**Version**: sprint26
+## [sprint26]
 
 NEW FEATURES
 
@@ -504,7 +504,7 @@ FIXES
 
 * Fbx Prefab: Properly handle updating Linked Prefab Instances that get nested inside other Prefabs.
 
-**Version**: 0.0.14a
+## [0.0.14a]
 
 NEW FEATURES
 
@@ -539,7 +539,7 @@ FIXES
 * Convert to Prefab: Rename "Convert to Prefab" to "Convert To Linked Prefab Instance"
 * Fbx Export: fix memory leak with SkinnedMeshRenderer creating a temporary mesh and not destroying it.
 
-**Version**: 0.0.13a
+## [0.0.13a]
 
 FIXES
 
@@ -551,7 +551,7 @@ FIXES
 * Maya Integration Plugin : add Unity icon to Unity menu item
 * Convert to Prefab : Add more unit tests
 
-**Version**: 0.0.12a
+## [0.0.12a]
 
 NEW FEATURES
 
@@ -605,7 +605,7 @@ FIXES
 * Maya Integration: remove version number from maya integration folder
 * Maya Integration: module file installed into Maya version independent location
 
-**Version**: 0.0.11a
+## [0.0.11a]
 
 NEW FEATURES
 
@@ -632,7 +632,7 @@ FIXES
 * Export Settings: fix export path doesn't refresh if selectable text box selected
 * Convert to Prefab: fix model added to wrong scene if multiple scenes open
 
-**Version**: 0.0.10a
+## [0.0.10a]
 
 NEW FEATURES
 
@@ -666,7 +666,7 @@ FIXES
 * FbxPrefab: Don't allow settings to be changed on prefab instance
 * Maya Integration: Fix so review brings Unity window to front on Windows if already open
 
-**Version**: 0.0.9a
+## [0.0.9a]
 
 * Auto updater for instanced prefabs
 
@@ -682,7 +682,7 @@ While Unity has the "FbxExporters_TurnTableReview" scene active it will automati
 
 * FBXSDK C# unitypackage with docs ready for release
 
-**Version**: 0.0.8a
+## [0.0.8a]
 
 NEW FEATURES
 
@@ -706,7 +706,7 @@ FIXES
 * Maya Integration: fix so destructors are always called
 * Export Unit tests: fix so ConvertToValidFilename tests pass on Mac
   
-**Version**: 0.0.7a 
+## [0.0.7a]
 
 NEW FEATURES
 
@@ -743,7 +743,7 @@ FIXES
 * Convert to Model: Don't reference embedded materials of original model in new model.
 * Convert to Model: If existing filename ends with a number, increment it instead of appending 1 (i.e. Sphere_1 becomes Sphere_2 instead of Sphere_1 1)
 
-**Version**: 0.0.6a 
+## [0.0.6a]
 
 NEW FEATURES
 
@@ -758,7 +758,7 @@ Headless install option also available through command line.
 The plugin creates a Unity menu item with 3 options in the drop down menu: Configure, Review, and Publish.
 The menu options do not yet have any functionality.
 
-**Version**: 0.0.5a 
+## [0.0.5a]
 
 NEW FEATURES
 
