@@ -2411,7 +2411,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             RotationCurve rotCurve;
             if (!rotations.TryGetValue (uniGO, out rotCurve)) {
-                rotCurve = new T { sampleRate = frameRate };
+                rotCurve = new T { SampleRate = frameRate };
                 rotations.Add (uniGO, rotCurve);
             }
             return rotCurve;
