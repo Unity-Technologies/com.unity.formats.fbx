@@ -47,7 +47,7 @@ public class FbxLayerElementArrayTemplateFbxVector4 : FbxLayerElementArray {
 
    public FbxVector4 GetAt(int pIndex) { 
       if (pIndex < 0 || pIndex >= GetCount()) { 
-        throw new System.IndexOutOfRangeException();
+        throw new System.ArgumentOutOfRangeException("pIndex");
       }
       return GetAtUnchecked(pIndex);
     }

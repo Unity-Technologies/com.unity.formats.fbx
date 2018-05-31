@@ -424,12 +424,12 @@ public class FbxProperty : global::System.IDisposable {
     return GetName();
   } 
   public FbxObject FindSrcObject(string pName, int pStartIndex = 0) {
-    if (pName == null) { throw new System.NullReferenceException(); }
+    if (pName == null) { throw new System.ArgumentNullException("pName"); }
     return FindSrcObjectInternal(pName, pStartIndex);
   }
 
   public FbxObject FindDstObject(string pName, int pStartIndex = 0) {
-    if (pName == null) { throw new System.NullReferenceException(); }
+    if (pName == null) { throw new System.ArgumentNullException("pName"); }
     return FindDstObjectInternal(pName, pStartIndex);
   }
 

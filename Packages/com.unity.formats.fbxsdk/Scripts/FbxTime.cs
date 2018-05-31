@@ -222,10 +222,10 @@ public class FbxTime : global::System.IDisposable {
     return ret;
   }
 
-  public override bool Equals(object other) {
-    if (object.ReferenceEquals(other, null)) { return false; }
-    if (! (other is FbxTime)) { return false; }
-    return CompareTo((FbxTime)other) == 0;
+  public override bool Equals(object obj) {
+    if (object.ReferenceEquals(obj, null)) { return false; }
+    if (! (obj is FbxTime)) { return false; }
+    return CompareTo((FbxTime)obj) == 0;
   }
   public int CompareTo(object other) {
     if (object.ReferenceEquals(other, null)) { return 1; }

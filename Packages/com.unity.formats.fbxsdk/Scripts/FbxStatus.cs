@@ -115,10 +115,10 @@ public class FbxStatus : global::System.IDisposable {
   }
 
   public override int GetHashCode() { return (int)GetCode(); }
-  public static bool operator == (EStatusCode a, FbxStatus b) { return a == b.GetCode(); }
-  public static bool operator != (EStatusCode a, FbxStatus b) { return a != b.GetCode(); }
-  public static bool operator == (FbxStatus a, EStatusCode b) { return a.GetCode() == b; }
-  public static bool operator != (FbxStatus a, EStatusCode b) { return a.GetCode() != b; }
+  public static bool operator == (EStatusCode a, FbxStatus b) { return (b != null ? a == b.GetCode() : false); }
+  public static bool operator != (EStatusCode a, FbxStatus b) { return (b != null ? a != b.GetCode() : false); }
+  public static bool operator == (FbxStatus a, EStatusCode b) { return (a != null ? a.GetCode() == b : false); }
+  public static bool operator != (FbxStatus a, EStatusCode b) { return (a != null ? a.GetCode() != b : false); }
 
   public override string ToString() {
     return GetCode().ToString() + ": " + GetErrorString();

@@ -1,4 +1,6 @@
 {
-  "dependencies": {
-  }
+    "dependencies": {
+        "com.unity.package-validation-suite": "0.3.0-preview.8"
+    },
+	"registry": "https://staging-packages.unity.com"
 }

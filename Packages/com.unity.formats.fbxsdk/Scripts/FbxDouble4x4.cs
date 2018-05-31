@@ -122,14 +122,14 @@ public class FbxDouble4x4 : global::System.IDisposable {
   public FbxDouble4 this[int index] {
     get {
       if (index < 0 || index >= 4) {
-        throw new System.IndexOutOfRangeException();
+        throw new System.ArgumentOutOfRangeException("index");
       } else {
         return this._get(index);
       }
     }
     set {
       if (index < 0 || index >= 4) {
-        throw new System.IndexOutOfRangeException();
+        throw new System.ArgumentOutOfRangeException("index");
       } else {
         this._set(index, value);
       }
