@@ -146,7 +146,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 case RuntimePlatform.OSXEditor:
                     return "\"";
                 default:
-                    throw new NotImplementedException ();
+                    throw new NotSupportedException ();
                 }
             }
         }
@@ -171,7 +171,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     case RuntimePlatform.OSXEditor:
                         return System.Environment.GetEnvironmentVariable("HOME");
                     default:
-                        throw new NotImplementedException();
+                        throw new NotSupportedException();
                 }
             }
         }
@@ -184,7 +184,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public static int HideSendToUnityMenu
         {
             get{
-                return ExportSettings.instance.HideSendToUnityMenu?1:0;
+                return ExportSettings.instance.HideSendToUnityMenuProperty?1:0;
             }
         }
 
@@ -358,7 +358,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     throw new NotImplementedException ();
                 }
 
-                if (ExportSettings.instance.launchAfterInstallation)
+                if (ExportSettings.instance.LaunchAfterInstallation)
                 {
                     myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
                     myProcess.StartInfo.CreateNoWindow = false;
@@ -372,7 +372,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 myProcess.EnableRaisingEvents = true;
                 myProcess.Start();
 
-                if (!ExportSettings.instance.launchAfterInstallation)
+                if (!ExportSettings.instance.LaunchAfterInstallation)
                 {
                     myProcess.WaitForExit();
                     ExitCode = myProcess.ExitCode;
@@ -637,7 +637,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 myProcess.WaitForExit();
                 ExitCode = myProcess.ExitCode;
 
-                if (ExportSettings.instance.launchAfterInstallation)
+                if (ExportSettings.instance.LaunchAfterInstallation)
                 {
                     LaunchDCCApplication(maxExe);
                 }
@@ -713,7 +713,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 title = string.Format("Failed to install {0} Integration.", dcc);
                 message = string.Format("Failed to configure {0}, please check logs (exitcode={1}).", dcc, exitCode);
             } else {
-                if (ExportSettings.instance.launchAfterInstallation)
+                if (ExportSettings.instance.LaunchAfterInstallation)
                 {
                     customMessage = "Installing Unity menu in {0}, application will open once installation is complete";
                 }

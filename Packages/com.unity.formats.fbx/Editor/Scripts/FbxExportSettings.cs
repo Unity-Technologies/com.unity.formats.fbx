@@ -47,15 +47,15 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             GUILayout.BeginVertical();
-            exportSettings.autoUpdaterEnabled = EditorGUILayout.Toggle(
+            exportSettings.AutoUpdaterEnabled = EditorGUILayout.Toggle(
                 new GUIContent("Auto-Updater:",
                     "Automatically updates prefabs with new fbx data that was imported."),
-                exportSettings.autoUpdaterEnabled
+                exportSettings.AutoUpdaterEnabled
             );
 
-            exportSettings.showConvertToPrefabDialog = EditorGUILayout.Toggle(
+            exportSettings.ShowConvertToPrefabDialog = EditorGUILayout.Toggle(
                 new GUIContent("Show Convert UI:", "Enable Convert dialog when converting to a Linked Prefab"),
-                exportSettings.showConvertToPrefabDialog
+                exportSettings.ShowConvertToPrefabDialog
             );
             EditorGUILayout.Space();
             EditorGUILayout.Space();
@@ -109,16 +109,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             EditorGUILayout.Space();
 
-            exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
+            exportSettings.LaunchAfterInstallation = EditorGUILayout.Toggle(
                 new GUIContent("Keep Open:",
                     "Keep the selected 3D application open after Unity integration install has completed."),
-                exportSettings.launchAfterInstallation
+                exportSettings.LaunchAfterInstallation
             );
 
-            exportSettings.HideSendToUnityMenu = EditorGUILayout.Toggle(
+            exportSettings.HideSendToUnityMenuProperty = EditorGUILayout.Toggle(
                 new GUIContent("Hide Native Menu:",
                     "Replace Maya's native 'Send to Unity' menu with the Unity Integration's menu"),
-                exportSettings.HideSendToUnityMenu
+                exportSettings.HideSendToUnityMenuProperty
             );
 
             EditorGUILayout.Space();
@@ -242,7 +242,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         public const string kMayaOptionName = "Maya ";
         public const string kMayaLtOptionName = "Maya LT";
 
-        public bool Verbose = false;
+        // NOTE: using "Verbose" and "VerboseProperty" to handle backwards compatibility with older FbxExportSettings.asset files.
+        //       The variable name is used when serializing, so changing the variable name would prevent older FbxExportSettings.asset files
+        //       from loading this property.
+        [SerializeField]
+        private bool Verbose = false;
+        public bool VerboseProperty
+        {
+            get { return Verbose; }
+            set { Verbose = value; }
+        }
 
         private static string DefaultIntegrationSavePath {
             get{
@@ -359,7 +368,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// If there is valid alternative vendor locations, do not use defaults
         /// always use MAYA_LOCATION when available
         /// </summary>
-        public static string[] DCCVendorLocations
+        public static List<string> DCCVendorLocations
         {
             get
             {
@@ -377,16 +386,50 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     result.Add(additionalLocation);
                 }
 
-                return result.ToArray<string>();
+                return result.ToList<string>();
             }
         }
 
         // Note: default values are set in LoadDefaults().
-        public bool autoUpdaterEnabled = true;
-        public bool launchAfterInstallation = true;
-        public bool HideSendToUnityMenu = true;
-        public bool BakeAnimation = true;
-        public bool showConvertToPrefabDialog = true;
+        [SerializeField]
+        private bool autoUpdaterEnabled = true;
+        public bool AutoUpdaterEnabled
+        {
+            get { return autoUpdaterEnabled; }
+            set { autoUpdaterEnabled = value; }
+        }
+
+        [SerializeField]
+        private bool launchAfterInstallation = true;
+        public bool LaunchAfterInstallation
+        {
+            get { return launchAfterInstallation; }
+            set { launchAfterInstallation = value; }
+        }
+
+        [SerializeField]
+        private bool HideSendToUnityMenu = true;
+        public bool HideSendToUnityMenuProperty
+        {
+            get { return HideSendToUnityMenu; }
+            set { HideSendToUnityMenu = value; }
+        }
+
+        [SerializeField]
+        private bool BakeAnimation = true;
+        public bool BakeAnimationProperty
+        {
+            get { return BakeAnimation; }
+            set { BakeAnimation = value; }
+        }
+
+        [SerializeField]
+        private bool showConvertToPrefabDialog = true;
+        public bool ShowConvertToPrefabDialog
+        {
+            get { return showConvertToPrefabDialog; }
+            set { showConvertToPrefabDialog = value; }
+        }
 
         public string integrationSavePath;
 
@@ -449,16 +492,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         protected override void LoadDefaults()
         {
-            autoUpdaterEnabled = true;
-            showConvertToPrefabDialog = true;
-            launchAfterInstallation = true;
-            HideSendToUnityMenu = true;
+            AutoUpdaterEnabled = true;
+            ShowConvertToPrefabDialog = true;
+            LaunchAfterInstallation = true;
+            HideSendToUnityMenuProperty = true;
             prefabSavePaths = new List<string>(){ kDefaultSavePath };
             fbxSavePaths = new List<string> (){ kDefaultSavePath };
             integrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
-            BakeAnimation = true;
+            BakeAnimationProperty = true;
             ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             exportModelSettingsSerialize = ExportModelSettings.info;
             ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
@@ -669,7 +712,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             var dccOptionPaths = instance.dccOptionPaths;
 
             // find dcc installation from vendor locations
-            for (int i = 0; i < DCCVendorLocations.Length; i++)
+            for (int i = 0; i < DCCVendorLocations.Count; i++)
             {
                 if (!Directory.Exists(DCCVendorLocations[i]))
                 {
@@ -729,8 +772,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         {
             get
             {
-                string[] locations = DCCVendorLocations;
-                for (int i = 0; i < locations.Length; i++)
+                List<string> locations = DCCVendorLocations;
+                for (int i = 0; i < locations.Count; i++)
                 {
                     //Look through the list of locations we have and take the first valid one
                     if (Directory.Exists(locations[i]))

@@ -47,7 +47,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         const string MenuItemName = "GameObject/Update from FBX";
         public static bool runningUnitTest = false;
 
-        public static bool Verbose { get { return ExportSettings.instance.Verbose; } }
+        public static bool Verbose { get { return ExportSettings.instance.VerboseProperty; } }
 
         public static string FindFbxPrefabAssetPath()
         {
@@ -130,7 +130,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
         {
             // Do not start if Auto Updater is disabled in FBX Exporter Settings
-            if (!UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.autoUpdaterEnabled)
+            if (!UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.AutoUpdaterEnabled)
             {
                 return;
             }
@@ -310,7 +310,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // renamed nodes (or auto-update if there's nothing to rename).
                 var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabComponent);
 
-                if (UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.autoUpdaterEnabled || runningUnitTest)
+                if (UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.AutoUpdaterEnabled || runningUnitTest)
                 {
                     fbxPrefabUtility.SyncPrefab();
                 }

@@ -2005,7 +2005,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // TODO: we'll resample the curve so we don't have to 
                 // configure tangents
-                if (ModelExporter.ExportSettings.BakeAnimation) {
+                if (ModelExporter.ExportSettings.BakeAnimationProperty) {
                     ExportAnimationSamples (uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
                 } else {
                     ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper);
@@ -4035,7 +4035,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
         }
 
-        internal bool Verbose { get { return ExportSettings.instance.Verbose; } }
+        internal bool Verbose { get { return ExportSettings.instance.VerboseProperty; } }
 
         /// <summary>
         /// manage the selection of a filename
