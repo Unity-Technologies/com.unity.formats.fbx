@@ -1,6 +1,6 @@
 # About the FBX SDK C# Bindings package 
 
-__Version__: 1.6.0-preview
+__Version__: 1.7.0-preview
 
 The FBX SDK C# Bindings provide access from Unity C# scripts to a subset of the Autodesk FBX SDK, version 2018.1.
 
@@ -30,18 +30,19 @@ The FBX Exporter package contains:
 
 There is no API documentation in the preview package. Refer to the <a href="http://help.autodesk.com/view/FBX/2018/ENU/">Autodesk FBX SDK API documentation</a>.
 
-The bindings are in the `Unity.FbxSdk` namespace:
+The bindings are in the `Autodesk.Fbx` namespace:
 
 ```
-using UnityEngine.Formats.FbxSdk;
+using Autodesk.Fbx;
+using UnityEditor;
 using UnityEngine;
 
 public class HelloFbx {
-    [MenuItem("Fbx/Hello")]
-    public static void Hello() {
-      using(var manager = FbxManager.Create()) {
-        Debug.LogFormat("FBX SDK is version {0}, FbxManager.GetVersion());
-      }
+  [MenuItem("Fbx/Hello")]
+  public static void Hello() {
+    using(var manager = FbxManager.Create()) {
+      Debug.LogFormat("FBX SDK is version {0}", FbxManager.GetVersion());
     }
+  }
 }
 ```
