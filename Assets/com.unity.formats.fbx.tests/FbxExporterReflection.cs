@@ -8,6 +8,77 @@ using UnityEngine;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
+    public static class Invoke
+    {
+        public static object InvokeMethod<T>(string methodName, object[] argsToPass, T instance = null) where T : class
+        {
+            // Use reflection to call the internal ModelExporter.GetGameObject static method
+            var internalMethod = typeof(T).GetMethod(methodName, (instance == null ? BindingFlags.Static : BindingFlags.Instance) | BindingFlags.NonPublic);
+            return internalMethod.Invoke(instance, argsToPass);
+        }
+
+        // Same as InvokeMethod, but for a specific overload
+        public static object InvokeMethodOverload<T>(string methodName,
+                                                   object[] argsToPass,
+                                                   Type[] overloadArgTypes,
+                                                   T instance = null) where T : class
+        {
+            var internalMethod = typeof(T).GetMethod(methodName,
+                                                    (instance == null ? BindingFlags.Static : BindingFlags.Instance) | BindingFlags.NonPublic,
+                                                    null,
+                                                    overloadArgTypes,
+                                                    null);
+            return internalMethod.Invoke(instance, argsToPass);
+        }
+
+        public static object GetStaticProperty<T>(string propertyName)
+        {
+            // Use reflection to get the internal property
+            var internalProperty = typeof(T).GetProperty(propertyName, BindingFlags.NonPublic | BindingFlags.Static);
+            return internalProperty.GetValue(null, null);
+        }
+
+        public static object GetStaticField<T>(string fieldName)
+        {
+            // Use reflection to get the internal property
+            var internalField = typeof(T).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static);
+            return internalField.GetValue(null);
+        }
+
+        public static object InvokeStaticMethod<T>(string methodName, object[] argsToPass)
+        {
+            var internalMethod = typeof(T).GetMethod(methodName, BindingFlags.Static | BindingFlags.NonPublic);
+            return internalMethod.Invoke(null, argsToPass);
+        }
+
+        public static object InvokeStaticMethod<T>(string methodName, ref object[] argsToPass)
+        {
+            // for functions with "ref" or "out" parameters. argsToPass list will have items replaced with the updated
+            // values.
+            var internalMethod = typeof(T).GetMethod(methodName, BindingFlags.Static | BindingFlags.NonPublic);
+            return internalMethod.Invoke(null, argsToPass);
+        }
+
+        public static object InvokeStaticGenericMethod<T>(string methodName, ref object[] argsToPass, params Type[] typeArgs)
+        {
+            MethodInfo method = typeof(T).GetMethod(methodName, BindingFlags.Static | BindingFlags.NonPublic);
+            MethodInfo generic = method.MakeGenericMethod(typeArgs);
+            return generic.Invoke(null, argsToPass);
+        }
+
+        // Same as InvokeStaticGenericMethod, but for a specific overload
+        public static object InvokeStaticGenericMethodOverload<T>(string methodName,
+                                                                   ref object[] argsToPass,
+                                                                   params Type[] typeArgs)
+        {
+            var internalMethod = typeof(T).GetMethods(BindingFlags.Static | BindingFlags.NonPublic).First(
+                m => m.Name == methodName && m.GetGenericArguments().Length == typeArgs.Length
+                );
+            MethodInfo generic = internalMethod.MakeGenericMethod(typeArgs);
+            return generic.Invoke(null, argsToPass);
+        }
+    }
+
     public static class ModelExporterReflection
     {
         /// <summary>
@@ -22,7 +93,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         {
             get
             {
-                return (Material)GetStaticProperty("DefaultMaterial");
+                return (Material)Invoke.GetStaticProperty<ModelExporter>("DefaultMaterial");
             }
         }
 
@@ -33,14 +104,14 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         {
             get
             {
-                return (float)GetStaticField("UnitScaleFactor");
+                return (float)Invoke.GetStaticField<ModelExporter>("UnitScaleFactor");
             }
         }
         public static Dictionary<System.Type, KeyValuePair<System.Type,ModelExporter.FbxNodeRelationType>> MapsToFbxObject
         {
             get
             {
-                return (Dictionary<System.Type, KeyValuePair<System.Type,ModelExporter.FbxNodeRelationType>>) GetStaticField("MapsToFbxObject");
+                return (Dictionary<System.Type, KeyValuePair<System.Type,ModelExporter.FbxNodeRelationType>>) Invoke.GetStaticField<ModelExporter>("MapsToFbxObject");
             }
         }
 
@@ -49,47 +120,47 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         /////////////
         public static GameObject GetGameObject(UnityEngine.Object obj)
         {
-            return (GameObject) InvokeMethod("GetGameObject", new object[] { obj });
+            return (GameObject) Invoke.InvokeMethod<ModelExporter>("GetGameObject", new object[] { obj });
         }
 
         public static HashSet<GameObject> RemoveRedundantObjects(IEnumerable<UnityEngine.Object> unityExportSet)
         {
-            return (HashSet<GameObject>) InvokeMethod("RemoveRedundantObjects", new object[] {unityExportSet});
+            return (HashSet<GameObject>) Invoke.InvokeMethod<ModelExporter>("RemoveRedundantObjects", new object[] {unityExportSet});
         }
 
         public static string GetVersionFromReadme()
         {
-            return (string)InvokeMethod("GetVersionFromReadme", null);
+            return (string)Invoke.InvokeMethod<ModelExporter>("GetVersionFromReadme", null);
         }
 
         public static string ConvertToValidFilename(string filename)
         {
-            return (string)InvokeMethod("ConvertToValidFilename", new object[] {filename});
+            return (string)Invoke.InvokeMethod<ModelExporter>("ConvertToValidFilename", new object[] {filename});
         }
 
         public static Vector3 FindCenter(IEnumerable<GameObject> gameObjects)
         {
-            return (Vector3)InvokeMethod("FindCenter", new object[] {gameObjects});
+            return (Vector3)Invoke.InvokeMethod<ModelExporter>("FindCenter", new object[] {gameObjects});
         }
 
         public static Vector3 GetRecenteredTranslation(Transform t, Vector3 center)
         {
-            return (Vector3)InvokeMethod("GetRecenteredTranslation", new object[] {t, center});
+            return (Vector3)Invoke.InvokeMethod<ModelExporter>("GetRecenteredTranslation", new object[] {t, center});
         }
 
         public static FbxLayer GetOrCreateLayer(FbxMesh fbxMesh, int layer = 0 /* default layer */)
         {
-            return (FbxLayer)InvokeMethod("GetOrCreateLayer", new object[] {fbxMesh,layer});
+            return (FbxLayer)Invoke.InvokeMethod<ModelExporter>("GetOrCreateLayer", new object[] {fbxMesh,layer});
         }
 
         public static FbxVector4 ConvertToRightHanded(Vector3 leftHandedVector, float unitScale = 1f)
         {
-            return (FbxVector4)InvokeMethod("ConvertToRightHanded", new object[] {leftHandedVector,unitScale});
+            return (FbxVector4)Invoke.InvokeMethod<ModelExporter>("ConvertToRightHanded", new object[] {leftHandedVector,unitScale});
         }
 
         public static bool ExportMaterial(ModelExporter instance, Material unityMaterial, FbxScene fbxScene, FbxNode fbxNode)
         {
-            return (bool)InvokeMethod("ExportMaterial", new object[] {unityMaterial,fbxScene,fbxNode},instance);
+            return (bool)Invoke.InvokeMethod("ExportMaterial", new object[] {unityMaterial,fbxScene,fbxNode},instance);
         }
 
         public static string ExportObjects(string filePath,
@@ -97,22 +168,22 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 IExportOptions exportOptions = null,
                 Dictionary<GameObject, IExportData> exportData = null)
         {
-            return (string)InvokeMethodOverload("ExportObjects",
-                                              new object[] { filePath, objects, exportOptions, exportData },
-                                              new Type[] { typeof(string), typeof(UnityEngine.Object[]), typeof(IExportOptions), typeof(Dictionary<GameObject, IExportData>) });
+            return (string)Invoke.InvokeMethodOverload<ModelExporter>("ExportObjects",
+                                                                      new object[] { filePath, objects, exportOptions, exportData },
+                                                                      new Type[] { typeof(string), typeof(UnityEngine.Object[]), typeof(IExportOptions), typeof(Dictionary<GameObject, IExportData>) });
         }
 
         public static IExportData GetExportData(GameObject rootObject, AnimationClip animationClip, IExportOptions exportOptions = null)
         {
-            return (IExportData)InvokeMethodOverload("GetExportData",
-                                                    new object[] { rootObject, animationClip, exportOptions },
-                                                    new Type[] { typeof(GameObject), typeof(AnimationClip), typeof(IExportOptions) });
+            return (IExportData)Invoke.InvokeMethodOverload<ModelExporter>("GetExportData",
+                                                                            new object[] { rootObject, animationClip, exportOptions },
+                                                                            new Type[] { typeof(GameObject), typeof(AnimationClip), typeof(IExportOptions) });
         }
 
         // Redefinition of the internal delegate. There might be a way to re-use the one in ModelExporter
         public static void RegisterMeshObjectCallback(GetMeshForObject callback)
         {
-            InvokeMethod("RegisterMeshObjectCallback", new object[] {callback});
+            Invoke.InvokeMethod<ModelExporter>("RegisterMeshObjectCallback", new object[] {callback});
         }
 
         public static void RegisterMeshCallback<T>(GetMeshForComponent<T> callback, bool replace = false)
@@ -146,73 +217,34 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
         public static void UnRegisterMeshCallback(GetMeshForObject callback)
         {
-            InvokeMethodOverload("UnRegisterMeshCallback", 
-                                 new object[] {callback},
-                                 new Type[] {typeof(GetMeshForObject)});
+            Invoke.InvokeMethodOverload<ModelExporter>("UnRegisterMeshCallback", 
+                                                         new object[] {callback},
+                                                         new Type[] {typeof(GetMeshForObject)});
         }
 
 
         public static bool ExportTexture(ModelExporter instance, Material unityMaterial, string unityPropName,
                            FbxSurfaceMaterial fbxMaterial, string fbxPropName)
         {
-            return (bool)InvokeMethod("ExportTexture", 
-                                      new object[] {unityMaterial,unityPropName,fbxMaterial,fbxPropName}, 
-                                      instance);
+            return (bool)Invoke.InvokeMethod("ExportTexture", 
+                                              new object[] {unityMaterial,unityPropName,fbxMaterial,fbxPropName}, 
+                                              instance);
         }
 
         public static FbxDouble3 ConvertQuaternionToXYZEuler(Quaternion q)
         {
-            return (FbxDouble3)InvokeMethodOverload("ConvertQuaternionToXYZEuler", 
-                                                    new object[] {q}, 
-                                                    new Type[] {typeof(Quaternion)});
+            return (FbxDouble3)Invoke.InvokeMethodOverload<ModelExporter>("ConvertQuaternionToXYZEuler", 
+                                                                            new object[] {q}, 
+                                                                            new Type[] {typeof(Quaternion)});
         }
 
         public static bool ExportMesh(ModelExporter instance, Mesh mesh, FbxNode fbxNode, Material[] materials = null)
         {
-            return (bool)InvokeMethodOverload("ExportMesh",
-                                              new object[] {mesh, fbxNode, materials},
-                                              new Type[] {typeof(Mesh), typeof(FbxNode), typeof(Material [])},
-                                              instance);
+            return (bool)Invoke.InvokeMethodOverload("ExportMesh",
+                                                      new object[] {mesh, fbxNode, materials},
+                                                      new Type[] {typeof(Mesh), typeof(FbxNode), typeof(Material [])},
+                                                      instance);
   
-        }
-
-        /////////// Helpers ///////////
-        private static object InvokeMethod(string methodName, object[] argsToPass, ModelExporter instance = null)
-        {
-            // Use reflection to call the internal ModelExporter.GetGameObject static method
-            var internalMethod = typeof(ModelExporter).GetMethod(methodName,
-                                                                 (instance == null ? BindingFlags.Static : BindingFlags.Instance) | BindingFlags.NonPublic);
-            return internalMethod.Invoke(instance, argsToPass);
-        }
-
-        // Same as InvokeMethod, but for a specific overload
-        private static object InvokeMethodOverload(string methodName, 
-                                                   object[] argsToPass, 
-                                                   Type[] overloadArgTypes, 
-                                                   ModelExporter instance = null)
-        {
-            var internalMethod = typeof(ModelExporter).GetMethod(methodName,
-                                                                 (instance == null ? BindingFlags.Static : BindingFlags.Instance) | BindingFlags.NonPublic,
-                                                                 null,
-                                                                 overloadArgTypes,
-                                                                 null);
-            return internalMethod.Invoke(instance, argsToPass);
-        }
-
-        private static object GetStaticProperty(string propertyName)
-        {
-            // Use reflection to get the internal property
-            var internalProperty = typeof(ModelExporter).GetProperty(propertyName, 
-                                          BindingFlags.NonPublic | BindingFlags.Static);
-            return internalProperty.GetValue(null,null);
-        }
-
-        private static object GetStaticField(string fieldName)
-        {
-            // Use reflection to get the internal property
-            var internalField = typeof(ModelExporter).GetField(fieldName, 
-                                                               BindingFlags.NonPublic | BindingFlags.Static);
-            return internalField.GetValue(null);
         }
     }
 }

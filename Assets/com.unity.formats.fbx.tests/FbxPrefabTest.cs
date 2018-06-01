@@ -8,10 +8,10 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
     public class FbxPrefabTest : ExporterTestBase
     {
         GameObject m_original; // stored for testing
-        FbxPrefabUtility.FbxRepresentation m_originalRep;
+        FbxRepresentation m_originalRep;
 
         GameObject m_source; // the fbx model
-        FbxPrefabUtility.FbxRepresentation m_originalHistory;
+        FbxRepresentation m_originalHistory;
 
         GameObject m_autoPrefab; // prefab that auto-updates
         GameObject m_manualPrefab; // prefab that doesn't auto-update
@@ -50,20 +50,20 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             }
         }
 
-        static KeyValuePair<string, FbxPrefabUtility.FbxRepresentation> StackItem(
-            string name, FbxPrefabUtility.FbxRepresentation rep)
+        static KeyValuePair<string, FbxRepresentation> StackItem(
+            string name, FbxRepresentation rep)
         {
-            return new KeyValuePair<string, FbxPrefabUtility.FbxRepresentation>(name, rep);
+            return new KeyValuePair<string, FbxRepresentation>(name, rep);
         }
 
         public static void AssertAreIdentical(
-            FbxPrefabUtility.FbxRepresentation a,
-            FbxPrefabUtility.FbxRepresentation b) {
+            FbxRepresentation a,
+            FbxRepresentation b) {
             // A bit of a laborious comparison scheme. This is due to the
             // round-trip through FBX causing tiny errors in the transforms.
-            var astack = new List<KeyValuePair<string, FbxPrefabUtility.FbxRepresentation>> ();
+            var astack = new List<KeyValuePair<string, FbxRepresentation>> ();
             astack.Add(StackItem("(root)", a));
-            var bstack = new List<KeyValuePair<string, FbxPrefabUtility.FbxRepresentation>> ();
+            var bstack = new List<KeyValuePair<string,FbxRepresentation>> ();
             bstack.Add(StackItem("(root)", b));
 
             var aDummy = new GameObject("aDummy").transform;
@@ -137,8 +137,8 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         }
 
         public static void AssertAreDifferent(
-            FbxPrefabUtility.FbxRepresentation a,
-            FbxPrefabUtility.FbxRepresentation b) {
+            FbxRepresentation a,
+            FbxRepresentation b) {
             Assert.AreNotEqual(a.ToJson(), b.ToJson());
         }
 
@@ -182,11 +182,11 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             }
         }
 
-        FbxPrefabUtility.FbxRepresentation Rep(GameObject go) {
-            return new FbxPrefabUtility.FbxRepresentation(go.transform);
+        FbxRepresentation Rep(GameObject go) {
+            return new FbxRepresentation(go.transform);
         }
 
-        FbxPrefabUtility.FbxRepresentation History(GameObject go) {
+        FbxRepresentation History(GameObject go) {
             return new FbxPrefabUtility(go.GetComponent<FbxPrefab>()).FbxHistory;
         }
 
@@ -230,8 +230,8 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             AssertAreIdentical(m_originalHistory, History(m_manualPrefab));
             AssertAreIdentical(m_originalHistory, History(m_autoPrefab));
 
-            FbxPrefabUtility.FbxRepresentation newHierarchy;
-            FbxPrefabUtility.FbxRepresentation newHistory;
+            FbxRepresentation newHierarchy;
+            FbxRepresentation newHistory;
             using(var updateSet = new UpdateListener(m_autoPrefab)) {
                 Debug.Log("Testing auto update");
                 newHierarchy = Rep(ModifySourceFbx());
@@ -496,19 +496,19 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             {
                 // Test Initialize semantics.
                 AClass anItem = null;
-                Assert.That(() => FbxPrefabUtility.Initialize(ref anItem), Throws.Nothing);
+                Assert.That(() => FbxPrefabUtilityReflection.Initialize(ref anItem), Throws.Nothing);
                 Assert.IsNotNull(anItem);
-                Assert.That(() => FbxPrefabUtility.Initialize(ref anItem), Throws.Exception);
+                Assert.That(() => FbxPrefabUtilityReflection.Initialize(ref anItem), Throws.Exception);
             }
 
             {
                 // Test list append helper.
                 List<string> thelist = null;
-                Assert.That(() => FbxPrefabUtility.Append(ref thelist, "hi"), Throws.Nothing);
+                Assert.That(() => FbxPrefabUtilityReflection.Append(ref thelist, "hi"), Throws.Nothing);
                 Assert.IsNotNull(thelist);
                 Assert.AreEqual(1, thelist.Count);
                 Assert.AreEqual("hi", thelist[0]);
-                Assert.That(() => FbxPrefabUtility.Append(ref thelist, "bye"), Throws.Nothing);
+                Assert.That(() => FbxPrefabUtilityReflection.Append(ref thelist, "bye"), Throws.Nothing);
                 Assert.IsNotNull(thelist);
                 Assert.AreEqual(2, thelist.Count);
                 Assert.AreEqual("hi", thelist[0]);
@@ -523,18 +523,18 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 AClass A = new AClass();
                 AClass B = new AClass();
 
-                Assert.That(() => FbxPrefabUtility.Add(ref thedict, "a", A), Throws.Nothing);
+                Assert.That(() => FbxPrefabUtilityReflection.Add(ref thedict, "a", A), Throws.Nothing);
                 expected = new Dictionary<string, AClass>();
                 expected["a"] = A;
                 Assert.IsNotNull(thedict);
                 Assert.AreEqual(expected, thedict);
 
-                Assert.That(() => FbxPrefabUtility.Add(ref thedict, "b", B), Throws.Nothing);
+                Assert.That(() => FbxPrefabUtilityReflection.Add(ref thedict, "b", B), Throws.Nothing);
                 expected["b"] = B;
                 Assert.IsNotNull(thedict);
                 Assert.AreEqual(expected, thedict);
 
-                Assert.That(() => FbxPrefabUtility.Add(ref thedict, "b", B), Throws.Exception);
+                Assert.That(() => FbxPrefabUtilityReflection.Add(ref thedict, "b", B), Throws.Exception);
 
                 var b = FbxPrefabUtility.GetOrCreate(thedict, "b"); // actually gets
                 Assert.AreEqual(B, b);
@@ -549,16 +549,16 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 Dictionary<string, List<string>> expected = null;
 
                 Assert.That(() => FbxPrefabUtility.Append(/* not ref */ thedict, "a", "1"), Throws.Exception);
-                Assert.That(() => FbxPrefabUtility.Append(ref thedict, "a", "1"), Throws.Nothing);
+                Assert.That(() => FbxPrefabUtilityReflection.Append(ref thedict, "a", "1"), Throws.Nothing);
                 expected = new Dictionary<string, List<string>>();
                 expected["a"] = new List<string>( new string [] { "1" });
                 Assert.AreEqual(expected, thedict);
 
-                Assert.That(() => FbxPrefabUtility.Append(ref thedict, "a", "2"), Throws.Nothing);
+                Assert.That(() => FbxPrefabUtilityReflection.Append(ref thedict, "a", "2"), Throws.Nothing);
                 expected["a"].Add("2");
                 Assert.AreEqual(expected, thedict);
 
-                Assert.That(() => FbxPrefabUtility.Append(ref thedict, "b", "3"), Throws.Nothing);
+                Assert.That(() => FbxPrefabUtilityReflection.Append(ref thedict, "b", "3"), Throws.Nothing);
                 expected["b"] = new List<string>( new string [] { "3" });
                 Assert.AreEqual(expected, thedict);
             }
@@ -568,17 +568,17 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 Dictionary<string, Dictionary<string, List<string>>> thedict = null;
                 Dictionary<string, Dictionary<string, List<string>>> expected = null;
 
-                Assert.That(() => FbxPrefabUtility.Append(ref thedict, "a", "1", "yo"), Throws.Nothing);
+                Assert.That(() => FbxPrefabUtilityReflection.Append(ref thedict, "a", "1", "yo"), Throws.Nothing);
                 expected = new Dictionary<string, Dictionary<string, List<string>>>();
                 expected["a"] = new Dictionary<string, List<string>>();
                 expected["a"]["1"] = new List<string>(new string[] { "yo" });
                 Assert.AreEqual(expected, thedict);
 
-                Assert.That(() => FbxPrefabUtility.Append(ref thedict, "a", "1", "yoyo"), Throws.Nothing);
+                Assert.That(() => FbxPrefabUtilityReflection.Append(ref thedict, "a", "1", "yoyo"), Throws.Nothing);
                 expected["a"]["1"].Add("yoyo");
                 Assert.AreEqual(expected, thedict);
 
-                Assert.That(() => FbxPrefabUtility.Append(ref thedict, "a", "2", "bar"), Throws.Nothing);
+                Assert.That(() => FbxPrefabUtilityReflection.Append(ref thedict, "a", "2", "bar"), Throws.Nothing);
                 expected["a"]["2"] = new List<string>(new string[] { "bar" });
                 Assert.AreEqual(expected, thedict);
             }
@@ -587,25 +587,25 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 // Test FbxRepresentation parsing function: consume.
                 string testString = "abc  \n\tdefg\nhij\tkl m";
                 int index = 0;
-                Assert.IsTrue(FbxPrefabUtility.FbxRepresentation.Consume('a', testString, ref index));
+                Assert.IsTrue(FbxRepresentationReflection.Consume('a', testString, ref index));
                 Assert.AreEqual(1, index);
                 index = 2;
-                Assert.IsTrue(FbxPrefabUtility.FbxRepresentation.Consume('c', testString, ref index));
+                Assert.IsTrue(FbxRepresentationReflection.Consume('c', testString, ref index));
                 Assert.AreEqual(3, index);
-                Assert.That(() => FbxPrefabUtility.FbxRepresentation.Consume('c', testString, ref index), Throws.Exception);
+                Assert.That(() => FbxRepresentationReflection.Consume('c', testString, ref index), Throws.Exception);
                 Assert.AreEqual(7, index);
-                Assert.IsFalse(FbxPrefabUtility.FbxRepresentation.Consume('c', testString, ref index, required: false));
+                Assert.IsFalse(FbxRepresentationReflection.Consume('c', testString, ref index, required: false));
                 Assert.AreEqual(7, index);
-                Assert.IsTrue(FbxPrefabUtility.FbxRepresentation.Consume('d', testString, ref index));
+                Assert.IsTrue(FbxRepresentationReflection.Consume('d', testString, ref index));
                 Assert.AreEqual(8, index);
                 index = testString.Length - 1;
-                Assert.IsTrue(FbxPrefabUtility.FbxRepresentation.Consume('m', testString, ref index));
+                Assert.IsTrue(FbxRepresentationReflection.Consume('m', testString, ref index));
                 Assert.AreEqual(testString.Length, index);
-                Assert.That(() => FbxPrefabUtility.FbxRepresentation.Consume('w', testString, ref index), Throws.Exception);
+                Assert.That(() => FbxRepresentationReflection.Consume('w', testString, ref index), Throws.Exception);
                 index = testString.Length;
-                Assert.That(() => FbxPrefabUtility.FbxRepresentation.Consume('w', testString, ref index, required: false), Throws.Exception);
+                Assert.That(() => FbxRepresentationReflection.Consume('w', testString, ref index, required: false), Throws.Exception);
                 index = testString.Length - 1;
-                Assert.IsFalse(FbxPrefabUtility.FbxRepresentation.Consume('n', testString, ref index, required: false));
+                Assert.IsFalse(FbxRepresentationReflection.Consume('n', testString, ref index, required: false));
                 Assert.AreEqual(testString.Length - 1, index);
             }
 
@@ -617,30 +617,30 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 string badStart = "this string has a quote but doesn't start.\"";
                 int index = 1;
 
-                Assert.AreEqual("this string has no quotes", FbxPrefabUtility.FbxRepresentation.ReadString(noQuotes, ref index));
+                Assert.AreEqual("this string has no quotes", FbxRepresentationReflection.ReadString(noQuotes, ref index));
                 Assert.AreEqual(index, noQuotes.LastIndexOf('"') + 1);
 
                 index = 1;
                 Assert.AreEqual("this string has \"quotes\" and backslashes \\ and \\ nonsense",
-                    FbxPrefabUtility.FbxRepresentation.ReadString(quotes, ref index));
+                    FbxRepresentationReflection.ReadString(quotes, ref index));
                 Assert.AreEqual(index, quotes.LastIndexOf('"') + 1);
 
                 index = 0;
-                Assert.That(() => FbxPrefabUtility.FbxRepresentation.ReadString(badEnd, ref index), Throws.Exception);
+                Assert.That(() => FbxRepresentationReflection.ReadString(badEnd, ref index), Throws.Exception);
                 Assert.AreEqual(badEnd.Length, index);
                 index = 0;
-                Assert.That(() => FbxPrefabUtility.FbxRepresentation.ReadString(badStart, ref index), Throws.Exception);
+                Assert.That(() => FbxRepresentationReflection.ReadString(badStart, ref index), Throws.Exception);
                 Assert.AreEqual(0, index);
             }
 
             {
                 string unquoted = " \"this string has backslashes \\ and quotes\" ";
                 string quoted = " \\\"this string has backslashes \\\\ and quotes\\\" ";
-                Assert.AreEqual(quoted, FbxPrefabUtility.FbxRepresentation.EscapeString(unquoted));
+                Assert.AreEqual(quoted, FbxRepresentation.EscapeString(unquoted));
             }
         }
 
-        static void TestFbxRepresentationMatches(FbxPrefabUtility.FbxRepresentation repA)
+        static void TestFbxRepresentationMatches(FbxRepresentation repA)
         {
             // Look at the top of TestFbxRepresentation for the construction.
 
@@ -688,12 +688,12 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             b.transform.localPosition = new Vector3(1,2,3);
             b.AddComponent<BoxCollider>();
 
-            var repA = new FbxPrefabUtility.FbxRepresentation(a.transform);
+            var repA = new FbxRepresentation(a.transform);
             TestFbxRepresentationMatches(repA);
 
             // Test that we can round-trip through a string.
             var json = repA.ToJson();
-            var repAstring = new FbxPrefabUtility.FbxRepresentation(json);
+            var repAstring = new FbxRepresentation(json);
             TestFbxRepresentationMatches(repAstring);
         }
     }
