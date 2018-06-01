@@ -60,17 +60,37 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         public static bool Consume(char expected, string json, ref int index, bool required = true)
         {
             object[] args = new object[] { expected, json, index, required };
-            var result = (bool)Invoke.InvokeStaticMethod<FbxRepresentation>("Consume", ref args);
-            index = (int)args[2];
-            return result;
+            try
+            {
+                var result = (bool)Invoke.InvokeStaticMethod<FbxRepresentation>("Consume", ref args);
+                return result;
+            }
+            finally
+            {
+                // adding this in the finally in case an exception is raised.
+                // This is because when calling the function normally, if an exception is raised after
+                // setting the ref param, then the ref param will still be set.
+                // Want to have the same functionality here.
+                index = (int)args[2];
+            }
         }
 
         public static string ReadString(string json, ref int index)
         {
             object[] args = new object[] { json, index };
-            var result =  (string)Invoke.InvokeStaticMethod<FbxRepresentation>("ReadString", ref args);
-            index = (int)args[1];
-            return result;
+            try
+            {
+                var result = (string)Invoke.InvokeStaticMethod<FbxRepresentation>("ReadString", ref args);
+                return result;
+            }
+            finally
+            {
+                // adding this in the finally in case an exception is raised.
+                // This is because when calling the function normally, if an exception is raised after
+                // setting the ref param, then the ref param will still be set.
+                // Want to have the same functionality here.
+                index = (int)args[1];
+            }
         }
     }
 }
