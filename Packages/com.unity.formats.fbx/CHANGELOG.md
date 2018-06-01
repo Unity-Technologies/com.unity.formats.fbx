@@ -2,6 +2,13 @@
 
 RELEASE NOTES
 
+## [1.7.0] - 2018-06-01
+
+FIXES
+
+* Fixed violations of the C# Framework Design Guidelines (FDG)
+* Fixed errors reported while running the Package Validation Suite
+
 ## [1.6.0] - 2018-05-29
 
 NEW FEATURES
