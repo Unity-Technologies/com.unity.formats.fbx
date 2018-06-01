@@ -11,6 +11,32 @@ using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
+    /// <summary>
+    /// If your MonoBehaviour knows about some custom geometry that
+    /// isn't in a MeshFilter or SkinnedMeshRenderer, use
+    /// RegisterMeshCallback to get a callback when the exporter tries
+    /// to export your component.
+    ///
+    /// The callback should return true, and output the mesh you want.
+    ///
+    /// Return false if you don't want to drive this game object.
+    ///
+    /// Return true and output a null mesh if you don't want the
+    /// exporter to output anything.
+    /// </summary>
+    public delegate bool GetMeshForComponent<T>(ModelExporter exporter, T component, FbxNode fbxNode) where T : MonoBehaviour;
+    public delegate bool GetMeshForComponent(ModelExporter exporter, MonoBehaviour component, FbxNode fbxNode);
+
+    /// <summary>
+    /// Delegate used to convert a GameObject into a mesh.
+    ///
+    /// This is useful if you want to have broader control over
+    /// the export process than the GetMeshForComponent callbacks
+    /// provide. But it's less efficient because you'll get a callback
+    /// on every single GameObject.
+    /// </summary>
+    public delegate bool GetMeshForObject(ModelExporter exporter, GameObject gameObject, FbxNode fbxNode);
+
     [System.Serializable]
     public class ModelExportException : System.Exception
     {
@@ -1979,7 +2005,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // TODO: we'll resample the curve so we don't have to 
                 // configure tangents
-                if (ModelExporter.ExportSettings.BakeAnimation) {
+                if (ModelExporter.ExportSettings.BakeAnimationProperty) {
                     ExportAnimationSamples (uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
                 } else {
                     ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper);
@@ -3804,22 +3830,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// If your MonoBehaviour knows about some custom geometry that
-        /// isn't in a MeshFilter or SkinnedMeshRenderer, use
-        /// RegisterMeshCallback to get a callback when the exporter tries
-        /// to export your component.
-        ///
-        /// The callback should return true, and output the mesh you want.
-        ///
-        /// Return false if you don't want to drive this game object.
-        ///
-        /// Return true and output a null mesh if you don't want the
-        /// exporter to output anything.
-        /// </summary>
-        public delegate bool GetMeshForComponent<T>(ModelExporter exporter, T component, FbxNode fbxNode) where T : MonoBehaviour;
-        public delegate bool GetMeshForComponent(ModelExporter exporter, MonoBehaviour component, FbxNode fbxNode);
-
-        /// <summary>
         /// Map from type (must be a MonoBehaviour) to callback.
         /// The type safety is lost; the caller must ensure it at run-time.
         /// </summary>
@@ -3868,16 +3878,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             MeshForComponentCallbacks[t] = callback;
         }
-
-        /// <summary>
-        /// Delegate used to convert a GameObject into a mesh.
-        ///
-        /// This is useful if you want to have broader control over
-        /// the export process than the GetMeshForComponent callbacks
-        /// provide. But it's less efficient because you'll get a callback
-        /// on every single GameObject.
-        /// </summary>
-        public delegate bool GetMeshForObject(ModelExporter exporter, GameObject gameObject, FbxNode fbxNode);
 
         static List<GetMeshForObject> MeshForObjectCallbacks = new List<GetMeshForObject>();
 
@@ -4035,7 +4035,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
         }
 
-        internal bool Verbose { get { return ExportSettings.instance.Verbose; } }
+        internal bool Verbose { get { return ExportSettings.instance.VerboseProperty; } }
 
         /// <summary>
         /// manage the selection of a filename

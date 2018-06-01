@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter {
     [System.Serializable]
@@ -47,15 +48,15 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             GUILayout.BeginVertical();
-            exportSettings.autoUpdaterEnabled = EditorGUILayout.Toggle(
+            exportSettings.AutoUpdaterEnabled = EditorGUILayout.Toggle(
                 new GUIContent("Auto-Updater:",
                     "Automatically updates prefabs with new fbx data that was imported."),
-                exportSettings.autoUpdaterEnabled
+                exportSettings.AutoUpdaterEnabled
             );
 
-            exportSettings.showConvertToPrefabDialog = EditorGUILayout.Toggle(
+            exportSettings.ShowConvertToPrefabDialog = EditorGUILayout.Toggle(
                 new GUIContent("Show Convert UI:", "Enable Convert dialog when converting to a Linked Prefab"),
-                exportSettings.showConvertToPrefabDialog
+                exportSettings.ShowConvertToPrefabDialog
             );
             EditorGUILayout.Space();
             EditorGUILayout.Space();
@@ -71,7 +72,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
 
-            exportSettings.selectedDCCApp = EditorGUILayout.Popup(exportSettings.selectedDCCApp, options);
+            exportSettings.SelectedDCCApp = EditorGUILayout.Popup(exportSettings.SelectedDCCApp, options);
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
@@ -109,16 +110,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             EditorGUILayout.Space();
 
-            exportSettings.launchAfterInstallation = EditorGUILayout.Toggle(
+            exportSettings.LaunchAfterInstallation = EditorGUILayout.Toggle(
                 new GUIContent("Keep Open:",
                     "Keep the selected 3D application open after Unity integration install has completed."),
-                exportSettings.launchAfterInstallation
+                exportSettings.LaunchAfterInstallation
             );
 
-            exportSettings.HideSendToUnityMenu = EditorGUILayout.Toggle(
+            exportSettings.HideSendToUnityMenuProperty = EditorGUILayout.Toggle(
                 new GUIContent("Hide Native Menu:",
                     "Replace Maya's native 'Send to Unity' menu with the Unity Integration's menu"),
-                exportSettings.HideSendToUnityMenu
+                exportSettings.HideSendToUnityMenuProperty
             );
 
             EditorGUILayout.Space();
@@ -242,7 +243,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         public const string kMayaOptionName = "Maya ";
         public const string kMayaLtOptionName = "Maya LT";
 
-        public bool Verbose = false;
+        // NOTE: using "Verbose" and "VerboseProperty" to handle backwards compatibility with older FbxExportSettings.asset files.
+        //       The variable name is used when serializing, so changing the variable name would prevent older FbxExportSettings.asset files
+        //       from loading this property.
+        [SerializeField]
+        private bool Verbose = false;
+        public bool VerboseProperty
+        {
+            get { return Verbose; }
+            set { Verbose = value; }
+        }
 
         private static string DefaultIntegrationSavePath {
             get{
@@ -359,7 +369,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// If there is valid alternative vendor locations, do not use defaults
         /// always use MAYA_LOCATION when available
         /// </summary>
-        public static string[] DCCVendorLocations
+        public static List<string> DCCVendorLocations
         {
             get
             {
@@ -377,20 +387,79 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     result.Add(additionalLocation);
                 }
 
-                return result.ToArray<string>();
+                return result.ToList<string>();
             }
         }
 
         // Note: default values are set in LoadDefaults().
-        public bool autoUpdaterEnabled = true;
-        public bool launchAfterInstallation = true;
-        public bool HideSendToUnityMenu = true;
-        public bool BakeAnimation = true;
-        public bool showConvertToPrefabDialog = true;
+        [SerializeField]
+        private bool autoUpdaterEnabled = true;
+        public bool AutoUpdaterEnabled
+        {
+            get { return autoUpdaterEnabled; }
+            set { autoUpdaterEnabled = value; }
+        }
 
-        public string integrationSavePath;
+        [SerializeField]
+        private bool launchAfterInstallation = true;
+        public bool LaunchAfterInstallation
+        {
+            get { return launchAfterInstallation; }
+            set { launchAfterInstallation = value; }
+        }
 
-        public int selectedDCCApp = 0;
+        [SerializeField]
+        private bool HideSendToUnityMenu = true;
+        public bool HideSendToUnityMenuProperty
+        {
+            get { return HideSendToUnityMenu; }
+            set { HideSendToUnityMenu = value; }
+        }
+
+        [SerializeField]
+        private bool BakeAnimation = true;
+        public bool BakeAnimationProperty
+        {
+            get { return BakeAnimation; }
+            set { BakeAnimation = value; }
+        }
+
+        [SerializeField]
+        private bool showConvertToPrefabDialog = true;
+        public bool ShowConvertToPrefabDialog
+        {
+            get { return showConvertToPrefabDialog; }
+            set { showConvertToPrefabDialog = value; }
+        }
+
+        [SerializeField]
+        private string integrationSavePath;
+        public static string IntegrationSavePath
+        {
+            get
+            {
+                //If the save path gets messed up and ends up not being valid, just use the project folder as the default
+                if (string.IsNullOrEmpty(instance.integrationSavePath) ||
+                    !Directory.Exists(instance.integrationSavePath))
+                {
+                    //The project folder, above the asset folder
+                    instance.integrationSavePath = DefaultIntegrationSavePath;
+                }
+                return instance.integrationSavePath;
+            }
+            set
+            {
+                instance.integrationSavePath = value;
+            }
+        }
+
+        [SerializeField]
+        private int selectedDCCApp = 0;
+        public int SelectedDCCApp
+        {
+            get { return selectedDCCApp; }
+            set { selectedDCCApp = value; }
+        }
 
         /// <summary>
         /// The path where Convert To Model will save the new fbx and prefab.
@@ -409,10 +478,20 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         private List<string> fbxSavePaths = new List<string> ();
 
         [SerializeField]
-        public int selectedFbxPath = 0;
+        private int selectedFbxPath = 0;
+        public int SelectedFbxPath
+        {
+            get { return selectedFbxPath; }
+            set { selectedFbxPath = value; }
+        }
 
         [SerializeField]
-        public int selectedPrefabPath = 0;
+        private int selectedPrefabPath = 0;
+        public int SelectedPrefabPath
+        {
+            get { return selectedPrefabPath; }
+            set { selectedPrefabPath = value; }
+        }
 
         private int maxStoredSavePaths = 5;
 
@@ -449,16 +528,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         protected override void LoadDefaults()
         {
-            autoUpdaterEnabled = true;
-            showConvertToPrefabDialog = true;
-            launchAfterInstallation = true;
-            HideSendToUnityMenu = true;
+            AutoUpdaterEnabled = true;
+            ShowConvertToPrefabDialog = true;
+            LaunchAfterInstallation = true;
+            HideSendToUnityMenuProperty = true;
             prefabSavePaths = new List<string>(){ kDefaultSavePath };
             fbxSavePaths = new List<string> (){ kDefaultSavePath };
             integrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
-            BakeAnimation = true;
+            BakeAnimationProperty = true;
             ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             exportModelSettingsSerialize = ExportModelSettings.info;
             ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
@@ -669,7 +748,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             var dccOptionPaths = instance.dccOptionPaths;
 
             // find dcc installation from vendor locations
-            for (int i = 0; i < DCCVendorLocations.Length; i++)
+            for (int i = 0; i < DCCVendorLocations.Count; i++)
             {
                 if (!Directory.Exists(DCCVendorLocations[i]))
                 {
@@ -718,7 +797,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 dccOptionNames.Add("MAYA_LOCATION");
             }
 
-            instance.selectedDCCApp = instance.PreferredDCCApp;
+            instance.SelectedDCCApp = instance.PreferredDCCApp;
         }
 
         /// <summary>
@@ -729,8 +808,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         {
             get
             {
-                string[] locations = DCCVendorLocations;
-                for (int i = 0; i < locations.Length; i++)
+                List<string> locations = DCCVendorLocations;
+                for (int i = 0; i < locations.Count; i++)
                 {
                     //Look through the list of locations we have and take the first valid one
                     if (Directory.Exists(locations[i]))
@@ -800,14 +879,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
 
             // set the selected DCC app to the previous selection
-            instance.selectedDCCApp = instance.dccOptionPaths.IndexOf (prevSelection);
-            if (instance.selectedDCCApp < 0) {
+            instance.SelectedDCCApp = instance.dccOptionPaths.IndexOf (prevSelection);
+            if (instance.SelectedDCCApp < 0) {
                 // find preferred app if previous selection no longer exists
-                instance.selectedDCCApp = instance.PreferredDCCApp;
+                instance.SelectedDCCApp = instance.PreferredDCCApp;
             }
 
             if (instance.dccOptionPaths.Count <= 0) {
-                instance.selectedDCCApp = 0;
+                instance.SelectedDCCApp = 0;
                 return new GUIContent[]{
                     new GUIContent("<No 3D Application found>")
                 };
@@ -825,6 +904,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         public enum DCCType { Maya, Max };
 
+        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public static void AddDCCOption(string newOption, DCCType dcc){
             if (Application.platform == RuntimePlatform.OSXEditor && dcc == DCCType.Maya) {
                 // on OSX we get a path ending in .app, which is not quite the exe
@@ -833,7 +914,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             var dccOptionPaths = instance.dccOptionPaths;
             if (dccOptionPaths.Contains(newOption)) {
-                instance.selectedDCCApp = dccOptionPaths.IndexOf (newOption);
+                instance.SelectedDCCApp = dccOptionPaths.IndexOf (newOption);
                 return;
             }
 
@@ -869,12 +950,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             instance.dccOptionNames.Add (optionName);
             dccOptionPaths.Add (newOption);
-            instance.selectedDCCApp = dccOptionPaths.Count - 1;
+            instance.SelectedDCCApp = dccOptionPaths.Count - 1;
         }
 
         /// <summary>
         /// Ask the version number by running maya.
         /// </summary>
+        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         internal static string AskMayaVersion(string exePath) {
             System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
             myProcess.StartInfo.FileName = exePath;
@@ -931,8 +1014,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             get
             {
                 return (instance.dccOptionPaths.Count > 0 &&
-                    instance.selectedDCCApp >= 0 &&
-                    instance.selectedDCCApp < instance.dccOptionPaths.Count) ? instance.dccOptionPaths[instance.selectedDCCApp] : "";
+                    instance.SelectedDCCApp >= 0 &&
+                    instance.SelectedDCCApp < instance.dccOptionPaths.Count) ? instance.dccOptionPaths[instance.SelectedDCCApp] : "";
             }
         }
 
@@ -941,8 +1024,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             get
             {
                 return (instance.dccOptionNames.Count > 0 &&
-                    instance.selectedDCCApp >= 0 &&
-                    instance.selectedDCCApp < instance.dccOptionNames.Count) ? instance.dccOptionNames[instance.selectedDCCApp] : "";
+                    instance.SelectedDCCApp >= 0 &&
+                    instance.SelectedDCCApp < instance.dccOptionNames.Count) ? instance.dccOptionNames[instance.SelectedDCCApp] : "";
             }
         }
 
@@ -1032,12 +1115,12 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         public static void AddFbxSavePath(string savePath){
             AddSavePath (savePath, ref instance.fbxSavePaths);
-            instance.selectedFbxPath = 0;
+            instance.SelectedFbxPath = 0;
         }
 
         public static void AddPrefabSavePath(string savePath){
             AddSavePath (savePath, ref instance.prefabSavePaths);
-            instance.selectedPrefabPath = 0;
+            instance.SelectedPrefabPath = 0;
         }
 
         public static string GetAbsoluteSavePath(string relativePath){
@@ -1053,7 +1136,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 {
                     instance.fbxSavePaths.Add(kDefaultSavePath);
                 }
-                return GetAbsoluteSavePath(instance.fbxSavePaths[instance.selectedFbxPath]);
+                return GetAbsoluteSavePath(instance.fbxSavePaths[instance.SelectedFbxPath]);
             }
         }
 
@@ -1064,26 +1147,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 {
                     instance.prefabSavePaths.Add(kDefaultSavePath);
                 }
-                return GetAbsoluteSavePath(instance.prefabSavePaths[instance.selectedPrefabPath]);
-            }
-        }
-
-        public static string IntegrationSavePath
-        {
-            get
-            {
-                //If the save path gets messed up and ends up not being valid, just use the project folder as the default
-                if (string.IsNullOrEmpty(instance.integrationSavePath) ||
-                    !Directory.Exists(instance.integrationSavePath))
-                {
-                    //The project folder, above the asset folder
-                    instance.integrationSavePath = DefaultIntegrationSavePath;
-                }
-                return instance.integrationSavePath;
-            }
-            set
-            {
-                instance.integrationSavePath = value;
+                return GetAbsoluteSavePath(instance.prefabSavePaths[instance.SelectedPrefabPath]);
             }
         }
 

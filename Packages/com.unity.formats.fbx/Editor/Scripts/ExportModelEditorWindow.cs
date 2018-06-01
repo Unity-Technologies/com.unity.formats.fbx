@@ -101,10 +101,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected abstract ExportOptionsSettingsSerializeBase SettingsObject { get; }
 
         private UnityEngine.Object[] m_toExport;
-        protected UnityEngine.Object[] ToExport {
-            get { return m_toExport; }
-            set { m_toExport = value; }
-        }
+        protected Object[] GetToExport(){ return m_toExport; }
+        protected void SetToExport(Object[] value){ m_toExport = value; }
 
         protected virtual void OnEnable(){
             #if UNITY_2018_1_OR_NEWER
@@ -232,7 +230,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected virtual GameObject FirstGameObjectToExport
         {
             get { 
-                return ModelExporter.GetGameObject(ToExport[0]);
+                return ModelExporter.GetGameObject(GetToExport()[0]);
             }
         }
 
@@ -241,7 +239,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return true;
             }
 
-            if (ToExport == null || ToExport.Length <= 0) {
+            if (GetToExport() == null || GetToExport().Length <= 0) {
                 Debug.LogWarning ("FbxExportSettings: no Objects selected for export, can't transfer animation");
                 return false;
             }
@@ -266,7 +264,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return true;
             }
 
-            if (ToExport == null || ToExport.Length <= 0) {
+            if (GetToExport() == null || GetToExport().Length <= 0) {
                 Debug.LogWarning ("FbxExportSettings: no Objects selected for export, can't transfer animation");
                 return false;
             }
@@ -344,7 +342,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             var pathLabels = ExportSettings.GetRelativeFbxSavePaths();
 
-            ExportSettings.instance.selectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.selectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+            ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new location to export to"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
@@ -458,8 +456,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             get
             {
                 return (IsTimelineAnim)
-                    ? AnimationOnlyExportData.GetGameObjectAndAnimationClip(ToExport[0]).Key
-                    : ModelExporter.GetGameObject(ToExport[0]);
+                    ? AnimationOnlyExportData.GetGameObjectAndAnimationClip(GetToExport()[0]).Key
+                    : ModelExporter.GetGameObject(GetToExport()[0]);
             }
         }
 
@@ -468,7 +466,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // don't transfer animation if we are exporting more than one hierarchy, the timeline clips from
                 // a playable director, or if only the model is being exported
                 // if we are on the timeline then export length can be more than 1
-                return ToExport == null || ToExport.Length == 0 || (!IsTimelineAnim && ToExport.Length > 1) || SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model;
+                return GetToExport() == null || GetToExport().Length == 0 || (!IsTimelineAnim && GetToExport().Length > 1) || SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model;
             }
         }
 
@@ -527,14 +525,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport){
-            ToExport = toExport.ToArray ();
-            if (ToExport.Length==0) return 0;
+            SetToExport(toExport.ToArray ());
+            if (GetToExport().Length==0) return 0;
 
             TransferAnimationSource = null;
             TransferAnimationDest = null;
 
             // if only one object selected, set transfer source/dest to this object
-            if (ToExport.Length == 1 || (IsTimelineAnim && ToExport.Length > 0))
+            if (GetToExport().Length == 1 || (IsTimelineAnim && GetToExport().Length > 0))
             {
                 GameObject go = FirstGameObjectToExport;
                 if (go)
@@ -544,7 +542,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
-            return ToExport.Length;
+            return GetToExport().Length;
         }
 
         /// <summary>
@@ -556,9 +554,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             get
             {
                 var filename = "";
-                if (ToExport.Length == 1)
+                if (GetToExport().Length == 1)
                 {
-                    filename = ToExport[0].name;
+                    filename = GetToExport()[0].name;
                 }
                 else
                 {
@@ -607,7 +605,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            if (ModelExporter.ExportObjects (filePath, ToExport, SettingsObject) != null) {
+            if (ModelExporter.ExportObjects (filePath, GetToExport(), SettingsObject) != null) {
                 // refresh the asset database so that the file appears in the
                 // asset folder view.
                 AssetDatabase.Refresh ();

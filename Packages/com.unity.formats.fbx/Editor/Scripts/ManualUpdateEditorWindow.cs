@@ -12,7 +12,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         int[] selectedNodesToDestroy;
         int[] selectedNodesToRename;
 
-        FbxPrefabAutoUpdater.FbxPrefabUtility m_fbxPrefabUtility;
+        FbxPrefabUtility m_fbxPrefabUtility;
         FbxPrefab m_fbxPrefab;
         GUIContent[] options;
         List<string> m_nodesToCreate;
@@ -21,16 +21,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         List<string> m_nodeNameToSuggest;
 
-        public bool Verbose { get { return UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.Verbose; } }
+        public bool Verbose { get { return UnityEditor.Formats.Fbx.Exporter.ExportSettings.instance.VerboseProperty; } }
 
-        public void Init(FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility, FbxPrefab fbxPrefab)
+        public void Init(FbxPrefabUtility fbxPrefabUtility, FbxPrefab fbxPrefab)
         {
             if(fbxPrefab == null)
             {
                 return;
             }
 
-            FbxPrefabAutoUpdater.FbxPrefabUtility.UpdateList updates = new FbxPrefabAutoUpdater.FbxPrefabUtility.UpdateList(new FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation(fbxPrefab.FbxHistory), fbxPrefab.FbxModel.transform, fbxPrefab);
+            FbxPrefabUtility.UpdateList updates = new FbxPrefabUtility.UpdateList(new FbxRepresentation(fbxPrefab.FbxHistory), fbxPrefab.FbxModel.transform, fbxPrefab);
 
             m_fbxPrefabUtility = fbxPrefabUtility;
             m_fbxPrefab = fbxPrefab;

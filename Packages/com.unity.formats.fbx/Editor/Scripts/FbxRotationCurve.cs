@@ -18,12 +18,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         private AnimationCurve[] m_curves;
-        public AnimationCurve[] Curves
-        {
-            get { return m_curves; }
-            set { m_curves = value; }
-        }
-
+        public AnimationCurve[] GetCurves() { return m_curves; }
+        public void SetCurves(AnimationCurve[] value) { m_curves = value; }
 
         protected struct Key {
             private FbxTime m_time;
@@ -43,7 +39,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected RotationCurve() { }
 
         public void SetCurve(int i, AnimationCurve curve) {
-            Curves [i] = curve;
+            GetCurves()[i] = curve;
         }
 
         protected abstract FbxQuaternion GetConvertedQuaternionRotation (float seconds, UnityEngine.Quaternion restRotation);
@@ -61,9 +57,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // Find when we have keys set.
             var keyTimes = 
-                (UnityEditor.Formats.Fbx.Exporter.ModelExporter.ExportSettings.BakeAnimation) 
-                ? ModelExporter.GetSampleTimes(Curves, SampleRate) 
-                : ModelExporter.GetKeyTimes(Curves);
+                (UnityEditor.Formats.Fbx.Exporter.ModelExporter.ExportSettings.BakeAnimationProperty) 
+                ? ModelExporter.GetSampleTimes(GetCurves(), SampleRate) 
+                : ModelExporter.GetKeyTimes(GetCurves());
 
             // Convert to the Key type.
             var keys = new Key[keyTimes.Count];
@@ -136,7 +132,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// prerotation from animated rotation.
     /// </summary>
     public class EulerCurve : RotationCurve {
-        public EulerCurve() { Curves = new AnimationCurve[3]; }
+        public EulerCurve() { SetCurves(new AnimationCurve[3]); }
 
         /// <summary>
         /// Gets the index of the euler curve by property name.
@@ -166,7 +162,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected override FbxQuaternion GetConvertedQuaternionRotation (float seconds, Quaternion restRotation)
         {
             var eulerRest = restRotation.eulerAngles;
-            AnimationCurve x = Curves [0], y = Curves [1], z = Curves [2];
+            AnimationCurve x = GetCurves()[0], y = GetCurves()[1], z = GetCurves()[2];
 
             // The final animation, including the effect of pre-rotation.
             // If we have no curve, assume the node has the correct rotation right now.
@@ -190,7 +186,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// </summary>
     public class QuaternionCurve : RotationCurve {
 
-        public QuaternionCurve() { Curves = new AnimationCurve[4]; }
+        public QuaternionCurve() { SetCurves(new AnimationCurve[4]); }
 
         /// <summary>
         /// Gets the index of the curve by property name.
@@ -226,7 +222,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected override FbxQuaternion GetConvertedQuaternionRotation (float seconds, Quaternion restRotation)
         {
-            AnimationCurve x = Curves [0], y = Curves [1], z = Curves [2], w = Curves[3];
+            AnimationCurve x = GetCurves()[0], y = GetCurves()[1], z = GetCurves()[2], w = GetCurves()[3];
 
             // The final animation, including the effect of pre-rotation.
             // If we have no curve, assume the node has the correct rotation right now.

@@ -108,7 +108,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var toExport = ModelExporter.RemoveRedundantObjects (unityGameObjectsToConvert);
 
-            if (ExportSettings.instance.showConvertToPrefabDialog)
+            if (ExportSettings.instance.ShowConvertToPrefabDialog)
             {
                 ConvertToPrefabEditorWindow.Init(toExport);
                 return toExport.ToArray();
@@ -416,7 +416,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Object.DestroyImmediate(fbxPrefab);
             }
             fbxPrefab = toSetUp.AddComponent<FbxPrefab>();
-            var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
+            var fbxPrefabUtility = new FbxPrefabUtility (fbxPrefab);
             fbxPrefabUtility.SetSourceModel(unityMainAsset);
         }
 
