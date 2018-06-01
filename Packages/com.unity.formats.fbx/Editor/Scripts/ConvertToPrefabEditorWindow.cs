@@ -235,7 +235,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             var pathLabels = ExportSettings.GetRelativePrefabSavePaths();
 
-            ExportSettings.instance.selectedPrefabPath = EditorGUILayout.Popup(ExportSettings.instance.selectedPrefabPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+            ExportSettings.instance.SelectedPrefabPath = EditorGUILayout.Popup(ExportSettings.instance.SelectedPrefabPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new location to save prefab to"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
