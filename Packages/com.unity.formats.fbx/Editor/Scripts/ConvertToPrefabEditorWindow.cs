@@ -84,11 +84,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected override void OnEnable()
         {
             base.OnEnable();
-            if (!m_innerEditor)
+            if (!InnerEditor)
             {
-                m_innerEditor = UnityEditor.Editor.CreateEditor(ExportSettings.instance.convertToPrefabSettings);
+                InnerEditor = UnityEditor.Editor.CreateEditor(ExportSettings.instance.ConvertToPrefabSettings);
             }
-            m_prefabExtLabelWidth = m_fbxExtLabelStyle.CalcSize(new GUIContent(".prefab")).x;
+            m_prefabExtLabelWidth = FbxExtLabelStyle.CalcSize(new GUIContent(".prefab")).x;
         }
 
         protected bool ExportSetContainsAnimation()
@@ -106,7 +106,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected override bool Export()
         {
-            if (string.IsNullOrEmpty(m_exportFileName))
+            if (string.IsNullOrEmpty(ExportFileName))
             {
                 Debug.LogError("FbxExporter: Please specify an fbx filename");
                 return false;
@@ -118,10 +118,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            var fbxDirPath = ExportSettings.GetFbxAbsoluteSavePath();
-            var fbxPath = System.IO.Path.Combine(fbxDirPath, m_exportFileName + ".fbx");
+            var fbxDirPath = ExportSettings.FbxAbsoluteSavePath;
+            var fbxPath = System.IO.Path.Combine(fbxDirPath, ExportFileName + ".fbx");
 
-            var prefabDirPath = ExportSettings.GetPrefabAbsoluteSavePath();
+            var prefabDirPath = ExportSettings.PrefabAbsoluteSavePath;
             var prefabPath = System.IO.Path.Combine(prefabDirPath, m_prefabFileName + ".prefab");
 
             if (ToExport == null)
@@ -175,7 +175,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 ConvertToModel.Convert(
-                    go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
+                    go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
                 );
                 return true;
             }
@@ -185,7 +185,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // Convert, automatically choosing a file path that won't clobber any existing files.
                 var go = ModelExporter.GetGameObject(obj);
                 ConvertToModel.Convert(
-                    go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.convertToPrefabSettings.info
+                    go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
                 );
             }
             return true;
@@ -193,12 +193,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected override ExportOptionsSettingsSerializeBase SettingsObject
         {
-            get { return ExportSettings.instance.convertToPrefabSettings.info; }
+            get { return ExportSettings.instance.ConvertToPrefabSettings.info; }
         }
 #if UNITY_2018_1_OR_NEWER
         protected override void ShowPresetReceiver()
         {
-            ShowPresetReceiver(ExportSettings.instance.convertToPrefabSettings);
+            ShowPresetReceiver(ExportSettings.instance.ConvertToPrefabSettings);
         }
 #endif
         protected override void CreateCustomUI()
@@ -215,11 +215,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUILayout.BeginHorizontal(EditorStyles.textField, GUILayout.Height(EditorGUIUtility.singleLineHeight));
             EditorGUI.indentLevel--;
             // continually resize to contents
-            var textFieldSize = m_nameTextFieldStyle.CalcSize(new GUIContent(m_prefabFileName));
-            m_prefabFileName = EditorGUILayout.TextField(m_prefabFileName, m_nameTextFieldStyle, GUILayout.Width(textFieldSize.x + 5), GUILayout.MinWidth(5));
+            var textFieldSize = NameTextFieldStyle.CalcSize(new GUIContent(m_prefabFileName));
+            m_prefabFileName = EditorGUILayout.TextField(m_prefabFileName, NameTextFieldStyle, GUILayout.Width(textFieldSize.x + 5), GUILayout.MinWidth(5));
             m_prefabFileName = ModelExporter.ConvertToValidFilename(m_prefabFileName);
 
-            EditorGUILayout.LabelField("<color=#808080ff>.prefab</color>", m_fbxExtLabelStyle, GUILayout.Width(m_prefabExtLabelWidth));
+            EditorGUILayout.LabelField("<color=#808080ff>.prefab</color>", FbxExtLabelStyle, GUILayout.Width(m_prefabExtLabelWidth));
             EditorGUI.indentLevel++;
 
             EditorGUILayout.EndHorizontal();
@@ -267,7 +267,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.EndHorizontal();
         }
 
-        protected override void DontShowDialogUI()
+        protected override void DoNotShowDialogUI()
         {
             EditorGUI.indentLevel--;
             ExportSettings.instance.showConvertToPrefabDialog = !EditorGUILayout.Toggle(

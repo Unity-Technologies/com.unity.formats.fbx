@@ -3,15 +3,15 @@ using UnityEditor.Presets;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
+    public delegate void SelectionChangedDelegate();
+    public delegate void DialogClosedDelegate();
+
     public class FbxExportPresetSelectorReceiver : PresetSelectorReceiver
     {
         UnityEngine.Object m_Target;
         Preset m_InitialValue;
-
-        public delegate void SelectionChangedDelegate();
+        
         public event SelectionChangedDelegate SelectionChanged;
-
-        public delegate void DialogClosedDelegate();
         public event DialogClosedDelegate DialogClosed;
 
         public override void OnSelectionClosed(Preset selection)

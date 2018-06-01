@@ -187,7 +187,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         }
 
         FbxPrefabAutoUpdater.FbxPrefabUtility.FbxRepresentation History(GameObject go) {
-            return new FbxPrefabAutoUpdater.FbxPrefabUtility(go.GetComponent<FbxPrefab>()).GetFbxHistory();
+            return new FbxPrefabAutoUpdater.FbxPrefabUtility(go.GetComponent<FbxPrefab>()).FbxHistory;
         }
 
         GameObject ModifySourceFbx()
@@ -270,7 +270,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             AssertAreIdentical(newHistory, History(m_manualPrefab));
 
             // Check some corner cases.
-            Assert.AreEqual(m_source, manualFbxPrefabUtility.GetFbxAsset());
+            Assert.AreEqual(m_source, manualFbxPrefabUtility.FbxAsset);
 
             // Illegal to set the source model to something that isn't an
             // asset.
@@ -287,7 +287,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             // hierarchy or anything.
             Debug.Log("Testing SetSourceModel to null");
             Assert.That( () => manualFbxPrefabUtility.SetSourceModel(null), Throws.Nothing );
-            Assert.IsNull(manualFbxPrefabUtility.GetFbxAsset());
+            Assert.IsNull(manualFbxPrefabUtility.FbxAsset);
             AssertAreIdentical(newHierarchy, Rep(m_manualPrefab));
             AssertAreIdentical(newHistory, History(m_manualPrefab));
             Assert.That( () => manualFbxPrefabUtility.SyncPrefab(), Throws.Nothing );
@@ -429,7 +429,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 GetRandomFbxFilePath(), root);
             SleepForFileTimestamp();
 
-            var destFile = new FbxPrefabAutoUpdater.FbxPrefabUtility (original.GetComponent<FbxPrefab> ()).GetFbxAssetPath ();
+            var destFile = new FbxPrefabAutoUpdater.FbxPrefabUtility (original.GetComponent<FbxPrefab> ()).FbxAssetPath;
             if (System.IO.File.Exists (destFile)) {
                 System.IO.File.Delete (destFile);
             }

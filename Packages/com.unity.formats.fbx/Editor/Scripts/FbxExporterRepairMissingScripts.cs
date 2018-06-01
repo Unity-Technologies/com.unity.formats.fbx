@@ -7,26 +7,26 @@ namespace UnityEditor.Formats.Fbx.Exporter
 {
     public class RepairMissingScripts
     {
-        private const string m_forumPackageGUID = "2d81c55c4d9d85146b1d2de96e084b63";
-        private const string m_assetStorePackageGUID = "628ffbda3fdf4df4588770785d91a698";
+        private const string ForumPackageGUID = "2d81c55c4d9d85146b1d2de96e084b63";
+        private const string AssetStorePackageGUID = "628ffbda3fdf4df4588770785d91a698";
 
-        private const string m_fbxPrefabDLLFileId = "69888640";
+        private const string FbxPrefabDLLFileId = "69888640";
 
-        private const string m_idFormat = "{{fileID: {0}, guid: {1}, type:";
+        private const string IdFormat = "{{fileID: {0}, guid: {1}, type:";
 
-        private static List<string> m_searchIDsToReplace;
+        private static List<string> s_searchIDsToReplace;
         private static List<string> SearchIDsToReplace
         {
             get
             {
-                if (m_searchIDsToReplace == null || m_searchIDsToReplace.Count <= 0)
+                if (s_searchIDsToReplace == null || s_searchIDsToReplace.Count <= 0)
                 {
-                    m_searchIDsToReplace = new List<string>() {
-                        string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_forumPackageGUID),
-                        string.Format(m_idFormat, m_fbxPrefabDLLFileId, m_assetStorePackageGUID)
+                    s_searchIDsToReplace = new List<string>() {
+                        string.Format(IdFormat, FbxPrefabDLLFileId, ForumPackageGUID),
+                        string.Format(IdFormat, FbxPrefabDLLFileId, AssetStorePackageGUID)
                     };
                 }
-                return m_searchIDsToReplace;
+                return s_searchIDsToReplace;
             }
         }
 
@@ -40,25 +40,32 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        public static string GetSourceCodeSearchID()
+        public static string SourceCodeSearchID
         {
-            var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
-            string searchID = null;
-            string guid;
+            get
+            {
+                var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
+                string searchID = null;
+                string guid;
 #if UNITY_2018_2_OR_NEWER
-            long fileId;
+                long fileId;
 #else
             int fileId;
 #endif
-            if(AssetDatabase.TryGetGUIDAndLocalFileIdentifier(fbxPrefabObj, out guid, out fileId))
-            {
-                searchID = string.Format(m_idFormat, fileId, guid);
+                if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(fbxPrefabObj, out guid, out fileId))
+                {
+                    searchID = string.Format(IdFormat, fileId, guid);
+                }
+                return searchID;
             }
-            return searchID;
         }
 
-        public int GetAssetsToRepairCount(){
-            return AssetsToRepair.Length;
+        public int AssetsToRepairCount
+        {
+            get
+            {
+                return AssetsToRepair.Length;
+            }
         }
 
         public string[] GetAssetsToRepair(){
@@ -95,7 +102,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     if(sr.Peek() > -1){
                         var firstLine = sr.ReadLine();
                         if(!firstLine.StartsWith("%YAML")){
-                            sr.Close();
                             return false;
                         }
                     }
@@ -103,7 +109,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     var contents = sr.ReadToEnd();
                     if (SearchIDsToReplace.Exists(searchId => contents.Contains(searchId)))
                     {
-                        sr.Close();
                         return true;
                     }
                 }
@@ -116,7 +121,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public bool ReplaceGUIDInTextAssets ()
         {
-            string sourceCodeSearchID = GetSourceCodeSearchID();
+            string sourceCodeSearchID = SourceCodeSearchID;
             if(string.IsNullOrEmpty(sourceCodeSearchID))
             {
                 return false;
@@ -158,7 +163,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     if (sr.Peek () > -1) {
                         firstLine = sr.ReadLine ();
                         if (!firstLine.StartsWith ("%YAML")) {
-                            sr.Close ();
                             return false;
                         }
                     }

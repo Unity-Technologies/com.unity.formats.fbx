@@ -23,13 +23,13 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             var animCurve = new AnimationCurve();
 
             eulerCurve.SetCurve (2, animCurve);
-            Assert.That (eulerCurve.m_curves [2], Is.EqualTo (animCurve));
+            Assert.That (eulerCurve.Curves [2], Is.EqualTo (animCurve));
 
             Assert.That(() => eulerCurve.SetCurve (-1, animCurve), Throws.Exception.TypeOf<System.IndexOutOfRangeException>());
             Assert.That(() => eulerCurve.SetCurve (3, animCurve), Throws.Exception.TypeOf<System.IndexOutOfRangeException>());
 
             quaternionCurve.SetCurve (3, animCurve);
-            Assert.That (quaternionCurve.m_curves [3], Is.EqualTo (animCurve));
+            Assert.That (quaternionCurve.Curves [3], Is.EqualTo (animCurve));
 
             Assert.That(() => quaternionCurve.SetCurve (-5, animCurve), Throws.Exception.TypeOf<System.IndexOutOfRangeException>());
             Assert.That(() => quaternionCurve.SetCurve (4, animCurve), Throws.Exception.TypeOf<System.IndexOutOfRangeException>());

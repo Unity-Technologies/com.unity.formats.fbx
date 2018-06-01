@@ -24,7 +24,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.exportFormat = (ExportSettings.ExportFormat)EditorGUILayout.Popup((int)exportSettings.exportFormat, exportFormatOptions);
+            exportSettings.SetExportFormat((ExportSettings.ExportFormat)EditorGUILayout.Popup((int)exportSettings.ExportFormat, exportFormatOptions));
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -51,18 +51,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
-            exportSettings.animatedSkinnedMesh = EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.animatedSkinnedMesh);
+            exportSettings.SetAnimatedSkinnedMesh(EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.AnimateSkinnedMesh));
 
-            exportSettings.mayaCompatibleNaming = EditorGUILayout.Toggle (
+            exportSettings.SetUseMayaCompatibleNames(EditorGUILayout.Toggle (
                 new GUIContent ("Compatible Naming",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
                     "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
                     "On export, convert the names of GameObjects so they are Maya compatible." +
-                    (exportSettings.mayaCompatibleNaming ? "" :
+                    (exportSettings.UseMayaCompatibleNames ? "" :
                         "\n\nWARNING: Disabling this feature may result in lost material connections," +
                         " and unexpected character replacements in Maya.")
                 ),
-                exportSettings.mayaCompatibleNaming);
+                exportSettings.UseMayaCompatibleNames));
         }
     }
 

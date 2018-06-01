@@ -2,10 +2,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
+using System.Runtime.Serialization;
 using UnityEngine.Formats.Fbx.Exporter;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
+    /// <summary>
+    /// Exception that denotes a likely programming error.
+    /// </summary>
+    [System.Serializable]
+    public class FbxPrefabException : System.Exception
+    {
+        public FbxPrefabException() { }
+        public FbxPrefabException(string message) : base(message) { }
+        public FbxPrefabException(string message, System.Exception inner) : base(message, inner) { }
+        protected FbxPrefabException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
     /// <summary>
     /// This class handles updating prefabs that are linked to an FBX source file.
     ///
@@ -24,17 +37,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
     public /*static*/ class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
     {
         #if COM_UNITY_FORMATS_FBX_AS_ASSET
-        public const string FBX_PREFAB_FILE = "/UnityFbxPrefab.dll";
+        public const string FbxPrefabFile = "/UnityFbxPrefab.dll";
         #elif UNITY_2018_2_OR_NEWER
-        public const string FBX_PREFAB_FILE = "/FbxPrefab.cs";
+        public const string FbxPrefabFile = "/FbxPrefab.cs";
         #else // Unity 2018.1 and fbx installed as a package
-        public const string FBX_PREFAB_FILE = "Packages/com.unity.formats.fbx/Runtime/FbxPrefab.cs";
+        public const string FbxPrefabFile = "Packages/com.unity.formats.fbx/Runtime/FbxPrefab.cs";
         #endif
 
         const string MenuItemName = "GameObject/Update from FBX";
         public static bool runningUnitTest = false;
 
-        public static bool Verbose { private set {;} get { return ExportSettings.instance.Verbose; } }
+        public static bool Verbose { get { return ExportSettings.instance.Verbose; } }
 
         public static string FindFbxPrefabAssetPath()
         {
@@ -45,18 +58,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
             string foundPath = "";
             foreach (var guid in allGuids) {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.EndsWith(FBX_PREFAB_FILE)) {
-                    if (foundPath != "") {
+                if (path.EndsWith(FbxPrefabFile)) {
+                    if (!string.IsNullOrEmpty(foundPath)) {
                         // How did this happen? Anyway, just don't try.
                         Debug.LogWarning(string.Format("{0} found in multiple places; did you forget to delete one of these?\n{1}\n{2}",
-                                FBX_PREFAB_FILE.Substring(1), foundPath, path));
+                                FbxPrefabFile.Substring(1), foundPath, path));
                         return "";
                     }
                     foundPath = path;
                 }
             }
-            if (foundPath == "") {
-                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE.Substring(1), ModelExporter.PACKAGE_UI_NAME));
+            if (string.IsNullOrEmpty(foundPath)) {
+                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FbxPrefabFile.Substring(1), ModelExporter.PACKAGE_UI_NAME));
             }
             return foundPath;
         #else
@@ -73,11 +86,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         public static bool IsFbxAsset(string assetPath) {
-            return assetPath.ToLower().EndsWith(".fbx");
+            return !string.IsNullOrEmpty(assetPath) && assetPath.ToLower().EndsWith(".fbx");
         }
 
         public static bool IsPrefabAsset(string assetPath) {
-            return assetPath.ToLower().EndsWith(".prefab");
+            return !string.IsNullOrEmpty(assetPath) && assetPath.ToLower().EndsWith(".prefab");
         }
 
         /// <summary>
@@ -89,6 +102,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         public static bool MayHaveFbxPrefabToFbxAsset(string prefabPath,
                 string fbxPrefabScriptPath, HashSet<string> fbxImported) {
+            if(fbxImported == null)
+            {
+                return false;
+            }
+
             var depPaths = AssetDatabase.GetDependencies(prefabPath, recursive: false);
 
             // If we can find the path to the FbxPrefab, check that the prefab depends on it.
@@ -197,7 +215,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         }
                         continue;
                     }
-                    var fbxAssetPath = fbxPrefabUtility.GetFbxAssetPath();
+                    var fbxAssetPath = fbxPrefabUtility.FbxAssetPath;
                     if (!fbxImported.Contains(fbxAssetPath)) {
                         if (Verbose) {
                             Debug.Log ("False-positive dependence: " + prefabPath + " via " + fbxAssetPath);
@@ -441,10 +459,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// Utility function: add an item to a dictionary.
             /// If the dictionary is null, create it.
             /// </summary>
-            public static void Add<K,V>(ref Dictionary<K,V> thedict, K key, V value)
+            public static void Add<TKey,TValue>(ref Dictionary<TKey,TValue> thedict, TKey key, TValue value)
             {
                 if (thedict == null) {
-                    thedict = new Dictionary<K, V>();
+                    thedict = new Dictionary<TKey, TValue>();
                 }
                 thedict.Add(key, value);
             }
@@ -454,11 +472,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// and return it.
             /// The dictionary must not be null.
             /// </summary>
-            public static V GetOrCreate<K,V>(Dictionary<K,V> thedict, K key) where V : new()
+            public static TValue GetOrCreate<TKey,TValue>(Dictionary<TKey,TValue> thedict, TKey key) where TValue : new()
             {
-                V value;
+                if(thedict == null)
+                {
+                    throw new System.ArgumentNullException("thedict");
+                }
+
+                TValue value;
                 if (!thedict.TryGetValue(key, out value)) {
-                    value = new V();
+                    value = new TValue();
                     thedict[key] = value;
                 }
                 return value;
@@ -469,10 +492,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// Create all the entries needed to append to the list.
             /// The dictionary will be allocated if it's null.
             /// </summary>
-            public static void Append<K, V>(ref Dictionary<K, List<V>> thedict, K key, V item)
+            public static void Append<TKey, TValue>(ref Dictionary<TKey, List<TValue>> thedict, TKey key, TValue item)
             {
                 if (thedict == null) {
-                    thedict = new Dictionary<K, List<V>>();
+                    thedict = new Dictionary<TKey, List<TValue>>();
                 }
                 GetOrCreate(thedict, key).Add(item);
             }
@@ -482,7 +505,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// Create all the entries needed to append to the list.
             /// The dictionary must not be null.
             /// </summary>
-            public static void Append<K, V>(Dictionary<K, List<V>> thedict, K key, V item)
+            public static void Append<TKey, TValue>(Dictionary<TKey, List<TValue>> thedict, TKey key, TValue item)
             {
                 GetOrCreate(thedict, key).Add(item);
             }
@@ -492,23 +515,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// Create all the entries needed to append to the list.
             /// The dictionary will be allocated if it's null.
             /// </summary>
-            public static void Append<K1, K2, V>(ref Dictionary<K1, Dictionary<K2, List<V>>> thedict, K1 key1, K2 key2, V item)
+            public static void Append<TKey1, TKey2, TValue>(ref Dictionary<TKey1, Dictionary<TKey2, List<TValue>>> thedict, TKey1 key1, TKey2 key2, TValue item)
             {
                 if (thedict == null) {
-                    thedict = new Dictionary<K1, Dictionary<K2, List<V>>>();
+                    thedict = new Dictionary<TKey1, Dictionary<TKey2, List<TValue>>>();
                 }
                 var thesubmap = GetOrCreate(thedict, key1);
                 Append(thesubmap, key2, item);
-            }
-
-            /// <summary>
-            /// Exception that denotes a likely programming error.
-            /// </summary>
-            public class FbxPrefabException : System.Exception
-            {
-                public FbxPrefabException() { }
-                public FbxPrefabException(string message) : base(message) { }
-                public FbxPrefabException(string message, System.Exception inner) : base(message, inner) { }
             }
 
             /// <summary>
@@ -544,6 +557,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 /// </summary>
                 public FbxRepresentation(Transform xfo, bool isRoot = true)
                 {
+                    if (!xfo)
+                    {
+                        return;
+                    }
+
                     m_children = new Dictionary<string, FbxRepresentation>();
                     
                     foreach (Transform child in xfo) {
@@ -575,6 +593,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 /// set 'required' to false to get a false return value instead.
                 /// </summary>
                 public static bool Consume(char expected, string json, ref int index, bool required = true) {
+                    if (string.IsNullOrEmpty(json))
+                    {
+                        return false;
+                    }
+
                     while (true) { // loop breaks if index == json.Length
                         switch(json[index]) {
                         case ' ':
@@ -601,6 +624,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 /// Leaves the index just past the close-quote character.
                 /// </summary>
                 public static string ReadString(string json, ref int index) {
+                    if (string.IsNullOrEmpty(json))
+                    {
+                        return null;
+                    }
+
                     int startIndex = index;
                     Consume('"', json, ref index);
                     var builder = new System.Text.StringBuilder();
@@ -638,6 +666,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 /// It does *not* surround str with quotes.
                 /// </summary>
                 public static string EscapeString(string str) {
+                    if(str == null)
+                    {
+                        return null;
+                    }
+
                     var builder = new System.Text.StringBuilder();
                     foreach(var c in str) {
                         switch(c) {
@@ -751,7 +784,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             ///
             /// TODO: handle conflicts. For now, we just clobber the prefab.
             /// </summary>
-            public class UpdateList
+            internal class UpdateList
             {
                 // We build up a flat list of names for the nodes of the old fbx,
                 // the new fbx, and the prefab. We also figure out the parents.
@@ -984,7 +1017,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     //    x    a     b   => conflict! switch to a for now (todo!)
                     //    x    x     a   => no action. Todo: what if a is being destroyed? conflict!
                     foreach (var prefabNodeName in m_prefabData.NodeNames) {
-                        if (prefabNodeName == "") {
+                        if (string.IsNullOrEmpty(prefabNodeName)) {
                             // Don't reparent the root.
                             continue;
                         }
@@ -1148,19 +1181,28 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         ;
                 }
 
-                public HashSet<String> GetNodesToCreate()
+                public HashSet<String> NodesToCreate
                 {
-                    return m_nodesToCreate;
+                    get
+                    {
+                        return m_nodesToCreate;
+                    }
                 }
 
-                public HashSet<String> GetNodesToDestroy()
+                public HashSet<String> NodesToDestroy
                 {
-                    return m_nodesToDestroy;
+                    get
+                    {
+                        return m_nodesToDestroy;
+                    }
                 }
 
-                public HashSet<String> GetNodesToRename()
+                public HashSet<String> NodesToRename
                 {
-                    return m_nodesToRename;
+                    get
+                    {
+                        return m_nodesToRename;
+                    }
                 }
 
                 /// <summary>
@@ -1192,6 +1234,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 /// </summary>
                 public HashSet<GameObject> ImplementUpdates(FbxPrefab prefabInstance)
                 {
+                    if(prefabInstance == null)
+                    {
+                        return new HashSet<GameObject>();
+                    }
+
                     Log("{0}: performing updates", prefabInstance.name);
 
                     var updatedNodes = new HashSet<GameObject>();
@@ -1333,32 +1380,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                                 prefabComponent = prefabComponents[index];
                                 prefabComponents.RemoveAt(index);
 
-                                GameObject tempGameObject = new GameObject();
-                                try
-                                {                                    
-                                    Transform tempTransform = tempGameObject.transform;
-
-                                    UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponent.jsonValue, tempTransform);
-
-                                    var rectTransform = prefabComponent as RectTransform;
-                                    rectTransform.localRotation = tempTransform.localRotation;
-                                    rectTransform.localPosition = tempTransform.localPosition;
-                                    rectTransform.localScale = tempTransform.localScale;
-
-                                    #region force update of rect transform 2017.3 or newer 
-                                    // using reflection so we can continue to compile against versions 2017.1
-                                    // Retrieve the method you are looking for
-                                    System.Reflection.MethodInfo methodInfo = 
-                                        rectTransform.GetType().GetMethod("ForceUpdateRectTransforms");
-                                    // Invoke the method on the instance 
-                                    if (methodInfo!=null)
-                                        methodInfo.Invoke(rectTransform, null);
-                                    #endregion
-                                }
-                                finally
-                                {
-                                    GameObject.DestroyImmediate(tempGameObject);
-                                }
+                                UpdateRectTransform(prefabComponent as RectTransform, fbxComponent.jsonValue);
 
                                 Log("updated component {0}:{1}", componentName, typeof(RectTransform));
                                 continue;
@@ -1370,40 +1392,72 @@ namespace UnityEditor.Formats.Fbx.Exporter
                             // the bones are in the prefab, and not the fbx
                             if (prefabComponent is SkinnedMeshRenderer)
                             {
-                                var skinnedMeshComponent = prefabComponent as SkinnedMeshRenderer;
-                                var rootBone = skinnedMeshComponent.rootBone;
-                                var bones = skinnedMeshComponent.bones;
-
-                                var fbxAssetTransform = m_fbxPrefabUtility.GetFbxAsset().transform;
-                                
-                                var rootPrefabTransform = GetMatchingPrefabTransform(rootBone, fbxAssetTransform, prefabRoot);
-                                if (rootPrefabTransform == null)
-                                {
-                                    Debug.LogWarningFormat("FbxPrefabAutoUpdater: Could not find root bone {0} for {1} skinned mesh in linked prefab", rootBone.name, skinnedMeshComponent.name);
-                                }
-                                skinnedMeshComponent.rootBone = rootPrefabTransform;
-
-                                var prefabBones = new Transform[bones.Length];
-                                for (int i = 0; i < bones.Length; i++)
-                                {
-                                    var bone = bones[i];
-
-                                    var prefabTransform = GetMatchingPrefabTransform(bone, fbxAssetTransform, prefabRoot);
-                                    if (prefabTransform == null)
-                                    {
-                                        Debug.LogWarningFormat("FbxPrefabAutoUpdater: Could not find bone {0} for {1} skinned mesh", bone.name, skinnedMeshComponent.name);
-                                        continue;
-                                    }
-
-                                    prefabBones[i] = prefabTransform;
-                                }
-                                skinnedMeshComponent.bones = prefabBones;
-
+                                UpdateSkinnedMeshBones(prefabComponent as SkinnedMeshRenderer, prefabRoot);
                                 continue;
                             }
                         }
                     }
                     return updatedNodes;
+                }
+
+                private void UpdateRectTransform(RectTransform rectTransform, string fbxComponentJson)
+                {
+                    GameObject tempGameObject = new GameObject();
+                    try
+                    {
+                        Transform tempTransform = tempGameObject.transform;
+
+                        UnityEditor.EditorJsonUtility.FromJsonOverwrite(fbxComponentJson, tempTransform);
+                        
+                        rectTransform.localRotation = tempTransform.localRotation;
+                        rectTransform.localPosition = tempTransform.localPosition;
+                        rectTransform.localScale = tempTransform.localScale;
+
+                        #region force update of rect transform 2017.3 or newer 
+                        // using reflection so we can continue to compile against versions 2017.1
+                        // Retrieve the method you are looking for
+                        System.Reflection.MethodInfo methodInfo =
+                            rectTransform.GetType().GetMethod("ForceUpdateRectTransforms");
+                        // Invoke the method on the instance 
+                        if (methodInfo != null)
+                            methodInfo.Invoke(rectTransform, null);
+                        #endregion
+                    }
+                    finally
+                    {
+                        GameObject.DestroyImmediate(tempGameObject);
+                    }
+                }
+
+                private void UpdateSkinnedMeshBones(SkinnedMeshRenderer skinnedMeshComponent, Transform prefabRoot)
+                {
+                    var rootBone = skinnedMeshComponent.rootBone;
+                    var bones = skinnedMeshComponent.bones;
+
+                    var fbxAssetTransform = m_fbxPrefabUtility.FbxAsset.transform;
+
+                    var rootPrefabTransform = GetMatchingPrefabTransform(rootBone, fbxAssetTransform, prefabRoot);
+                    if (rootPrefabTransform == null)
+                    {
+                        Debug.LogWarningFormat("FbxPrefabAutoUpdater: Could not find root bone {0} for {1} skinned mesh in linked prefab", rootBone.name, skinnedMeshComponent.name);
+                    }
+                    skinnedMeshComponent.rootBone = rootPrefabTransform;
+
+                    var prefabBones = new Transform[bones.Length];
+                    for (int i = 0; i < bones.Length; i++)
+                    {
+                        var bone = bones[i];
+
+                        var prefabTransform = GetMatchingPrefabTransform(bone, fbxAssetTransform, prefabRoot);
+                        if (prefabTransform == null)
+                        {
+                            Debug.LogWarningFormat("FbxPrefabAutoUpdater: Could not find bone {0} for {1} skinned mesh", bone.name, skinnedMeshComponent.name);
+                            continue;
+                        }
+
+                        prefabBones[i] = prefabTransform;
+                    }
+                    skinnedMeshComponent.bones = prefabBones;
                 }
             }
 
@@ -1437,7 +1491,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 // First write down what we want to do.
-                var updates = new UpdateList(GetFbxHistory(), m_fbxPrefab.FbxModel.transform, m_fbxPrefab);
+                var updates = new UpdateList(FbxHistory, m_fbxPrefab.FbxModel.transform, m_fbxPrefab);
 
                 // Instantiate the prefab, work on the instance, then copy back.
                 // We could optimize this out if we had nothing to do, but then the
@@ -1449,13 +1503,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var prefabRoot = UnityEditor.PrefabUtility.FindPrefabRoot(m_fbxPrefab.gameObject);
                 var prefabInstanceRoot = UnityEditor.PrefabUtility.InstantiatePrefab(prefabRoot) as GameObject;
                 if (!prefabInstanceRoot) {
-                    throw new System.Exception(string.Format("Failed to instantiate {0}; is it really a prefab?",
+                    throw new FbxPrefabException(string.Format("Failed to instantiate {0}; is it really a prefab?",
                         m_fbxPrefab.gameObject));
                 }
                 var fbxPrefabInstance = prefabInstanceRoot.GetComponentsInChildren<FbxPrefab>().FirstOrDefault(
                     fbxPrefab => UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(fbxPrefab) == m_fbxPrefab);
                 if (!fbxPrefabInstance) {
-                    throw new System.Exception(string.Format("Internal error: couldn't find the right FbxPrefab after instantiating."));
+                    throw new FbxPrefabException(string.Format("Internal error: couldn't find the right FbxPrefab after instantiating."));
                 }
 
                 // Do ALL the things (potentially nothing).
@@ -1479,35 +1533,47 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// <summary>
             /// Returns the fbx model we're tracking.
             /// </summary>
-            public GameObject GetFbxAsset()
+            public GameObject FbxAsset
             {
-                return m_fbxPrefab.FbxModel;
+                get
+                {
+                    return m_fbxPrefab.FbxModel;
+                }
             }
 
             /// <summary>
             /// Returns the asset path of the fbx model we're tracking.
             /// </summary>
-            public string GetFbxAssetPath()
+            public string FbxAssetPath
             {
-                if (!GetFbxAsset()) { return ""; }
-                return UnityEditor.AssetDatabase.GetAssetPath(GetFbxAsset());
+                get
+                {
+                    if (!FbxAsset) { return ""; }
+                    return UnityEditor.AssetDatabase.GetAssetPath(FbxAsset);
+                }
             }
 
             /// <summary>
             /// Returns the tree representation of the fbx file as it was last time we sync'd.
             /// </summary>
-            public FbxRepresentation GetFbxHistory()
+            public FbxRepresentation FbxHistory
             {
-                return new FbxRepresentation(m_fbxPrefab.FbxHistory);
+                get
+                {
+                    return new FbxRepresentation(m_fbxPrefab.FbxHistory);
+                }
             }
 
             /// <summary>
             /// Returns the string representation of the fbx file as it was last time we sync'd.
             /// Really just for debugging.
             /// </summary>
-            public string GetFbxHistoryString()
+            public string FbxHistoryString
             {
-                return m_fbxPrefab.FbxHistory;
+                get
+                {
+                    return m_fbxPrefab.FbxHistory;
+                }
             }
 
             /// <summary>
@@ -1545,12 +1611,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 //          => normal case when user wants to reconnect or change
                 //             the model. Keep the old history and update
                 //             immediately.
-                if (!GetFbxAsset()) {
+                if (!FbxAsset) {
                     // Case 0 or 1
                     return;
                 }
 
-                if (string.IsNullOrEmpty(GetFbxHistoryString())) {
+                if (string.IsNullOrEmpty(FbxHistoryString)) {
                     // Case 2.
                     // This is the first time we've seen the FBX file. Assume that
                     // it's the original FBX. Further assume that the user is happy

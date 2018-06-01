@@ -68,10 +68,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return new MetricDistance(a._meters + b._meters);
             }
 
+            public static MetricDistance Add(MetricDistance a, MetricDistance b)
+            {
+                return a + b;
+            }
+
             public static MetricDistance operator -(MetricDistance a, MetricDistance b) {
                 if (a == null) throw new ArgumentNullException("a");
                 if (b == null) throw new ArgumentNullException("b");
                 return new MetricDistance(a._meters - b._meters);
+            }
+
+            public static MetricDistance Subtract(MetricDistance a, MetricDistance b)
+            {
+                return a - b;
             }
 
             public static MetricDistance operator *(MetricDistance a, MetricDistance b) {
@@ -80,10 +90,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return new MetricDistance(a._meters * b._meters);
             }
 
+            public static MetricDistance Multiply(MetricDistance a, MetricDistance b)
+            {
+                return a * b;
+            }
+
             public static MetricDistance operator /(MetricDistance a, MetricDistance b) {
                 if (a == null) throw new ArgumentNullException("a");
                 if (b == null) throw new ArgumentNullException("b");
                 return new MetricDistance(a._meters / b._meters);
+            }
+
+            public static MetricDistance Divide(MetricDistance a, MetricDistance b)
+            {
+                return a / b;
             }
 
         }
@@ -141,10 +161,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return new ImperialDistance(a._inches + b._inches);
             }
 
+            public static ImperialDistance Add(ImperialDistance a, ImperialDistance b)
+            {
+                return a + b;
+            }
+
             public static ImperialDistance operator -(ImperialDistance a, ImperialDistance b) {
                 if (a == null) throw new ArgumentNullException("a");
                 if (b == null) throw new ArgumentNullException("b");
                 return new ImperialDistance(a._inches - b._inches);
+            }
+
+            public static ImperialDistance Subtract(ImperialDistance a, ImperialDistance b)
+            {
+                return a - b;
             }
 
             public static ImperialDistance operator *(ImperialDistance a, ImperialDistance b) {
@@ -153,10 +183,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return new ImperialDistance(a._inches * b._inches);
             }
 
+            public static ImperialDistance Multiply(ImperialDistance a, ImperialDistance b)
+            {
+                return a * b;
+            }
+
             public static ImperialDistance operator /(ImperialDistance a, ImperialDistance b) {
                 if (a == null) throw new ArgumentNullException("a");
                 if (b == null) throw new ArgumentNullException("b");
                 return new ImperialDistance(a._inches / b._inches);
+            }
+
+            public static ImperialDistance Divide(ImperialDistance a, ImperialDistance b)
+            {
+                return a / b;
             }
         }
 
@@ -209,6 +249,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // and specifies the type for which the method is defined.
             public static void Dump (this AnimationCurve animCurve, string message="", float[] keyTimesExpected = null, float[] keyValuesExpected = null)
             {
+                if(animCurve == null)
+                {
+                    throw new System.ArgumentNullException("animCurve");
+                }
+
                 int idx = 0;
                 foreach (var key in animCurve.keys) {
                     if (keyTimesExpected != null && keyValuesExpected != null && keyTimesExpected.Length==keyValuesExpected.Length) {
