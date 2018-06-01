@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -60,6 +61,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns>The integration.</returns>
         /// <param name="exe">Exe.</param>
+        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public abstract int InstallIntegration(string exe);
 
         /// <summary>
@@ -73,6 +76,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Launches application at given path
         /// </summary>
         /// <param name="AppPath"></param>
+        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public static void LaunchDCCApplication(string AppPath)
         {
             System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
@@ -327,6 +332,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
+        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public int ConfigureMaya(string mayaPath)
         {
              int ExitCode = 0;
@@ -527,6 +534,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
+        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public override int InstallIntegration (string exe)
         {
             if (!InstallMaya(verbose: true)) {
@@ -606,6 +615,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return installScript;
         }
 
+        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public static int InstallMaxPlugin(string maxExe){
             if (Application.platform != RuntimePlatform.WindowsEditor) {
                 Debug.LogError ("The 3DsMax Unity plugin is Windows only, please try installing a Maya plugin instead");
@@ -667,6 +678,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return ExitCode;
         }
 
+        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public override int InstallIntegration(string exe){
             return MaxIntegration.InstallMaxPlugin (exe);
         }

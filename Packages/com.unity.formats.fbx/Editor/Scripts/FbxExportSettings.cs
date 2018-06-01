@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter {
     [System.Serializable]
@@ -903,6 +904,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         public enum DCCType { Maya, Max };
 
+        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public static void AddDCCOption(string newOption, DCCType dcc){
             if (Application.platform == RuntimePlatform.OSXEditor && dcc == DCCType.Maya) {
                 // on OSX we get a path ending in .app, which is not quite the exe
@@ -953,6 +956,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// <summary>
         /// Ask the version number by running maya.
         /// </summary>
+        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         internal static string AskMayaVersion(string exePath) {
             System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
             myProcess.StartInfo.FileName = exePath;
