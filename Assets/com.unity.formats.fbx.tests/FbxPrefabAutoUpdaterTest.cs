@@ -170,7 +170,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             FbxPrefab fbxPrefabScript = cubePrefab.GetComponent<FbxPrefab>();
 
 
-            FbxPrefab.StringPair stringpair = new FbxPrefab.StringPair();
+            StringPair stringpair = new StringPair();
             stringpair.FBXObjectName = "SphereFBX";
             stringpair.UnityObjectName = "Sphere";
             fbxPrefabScript.NameMapping.Add(stringpair);
@@ -203,7 +203,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
             // In FbxPrefab Component of Cube, add SphereFBX/Sphere name mapping
             FbxPrefab fbxPrefabScript = cube.GetComponent<FbxPrefab>();
-            FbxPrefab.StringPair stringpair = new FbxPrefab.StringPair();
+            StringPair stringpair = new StringPair();
             stringpair.FBXObjectName = "SphereFBX";
             stringpair.UnityObjectName = "Sphere";
             fbxPrefabScript.NameMapping.Add(stringpair);
@@ -262,7 +262,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
             // In FbxPrefab Component of Cube, add SphereFBX/Sphere name mapping
             FbxPrefab fbxPrefabScript = cube.GetComponent<FbxPrefab>();
-            FbxPrefab.StringPair stringpair = new FbxPrefab.StringPair();
+            StringPair stringpair = new StringPair();
             stringpair.FBXObjectName = "SphereFBX";
             stringpair.UnityObjectName = "Sphere";
             fbxPrefabScript.NameMapping.Add(stringpair);

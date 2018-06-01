@@ -42,11 +42,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         public void RemoveMappingFBXObjectName(string fbxObjectName)
         {
-            FbxPrefab.StringPair stockNameMapping = new FbxPrefab.StringPair();
+            StringPair stockNameMapping = new StringPair();
             if (!String.IsNullOrEmpty(fbxObjectName) && m_fbxPrefab.NameMapping != null)
             {
                 bool foundMapping = false;
-                foreach (FbxPrefab.StringPair nameMapping in m_fbxPrefab.NameMapping)
+                foreach (StringPair nameMapping in m_fbxPrefab.NameMapping)
                 {
                     if (fbxObjectName == nameMapping.FBXObjectName)
                     {
@@ -67,11 +67,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         public void RemoveMappingUnityObjectName(string unityObjectName)
         {
-            FbxPrefab.StringPair stockNameMapping = new FbxPrefab.StringPair();
+            StringPair stockNameMapping = new StringPair();
             if (!String.IsNullOrEmpty(unityObjectName) && m_fbxPrefab.NameMapping != null)
             {
                 bool foundMapping = false;
-                foreach (FbxPrefab.StringPair nameMapping in m_fbxPrefab.NameMapping)
+                foreach (StringPair nameMapping in m_fbxPrefab.NameMapping)
                 {
                     if (unityObjectName == nameMapping.UnityObjectName)
                     {
