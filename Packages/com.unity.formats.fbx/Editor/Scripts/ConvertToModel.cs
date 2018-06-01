@@ -416,7 +416,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Object.DestroyImmediate(fbxPrefab);
             }
             fbxPrefab = toSetUp.AddComponent<FbxPrefab>();
-            var fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxPrefab);
+            var fbxPrefabUtility = new FbxPrefabUtility (fbxPrefab);
             fbxPrefabUtility.SetSourceModel(unityMainAsset);
         }
 

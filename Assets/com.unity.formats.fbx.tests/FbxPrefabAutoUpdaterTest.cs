@@ -30,7 +30,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             // Instantiate the fbx and create a prefab from it.
             // Delete the object right away (don't even wait for term).
             var fbxInstance = PrefabUtility.InstantiatePrefab (m_fbx) as GameObject;
-            new FbxPrefabAutoUpdater.FbxPrefabUtility (fbxInstance.AddComponent<FbxPrefab> ()).SetSourceModel (m_fbx);
+            new FbxPrefabUtility (fbxInstance.AddComponent<FbxPrefab> ()).SetSourceModel (m_fbx);
             m_prefabPath = GetRandomPrefabAssetPath ();
             m_prefab = PrefabUtility.CreatePrefab (m_prefabPath, fbxInstance);
             AssetDatabase.Refresh ();
@@ -176,7 +176,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             fbxPrefabScript.NameMapping.Add(stringpair);
 
 
-            FbxPrefabAutoUpdater.FbxPrefabUtility fbxPrefabUtility = new FbxPrefabAutoUpdater.FbxPrefabUtility(fbxPrefabScript);
+            FbxPrefabUtility fbxPrefabUtility = new FbxPrefabUtility(fbxPrefabScript);
 
             Assert.IsTrue(fbxPrefabUtility.GetUnityObjectName("SphereFBX") == stringpair.UnityObjectName);
             Assert.IsTrue(fbxPrefabUtility.GetFBXObjectName("Sphere") == stringpair.FBXObjectName);
@@ -401,7 +401,7 @@ namespace FbxExporters.PerformanceTests {
                 var instance = CreateGameObject("prefab_" + i);
                 Assert.IsTrue(instance);
                 var fbxPrefab = instance.AddComponent<FbxPrefab>();
-                new FbxPrefabAutoUpdater.FbxPrefabUtility(fbxPrefab).SetSourceModel(fbxFiles[i]);
+                new FbxPrefabUtility(fbxPrefab).SetSourceModel(fbxFiles[i]);
                 PrefabUtility.CreatePrefab(GetRandomPrefabAssetPath(), fbxFiles[i]);
             }
             Debug.Log("Created prefabs in " + stopwatch.ElapsedMilliseconds);
