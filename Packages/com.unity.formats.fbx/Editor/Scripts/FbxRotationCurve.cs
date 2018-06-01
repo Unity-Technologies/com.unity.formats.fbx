@@ -1,4 +1,4 @@
-﻿using UnityEngine.Formats.FbxSdk;
+﻿using Autodesk.Fbx;
 using UnityEngine;
 using System.Collections.Generic;
 

@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.Animations;
 using UnityEditor;
 using System.Linq;
+using Autodesk.Fbx;
 using System.Runtime.Serialization;
-using UnityEngine.Formats.FbxSdk;
 using UnityEditor.Formats.Fbx.Exporter.Visitors;
 using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 
@@ -1291,7 +1291,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var renderer = unityGo.GetComponent<Renderer>();
             var materials = renderer ? renderer.sharedMaterials : null;
 
-            UnityEngine.Formats.FbxSdk.FbxSurfaceMaterial newMaterial = null;
+            Autodesk.Fbx.FbxSurfaceMaterial newMaterial = null;
             if (materials != null)
             {
                 foreach (var mat in materials) {

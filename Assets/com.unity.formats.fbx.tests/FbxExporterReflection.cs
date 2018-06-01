@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine.Formats.FbxSdk;
+using Autodesk.Fbx;
 using UnityEngine;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests

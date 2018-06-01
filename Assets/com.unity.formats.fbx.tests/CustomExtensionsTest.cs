@@ -5,7 +5,7 @@
 using UnityEngine;
 using NUnit.Framework;
 using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
-using UnityEngine.Formats.FbxSdk;
+using Autodesk.Fbx;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
