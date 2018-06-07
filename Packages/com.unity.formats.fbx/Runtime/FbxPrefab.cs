@@ -3,6 +3,40 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Fbx.Exporter
 {
+    [System.Serializable]
+    public struct StringPair {
+        private string m_fbxObjectName;
+        public string FBXObjectName
+        {
+            get { return m_fbxObjectName; }
+            set { m_fbxObjectName = value; }
+        }
+        private string m_unityObjectName;
+        public string UnityObjectName
+        {
+            get { return m_unityObjectName; }
+            set { m_unityObjectName = value; }
+        }
+    }
+
+    /// <summary>
+    /// Handler for an OnUpdate event.
+    ///
+    /// The update is performed on a temporary instance, which, shortly after
+    /// this handler is invoked, will be applied to the prefab.
+    ///
+    /// The event handler can make changes to any objects in the hierarchy rooted
+    /// by the updatedInstance. Those changes will be applied to the prefab.
+    ///
+    /// The updatedObjects include all objects in the temporary instance
+    /// that were:
+    /// - created, or
+    /// - changed parent, or
+    /// - had a component that was created, destroyed, or updated.
+    /// There is no notification for entire objects that were destroyed.
+    /// </summary>
+    public delegate void HandleUpdate(FbxPrefab updatedInstance, IEnumerable<GameObject> updatedObjects);
+
     /// <summary>
     /// This component is applied to a prefab. It keeps the prefab sync'd up
     /// with an FBX file.
@@ -23,22 +57,6 @@ namespace UnityEngine.Formats.Fbx.Exporter
         /// </summary>
         [SerializeField] // [HideInInspector]
         string m_fbxHistory;
-
-        [System.Serializable]
-        public struct StringPair {
-            private string m_fbxObjectName;
-            public string FBXObjectName
-            {
-                get { return m_fbxObjectName; }
-                set { m_fbxObjectName = value; }
-            }
-            private string m_unityObjectName;
-            public string UnityObjectName
-            {
-                get { return m_unityObjectName; }
-                set { m_unityObjectName = value; }
-            }
-        }
 
         [SerializeField]
         List<StringPair> m_nameMapping = new List<StringPair>();
@@ -94,25 +112,6 @@ namespace UnityEngine.Formats.Fbx.Exporter
 
         //////////////////////////////////////////////////////////////////////////
         // Event handling for updates.
-
-        /// <summary>
-        /// Handler for an OnUpdate event.
-        ///
-        /// The update is performed on a temporary instance, which, shortly after
-        /// this handler is invoked, will be applied to the prefab.
-        ///
-        /// The event handler can make changes to any objects in the hierarchy rooted
-        /// by the updatedInstance. Those changes will be applied to the prefab.
-        ///
-        /// The updatedObjects include all objects in the temporary instance
-        /// that were:
-        /// - created, or
-        /// - changed parent, or
-        /// - had a component that was created, destroyed, or updated.
-        /// There is no notification for entire objects that were destroyed.
-        /// </summary>
-        public delegate void HandleUpdate(FbxPrefab updatedInstance, IEnumerable<GameObject> updatedObjects);
-
         /// <summary>
         /// OnUpdate is raised once when an FbxPrefab gets updated, after all the changes
         /// have been done.

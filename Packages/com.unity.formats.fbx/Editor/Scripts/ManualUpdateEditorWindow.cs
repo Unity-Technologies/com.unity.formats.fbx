@@ -142,7 +142,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // != [Delete] 
                 if (selectedNodesToDestroy[i] != 0)
                 {
-                    FbxPrefab.StringPair stringpair = new FbxPrefab.StringPair();
+                    StringPair stringpair = new StringPair();
                     stringpair.FBXObjectName = options[selectedNodesToDestroy[i]].text;
                     stringpair.UnityObjectName = m_nodesToDestroy[i];
 
@@ -170,7 +170,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     if (currentUnityNodeName != m_fbxPrefabUtility.GetUnityObjectName(options[selectedNodesToRename[i]].text))
                     {
                         m_fbxPrefabUtility.RemoveMappingUnityObjectName(currentUnityNodeName);
-                        FbxPrefab.StringPair stringpair = new FbxPrefab.StringPair();
+                        StringPair stringpair = new StringPair();
                         stringpair.FBXObjectName = options[selectedNodesToRename[i]].text;
                         stringpair.UnityObjectName = currentUnityNodeName;
                         m_fbxPrefab.NameMapping.Add(stringpair);

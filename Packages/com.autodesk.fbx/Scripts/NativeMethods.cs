@@ -226,15 +226,22 @@ class NativeMethods {
 #if COM_UNITY_FORMATS_FBX_AS_ASSET || UNITY_STANDALONE 
   const string DllImportName = "UnityFbxSdkNative";
 #elif UNITY_EDITOR_OSX
-  const string DllImportName = "Packages/com.unity.formats.fbxsdk/MacOS/UnityFbxSdkNative.bundle/Contents/MacOS/UnityFbxSdkNative";
+  const string DllImportName = "Packages/com.autodesk.fbx/MacOS/UnityFbxSdkNative.bundle/Contents/MacOS/UnityFbxSdkNative";
 #elif UNITY_EDITOR_LINUX
-  const string DllImportName = "Packages/com.unity.formats.fbxsdk/Linux/UnityFbxSdkNative.so";
+  const string DllImportName = "Packages/com.autodesk.fbx/Linux/UnityFbxSdkNative.so";
 #elif UNITY_EDITOR_WIN
-  const string DllImportName = "Packages/com.unity.formats.fbxsdk/Windows/UnityFbxSdkNative.dll";
+  const string DllImportName = "Packages/com.autodesk.fbx/Windows/UnityFbxSdkNative.dll";
 #else
   #error "FbxSdk: C# bindings for this platform haven't been implemented yet, sorry."
   const string DllImportName = "UnityFbxSdkNative";
 #endif
+
+// Because of a non-static delegate (ProgressCallback) that is called from NativeFBX->Managed, 
+// we are not supporting IL2CPP
+#if ENABLE_IL2CPP
+     #error Autodesk.Fbx is not supported on IL2CPP
+#endif
+
 
 
   [global::System.Runtime.InteropServices.DllImport(DllImportName, EntryPoint="CSharp_AutodeskfFbx_new_FbxDouble4x4__SWIG_0___")]
