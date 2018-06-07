@@ -38,9 +38,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     {
         #if COM_UNITY_FORMATS_FBX_AS_ASSET
         public const string FbxPrefabFile = "/UnityFbxPrefab.dll";
-        #elif UNITY_2018_2_OR_NEWER
-        public const string FbxPrefabFile = "/FbxPrefab.cs";
-        #else // Unity 2018.1 and fbx installed as a package
+        #else
         public const string FbxPrefabFile = "Packages/com.unity.formats.fbx/Runtime/FbxPrefab.cs";
         #endif
 
@@ -51,7 +49,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public static string FindFbxPrefabAssetPath()
         {
-        #if COM_UNITY_FORMATS_FBX_AS_ASSET || UNITY_2018_2_OR_NEWER
+#if COM_UNITY_FORMATS_FBX_AS_ASSET
             // Find guids that are scripts that look like FbxPrefab.
             // That catches FbxPrefabTest too, so we have to make sure.
             var allGuids = AssetDatabase.FindAssets("FbxPrefab t:MonoScript");
@@ -72,17 +70,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FbxPrefabFile.Substring(1), ModelExporter.PACKAGE_UI_NAME));
             }
             return foundPath;
-        #else
-            // In Unity 2018.1, FindAssets can't find FbxPrefab.cs in a package.
+#else
+            // In Unity 2018.1 and 2018.2.0b7, FindAssets can't find FbxPrefab.cs in a package.
             // So we hardcode the path.
-            var path = FBX_PREFAB_FILE;
+            var path = FbxPrefabFile;
             if (System.IO.File.Exists(System.IO.Path.GetFullPath(path))) {
                 return path;
             } else {
-                Debug.LogWarning(string.Format("{0} not found; are you trying to uninstall {1}?", FBX_PREFAB_FILE, UnityEditor.Formats.Fbx.Exporter.ModelExporter.PACKAGE_UI_NAME));
+                Debug.LogWarningFormat("{0} not found; update FbxPrefabFile variable in FbxPrefabAutoUpdater.cs to point to FbxPrefab.cs path.", FbxPrefabFile);
                 return "";
             }
-        #endif
+#endif
         }
 
         public static bool IsFbxAsset(string assetPath) {
