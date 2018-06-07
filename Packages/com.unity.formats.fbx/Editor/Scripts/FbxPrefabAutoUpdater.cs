@@ -4,6 +4,7 @@ using System.Linq;
 using System;
 using System.Runtime.Serialization;
 using UnityEngine.Formats.Fbx.Exporter;
+using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -100,6 +101,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         ///
         /// May return a false positive. This is a cheap check.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public static bool MayHaveFbxPrefabToFbxAsset(string prefabPath,
                 string fbxPrefabScriptPath, HashSet<string> fbxImported) {
             if(fbxImported == null)
@@ -289,6 +291,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Launch the manual update of the linked prefab specified
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public static void UpdateLinkedPrefab(GameObject prefabOrInstance)
         {
             // Find the prefab, bail if this is neither a prefab nor an instance.

@@ -8,6 +8,7 @@ using Autodesk.Fbx;
 using System.Runtime.Serialization;
 using UnityEditor.Formats.Fbx.Exporter.Visitors;
 using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
+using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -873,6 +874,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export GameObject as a skinned mesh with material, bones, a skin and, a bind pose.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         protected bool ExportSkinnedMesh (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
         {
             if(!unityGo || fbxNode == null)
@@ -948,6 +950,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Export bones of skinned mesh, if this is a skinned mesh with
         /// bones and bind poses.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         private bool ExportSkeleton (SkinnedMeshRenderer skinnedMesh, FbxScene fbxScene, out Dictionary<SkinnedMeshRenderer, Transform[]> skinnedMeshToBonesMap)
         {
             skinnedMeshToBonesMap = new Dictionary<SkinnedMeshRenderer, Transform[]> ();
@@ -1285,6 +1288,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// if this game object is a model prefab then export with shared components
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         protected bool ExportInstance(GameObject unityGo, FbxNode fbxNode)
         {
             if (!unityGo || fbxNode == null)
@@ -1771,6 +1775,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Return set of sample times to cover all keys on animation curves
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static HashSet<float> GetSampleTimes(AnimationCurve[] animCurves, double sampleRate)
         {
             var keyTimes = new HashSet<float>();
@@ -1798,6 +1803,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Return set of all keys times on animation curves
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static HashSet<float> GetKeyTimes(AnimationCurve[] animCurves)
         {
             var keyTimes = new HashSet<float>();
@@ -1868,6 +1874,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export animation curve key samples
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         internal void ExportAnimationSamples (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve,
             double sampleRate,
             UnityToMayaConvertSceneHelper convertSceneHelper)
@@ -1964,6 +1971,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// NOTE: This is not used for rotations, because we need to convert from
         /// quaternion to euler and various other stuff.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         protected void ExportAnimationCurve (FbxNode fbxNode,
                                                 AnimationCurve uniAnimCurve,
                                                 float frameRate,
@@ -2063,6 +2071,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export an AnimationClip as a single take
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         protected void ExportAnimationClip (AnimationClip uniAnimClip, GameObject uniRoot, FbxScene fbxScene)
         {
             if (!uniAnimClip || !uniRoot || fbxScene == null) return;
@@ -2229,6 +2238,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="dest">Destination, child of the source.</param>
         /// <param name="sampleRate">Sample rate.</param>
         /// <param name="unityCurves">Unity curves.</param>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         private void TransferMotion(Transform source, Transform dest, float sampleRate, ref Dictionary<GameObject, List<UnityCurve>> unityCurves){
             // get sample times for curves in dest + source
             // at each sample time, evaluate all 18 transfom anim curves, creating 2 transform matrices
@@ -2457,6 +2467,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export the Animator component on this game object
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         protected void ExportAnimation (GameObject uniRoot, FbxScene fbxScene)
         {
             if (!uniRoot)
@@ -2641,6 +2652,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         ///     but components are only exported if explicitly animated. Meshes are not exported.
         /// </summary>
         /// <returns>The number of nodes exported.</returns>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         internal int ExportAnimationOnly(
             GameObject unityGO,
             FbxScene fbxScene,
@@ -2942,6 +2954,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>The animation only hierarchy count.</returns>
         /// <param name="exportSet">GameObject hierarchies selected for export.</param>
         /// <param name="hierarchyToExportData">Map from GameObject hierarchy to animation export data.</param>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         internal int GetAnimOnlyHierarchyCount(Dictionary<GameObject, IExportData> hierarchyToExportData)
         {
             // including any parents of animated objects that are exported
@@ -2960,6 +2973,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return completeExpSet.Count;
         }
 
+        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static Dictionary<GameObject, IExportData> GetExportData(Object[] objects, IExportOptions exportOptions = null)
         {
             if (exportOptions==null)
@@ -2990,6 +3004,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return exportData.Count == 0 ? null : exportData;
         }
 
+        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static IExportData GetExportData(GameObject rootObject, AnimationClip animationClip, IExportOptions exportOptions = null)
         {
             if (exportOptions==null)
@@ -3090,6 +3105,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Transform components have already been exported.
         /// This function exports the other components and animation.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         protected bool ExportComponents(FbxScene fbxScene, bool exportAnim = true)
         {
             var animationNodes = new HashSet<GameObject> ();
@@ -3186,6 +3202,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns>The revised export set</returns>
         /// <param name="unityExportSet">Unity export set.</param>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static HashSet<GameObject> RemoveRedundantObjects(IEnumerable<UnityEngine.Object> unityExportSet)
         {
             // basically just remove the descendents from the unity export set
@@ -3296,6 +3313,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         ///
         /// This refreshes the asset database.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         internal int ExportAll (
             IEnumerable<UnityEngine.Object> unityExportSet, 
             Dictionary<GameObject, IExportData> exportData)
@@ -3927,6 +3945,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// This goes through the callback system to find the right mesh and
         /// allow plugins to substitute their own meshes.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         bool ExportMesh (GameObject gameObject, FbxNode fbxNode)
         {
             // First allow the object-based callbacks to have a hack at it.
@@ -4060,6 +4079,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
 
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public static string ExportObjects(
             string filePath,
             UnityEngine.Object[] objects = null,
@@ -4073,6 +4093,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Export a list of (Game) objects to FBX file. 
         /// Use the SaveFile panel to allow user to enter a file name.
         /// <summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static string ExportObjects (
             string filePath,
             UnityEngine.Object[] objects = null,
@@ -4104,6 +4125,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return null;
         }
 
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public static string ExportObject (
             string filePath, 
             UnityEngine.Object root,

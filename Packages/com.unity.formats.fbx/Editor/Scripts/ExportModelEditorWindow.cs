@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor.Presets;
 #endif
 using System.Linq;
+using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -593,6 +594,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
 
+        [SecurityPermission(SecurityAction.LinkDemand)]
         protected override bool Export(){
             if (string.IsNullOrEmpty (ExportFileName)) {
                 Debug.LogError ("FbxExporter: Please specify an fbx filename");

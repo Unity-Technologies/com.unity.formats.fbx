@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.Formats.Fbx.Exporter;
+using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter {
 
     [CustomEditor(typeof(FbxPrefab))]
     public class FbxPrefabInspector : UnityEditor.Editor {
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public override void OnInspectorGUI() {
 
             SerializedProperty m_GameObjectProp = serializedObject.FindProperty("m_nameMapping");
