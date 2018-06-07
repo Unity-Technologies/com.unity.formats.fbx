@@ -1,6 +1,6 @@
 {
 "name": "com.autodesk.fbx",
-"version" : "1.7.0-preview",
+"version" : "0.0.0-master",
 "displayName" : "FBX SDK CSharp bindings",
 "unity": "2018.2",
 "description" : "This package provides C# bindings to the Autodesk FBX SDK.",
