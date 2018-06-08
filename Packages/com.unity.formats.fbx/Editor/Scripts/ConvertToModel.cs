@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Linq;
 using UnityEngine.Formats.Fbx.Exporter;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -103,6 +104,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>list of instanced Model Prefabs</returns>
         /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
         /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public static GameObject[] CreateInstantiatedModelPrefab (
             GameObject [] unityGameObjectsToConvert)
         {
@@ -165,6 +167,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// file under a unique filename. May be null, in which case we use
         /// the export settings. Ignored if 'prefabFullPath' is specified.
         /// Ignored if 'toConvert' is a prefab asset.</param>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public static GameObject Convert (
             GameObject toConvert,
             string fbxDirectoryFullPath = null,
@@ -402,6 +405,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <param name="toSetUp">Instance in the scene that we want to link to the fbx asset.</param>
         /// <param name="unityMainAsset">Main asset in the FBX.</param>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public static void SetupFbxPrefab(GameObject toSetUp, GameObject unityMainAsset)
         {
             if(toSetUp == null)

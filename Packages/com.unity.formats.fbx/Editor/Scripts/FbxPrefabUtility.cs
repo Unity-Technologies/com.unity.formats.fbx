@@ -4,6 +4,7 @@ using System.Linq;
 using System;
 using System.Runtime.Serialization;
 using UnityEngine.Formats.Fbx.Exporter;
+using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {   
@@ -250,6 +251,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 /// Recursively explore the hierarchical representation and
                 /// store it with flat indices.
                 /// </summary>
+                [SecurityPermission(SecurityAction.LinkDemand)]
                 void InitHelper(FbxRepresentation fbxrep, string nodeName)
                 {
                     foreach (var typename in fbxrep.ComponentTypes)
@@ -417,6 +419,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// </summary>
             Dictionary<string, List<ComponentValue>> m_componentsToUpdate;
 
+            [SecurityPermission(SecurityAction.LinkDemand)]
             void ClassifyDestroyCreateNodes()
             {
                 // Figure out which nodes to add to the prefab, which nodes in the prefab to destroy.
@@ -474,6 +477,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
+            [SecurityPermission(SecurityAction.LinkDemand)]
             void ClassifyReparenting()
             {
                 Initialize(ref m_reparentings);
@@ -528,6 +532,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
+            [SecurityPermission(SecurityAction.LinkDemand)]
             void ClassifyComponents(Transform newFbx, Transform prefab)
             {
                 Initialize(ref m_componentsToDestroy);
@@ -645,6 +650,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// 3. Figure out what nodes we need to reparent.
             /// 4. Figure out what nodes we need to update or add components to.
             /// </summary>
+            [SecurityPermission(SecurityAction.LinkDemand)]
             public UpdateList(
                 FbxRepresentation oldFbx,
                 Transform newFbx,
@@ -724,6 +730,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// in 1 and 2; or that were updated in 4. Does not return the destroyed
             /// GameObjects -- they've been destroyed!
             /// </summary>
+            [SecurityPermission(SecurityAction.LinkDemand)]
             public HashSet<GameObject> ImplementUpdates(FbxPrefab prefabInstance)
             {
                 if (prefabInstance == null)
@@ -986,6 +993,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Set whether this FbxPrefab component requests automatic updates.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public void SetAutoUpdate(bool autoUpdate)
         {
             if (!WantsAutoUpdate() && autoUpdate)
@@ -999,6 +1007,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Compare the old and new, and update the old according to the rules.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         void CompareAndUpdate()
         {
             // If we're not tracking anything, stop updating now.
@@ -1099,6 +1108,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Sync the prefab to match the FBX file.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public void SyncPrefab()
         {
             CompareAndUpdate();
@@ -1110,6 +1120,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Set to null to stop tracking in a way that we can
         /// still restart tracking later.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public void SetSourceModel(GameObject fbxModel)
         {
             // Null is OK. But otherwise, fbxModel must be an fbx.

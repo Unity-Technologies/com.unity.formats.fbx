@@ -32,6 +32,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         const float FieldOffset = 18;
         const float BrowseButtonOffset = 5;
 
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public override void OnInspectorGUI() {
             ExportSettings exportSettings = (ExportSettings)target;
 
@@ -310,6 +311,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// <summary>
         /// Returns a set of valid vendor folder paths with no trailing '/'
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         private static HashSet<string> GetCustomVendorLocations()
         {
             HashSet<string> result = null;
@@ -331,6 +333,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             return result;
         }
 
+        [SecurityPermission(SecurityAction.LinkDemand)]
         private static HashSet<string> GetDefaultVendorLocations()
         {
             if (Application.platform == RuntimePlatform.WindowsEditor)
@@ -371,6 +374,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         public static List<string> DCCVendorLocations
         {
+            [SecurityPermission(SecurityAction.LinkDemand)]
             get
             {
                 HashSet<string> result = GetCustomVendorLocations();
@@ -743,6 +747,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// 
         /// If MAYA_LOCATION is set, add this to the list as well.
         /// </summary>
+        [SecurityPermission(SecurityAction.LinkDemand)]
         private static void FindDCCInstalls() {
             var dccOptionNames = instance.dccOptionNames;
             var dccOptionPaths = instance.dccOptionPaths;
@@ -806,6 +811,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// <returns>The first valid vendor location</returns>
         public static string FirstValidVendorLocation
         {
+            [SecurityPermission(SecurityAction.LinkDemand)]
             get
             {
                 List<string> locations = DCCVendorLocations;
@@ -849,6 +855,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
+        [SecurityPermission(SecurityAction.LinkDemand)]
         public static GUIContent[] GetDCCOptions(){
             if (instance.dccOptionNames == null ||
                 instance.dccOptionNames.Count != instance.dccOptionPaths.Count ||
