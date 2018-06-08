@@ -14,7 +14,7 @@ namespace Autodesk.Fbx
      * That allows passing these structs on the stack between C# and C++, rather than
      * heap-allocating a class on either side, which is about 100x slower.
      */
-    public struct FbxDouble2 {
+    public struct FbxDouble2: System.IEquatable<FbxDouble2> {
         public double X;
         public double Y;
 
@@ -71,7 +71,7 @@ namespace Autodesk.Fbx
         }
     }
 
-    public struct FbxDouble3 {
+    public struct FbxDouble3: System.IEquatable<FbxDouble3> {
         public double X;
         public double Y;
         public double Z;
@@ -133,7 +133,7 @@ namespace Autodesk.Fbx
         }
     }
 
-    public struct FbxDouble4 {
+    public struct FbxDouble4: System.IEquatable<FbxDouble4> {
         public double X;
         public double Y;
         public double Z;
@@ -200,7 +200,7 @@ namespace Autodesk.Fbx
         }
     }
 
-    public struct FbxColor {
+    public struct FbxColor: System.IEquatable<FbxColor> {
         public double mRed;
         public double mGreen;
         public double mBlue;
@@ -275,7 +275,7 @@ namespace Autodesk.Fbx
         }
     }
 
-    public struct FbxVector2 {
+    public struct FbxVector2: System.IEquatable<FbxVector2> {
         public double X;
         public double Y;
 
@@ -389,7 +389,7 @@ namespace Autodesk.Fbx
         }
    }
 
-    public struct FbxVector4 {
+    public struct FbxVector4: System.IEquatable<FbxVector4> {
         public double X;
         public double Y;
         public double Z;
