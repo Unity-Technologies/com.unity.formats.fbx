@@ -5,7 +5,7 @@ using System.IO;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
-    public class RepairMissingScripts
+    internal class RepairMissingScripts
     {
         private const string ForumPackageGUID = "2d81c55c4d9d85146b1d2de96e084b63";
         private const string AssetStorePackageGUID = "628ffbda3fdf4df4588770785d91a698";

@@ -12,7 +12,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Exception that denotes a likely programming error.
     /// </summary>
     [System.Serializable]
-    public class FbxPrefabException : System.Exception
+    internal class FbxPrefabException : System.Exception
     {
         public FbxPrefabException() { }
         public FbxPrefabException(string message) : base(message) { }
@@ -35,7 +35,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// All functions in this class are static: there is no reason to make an
     /// instance.
     /// </summary>
-    public /*static*/ class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
+    internal class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
     {
         #if COM_UNITY_FORMATS_FBX_AS_ASSET
         public const string FbxPrefabFile = "/UnityFbxPrefab.dll";

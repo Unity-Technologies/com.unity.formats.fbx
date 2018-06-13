@@ -20,15 +20,15 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         [Test]
         public void TestBasics ()
         {
-            Assert.That(!string.IsNullOrEmpty(ModelExporterReflection.GetVersionFromReadme()));
+            Assert.That(!string.IsNullOrEmpty(ModelExporter.GetVersionFromReadme()));
 
             // Test GetOrCreateLayer
             using (var fbxManager = FbxManager.Create()) {
                 var fbxMesh = FbxMesh.Create(fbxManager, "name");
-                var layer0 = ModelExporterReflection.GetOrCreateLayer(fbxMesh);
+                var layer0 = ModelExporter.GetOrCreateLayer(fbxMesh);
                 Assert.That(layer0, Is.Not.Null);
-                Assert.That(ModelExporterReflection.GetOrCreateLayer(fbxMesh), Is.EqualTo(layer0));
-                var layer5 = ModelExporterReflection.GetOrCreateLayer(fbxMesh, layer: 5);
+                Assert.That(ModelExporter.GetOrCreateLayer(fbxMesh), Is.EqualTo(layer0));
+                var layer5 = ModelExporter.GetOrCreateLayer(fbxMesh, layer: 5);
                 Assert.That(layer5, Is.Not.Null);
                 Assert.That(layer5, Is.Not.EqualTo(layer0));
             }
@@ -39,22 +39,22 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             var b = new Vector3(0,0,1);
             var crossLeft = Vector3.Cross(a,b);
 
-            var afbx = ModelExporterReflection.ConvertToRightHanded(a);
-            var bfbx = ModelExporterReflection.ConvertToRightHanded(b);
-            Assert.AreEqual(ModelExporterReflection.ConvertToRightHanded(crossLeft), bfbx.CrossProduct(afbx));
+            var afbx = ModelExporter.ConvertToRightHanded(a);
+            var bfbx = ModelExporter.ConvertToRightHanded(b);
+            Assert.AreEqual(ModelExporter.ConvertToRightHanded(crossLeft), bfbx.CrossProduct(afbx));
 
             // Test scale conversion. Nothing complicated here...
-            var afbxPosition = ModelExporterReflection.ConvertToRightHanded(a, ModelExporterReflection.UnitScaleFactor);
+            var afbxPosition = ModelExporter.ConvertToRightHanded(a, ModelExporter.UnitScaleFactor);
             Assert.AreEqual(100, afbxPosition.Length());
 
             // Test rotation conversion.
             var q = Quaternion.Euler(new Vector3(0, 90, 0));
-            var fbxAngles = ModelExporterReflection.ConvertQuaternionToXYZEuler(q);
+            var fbxAngles = ModelExporter.ConvertQuaternionToXYZEuler(q);
             Assert.AreEqual(fbxAngles.X, 0);
             Assert.That(fbxAngles.Y, Is.InRange(-90.001, -89.999));
             Assert.AreEqual(fbxAngles.Z, 0);
 
-            Assert.That(ModelExporterReflection.DefaultMaterial);
+            Assert.That(ModelExporter.DefaultMaterial);
 
             // Test non-static functions.
             using (var fbxManager = FbxManager.Create()) {
@@ -63,18 +63,18 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 var exporter = new ModelExporter();
 
                 // Test ExportMaterial: it exports and it re-exports
-                bool result = ModelExporterReflection.ExportMaterial(exporter,ModelExporterReflection.DefaultMaterial, fbxScene, fbxNode);
+                bool result = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene, fbxNode);
                 Assert.IsTrue (result);
                 var fbxMaterial = fbxNode.GetMaterial (0);
                 Assert.That(fbxMaterial, Is.Not.Null);
 
-                result = ModelExporterReflection.ExportMaterial(exporter, ModelExporterReflection.DefaultMaterial, fbxScene, fbxNode);
+                result = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene, fbxNode);
                 var fbxMaterial2 = fbxNode.GetMaterial (1);
                 Assert.AreEqual(fbxMaterial, fbxMaterial2);
 
                 // Test ExportTexture: it finds the same texture for the default-material (it doesn't create a new one)
                 var fbxMaterialNew = FbxSurfaceLambert.Create(fbxScene, "lambert");
-                ModelExporterReflection.ExportTexture(exporter,ModelExporterReflection.DefaultMaterial, "_MainTex",
+                exporter.ExportTexture(ModelExporter.DefaultMaterial, "_MainTex",
                     fbxMaterialNew, FbxSurfaceLambert.sBump);
                 Assert.AreEqual(
                     fbxMaterial.FindProperty(FbxSurfaceLambert.sDiffuse).GetSrcObject(),
@@ -84,7 +84,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 // Test ExportMesh: make sure we exported a mesh with welded vertices.
                 var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 var cubeNode = FbxNode.Create(fbxScene, "cube");
-                ModelExporterReflection.ExportMesh(exporter,cube.GetComponent<MeshFilter>().sharedMesh, cubeNode);
+                exporter.ExportMesh(cube.GetComponent<MeshFilter>().sharedMesh, cubeNode);
                 Assert.That(cubeNode.GetMesh(), Is.Not.Null);
                 Assert.That(cubeNode.GetMesh().GetControlPointsCount(), Is.EqualTo(8));
             }
@@ -117,7 +117,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             cube2.transform.localScale = new Vector3 (3, 1, 1);
 
             // Find the center
-            var center = ModelExporterReflection.FindCenter(new GameObject[] { cube, cube1, cube2 });
+            var center = ModelExporter.FindCenter(new GameObject[] { cube, cube1, cube2 });
 
             // Check that it is what we expect
             Assert.AreEqual(center, new Vector3(26, -2.5f, 6.75f));
@@ -133,26 +133,26 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
             // test set: root
             // expected result: root
-            var result = ModelExporterReflection.RemoveRedundantObjects(new Object[] { root });
+            var result = ModelExporter.RemoveRedundantObjects(new Object[] { root });
             Assert.AreEqual (1, result.Count);
             Assert.IsTrue (result.Contains (root));
 
             // test set: root, child1
             // expected result: root
-            result = ModelExporterReflection.RemoveRedundantObjects(new Object[] { root, child1 });
+            result = ModelExporter.RemoveRedundantObjects(new Object[] { root, child1 });
             Assert.AreEqual (1, result.Count);
             Assert.IsTrue (result.Contains (root));
 
             // test set: root, child1, child2, root2
             // expected result: root, root2
-            result = ModelExporterReflection.RemoveRedundantObjects(new Object[] { root, root2, child2, child1 });
+            result = ModelExporter.RemoveRedundantObjects(new Object[] { root, root2, child2, child1 });
             Assert.AreEqual (2, result.Count);
             Assert.IsTrue (result.Contains (root));
             Assert.IsTrue (result.Contains (root2));
 
             // test set: child1, child2
             // expected result: child1, child2
-            result = ModelExporterReflection.RemoveRedundantObjects(new Object[] { child2, child1 });
+            result = ModelExporter.RemoveRedundantObjects(new Object[] { child2, child1 });
             Assert.AreEqual (2, result.Count);
             Assert.IsTrue (result.Contains (child1));
             Assert.IsTrue (result.Contains (child2));
@@ -163,16 +163,16 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         {
             // test already valid filenames
             var filename = "foobar.fbx";
-            var result = ModelExporterReflection.ConvertToValidFilename(filename);
+            var result = ModelExporter.ConvertToValidFilename(filename);
             Assert.AreEqual (filename, result);
 
             filename = "foo_bar 1.fbx";
-            result = ModelExporterReflection.ConvertToValidFilename(filename);
+            result = ModelExporter.ConvertToValidFilename(filename);
             Assert.AreEqual (filename, result);
 
             // test invalid filenames
             filename = "?foo**bar///.fbx";
-            result = ModelExporterReflection.ConvertToValidFilename(filename);
+            result = ModelExporter.ConvertToValidFilename(filename);
 #if UNITY_EDITOR_WIN
             Assert.AreEqual ("_foo__bar___.fbx", result);
 #else
@@ -180,7 +180,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 #endif
 
             filename = "foo$?ba%r 2.fbx";
-            result = ModelExporterReflection.ConvertToValidFilename(filename);
+            result = ModelExporter.ConvertToValidFilename(filename);
 #if UNITY_EDITOR_WIN
             Assert.AreEqual ("foo$_ba%r 2.fbx", result);
 #else
@@ -233,8 +233,8 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             // No callbacks registered => no calls.
             tester.Verify(0, 0);
 
-            ModelExporterReflection.RegisterMeshObjectCallback(tester.CallbackForObject);
-            ModelExporterReflection.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab);
+            ModelExporter.RegisterMeshObjectCallback(tester.CallbackForObject);
+            ModelExporter.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab);
 
             // No fbprefab => no component calls, but every object called.
             tester.Verify(0, n);
@@ -249,29 +249,29 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             // Make sure we can't register for a component twice, but we can
             // for an object.  Register twice for an object means two calls per
             // object.
-            Assert.That( () => ModelExporterReflection.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab),
+            Assert.That( () => ModelExporter.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab),
                     Throws.Exception);
-            ModelExporterReflection.RegisterMeshObjectCallback(tester.CallbackForObject);
+            ModelExporter.RegisterMeshObjectCallback(tester.CallbackForObject);
             tester.Verify(1, 2 * n);
 
             // Register twice but return true => only one call per object.
             tester.Verify(0, n, objectResult: true);
 
             // Unregister once => only one call per object, and no more for the prefab.
-            ModelExporterReflection.UnRegisterMeshCallback<FbxPrefab>();
-            ModelExporterReflection.UnRegisterMeshCallback(tester.CallbackForObject);
+            ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
+            ModelExporter.UnRegisterMeshCallback(tester.CallbackForObject);
             tester.Verify(0, n);
 
             // Legal to unregister if already unregistered.
-            ModelExporterReflection.UnRegisterMeshCallback<FbxPrefab>();
+            ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
             tester.Verify(0, n);
 
             // Register same callback twice gets back to original state.
-            ModelExporterReflection.UnRegisterMeshCallback(tester.CallbackForObject);
+            ModelExporter.UnRegisterMeshCallback(tester.CallbackForObject);
             tester.Verify(0, 0);
 
             // Legal to unregister if already unregistered.
-            ModelExporterReflection.UnRegisterMeshCallback(tester.CallbackForObject);
+            ModelExporter.UnRegisterMeshCallback(tester.CallbackForObject);
             tester.Verify(0, 0);
 
             ///////////////////////
@@ -290,13 +290,13 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
             GetMeshForComponent<FbxPrefab> prefabCallback =
                 (ModelExporter exporter, FbxPrefab component, FbxNode node) => {
-                    ModelExporterReflection.ExportMesh(exporter,sphereMesh, node);
+                    exporter.ExportMesh(sphereMesh, node);
                     return true;
                 };
-            ModelExporterReflection.RegisterMeshCallback(prefabCallback);
+            ModelExporter.RegisterMeshCallback(prefabCallback);
             filename = GetRandomFbxFilePath();
             ModelExporter.ExportObject(filename, tree);
-            ModelExporterReflection.UnRegisterMeshCallback<FbxPrefab>();
+            ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
 
             asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             assetMesh = asset.transform.Find("Parent1").GetComponent<MeshFilter>().sharedMesh;
@@ -311,15 +311,15 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             GetMeshForObject callback =
                 (ModelExporter exporter, GameObject gameObject, FbxNode node) => {
                     if (gameObject.name == "Parent2") {
-                        ModelExporterReflection.ExportMesh(exporter,sphereMesh, node);
+                        exporter.ExportMesh(sphereMesh, node);
                         return true;
                     } else {
                         return false;
                     }
                 };
-            ModelExporterReflection.RegisterMeshObjectCallback(callback);
+            ModelExporter.RegisterMeshObjectCallback(callback);
             ModelExporter.ExportObject(filename, tree);
-            ModelExporterReflection.UnRegisterMeshCallback(callback);
+            ModelExporter.UnRegisterMeshCallback(callback);
 
             asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             assetMesh = asset.transform.Find("Parent1").GetComponent<MeshFilter>().sharedMesh;

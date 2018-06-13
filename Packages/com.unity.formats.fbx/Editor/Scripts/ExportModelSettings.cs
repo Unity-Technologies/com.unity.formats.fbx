@@ -4,7 +4,7 @@ using UnityEngine;
 namespace UnityEditor.Formats.Fbx.Exporter
 {
     [CustomEditor (typeof(ExportModelSettings))]
-    public class ExportModelSettingsEditor : UnityEditor.Editor
+    internal class ExportModelSettingsEditor : UnityEditor.Editor
     {
         private const float LabelWidth = 175;
         private const float FieldOffset = 18;
@@ -98,7 +98,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
-    public interface IExportOptions {
+    internal interface IExportOptions {
         ExportSettings.ExportFormat ExportFormat { get; }
         ExportSettings.Include ModelAnimIncludeOption { get; }
         ExportSettings.LODExportType LODExportType { get; }
@@ -111,7 +111,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         Transform AnimationDest { get; }
     }
 
-    public abstract class ExportOptionsSettingsBase<T> : ScriptableObject where T : ExportOptionsSettingsSerializeBase, new()
+    internal abstract class ExportOptionsSettingsBase<T> : ScriptableObject where T : ExportOptionsSettingsSerializeBase, new()
     {
         private T m_info = new T();
         public T info {
@@ -120,11 +120,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
-    public class ExportModelSettings : ExportOptionsSettingsBase<ExportModelSettingsSerialize>
+    internal class ExportModelSettings : ExportOptionsSettingsBase<ExportModelSettingsSerialize>
     {}
 
     [System.Serializable]
-    public abstract class ExportOptionsSettingsSerializeBase : IExportOptions
+    internal abstract class ExportOptionsSettingsSerializeBase : IExportOptions
     {
         [SerializeField]
         private ExportSettings.ExportFormat exportFormat = ExportSettings.ExportFormat.ASCII;
@@ -156,7 +156,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     }
 
     [System.Serializable]
-    public class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
+    internal class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
         [SerializeField]
         private ExportSettings.Include include = ExportSettings.Include.ModelAndAnim;

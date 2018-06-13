@@ -5,7 +5,7 @@ using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
-    public abstract class DCCIntegration
+    internal abstract class DCCIntegration
     {
         public abstract string DccDisplayName { get; }
         public abstract string IntegrationZipPath { get; }
@@ -92,7 +92,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     }
 
 
-    public class MayaIntegration : DCCIntegration
+    internal class MayaIntegration : DCCIntegration
     {
         public override string DccDisplayName { get { return "Maya"; } }
 
@@ -560,12 +560,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
-    public class MayaLTIntegration : MayaIntegration 
+    internal class MayaLTIntegration : MayaIntegration 
     {
         public override string DccDisplayName { get { return "Maya LT"; } }
     }
 
-    public class MaxIntegration : DCCIntegration
+    internal class MaxIntegration : DCCIntegration
     {
         public override string DccDisplayName { get { return "3Ds Max"; } }
 

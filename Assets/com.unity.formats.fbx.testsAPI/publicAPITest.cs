@@ -1,0 +1,63 @@
+﻿using UnityEngine;
+using NUnit.Framework;
+using System.Diagnostics;
+
+namespace UnityEditor.Formats.Fbx.Exporter.API.UnitTests
+{
+    public class PublicAPITest: ExporterTestBaseAPI
+    {
+        private GameObject[] m_toExport;
+
+        [SetUp]
+        public override void Init()
+        {
+            base.Init();
+            m_toExport = new GameObject[] {CreateGameObjectToExport(), CreateGameObjectToExport()};
+        }
+
+        [TearDown]
+        public override void Term()
+        {
+            foreach (var go in m_toExport) 
+            {
+                GameObject.DestroyImmediate (go);
+            }
+            base.Term();
+        }
+
+        /// <summary>
+        /// Creates a GameObject to export.
+        /// </summary>
+        /// <returns>The game object to export.</returns>
+        private GameObject CreateGameObjectToExport ()
+        {
+            return GameObject.CreatePrimitive (PrimitiveType.Sphere);
+        }
+
+        [Test]
+        public void TestExportObject()
+        {
+            Assert.IsNotNull (m_toExport);
+            Assert.IsNotNull (m_toExport[0]);
+            var filename = GetRandomFbxFilePath();
+
+            var fbxFileName = ModelExporter.ExportObject(filename, m_toExport[0]);
+
+            Assert.IsNotNull (fbxFileName);
+            Assert.AreEqual(fbxFileName, filename);
+        }
+
+        [Test]
+        public void TestExportObjects()
+        {
+            Assert.IsNotNull (m_toExport);
+            Assert.Greater(m_toExport.Length, 1);
+            var filename = GetRandomFbxFilePath();
+
+            var fbxFileName = ModelExporter.ExportObjects(filename, m_toExport);
+
+            Assert.IsNotNull (fbxFileName);
+            Assert.AreEqual(fbxFileName, filename);
+        }
+    }
+}

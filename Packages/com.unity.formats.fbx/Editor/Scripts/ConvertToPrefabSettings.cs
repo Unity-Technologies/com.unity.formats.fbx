@@ -4,7 +4,7 @@ using UnityEngine;
 namespace UnityEditor.Formats.Fbx.Exporter
 {
     [CustomEditor (typeof(ConvertToPrefabSettings))]
-    public class ConvertToPrefabSettingsEditor : UnityEditor.Editor
+    internal class ConvertToPrefabSettingsEditor : UnityEditor.Editor
     {
         private const float LabelWidth = 175;
         private const float FieldOffset = 18;
@@ -66,11 +66,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
-    public class ConvertToPrefabSettings : ExportOptionsSettingsBase<ConvertToPrefabSettingsSerialize>
+    internal class ConvertToPrefabSettings : ExportOptionsSettingsBase<ConvertToPrefabSettingsSerialize>
     {}
 
     [System.Serializable]
-    public class ConvertToPrefabSettingsSerialize : ExportOptionsSettingsSerializeBase
+    internal class ConvertToPrefabSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
         public override ExportSettings.Include ModelAnimIncludeOption { get { return ExportSettings.Include.ModelAndAnim; } }
         public override ExportSettings.LODExportType LODExportType { get { return ExportSettings.LODExportType.All; } }

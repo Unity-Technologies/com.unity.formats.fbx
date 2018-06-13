@@ -509,27 +509,19 @@ Use the Fbx Export Settings window to specify whether or not to automatically up
 
 # Developer’s Guide
 
-As a developer you have access to the FBX Exporter from C# scripting. You can use the basic API for exporting Models with animation, Models only, or Animation only by providing a list of GameObjects.
+As a developer you have access to the FBX Exporter from C# scripting. You can use the basic API by providing a list of GameObjects.
 
-You can call the FBX Exporter from C# using methods found in the `FbxExporters.Editor` and `FbxExporters.EditorTools` namespaces, for example:
+You can call the FBX Exporter from C# using methods found in the "UnityEditor.Formats.Fbx.Exporter" namespace, for example:
 
 ```
 using System.IO;
-
-using UnityEditor;
 using UnityEngine;
+using UnityEditor;
+using UnityEditor.Formats.Fbx.Exporter
 
-using FbxExporters.Editor;
-using FbxExporters.EditorTools;
-
-public static void ExportModelAndAnimation(Objects[] objects)
+public static void ExportGameObjects(Object[] objects)
 {
     string filePath = Path.Combine(Application.dataPath, "MyGame.fbx");
-    var options = new ExportModelSettingsSerialize ();
-
-    options.SetModelAnimIncludeOption(ExportSettings.Include.ModelAndAnim);
-
-    ModelExporter.ExportObjects(filePath, objects, options);
+    ModelExporter.ExportObjects(filePath, objects);
 }
 ```
-

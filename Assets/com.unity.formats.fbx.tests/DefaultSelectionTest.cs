@@ -13,7 +13,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
     public class DefaultSelectionTest : ExporterTestBase
     {
         protected GameObject m_root;
-        protected ExportModelSettingsSerialize m_centerObjectsSetting;
+        internal ExportModelSettingsSerialize m_centerObjectsSetting;
 
         [SetUp]
         public override void Init ()
@@ -103,7 +103,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
             // test with centered objects
             m_centerObjectsSetting.SetObjectPosition(ExportSettings.ObjectPosition.LocalCentered);
-            var newCenter = ModelExporterReflection.FindCenter (goExportSet);
+            var newCenter = ModelExporter.FindCenter (goExportSet);
 
             exportedRoot = ExportSelection (exportSet, m_centerObjectsSetting);
             children = new List<GameObject> ();
@@ -142,7 +142,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         /// <param name="center">New center for global transform.</param>
         private FbxAMatrix ConstructTRSMatrix (Transform t, bool local = true, Vector3 center = default(Vector3))
         {
-            var translation = local ? t.localPosition : ModelExporterReflection.GetRecenteredTranslation (t, center);
+            var translation = local ? t.localPosition : ModelExporter.GetRecenteredTranslation (t, center);
             var rotation = local ? t.localEulerAngles : t.eulerAngles;
             var scale = local ? t.localScale : t.lossyScale;
             return new FbxAMatrix (

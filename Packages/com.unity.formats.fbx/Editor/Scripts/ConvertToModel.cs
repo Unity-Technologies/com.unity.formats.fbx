@@ -9,7 +9,7 @@ using System.Security.Permissions;
 namespace UnityEditor.Formats.Fbx.Exporter
 {
     [System.Serializable]
-    public class ConvertToLinkedPrefabException : System.Exception
+    internal class ConvertToLinkedPrefabException : System.Exception
     {
         public ConvertToLinkedPrefabException()
         {
@@ -31,7 +31,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
-    public static class ConvertToModel
+    internal static class ConvertToModel
     {
         const string GameObjectMenuItemName = "GameObject/Convert To Linked Prefab Instance...";
         const string AssetsMenuItemName = "Assets/Convert To Linked Prefab...";

@@ -6,7 +6,7 @@ using System.Security.Permissions;
 namespace UnityEditor.Formats.Fbx.Exporter {
 
     [CustomEditor(typeof(FbxPrefab))]
-    public class FbxPrefabInspector : UnityEditor.Editor {
+    internal class FbxPrefabInspector : UnityEditor.Editor {
         [SecurityPermission(SecurityAction.LinkDemand)]
         public override void OnInspectorGUI() {
 
