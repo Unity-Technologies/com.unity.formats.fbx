@@ -56,6 +56,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             : base(info, context){}
     }
 
+	/// <summary>
+	/// The ModelExporter class can be used to export Unity game objects to an FBX File.
+    /// To do so, simply use its ExportObject and ExportObjects methods. Default export
+    /// options are used when exporting the objects to the FBX file.
+	/// </summary>
     public class ModelExporter : System.IDisposable
     {
         const string Title =
