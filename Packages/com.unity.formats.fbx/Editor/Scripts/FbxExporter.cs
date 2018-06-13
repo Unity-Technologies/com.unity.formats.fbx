@@ -4092,11 +4092,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Exports an array of Unity objects and their children to an FBX file.
+        /// Exports an array of Unity objects to an FBX file.
         /// Returns the FBX file path if successful, otherwise returns null.
         /// </summary>
         /// <param name="filePath">File path to use for the FBX file.</param>
-        /// <param name="objects">Array of Unity objects to export along with their children.</param>
+        /// <param name="objects">Array of Unity objects to export.</param>
         [SecurityPermission(SecurityAction.LinkDemand)]
         public static string ExportObjects(string filePath, UnityEngine.Object[] objects = null)
         {
@@ -4104,11 +4104,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Exports a single Unity object and its children to an FBX file.
+        /// Exports a single Unity object an FBX file.
         /// Returns the FBX file path if successful, otherwise returns null.
         /// </summary>
         /// <param name="filePath">The file path to use for the FBX file.</param>
-        /// <param name="singleObject">The Unity object to export along with its children.</param>
+        /// <param name="singleObject">The Unity object to export.</param>
         [SecurityPermission(SecurityAction.LinkDemand)]
         public static string ExportObject (string filePath, UnityEngine.Object singleObject)
         {

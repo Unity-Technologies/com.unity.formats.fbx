@@ -525,6 +525,6 @@ public static void ExportGameObjects(Object[] objects)
     ModelExporter.ExportObjects(filePath, objects);
     
     // ModelExporter.ExportObject can be used instead of 
-    // ModelExporter.ExportObjects to export a single game object (and its children)
+    // ModelExporter.ExportObjects to export a single game object
 }
 ```
