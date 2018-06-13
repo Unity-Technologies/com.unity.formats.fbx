@@ -8,7 +8,7 @@ using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {   
-    public class FbxPrefabUtility
+    internal class FbxPrefabUtility
     {
 
         private FbxPrefab m_fbxPrefab;
@@ -1174,7 +1174,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Converts to/from json for serialization, or initialize it from a
     /// Unity Transform.
     /// </summary>
-    public class FbxRepresentation
+    internal class FbxRepresentation
     {
         /// <summary>
         /// Children of this node.

@@ -6,7 +6,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 { 
     namespace CustomExtensions
     {
-        public class MetricDistance : object {
+        internal class MetricDistance : object {
 
             public static readonly MetricDistance Millimeter = new MetricDistance(0.001f);
             public static readonly MetricDistance Centimeter = new MetricDistance(0.01f);
@@ -108,7 +108,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         }
 
-        public class ImperialDistance {
+        internal class ImperialDistance {
 
             public static readonly ImperialDistance Inch = new ImperialDistance(1.0f);
             public static readonly ImperialDistance Foot = new ImperialDistance(12.0f);
@@ -201,7 +201,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         //Extension methods must be defined in a static class
-        public static class FloatExtension
+        internal static class FloatExtension
         {
             public static MetricDistance Meters(this float that) {
                 return new MetricDistance(that);
@@ -221,7 +221,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         //Extension methods must be defined in a static class
-        public static class Vector3Extension
+        internal static class Vector3Extension
         {
             public static Vector3 RightHanded (this Vector3 leftHandedVector)
             {
@@ -242,7 +242,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         //Extension methods must be defined in a static class
-        public static class AnimationCurveExtension
+        internal static class AnimationCurveExtension
         {
             // This is an extension method for the AnimationCurve class
             // The first parameter takes the "this" modifier

@@ -8,7 +8,7 @@ using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
-    public class ConvertToPrefabEditorWindow : ExportOptionsEditorWindow
+    internal class ConvertToPrefabEditorWindow : ExportOptionsEditorWindow
     {
         protected override GUIContent WindowTitle { get { return new GUIContent("Convert Options"); } }
         protected override float MinWindowHeight { get { return 350; } } // determined by trial and error

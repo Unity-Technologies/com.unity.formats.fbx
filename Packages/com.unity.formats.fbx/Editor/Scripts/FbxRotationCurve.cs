@@ -10,7 +10,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Provides implementation for computing keys and generating FbxAnimCurves
     /// for euler rotation.
     /// </summary>
-    public abstract class RotationCurve {
+    internal abstract class RotationCurve {
         private double m_sampleRate;
         public double SampleRate
         {
@@ -134,7 +134,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Convert from ZXY to XYZ euler, and remove
     /// prerotation from animated rotation.
     /// </summary>
-    public class EulerCurve : RotationCurve {
+    internal class EulerCurve : RotationCurve {
         public EulerCurve() { SetCurves(new AnimationCurve[3]); }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Exporting rotations is more complicated. We need to convert
     /// from quaternion to euler. We use this class to help.
     /// </summary>
-    public class QuaternionCurve : RotationCurve {
+    internal class QuaternionCurve : RotationCurve {
 
         public QuaternionCurve() { SetCurves(new AnimationCurve[4]); }
 
@@ -247,7 +247,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Exporting rotations is more complicated. We need to convert
     /// from quaternion to euler. We use this class to help.
     /// </summary>
-    public class FbxAnimCurveModifyHelper : System.IDisposable 
+    internal class FbxAnimCurveModifyHelper : System.IDisposable 
     {
         public List<FbxAnimCurve> Curves { get ; private set; }
 

@@ -1,0 +1,12 @@
+{
+    "name": "Unity.Formats.Fbx.Editortests.API",
+    "references": [
+        "Unity.Formats.Fbx.Editor"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}

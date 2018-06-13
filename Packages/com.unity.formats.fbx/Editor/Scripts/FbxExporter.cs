@@ -5,10 +5,13 @@ using UnityEngine.Animations;
 using UnityEditor;
 using System.Linq;
 using Autodesk.Fbx;
+using System.Runtime.CompilerServices;  
 using System.Runtime.Serialization;
 using UnityEditor.Formats.Fbx.Exporter.Visitors;
 using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 using System.Security.Permissions;
+
+[assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editortests")]  
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -25,8 +28,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Return true and output a null mesh if you don't want the
     /// exporter to output anything.
     /// </summary>
-    public delegate bool GetMeshForComponent<T>(ModelExporter exporter, T component, FbxNode fbxNode) where T : MonoBehaviour;
-    public delegate bool GetMeshForComponent(ModelExporter exporter, MonoBehaviour component, FbxNode fbxNode);
+    internal delegate bool GetMeshForComponent<T>(ModelExporter exporter, T component, FbxNode fbxNode) where T : MonoBehaviour;
+    internal delegate bool GetMeshForComponent(ModelExporter exporter, MonoBehaviour component, FbxNode fbxNode);
 
     /// <summary>
     /// Delegate used to convert a GameObject into a mesh.
@@ -36,10 +39,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// provide. But it's less efficient because you'll get a callback
     /// on every single GameObject.
     /// </summary>
-    public delegate bool GetMeshForObject(ModelExporter exporter, GameObject gameObject, FbxNode fbxNode);
+    internal delegate bool GetMeshForObject(ModelExporter exporter, GameObject gameObject, FbxNode fbxNode);
 
     [System.Serializable]
-    public class ModelExportException : System.Exception
+    internal class ModelExportException : System.Exception
     {
         public ModelExportException(){}
 
@@ -123,7 +126,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Which components map from Unity Object to Fbx Object
         /// </summary>
-        public enum FbxNodeRelationType
+        internal enum FbxNodeRelationType
         {
             NodeAttribute,
             Property,
@@ -4078,15 +4081,38 @@ namespace UnityEditor.Formats.Fbx.Exporter
             ExportModelEditorWindow.Init (System.Linq.Enumerable.Cast<UnityEngine.Object> (toExport), isTimelineAnim: false);
         }
 
-
         [SecurityPermission(SecurityAction.LinkDemand)]
-        public static string ExportObjects(
-            string filePath,
-            UnityEngine.Object[] objects = null,
+        internal static string ExportObject (
+            string filePath, 
+            UnityEngine.Object root,
             IExportOptions exportOptions = null
         )
         {
-            return ExportObjects(filePath, objects, exportOptions, exportData: null);
+            return ExportObjects(filePath, new Object[] { root }, exportOptions);
+        }
+
+        /// <summary>
+        /// Exports an array of Unity objects to an FBX file.
+        /// Returns the FBX file path if successful, otherwise returns null.
+        /// </summary>
+        /// <param name="filePath">File path to use for the FBX file.</param>
+        /// <param name="objects">Array of Unity objects to export.</param>
+        [SecurityPermission(SecurityAction.LinkDemand)]
+        public static string ExportObjects(string filePath, UnityEngine.Object[] objects = null)
+        {
+            return ExportObjects(filePath, objects, exportOptions: null, exportData: null);
+        }
+
+        /// <summary>
+        /// Exports a single Unity object to an FBX file.
+        /// Returns the FBX file path if successful, otherwise returns null.
+        /// </summary>
+        /// <param name="filePath">The file path to use for the FBX file.</param>
+        /// <param name="singleObject">The Unity object to export.</param>
+        [SecurityPermission(SecurityAction.LinkDemand)]
+        public static string ExportObject (string filePath, UnityEngine.Object singleObject)
+        {
+            return ExportObjects(filePath, new Object[] {singleObject}, exportOptions: null);
         }
 
         /// <summary>
@@ -4123,15 +4149,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
             return null;
-        }
-
-        [SecurityPermission(SecurityAction.LinkDemand)]
-        public static string ExportObject (
-            string filePath, 
-            UnityEngine.Object root,
-            IExportOptions exportOptions = null)
-        {
-            return ExportObjects(filePath, new Object[] { root }, exportOptions);
         }
 
         private static void EnsureDirectory (string path)

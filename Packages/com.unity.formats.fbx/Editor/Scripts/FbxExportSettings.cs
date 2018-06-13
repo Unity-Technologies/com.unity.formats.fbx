@@ -9,7 +9,7 @@ using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter {
     [System.Serializable]
-    public class FbxExportSettingsException : System.Exception
+    internal class FbxExportSettingsException : System.Exception
     {
         public FbxExportSettingsException() { }
 
@@ -24,7 +24,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
     }
 
     [CustomEditor(typeof(ExportSettings))]
-    public class ExportSettingsEditor : UnityEditor.Editor {
+    internal class ExportSettingsEditor : UnityEditor.Editor {
         Vector2 scrollPos = Vector2.zero;
         const float LabelWidth = 144;
         const float SelectableLabelMinWidth = 90;
@@ -227,7 +227,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
     }
 
     [FilePath("ProjectSettings/FbxExportSettings.asset",FilePathAttribute.Location.ProjectFolder)]
-    public class ExportSettings : ScriptableSingleton<ExportSettings>
+    internal class ExportSettings : ScriptableSingleton<ExportSettings>
     {
         public enum ExportFormat { ASCII = 0, Binary = 1}
 
@@ -237,19 +237,19 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 
-        public const string kDefaultSavePath = ".";
+        internal const string kDefaultSavePath = ".";
         private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};
         //Any additional names require a space after the name
-        public const string kMaxOptionName = "3ds Max ";
-        public const string kMayaOptionName = "Maya ";
-        public const string kMayaLtOptionName = "Maya LT";
+        internal const string kMaxOptionName = "3ds Max ";
+        internal const string kMayaOptionName = "Maya ";
+        internal const string kMayaLtOptionName = "Maya LT";
 
         // NOTE: using "Verbose" and "VerboseProperty" to handle backwards compatibility with older FbxExportSettings.asset files.
         //       The variable name is used when serializing, so changing the variable name would prevent older FbxExportSettings.asset files
         //       from loading this property.
         [SerializeField]
         private bool Verbose = false;
-        public bool VerboseProperty
+        internal bool VerboseProperty
         {
             get { return Verbose; }
             set { Verbose = value; }
@@ -372,7 +372,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// If there is valid alternative vendor locations, do not use defaults
         /// always use MAYA_LOCATION when available
         /// </summary>
-        public static List<string> DCCVendorLocations
+        internal static List<string> DCCVendorLocations
         {
             [SecurityPermission(SecurityAction.LinkDemand)]
             get
@@ -422,7 +422,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         [SerializeField]
         private bool BakeAnimation = true;
-        public bool BakeAnimationProperty
+        internal bool BakeAnimationProperty
         {
             get { return BakeAnimation; }
             set { BakeAnimation = value; }
@@ -438,7 +438,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         [SerializeField]
         private string integrationSavePath;
-        public static string IntegrationSavePath
+        internal static string IntegrationSavePath
         {
             get
             {
@@ -459,7 +459,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         [SerializeField]
         private int selectedDCCApp = 0;
-        public int SelectedDCCApp
+        internal int SelectedDCCApp
         {
             get { return selectedDCCApp; }
             set { selectedDCCApp = value; }
@@ -509,7 +509,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         // don't serialize as ScriptableObject does not get properly serialized on export
         [System.NonSerialized]
         private ExportModelSettings m_exportModelSettings;
-        public ExportModelSettings ExportModelSettings
+        internal ExportModelSettings ExportModelSettings
         {
             get { return m_exportModelSettings; }
             set { m_exportModelSettings = value; }
@@ -521,7 +521,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         [System.NonSerialized]
         private ConvertToPrefabSettings m_convertToPrefabSettings;
-        public ConvertToPrefabSettings ConvertToPrefabSettings
+        internal ConvertToPrefabSettings ConvertToPrefabSettings
         {
             get { return m_convertToPrefabSettings; }
             set { m_convertToPrefabSettings = value; }
@@ -530,7 +530,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         [SerializeField]
         private ConvertToPrefabSettingsSerialize convertToPrefabSettingsSerialize;
 
-        protected override void LoadDefaults()
+        internal override void LoadDefaults()
         {
             AutoUpdaterEnabled = true;
             ShowConvertToPrefabDialog = true;
@@ -553,7 +553,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         /// <returns>The unique name.</returns>
         /// <param name="name">Name.</param>
-        public static string GetUniqueDCCOptionName(string name){
+        internal static string GetUniqueDCCOptionName(string name){
             Debug.Assert(instance != null);
             if (name == null)
             {
@@ -585,22 +585,22 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             return uniqueName;
         }
 
-        public void SetDCCOptionNames(List<string> newList)
+        internal void SetDCCOptionNames(List<string> newList)
         {
             dccOptionNames = newList;
         }
 
-        public void SetDCCOptionPaths(List<string> newList)
+        internal void SetDCCOptionPaths(List<string> newList)
         {
             dccOptionPaths = newList;
         }
 
-        public void ClearDCCOptionNames()
+        internal void ClearDCCOptionNames()
         {
             dccOptionNames.Clear();
         }
 
-        public void ClearDCCOptions()
+        internal void ClearDCCOptions()
         {
             SetDCCOptionNames(null);
             SetDCCOptionPaths(null);
@@ -614,7 +614,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// Returns the index of the most recent program in the list of dccOptionNames
         /// Returns -1 on error.
         /// </summary>
-        public int PreferredDCCApp
+        internal int PreferredDCCApp
         {
             get
             {
@@ -687,7 +687,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// Takes a given string and removes any spaces or numbers from it
         /// </summary>
         /// <param name="s"></param>
-        public static string RemoveSpacesAndNumbers(string s)
+        internal static string RemoveSpacesAndNumbers(string s)
         {
             return System.Text.RegularExpressions.Regex.Replace(s, @"[\s^0-9]", "");
         }
@@ -809,7 +809,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// Returns the first valid folder in our list of vendor locations
         /// </summary>
         /// <returns>The first valid vendor location</returns>
-        public static string FirstValidVendorLocation
+        internal static string FirstValidVendorLocation
         {
             [SecurityPermission(SecurityAction.LinkDemand)]
             get
@@ -856,7 +856,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         }
 
         [SecurityPermission(SecurityAction.LinkDemand)]
-        public static GUIContent[] GetDCCOptions(){
+        internal static GUIContent[] GetDCCOptions(){
             if (instance.dccOptionNames == null ||
                 instance.dccOptionNames.Count != instance.dccOptionPaths.Count ||
                 instance.dccOptionNames.Count == 0) {
@@ -909,11 +909,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             return optionArray;
         }
 
-        public enum DCCType { Maya, Max };
+        internal enum DCCType { Maya, Max };
 
         [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        public static void AddDCCOption(string newOption, DCCType dcc){
+        internal static void AddDCCOption(string newOption, DCCType dcc){
             if (Application.platform == RuntimePlatform.OSXEditor && dcc == DCCType.Maya) {
                 // on OSX we get a path ending in .app, which is not quite the exe
                 newOption = GetMayaExePathFromLocation(newOption);
@@ -1007,16 +1007,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         /// <returns>The 3DsMax dropdown option label.</returns>
         /// <param name="exePath">Exe path.</param>
-        public static string GetMaxOptionName(string exePath){
+        internal static string GetMaxOptionName(string exePath){
             return GetUniqueDCCOptionName(Path.GetFileName(Path.GetDirectoryName (exePath)));
         }
 
-        public static bool IsEarlierThanMax2017(string AppName){
+        internal static bool IsEarlierThanMax2017(string AppName){
             int version = FindDCCVersion(AppName);
             return version != -1 && version < 2017;
         }
 
-        public static string SelectedDCCPath
+        internal static string SelectedDCCPath
         {
             get
             {
@@ -1026,7 +1026,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        public static string SelectedDCCName
+        internal static string SelectedDCCName
         {
             get
             {
@@ -1036,12 +1036,12 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        public static bool CanInstall()
+        internal static bool CanInstall()
         {
             return instance.dccOptionPaths.Count > 0;
         }
 
-        public static string GetProjectRelativePath(string fullPath){
+        internal static string GetProjectRelativePath(string fullPath){
             var assetRelativePath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.ConvertToAssetRelativePath(fullPath);
             var projectRelativePath = "Assets/" + assetRelativePath;
             if (string.IsNullOrEmpty(assetRelativePath)) {
@@ -1055,7 +1055,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// This is relative to the Application.dataPath ; it uses '/' as the
         /// separator on all platforms.
         /// </summary>
-        public static string[] GetRelativeSavePaths(List<string> exportSavePaths){
+        internal static string[] GetRelativeSavePaths(List<string> exportSavePaths){
             if(exportSavePaths == null)
             {
                 return null;
@@ -1079,7 +1079,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// This is relative to the Application.dataPath ; it uses '/' as the
         /// separator on all platforms.
         /// </summary>
-        public static string[] GetRelativeFbxSavePaths(){
+        internal static string[] GetRelativeFbxSavePaths(){
             return GetRelativeSavePaths(instance.fbxSavePaths);
         }
 
@@ -1088,7 +1088,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// This is relative to the Application.dataPath ; it uses '/' as the
         /// separator on all platforms.
         /// </summary>
-        public static string[] GetRelativePrefabSavePaths(){
+        internal static string[] GetRelativePrefabSavePaths(){
             return GetRelativeSavePaths(instance.prefabSavePaths);
         }
 
@@ -1120,23 +1120,23 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             exportSavePaths.Insert (0, savePath);
         }
 
-        public static void AddFbxSavePath(string savePath){
+        internal static void AddFbxSavePath(string savePath){
             AddSavePath (savePath, ref instance.fbxSavePaths);
             instance.SelectedFbxPath = 0;
         }
 
-        public static void AddPrefabSavePath(string savePath){
+        internal static void AddPrefabSavePath(string savePath){
             AddSavePath (savePath, ref instance.prefabSavePaths);
             instance.SelectedPrefabPath = 0;
         }
 
-        public static string GetAbsoluteSavePath(string relativePath){
+        internal static string GetAbsoluteSavePath(string relativePath){
             var absolutePath = Path.Combine(Application.dataPath, relativePath);
             return NormalizePath(absolutePath, isRelative: false,
                 separator: Path.DirectorySeparatorChar);
         }
 
-        public static string FbxAbsoluteSavePath{
+        internal static string FbxAbsoluteSavePath{
             get
             {
                 if (instance.fbxSavePaths.Count <= 0)
@@ -1147,7 +1147,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        public static string PrefabAbsoluteSavePath{
+        internal static string PrefabAbsoluteSavePath{
             get
             {
                 if (instance.prefabSavePaths.Count <= 0)
@@ -1167,7 +1167,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// If 'requireSubdirectory' is the default on, return empty-string if the full
         /// path is not in a subdirectory of assets.
         /// </summary>
-        public static string ConvertToAssetRelativePath(string fullPathInAssets, bool requireSubdirectory = true)
+        internal static string ConvertToAssetRelativePath(string fullPathInAssets, bool requireSubdirectory = true)
         {
             if (!Path.IsPathRooted(fullPathInAssets)) {
                 fullPathInAssets = Path.GetFullPath(fullPathInAssets);
@@ -1186,7 +1186,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// <summary>
         /// Compute how to get from 'fromDir' to 'toDir' via a relative path.
         /// </summary>
-        public static string GetRelativePath(string fromDir, string toDir,
+        internal static string GetRelativePath(string fromDir, string toDir,
                 char separator = '/')
         {
             // https://stackoverflow.com/questions/275689/how-to-get-relative-path-from-absolute-path
@@ -1241,7 +1241,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// If you claim the path is absolute but actually it's relative, we
         /// treat it as a relative path.
         /// </summary>
-        public static string NormalizePath(string path, bool isRelative,
+        internal static string NormalizePath(string path, bool isRelative,
                 char separator = '/')
         {
             if(path == null)
@@ -1329,7 +1329,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             instance.Load();
         }
 
-        protected override void Load ()
+        internal override void Load ()
         {
             base.Load ();
             if (!instance.ExportModelSettings) {
@@ -1344,7 +1344,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         }
 
-        public void Save()
+        internal void Save()
         {
             exportModelSettingsSerialize = ExportModelSettings.info;
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
@@ -1352,7 +1352,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         }
     }
 
-    public abstract class ScriptableSingleton<T> : ScriptableObject where T : ScriptableSingleton<T>
+    internal abstract class ScriptableSingleton<T> : ScriptableObject where T : ScriptableSingleton<T>
     {
         private static T s_Instance;
         public static T instance
@@ -1368,7 +1368,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        protected ScriptableSingleton()
+        internal ScriptableSingleton()
         {
             if (s_Instance != null)
             {
@@ -1376,9 +1376,9 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        protected abstract void LoadDefaults();
+        internal abstract void LoadDefaults();
 
-        protected virtual void Load()
+        internal virtual void Load()
         {
             string filePath = GetFilePath();
             if (!System.IO.File.Exists(filePath)) {
@@ -1395,7 +1395,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        protected virtual void Save(bool saveAsText)
+        internal virtual void Save(bool saveAsText)
         {
             if (s_Instance == null)
             {
@@ -1429,7 +1429,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
 
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class FilePathAttribute : Attribute
+    internal sealed class FilePathAttribute : Attribute
     {
         public enum Location
         {

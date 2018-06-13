@@ -8,7 +8,7 @@ using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
-    public abstract class ExportOptionsEditorWindow : EditorWindow
+    internal abstract class ExportOptionsEditorWindow : EditorWindow
     {
         protected const string DefaultWindowTitle = "Export Options";
         protected const float SelectableLabelMinWidth = 90;
@@ -443,7 +443,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
-    public class ExportModelEditorWindow : ExportOptionsEditorWindow
+    internal class ExportModelEditorWindow : ExportOptionsEditorWindow
     {
         protected override float MinWindowHeight { get { return 310; } } // determined by trial and error
         protected override bool DisableNameSelection {

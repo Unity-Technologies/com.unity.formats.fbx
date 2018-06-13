@@ -3,7 +3,8 @@
     "references": [
         "Unity.Formats.Fbx.Editor",
         "Autodesk.Fbx",
-        "Unity.Formats.Fbx.Runtime"
+        "Unity.Formats.Fbx.Runtime",
+        "Unity.Formats.Fbx.Editortests.API"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

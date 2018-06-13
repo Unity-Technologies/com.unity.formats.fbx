@@ -1,10 +1,14 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;  
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editor")]  
+[assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editortests")]  
 
 namespace UnityEngine.Formats.Fbx.Exporter
 {
     [System.Serializable]
-    public struct StringPair {
+    internal struct StringPair {
         private string m_fbxObjectName;
         public string FBXObjectName
         {
@@ -35,7 +39,7 @@ namespace UnityEngine.Formats.Fbx.Exporter
     /// - had a component that was created, destroyed, or updated.
     /// There is no notification for entire objects that were destroyed.
     /// </summary>
-    public delegate void HandleUpdate(FbxPrefab updatedInstance, IEnumerable<GameObject> updatedObjects);
+    internal delegate void HandleUpdate(FbxPrefab updatedInstance, IEnumerable<GameObject> updatedObjects);
 
     /// <summary>
     /// This component is applied to a prefab. It keeps the prefab sync'd up
@@ -45,7 +49,7 @@ namespace UnityEngine.Formats.Fbx.Exporter
     ///         FbxPrefabInspector
     ///         FbxPrefabAutoUpdater
     /// </summary>
-    public class FbxPrefab : MonoBehaviour
+    internal class FbxPrefab : MonoBehaviour
     {
         //////////////////////////////////////////////////////////////////////
         // TODO: Fields included in editor must be included in player, or it doesn't

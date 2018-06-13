@@ -7,7 +7,7 @@ using System.Linq;
 namespace UnityEditor.Formats.Fbx.Exporter
 {
 
-    public class ManualUpdateEditorWindow : EditorWindow
+    internal class ManualUpdateEditorWindow : EditorWindow
     {
         int[] selectedNodesToDestroy;
         int[] selectedNodesToRename;

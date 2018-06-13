@@ -3,7 +3,9 @@ using NUnit.Framework;
 using UnityEngine.Timeline;
 using UnityEngine.Playables;
 using UnityEditor.SceneManagement;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 {
@@ -37,14 +39,22 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                         Assert.That (timeLineClip.animationClip, Is.Not.Null);
 
                         filePath = string.Format ("{0}/{1}@{2}", folderPath, atObject.name, "Recorded.fbx");
-                        exportData[atObject] = ModelExporterReflection.GetExportData(atObject, timeLineClip.animationClip);
+                        exportData[atObject] = ModelExporter.GetExportData(atObject, timeLineClip.animationClip);
                         break;
                     }
                 }
             }
             Assert.That (filePath, Is.Not.Null);
             Assert.That (exportData, Is.Not.Null);
-            ModelExporterReflection.ExportObjects(filePath, new Object[1]{myCube}, null, exportData);
+
+            // This version of ExportObjects is private. Use reflection
+            // ModelExporter.ExportObjects(filePath, new Object[1]{myCube}, null, exportData);
+            var internalMethod = typeof(ModelExporter).GetMethod(   "ExportObjects",    
+                                                                    BindingFlags.Static | BindingFlags.NonPublic,
+                                                                    null,
+                                                                    new Type[] { typeof(string), typeof(UnityEngine.Object[]), typeof(IExportOptions), typeof(Dictionary<GameObject, IExportData>) },
+                                                                    null);
+            internalMethod.Invoke(null, new object[] { filePath, new UnityEngine.Object[1]{myCube}, null, exportData });            
             FileAssert.Exists (filePath);
         }
     }
