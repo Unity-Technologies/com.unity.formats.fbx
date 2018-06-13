@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using NUnit.Framework;
 using System.Diagnostics;
+using System.Linq;
 
 namespace UnityEditor.Formats.Fbx.Exporter.API.UnitTests
 {
@@ -42,9 +43,14 @@ namespace UnityEditor.Formats.Fbx.Exporter.API.UnitTests
             var filename = GetRandomFbxFilePath();
 
             var fbxFileName = ModelExporter.ExportObject(filename, m_toExport[0]);
-
-            Assert.IsNotNull (fbxFileName);
+            Assert.IsNotNull(fbxFileName);
             Assert.AreEqual(fbxFileName, filename);
+
+            Object[] loaded = AssetDatabase.LoadAllAssetsAtPath(filename);
+            var loadedMeshes = (from loadedObj in loaded where loadedObj as Mesh != null select loadedObj as Mesh).ToArray();
+
+            Assert.AreEqual(1, loadedMeshes.Length);
+            Assert.Greater(loadedMeshes[0].triangles.Length, 0);
         }
 
         [Test]
@@ -58,6 +64,15 @@ namespace UnityEditor.Formats.Fbx.Exporter.API.UnitTests
 
             Assert.IsNotNull (fbxFileName);
             Assert.AreEqual(fbxFileName, filename);
+
+            Object[] loaded = AssetDatabase.LoadAllAssetsAtPath(filename);
+            var loadedMeshes = (from loadedObj in loaded where loadedObj as Mesh != null select loadedObj as Mesh).ToArray();
+
+            Assert.AreEqual(2, loadedMeshes.Length);
+            foreach (var mesh in loadedMeshes)
+            {
+                Assert.Greater(mesh.triangles.Length, 0);
+            }
         }
     }
 }
