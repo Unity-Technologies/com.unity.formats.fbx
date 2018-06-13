@@ -4104,7 +4104,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Exports a single Unity object an FBX file.
+        /// Exports a single Unity object to an FBX file.
         /// Returns the FBX file path if successful, otherwise returns null.
         /// </summary>
         /// <param name="filePath">The file path to use for the FBX file.</param>
