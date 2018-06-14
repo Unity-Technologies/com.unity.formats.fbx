@@ -12,6 +12,7 @@ using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 using System.Security.Permissions;
 
 [assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editortests")]  
+[assembly: InternalsVisibleTo("Unity.ProBuilder.AddOns.Editor")]  
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {

@@ -4,6 +4,7 @@ using UnityEngine;
 
 [assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editor")]  
 [assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editortests")]  
+[assembly: InternalsVisibleTo("Unity.ProBuilder.AddOns.Editor")]  
 
 namespace UnityEngine.Formats.Fbx.Exporter
 {
