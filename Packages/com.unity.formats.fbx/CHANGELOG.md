@@ -1,7 +1,7 @@
 # Changes in Fbx Exporter
 
 RELEASE NOTES
-## [2.0.0] - 2018-06-01
+## [2.0.0] - 2018-06-14
 
 FIXES
 * Streamlined the API to conform with Unity's API guidelines

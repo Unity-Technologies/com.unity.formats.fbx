@@ -1,6 +1,6 @@
 # About the FBX SDK C# Bindings package 
 
-__Version__: 1.7.0-preview
+__Version__: 2.0.0-preview
 
 The FBX SDK C# Bindings provide access from Unity C# scripts to a subset of the Autodesk FBX SDK, version 2018.1.
 
@@ -25,6 +25,7 @@ The FBX Exporter package contains:
 
 * In this version, you cannot downcast the C# objects, which limits the use of the bindings for an importer. For example, if the FBX SDK declares in C++ that it will return an FbxDeformer, on the C++ side if you happen to know it is in fact an FbxSkinDeformer you could safely cast the deformer to a skin deformer. However, on the C# side, this is not permitted.
 * While there are guards against some common errors, it is possible to crash Unity by writing C# code that directs the FBX SDK to perform invalid operations. For example, if you have an FbxProperty in C# and you delete the FbxNode that contains the property, if you try to use the FbxProperty, that will have undefined behaviour which may include crashing the Unity Editor. Make sure to read the editor log if you have unexplained crashes when writing FBX SDK C# code.
+* The FBX SDK C# Bindings package is not supported if you build using the IL2CPP backend.
 
 ## API Documentation
 
