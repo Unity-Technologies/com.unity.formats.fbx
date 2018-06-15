@@ -44,43 +44,23 @@ The FBX Exporter package contains:
 
 * When installing a new version of the FBX Exporter Package after using version 1.1.0.b1, the link between Assets and FbxPrefab components may be lost. See [Updating from 1.1.0b1](#Repairs_1_1_0b_1) for repairing instructions.
 
+# Upgrading the Asset Store version of the plugin to the Package Manager version.
 
+Installing the Package Manager version of the plugin will break some associations with the Prefabs you already have; these are the steps to take to upgrade your already existing prefab instances:
 
-# Installing the FBX Exporter package in Unity
+1. Close Unity.
 
-Before you install the FBX Exporter Package, follow these steps (recommended):
+2. Delete the *FbxExporters* folder from your Assets folder.
 
-1. Back up your Project.
+4. Open Unity.
 
-2. Restart Unity.
+![](images/FBXExporter_PrefabComponentUpdater.png)
 
-3. Delete the *FbxExporters* folder.
+5. Select __Edit__ > __Project Settings__ > __Fbx Export__ and click on the __FBX Prefab Component Updater__ button.
 
-4. Select __Assets__ > __Import Package__ > __Custom Package__ in Unity.
+6. Restart Unity.
 
-![](images/FBXExporter_Menu.png)
-
-5. Select the FbxExporter package from the file browser and click __Open__ to [import and install](https://docs.unity3d.com/Manual/AssetPackages.html) the new version of the FBX Exporter package.
-
-
-
-<a name="Repairs_1_1_0b_1"></a>
-## Updating from 1.1.0b1
-
-If your previous version of the FBX Exporter Package was 1.1.0b1, some Assets in your Project may lose their FbxPrefab components. To repair this issue, follow these steps: 
-
-1. If your Project Assets are serialized as Binary, select __Edit__ > __Project Settings__ > __Editor__ to view the Editor Settings. 
-
-2. Change the __Asset Serialization__ mode to __Force Text__. The __Force Text__ option converts all Project Assets to text.
-
-3. Before continuing, back up your Project.
-
-4. Select __Edit__ > __Project Settings__ > __Fbx Export__ to view the [Fbx Export Settings](#FBXSettings).
-
-![](images/FBXExporter_FBXExportSettingsWindow.png)
-
-5. Click the __Run Component Updater__ button to repair all text serialized Prefab and Scene Assets in the Project containing the FbxPrefab component.
-
+Your Prefab instances will now be working again.
 
 <a name="ExportFBX"></a>
 # Exporting FBX files from Unity
