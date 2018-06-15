@@ -1,4 +1,4 @@
-FBX Exporter copyright © 2017 Unity Technologies ApS
+FBX Exporter copyright © 2018 Unity Technologies ApS
 
 Licensed under the Unity Companion License for Unity-dependent projects--see [Unity Companion License](http://www.unity3d.com/legal/licenses/Unity_Companion_License).
 
@@ -6,6 +6,4 @@ Unless expressly provided otherwise, the Software under this license is made ava
 
 =========================================================================
 
-Autodesk FBX SDK. Copyright (c) 2016 Autodesk, Inc. All rights reserved. 
-Use of the FBX SDK requires agreeing to and complying with the FBX SDK License and Service Agreement terms 
-accessed at https://damassets.autodesk.net/content/dam/autodesk/www/Company/docs/pdf/legal-notices-&-trademarks/Autodesk_FBX_SDK_2015_License_and_Services_Agreement.pdf"
+Autodesk FBX SDK. Copyright (c) 2018 Autodesk, Inc. All rights reserved. Use of the FBX SDK requires agreeing to and complying with the FBX SDK License and Service Agreement terms accessed at https://oc.unity3d.com/index.php/s/Pb6ny5njyqp435N
