@@ -16,7 +16,7 @@ The FBX SDK C# Bindings package is compatible with the following versions of the
 
 ## Contents
 
-The FBX Exporter package contains:
+The FBX SDK C# Bindings package contains:
 
 * C# bindings
 * Compiled binaries for MacOS and Windows that include the FBX SDK
