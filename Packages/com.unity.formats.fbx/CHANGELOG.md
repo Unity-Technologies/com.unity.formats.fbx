@@ -1,183 +1,206 @@
 # Changes in Fbx Exporter
 
 RELEASE NOTES
-## [2.0.0] - 2018-06-14
-
-FIXES
-* Streamlined the API to conform with Unity's API guidelines
-
-## [1.7.0] - 2018-06-01
-
-FIXES
-
-* Fixed violations of the C# Framework Design Guidelines (FDG)
-* Fixed errors reported while running the Package Validation Suite
-
-## [1.6.0] - 2018-05-29
-
+## [2.0.0] - 2018-06-18
 NEW FEATURES
-
 * Added support for physical cameras
-
-FIXES
-
-* Fixed skinned mesh bone update
-
-## [1.5.0]
-
-NEW FEATURES
-
+* FBX Exporter is now distributed via the Package Manager
+* Now compatible with Unity 2018.2
 * The roundtrip of assets can now be started from Maya from assets that have not been exported from Unity
 * DCC integration plug-in sources have been moved away from the package
-* Windows version is now using the FBX SDK version 2018.1.1
-* Streamlined public interface for the ModelExporter class
-
-FIXES:
-
-* DCC integration plug-ins now work with packman
-
-## [1.4.0]
-
-NEW FEATURES
-
-* FBX Exporter is now distributed via the Package Manager
+* Now using FBX SDK version 2018.1
+* Streamlined the API public interface
 * Constraints: we now export Unity constraints to FBX
 * ConvertToPrefab: Add ability to convert an fbx or prefab asset from the Project view
+  * Right click on an fbx in the project view then select Convert to Linked Prefab to create a linked prefab asset for the fbx. It will not create an instance in the scene.
+  * Right click on a prefab in the project view and select Convert to Linked Prefab to export the prefab to an fbx file and link the existing prefab to the newly created fbx.
 
-Right click on an fbx in the project view then select Convert to Linked Prefab to create
-a linked prefab asset for the fbx. It will not create an instance in the scene.
-
-Right click on a prefab in the project view and select Convert to Linked Prefab to export the prefab to an fbx file
-and link the existing prefab to the newly created fbx.
-
-FIXES:
-
-* Now compatible with Unity 2018.2.0b3
+FIXES
+* Fixed skinned mesh bone update
 * Last frame was sometimes not exported
 * FBX export dialog hard to read in Unity Pro's dark theme
 
 KNOWN ISSUES
-
 * ConvertToPrefab: UI doesn't provide feedback about whether it will be converting an existing file or creating new files.
-When converting an existing FBX file, the fbx filename and fbx export options are ignored (but not greyed out).
-When converting an existing prefab, the prefab filename is ignored (but not greyed out)
+  * When converting an existing FBX file, the fbx filename and fbx export options are ignored (but not greyed out).
+  * When converting an existing prefab, the prefab filename is ignored (but not greyed out)
 
-## [1.3.0f1]
-
+## [1.3.0f1] - 2018-04-17
 NEW FEATURES
-
-* Updated documentation
-
-## [1.3.0b3]
-
-NEW FEATURES
-
-* Updated documentation
+* 3ds Max Integration:
+  * Add FBX Import settings file
+  * Add ability to import multiple files at once
+  * Recognize animation files on import
+  * Add ability to export based on scene selection
+  * Add export model only option
+* Fbx Export Settings: Added option to transfer transform animation on export
+  * Ability to select source and destination transforms to transfer animation from and to respectively. Destination must be a descendant of source. All animation on transforms on and between source and destination will be combined and transferred to destination.
+* Maya Integration: Added option to export both model and animation to same file
+  * File exported to will be the same as "Export Model Only"
+* Export Settings: Added new UI to set export settings
+  * Window opens when exporting or converting to linked prefab, asking where to save the file and with what filename. Last 5 file paths used are saved. Ability to save presets for the selected options.
+* Fbx Exporter: Added option to export model only
+* Fbx Exporter: Added option to not export animation on skinned meshes
+  * When option is checked all animation will be exported. 
+  * When unchecked, animation on skinned meshes or their ancestors won't be exported
+* Export Settings: Added option to export meshes without renderers
+  * If selected, export meshes on GameObjects that have a mesh filter but no mesh renderer (e.g. Colliders).
+* Unity Maya Integration: Add all imported objects to the same namespace
+  * Namespace is created according to the filename and is stored as an attribute on the export set.
+* Fbx Exporter: "Export Model" option exports with global transform
+  * Center Objects option is disabled by default but still available in the export settings.
+* Fbx Export Settings: Add LOD export option
+  * Added 3 options for LOD export: Highest, Lowest, All. If "Highest" is selected, then only highest LOD is exported in the hierarchy for GameObjects with LOD groups, and vice versa for "Lowest". If All is selected, behaviour will be the same as before, exporting all LODs. 
+  * NOTE: will ignore any LOD meshes not directly parented under the object containing the LOD group.
+* Unity Maya Integration: Allow multi file import
+  * Added ability to select multiple files to import. A different export set is created for each file imported. If a file "model.fbx" is imported, and an animation file with the following naming format: "model@anim.fbx" is imported, the animation file will be added into the model's export set and additional custom attributes will be added showing which animation file is applied to the model. Currently there has to be a 1-1 mapping of animation file to model file.
+* Unity Maya Integration: Allow multi file export by scene selection
+  * In order to choose which sets to export, select desired objects in scene, then click Unity->Export Model Only order Unity->Export Animation Only. All sets containing at least one object in the selection set will be exported.
+  * If "Export Model Only" button is hit, then animation is not exported, and if "Export Animation Only" is clicked, then only animation and required nodes (i.e. animated transforms) will be exported to the animation file of format "model@anim.fbx".
+* Fbx Exporter: Export animation clips from Timeline
+  * Select GameObject in hierarchy containing PlayableDirector component and right click -> "Export All Timeline Clips" to export all tracks and animation clips on the timeline. Each track will be exported to a separate fbx file. Select clips on timeline then go to GameObject->Export Selected Timeline Clip to export each selected timeline clip to a separate fbx file.
+* (Alpha) FbxPrefabAutoUpdater: new UI to help manage name changes. To use the UI, disable auto-update in the FbxExporter settings, then right-click on a linked prefab in the project view and select "Update from FBX"
+* FbxExporter: Added animation only export
+  * Use GameObject menu or context menu to select "Export Animation Only". Animation will be taken from Animation and Animator components. All animation clips will be saved to the same fbx. The first clip exported will be the default clip from the root Animator or Animation component.
+* FbxExporter: Added support for exporting Blendshapes
+* FbxExporter: Added support for exporting SkinnedMeshes with legacy animation
+* FbxExporter: Added support for exporting Lights with animated properties (Intensity, Spot Angle, Color)
+* FbxExporter: Added support for exporting Cameras with animated properties (Field of View)
+* Added support for exporting lights
+* FbxExporter: added ability to export animation on transforms
+* FbxExporter: added ability to export animation on lights
+  * Supports exporting animation of a light component's Intensity, SpotAngle, and Color
+* FbxExporter: Added support for exporting Skinned Meshes
+* Updated User Guide documentation
+* Updated meta files to match original asset store release (1.0.0b1)
+* FbxExporter: Don't export visibility
+* Fbx Exporter: Added camera export support
+  * Export game camera as film camera, with filmback settings set to 35 mm TV Projection (0.816 x 0.612). The camera aperture with always have a height of 0.612 inches, while the width will depend on the aspect of the Unity camera, as camera width = aspectRatio * height.
+  * The projection type (perspective/orthogonal), aspect ratio, focal length, field of view, near plane, and far plane are also exported. Background color and clear flags are exported as custom properties. The last camera exported is set to the default camera in the FBX file.
+  * NOTE: the field of view will show up as a different value in Maya. This is because Unity display's the vertical FOV,Maya displays the horizontal FOV.
+  * NOTE: for GameObjects that have both a mesh and a camera component, only the mesh will be exported.
+* Export Settings: Grouped settings visually into 2 categories
+  * Categories are: Export Options and Integration
+* Maya Unity Integration: Added export setting option to hide native "File->Send To Unity" menu
+* Unity 3D application Integration: Different installation popup message if "Keep open" checked
+  * To avoid misleading successful installation message popping up before installation completes, instead of "Enjoy the new Unity menu in {3DApp}", show "Installing Unity menu in {3DApp}, application will open once installation is complete", if user selected to launch the 3D application after installation.
+* Maya Unity Integration: Added Unity plugin version to File->Unity menu item's tooltip
+* Fbx Exporter: Export GameObject visibility
+  * Set FbxNode visibility based on whether a GameObject is enabled.
+  * NOTE: a disabled FBX node will be imported into Unity as an enabled GameObject with a disabled Mesh Renderer.
+  * NOTE: in 3ds Max disabled objects will still be visible
+* Ship all C# scripts as source code
+* Added Maya LT Integration
+  * Replaced Maya python implementation with MEL script, which is used by both Maya and Maya LT.
+  * NOTE: it is no longer possible to unload the plugin using Maya's plugin manager.
+* Export Settings: Added option to launch 3D application after installing integration
+* Export Settings: Added option to export FBX as ASCII or Binary
+* Export Settings: Added integration unzip location field
+  * Use new field to select where to unzip the integration zip file, instead of being asked each time "Install Unity Integration" button is clicked.
+* Export Settings: Set application with latest version as default selection in 3D application dropdown
+  * In case of a tie, use the following preference order: Maya > Maya LT > 3ds Max > Blender.
+* Updated user documentation
+* 3DsMax Unity Integration: Added popup suggesting user set system units to centimeters
+  * Will only show up if system units are not already centimeters. Click "yes" to change system units to centimeters, "no" to leave units as is. If "no" is clicked, popup will not show up again for this session or .max file.
+* Added 3ds Max 2017 support
+  * Import/Export menu items added into a Unity menu item on the main menu bar.
+* Added 3DsMax Integration
+  * Install the same way as the Maya integration from the export settings. 3DsMax 2017 or earlier not supported. Plugin menu items can be found in the File menu:
+    * File->Import->Import from Unity
+	* File->Export->Export to Unity
+* Ship all C# scripts as DLLs
+* Maya Unity Integration: Remove Preview option from menu
+* Enforce Exporter only works with Unity 2017.1+
+* Fbx Export: add support for installing a zipped version of the Maya Unity Integration
+* Fbx Export: Add support for Third Party software, through a delegate callback, to handling adding the FbxMesh to the FbxNode on export.
+* Maya Unity Integration: Added script for installing Maya integration through the command line
+* Maya Unity Integration: Added dropdown to select Maya version to use for installation
+  * Tries to find all Maya versions installed in default install location. Also contains browse option to select Maya installed in custom location.
+* Maya Unity Integration: Added icons for Import, Preview, and Export
+* Moved Integrations and FbxSdk folders under a single FbxExporters folder in the Unity package
+* Show FbxExporter package version in Fbx Export Settings
+* Fbx Prefab auto-updater updates transforms and components
+  * If components are added/removed in Maya, the changes will be reflected in Unity (e.g. if a mesh is removed from a node, the MeshFilter and MeshRenderer components will be removed in Unity as well. Updating the translation/rotation/scale of a transform in Maya will update the transform in the Unity prefab.
+* Move Autoload Last Saved Prefab menu item to Fbx Export Settings
+  * Now loading the turntable scene with the latest prefab can be done via a button in the Fbx Export Settings
+* Maya Integration: Unity->Import starting directory is Unity Project
+  * Instead of opening in the default Maya project. A side effect of this is that a workspace.mel file gets added to the Unity project root.
+* Maya Integration: Install Maya Integration menu item moved into Fbx Export Settings
+  * Now installing the maya integration can be done via a button in the Fbx Export Settings
+* Fbx Exporter menu removed from main menu bar
+* Maya Integration: Hide Configure button, guess Unity project on Unity->Import
+  * On Unity->Import try to guess which Unity project we are loading the fbx from (if any), set it to be the project we use in Maya if found, do nothing otherwise.
+* Fbx Exporter: Allow GameObjects and/or components to specify the mesh to export
+  * Added callbacks to allow the GameObject or components to specify the mesh that should be exported, fallback to using the MeshFilter or SkinnedMeshRenderer meshes.
+* Fbx Prefab: Added OnUpdate event that returns which GameObjects were updated
+  * The returned objects include all objects in the temporary instance that were created, changed parent, or had a component that was created, destroyed, or updated. The event happens before changes are applied to the prefab, so any further modification of the returned GameObjectswill be applied as well.
+* Maya Integration: Publish automatically writes to the same file you imported from.
+  * On Unity->Import, store the path and filename of the imported FBX as attributes on the export set.
+  * On Unity->Publish, if path and filename attributes are set, publish directly to this location without prompting user.
+* Maya Integration: Unity->Import creates export set containing imported objects
+  * If an export set already exists, replace its contents with newly imported objects
+* Maya Integration: Unity->Publish exports what is in the export set
+  * Export contents of export set, or if there is no export set, then the current selection will be exported.
+* Maya Integration: Fbx export options are set from a file in the Unity project
+  * Export settings stored in Integrations/Autodesk/maya2017/scripts/unityFbxExportSettings.mel are loaded into Maya before exporting either with Unity->Review or Unity->Publish. 
+* Turntable Review shows minimal Unity window
+  * The Game window is maximized so that it takes up most of the layout.
+* Turntable Review frames camera onto model
+* Turntable Review rotates model
+  * Model rotates either when selected in the editor or in play mode.
+* Maya Integration: Turntable Review publishes to temporary location
+  * Running Unity -> Review command in Maya publishes the asset to a temporary location inside the Unity project.
+* Maya Integration: Added support for multiple Maya versions
+* Set Turntable scene from Project Settings
+  * Scene to use for Turntable review can be selected in Project Settings.
+* Select Turntable Base GameObject by attaching FbxTurnTableBase script
+  * Attaching the FbxTurnTableBase script to a GameObject will parent the model being reviewed under this GameObject. If none present, an empty GameObject will be used as the base.
+* Auto updater for instanced prefabs
+  * Convert To Prefab will now create both a .prefab file and a FBX file from the selected GameObject hierarchy. The newly instanced prefab will automatically update whenever the FBX file changes. The instanced prefab will now include updates whenever objects are added or removed from the source FBX file.
+* Maya-to-Unity turntable review workflow
+  * Unity One Click integration for Maya 2017 now includes a "Review in Unity" feature.
+  * You can review how your Model looks in Unity by clicking "Unity->Review" menu Item. This will start Unity and your Model will be loaded into "FbxExporters_TurnTableReview" scene. If the scene cannot be found then an empty scene will be created for you. If the scene contains a "Turntable" object then your model will be parented under that object.
+  * While Unity has the "FbxExporters_TurnTableReview" scene active it will automatically update each time you publish a Model. If you've changed the active scene and want to go back to the reviewing you can run the command "FbxExporters->Turntable Review->Auto Load Last Saved Prefab". If you have unmodified scene changes in a previously saved scene then you'll be prompted to save these changes before the active scene is switched for you. If the scene is an Untitled but modified scene then these changes will be left as-is and the active scene will be switched.
+* FBXSDK C# unitypackage with docs ready for release
+* Added Model Exporter unit tests
+  * Added unit tests for frequently used public functions
+* Export with common center
+  * Now if you export multiple root objects, they will export so they are centered around the union of their bounding boxes.
+  * Added an option to preferences to toggle whether the objects are exported with a common center or not.
+* Handle export of Quads
+  * If submesh has triangle or quad topology in Unity, then it will have same topology in FBX.
+* Enforce unique names in exported Fbx
+  * Rename objects with duplicate names when exporting to ensure naming stays consistent, as both Maya and Unity rename objects with duplicate names on import. 
+* Save Application name and version to Fbx
+  * Save name and version of FbxExporter to file when exporting.
+* Added export performance test
+  * Test exporting a large mesh and fail if export takes too long.
+* Model prefab path preference
+  * Added a preference to the Fbx Export Preferences to control where Convert to Model saves models.
+* FbxExporter Maya plugin
+  * Added a Maya plugin with one click integration from within Unity to install the plugin into Maya 2017. 
+  * Headless install option also available through command line.
+  * The plugin creates a Unity menu item with 3 options in the drop down menu: Configure, Review, and Publish.
+  * The menu options do not yet have any functionality.
+* Automatic file naming 
+  * When exporting the default filename is name of top level selection. If multiple objects are selected then we use the last name exported or if it’s the first time then we use Untitled.fbx.
+  * Added option to rename Object and Material names on export to be Maya compatible.
+  * We ensure that generated filenames do not contain invalid characters.
+* Reliable file system units 
+  * Export in cm units, mesh set to real world (meter) scale. No import options need to be adjusted between Unity and Maya.
+* Freeze transform on export
+  * For selection containing a single object then zero out its transform in the FBX so it is at the world centre in Maya.
+  * For selection containing multiple objects then export their global transforms.
+* Support exporting multiple materials per mesh
+* Support exporting mesh instances
+  * Instanced meshes are exported once and then shared between FbxNodes.
+* Support exporting all available UV sets
+* Added test for default selection behaviour.
 
 FIXES
-
 * ConvertToPrefab: fix Mesh Collider not pointing to exported mesh after converting
 * FbxExporter: fix so "Compatible Naming" doesn't modify scene on export
 * ConvertToPrefab: warn that hierarchy might change and animations could break when "Compatible Naming" is enabled
-
-## [1.3.0b2]
-
-NEW FEATURES
-
-* 3ds Max Integration:
-
-- Add FBX Import settings file
-- Add ability to import multiple files at once
-- Recognize animation files on import
-- Add ability to export based on scene selection
-- Add export model only option
-
-KNOWN ISSUES
-
-* Cannot export animation only from 3ds Max
-
-## [1.3.0b1]
-
-NEW FEATURES
-
-* Fbx Exporter: remove "Export All Timeline Clips" menu option
-
-* Fbx Export Settings: Added option to transfer transform animation on export
-
-Ability to select source and destination transforms to transfer animation from and to respectively.
-Destination must be a descendant of source.
-All animation on transforms on and between source and destination will be combined and transferred to destination.
-
-* Maya Integration: Added option to export both model and animation to same file
-
-File exported to will be the same as "Export Model Only"
-
-* Export Settings: Added new UI to set export settings
-
-Window opens when exporting or converting to linked prefab, asking where to save the file and with what filename.
-Last 5 file paths used are saved.
-Ability to save presets for the selected options.
-
-* Fbx Exporter: Added option to export model only
-
-* Fbx Exporter: Added option to not export animation on skinned meshes
-
-When option is checked all animation will be exported. 
-When unchecked, animation on skinned meshes or their ancestors won't be exported
-
-* Export Settings: Added option to export meshes without renderers
-
-If selected, export meshes on GameObjects that have a mesh filter but no mesh renderer (e.g. Colliders).
-
-* Unity Maya Integration: Add all imported objects to same namespace
-
-Namespace is created according to the filename and is stored as an attribute on the export set.
-
-* Fbx Exporter: "Export Model" option exports with global transform
-
-Center Objects option is disabled by default but still available in the export settings.
-
-* Fbx Export Settings: Add LOD export option
-
-Added 3 options for LOD export: Highest, Lowest, All.
-If "Highest" is selected, then only highest LOD is exported in the hierarchy for GameObjects with LOD groups, and
-vice versa for "Lowest". If All is selected, behaviour will be the same as before, exporting all LODs.
-NOTE: will ignore any LOD meshes not directly parented under the object containing the LOD group.
-
-* Unity Maya Integration: Allow multi file import
-
-Added ability to select multiple files to import. A different export set is created for each file imported.
-If a file "model.fbx" is imported, and an animation file with the following naming format: "model@anim.fbx"
-is imported, the animation file will be added into the model's export set and additional custom attributes will
-be added showing which animation file is applied to the model. Currently there has to be a 1-1 mapping of
-animation file to model file.
-
-* Unity Maya Integration: Allow multi file export by scene selection
-
-In order to choose which sets to export, select desired objects in scene, then click Unity->Export Model Only order
-Unity->Export Animation Only. All sets containing at least one object in the selection set will be exported.
-
-If "Export Model Only" button is hit, then animation is not exported, and if "Export Animation Only" is clicked,
-then only animation and required nodes (i.e. animated transforms) will be exported to the animation file of format "model@anim.fbx".
-
-* Fbx Exporter: Export animation clips from Timeline
-
-Select GameObject in hierarchy containing PlayableDirector component and right click -> "Export All Timeline Clips" to export
-all tracks and animation clips on the timeline. Each track will be exported to a separate fbx file.
-Select clips on timeline then go to GameObject->Export Selected Timeline Clip to export each selected timeline clip to a separate
-fbx file.
-
-* (Alpha) FbxPrefabAutoUpdater: new UI to help manage name changes. 
-To use the UI, disable auto-update in the FbxExporter settings, then right-click on a linked prefab in the project view and select "Update from FBX"
-
-* FbxExporter: Added animation only export
-
-Use GameObject menu or context menu to select "Export Animation Only". Animation will be taken from
-Animation and Animator components. All animation clips will be saved to the same fbx.
-The first clip exported will be the default clip from the root Animator or Animation component.
-
-FIXES
-
 * FbxExporter: if "Animated Skinned Mesh" off, don't export skinned mesh transform
 * Maya Integration: fix so saved files do not lose export set information on export
 * ConvertToPrefab: fix error when converting model instances whose file ends in .FBX (with capitals)
@@ -203,132 +226,32 @@ FIXES
 * FbxExporter: fix so animating spot angle in Unity animates cone angle in Maya (not penumbra)
 * MayaIntegration: fix so export set names don't contain invalid chars from filenames (e.g. spaces)
 * ConvertToPrefab: Don't re-export fbx model instances
-
-If the object being exported in the scene is an fbx model instance, then create the prefab with the FbxPrefab component,
-and attach it to the existing fbx without re-exporting the fbx.
-
+  * If the object being exported in the scene is an fbx model instance, then create the prefab with the FbxPrefab component, and attach it to the existing fbx without re-exporting the fbx.
 * README: remove line from README about not supporting Maya LT
 * Exporter: export correct rotation order (xyz) for euler rotation animations (previously would export as zxy)
 * Exporter: remove pre-rotation from euler rotation animation on skinned mesh export
 * NameRemapping: fix IndexOutOfRangeException when imported object count doesn't match original object count
 * PrefabAutoUpdater: fix so unit tests don't fail if auto update is turned off
-
-KNOWN ISSUES
-
-* FbxExporter: animated skinned meshes must be in the bind pose on export (i.e. not being previewed in the Animation or Timeline windows, and the original rig's fbx must not contain animation)
-* FbxExporter: animated meshes in bone hierarchy are not supported
-* FbxExporter: for skinned meshes all bones must be descendants of the root bone
-* 3DIntegration: fbx containing rig must have file units in cm in order for animation exported from Unity to be properly applied
-* ConvertToPrefab: converting model instance that has been modified in the scene won't reexport fbx
-* Requires Unity 2018.1.0
-
-## [1.3.0a1]
-
-NEW FEATURES
-* FbxExporter: Added support for exporting Blendshapes
-* FbxExporter: Added support for exporting SkinnedMeshes with legacy animation
-* FbxExporter: Added support for exporting Lights with animated properties (Intensity, Spot Angle, Color)
-* FbxExporter: Added support for exporting Cameras with animated properties (Field of View)
-* Added support for exporting lights
-* FbxExporter: added ability to export animation on transforms
-* FbxExporter: added ability to export animation on lights
-
-Supports exporting animation of a light component's Intensity, SpotAngle, and Color
-
-* FbxExporter: Added support for exporting Skinned Meshes
-
-FIXES
 * FbxExporter: fixed so last keyframe is exported
 * fix Universal Windows Platform build errors
 * FbxExporter: fixed issue where animations would sometimes be exported before their components, causing errors
 * FbxExporter: fixed bug where skinning weights were incorrect on export
-
-Error caused by UnityFbxSdk.dll being set as compatible with any platform instead of editor only.
-
+  * Error caused by UnityFbxSdk.dll being set as compatible with any platform instead of editor only.
 * FbxExporter: Added unroll filter to support continuous rotations
 * FbxExporter: Fixed issue where exported animations always operated at 30 FPS, regardless of what they were originally
 * Export Settings: Added back support for MAYA_LOCATION
 * Export Settings: fixed dropdown preference for Mayalt
 * FbxPrefabAutoUpdater: fixed so RectTransforms update correctly in Unity 2017.3
 * ConvertToPrefab: fixed null reference exception when converting missing components
-
-KNOWN ISSUES
-* When exporting with an animated transform for a Camera or a Light, the resulting rotation does not take the forward direction into account and is off by 90 degrees
-* Key tangents are not exported and the default key tangent setting is different between Unity, FBXSDK and Maya. This cause the curve shape to change between Unity and Maya.
-* Animated continuous rotations are not maintained
-* Animated rotations with Euler Angles (Quaternion) or Quaternion interpolation are not converted to the correct Euler equivalent.
-
-## [1.2.0b1]
-
-NEW FEATURES
-
-* Updated User Guide documentation
-* Updated meta files to match original asset store release (1.0.0b1)
-* FbxExporter: Don't export visibility
-* Fbx Exporter: Added camera export support
-
-Export game camera as film camera, with filmback settings set to 35 mm TV Projection (0.816 x 0.612).
-The camera aperture with always have a height of 0.612 inches, while the width will depend on the aspect of the Unity camera,
-as camera width = aspectRatio * height.
-The projection type (perspective/orthogonal), aspect ratio, focal length, field of view, near plane, and far plane are also
-exported. Background color and clear flags are exported as custom properties.
-The last camera exported is set to the default camera in the FBX file.
-NOTE: the field of view will show up as a different value in Maya. This is because Unity display's the vertical FOV,
-      Maya displays the horizontal FOV.
-NOTE: for GameObjects that have both a mesh and a camera component, only the mesh will be exported.
-
-* Export Settings: Grouped settings visually into 2 categories
-
-Categories are: Export Options and Integration
-
-* Maya Unity Integration: Added export setting option to hide native "File->Send To Unity" menu
-
-* Unity 3D application Integration: Different installation popup message if "Keep open" checked
-
-To avoid misleading successful installation message popping up before installation completes, instead of 
-"Enjoy the new Unity menu in {3DApp}", show "Installing Unity menu in {3DApp}, application will open once installation is complete",
-if user selected to launch the 3D application after installation.
-
-* Maya Unity Integration: Added Unity plugin version to File->Unity menu item's tooltip
-
-* Fbx Exporter: Export GameObject visibility
-
-Set FbxNode visibility based on whether a GameObject is enabled.
-NOTE: a disabled FBX node will be imported into Unity as an enabled GameObject with a disabled Mesh Renderer.
-NOTE: in 3ds Max disabled objects will still be visible
-
-* Ship all C# scripts as source code
-
-* Added Maya LT Integration
-
-Replaced Maya python implementation with MEL script, which is used by both Maya and Maya LT.
-
-NOTE: it is no longer possible to unload the plugin using Maya's plugin manager.
-
-* Export Settings: Added option to launch 3D application after installing integration
-
-* Export Settings: Added option to export FBX as ASCII or Binary
-
-* Export Settings: Added integration unzip location field
-
-Use new field to select where to unzip the integration zip file, instead of being asked each time
-"Install Unity Integration" button is clicked.
-
-FIXES
-
 * Revert to shipping DLLs not source
 * Export Settings: Moved browse ("...") buttons for 3D Application/Export Path next to dropdown/path fields
 * Export Settings: Made "Keep Open" and "Hide Native Menu" labels camel case
 * Exporter: Fix so normals/binormals/tangents/vertex colors are exported if they exist
-
-Weren't being exported for primitives or meshes that had less vertices than triangles.
-
+  * Weren't being exported for primitives or meshes that had less vertices than triangles.
 * Added script to fix FbxPrefab component links when updating from forum release (1.1.0b1)
-
-A "Run Component Updater" button will appear in the FBX export settings inspector. 
-Clicking the button will repair all prefabs and scene files serialized as text.
-To repair binary files, first convert asset serialization mode to "Force Text" in Editor Settings (Edit->Project Settings->Editor).
-
+  * A "Run Component Updater" button will appear in the FBX export settings inspector. 
+  * Clicking the button will repair all prefabs and scene files serialized as text.
+  * To repair binary files, first convert asset serialization mode to "Force Text" in Editor Settings (Edit->Project Settings->Editor).
 * FbxPrefabAutoUpdater: Now accepts updates to RectTransforms
 * FbxExporter: Fix so camera exports with correct rotation
 * MayaIntegration: Fix so the "SendToUnity" button in Maya is hidden on startup
@@ -348,83 +271,21 @@ To repair binary files, first convert asset serialization mode to "Force Text" i
 * Export Settings: Align checkboxes, text fields, and dropdown
 * Fbx Prefab: Add tooltip to "Source Fbx Asset" field
 * Export Settings: Search for 3D applicaitons in multiple vendor locations (e.g. C:/ and D:/ drive)
-
-## [1.1.0b1]
-
-NEW FEATURES
-
-* Export Settings: Set application with latest version as default selection in 3D application dropdown
-
-In case of a tie, use the following preference order: Maya > Maya LT > 3ds Max > Blender.
-
-* Updated user documentation
-* 3DsMax Unity Integration: Added popup suggesting user set system units to centimeters
-
-Will only show up if system units are not already centimeters.
-Click "yes" to change system units to centimeters, "no" to leave units as is.
-If "no" is clicked, popup will not show up again for this session or .max file.
-
-* Added 3ds Max 2017 support
-
-Import/Export menu items added into a Unity menu item on the main menu bar.
-
-* Added 3DsMax Integration
-
-Install the same way as the Maya integration from the export settings.
-3DsMax 2017 or earlier not supported.
-Plugin menu items can be found in the File menu:
-File->Import->Import from Unity
-File->Export->Export to Unity
-
-FIXES
-
 * Exporter: Fix FBX exported from Unity causing crash when imported in 3ds Max.
 * Export Settings: Fix hang when adding multiple installations of the same version of a 3D application to the dropdown
 * 3DsMax Unity Integration: In 3ds Max 2017 move the Unity menu before the Help menu in the main menu bar
-* 3DsMax Unity Integration: Fix so file units are always exported as cm. Adjust scaling according to system units
-                            e.g. a 3 meter cube in Max will export as a 300 cm cube in Unity
+* 3DsMax Unity Integration: Fix so file units are always exported as cm. Adjust scaling according to system units. e.g. a 3 meter cube in Max will export as a 300 cm cube in Unity
 * FbxPrefab: Avoid trying to update Rect Transforms with the fbx's Transform component
 * Export Settings: Rename "DCC Application" to "3D Application"
 * Unity 3ds Max integration: Fix model rotated by 90 degrees along x when importing into Unity
 * Maya Unity Integration: lock export set so it doesn't accidentally get deleted
 * Convert to Prefab: Fix so convert to prefab doesn't lose Object references in scripts
 * Export Settings: Fix so MayaLT cannot be selected using "Browse" on Mac
-
-## [1.0.0b1]
-
-NEW FEATURES
-
-* Ship all C# scripts as DLLs
-* Maya Unity Integration: Remove Preview option from menu
-* Enforce Exporter only works with Unity 2017.1+
-* Fbx Export: add support for installing a zipped version of the Maya Unity Integration
-
-FIXES
 * Export Settings: prevent user from selecting Maya LT with "Browse" option in dropdown
 * Fbx Export: fix game won't compile with package installed (move FbxSdk to editor folder)
 * Convert to Prefab: fix particle system component causing convert to fail 
 * Fbx Prefab: Properly handle updating Linked Prefab Instances that get nested inside other Prefabs.
 * Fbx Prefab: Properly handle updating Linked Prefab Instances that get nested inside other Prefabs.
-
-## [0.0.14a]
-
-NEW FEATURES
-
-* Fbx Export: Add support for Third Party software, through a delegate callback, to handling adding the FbxMesh to the FbxNode on export.
-
-* Maya Unity Integration: Added script for installing Maya integration through the command line
-
-* Maya Unity Integration: Added dropdown to select Maya version to use for installation
-
-Tries to find all Maya versions installed in default install location. Also contains browse option to select Maya installed
-in custom location.
-
-* Maya Unity Integration: Added icons for Import, Preview, and Export
-
-* Moved Integrations and FbxSdk folders under a single FbxExporters folder in the Unity package
-
-FIXES
-
 * Maya Unity Integration: always show plugin as "what's new" regardless of Maya version
 * Convert to Prefab: fix running "Convert to Prefab" multiple times on same object adds multiple FbxPrefab components
 * FbxPrefab: Fire OnUpdate event even if there is no obvious change to the Fbx
@@ -440,11 +301,6 @@ FIXES
 * Convert to Prefab: Don't copy SkinnedMeshRenderer component to FbxPrefab (as we currently do not support skinned mesh export)
 * Convert to Prefab: Rename "Convert to Prefab" to "Convert To Linked Prefab Instance"
 * Fbx Export: fix memory leak with SkinnedMeshRenderer creating a temporary mesh and not destroying it.
-
-## [0.0.13a]
-
-FIXES
-
 * Updated license to Unity Companion License 1.0 
 * Hide "auto-update" feature of FbxPrefab component from the Unity Inspector
 * Remove "Embedded Textures" option from the Fbx Export Settings
@@ -452,148 +308,10 @@ FIXES
 * Maya Integration Plugin : the Unity menu is now submenu of the File menu
 * Maya Integration Plugin : add Unity icon to Unity menu item
 * Convert to Prefab : Add more unit tests
-
-## [0.0.12a]
-
-NEW FEATURES
-
-* Show FbxExporter package version in Fbx Export Settings
-
-* Fbx Prefab auto-updater updates transforms and components
-
-If components are added/removed in Maya, the changes will be reflected in Unity (e.g. if a mesh is removed from a node,
-the MeshFilter and MeshRenderer components will be removed in Unity as well.
-Updating the translation/rotation/scale of a transform in Maya will update the transform in the Unity prefab.
-
-* Move Autoload Last Saved Prefab menu item to Fbx Export Settings
-
-Now loading the turntable scene with the latest prefab can be done via a button
-in the Fbx Export Settings
-
-* Maya Integration: Unity->Import starting directory is Unity Project
-
-Instead of opening in the default Maya project. A side effect of this is that a workspace.mel file
-gets added to the Unity project root.
-
-* Maya Integration: Install Maya Integration menu item moved into Fbx Export Settings
-
-Now installing the maya integration can be done via a button
-in the Fbx Export Settings
-
-* Fbx Exporter menu removed from main menu bar
-
-* Maya Integration: Hide Configure button, guess Unity project on Unity->Import
-
-On Unity->Import try to guess which Unity project we are loading the fbx from (if any), set it to be the project we
-use in Maya if found, do nothing otherwise.
-
-* Fbx Exporter: Allow GameObjects and/or components to specify the mesh to export
-
-Added callbacks to allow the GameObject or components to specify the mesh that should be exported, fallback
-to using the MeshFilter or SkinnedMeshRenderer meshes.
-
-* Fbx Prefab: Added OnUpdate event that returns which GameObjects were updated
-
-The returned objects include all objects in the temporary instance that were created, changed parent, or had a component
-that was created, destroyed, or updated. 
-The event happens before changes are applied to the prefab, so any further modification of the returned GameObjects
-will be applied as well.
-
-FIXES
-
-* Export Settings: make sure export path always points to an existing folder in assets
-* Maya Integration: fix using Unity->Import to import the same model twice clears export set the second time
-* Maya Integration: fix fbxmaya and GamePipeline plugins not being autoloaded on Mac
-* Maya Integration: remove version number from maya integration folder
-* Maya Integration: module file installed into Maya version independent location
-
-## [0.0.11a]
-
-NEW FEATURES
-
-* Maya Integration: Publish automatically writes to the same file you imported from.
-
-On Unity->Import, store the path and filename of the imported FBX as attributes on the export set.
-On Unity->Publish, if path and filename attributes are set, publish directly to this location without prompting user.
-
-* Maya Integration: Unity->Import creates export set containing imported objects
-
-If an export set already exists, replace its contents with newly imported objects
-
-* Maya Integration: Unity->Publish exports what is in the export set
-
-Export contents of export set, or if there is no export set, then the current selection will be exported.
-
-* Maya Integration: Fbx export options are set from a file in the Unity project
-
-Export settings stored in Integrations/Autodesk/maya2017/scripts/unityFbxExportSettings.mel are loaded into Maya before
-exporting either with Unity->Review or Unity->Publish.
-
-FIXES
-
 * Export Settings: fix export path doesn't refresh if selectable text box selected
 * Convert to Prefab: fix model added to wrong scene if multiple scenes open
-
-## [0.0.10a]
-
-NEW FEATURES
-
-* Turntable Review shows minimal Unity window
-
-The Game window is maximized so that it takes up most of the layout.
-
-* Turntable Review frames camera onto model
-
-* Turntable Review rotates model
-
-Model rotates either when selected in the editor or in play mode.
-
-* Maya Integration: Turntable Review publishes to temporary location
-
-Running Unity -> Review command in Maya publishes the asset to a temporary location inside the Unity project.
-
-* Maya Integration: Added support for multiple Maya versions
-
-* Set Turntable scene from Project Settings
-
-Scene to use for Turntable review can be selected in Project Settings.
-
-* Select Turntable Base GameObject by attaching FbxTurnTableBase script
-
-Attaching the FbxTurnTableBase script to a GameObject will parent the model being reviewed under this GameObject.
-If none present, an empty GameObject will be used as the base.
-
-FIXES
-
 * FbxPrefab: Don't allow settings to be changed on prefab instance
 * Maya Integration: Fix so review brings Unity window to front on Windows if already open
-
-## [0.0.9a]
-
-* Auto updater for instanced prefabs
-
-Convert To Prefab will now create both a .prefab file and a FBX file from the selected GameObject hierarchy. The newly instanced prefab will automatically update whenever the FBX file changes. The instanced prefab will now include updates whenever objects are added or removed from the source FBX file.
-
-* Maya-to-Unity turntable review workflow
-
-Unity One Click integration for Maya 2017 now includes a "Review in Unity" feature.
-
-You can review how your Model looks in Unity by clicking "Unity->Review" menu Item. This will start Unity and your Model will be loaded into "FbxExporters_TurnTableReview" scene. If the scene cannot be found then an empty scene will be created for you. If the scene contains a "Turntable" object then your model will be parented under that object.
-
-While Unity has the "FbxExporters_TurnTableReview" scene active it will automatically update each time you publish a Model. If you've changed the active scene and want to go back to the reviewing you can run the command "FbxExporters->Turntable Review->Auto Load Last Saved Prefab". If you have unmodified scene changes in a previously saved scene then you'll be prompted to save these changes before the active scene is switched for you. If the scene is an Untitled but modified scene then these changes will be left as-is and the active scene will be switched.
-
-* FBXSDK C# unitypackage with docs ready for release
-
-## [0.0.8a]
-
-NEW FEATURES
-
-* Added Model Exporter unit tests
-
-Added unit tests for frequently used public functions
-
-FIXES
-
 * Export: If nothing selected on export, pop up a dialog saying that nothing is selected
 * Export: Remove menu items from Assets menu
 * Convert to Model: fix issues with file number not incrementing properly (e.g. Sphere_1 would become Sphere_ 2)
@@ -607,35 +325,6 @@ FIXES
   * Fix so button isn't clipped with default panel width  
 * Maya Integration: fix so destructors are always called
 * Export Unit tests: fix so ConvertToValidFilename tests pass on Mac
-  
-## [0.0.7a]
-
-NEW FEATURES
-
-* Export with common center
-
-Now if you export multiple root objects, they will export so they are centered around the union of their bounding boxes.
-Added an option to preferences to toggle whether the objects are exported with a common center or not.
-
-* Handle export of Quads
-
-If submesh has triangle or quad topology in Unity, then it will have same topology in FBX.
-
-* Enforce unique names in exported Fbx
-
-Rename objects with duplicate names when exporting to ensure naming stays consistent, as
-both Maya and Unity rename objects with duplicate names on import. 
-
-* Save Application name and version to Fbx
-
-Save name and version of FbxExporter to file when exporting.
-
-* Added export performance test
-
-Test exporting a large mesh and fail if export takes too long.
-
-FIXES
-
 * Export: Export rotation in XYZ order instead of ZXY so Maya always imports rotation correctly
 * Export: Improved performance by caching Mesh data (i.e. triangles, tangents, vertices, etc.)
 * Export: Set emissive color default to 0 so material does not appear white if no emissive color found.
@@ -644,62 +333,27 @@ FIXES
 * Convert to Model: Ensure imported model name matches incremented filename
 * Convert to Model: Don't reference embedded materials of original model in new model.
 * Convert to Model: If existing filename ends with a number, increment it instead of appending 1 (i.e. Sphere_1 becomes Sphere_2 instead of Sphere_1 1)
-
-## [0.0.6a]
-
-NEW FEATURES
-
-* Model prefab path preference
-
-Added a preference to the Fbx Export Preferences to control where Convert to Model saves models.
-
-* FbxExporter Maya plugin
-
-Added a Maya plugin with one click integration from within Unity to install the plugin into Maya 2017. 
-Headless install option also available through command line.
-The plugin creates a Unity menu item with 3 options in the drop down menu: Configure, Review, and Publish.
-The menu options do not yet have any functionality.
-
-## [0.0.5a]
-
-NEW FEATURES
-
-* Automatic file naming 
-
-When exporting the default filename is name of top level selection. If multiple objects are selected then we use the last name exported or if it’s the first time then we use Untitled.fbx.
-
-Added option to rename Object and Material names on export to be Maya compatible.
-
-We ensure that generated filenames do not contain invalid characters.
-
-* Reliable file system units 
-
-Export in cm units, mesh set to real world (meter) scale. No import options need to be adjusted between Unity and Maya.
-
-* Freeze transform on export
-
-For selection containing a single object then zero out its transform in the FBX so it is at the world centre in Maya.
-For selection containing multiple objects then export their global transforms.
-
-* Support exporting multiple materials per mesh
-
-* Support exporting mesh instances
-
-Instanced meshes are exported once and then shared between FbxNodes.
-
-* Support exporting all available UV sets
-
-TODO: publish video demonstrating feature
-
-* Unit Tests
-
-Added test for default selection behaviour.
-
-FIXES
-
 * Export : Set default Albedo colour to white instead of grey if not found in source material so that it uses the same default as a new material.
 * Convert to Model : copy component values for components that already between the source hierarchy and the imported copy.
 * Convert to Model : ensure only called once from context menu with multiple selection.
 * Convert to Model: ensure instanced prefab linked to prefab on disk
 * Convert to Model: don’t overwrite existing files for example, if “Sphere.fbx” exists then the file will be called “Sphere1.fbx”
 * Convert to Model: ensure order of copied siblings in matches original; ensure all GameObjects have unique names before export
+
+KNOWN ISSUES
+* Cannot export animation only from 3ds Max
+* FbxExporter: animated skinned meshes must be in the bind pose on export (i.e. not being previewed in the Animation or Timeline windows, and the original rig's fbx must not contain animation)
+* FbxExporter: animated meshes in bone hierarchy are not supported
+* FbxExporter: for skinned meshes all bones must be descendants of the root bone
+* 3DIntegration: fbx containing rig must have file units in cm in order for animation exported from Unity to be properly applied
+* ConvertToPrefab: converting model instance that has been modified in the scene won't reexport fbx
+* Requires Unity 2018.1.0
+* When exporting with an animated transform for a Camera or a Light, the resulting rotation does not take the forward direction into account and is off by 90 degrees
+* Key tangents are not exported and the default key tangent setting is different between Unity, FBXSDK and Maya. This cause the curve shape to change between Unity and Maya.
+* Animated continuous rotations are not maintained
+* Animated rotations with Euler Angles (Quaternion) or Quaternion interpolation are not converted to the correct Euler equivalent.
+* Export Settings: make sure export path always points to an existing folder in assets
+* Maya Integration: fix using Unity->Import to import the same model twice clears export set the second time
+* Maya Integration: fix fbxmaya and GamePipeline plugins not being autoloaded on Mac
+* Maya Integration: remove version number from maya integration folder
+* Maya Integration: module file installed into Maya version independent location
