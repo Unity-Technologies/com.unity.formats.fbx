@@ -42,17 +42,6 @@ NEW FEATURES
 
 * FBX Exporter is now distributed via the Package Manager
 * Constraints: we now export Unity constraints to FBX
-
-FIXES:
-
-* Now compatible with Unity 2018.2.0b3
-* Last frame was sometimes not exported
-* FBX export dialog hard to read in Unity Pro's dark theme
-
-## [sprint55]
-
-NEW FEATURES
-
 * ConvertToPrefab: Add ability to convert an fbx or prefab asset from the Project view
 
 Right click on an fbx in the project view then select Convert to Linked Prefab to create
@@ -60,6 +49,12 @@ a linked prefab asset for the fbx. It will not create an instance in the scene.
 
 Right click on a prefab in the project view and select Convert to Linked Prefab to export the prefab to an fbx file
 and link the existing prefab to the newly created fbx.
+
+FIXES:
+
+* Now compatible with Unity 2018.2.0b3
+* Last frame was sometimes not exported
+* FBX export dialog hard to read in Unity Pro's dark theme
 
 KNOWN ISSUES
 
@@ -103,22 +98,6 @@ KNOWN ISSUES
 
 ## [1.3.0b1]
 
-FIXES
-
-* FbxExporter: if "Animated Skinned Mesh" off, don't export skinned mesh transform
-* Maya Integration: fix so saved files do not lose export set information on export
-* ConvertToPrefab: fix error when converting model instances whose file ends in .FBX (with capitals)
-
-KNOWN ISSUES
-
-* FbxExporter: animated skinned meshes must be in the bind pose on export (i.e. not being previewed in the Animation or Timeline windows, and the original rig's fbx must not contain animation)
-* FbxExporter: animated meshes in bone hierarchy are not supported
-* FbxExporter: for skinned meshes all bones must be descendants of the root bone
-* 3DIntegration: fbx containing rig must have file units in cm in order for animation exported from Unity to be properly applied
-* ConvertToPrefab: converting model instance that has been modified in the scene won't reexport fbx
-
-## [sprint50]
-
 NEW FEATURES
 
 * Fbx Exporter: remove "Export All Timeline Clips" menu option
@@ -133,26 +112,6 @@ All animation on transforms on and between source and destination will be combin
 
 File exported to will be the same as "Export Model Only"
 
-FIXES
-
-* FbxExporterTests: fix Export Timeline Clip unit tests (add back missing scene)
-* FbxExporter: don't export animation on objects (e.g. LODs) that don't get exported
-* FbxExportSettings: remove presets so package works in Unity 2017
-* FbxExportSettings: fix so min dialog size doesn't cut off export button
-* FbxExporter: rename Export Model to Export To FBX
-* FbxExportSettings: fix console error on Mac when clicking "Install Unity Integration"
-* FbxExportSettings: turn animated skinned mesh export off by default
-* FbxExportSettings: export animation on skinned mesh ancestors even if animated skinned mesh option is off
-* FbxExporter: fix error when trying to export animation only on model without animation
-* ConvertToPrefabUI: don't give warning about overwriting fbx if GameObject was model instance
-* FbxExportSettings: give error if empty filename specified
-* ExportModelUI: restore "Include" setting from "Animation Only" after exporting timeline clip
-* FbxExporter: if export unrendered turned off, don't export meshes that have disabled mesh renderers
-
-## [sprint49]
-
-NEW FEATURES
-
 * Export Settings: Added new UI to set export settings
 
 Window opens when exporting or converting to linked prefab, asking where to save the file and with what filename.
@@ -166,35 +125,9 @@ Ability to save presets for the selected options.
 When option is checked all animation will be exported. 
 When unchecked, animation on skinned meshes or their ancestors won't be exported
 
-FIXES
-
-* FbxExporter: avoid duplicate @ in filename when exporting timeline clip containing @ in the display name
-* FbxExporter: added validation functions for all context menu items
-* FbxExporter: link materials to objects connected to mesh instances
-
-KNOWN ISSUES
-
-* Requires Unity 2018.1.0
-
-## [sprint48]
-
-NEW FEATURES
-
 * Export Settings: Added option to export meshes without renderers
 
 If selected, export meshes on GameObjects that have a mesh filter but no mesh renderer (e.g. Colliders).
-
-FIXES
-
-* TimelineClipExport: use EditorClip name instead of AnimationClip name for filename
-* TimelineClipExport: allow user to select filename for export instead of just the folder name
-* FbxExporter: export meshes in model prefab instances as mesh instances in fbx
-* FbxExporter: fix so animating spot angle in Unity animates cone angle in Maya (not penumbra)
-* MayaIntegration: fix so export set names don't contain invalid chars from filenames (e.g. spaces)
-
-## [sprint47]
-
-NEW FEATURES
 
 * Unity Maya Integration: Add all imported objects to same namespace
 
@@ -210,17 +143,6 @@ Added 3 options for LOD export: Highest, Lowest, All.
 If "Highest" is selected, then only highest LOD is exported in the hierarchy for GameObjects with LOD groups, and
 vice versa for "Lowest". If All is selected, behaviour will be the same as before, exporting all LODs.
 NOTE: will ignore any LOD meshes not directly parented under the object containing the LOD group.
-
-FIXES
-
-* ConvertToPrefab: Don't re-export fbx model instances
-
-If the object being exported in the scene is an fbx model instance, then create the prefab with the FbxPrefab component,
-and attach it to the existing fbx without re-exporting the fbx.
-
-## [sprint46]
-
-NEW FEATURES
 
 * Unity Maya Integration: Allow multi file import
 
@@ -245,17 +167,6 @@ all tracks and animation clips on the timeline. Each track will be exported to a
 Select clips on timeline then go to GameObject->Export Selected Timeline Clip to export each selected timeline clip to a separate
 fbx file.
 
-FIXES
-* README: remove line from README about not supporting Maya LT
-* Exporter: export correct rotation order (xyz) for euler rotation animations (previously would export as zxy)
-* Exporter: remove pre-rotation from euler rotation animation on skinned mesh export
-* NameRemapping: fix IndexOutOfRangeException when imported object count doesn't match original object count
-* PrefabAutoUpdater: fix so unit tests don't fail if auto update is turned off
-
-## [sprint45]
-
-NEW FEATURES
-
 * (Alpha) FbxPrefabAutoUpdater: new UI to help manage name changes. 
 To use the UI, disable auto-update in the FbxExporter settings, then right-click on a linked prefab in the project view and select "Update from FBX"
 
@@ -265,43 +176,59 @@ Use GameObject menu or context menu to select "Export Animation Only". Animation
 Animation and Animator components. All animation clips will be saved to the same fbx.
 The first clip exported will be the default clip from the root Animator or Animation component.
 
-## [1.3.0a1]
-
 FIXES
-* FbxExporter: fixed so last keyframe is exported
-* fix Universal Windows Platform build errors
 
-Error caused by UnityFbxSdk.dll being set as compatible with any platform instead of editor only.
+* FbxExporter: if "Animated Skinned Mesh" off, don't export skinned mesh transform
+* Maya Integration: fix so saved files do not lose export set information on export
+* ConvertToPrefab: fix error when converting model instances whose file ends in .FBX (with capitals)
+* FbxExporterTests: fix Export Timeline Clip unit tests (add back missing scene)
+* FbxExporter: don't export animation on objects (e.g. LODs) that don't get exported
+* FbxExportSettings: remove presets so package works in Unity 2017
+* FbxExportSettings: fix so min dialog size doesn't cut off export button
+* FbxExporter: rename Export Model to Export To FBX
+* FbxExportSettings: fix console error on Mac when clicking "Install Unity Integration"
+* FbxExportSettings: turn animated skinned mesh export off by default
+* FbxExportSettings: export animation on skinned mesh ancestors even if animated skinned mesh option is off
+* FbxExporter: fix error when trying to export animation only on model without animation
+* ConvertToPrefabUI: don't give warning about overwriting fbx if GameObject was model instance
+* FbxExportSettings: give error if empty filename specified
+* ExportModelUI: restore "Include" setting from "Animation Only" after exporting timeline clip
+* FbxExporter: if export unrendered turned off, don't export meshes that have disabled mesh renderers
+* FbxExporter: avoid duplicate @ in filename when exporting timeline clip containing @ in the display name
+* FbxExporter: added validation functions for all context menu items
+* FbxExporter: link materials to objects connected to mesh instances
+* TimelineClipExport: use EditorClip name instead of AnimationClip name for filename
+* TimelineClipExport: allow user to select filename for export instead of just the folder name
+* FbxExporter: export meshes in model prefab instances as mesh instances in fbx
+* FbxExporter: fix so animating spot angle in Unity animates cone angle in Maya (not penumbra)
+* MayaIntegration: fix so export set names don't contain invalid chars from filenames (e.g. spaces)
+* ConvertToPrefab: Don't re-export fbx model instances
 
-## [sprint43]
+If the object being exported in the scene is an fbx model instance, then create the prefab with the FbxPrefab component,
+and attach it to the existing fbx without re-exporting the fbx.
+
+* README: remove line from README about not supporting Maya LT
+* Exporter: export correct rotation order (xyz) for euler rotation animations (previously would export as zxy)
+* Exporter: remove pre-rotation from euler rotation animation on skinned mesh export
+* NameRemapping: fix IndexOutOfRangeException when imported object count doesn't match original object count
+* PrefabAutoUpdater: fix so unit tests don't fail if auto update is turned off
+
+KNOWN ISSUES
+
+* FbxExporter: animated skinned meshes must be in the bind pose on export (i.e. not being previewed in the Animation or Timeline windows, and the original rig's fbx must not contain animation)
+* FbxExporter: animated meshes in bone hierarchy are not supported
+* FbxExporter: for skinned meshes all bones must be descendants of the root bone
+* 3DIntegration: fbx containing rig must have file units in cm in order for animation exported from Unity to be properly applied
+* ConvertToPrefab: converting model instance that has been modified in the scene won't reexport fbx
+* Requires Unity 2018.1.0
+
+## [1.3.0a1]
 
 NEW FEATURES
 * FbxExporter: Added support for exporting Blendshapes
-
-FIXES
-* FbxExporter: Added unroll filter to support continuous rotations
-* FbxExporter: Fixed issue where exported animations always operated at 30 FPS, regardless of what they were originally
-
-## [sprint42]
-
-NEW FEATURES
 * FbxExporter: Added support for exporting SkinnedMeshes with legacy animation
 * FbxExporter: Added support for exporting Lights with animated properties (Intensity, Spot Angle, Color)
 * FbxExporter: Added support for exporting Cameras with animated properties (Field of View)
-
-FIXES
-* FbxExporter: fixed issue where animations would sometimes be exported before their components, causing errors
-* FbxExporter: fixed bug where skinning weights were incorrect on export
-
-KNOWN ISSUES
-* When exporting with an animated transform for a Camera or a Light, the resulting rotation does not take the forward direction into account and is off by 90 degrees
-* Key tangents are not exported and the default key tangent setting is different between Unity, FBXSDK and Maya. This cause the curve shape to change between Unity and Maya.
-* Animated continuous rotations are not maintained
-* Animated rotations with Euler Angles (Quaternion) or Quaternion interpolation are not converted to the correct Euler equivalent.
-
-## [sprint41]
-
-NEW FEATURES
 * Added support for exporting lights
 * FbxExporter: added ability to export animation on transforms
 * FbxExporter: added ability to export animation on lights
@@ -311,10 +238,25 @@ Supports exporting animation of a light component's Intensity, SpotAngle, and Co
 * FbxExporter: Added support for exporting Skinned Meshes
 
 FIXES
+* FbxExporter: fixed so last keyframe is exported
+* fix Universal Windows Platform build errors
+* FbxExporter: fixed issue where animations would sometimes be exported before their components, causing errors
+* FbxExporter: fixed bug where skinning weights were incorrect on export
+
+Error caused by UnityFbxSdk.dll being set as compatible with any platform instead of editor only.
+
+* FbxExporter: Added unroll filter to support continuous rotations
+* FbxExporter: Fixed issue where exported animations always operated at 30 FPS, regardless of what they were originally
 * Export Settings: Added back support for MAYA_LOCATION
 * Export Settings: fixed dropdown preference for Mayalt
 * FbxPrefabAutoUpdater: fixed so RectTransforms update correctly in Unity 2017.3
 * ConvertToPrefab: fixed null reference exception when converting missing components
+
+KNOWN ISSUES
+* When exporting with an animated transform for a Camera or a Light, the resulting rotation does not take the forward direction into account and is off by 90 degrees
+* Key tangents are not exported and the default key tangent setting is different between Unity, FBXSDK and Maya. This cause the curve shape to change between Unity and Maya.
+* Animated continuous rotations are not maintained
+* Animated rotations with Euler Angles (Quaternion) or Quaternion interpolation are not converted to the correct Euler equivalent.
 
 ## [1.2.0b1]
 
@@ -322,41 +264,7 @@ NEW FEATURES
 
 * Updated User Guide documentation
 * Updated meta files to match original asset store release (1.0.0b1)
-
-FIXES
-
-* Revert to shipping DLLs not source
-* Export Settings: Moved browse ("...") buttons for 3D Application/Export Path next to dropdown/path fields
-* Export Settings: Made "Keep Open" and "Hide Native Menu" labels camel case
-* Exporter: Fix so normals/binormals/tangents/vertex colors are exported if they exist
-
-Weren't being exported for primitives or meshes that had less vertices than triangles.
-
-* Added script to fix FbxPrefab component links when updating from forum release (1.1.0b1)
-
-A "Run Component Updater" button will appear in the FBX export settings inspector. 
-Clicking the button will repair all prefabs and scene files serialized as text.
-To repair binary files, first convert asset serialization mode to "Force Text" in Editor Settings (Edit->Project Settings->Editor).
-
-## [sprint36]
-
-NEW FEATURES
-*FbxExporter: Don't export visibility
-
-FIXES
-*FbxPrefabAutoUpdater: Now accepts updates to RectTransforms
-*FbxExporter: Fix so camera exports with correct rotation
-*MayaIntegration: Fix so the "SendToUnity" button in Maya is hidden on startup
-*FbxPrefabAutoUpdater: Fix updating gameObjects with missing components
-*UnityIntegration: Catch and print installation errors from 3D applications
-*FbxExporter: Fix incorrect scaling when importing into Maya
-*FbxExportSettings: Fix vendor location environmnet variable pointing to empty folder
-*MaxIntegration: Reset export path on new scene
-
-## [sprint35]
-
-NEW FEATURES
-
+* FbxExporter: Don't export visibility
 * Fbx Exporter: Added camera export support
 
 Export game camera as film camera, with filmback settings set to 35 mm TV Projection (0.816 x 0.612).
@@ -389,18 +297,6 @@ Set FbxNode visibility based on whether a GameObject is enabled.
 NOTE: a disabled FBX node will be imported into Unity as an enabled GameObject with a disabled Mesh Renderer.
 NOTE: in 3ds Max disabled objects will still be visible
 
-FIXES
-* Export Settings: Changed "Launch 3D Application" to "Keep open"
-* Fbx Exporter: cleaned up code: removed TODO's, unused, and commented out code
-* Export Settings: Fix settings giving error when updating to sprint34 package
-* Fbx Exporter: fix error when exporting meshes with missing normals, tangents, binormals, or vertex colors
-* Export Settings: Fix empty dropdown selection when uninstalling 3D applications
-* Convert to Linked Prefab: fix prefab instance name differing from prefab file name when filename is incremented
-
-## [sprint34]
-
-NEW FEATURES
-
 * Ship all C# scripts as source code
 
 * Added Maya LT Integration
@@ -419,6 +315,34 @@ Use new field to select where to unzip the integration zip file, instead of bein
 "Install Unity Integration" button is clicked.
 
 FIXES
+
+* Revert to shipping DLLs not source
+* Export Settings: Moved browse ("...") buttons for 3D Application/Export Path next to dropdown/path fields
+* Export Settings: Made "Keep Open" and "Hide Native Menu" labels camel case
+* Exporter: Fix so normals/binormals/tangents/vertex colors are exported if they exist
+
+Weren't being exported for primitives or meshes that had less vertices than triangles.
+
+* Added script to fix FbxPrefab component links when updating from forum release (1.1.0b1)
+
+A "Run Component Updater" button will appear in the FBX export settings inspector. 
+Clicking the button will repair all prefabs and scene files serialized as text.
+To repair binary files, first convert asset serialization mode to "Force Text" in Editor Settings (Edit->Project Settings->Editor).
+
+* FbxPrefabAutoUpdater: Now accepts updates to RectTransforms
+* FbxExporter: Fix so camera exports with correct rotation
+* MayaIntegration: Fix so the "SendToUnity" button in Maya is hidden on startup
+* FbxPrefabAutoUpdater: Fix updating gameObjects with missing components
+* UnityIntegration: Catch and print installation errors from 3D applications
+* FbxExporter: Fix incorrect scaling when importing into Maya
+* FbxExportSettings: Fix vendor location environmnet variable pointing to empty folder
+* MaxIntegration: Reset export path on new scene
+* Export Settings: Changed "Launch 3D Application" to "Keep open"
+* Fbx Exporter: cleaned up code: removed TODO's, unused, and commented out code
+* Export Settings: Fix settings giving error when updating package
+* Fbx Exporter: fix error when exporting meshes with missing normals, tangents, binormals, or vertex colors
+* Export Settings: Fix empty dropdown selection when uninstalling 3D applications
+* Convert to Linked Prefab: fix prefab instance name differing from prefab file name when filename is incremented
 * Export Settings: Moved "Browse" button out of the dropdown
 * Unity 3ds Max Integration: Added tooltips to the import/export menu items
 * Export Settings: Align checkboxes, text fields, and dropdown
@@ -434,46 +358,15 @@ NEW FEATURES
 In case of a tie, use the following preference order: Maya > Maya LT > 3ds Max > Blender.
 
 * Updated user documentation
-
-FIXES
-
-* Exporter: Fix FBX exported from Unity causing crash when imported in 3ds Max.
-* Export Settings: Fix hang when adding multiple installations of the same version of a 3D application to the dropdown
-
-## [sprint32]
-
-NEW FEATURES
-
 * 3DsMax Unity Integration: Added popup suggesting user set system units to centimeters
 
 Will only show up if system units are not already centimeters.
 Click "yes" to change system units to centimeters, "no" to leave units as is.
 If "no" is clicked, popup will not show up again for this session or .max file.
 
-FIXES
-
-* 3DsMax Unity Integration: In 3ds Max 2017 move the Unity menu before the Help menu in the main menu bar
-* 3DsMax Unity Integration: Fix so file units are always exported as cm. Adjust scaling according to system units
-                            e.g. a 3 meter cube in Max will export as a 300 cm cube in Unity
-
-
-## [sprint31]
-
-NEW FEATURES
-
 * Added 3ds Max 2017 support
 
 Import/Export menu items added into a Unity menu item on the main menu bar.
-
-FIXES
-*FbxPrefab: Avoid trying to update Rect Transforms with the fbx's Transform component
-*Export Settings: Rename "DCC Application" to "3D Application"
-*Unity 3ds Max integration: Fix model rotated by 90 degrees along x when importing into Unity
-
-
-## [sprint30]
-
-NEW FEATURES
 
 * Added 3DsMax Integration
 
@@ -485,6 +378,14 @@ File->Export->Export to Unity
 
 FIXES
 
+* Exporter: Fix FBX exported from Unity causing crash when imported in 3ds Max.
+* Export Settings: Fix hang when adding multiple installations of the same version of a 3D application to the dropdown
+* 3DsMax Unity Integration: In 3ds Max 2017 move the Unity menu before the Help menu in the main menu bar
+* 3DsMax Unity Integration: Fix so file units are always exported as cm. Adjust scaling according to system units
+                            e.g. a 3 meter cube in Max will export as a 300 cm cube in Unity
+* FbxPrefab: Avoid trying to update Rect Transforms with the fbx's Transform component
+* Export Settings: Rename "DCC Application" to "3D Application"
+* Unity 3ds Max integration: Fix model rotated by 90 degrees along x when importing into Unity
 * Maya Unity Integration: lock export set so it doesn't accidentally get deleted
 * Convert to Prefab: Fix so convert to prefab doesn't lose Object references in scripts
 * Export Settings: Fix so MayaLT cannot be selected using "Browse" on Mac
@@ -494,25 +395,15 @@ FIXES
 NEW FEATURES
 
 * Ship all C# scripts as DLLs
-
 * Maya Unity Integration: Remove Preview option from menu
-
 * Enforce Exporter only works with Unity 2017.1+
+* Fbx Export: add support for installing a zipped version of the Maya Unity Integration
 
 FIXES
 * Export Settings: prevent user from selecting Maya LT with "Browse" option in dropdown
 * Fbx Export: fix game won't compile with package installed (move FbxSdk to editor folder)
 * Convert to Prefab: fix particle system component causing convert to fail 
 * Fbx Prefab: Properly handle updating Linked Prefab Instances that get nested inside other Prefabs.
-
-## [sprint26]
-
-NEW FEATURES
-
-* Fbx Export: add support for installing a zipped version of the Maya Unity Integration
-
-FIXES
-
 * Fbx Prefab: Properly handle updating Linked Prefab Instances that get nested inside other Prefabs.
 
 ## [0.0.14a]

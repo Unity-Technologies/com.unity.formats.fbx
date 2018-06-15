@@ -2,7 +2,7 @@
 
 ## [2.0.0] - 2018-06-14
 
-No change since 1.7.0. Synchronizing the version number with the com.unity.formats.fbx package
+* No change since 1.7.0. Synchronizing the version number with the com.unity.formats.fbx package
 
 ## [1.7.0] - 2018-06-01
 
@@ -29,75 +29,53 @@ FEATURE
 
 ## [1.3.0a1]
 
-Fix Universal Windows Platform build error caused by UnityFbxSdk.dll being set as compatible with any platform instead of editor only.
-
-## [sprint43]
-
-Add bindings for FbxAnimCurveFilterUnroll
-
-Add binding for FbxGlobalSettings SetTimeMode to set frame rate
+* Fix Universal Windows Platform build error caused by UnityFbxSdk.dll being set as compatible with any platform instead of editor only.
+* Add bindings for FbxAnimCurveFilterUnroll
+* Add binding for FbxGlobalSettings SetTimeMode to set frame rate
 
 ## [1.2.0b1]
 
-Update version number
-
-Replace meta files with meta files from release 1.0.0b1 for backwards compatibility
-
-## [sprint36]
-
-Expose bindings to set FbxNode's transformation inherit type
-
-## [sprint35]
-
-Add binding for FbxCamera's FieldOfView property
+* Update version number
+* Replace meta files with meta files from release 1.0.0b1 for backwards compatibility
+* Expose bindings to set FbxNode's transformation inherit type
+* Add binding for FbxCamera's FieldOfView property
 
 ## [1.0.0b1]
 
-Enforce FbxSdk DLL only works with Unity 2017.1+
+* Enforce FbxSdk DLL only works with Unity 2017.1+
 
 ## [0.0.14a]
-Note: skipping some versions so that FbxSdk package version matches FbxExporter package version
-
-Added FbxObject::GetScene
+* Note: skipping some versions so that FbxSdk package version matches FbxExporter package version
+* Added FbxObject::GetScene
 
 ## [0.0.10a]
 
-Added documentation of vector classes.
-
-Added test to check that the FbxSdk DLL cannot be used without the Unity Editor (This is a legal requirement).
-
-Improve build process so it is more robust.
+* Added documentation of vector classes.
+* Added test to check that the FbxSdk DLL cannot be used without the Unity Editor (This is a legal requirement).
+* Improve build process so it is more robust.
 
 ## [0.0.9a]
 
-Set the Doxygen homepage to be README.txt instead of README.md
-
-Rename namespace to `Unity.FbxSdk`
-
-Rename `FbxSharp.dll` and `fbxsdk_csharp` libaries to `UnityFbxSdk.dll` and `UnityFbxSdkNative` respectively
-
-Change documentation title to "Unity FBXSDK C# API Reference"
-
-Package zip file containing Doxygen documentation
-
-Update license in README to Autodesk license
+* Set the Doxygen homepage to be README.txt instead of README.md
+* Rename namespace to `Unity.FbxSdk`
+* Rename `FbxSharp.dll` and `fbxsdk_csharp` libaries to `UnityFbxSdk.dll` and `UnityFbxSdkNative` respectively
+* Change documentation title to "Unity FBXSDK C# API Reference"
+* Package zip file containing Doxygen documentation
+* Update license in README to Autodesk license
 
 ## [0.0.8a]
 
-Updated LICENCSE.txt to include Autodesk license
-
-Use .bundle on Mac instead of .so for shared libraries
-
-Ship bindings as binaries without source
+* Updated LICENCSE.txt to include Autodesk license
+* Use .bundle on Mac instead of .so for shared libraries
+* Ship bindings as binaries without source
 
 ## [0.0.7a]
 Note: skipping version 0.0.6a so that FbxSdk package version matches FbxExporter package version
 
-Add bindings for FbxIOFileHeaderInfo. 
-  - Exposed mCreator and mFileVersion as read-only attributes.
-
-Made it easier for performance tests to pass.
+* Add bindings for FbxIOFileHeaderInfo. 
+* Exposed mCreator and mFileVersion as read-only attributes.
+* Made it easier for performance tests to pass.
 
 ## [0.0.5a]
 
-Added Doxygen documentation generation for C# bindings.
+* Added Doxygen documentation generation for C# bindings.
