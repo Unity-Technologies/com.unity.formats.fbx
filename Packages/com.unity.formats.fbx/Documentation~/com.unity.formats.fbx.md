@@ -302,7 +302,7 @@ If you enabled the __Keep Open__ option in the [Fbx Export Settings](#FBXSetting
 
 ## Manually Installing a Maya Integration
 
-Sometimes you need to install a Maya integration manually. For example, if you are using an unsupported version of Maya.
+There may be some cases (e.g you may be using an unsupported version of Maya) where you have to install your integration manually.
 
 To manually install a Maya Integration, follow these steps:
 
@@ -316,12 +316,12 @@ To manually install a Maya Integration, follow these steps:
 * On Mac:<br/>*$HOME/Library/Preferences/Autodesk/Maya/modules/UnityFbxForMaya.mod*
 
 4. In *UnityFbxForMaya.mod*, modify the following line (mel code):
+<br/>
 ```
-+ UnityFbxForMaya {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya
+UnityFbxForMaya {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya
 ```
 
-... where `{Version}` = `2.0.0` (or your version number of the FBX Exporter package) and `{UnityIntegrationsPath}` = the location where you unzipped UnityFbxForMaya.zip in step 1
-
+Where `{Version}` = `2.0.0` (or your version number of the FBX Exporter package) and `{UnityIntegrationsPath}` = the location where you unzipped UnityFbxForMaya.zip in step 1
 
 5. Locate the following file (if it doesn't exist, create the file):
 
@@ -341,8 +341,7 @@ if(`exists unitySetupUI`){ unitySetupUI; }
 ```
 unityConfigure "{UnityProjectPath}" "{ExportSettingsPath}" "{ImportSettingsPath}" 0 0;
 ```
-
-... where `{UnityProjectPath}` = path/to/UnityProject and `{ExportSettingsPath}` = path/to/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel and `{ImportSettingsPath}` = path/to/Integrations/Autodesk/maya/scripts/unityFbxImportSettings.mel
+Where `{UnityProjectPath}` would be replaced by the path to your Unity Project,  `{ExportSettingsPath}` would be replaced by the path to Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel and `{ImportSettingsPath}` would be replaced by the path to Integrations/Autodesk/maya/scripts/unityFbxImportSettings.mel
 
 
 
@@ -350,7 +349,7 @@ unityConfigure "{UnityProjectPath}" "{ExportSettingsPath}" "{ImportSettingsPath}
 
 ### Importing from Unity
 
-Importing an FBX Model automatically configures the plug-in for export. The plug-in remembers your Unity Project, the export filenames, and which objects to export per file.
+Importing an FBX Model automatically configures the plug-in for export. The plug-in remembers your Unity Project, the export filenames for your models and animations, and which objects to export per file.
 
 Select __File__ > __Unity__ > __Import__ to open a file browser directly in your current Unity Project. 
 
@@ -364,7 +363,7 @@ The FBX Exporter adds the contents of each imported file to an export set named 
 
 In addition, the contents of the file are placed into a namespace based on the filename. For *model.fbx*, the contents are placed into the `model:` namespace.
 
-Animation files using the **@** notation (*<modelname>@<animation>.fbx*), are recognized as animation files belonging to the Model contained in *model.fbx*.
+Animation files using the **@** notation (**modelname**@**animation**.fbx), are recognized as animation files belonging to the Model contained in *model.fbx*.
 
 For instance, if you import a file called *model@anim.fbx*, the export set and namespace name are based on the name before the **@** symbol. Therefore, it uses the same set and namespace as *model.fbx*. 
 
@@ -381,11 +380,11 @@ There are three options available for export in Maya and Maya LT:
 
 ![](images/FBXExporter_MayaUnityMenuItems.png)
 
-__File__ > __Unity__ > __Export __exports both Models and animation contained in the export sets selected for export.
+__File__ > __Unity__ > __Export__ exports both Models and Animation contained in the export sets selected for export.
 
-__File__ > __Unity__ > __Export Model Only__ exports all Models in the selected export sets, but does not export any animation.
+__File__ > __Unity__ > __Export Model Only__ exports all Models in the selected export sets, but does not export any Animation.
 
-__File__ > __Unity__ > __Export Animation Only__ exports only the animation applied to the objects in the export set as well as the minimum components required for the animation (such as transforms, animated lights and cameras).
+__File__ > __Unity__ > __Export Animation Only__ exports only the Animation applied to the objects in the export set as well as the minimum components required for the animation (such as transforms, animated lights and cameras).
 
 **Note:** If no animation file with the **@** notation has been imported, then this option has no effect. The workaround for exporting a new animation is to first import an empty FBX file with the **@** notation (*{model}@anim.fbx*), so that the export set is configured correctly.
 
@@ -447,9 +446,9 @@ There are two options available for export in 3ds Max:
 * Export
 * Export Model Only
 
-__Export __exports both Models and animation contained in the export sets selected for export.
+__Export__ exports both Models and Animation contained in the export sets selected for export.
 
-__Export Model Only__ exports all Models in the selected export sets, but does not export any animation.
+__Export Model Only__ exports all Models in the selected export sets, but does not export any Animation.
 
 Select either to automatically export with the settings and Models configured during import. No additional steps are required.
 
@@ -467,11 +466,13 @@ If you select multiple dummy objects corresponding to sets or objects from multi
 
 In each case, selecting __Export__ automatically exports the current Model back to Unity. When you switch back into Unity, your Scene has already been updated.
 
-Unity export uses the selection sets created on import to determine which objects to export. If you add a new object to the Model, you must also add this new object to the model’s UnityExportSet set.
+Unity export uses the selection sets created on import to determine which objects to export. If you add a new object to the Model, you must also add this new object to the model’s *UnityExportSet* set.
 
 ![UnityExportSets in 3ds Max](images/FBXExporter_MaxMultipleUnityExportSets.png)
 
-Click the __Edit Named Selection Sets__ button to edit a UnityExportSet. 
+Click the __Manage Selection Sets__ button to edit a UnityExportSet. 
+
+![](images/FBXExporter_ManageSelectionSets.png)
 
 To add an object to a set, select the set, select an object and click the __Add Selected Objects__ button. 
 
@@ -479,7 +480,10 @@ To remove an object from a set, select the object in the set and click the __Sub
 
 **Tip:** You can also right-click the UnityExportSets and add or remove objects using the context menu.
 
-![In 3ds max, use the __Add Selected Objects__ button (red outline) to add objects to Wolf_UnityExportSet](FBXExporter_MaxNamedSelectionSets.png)
+![](FBXExporter_MaxNamedSelectionSets.png)
+
+In 3ds max, use the __Add Selected Objects__ button (red outline) to add objects to Wolf_UnityExportSet
+
 
 
 # Setting FBX Export options
@@ -495,12 +499,12 @@ Use the Fbx Export Settings window to specify whether or not to automatically up
 
 | Property:| Function: |
 |:---|:---| 
-|__Auto-Updater__ |Check this option to enable automatic updating for Linked Prefabs whenever their linked FBX files is updated. |
+|__Auto-Updater__ |Check this option to enable automatic updating for Linked Prefabs whenever their linked FBX file is updated. |
 |__3D Application__ |Select the 3D modeling software you want to integrate with Unity. Maya 2017+, Maya LT 2017+, and 3ds Max 2017+ are the three applications currently supported.<br/><br/>Click the Browse button to choose a 3D modeling software installed in a non-standard location.  |
 |__Keep Open__ |Check this option to keep the selected 3D modeling software open after installing it. |
 |__Hide Native Menu__ |Check this option to hide the native __Send to Unity__ menu in Maya and Maya LT. |
 |__Install Unity Integration__ |Click this button to install [Unity Integration](#Integration) for the selected __3D Application__. |
-|__Run Component Updater__ |Click this button to run the [Component Updater](#Repairs_1_1_0b_1) to repair any broken FbxPrefab components if your previous version of the FBX Exporter Package was 1.1.0b1. |
+|__Run Component Updater__ |Click this button to run the [Component Updater](#Repairs_1_1_0b_1) to repair any broken FbxPrefab components if if you were using a previous version of the FBX Exporter Package.|
 
 
 
