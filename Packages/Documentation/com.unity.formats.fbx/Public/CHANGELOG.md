@@ -11,9 +11,9 @@ NEW FEATURES
 * Now using FBX SDK version 2018.1
 * Streamlined the API public interface
 * Added support for exporting constraints
-* ConvertToPrefab: Add ability to convert an fbx or prefab asset from the Project view
-  * Right click on an fbx in the project view then select Convert to Linked Prefab to create a linked prefab asset for the fbx. It will not create an instance in the scene.
-  * Right click on a prefab in the project view and select Convert to Linked Prefab to export the prefab to an fbx file and link the existing prefab to the newly created fbx.
+* ConvertToPrefab: Add ability to convert an FBX or prefab asset from the Project view
+  * Right click on an FBX in the project view then select Convert to Linked Prefab to create a linked prefab asset for the FBX file. It will not create an instance in the scene.
+  * Right click on a prefab in the project view and select Convert to Linked Prefab to export the prefab to an FBX file and link the existing prefab to the newly created FBX.
 
 FIXES
 * Fixed skinned mesh bone update
@@ -22,7 +22,7 @@ FIXES
 
 KNOWN ISSUES
 * ConvertToPrefab: UI doesn't provide feedback about whether it will be converting an existing file or creating new files.
-  * When converting an existing FBX file, the fbx filename and fbx export options are ignored (but not greyed out).
+  * When converting an existing FBX file, the FBX filename and FBX export options are ignored (but not greyed out).
   * When converting an existing prefab, the prefab filename is ignored (but not greyed out)
 
 ## [1.3.0f1] - 2018-04-17
@@ -48,19 +48,32 @@ NEW FEATURES
 * Added Maya LT one button import/export
 * Added Camera export support 
 * Added 3ds Max one button import/export
-* Ability to export fbx files from Unity
-* Convert to linked prefab to create a prefab that auto-updates with the linked fbx
+* Ability to export FBX files from Unity
+* Convert to linked prefab to create a prefab that auto-updates with the linked FBX
 * Maya one button import/export
 
 FIXES
 * ConvertToPrefab: fix Mesh Collider not pointing to exported mesh after converting
 * FbxExporter: fix so "Compatible Naming" doesn't modify scene on export
 * FbxExporter: link materials to objects connected to mesh instances
-* FbxExporter: export meshes in model prefab instances as mesh instances in fbx
-* ConvertToPrefab: Don't re-export fbx model instances
+* FbxExporter: export meshes in model prefab instances as mesh instances in FBX
+* ConvertToPrefab: Don't re-export FBX model instances
 * FbxExportSettings: fix console error on Mac when clicking "Install Unity Integration"
 * FbxExporter: fix so animating spot angle in Unity animates cone angle in Maya (not penumbra)
 * FbxExporter: export correct rotation order (xyz) for euler rotation animations (previously would export as zxy)
 * Fix Universal Windows Platform build errors caused by UnityFbxSdk.dll being set as compatible with any platform instead of editor only.
 * Fix so Object references aren't lost when using Convert to Linked Prefab Instance
 * Fix Maya Integration dropdown not appearing in the Export Settings
+
+KNOWN ISSUES
+* Cannot export animation only from 3ds Max
+* FbxExporter: animated skinned meshes must be in the bind pose on export (i.e. not being previewed in the Animation or Timeline windows, and the original rig's fbx must not contain animation)
+* FbxExporter: animated meshes in bone hierarchy are not supported
+* FbxExporter: for skinned meshes all bones must be descendants of the root bone
+* 3DIntegration: FBX containing rig must have file units in cm in order for animation exported from Unity to be properly applied
+* ConvertToPrefab: converting model instance that has been modified in the scene won't re-export FBX
+* Requires Unity 2018.1.0
+* When exporting with an animated transform for a Camera or a Light, the resulting rotation does not take the forward direction into account and is off by 90 degrees
+* Key tangents are not exported and the default key tangent setting is different between Unity, FBXSDK and Maya. This cause the curve shape to change between Unity and Maya.
+* Animated continuous rotations are not maintained
+* Animated rotations with Euler Angles (Quaternion) or Quaternion interpolation are not converted to the correct Euler equivalent.
