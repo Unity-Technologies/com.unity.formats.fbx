@@ -3,27 +3,27 @@
 RELEASE NOTES
 ## [2.0.0] - 2018-06-18
 NEW FEATURES
-* Added support for physical cameras
+* Added support for Physical Cameras
 * FBX Exporter is now distributed via the Package Manager
 * Now compatible with Unity 2018.2
 * The roundtrip of assets can now be started from Maya from assets that have not been exported from Unity
 * DCC integration plug-in sources have been moved away from the package
 * Now using FBX SDK version 2018.1
-* Streamlined the API public interface
+* Conformed the Unity's API guidelines
 * Added support for exporting constraints
 * ConvertToPrefab: Add ability to convert an FBX or prefab asset from the Project view
-  * Right click on an FBX in the project view then select Convert to Linked Prefab to create a linked prefab asset for the FBX file. It will not create an instance in the scene.
-  * Right click on a prefab in the project view and select Convert to Linked Prefab to export the prefab to an FBX file and link the existing prefab to the newly created FBX.
+  * Right click on an FBX file in the project view then select "Convert to Linked Prefab" to create a Linked Prefab asset for the FBX file. It will not create an instance in the scene.
+  * Right click on a Prefab in the project view and select "Convert to Linked Prefab" to export the Prefab to an FBX file and link the existing Prefab to the newly created FBX file.
 
 FIXES
-* Fixed skinned mesh bone update
-* Last frame was sometimes not exported
-* FBX export dialog hard to read in Unity Pro's dark theme
+* Fixed skinned mesh bone update when the number of bones change between updates
+* Keyframes were sometimes missing when exporting animation curves
+* The file name fields in the FBX export dialog were hard to read in Unity Pro's dark theme
 
 KNOWN ISSUES
 * ConvertToPrefab: UI doesn't provide feedback about whether it will be converting an existing file or creating new files.
   * When converting an existing FBX file, the FBX filename and FBX export options are ignored (but not greyed out).
-  * When converting an existing prefab, the prefab filename is ignored (but not greyed out)
+  * When converting an existing Prefab, the Prefab filename is ignored (but not greyed out)
 
 ## [1.3.0f1] - 2018-04-17
 NEW FEATURES
