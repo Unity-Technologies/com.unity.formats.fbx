@@ -1,6 +1,6 @@
 # Changes in FBX SDK C# Bindings
 
-## [2.0.0] - 2018-06-14
+## [2.0.0] - 2018-06-18
 
 * No change since 1.7.0. Synchronizing the version number with the com.unity.formats.fbx package
 
