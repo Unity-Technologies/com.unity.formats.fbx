@@ -10,7 +10,7 @@ NEW FEATURES
 * DCC integration plug-in sources have been moved away from the package
 * Now using FBX SDK version 2018.1
 * Conformed the Unity's API guidelines
-* Added support for exporting constraints
+* Added support for exporting constraints (Rotation, Aim, Position, Scale and Parent)
 * ConvertToPrefab: Add ability to convert an FBX or prefab asset from the Project view
   * Right click on an FBX file in the project view then select "Convert to Linked Prefab" to create a Linked Prefab asset for the FBX file. It will not create an instance in the scene.
   * Right click on a Prefab in the project view and select "Convert to Linked Prefab" to export the Prefab to an FBX file and link the existing Prefab to the newly created FBX file.

@@ -93,18 +93,17 @@ The FBX Exporter exports the following objects:
     * Quads or Triangles
 * SkinnedMeshRenderers with the following exceptions:
     * Humanoid rigs are not supported
-    * Meshes in bone hierarchy are not supported
+    * Meshes in bone hierarchies are not supported
 * Materials as Phong if the material has specular; Lambert in all other cases
 * Textures
-* Game Cameras as film cameras with 35mm TV Projection. These camera attributes are also exported:
+* Game Cameras are exported using the sensor back settings for 35mm TV Projection (width = 0.816 inches, height = 0.612 inches). These camera attributes are also exported:
     * Projection type (perspective/orthographic)
-    * Aperture Width and Height (Height set to 0.612 inches, and width calculated based on aspect ratio; for Game Cameras, aspect ratio is dictated by the display viewport)
     * Aspect ratio
+    * Aperture Width and Height (shown as "Sensor Size" in Unity, in milimiters. The height is set to 0.612 inches, and the width is relative to the aspect ratio)
     * Focal length
-    * Vertical field of view
+    * Vertical field of view. The default aperture mode is vertical.
     * Near and far clipping plane
-* Physical Cameras
-    * Sensor Size
+* Physical Cameras (cameras for which the "Physical Camera" checkbox is enabled. 
     * Lens Shift
     * Focal Length
 * Lights of type *Directional*, *Spot* , *Point*, and *Area*; also the following light attributes:
@@ -123,7 +122,11 @@ The FBX Exporter exports the following objects:
         * Field of View
 * Blendshapes
 * Constraints
-
+    * Rotation
+	* Aim
+	* Position
+	* Scale 
+	* Parent
 
 
 ## Export Options window
