@@ -2,11 +2,11 @@
 
 __Version__: 2.0.0-preview
 
-The FBX Exporter package provides round-trip workflows between Unity and 3D modeling software. Use this workflow to send geometry, Lights, Cameras, and animation from Unity to Maya, Maya LT, or 3ds Max, and back again, with minimal effort.
+The FBX Exporter package provides round-trip workflows between Unity and 3D modeling software. Use this workflow to send geometry, lights, cameras, and animation from Unity to Maya, Maya LT, or 3ds Max, and back again, with minimal effort.
 
 The FBX Exporter package includes the following features:
 
-* [FBX Exporter](#ExportFBX): Export geometry, animation, Lights, and Cameras as FBX files so you can transfer game data to any 3D modeling software. Record gameplay and export it to make cinematics. Start grey-boxing with ProBuilder, then export to FBX to replace with final assets.
+* [FBX Exporter](#ExportFBX): Export geometry, animation, Lights, and Cameras as FBX files so you can transfer game data to any 3D modeling software. Record gameplay and export it to make cinematics. Start grey-boxing with [ProBuilder](https://unity3d.com/unity/features/worldbuilding/probuilder), then export to FBX to replace with final assets.
 
 * [Linked Prefab](#LinkedPrefab): Link a Prefab to a new or existing FBX file. When you later change the FBX file, Unity automatically updates the Prefab to integrate changes to the transforms and hierarchy (in addition to Meshes and Materials). This helps you avoid rebuilding your Prefabs from scratch.
 
@@ -36,9 +36,7 @@ The FBX Exporter package contains:
 
 * FBX Exporter
 * FBX Prefab Component
-* Integration with 3D modeling software (3ds Max and Maya)
-
-![](images/FBXExporter_Contents.png)
+* Integration with 3D modeling software
 
 ## Known Issues
 
@@ -96,20 +94,24 @@ The FBX Exporter exports the following objects:
     * Binormals
     * Tangents
     * Vertex Colors
-    * All 4 Mesh UVs, if present
+    * All 8 Mesh UVs, if present
     * Quads or Triangles
 * SkinnedMeshRenderers with the following exceptions:
     * Humanoid rigs are not supported
     * Animated meshes in bone hierarchy are not supported
 * Materials as Phong if the material has specular; Lambert in all other cases
 * Textures
-* Cameras as film cameras with 35mm TV Projection; also the following camera attributes:
+* Game Cameras as film cameras with 35mm TV Projection; also the following camera attributes:
     * Projection type (perspective/orthographic)
-    * Aperture Width and Height (Height set to 0.612 inches, and width calculated based on aspect ratio)
+    * Aperture Width and Height (Height set to 0.612 inches, and width calculated based on aspect ratio; for Game Cameras, aspect ratio is dictated by the display viewport)
     * Aspect ratio
     * Focal length
-    * Field of view
+    * Vertical field of view
     * Near and far clipping plane
+* Physical Cameras
+    * Sensor Size
+    * Lens Shift
+    * Focal Length
 * Lights of type *Directional*, *Spot* , *Point*, and *Area*; also the following light attributes:
     * Spot Angle (for Spot lights)
     * Color
@@ -125,6 +127,7 @@ The FBX Exporter exports the following objects:
     * Cameras:
         * Field of View
 * Blendshapes
+* Constraints
 
 
 
@@ -139,10 +142,10 @@ When exporting an FBX file, the following Export Options window opens, displayin
 
 | Property:| Function: |
 |:---|:---| 
-|__Export Name__ |Specify the filename to export to. |
+|__Export Name__ |Specify the exported FBX's filename. |
 |__Export Path__ |Specify the location where the FBX Exporter will save the FBX file. |
-|__Source__ |Transfer the transform animation from this transform to the Destination. <br/><br/>**Notes:** - __Source__ must be an ancestor of __Destination__<br/> - __Source__ may be an ancestor of the selected object. |
-|__Destination__ |Where to transfer the transform animation to (which Transform object).<br/><br/>This object receives the transform animation on objects between __Source__ and __Destination__ as well as the animation on the Source itself.  |
+|__Source__ |Transfer the transform animation from this object to the __Destination__ transform. <br/><br/>**Notes:** - __Source__ must be an ancestor of __Destination__<br/> - __Source__ may be an ancestor of the selected object. |
+|__Destination__ |Which object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between __Source__ and __Destination__ as well as the animation on the Source itself.  |
 |__Export Format__ |Select the format for the FBX Exporter to use when exporting the FBX file (ASCII or binary). |
 |__Include__ |Choose whether to export both Models and Animation, only Models, or only Animations. |
 |__LOD level__ |For level of detail (LOD) groups, choose the desired level of detail to export (all, highest, or lowest). <br/><br/>**Notes:** - The FBX Exporter ignores LODs outside of selected hierarchy.<br/> - The FBX Exporter does not filter out objects that are used as LODs and doesn't export them if they aren’t direct descendants of their respective LOD Group |
@@ -180,7 +183,7 @@ For example, when working with large models in Maya, to ensure that the models c
 <a name="LinkedPrefab"></a>
 # Converting GameObjects to Linked Prefabs
 
-A Linked Prefab is a Prefab which maintains a link to an FBX file and is responsible for updating the Prefab so that it remains in sync with its source. What it adds to the default Unity behaviour is that the Linked Prefab integrates changes in the hierarchy and transforms (in addition to Meshes and Materials). 
+A Linked Prefab is a Prefab which maintains a link to an FBX file and is responsible for updating the Prefab so that it remains in sync with its source. The notable difference between a Linked Prefab and a stock Unity Prefab is that the Linked Prefab integrates changes in the hierarchy and transforms (in addition to Meshes and Materials). 
 
 During an update, the Linked Prefab preserves components and object references to the greatest extent possible. If you delete a node in the FBX, the Linked Prefab deletes the corresponding object in Unity along with its components.
 
@@ -203,12 +206,12 @@ When converting to a Linked Prefab, the following window opens, displaying optio
 
 | Property:| Function: |
 |:---|:---| 
-|__Export Name__ |Specify the filename to export to |
+|__Export Name__ |Specify the exported FBX's filename |
 |__Export Path__ |Specify the location where the FBX Exporter will save the FBX file. |
-|__Prefab Name__ |Specify the filename to save the Linked Prefab to |
+|__Prefab Name__ |Specify the Linked Prefab's filename |
 |__Prefab Path__ |Specify the location where the FBX Exporter will save the linked prefab file. |
-|__Source__ |Transfer the transform animation from this transform to __Destination__.<br/><br/>**Notes:** - __Source__ must be an ancestor of __Destination__.<br/> - __Source__ may be an ancestor of the selected object. |
-|__Destination__ |Where to copy the transform animation to (which Transform object).<br/><br/>This object receives the transform animation on objects between Source and Destination as well as the animation on the Source itself. |
+|__Source__ |Transfer the transform animation from this object to the __Destination__ transform. __Destination__.<br/><br/>**Notes:** - __Source__ must be an ancestor of __Destination__.<br/> - __Source__ may be an ancestor of the selected object. |
+|__Destination__ |Which object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between Source and Destination as well as the animation on the Source itself. |
 |__Export Format__ |Select the format for the FBX Exporter to use when exporting the FBX file (ASCII or binary). |
 |__Include__ |__Convert to Linked Prefab Instance__ always exports both Models and Animation in the hierarchy. |
 |__LOD level__ |__Convert to Linked Prefab Instance__ always exports All levels of detail (LOD) available in the hierarchy for LOD groups. |
@@ -295,7 +298,13 @@ To select a version of Maya, Maya LT, or 3ds Max installed outside the default l
 
 Before installing Unity Integration, close all instances of the selected 3D modeling software that matches the specified version.
 
-Click __Install Unity Integration__ to install the Unity Integration for the selected 3D modeling software. Unity Integration comes packaged in several zip files (one zip file per supported application). Then select a target folder to extract the Unity Integration to when prompted. The target folder can be outside of your current Project. Maya and Maya LT both use the same zip folder.
+Click __Install Unity Integration__ to install the Unity Integration for the selected 3D modeling software. 
+
+![](images/FBXExporter_AlreadyExist.png)
+
+If a previous integration was already unpacked in the selected folder, Unity will prompt you to either use the already existing integration or to overwrite it with the newer version.
+
+Unity Integration comes packaged in several zip files (one zip file per supported application). Then select a target folder to extract the Unity Integration to when prompted. The target folder can be outside of your current Project. Maya and Maya LT both use the same zip folder.
 
 The application starts, configures the plug-in, and automatically exits. Unity reports whether the installation was a success.
 
