@@ -59,7 +59,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     /// <summary>
     /// The ModelExporter class can be used to export Unity game objects to an FBX File.
-    /// To do so, simply use its ExportObject and ExportObjects methods. Default export
+    /// To do so, simply use its ExportObject and ExportObjects methods. The default export
     /// options are used when exporting the objects to the FBX file.
     /// </summary>
     public sealed class ModelExporter : System.IDisposable
@@ -4098,10 +4098,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Exports an array of Unity objects to an FBX file.
+        /// Exports an array of Unity game objects to an FBX file.
         /// Returns the FBX file path if successful, otherwise returns null.
         /// </summary>
-        /// <param name="filePath">File path to use for the FBX file.</param>
+        /// <param name="filePath">Absolute file path to use for the FBX file.</param>
         /// <param name="objects">Array of Unity objects to export.</param>
         [SecurityPermission(SecurityAction.LinkDemand)]
         public static string ExportObjects(string filePath, UnityEngine.Object[] objects = null)
@@ -4110,10 +4110,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Exports a single Unity object to an FBX file.
+        /// Exports a single Unity game object to an FBX file.
         /// Returns the FBX file path if successful, otherwise returns null.
         /// </summary>
-        /// <param name="filePath">The file path to use for the FBX file.</param>
+        /// <param name="filePath">Absolute file path to use for the FBX file.</param>
         /// <param name="singleObject">The Unity object to export.</param>
         [SecurityPermission(SecurityAction.LinkDemand)]
         public static string ExportObject (string filePath, UnityEngine.Object singleObject)

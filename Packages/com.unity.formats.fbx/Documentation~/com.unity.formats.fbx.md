@@ -6,7 +6,7 @@ The FBX Exporter package provides round-trip workflows between Unity and 3D mode
 
 The FBX Exporter package includes the following features:
 
-* [FBX Exporter](#ExportFBX): Export geometry, animation, Lights, and Cameras as FBX files so you can transfer game data to any 3D modeling software. Record gameplay and export it to make cinematics. Start grey-boxing with [ProBuilder](https://unity3d.com/unity/features/worldbuilding/probuilder), then export to FBX to replace with final assets.
+* [FBX Exporter](#ExportFBX): Export geometry, animation, lights, and cameras as FBX files so you can transfer game data to any 3D modeling software. Record gameplay and export it to make cinematics. Start grey-boxing with [ProBuilder](https://unity3d.com/unity/features/worldbuilding/probuilder), then export to FBX to replace with final assets.
 
 * [Linked Prefab](#LinkedPrefab): Link a Prefab to a new or existing FBX file. When you later change the FBX file, Unity automatically updates the Prefab to integrate changes to the transforms and hierarchy (in addition to Meshes and Materials). This helps you avoid rebuilding your Prefabs from scratch.
 
@@ -44,25 +44,6 @@ The FBX Exporter package contains:
 
 * The Fbx Exporter package does not support exporting .asset files.
 
-
-# Installing the FBX Exporter package in Unity
-
-Before you install the FBX Exporter Package, follow these steps (recommended):
-
-1. Back up your Project.
-
-2. Restart Unity.
-
-3. Delete the *FbxExporters* folder.
-
-4. Select __Assets__ > __Import Package__ > __Custom Package__ in Unity.
-
-![](images/FBXExporter_Menu.png)
-
-5. Select the FbxExporter package from the file browser and click __Open__ to [import and install](https://docs.unity3d.com/Manual/AssetPackages.html) the new version of the FBX Exporter package.
-
-
-
 <a name="Repairs_1_1_0b_1"></a>
 ## Updating from 1.1.0b1
 
@@ -98,10 +79,10 @@ The FBX Exporter exports the following objects:
     * Quads or Triangles
 * SkinnedMeshRenderers with the following exceptions:
     * Humanoid rigs are not supported
-    * Animated meshes in bone hierarchy are not supported
+    * Meshes in bone hierarchy are not supported
 * Materials as Phong if the material has specular; Lambert in all other cases
 * Textures
-* Game Cameras as film cameras with 35mm TV Projection; also the following camera attributes:
+* Game Cameras as film cameras with 35mm TV Projection. These camera attributes are also exported:
     * Projection type (perspective/orthographic)
     * Aperture Width and Height (Height set to 0.612 inches, and width calculated based on aspect ratio; for Game Cameras, aspect ratio is dictated by the display viewport)
     * Aspect ratio
@@ -142,11 +123,11 @@ When exporting an FBX file, the following Export Options window opens, displayin
 
 | Property:| Function: |
 |:---|:---| 
-|__Export Name__ |Specify the exported FBX's filename. |
+|__Export Name__ |Specify the exported FBX file name. |
 |__Export Path__ |Specify the location where the FBX Exporter will save the FBX file. |
-|__Source__ |Transfer the transform animation from this object to the __Destination__ transform. <br/><br/>**Notes:** - __Source__ must be an ancestor of __Destination__<br/> - __Source__ may be an ancestor of the selected object. |
+|__Source__ |Transfer the transform animation from this object to the __Destination__ transform. <br/><br/>**Notes:**<br/> - __Source__ must be an ancestor of __Destination__<br/> - __Source__ may be an ancestor of the selected object. |
 |__Destination__ |Which object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between __Source__ and __Destination__ as well as the animation on the Source itself.  |
-|__Export Format__ |Select the format for the FBX Exporter to use when exporting the FBX file (ASCII or binary). |
+|__Export Format__ |Select the format to use in the FBX file (ASCII or Binary). |
 |__Include__ |Choose whether to export both Models and Animation, only Models, or only Animations. |
 |__LOD level__ |For level of detail (LOD) groups, choose the desired level of detail to export (all, highest, or lowest). <br/><br/>**Notes:** - The FBX Exporter ignores LODs outside of selected hierarchy.<br/> - The FBX Exporter does not filter out objects that are used as LODs and doesn't export them if they aren’t direct descendants of their respective LOD Group |
 |__Object(s) Position__ |Choose whether to reset the exported objects to world center, or keep world transforms during export.<br/><br/>If you select multiple objects for export, and you choose __Local Centered__ from this drop-down menu, the FBX Exporter centers objects around a shared root while keeping their relative placement unchanged. |
@@ -206,7 +187,7 @@ When converting to a Linked Prefab, the following window opens, displaying optio
 
 | Property:| Function: |
 |:---|:---| 
-|__Export Name__ |Specify the exported FBX's filename |
+|__Export Name__ |Specify the exported FBX file name |
 |__Export Path__ |Specify the location where the FBX Exporter will save the FBX file. |
 |__Prefab Name__ |Specify the Linked Prefab's filename |
 |__Prefab Path__ |Specify the location where the FBX Exporter will save the linked prefab file. |
@@ -218,6 +199,7 @@ When converting to a Linked Prefab, the following window opens, displaying optio
 |__Object(s) Position__ |__Convert to Linked Prefab Instance__ always resets the root object's transform during export. However, the Prefab maintains the global transform for the root object. |
 |__Animated Skinned Mesh__ |Check this option to export animation on objects with skinned meshes.<br/><br/>If unchecked, the FBX Exporter does not export animation on skinned meshes. |
 |__Compatible Naming__ |Check this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Maya to avoid unexpected name changes between Unity and Maya. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("_"). Invalid characters are all non-alphanumeric characters, except for colon (":").<br/> - Adds an underscore ("_") to names that begin with a number. - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters may differ between file systems.<br/><br/>**Note:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
+|__Don't ask me again__ |When enabled, will prevent the Convert Option Properties dialog from being shown when converting to Linked Prefabs. The option can be reset by turning on "Show Convert UI" option under Edit/Project Settings/Fbx Export|
 
 
 
@@ -321,36 +303,38 @@ Sometimes you need to install a Maya integration manually. For example, if you a
 
 To manually install a Maya Integration, follow these steps:
 
-1. Extract the *UnityFbxForMaya.zip* file in the *FbxExporters/* folder from the Unity package to a writable location. This can be in or outside of your Unity Project.
+1. Locate the *UnityFbxForMaya.zip* file. You can find it in Unity, using the Project Window, under "FBX Exporter/Editor/Integrations"
 
-2. Copy the contents of *Integrations/Autodesk/maya/UnityFbxForMaya.txt* from the unzipped folder to the following file:
+2. Extract the archive to a writable location. This can be in or outside of your Unity Project.
+
+3. Copy the contents of *Integrations/Autodesk/maya/UnityFbxForMaya.txt* from the unzipped folder to the following file:
 
 * On Windows:<br/>*C:\Users\{username}\Documents\maya\modules\UnityFbxForMaya.mod*
 * On Mac:<br/>*$HOME/Library/Preferences/Autodesk/Maya/modules/UnityFbxForMaya.mod*
 
-3. In *UnityFbxForMaya.mod*, modify the following line (mel code):
+4. In *UnityFbxForMaya.mod*, modify the following line (mel code):
 ```
 + UnityFbxForMaya {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya
 ```
 
-... where `{Version}` = `1.3.0b1` (or your version number of the FBX Exporter package) and `{UnityIntegrationsPath}` = the location where you unzipped UnityFbxForMaya.zip in step 1
+... where `{Version}` = `2.0.0` (or your version number of the FBX Exporter package) and `{UnityIntegrationsPath}` = the location where you unzipped UnityFbxForMaya.zip in step 1
 
 
-4. Locate the following file (if it doesn't exist, create the file):
+5. Locate the following file (if it doesn't exist, create the file):
 
 * On Windows: <br/>*C:\Users\{username}\Documents\maya\scripts\userSetup.mel*
 * On Mac: <br/>*$HOME/Library/Preferences/Autodesk/Maya/scripts/userSetup.mel*
 
-5. Add this line (mel code):
+6. Add this line (mel code):
 ```
 if(`exists unitySetupUI`){ unitySetupUI; }
 ```
 
-6. Open Maya, and then open the Script Editor:
+7. Open Maya, and then open the Script Editor:
 
 ![](images/FBXExporter_MayaAccessScriptEditor.png) 
 
-7. Run the following (mel code):
+8. Run the following (mel code):
 ```
 unityConfigure "{UnityProjectPath}" "{ExportSettingsPath}" "{ImportSettingsPath}" 0 0;
 ```
@@ -527,7 +511,7 @@ You can call the FBX Exporter from C# using methods found in the "UnityEditor.Fo
 using System.IO;
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.Formats.Fbx.Exporter
+using UnityEditor.Formats.Fbx.Exporter;
 
 public static void ExportGameObjects(Object[] objects)
 {
