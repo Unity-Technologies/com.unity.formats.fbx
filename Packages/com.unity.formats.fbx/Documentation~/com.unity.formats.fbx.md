@@ -98,6 +98,39 @@ The FBX Exporter exports the following objects:
     * Intensity
     * Range
     * Shadows (either On or Off)
+* Constraints or type *Rotation*, *Aim*, *Position*, *Scale*, and *Parent*; also the following attributes:
+    * Sources
+    * Source Weight
+    * Weight
+    * Active
+    * Rotation:
+        * Affected axes (X,Y,Z)
+        * Rotation Offset
+        * Rest Rotation
+	* Aim:
+        * Affected axes (X,Y,Z)
+        * Rotation Offset
+        * Rest Rotation
+        * World Up Type
+        * World Up Object
+        * World Up Vector
+        * Up Vector
+        * Aim Vector
+	* Position:
+        * Affected axes (X,Y,Z)
+        * Translation Offset
+        * Rest Translation
+	* Scale:
+        * Affected axes (X,Y,Z)
+        * Scale Offset
+        * Rest Scale
+	* Parent:
+        * Source Translation Offset (animated)
+        * Source Rotation Offset (animated)
+        * Affect Rotation Axes
+        * Affect Translation Axes
+        * Rest Translation
+        * Rest Rotation
 * Legacy and Generic Animation from Animation and Animator components, or from a Timeline clip; also the following animated attributes:
     * Transforms
     * Lights:
@@ -106,13 +139,18 @@ The FBX Exporter exports the following objects:
         * Color
     * Cameras:
         * Field of View
+    * Constraints:
+        * Weight
+        * Source Weight
+        * Translation Offset (Position Constraint)
+        * Rotation Offset (Rotation Constraint and Aim Constraint)
+        * Scale Offset (Scale Constraint)
+        * Source Translation Offset (Parent Constraint)
+        * Source Rotation Offset (Parent Constraint)
+        * World Up Vector (Aim Constraint)
+        * Up Vector (Aim Constraint)
+        * Aim Vector (Aim Constraint)
 * Blendshapes
-* Constraints
-    * Rotation
-	* Aim
-	* Position
-	* Scale 
-	* Parent
 
 
 ## Export Options window
