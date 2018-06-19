@@ -112,7 +112,7 @@ The FBX Exporter exports the following objects:
     * Intensity
     * Range
     * Shadows (either On or Off)
-* Constraints or type *Rotation*, *Aim*, *Position*, *Scale*, and *Parent*; also the following attributes:
+* Constraints of type *Rotation*, *Aim*, *Position*, *Scale*, and *Parent*; also the following constraint attributes:
     * Sources
     * Source Weight
     * Weight
