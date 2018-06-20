@@ -85,11 +85,11 @@ The FBX Exporter exports the following objects:
 * Game Cameras are exported using the sensor back settings for 35mm TV Projection (width = 0.816 inches, height = 0.612 inches). These camera attributes are also exported:
     * Projection type (perspective/orthographic)
     * Aspect ratio
-    * Aperture Width and Height (shown as "Sensor Size" in Unity, in milimiters. The height is set to 0.612 inches, and the width is relative to the aspect ratio)
+    * Aperture Width and Height (shown as "Sensor Size" in Unity, in millimeters. The height is set to 0.612 inches, and the width is relative to the aspect ratio)
     * Focal length
     * Vertical field of view. The default aperture mode is vertical.
     * Near and far clipping plane
-* Physical Cameras (cameras for which the "Physical Camera" checkbox is enabled. 
+* Physical Cameras (cameras for which the "Physical Camera" checkbox is enabled.)
     * Lens Shift
     * Focal Length
 * Lights of type *Directional*, *Spot* , *Point*, and *Area*; also the following light attributes:
@@ -98,6 +98,39 @@ The FBX Exporter exports the following objects:
     * Intensity
     * Range
     * Shadows (either On or Off)
+* Constraints of type *Rotation*, *Aim*, *Position*, *Scale*, and *Parent*; also the following constraint attributes:
+    * Sources
+    * Source Weight
+    * Weight
+    * Active
+    * Rotation:
+        * Affected axes (X,Y,Z)
+        * Rotation Offset
+        * Rest Rotation
+	* Aim:
+        * Affected axes (X,Y,Z)
+        * Rotation Offset
+        * Rest Rotation
+        * World Up Type
+        * World Up Object
+        * World Up Vector
+        * Up Vector
+        * Aim Vector
+	* Position:
+        * Affected axes (X,Y,Z)
+        * Translation Offset
+        * Rest Translation
+	* Scale:
+        * Affected axes (X,Y,Z)
+        * Scale Offset
+        * Rest Scale
+	* Parent:
+        * Source Translation Offset (animated)
+        * Source Rotation Offset (animated)
+        * Affect Rotation Axes
+        * Affect Translation Axes
+        * Rest Translation
+        * Rest Rotation
 * Legacy and Generic Animation from Animation and Animator components, or from a Timeline clip; also the following animated attributes:
     * Transforms
     * Lights:
@@ -106,13 +139,34 @@ The FBX Exporter exports the following objects:
         * Color
     * Cameras:
         * Field of View
+    * Constraints:
+        * Weight
+        * Source Weight
+        * Translation Offset (Position Constraint)
+        * Rotation Offset (Rotation Constraint and Aim Constraint)
+        * Scale Offset (Scale Constraint)
+        * Source Translation Offset (Parent Constraint)
+        * Source Rotation Offset (Parent Constraint)
+        * World Up Vector (Aim Constraint)
+        * Up Vector (Aim Constraint)
+        * Aim Vector (Aim Constraint)
 * Blendshapes
-* Constraints
-    * Rotation
-	* Aim
-	* Position
-	* Scale 
-	* Parent
+
+## Cameras
+
+Game Cameras (Physical Camera unchecked) are  exported using the sensor back settings for 35mm TV Projection which has an Aperture Width of 0.816 inches and Aperture Height of 0.612 inches.
+
+On export the Aperture Width is calculated using this sensor back relative to the Camera Aspect Ratio for example:
+
+    * Full 1024 4:3 (1024x768) 
+       *  Aspect Ratio 4:3 
+       *  Aperture Width = 0.612 * (1024/768)
+ 
+The Focal Length (for game cameras) will be derived from the vertical FOV and the sensor back settings (Aperture Width and Aperture Height). The aperture mode will be set to Vertical using the default FBX setting for ApertureMode.
+
+Film Resolution Gate is set to Horizontal so that the importing software will fit the resolution gate horizontally within the film gate. 
+
+The Near & Far clipping plane has a range of 30 cm to 600000 cm.
 
 
 ## Export Options window
@@ -529,3 +583,70 @@ public static void ExportGameObjects(Object[] objects)
     // ModelExporter.ExportObjects to export a single game object
 }
 ```
+
+## Runtime
+
+The FBX SDK bindings can be executed during gameplay allowing import/export at runtime. Currently a custom importer/exporter needs to be written in order to do so, as the FBX exporter is editor only.
+
+Basic Exporter:
+
+```
+using Autodesk.Fbx;
+using UnityEngine;
+using UnityEditor;
+
+protected void ExportScene (string fileName)
+{
+    using(FbxManager fbxManager = FbxManager.Create ()){
+        // configure IO settings.
+        fbxManager.SetIOSettings (FbxIOSettings.Create (fbxManager, Globals.IOSROOT));
+        
+        // Export the scene
+        using (FbxExporter exporter = FbxExporter.Create (fbxManager, "myExporter")) {
+
+            // Initialize the exporter.
+            bool status = exporter.Initialize (fileName, -1, fbxManager.GetIOSettings ());
+
+            // Create a new scene to export
+            FbxScene scene = FbxScene.Create (fbxManager, "myScene");
+
+            // Export the scene to the file.
+            exporter.Export (scene);
+        }
+    }
+}
+```
+
+Basic Importer:
+
+```
+using Autodesk.Fbx;
+using UnityEngine;
+using UnityEditor;
+
+protected void ImportScene (string fileName)
+{
+    using(FbxManager fbxManager = FbxManager.Create ()){
+        // configure IO settings.
+        fbxManager.SetIOSettings (FbxIOSettings.Create (fbxManager, Globals.IOSROOT));
+        
+        // Import the scene to make sure file is valid
+        using (FbxImporter importer = FbxImporter.Create (fbxManager, "myImporter")) {
+
+            // Initialize the importer.
+            bool status = importer.Initialize (fileName, -1, fbxManager.GetIOSettings ());
+
+            // Create a new scene so it can be populated by the imported file.
+            FbxScene scene = FbxScene.Create (fbxManager, "myScene");
+
+            // Import the contents of the file into the scene.
+            importer.Import (scene);
+        }
+    }
+}
+```
+
+### Limitations
+
+* IL2CPP is not supported
+* Only 64 bit Windows and MacOS standalone player builds are supported
