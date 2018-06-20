@@ -64,7 +64,7 @@ If you use Linked Prefabs in your project then they will need to be upgraded to 
 
 Your Prefab instances will now be working again.
 
-# Making Sure Your Project Supports Text-Based Asset Serialization 
+## Making Sure Your Project Supports Text-Based Asset Serialization 
 
 Unity uses serialization to store Scene and Prefab files in a text-based, merge-friendly format. For the Package Manager version of the FBX Exporter to work properly, you need to ensure that your Unity project’s Asset Serialization Mode is set to *Force Text*.
 
