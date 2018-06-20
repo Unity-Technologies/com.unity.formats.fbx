@@ -38,19 +38,21 @@ The FBX Exporter package contains:
 * FBX Prefab Component
 * Integration with 3D modeling software (3ds Max and Maya)
 
-![](images/FBXExporter_Contents.png)
+![](images/FBXExporter_Contents.png) 
 
 ## Known Issues
 
-* When installing a new version of the FBX Exporter Package after using version 1.1.0.b1, the link between Assets and FbxPrefab components may be lost. See [Updating from 1.1.0b1](#Repairs_1_1_0b_1) for repairing instructions.
+* When installing a new version of the FBX Exporter Package after using version 1.1.0.b1, the link between Assets and FbxPrefab components may be lost. See [Updating from 1.1.0b1](# Updating from 1.1.0b1) for repairing instructions.
 
-# Upgrading the Asset Store version of the plugin to the Package Manager version.
+# Updating from 1.1.0b1
 
-Installing the Package Manager version of the plugin will break some associations with the Prefabs you already have; these are the steps to take to upgrade your already existing prefab instances:
+If you use Linked Prefabs in your project then they will need to be upgraded to work with the Package Manager version, these are the steps:
 
-1. Close Unity.
+1. Back up your project.
 
-2. Delete the *FbxExporters* folder from your Assets folder.
+2. Make sure you Unity is closed.
+
+3. Delete the *FbxExporters* folder from your Assets folder.
 
 4. Open Unity.
 
@@ -483,7 +485,7 @@ Use the Fbx Export Settings window to specify whether or not to automatically up
 |__Keep Open__ |Check this option to keep the selected 3D modeling software open after installing it. |
 |__Hide Native Menu__ |Check this option to hide the native __Send to Unity__ menu in Maya and Maya LT. |
 |__Install Unity Integration__ |Click this button to install [Unity Integration](#Integration) for the selected __3D Application__. |
-|__Run Component Updater__ |Click this button to run the [Component Updater](#Repairs_1_1_0b_1) to repair any broken FbxPrefab components if your previous version of the FBX Exporter Package was 1.1.0b1. |
+|__Run Component Updater__ |Click this button to run the [Component Updater](# Updating from 1.1.0b1) to repair any broken FbxPrefab components if your previous version of the FBX Exporter Package was 1.1.0b1. |
 
 
 
