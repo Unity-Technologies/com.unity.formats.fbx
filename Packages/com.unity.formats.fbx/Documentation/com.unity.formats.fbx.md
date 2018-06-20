@@ -44,7 +44,7 @@ The FBX Exporter package contains:
 
 * When installing a new version of the FBX Exporter Package after using version 1.1.0.b1, the link between Assets and FbxPrefab components may be lost. See [Updating from 1.1.0b1](# Updating from 1.1.0b1) for repairing instructions.
 
-# Updating from 1.1.0b1
+# Updating from the Asset Store Version to the Package Manager Version
 
 If you use Linked Prefabs in your project then they will need to be upgraded to work with the Package Manager version, these are the steps:
 
@@ -63,6 +63,14 @@ If you use Linked Prefabs in your project then they will need to be upgraded to 
 6. Restart Unity.
 
 Your Prefab instances will now be working again.
+
+# Making Sure Your Project Supports Text-Based Asset Serialization 
+
+Unity uses serialization to store Scene and Prefab files in a text-based, merge-friendly format. For the Package Manager version of the FBX Exporter to work properly, you need to ensure that your Unity project’s Asset Serialization Mode is set to *Force Text*.
+
+1. Navigate to __Edit__ > __Project Settings__ > __Editor__.
+
+1. Set the __Asset Serialization Mode__ to *Force Text*.
 
 <a name="ExportFBX"></a>
 # Exporting FBX files from Unity
