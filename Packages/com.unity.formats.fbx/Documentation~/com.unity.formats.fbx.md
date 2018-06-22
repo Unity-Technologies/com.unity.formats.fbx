@@ -1,12 +1,12 @@
-# About the FBX Exporter package 
+# FBX Exporter 
 
 __Version__: 2.0.0-preview
 
-The FBX Exporter package provides round-trip workflows between Unity and 3D modeling software. Use this workflow to send geometry, lights, cameras, and animation from Unity to Maya, Maya LT, or 3ds Max, and back again, with minimal effort.
+The FBX Exporter package provides round-trip workflows between Unity and 3D modeling software. Use this workflow to send geometry, Lights, Cameras, and animation from Unity to Maya, Maya LT, or 3ds Max, and back again, with minimal effort.
 
 The FBX Exporter package includes the following features:
 
-* [FBX Exporter](#ExportFBX): Export geometry, animation, lights, and cameras as FBX files so you can transfer game data to any 3D modeling software. Record gameplay and export it to make cinematics. Start grey-boxing with [ProBuilder](https://unity3d.com/unity/features/worldbuilding/probuilder), then export to FBX to replace with final assets.
+* [FBX Exporter](#ExportFBX): Export geometry, animation, Lights, and Cameras as FBX files so you can transfer game data to any 3D modeling software. Record gameplay and export it to make cinematics. Start grey-boxing with [ProBuilder](https://docs.unity3d.com/Packages/com.unity.probuilder@latest/), then export to FBX to replace with final assets.
 
 * [Linked Prefab](#LinkedPrefab): Link a Prefab to a new or existing FBX file. When you later change the FBX file, Unity automatically updates the Prefab to integrate changes to the transforms and hierarchy (in addition to Meshes and Materials). This helps you avoid rebuilding your Prefabs from scratch.
 
@@ -60,7 +60,13 @@ If you use Linked Prefabs in your project then they will need to be upgraded to 
 ![](images/FBXExporter_PrefabComponentUpdater.png)
 
 <a name="Repairs_1_1_0b_1"></a>
-## Updating from 1.1.0b1
+## Installing the FBX Exporter
+
+To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest).
+
+Verify that the FBX Exporter is correctly installed by opening it (from the top menu: **GameObject** > **Export To FBX**).
+
+### Updating from 1.1.0b1
 
 5. Select __Edit__ > __Project Settings__ > __Fbx Export__ and click on the __FBX Prefab Component Updater__ button.
 
@@ -74,9 +80,11 @@ Unity uses serialization to store Scene and Prefab files in a text-based, merge-
 
 1. Navigate to __Edit__ > __Project Settings__ > __Editor__.
 
-1. Set the __Asset Serialization Mode__ to *Force Text*.
+2. Set the __Asset Serialization Mode__ to *Force Text*.
+
 
 <a name="ExportFBX"></a>
+
 # Exporting FBX files from Unity
 
 Use __Export To FBX__ (menu: __GameObject__ > __Export To FBX__) to manually export GameObject hierarchies to an FBX file. The FBX Exporter exports selected objects and their descendants to a single FBX file. However, if you select both a parent and a descendant, only the parent’s hierarchy is exported.
@@ -84,131 +92,225 @@ Use __Export To FBX__ (menu: __GameObject__ > __Export To FBX__) to manually exp
 The FBX Exporter exports the following objects:
 
 * GameObject hierarchies and their transforms
-* Meshes. The FBX Exporter exports multiple copies of the same mesh as instances. The FBX Exporter also exports the following mesh attributes:
-    * Normals
-    * Binormals
-    * Tangents
-    * Vertex Colors
-    * All 8 Mesh UVs, if present
-    * Quads or Triangles
+* [Meshes](#meshes) 
 * SkinnedMeshRenderers with the following exceptions:
     * Humanoid rigs are not supported
     * Meshes in bone hierarchies are not supported
 * Materials as Phong if the material has specular; Lambert in all other cases
 * Textures
-* Game Cameras are exported using the sensor back settings for 35mm TV Projection (width = 0.816 inches, height = 0.612 inches). These camera attributes are also exported:
-    * Projection type (perspective/orthographic)
-    * Aspect ratio
-    * Aperture Width and Height (shown as "Sensor Size" in Unity, in millimeters. The height is set to 0.612 inches, and the width is relative to the aspect ratio)
-    * Focal length
-    * Vertical field of view. The default aperture mode is vertical.
-    * Near and far clipping plane
-* Physical Cameras (cameras for which the "Physical Camera" checkbox is enabled.)
-    * Lens Shift
-    * Focal Length
-* Lights of type *Directional*, *Spot* , *Point*, and *Area*; also the following light attributes:
-    * Spot Angle (for Spot lights)
-    * Color
-    * Intensity
-    * Range
-    * Shadows (either On or Off)
-* Constraints of type *Rotation*, *Aim*, *Position*, *Scale*, and *Parent*; also the following constraint attributes:
-    * Sources
-    * Source Weight
-    * Weight
-    * Active
-    * Rotation:
-        * Affected axes (X,Y,Z)
-        * Rotation Offset
-        * Rest Rotation
-	* Aim:
-        * Affected axes (X,Y,Z)
-        * Rotation Offset
-        * Rest Rotation
-        * World Up Type
-        * World Up Object
-        * World Up Vector
-        * Up Vector
-        * Aim Vector
-	* Position:
-        * Affected axes (X,Y,Z)
-        * Translation Offset
-        * Rest Translation
-	* Scale:
-        * Affected axes (X,Y,Z)
-        * Scale Offset
-        * Rest Scale
-	* Parent:
-        * Source Translation Offset (animated)
-        * Source Rotation Offset (animated)
-        * Affect Rotation Axes
-        * Affect Translation Axes
-        * Rest Translation
-        * Rest Rotation
-* Legacy and Generic Animation from Animation and Animator components, or from a Timeline clip; also the following animated attributes:
-    * Transforms
-    * Lights:
-        * Intensity
-        * Spot Angle (for Spot lights)
-        * Color
-    * Cameras:
-        * Field of View
-    * Constraints:
-        * Weight
-        * Source Weight
-        * Translation Offset (Position Constraint)
-        * Rotation Offset (Rotation Constraint and Aim Constraint)
-        * Scale Offset (Scale Constraint)
-        * Source Translation Offset (Parent Constraint)
-        * Source Rotation Offset (Parent Constraint)
-        * World Up Vector (Aim Constraint)
-        * Up Vector (Aim Constraint)
-        * Aim Vector (Aim Constraint)
+* [Cameras](#cameras)
+* [Lights](#lights)
+* [Contraints](#constraints)
+* [Animation](#animation)
 * Blendshapes
+
+
+
+<a name="meshes"></a>
+
+## Mesh support
+
+The FBX Exporter exports multiple copies of the same Mesh as instances. The FBX Exporter also exports the following mesh attributes:
+
+- Normals
+- Binormals
+- Tangents
+- Vertex Colors
+- All 8 Mesh UVs, if present
+- Quads or Triangles
+
+
+
+<a name="cameras"></a>
 
 ## Cameras
 
-Game Cameras (Physical Camera unchecked) are  exported using the sensor back settings for 35mm TV Projection which has an Aperture Width of 0.816 inches and Aperture Height of 0.612 inches.
+The FBX Exporter exports both Game Cameras and Physical Cameras.
 
-On export the Aperture Width is calculated using this sensor back relative to the Camera Aspect Ratio for example:
+> ***Note:*** In Unity's Inspector, a Camera's **Physical Camera** property determines whether it is a *Physical Camera* or a *Game Camera*.
+
+### Physical Cameras
+
+The FBX Exporter exports Physical Cameras, including these properties:
+
+- **Focal Length**
+- **Lens Shift**
+
+### Game Cameras
+
+On export, the FBX Exporter sets the **Aperture Height** to 0.612 inches, and calculates the **Aperture Width** using this sensor back relative to the Camera's Aspect Ratio. For example:
 
     * Full 1024 4:3 (1024x768) 
        *  Aspect Ratio 4:3 
        *  Aperture Width = 0.612 * (1024/768)
- 
-The Focal Length (for game cameras) will be derived from the vertical FOV and the sensor back settings (Aperture Width and Aperture Height). The aperture mode will be set to Vertical using the default FBX setting for ApertureMode.
 
-Film Resolution Gate is set to Horizontal so that the importing software will fit the resolution gate horizontally within the film gate. 
+The Aperture Width and Height values appear in Unity's Inspector as the **Sensor Size** property in millimeters. 
 
-The Near & Far clipping plane has a range of 30 cm to 600000 cm.
+The FBX Exporter derives the **Focal Length** from the vertical Field of View (FOV) and the sensor back settings (Aperture Width and Aperture Height). The FBX Exporter uses the default FBX setting for Aperture Mode: Vertical.
+
+**Film Resolution Gate** is set to Horizontal so that the importing software fits the resolution gate horizontally within the film gate. 
+
+The **Near & Far** Clipping Plane values have a range of 30 cm to 600000 cm.
+
+In addition, the **Projection** type (perspective/orthographic) and **Aspect Ratio** are also exported.
+
+
+
+<a name="lights"></a>
+
+## Lights
+
+The FBX Exporter exports Lights of type *Directional*, *Spot* , *Point*, and *Area*.
+
+It also exports the following Light attributes:
+
+- Spot Angle (for Spot lights)
+
+- Color
+
+- Intensity
+
+- Range
+
+- Shadows (either On or Off)
+
+  
+
+<a name="constraints"></a>
+
+## Constraints
+
+The FBX Exporter exports these types of Constraints:
+
+- [Rotation](#cns_rotation)
+- [Aim](#cns_aim)
+- [Position](#cns_position)
+- [Scale](#cns_scale)
+- [Parent](#cns_parent)
+
+In addition, the FBX Exporter also exports the following attributes for all Constraint types:
+
+- Sources
+- Source Weight
+- Weight
+- Active
+
+<a name="cns_rotation"></a>
+
+### Rotation
+
+The FBX Exporter exports the following attributes for the Rotation Constraint type:
+
+- Affected axes (X,Y,Z)
+- Rotation Offset
+- Rest Rotation
+
+<a name="cns_aim"></a>
+
+### Aim
+
+The FBX Exporter exports the following attributes for the Rotation Constraint type:
+
+- Affected axes (X,Y,Z)
+
+- Rotation Offset
+- Rest Rotation
+- World Up Type
+- World Up Object
+- World Up Vector
+- Up Vector
+- Aim Vector
+
+<a name="cns_position"></a>
+
+### Position
+
+The FBX Exporter exports the following attributes for the Position Constraint type:
+
+- Affected axes (X,Y,Z)
+- Translation Offset
+- Rest Translation
+
+<a name="cns_scale"></a>
+
+### Scale
+
+The FBX Exporter exports the following attributes for the Scale Constraint type:
+
+- Affected axes (X,Y,Z)
+- Scale Offset
+- Rest Scale
+
+<a name="cns_parent"></a>
+
+### Parent
+
+The FBX Exporter exports the following attributes for the Parent Constraint type:
+
+- Source Translation Offset (animated)
+- Source Rotation Offset (animated)
+- Affect Rotation Axes
+- Affect Translation Axes
+- Rest Translation
+- Rest Rotation
+
+
+
+<a name="animation"></a>
+
+## Animation
+
+The FBX Exporter exports Legacy and Generic Animation from Animation and Animator components, or from a Timeline clip. 
+
+In addition, it also exports the following animated attributes:
+
+- Transforms
+- Lights:
+  - Intensity
+  - Spot Angle (for Spot lights)
+  - Color
+- Cameras:
+  - Field of View
+- Constraints:
+  - Weight
+  - Source Weight
+  - Translation Offset (Position Constraint)
+  - Rotation Offset (Rotation Constraint and Aim Constraint)
+  - Scale Offset (Scale Constraint)
+  - Source Translation Offset (Parent Constraint)
+  - Source Rotation Offset (Parent Constraint)
+  - World Up Vector (Aim Constraint)
+  - Up Vector (Aim Constraint)
+  - Aim Vector (Aim Constraint)
+
 
 
 ## Export Options window
 
 When exporting an FBX file, the following Export Options window opens, displaying options for specifying what gets exported.
 
-![](images/FBXExporter_ExportOptionsWindow.png)
+![Export Options window](images/FBXExporter_ExportOptionsWindow.png)
 
 
 ### Export Options Properties
 
-| Property:| Function: |
-|:---|:---| 
-|__Export Name__ |Specify the exported FBX file name. |
-|__Export Path__ |Specify the location where the FBX Exporter will save the FBX file. |
-|__Source__ |Transfer the transform animation from this object to the __Destination__ transform. <br/><br/>**Notes:**<br/> - __Source__ must be an ancestor of __Destination__<br/> - __Source__ may be an ancestor of the selected object. |
-|__Destination__ |Which object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between __Source__ and __Destination__ as well as the animation on the Source itself.  |
-|__Export Format__ |Select the format to use in the FBX file (ASCII or Binary). |
-|__Include__ |Choose whether to export both Models and Animation, only Models, or only Animations. |
-|__LOD level__ |For level of detail (LOD) groups, choose the desired level of detail to export (all, highest, or lowest). <br/><br/>**Notes:** - The FBX Exporter ignores LODs outside of selected hierarchy.<br/> - The FBX Exporter does not filter out objects that are used as LODs and doesn't export them if they aren’t direct descendants of their respective LOD Group |
-|__Object(s) Position__ |Choose whether to reset the exported objects to world center, or keep world transforms during export.<br/><br/>If you select multiple objects for export, and you choose __Local Centered__ from this drop-down menu, the FBX Exporter centers objects around a shared root while keeping their relative placement unchanged. |
-|__Animated Skinned Mesh__ |Check this option to export animation on objects with skinned meshes.<br/><br/>If unchecked, the FBX Exporter does not export animation on skinned meshes. |
-|__Compatible Naming__ |Check this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Maya to avoid unexpected name changes between Unity and Maya. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("_"). Invalid characters are all non-alphanumeric characters, except for the colon (":").<br/> - Adds an underscore ("_") to names that begin with a number.<br/> - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters may differ between file systems.<br/><br/>**Note:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
-|__Export Unrendered__ |Check this option to export meshes that either don't have a renderer component, or that have a disabled renderer component. For example, a simplified mesh used as a Mesh collider. |
+| Property:                 | Function:                                                    |
+| :------------------------ | :----------------------------------------------------------- |
+| __Export Name__           | Specify the name of the FBX file to export.                  |
+| __Export Path__           | Specify the location where the FBX Exporter will save the FBX file. |
+| __Source__                | Transfer the transform animation from this object to the __Destination__ transform. <br/><br/>**Notes:**<br/> - __Source__ must be an ancestor of __Destination__<br/> - __Source__ may be an ancestor of the selected object. |
+| __Destination__           | Which object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between __Source__ and __Destination__ as well as the animation on the Source itself. |
+| __Export Format__         | Select the format to use in the FBX file (ASCII or Binary).  |
+| __Include__               | Choose whether to export both Models and Animation, only Models, or only Animations. |
+| __LOD level__             | For level of detail (LOD) groups, choose the desired level of detail to export (all, highest, or lowest). <br/><br/>**Notes:** - The FBX Exporter ignores LODs outside of selected hierarchy.<br/> - The FBX Exporter does not filter out objects that are used as LODs and doesn't export them if they aren’t direct descendants of their respective LOD Group |
+| __Object(s) Position__    | Choose whether to reset the exported objects to world center, or keep world transforms during export.<br/><br/>If you select multiple objects for export, and you choose __Local Centered__ from this drop-down menu, the FBX Exporter centers objects around a shared root while keeping their relative placement unchanged. |
+| __Animated Skinned Mesh__ | Check this option to export animation on objects with skinned meshes.<br/><br/>If unchecked, the FBX Exporter does not export animation on skinned meshes. |
+| __Compatible Naming__     | Check this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Maya to avoid unexpected name changes between Unity and Maya. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("_"). Invalid characters are all non-alphanumeric characters, except for the colon (":").<br/> - Adds an underscore ("_") to names that begin with a number.<br/> - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters may differ between file systems.<br/><br/>**Note:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
+| __Export Unrendered__     | Check this option to export meshes that either don't have a renderer component, or that have a disabled renderer component. For example, a simplified mesh used as a Mesh collider. |
 
 
 
-## Exporting Animation from the Timeline
+## Exporting animation from the Timeline
 
 In order to export an animation clip from the timeline, in the Timeline editor select the desired clip, then from the top menu select __GameObject__ > __Export Selected Timeline Clip__.
 
@@ -223,16 +325,18 @@ There are no specific import options to adjust between Unity and Maya. When work
 
 For example, when working with large models in Maya, to ensure that the models clip to meters, adjust the scale of the near and far clipping planes for all cameras by 100x. In addition, you should scale lights by 100x so that objects display in the viewport.
 
-## Known Issues
+## Known issues
 
-* Bind pose of animated skinned mesh is lost on export. For example, if you export an animated skinned mesh from Unity and import it into Maya you will not be able to set the character into the bind pose using the Rigging > Skin > Go to Bind Pose command.
+* Bind pose of animated skinned mesh is lost on export. For example, if you export an animated skinned mesh from Unity and import it into Maya you will not be able to set the character into the bind pose using the **Rigging** > **Skin** > **Go to Bind Pose** command.
 
 * Animated skinned meshes may not export with the correct skinning if they are not in the bind pose on export (that is, not being previewed in the Animation or Timeline windows, and the original Rig's FBX must not contain animation)
 
 * For skinned meshes all bones must be descendants of the root bone. For example, if the root bone is "hips" and the right leg for the same skinned mesh is not a descendant of hips, export will fail.
 
 
+
 <a name="LinkedPrefab"></a>
+
 # Converting GameObjects to Linked Prefabs
 
 A Linked Prefab is a Prefab which maintains a link to an FBX file and is responsible for updating the Prefab so that it remains in sync with its source. The notable difference between a Linked Prefab and a stock Unity Prefab is that the Linked Prefab integrates changes in the hierarchy and transforms (in addition to Meshes and Materials). 
@@ -251,26 +355,26 @@ __Convert To Linked Prefab Instance__ exports each selected GameObject hierarchy
 
 When converting to a Linked Prefab, the following window opens, displaying options to specify what gets exported:
 
-![](images/FBXExporter_ConvertOptionsWindow.png)
+![Convert Options for a Linked Prefab](images/FBXExporter_ConvertOptionsWindow.png)
 
 
 ### Convert Option Properties
 
-| Property:| Function: |
-|:---|:---| 
-|__Export Name__ |Specify the exported FBX file name |
-|__Export Path__ |Specify the location where the FBX Exporter will save the FBX file. |
-|__Prefab Name__ |Specify the Linked Prefab's filename |
-|__Prefab Path__ |Specify the location where the FBX Exporter will save the linked prefab file. |
-|__Source__ |Transfer the transform animation from this object to the __Destination__ transform. __Destination__.<br/><br/>**Notes:** - __Source__ must be an ancestor of __Destination__.<br/> - __Source__ may be an ancestor of the selected object. |
-|__Destination__ |Which object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between Source and Destination as well as the animation on the Source itself. |
-|__Export Format__ |Select the format for the FBX Exporter to use when exporting the FBX file (ASCII or binary). |
-|__Include__ |__Convert to Linked Prefab Instance__ always exports both Models and Animation in the hierarchy. |
-|__LOD level__ |__Convert to Linked Prefab Instance__ always exports All levels of detail (LOD) available in the hierarchy for LOD groups. |
-|__Object(s) Position__ |__Convert to Linked Prefab Instance__ always resets the root object's transform during export. However, the Prefab maintains the global transform for the root object. |
-|__Animated Skinned Mesh__ |Check this option to export animation on objects with skinned meshes.<br/><br/>If unchecked, the FBX Exporter does not export animation on skinned meshes. |
-|__Compatible Naming__ |Check this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Maya to avoid unexpected name changes between Unity and Maya. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("_"). Invalid characters are all non-alphanumeric characters, except for colon (":").<br/> - Adds an underscore ("_") to names that begin with a number. - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters may differ between file systems.<br/><br/>**Note:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
-|__Don't ask me again__ |When enabled, will prevent the Convert Option Properties dialog from being shown when converting to Linked Prefabs. The option can be reset by turning on "Show Convert UI" option under Edit/Project Settings/Fbx Export|
+| Property:                 | Function:                                                    |
+| :------------------------ | :----------------------------------------------------------- |
+| __Export Name__           | Specify the name of the FBX file to export.                  |
+| __Export Path__           | Specify the location where the FBX Exporter will save the FBX file. |
+| __Prefab Name__           | Specify the name of the Linked Prefab's file.                |
+| __Prefab Path__           | Specify the location where the FBX Exporter will save the Linked Prefab file. |
+| __Source__                | Transfer the transform animation from this object to the __Destination__ transform. __Destination__.<br/><br/>**Notes:** - __Source__ must be an ancestor of __Destination__.<br/> - __Source__ may be an ancestor of the selected object. |
+| __Destination__           | Which object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between Source and Destination as well as the animation on the Source itself. |
+| __Export Format__         | Select the format for the FBX Exporter to use when exporting the FBX file (ASCII or binary). |
+| __Include__               | __Convert to Linked Prefab Instance__ always exports both Models and Animation in the hierarchy. |
+| __LOD level__             | __Convert to Linked Prefab Instance__ always exports All levels of detail (LOD) available in the hierarchy for LOD groups. |
+| __Object(s) Position__    | __Convert to Linked Prefab Instance__ always resets the root object's transform during export. However, the Prefab maintains the global transform for the root object. |
+| __Animated Skinned Mesh__ | Check this option to export animation on objects with skinned meshes.<br/><br/>If unchecked, the FBX Exporter does not export animation on skinned meshes. |
+| __Compatible Naming__     | Check this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Maya to avoid unexpected name changes between Unity and Maya. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("_"). Invalid characters are all non-alphanumeric characters, except for colon (":").<br/> - Adds an underscore ("_") to names that begin with a number. - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters may differ between file systems.<br/><br/>**Note:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
+| __Don't ask me again__    | Check this option to use the same **Convert Option** properties and hide this window when converting to Linked Prefabs in the future. You can reset this option by turning on the **Show Convert UI** option under **Edit** > **Project Settings** > **Fbx Export** in Unity's top menu. |
 
 
 
@@ -320,13 +424,14 @@ If you re-enable the __Auto-Updater__ option after having disabled manual update
 * The Name Remapping ignores the root object, since the name comes from the name of the FBX file, rather than what's in the file.
 
 
-## Known Issues
+## Known issues
 
 * Name or path changes are ignored when converting a Model instance.
 
 
 
 <a name="Integration"></a>
+
 # Integrating Unity with 3D modeling software
 
 The Unity Integration tool allows you to effortlessly exchange Assets between Unity and either __Maya__, __Maya LT__ or __3ds Max__. 
@@ -341,7 +446,7 @@ For 3ds Max, use the *unityFbxImportSettings.ms* and *unityFbxExportSettings.ms*
 
 To install Unity Integration for Maya, Maya LT, or 3ds Max, open [Fbx Export Settings](#FBXSettings) (menu: __Edit__ > __Project Settings__ > __Fbx Export__) in Unity:
 
-![](images/FBXExporter_FBXExportSettingsWindow.png)
+![FBX Export Settings window](images/FBXExporter_FBXExportSettingsWindow.png)
 
 Use the __3D Application__ property to choose the 3D modeling software and version where you want to install the Unity Integration. 
 
@@ -355,9 +460,9 @@ Click __Install Unity Integration__ to install the Unity Integration for the sel
 
 ![](images/FBXExporter_AlreadyExist.png)
 
-If a previous integration was already unpacked in the selected folder, Unity will prompt you to either use the already existing integration or to overwrite it with the newer version.
+If you already unpacked a previous integration in the selected folder, Unity prompts you to either use the existing integration or to overwrite it with the newer version.
 
-Unity Integration comes packaged in several zip files (one zip file per supported application). Then select a target folder to extract the Unity Integration to when prompted. The target folder can be outside of your current Project. Maya and Maya LT both use the same zip folder.
+Unity Integration comes packaged in several zip files (one zip file per supported application). When prompted, select a target folder where you want to extract the Unity Integration. The target folder can be outside of your current Project. Maya and Maya LT both use the same zip folder.
 
 The application starts, configures the plug-in, and automatically exits. Unity reports whether the installation was a success.
 
@@ -368,20 +473,22 @@ If an error occurs during startup, Maya may not close. If this happens, check th
 If you enabled the __Keep Open__ option in the [Fbx Export Settings](#FBXSettings) window, then Maya stays open after installation completes.
 
 
+
+
 ## Manually Installing a Maya Integration
 
-There may be some cases (e.g you may be using an unsupported version of Maya) where you have to install your integration manually.
+In some cases, you have to install your integration manually. For example, you may be using an unsupported version of Maya.
 
 To manually install a Maya Integration, follow these steps:
 
-1. Locate the *UnityFbxForMaya.zip* file. You can find it in Unity, using the Project Window, under "FBX Exporter/Editor/Integrations"
+1. Locate the *UnityFbxForMaya.zip* file. You can find it in Unity's Project view, under the *Packages/FBX Exporter/Editor/Integrations* folder.
 
-2. Extract the archive to a writable location. This can be in or outside of your Unity Project.
+2. Extract the archive to a folder where you have write permission. This can be in or outside of your Unity Project.
 
 3. Copy the contents of *Integrations/Autodesk/maya/UnityFbxForMaya.txt* from the unzipped folder to the following file:
 
-* On Windows:<br/>*C:\Users\{username}\Documents\maya\modules\UnityFbxForMaya.mod*
-* On Mac:<br/>*$HOME/Library/Preferences/Autodesk/Maya/modules/UnityFbxForMaya.mod*
+  * On Windows:<br/>*C:\Users\{username}\Documents\maya\modules\UnityFbxForMaya.mod*
+  * On Mac:<br/>*$HOME/Library/Preferences/Autodesk/Maya/modules/UnityFbxForMaya.mod*
 
 4. In *UnityFbxForMaya.mod*, modify the following line (mel code):
 ```
@@ -393,23 +500,20 @@ UnityFbxForMaya {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya
 
 5. Locate the following file (if it doesn't exist, create the file):
 
-* On Windows: <br/>*C:\Users\{username}\Documents\maya\scripts\userSetup.mel*
-* On Mac: <br/>*$HOME/Library/Preferences/Autodesk/Maya/scripts/userSetup.mel*
+  * On Windows: <br/>*C:\Users\{username}\Documents\maya\scripts\userSetup.mel*
+  * On Mac: <br/>*$HOME/Library/Preferences/Autodesk/Maya/scripts/userSetup.mel*
 
 6. Add this line (mel code):
-```
-if(`exists unitySetupUI`){ unitySetupUI; }
-```
+  ```if(`exists unitySetupUI`){ unitySetupUI; }```
 
 7. Open Maya, and then open the Script Editor:
 
-![](images/FBXExporter_MayaAccessScriptEditor.png) 
+  ![](images/FBXExporter_MayaAccessScriptEditor.png) 
 
 8. Run the following (mel code):
-```
-unityConfigure "{UnityProjectPath}" "{ExportSettingsPath}" "{ImportSettingsPath}" 0 0;
-```
-Where `{UnityProjectPath}` would be replaced by the path to your Unity Project,  `{ExportSettingsPath}` would be replaced by the path to Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel and `{ImportSettingsPath}` would be replaced by the path to Integrations/Autodesk/maya/scripts/unityFbxImportSettings.mel
+  ```unityConfigure "{UnityProjectPath}" "{ExportSettingsPath}" "{ImportSettingsPath}" 0 0;```
+
+  Where you replace `{UnityProjectPath}` with the path to your Unity Project, and  `{ExportSettingsPath}` with the path to *Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel* and `{ImportSettingsPath}` with the path to *Integrations/Autodesk/maya/scripts/unityFbxImportSettings.mel*.
 
 
 
@@ -417,7 +521,7 @@ Where `{UnityProjectPath}` would be replaced by the path to your Unity Project, 
 
 ### Importing from Unity
 
-Importing an FBX Model automatically configures the plug-in for export. The plug-in remembers your Unity Project, the export filenames for your models and animations, and which objects to export per file.
+Importing an FBX Model automatically configures the plug-in for export. The plug-in remembers your Unity Project, the export filenames for your Models and animations, and which objects to export per file.
 
 Select __File__ > __Unity__ > __Import__ to open a file browser directly in your current Unity Project. 
 
@@ -448,13 +552,13 @@ There are three options available for export in Maya and Maya LT:
 
 ![](images/FBXExporter_MayaUnityMenuItems.png)
 
-__File__ > __Unity__ > __Export__ exports both Models and Animation contained in the export sets selected for export.
+__File__ > __Unity__ > __Export__ exports both Models and animation contained in the export sets selected for export.
 
-__File__ > __Unity__ > __Export Model Only__ exports all Models in the selected export sets, but does not export any Animation.
+__File__ > __Unity__ > __Export Model Only__ exports all Models in the selected export sets, but does not export any animation.
 
-__File__ > __Unity__ > __Export Animation Only__ exports only the Animation applied to the objects in the export set as well as the minimum components required for the animation (such as transforms, animated lights and cameras).
+__File__ > __Unity__ > __Export Animation Only__ exports only the animation applied to the objects in the export set as well as the minimum components required for the animation (such as transforms, animated lights and cameras).
 
-**Note:** If no animation file with the **@** notation has been imported, then this option has no effect. The workaround for exporting a new animation is to first import an empty FBX file with the **@** notation (*{model}@anim.fbx*), so that the export set is configured correctly.
+> ***Note:*** If no animation file with the **@** notation has been imported, then this option has no effect. The workaround for exporting a new animation is to first import an empty FBX file with the **@** notation (*{model}@anim.fbx*), so that the export set is configured correctly.
 
 In order to export objects from the desired export set, you can select one or more objects in the set or the set itself. In either case, the FBX Exporter exports the entire contents of the set.
 
@@ -514,9 +618,9 @@ There are two options available for export in 3ds Max:
 * Export
 * Export Model Only
 
-__Export__ exports both Models and Animation contained in the export sets selected for export.
+__Export__ exports both Models and animation contained in the export sets selected for export.
 
-__Export Model Only__ exports all Models in the selected export sets, but does not export any Animation.
+__Export Model Only__ exports all Models in the selected export sets, but does not export any animation.
 
 Select either to automatically export with the settings and Models configured during import. No additional steps are required.
 
@@ -534,24 +638,23 @@ If you select multiple dummy objects corresponding to sets or objects from multi
 
 In each case, selecting __Export__ automatically exports the current Model back to Unity. When you switch back into Unity, your Scene has already been updated.
 
-Unity export uses the selection sets created on import to determine which objects to export. If you add a new object to the Model, you must also add this new object to the model’s *UnityExportSet* set.
+Unity export uses the selection sets created on import to determine which objects to export. If you add a new object to the Model, you must also add this new object to the Model’s *UnityExportSet* set.
 
 ![UnityExportSets in 3ds Max](images/FBXExporter_MaxMultipleUnityExportSets.png)
 
-Click the __Manage Selection Sets__ button to edit a UnityExportSet. 
+Click the __Manage Selection Sets__ button to edit a *UnityExportSet* set. 
 
-![](images/FBXExporter_ManageSelectionSets.png)
+![Manage Selection Sets in 3ds Max](images/FBXExporter_ManageSelectionSets.png)
 
 To add an object to a set, select the set, select an object and click the __Add Selected Objects__ button. 
 
 To remove an object from a set, select the object in the set and click the __Subtract Selected Objects__ button. 
 
-**Tip:** You can also right-click the UnityExportSets and add or remove objects using the context menu.
+> ***Tip:*** You can also right-click the UnityExportSets and add or remove objects using the context menu.
 
-![](FBXExporter_MaxNamedSelectionSets.png)
+![Named Selection Sets in 3ds Max](images/FBXExporter_MaxNamedSelectionSets.png)
 
-In 3ds max, use the __Add Selected Objects__ button (red outline) to add objects to Wolf_UnityExportSet
-
+In 3ds max, use the __Add Selected Objects__ button (red outline) to add objects to the *Wolf_UnityExportSet* set.
 
 
 # Setting FBX Export options
@@ -565,22 +668,21 @@ Use the Fbx Export Settings window to specify whether or not to automatically up
 <a name="FBXSettings"></a>
 ## Fbx Export Settings window
 
-| Property:| Function: |
-|:---|:---| 
-|__Auto-Updater__ |Check this option to enable automatic updating for Linked Prefabs whenever their linked FBX file is updated. |
-|__3D Application__ |Select the 3D modeling software you want to integrate with Unity. Maya 2017+, Maya LT 2017+, and 3ds Max 2017+ are the three applications currently supported.<br/><br/>Click the Browse button to choose a 3D modeling software installed in a non-standard location.  |
-|__Keep Open__ |Check this option to keep the selected 3D modeling software open after installing it. |
-|__Hide Native Menu__ |Check this option to hide the native __Send to Unity__ menu in Maya and Maya LT. |
-|__Install Unity Integration__ |Click this button to install [Unity Integration](#Integration) for the selected __3D Application__. |
-|__Run Component Updater__ |Click this button to run the [Component Updater](#Repairs_1_1_0b_1) to repair any broken FbxPrefab components if if you were using a previous version of the FBX Exporter Package.|
-
+| Property:                     | Function:                                                    |
+| :---------------------------- | :----------------------------------------------------------- |
+| __Auto-Updater__              | Check this option to enable automatic updating for Linked Prefabs whenever their linked FBX file is updated. |
+| __3D Application__            | Select the 3D modeling software you want to integrate with Unity. Maya 2017+, Maya LT 2017+, and 3ds Max 2017+ are the three applications currently supported.<br/><br/>Click the Browse button to choose a 3D modeling software installed in a non-standard location. |
+| __Keep Open__                 | Check this option to keep the selected 3D modeling software open after installing it. |
+| __Hide Native Menu__          | Check this option to hide the native __Send to Unity__ menu in Maya and Maya LT. |
+| __Install Unity Integration__ | Click this button to install [Unity Integration](#Integration) for the selected __3D Application__. |
+| __Run Component Updater__     | Click this button to run the [Component Updater](#Repairs_1_1_0b_1) to repair any broken FbxPrefab components if you were using a previous version of the FBX Exporter package. |
 
 
 # Developer’s Guide
 
-As a developer you have access to the FBX Exporter from C# scripting. You can use the basic API by providing a single GameObject, or a list of GameObjects. Note that default export settings are used for exporting the GameObjects to the FBX file.
+As a developer you have access to the FBX Exporter from C# scripting. You can use the basic API by providing a single GameObject or a list of GameObjects. Note that default export settings are used for exporting the GameObjects to the FBX file.
 
-You can call the FBX Exporter from C# using methods found in the "UnityEditor.Formats.Fbx.Exporter" namespace, for example:
+You can call the FBX Exporter from C# using methods found in the [**UnityEditor.Formats.Fbx.Exporter** ](../api/UnityEditor.Formats.Fbx.Exporter.html) namespace, for example:
 
 ```
 using System.IO;
@@ -600,9 +702,9 @@ public static void ExportGameObjects(Object[] objects)
 
 ## Runtime
 
-The FBX SDK bindings can be executed during gameplay allowing import/export at runtime. Currently a custom importer/exporter needs to be written in order to do so, as the FBX exporter is editor only.
+The FBX SDK bindings can be executed during gameplay allowing import and export at runtime. Currently a custom importer/exporter needs to be written in order to do so, as the FBX Exporter is Editor only.
 
-Basic Exporter:
+### Basic Exporter:
 
 ```
 using Autodesk.Fbx;
@@ -631,7 +733,7 @@ protected void ExportScene (string fileName)
 }
 ```
 
-Basic Importer:
+### Basic Importer:
 
 ```
 using Autodesk.Fbx;
@@ -664,3 +766,4 @@ protected void ImportScene (string fileName)
 
 * IL2CPP is not supported
 * Only 64 bit Windows and MacOS standalone player builds are supported
+
