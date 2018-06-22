@@ -1,6 +1,6 @@
 # Changes in FBX SDK C# Bindings
 
-## [2.0.0] - 2018-06-18
+## [2.0.0] - 2018-06-22
 
 NEW FEATURES
 * The C# Bindings package has been renamed to com.autodesk.fbx
