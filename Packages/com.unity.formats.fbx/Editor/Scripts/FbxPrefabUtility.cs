@@ -114,7 +114,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         [System.Diagnostics.Conditional("FBXEXPORTER_DEBUG")]
         public static void Log(string message)
         {
-            Debug.Log("Fbx prefab update: " + message);
+            Debug.Log("FBX prefab update: " + message);
         }
 
         [System.Diagnostics.Conditional("FBXEXPORTER_DEBUG")]
