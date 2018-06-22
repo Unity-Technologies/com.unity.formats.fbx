@@ -34,7 +34,7 @@ The Unity Integration for 3ds Max feature supports the following versions of 3ds
 
 * When installing a new version of the FBX Exporter Package after using version 1.1.0.b1, the link between Assets and FbxPrefab components may be lost. See [Updating from 1.1.0b1](#Repairs_1_1_0b_1) for repairing instructions.
 
-* The Fbx Exporter package does not support exporting .asset files.
+* The FBX Exporter package does not support exporting .asset files.
 
 <a name="Repairs_1_1_0b_1"></a>
 ## Installing the FBX Exporter
