@@ -24,10 +24,10 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUI.BeginDisabledGroup(isDisabled);
             FbxPrefabUtility fbxPrefabUtility = new FbxPrefabUtility (fbxPrefab);
             var oldFbxAsset = fbxPrefabUtility.FbxAsset;
-            var newFbxAsset = EditorGUILayout.ObjectField(new GUIContent("Source Fbx Asset", "The FBX file that is linked to this Prefab"), oldFbxAsset,
+            var newFbxAsset = EditorGUILayout.ObjectField(new GUIContent("Source FBX Asset", "The FBX file that is linked to this Prefab"), oldFbxAsset,
                     typeof(GameObject), allowSceneObjects: false) as GameObject;
             if (newFbxAsset && !FbxPrefabAutoUpdater.IsFbxAsset(UnityEditor.AssetDatabase.GetAssetPath(newFbxAsset))) {
-                Debug.LogError("FbxPrefab must point to an Fbx asset (or none).");
+                Debug.LogError("FbxPrefab must point to an FBX asset (or none).");
             } else if (newFbxAsset != oldFbxAsset) {
                 fbxPrefabUtility.SetSourceModel(newFbxAsset);
             }

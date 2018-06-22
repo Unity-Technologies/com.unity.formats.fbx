@@ -1321,10 +1321,10 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        [MenuItem("Edit/Project Settings/Fbx Export", priority = 300)]
+        [MenuItem("Edit/Project Settings/FBX Export", priority = 300)]
         static void ShowManager()
         {
-            instance.name = "Fbx Export Settings";
+            instance.name = "FBX Export Settings";
             Selection.activeObject = instance;
             instance.Load();
         }

@@ -88,7 +88,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         const string TimelineClipMenuItemName = "GameObject/Export Selected Timeline Clip...";
 
-        const string ProgressBarTitle = "Fbx Export";
+        const string ProgressBarTitle = "FBX Export";
 
         const char MayaNamespaceSeparator = ':';
 
