@@ -12,6 +12,7 @@ using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 using System.Security.Permissions;
 
 [assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editortests")]  
+[assembly: InternalsVisibleTo("Unity.ProBuilder.AddOns.Editor")]  
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -61,7 +62,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// To do so, simply use its ExportObject and ExportObjects methods. Default export
     /// options are used when exporting the objects to the FBX file.
     /// </summary>
-    public class ModelExporter : System.IDisposable
+    public sealed class ModelExporter : System.IDisposable
     {
         const string Title =
             "Created by FBX Exporter from Unity Technologies";
@@ -883,7 +884,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Export GameObject as a skinned mesh with material, bones, a skin and, a bind pose.
         /// </summary>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        protected bool ExportSkinnedMesh (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
+        private bool ExportSkinnedMesh (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
         {
             if(!unityGo || fbxNode == null)
             {
@@ -1126,7 +1127,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export bind pose of mesh to skeleton
         /// </summary>
-        protected bool ExportBindPose (SkinnedMeshRenderer skinnedMesh, FbxNode fbxMeshNode,
+        private bool ExportBindPose (SkinnedMeshRenderer skinnedMesh, FbxNode fbxMeshNode,
                                 FbxScene fbxScene, Dictionary<SkinnedMeshRenderer, Transform[]> skinnedMeshToBonesMap)
         {
             if (fbxMeshNode == null || skinnedMeshToBonesMap == null || fbxScene == null)
@@ -1297,7 +1298,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// if this game object is a model prefab then export with shared components
         /// </summary>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        protected bool ExportInstance(GameObject unityGo, FbxNode fbxNode)
+        private bool ExportInstance(GameObject unityGo, FbxNode fbxNode)
         {
             if (!unityGo || fbxNode == null)
             {
@@ -1350,7 +1351,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Exports camera component
         /// </summary>
-        protected bool ExportCamera (GameObject unityGO, FbxScene fbxScene, FbxNode fbxNode)
+        private bool ExportCamera (GameObject unityGO, FbxScene fbxScene, FbxNode fbxNode)
         {
             if (!unityGO || fbxScene == null || fbxNode == null)
             {
@@ -1387,7 +1388,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Supported types: point, spot and directional
         /// Cookie => Gobo
         /// </summary>
-        protected bool ExportLight (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
+        private bool ExportLight (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
         {
             if(!unityGo || fbxScene == null || fbxNode == null)
             {
@@ -1457,7 +1458,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        protected bool ExportCommonConstraintProperties<TUnityConstraint,TFbxConstraint>(TUnityConstraint uniConstraint, TFbxConstraint fbxConstraint, FbxNode fbxNode)
+        private bool ExportCommonConstraintProperties<TUnityConstraint,TFbxConstraint>(TUnityConstraint uniConstraint, TFbxConstraint fbxConstraint, FbxNode fbxNode)
             where TUnityConstraint : IConstraint where TFbxConstraint : FbxConstraint
         {
             fbxConstraint.Active.Set(uniConstraint.constraintActive);
@@ -1468,7 +1469,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        protected struct ExpConstraintSource
+        private struct ExpConstraintSource
         {
             private FbxNode m_node;
             public FbxNode node
@@ -1491,7 +1492,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        protected List<ExpConstraintSource> GetConstraintSources(IConstraint unityConstraint)
+        private List<ExpConstraintSource> GetConstraintSources(IConstraint unityConstraint)
         {
             if(unityConstraint == null)
             {
@@ -1514,7 +1515,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return fbxSources;
         }
 
-        protected void AddFbxNodeToConstraintsMapping<T>(FbxNode fbxNode, T fbxConstraint, System.Type uniConstraintType) where T : FbxConstraint
+        private void AddFbxNodeToConstraintsMapping<T>(FbxNode fbxNode, T fbxConstraint, System.Type uniConstraintType) where T : FbxConstraint
         {
             Dictionary<FbxConstraint, System.Type> constraintMapping;
             if (!MapConstrainedObjectToConstraints.TryGetValue(fbxNode, out constraintMapping))
@@ -1525,7 +1526,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             constraintMapping.Add(fbxConstraint, uniConstraintType);
         }
 
-        protected bool ExportPositionConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
+        private bool ExportPositionConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
         {
             if(fbxNode == null)
             {
@@ -1556,7 +1557,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        protected bool ExportRotationConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
+        private bool ExportRotationConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
         {
             if(fbxNode == null)
             {
@@ -1591,7 +1592,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        protected bool ExportScaleConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
+        private bool ExportScaleConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
         {
             if(fbxNode == null)
             {
@@ -1624,7 +1625,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        protected bool ExportAimConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
+        private bool ExportAimConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
         {
             if(fbxNode == null)
             {
@@ -1690,7 +1691,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        protected bool ExportParentConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
+        private bool ExportParentConstraint(IConstraint uniConstraint, FbxScene fbxScene, FbxNode fbxNode)
         {
             if(fbxNode == null)
             {
@@ -1746,7 +1747,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private delegate bool ExportConstraintDelegate(IConstraint c , FbxScene fs, FbxNode fn);
 
-        protected bool ExportConstraints (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
+        private bool ExportConstraints (GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
         {
             if (!unityGo)
             {
@@ -1912,7 +1913,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="constrainedNode"></param>
         /// <param name="uniConstraintType"></param>
         /// <returns></returns>
-        protected FbxConstraint GetFbxConstraint(FbxNode constrainedNode, System.Type uniConstraintType)
+        private FbxConstraint GetFbxConstraint(FbxNode constrainedNode, System.Type uniConstraintType)
         {
             if (uniConstraintType == null || !uniConstraintType.GetInterfaces().Contains(typeof(IConstraint)))
             {
@@ -1939,7 +1940,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return null;
         }
 
-        protected FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType)
+        private FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType)
         {
             if(fbxNode == null)
             {
@@ -1980,7 +1981,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// quaternion to euler and various other stuff.
         /// </summary>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        protected void ExportAnimationCurve (FbxNode fbxNode,
+        private void ExportAnimationCurve (FbxNode fbxNode,
                                                 AnimationCurve uniAnimCurve,
                                                 float frameRate,
                                                 string uniPropertyName,
@@ -2080,7 +2081,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Export an AnimationClip as a single take
         /// </summary>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        protected void ExportAnimationClip (AnimationClip uniAnimClip, GameObject uniRoot, FbxScene fbxScene)
+        private void ExportAnimationClip (AnimationClip uniAnimClip, GameObject uniRoot, FbxScene fbxScene)
         {
             if (!uniAnimClip || !uniRoot || fbxScene == null) return;
 
@@ -2476,7 +2477,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Export the Animator component on this game object
         /// </summary>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        protected void ExportAnimation (GameObject uniRoot, FbxScene fbxScene)
+        private void ExportAnimation (GameObject uniRoot, FbxScene fbxScene)
         {
             if (!uniRoot)
             {
@@ -2531,7 +2532,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// configures default camera for the scene
         /// </summary>
-        protected void SetDefaultCamera (FbxScene fbxScene)
+        private void SetDefaultCamera (FbxScene fbxScene)
         {
             if(fbxScene == null) { return; }
 
@@ -3114,7 +3115,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// This function exports the other components and animation.
         /// </summary>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        protected bool ExportComponents(FbxScene fbxScene, bool exportAnim = true)
+        private bool ExportComponents(FbxScene fbxScene, bool exportAnim = true)
         {
             var animationNodes = new HashSet<GameObject> ();
 
@@ -3175,7 +3176,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns><c>true</c>, if object has animation, <c>false</c> otherwise.</returns>
         /// <param name="go">Go.</param>
-        protected bool GameObjectHasAnimation(GameObject go){
+        private bool GameObjectHasAnimation(GameObject go){
             return go != null &&
                 (go.GetComponent<Animator> () ||
                 go.GetComponent<Animation> () ||
@@ -4054,12 +4055,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         public void Dispose ()
         {
-            Dispose(true);
             System.GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool cleanUpManaged)
-        {
         }
 
         internal bool Verbose { get { return ExportSettings.instance.VerboseProperty; } }
