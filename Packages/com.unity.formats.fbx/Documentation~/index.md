@@ -2,7 +2,7 @@
 
 __Version__: 2.0.0-preview
 
-The FBX Exporter package provides round-trip workflows between Unity and 3D modeling software. Use this workflow to send geometry, Lights, Cameras, and animation from Unity to Maya, Maya LT, or 3ds Max, and back again, with minimal effort.
+The FBX Exporter package provides round-trip workflows between Unity and 3D modeling software. Use this workflow to send geometry, Lights, Cameras, and animation from Unity to Autodesk® Maya®, Autodesk® Maya LT™, or Autodesk® 3ds Max®, and back again, with minimal effort.
 
 The FBX Exporter package includes the following features:
 
@@ -10,7 +10,7 @@ The FBX Exporter package includes the following features:
 
 * [Linked Prefab](prefabs.html): Link a Prefab to a new or existing FBX file. When you later change the FBX file, Unity automatically updates the Prefab to integrate changes to the transforms and hierarchy (in addition to Meshes and Materials). This helps you avoid rebuilding your Prefabs from scratch.
 
-* [Unity Integration for 3D modeling software](integration.html): Effortlessly import and export Assets between Unity and Maya, Maya LT, or 3ds Max. The 3D modeling software remembers where the files go, and what objects to export back to Unity.
+* [Unity Integration for 3D modeling software](integration.html): Effortlessly import and export Assets between Unity and Autodesk® Maya®, Autodesk® Maya LT™, or Autodesk® 3ds Max®. The 3D modeling software remembers where the files go, and what objects to export back to Unity.
 
 ## Requirements
 
@@ -18,21 +18,21 @@ The FBX Exporter package is compatible with the following versions of the Unity 
 
 * 2018.2 and later
 
-The Unity Integration for Maya feature supports the following versions of Maya:
+The Unity Integration for Autodesk® Maya® and Autodesk® Maya LT™ feature supports the following versions:
 
-* Maya 2017
-* Maya 2018
-* Maya LT 2017
-* Maya LT 2018
+* Autodesk® Maya® and Autodesk® Maya LT™ 2017
+* Autodesk® Maya® and Autodesk® Maya LT™ 2018
+* Autodesk® Maya® and Autodesk® Maya LT™ LT 2017
+* Autodesk® Maya® and Autodesk® Maya LT™ LT 2018
 
-The Unity Integration for 3ds Max feature supports the following versions of 3ds Max:
+The Unity Integration for Autodesk® 3ds Max® feature supports the following versions of Autodesk® 3ds Max®:
 
-* 3ds Max 2017
-* 3ds Max 2018
+* Autodesk® 3ds Max® 2017
+* Autodesk® 3ds Max® 2018
 
 ## Known issues
 
-* When installing a new version of the FBX Exporter Package after using version 1.1.0.b1, the link between Assets and FbxPrefab components may be lost. See [Updating from 1.1.0b1](#Repairs_1_1_0b_1) for repairing instructions.
+* When installing a new version of the FBX Exporter package after using version 1.1.0.b1, the link between Assets and FbxPrefab components may be lost. See [Updating from 1.1.0b1](#Repairs_1_1_0b_1) for repairing instructions.
 
 * The FBX Exporter package does not support exporting .asset files.
 
@@ -45,7 +45,7 @@ Verify that the FBX Exporter is correctly installed by opening it (from the top 
 
 ### Updating from 1.1.0b1
 
-If your previous version of the FBX Exporter Package was 1.1.0b1, some Assets in your Project may lose their FbxPrefab components. To repair this issue, follow these steps: 
+If your previous version of the FBX Exporter package was 1.1.0b1, some Assets in your Project may lose their FbxPrefab components. To repair this issue, follow these steps: 
 
 1. If your Project Assets are serialized as Binary, select __Edit__ > __Project Settings__ > __Editor__ to view the Editor Settings. 
 
