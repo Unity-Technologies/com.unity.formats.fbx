@@ -1,3 +1,4 @@
+<a name="LinkedPrefab"></a>
 # Converting GameObjects to Linked Prefabs
 
 A Linked Prefab is a Prefab which maintains a link to an FBX file and is responsible for updating the Prefab so that it remains in sync with its source. The notable difference between a Linked Prefab and a stock Unity Prefab is that the Linked Prefab integrates changes in the hierarchy and transforms (in addition to Meshes and Materials). 
