@@ -32,20 +32,32 @@ The Unity Integration for Autodesk® 3ds Max® feature supports the following ve
 
 ## Known issues
 
-* When installing a new version of the FBX Exporter package after using version 1.1.0.b1, the link between Assets and FbxPrefab components may be lost. See [Updating from 1.1.0b1](#Repairs_1_1_0b_1) for repairing instructions.
+* When installing a new version of the FBX Exporter package after using version 1.3.0f1 or earlier, the link between Assets and FbxPrefab components may be lost. See [Updating from 1.3.0f1 or earlier](#Repairs_1_3_0f_1) for repairing instructions.
 
 * The FBX Exporter package does not support exporting .asset files.
 
-<a name="Repairs_1_1_0b_1"></a>
+<a name="Repairs_1_3_0f_1"></a>
 ## Installing the FBX Exporter
 
 To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest).
 
 Verify that the FBX Exporter is correctly installed by opening it (from the top menu: **GameObject** > **Export To FBX**).
 
-### Updating from 1.1.0b1
+### Updating from 1.3.0f1 or earlier
 
-If your previous version of the FBX Exporter package was 1.1.0b1, some Assets in your Project may lose their FbxPrefab components. To repair this issue, follow these steps: 
+If your previous version of the FBX Exporter package was version 1.3.0f1 or earlier, follow these steps for updating:
+
+Before you install the FBX Exporter Package, follow these steps (recommended):
+
+1. Back up your Project.
+
+2. Restart Unity.
+
+3. Delete the *FbxExporters* folder.
+
+4. Install the FBX Exporter from the [Package Manager](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest)
+
+Some Assets in your Project may lose their FbxPrefab components. To repair this issue, follow these steps: 
 
 1. If your Project Assets are serialized as Binary, select __Edit__ > __Project Settings__ > __Editor__ to view the Editor Settings. 
 
@@ -53,7 +65,7 @@ If your previous version of the FBX Exporter package was 1.1.0b1, some Assets in
 
 3. Before continuing, back up your Project.
 
-4. Select __Edit__ > __Project Settings__ > __Fbx Export__ to view the [Fbx Export Settings](options.html).
+4. Select __Edit__ > __Project Settings__ > __FBX Export__ to view the [FBX Export Settings](options.html).
 
   ![Run Component Updated button](images/FBXExporter_RunComponentUpdater.png)
 
