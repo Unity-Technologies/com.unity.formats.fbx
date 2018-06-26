@@ -41,7 +41,7 @@ If you enabled the __Keep Open__ option in the [Fbx Export Settings](options.htm
 
 
 
-## Manually Installing an Autodesk® Maya® or Autodesk® Maya LT™ Integration
+## Manually Installing an Autodesk® Maya®<br/>or Autodesk® Maya LT™ Integration
 
 In some cases, you have to install your integration manually. For example, you may be using an unsupported version of Autodesk® Maya® or Autodesk® Maya LT™.
 
@@ -80,7 +80,7 @@ To manually install an Autodesk® Maya® or Autodesk® Maya LT™ Integration, f
 
 
 
-## Working with Autodesk® Maya® 2017+ and Autodesk® Maya LT™ 2017+
+## Working with Autodesk® Maya® 2017+<br/>and Autodesk® Maya LT™ 2017+
 
 ### Importing from Unity
 
@@ -119,7 +119,7 @@ __File__ > __Unity__ > __Export__ exports both Models and animation contained in
 
 __File__ > __Unity__ > __Export Model Only__ exports all Models in the selected export sets, but does not export any animation.
 
-__File__ > __Unity__ > __Export Animation Only__ exports only the animation applied to the objects in the export set as well as the minimum components required for the animation (such as transforms, animated lights and cameras).
+__File__ > __Unity__ > __Export Animation Only__ exports only the animation applied to the objects in the export set as well as the minimum components required for the animation (such as transforms).
 
 > ***Note:*** If no animation file with the **@** notation has been imported, then this option has no effect. The workaround for exporting a new animation is to first import an empty FBX file with the **@** notation (*{model}@anim.fbx*), so that the export set is configured correctly.
 
@@ -127,6 +127,10 @@ In order to export objects from the desired export set, you can select one or mo
 
 If you select multiple sets or objects from multiple sets, then the FBX Exporter exports each set to its respective file defined in the attributes of the set.
 
+
+### Known Issues
+
+* Exporting animation only for animated lights and cameras is not currently supported
 
 ## Working with Autodesk® 3ds Max® 2017+
 
