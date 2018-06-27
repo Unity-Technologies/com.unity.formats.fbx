@@ -41,7 +41,7 @@ If you enabled the __Keep Open__ option in the [Fbx Export Settings](options.htm
 
 
 
-## Manually Installing an Autodesk® Maya® or Autodesk® Maya LT™ Integration
+## Manually Installing an Autodesk® Maya®<br/>or Autodesk® Maya LT™ Integration
 
 In some cases, you have to install your integration manually. For example, you may be using an unsupported version of Autodesk® Maya® or Autodesk® Maya LT™.
 
@@ -53,13 +53,13 @@ To manually install an Autodesk® Maya® or Autodesk® Maya LT™ Integration, f
 
 3. Copy the contents of *Integrations/Autodesk/maya/UnityFbxForMaya.txt* from the unzipped folder to the following file:
 
-  * On Windows:<br/>*C:\Users\{username}\Documents\maya\modules\UnityFbxForMaya.mod*
+  * On Windows:<br/>*C:\Users\\{username}\Documents\maya\modules\UnityFbxForMaya.mod*
   * On Mac:<br/>*$HOME/Library/Preferences/Autodesk/Maya/modules/UnityFbxForMaya.mod*
 
-4. In *UnityFbxForMaya.mod*, modify the following line (mel code):
+4. In *UnityFbxForMaya.mod*, modify the following line (mel code): <br/>
   ```UnityFbxForMaya {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya```
 
-  Where `{Version}` = `2.0.0` (or your version number of the FBX Exporter package) and `{UnityIntegrationsPath}` = the location where you unzipped *UnityFbxForMaya.zip* in step 1.
+  Set `{Version}` = `2.0.0` (or your version number of the FBX Exporter package) and `{UnityIntegrationsPath}` = the location where you unzipped *UnityFbxForMaya.zip* in step 1.
 
 5. Locate the following file (if it doesn't exist, create the file):
 
@@ -73,14 +73,14 @@ To manually install an Autodesk® Maya® or Autodesk® Maya LT™ Integration, f
 
   ![](images/FBXExporter_MayaAccessScriptEditor.png) 
 
-8. Run the following (mel code):
+8. Run the following (mel code): <br/>
   ```unityConfigure "{UnityProjectPath}" "{ExportSettingsPath}" "{ImportSettingsPath}" 0 0;```
 
   Where you replace `{UnityProjectPath}` with the path to your Unity Project, and  `{ExportSettingsPath}` with the path to *Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel* and `{ImportSettingsPath}` with the path to *Integrations/Autodesk/maya/scripts/unityFbxImportSettings.mel*.
 
 
 
-## Working with Autodesk® Maya® 2017+ and Autodesk® Maya LT™ 2017+
+## Working with Autodesk® Maya® 2017+<br/>and Autodesk® Maya LT™ 2017+
 
 ### Importing from Unity
 
@@ -119,7 +119,7 @@ __File__ > __Unity__ > __Export__ exports both Models and animation contained in
 
 __File__ > __Unity__ > __Export Model Only__ exports all Models in the selected export sets, but does not export any animation.
 
-__File__ > __Unity__ > __Export Animation Only__ exports only the animation applied to the objects in the export set as well as the minimum components required for the animation (such as transforms, animated lights and cameras).
+__File__ > __Unity__ > __Export Animation Only__ exports only the animation applied to the objects in the export set as well as the minimum components required for the animation (such as transforms).
 
 > ***Note:*** If no animation file with the **@** notation has been imported, then this option has no effect. The workaround for exporting a new animation is to first import an empty FBX file with the **@** notation (*{model}@anim.fbx*), so that the export set is configured correctly.
 
@@ -127,6 +127,10 @@ In order to export objects from the desired export set, you can select one or mo
 
 If you select multiple sets or objects from multiple sets, then the FBX Exporter exports each set to its respective file defined in the attributes of the set.
 
+
+### Known Issues
+
+* Exporting animation only for animated lights and cameras is not currently supported
 
 ## Working with Autodesk® 3ds Max® 2017+
 
@@ -156,7 +160,7 @@ This dummy contains the imported file’s path and filename as custom attributes
 
 ![Custom attributes on a UnityExportSet dummy](images/FBXExporter_MaxUnityExportSetCustomAttribs.png)
 
-The **@** notation (*<modelname>@<animation>.fbx*), indicates that this is an animation file belonging to the Model contained in *model.fbx*.
+The **@** notation (**modelname**@**animation**.fbx), indicates that this is an animation file belonging to the Model contained in *model.fbx*.
 
 For instance, if you import a file called *model@anim.fbx*, the export set is based on the name before the **@** symbol. Therefore, it uses the same set as *model.fbx*. 
 
