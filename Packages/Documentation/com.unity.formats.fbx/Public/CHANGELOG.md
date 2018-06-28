@@ -3,8 +3,8 @@
 RELEASE NOTES
 ## [2.0.0] - 2018-06-22
 NEW FEATURES
-* FBX Exporter is now distributed via the Package Manager
 * Added support for Physical Cameras
+* FBX Exporter is now distributed via the Package Manager
 * Now compatible with Unity 2018.2
 * The roundtrip of assets can now be started from Maya from assets that have not been exported from Unity
 * DCC integration plug-in sources have been removed from the packages folder. You can still find them in the zip file
