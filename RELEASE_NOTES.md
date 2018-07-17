@@ -1,5 +1,10 @@
 ﻿RELEASE NOTES
 
+**Version**: 1.3.1
+
+FIXES
+* FbxPrefabAutoUpdater: Fixed skinned mesh bone update breaking bone connection in Linked Prefab
+
 **Version**: 1.3.0f1
 
 NEW FEATURES
