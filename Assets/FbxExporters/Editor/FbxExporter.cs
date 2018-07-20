@@ -967,6 +967,10 @@ namespace FbxExporters
                 // Step 1: gather all the bones
                 HashSet<Transform> boneSet = new HashSet<Transform> ();
                 var s = new Stack<Transform> (bones);
+
+                // keep track of all the bones that are added that are not in the original bone list (index),
+                // and at the end remove everything that hits null
+                var potentialBones = new HashSet<Transform>();
                 var root = skinnedMesh.rootBone;
                 while (s.Count > 0) {
                     var t = s.Pop ();
@@ -977,8 +981,8 @@ namespace FbxExporters
 
                     if (t.parent == null) {
                         Debug.LogWarningFormat (
-                            "FbxExporter: {0} is a bone but not a descendant of {1}'s mesh's root bone.",
-                            t.name, skinnedMesh.name
+                            "FbxExporter: {0} is not a descendant of {1}'s mesh's root bone {2}.",
+                            t.name, skinnedMesh.name, root.name
                         );
                         continue;
                     }
@@ -993,6 +997,20 @@ namespace FbxExporters
                     // to the boneSet regardless of whether it is in the skinned mesh's bone list.
                     if (t != root && !boneSet.Contains(t.parent)) {
                         s.Push (t.parent);
+                        if (!index.ContainsKey(t.parent))
+                        {
+                            potentialBones.Add(t.parent);
+                        }
+                    }
+                }
+
+                var falseBones = new HashSet<Transform>();
+                foreach(var bone in potentialBones)
+                {
+                    if(bone.parent == null || falseBones.Contains(bone) || falseBones.Contains(bone.parent))
+                    {
+                        falseBones.Add(bone);
+                        boneSet.Remove(bone);
                     }
                 }
 
@@ -2591,7 +2609,8 @@ namespace FbxExporters
                 }
 
                 Matrix4x4 pose;
-                if (unityBone == rootBone) {
+                // if the parent of the bone is not a bone, then treat it as a root bone
+                if (unityBone == rootBone || !boneDict.ContainsKey(unityBone.parent) ) {
                     pose = (unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix * bindPose.inverse);
                 } else {
                     // get parent's bind pose

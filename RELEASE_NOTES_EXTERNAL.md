@@ -1,5 +1,10 @@
 RELEASE NOTES
 
+**Version**: 1.3.2
+
+FIXES
+* FbxExporter: Fix ArgumentNullException when exporting skinned mesh with bones that are not descendants of root bone
+
 **Version**: 1.3.1
 
 FIXES
