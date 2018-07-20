@@ -2544,7 +2544,8 @@ namespace FbxExporters
                 }
 
                 SkinnedMeshBoneInfo parentBoneInfo = null;
-                if (boneInfo != null && boneInfo.skinnedMesh.rootBone != null && unityGo.transform != boneInfo.skinnedMesh.rootBone) {
+                if (boneInfo != null && boneInfo.skinnedMesh.rootBone != null &&
+                    unityGo.transform != boneInfo.skinnedMesh.rootBone && boneInfo.boneDict.ContainsKey(unityGo.transform.parent)) {
                     parentBoneInfo = boneInfo;
                 }
 
@@ -2609,18 +2610,13 @@ namespace FbxExporters
                 }
 
                 Matrix4x4 pose;
-                // if the parent of the bone is not a bone, then treat it as a root bone
-                if (unityBone == rootBone || !boneDict.ContainsKey(unityBone.parent) ) {
-                    pose = (unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix * bindPose.inverse);
-                } else {
-                    // get parent's bind pose
-                    Matrix4x4 parentBindPose;
-                    if (!boneInfo.boneToBindPose.TryGetValue (unityBone.parent, out parentBindPose)) {
-                        parentBindPose = GetBindPose (unityBone.parent, bindPoses, boneDict, skinnedMesh);
-                        boneInfo.boneToBindPose.Add (unityBone.parent, parentBindPose);
-                    }
-                    pose = parentBindPose * bindPose.inverse;
+                // get parent's bind pose
+                Matrix4x4 parentBindPose;
+                if (!boneInfo.boneToBindPose.TryGetValue (unityBone.parent, out parentBindPose)) {
+                    parentBindPose = GetBindPose (unityBone.parent, bindPoses, boneDict, skinnedMesh);
+                    boneInfo.boneToBindPose.Add (unityBone.parent, parentBindPose);
                 }
+                pose = parentBindPose * bindPose.inverse;
 
                 FbxVector4 translation, rotation, scale;
                 GetTRSFromMatrix (pose, out translation, out rotation, out scale);
