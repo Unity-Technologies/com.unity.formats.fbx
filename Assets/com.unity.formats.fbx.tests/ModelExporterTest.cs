@@ -104,10 +104,11 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         [Test]
         public void TestBagofBones () {
         // Test exporting a skinned-mesh where not all bones are descendants of the root.
-        Assert.That (!string.IsNullOrEmpty (ModelExporter.GetVersionFromReadme ()));
-        {
-        var Bag = AddAssetToScene ("com.unity.formats.fbx.tests/Models/BagOfBones.fbx");
-        ModelExporter.ExportObject (GetRandomFbxFilePath (), Bag);
+            {
+            var bag = AddAssetToScene ("com.unity.formats.fbx.tests/Models/BagOfBones.fbx");
+            var path = GetRandomFbxFilePath ();
+            ModelExporter.ExportObject (path, bag);
+            Assert.That(path != null);
             }
         }
 
