@@ -101,15 +101,16 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             }
         }
 
-        [Test]
-        public void TestBagofBones () {
-        // Test exporting a skinned-mesh where not all bones are descendants of the root.
-            {
-            var bag = AddAssetToScene ("com.unity.formats.fbx.tests/Models/BagOfBones.fbx");
-            var path = GetRandomFbxFilePath ();
-            ModelExporter.ExportObject (path, bag);
-            Assert.That(path != null);
-            }
+        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases3")]
+        public void TestMultiRoot (string fbxPath) {
+        // Test exporting skinned meshes with various non-standard bone configurations.
+            fbxPath = FindPathInUnitTests (fbxPath);
+            Assert.That (fbxPath, Is.Not.Null);
+            Assert.That(fbxPath, Is.Not.Null);
+            var exportPath = GetRandomFbxFilePath ();
+            var character = AddAssetToScene(fbxPath);
+            ModelExporter.ExportObject (exportPath, character);
+            Assert.That(exportPath, Is.Not.Null);
         }
 
         [Test]
@@ -572,6 +573,22 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             public static System.Collections.IEnumerable TestCases2 {
                 get {
                     yield return "Models/SimpleMan/SimpleMan.fbx";
+                }
+            }
+            public static System.Collections.IEnumerable TestCases3 {
+                get {
+                    yield return "Models/MultiRootCharacters/BasicSeparateBind.fbx";
+                    yield return "Models/MultiRootCharacters/BonesParentedInMesh.fbx";
+                    yield return "Models/MultiRootCharacters/ImproperRootNaming.fbx";
+                    yield return "Models/MultiRootCharacters/LocatorsInHierachy.fbx";
+                    yield return "Models/MultiRootCharacters/LooseLocators.fbx";
+                    yield return "Models/MultiRootCharacters/LooseNulls.fbx";
+                    yield return "Models/MultiRootCharacters/LooseSkinnedJoints.fbx";
+                    yield return "Models/MultiRootCharacters/MeshesInHierarchy.fbx";
+                    yield return "Models/MultiRootCharacters/MultipleMeshesOneHierarchy.fbx";
+                    yield return "Models/MultiRootCharacters/MultipleRoots.fbx";
+                    yield return "Models/MultiRootCharacters/NullRootMultipleMeshes.fbx";
+                    yield return "Models/MultiRootCharacters/NullsInHierarchy.fbx";
                 }
             }
         }

@@ -1,33 +1,61 @@
 fileFormatVersion: 2
-guid: ac0ce14abcafbbb4694e56c7accd8c74
+guid: 11963e6bf325eb54cb59474accae7e1d
 ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
-    100000: //RootNode
-    100002: Body
-    100004: Head
-    100006: LeftMandible
-    100008: LeftWiggle
-    100010: RightMandible
-    100012: RightWiggle
-    100014: Root
-    100016: Spine
-    400000: //RootNode
-    400002: Body
-    400004: Head
-    400006: LeftMandible
-    400008: LeftWiggle
-    400010: RightMandible
-    400012: RightWiggle
-    400014: Root
-    400016: Spine
-    2100000: M_BagofBones
-    4300000: Body
+    100000: Head
+    100002: LeftElbow
+    100004: LeftFoot
+    100006: LeftHand
+    100008: LeftKnee
+    100010: LeftShoulder
+    100012: LeftThigh
+    100014: LowerBody
+    100016: //RootNode
+    100018: Neck
+    100020: Pelvis
+    100022: RightElbow
+    100024: RightFoot
+    100026: RightHand
+    100028: RightKnee
+    100030: RightShoulder
+    100032: RightThigh
+    100034: Root
+    100036: Spine1
+    100038: Spine2
+    100040: Spine3
+    100042: UpperBody
+    400000: Head
+    400002: LeftElbow
+    400004: LeftFoot
+    400006: LeftHand
+    400008: LeftKnee
+    400010: LeftShoulder
+    400012: LeftThigh
+    400014: LowerBody
+    400016: //RootNode
+    400018: Neck
+    400020: Pelvis
+    400022: RightElbow
+    400024: RightFoot
+    400026: RightHand
+    400028: RightKnee
+    400030: RightShoulder
+    400032: RightThigh
+    400034: Root
+    400036: Spine1
+    400038: Spine2
+    400040: Spine3
+    400042: UpperBody
+    2100000: phong1
+    4300000: LowerBody
+    4300002: UpperBody
     9500000: //RootNode
-    13700000: Body
+    13700000: LowerBody
+    13700002: UpperBody
   externalObjects: {}
   materials:
-    importMaterials: 1
+    importMaterials: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -83,7 +111,7 @@ ModelImporter:
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
-  importAnimation: 1
+  importAnimation: 0
   copyAvatar: 0
   humanDescription:
     serializedVersion: 2
@@ -96,8 +124,8 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    rootMotionBoneName: Root
-    rootMotionBoneRotation: {x: -0, y: -0, z: -0.7071068, w: 0.7071068}
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
