@@ -952,10 +952,9 @@ namespace FbxExporters
                     return false;
                 }
 
-                // Three steps:
+                // Two steps:
                 // 0. Set up the map from bone to index.
-                // 1. Gather complete list of bones
-                // 2. Set the transforms.
+                // 1. Set the transforms.
 
                 // Step 0: map transform to index so we can look up index by bone.
                 Dictionary<Transform, int> index = new Dictionary<Transform, int>();
@@ -963,63 +962,12 @@ namespace FbxExporters
                     Transform unityBoneTransform = bones [boneIndex];
                     index[unityBoneTransform] = boneIndex;
                 }
+                
+                skinnedMeshToBonesMap.Add (skinnedMesh, bones);
 
-                // Step 1: gather all the bones
-                HashSet<Transform> boneSet = new HashSet<Transform> ();
-                var s = new Stack<Transform> (bones);
-
-                // keep track of all the bones that are added that are not in the original bone list (index),
-                // and at the end remove everything that hits null
-                var potentialBones = new HashSet<Transform>();
-                var root = skinnedMesh.rootBone;
-                while (s.Count > 0) {
-                    var t = s.Pop ();
-
-                    if (!boneSet.Add (t)) {
-                        continue;
-                    }
-
-                    if (t.parent == null) {
-                        Debug.LogWarningFormat (
-                            "FbxExporter: {0} is not a descendant of {1}'s mesh's root bone {2}.",
-                            t.name, skinnedMesh.name, root.name
-                        );
-                        continue;
-                    }
-
-                    // Each skinned mesh in Unity has one root bone, but may have objects
-                    // between the root bone and leaf bones that are not in the bone list.
-                    // However all objects between two bones in a hierarchy should be bones
-                    // as well. 
-                    // e.g. in rootBone -> bone1 -> obj1 -> bone2, obj1 should be a bone
-                    //
-                    // Traverse from all leaf bones to the root bone adding everything in between
-                    // to the boneSet regardless of whether it is in the skinned mesh's bone list.
-                    if (t != root && !boneSet.Contains(t.parent)) {
-                        s.Push (t.parent);
-                        if (!index.ContainsKey(t.parent))
-                        {
-                            potentialBones.Add(t.parent);
-                        }
-                    }
-                }
-
-                var falseBones = new HashSet<Transform>();
-                foreach(var bone in potentialBones)
-                {
-                    if(bone.parent == null || falseBones.Contains(bone) || falseBones.Contains(bone.parent))
-                    {
-                        falseBones.Add(bone);
-                        boneSet.Remove(bone);
-                    }
-                }
-
-                var boneList = boneSet.ToArray();
-                skinnedMeshToBonesMap.Add (skinnedMesh, boneList);
-
-                // Step 2: Set transforms
+                // Step 1: Set transforms
                 var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, index);
-                foreach (var bone in boneList) {
+                foreach (var bone in bones) {
                     var fbxBone = MapUnityObjectToFbxNode [bone.gameObject];
                     ExportBoneTransform (fbxBone, fbxScene, bone, boneInfo);
                 }
@@ -1129,6 +1077,7 @@ namespace FbxExporters
                 if (!skinnedMeshToBonesMap.TryGetValue (skinnedMesh, out bones)) {
                     return false;
                 }
+
                 for (int i = 0; i < bones.Length; i++) {
                     FbxNode fbxBoneNode = MapUnityObjectToFbxNode [bones[i].gameObject];
 
