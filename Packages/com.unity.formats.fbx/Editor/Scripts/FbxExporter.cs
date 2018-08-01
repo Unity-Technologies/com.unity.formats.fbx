@@ -3418,12 +3418,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     IEnumerable<GameObject> revisedExportSet = null;
 
                     int count = 0;
+                    int rootObjCount = 0; // # of objects to export that are root objects
+
                     if(animOnly){
                         count = GetAnimOnlyHierarchyCount(exportData);
                         revisedExportSet = from entry in exportData select entry.Key;
+                        rootObjCount = exportData.Keys.Count;
                     } else {
                         var revisedGOSet = RemoveRedundantObjects(unityExportSet);
                         count = GetHierarchyCount (revisedGOSet);
+                        rootObjCount = revisedGOSet.Count;
                         revisedExportSet = revisedGOSet;
                     }
 
@@ -3438,7 +3442,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     switch(ExportOptions.ObjectPosition){
                     case ExportSettings.ObjectPosition.LocalCentered:
                         // one object to export -> move to (0,0,0)
-                        if(count == 1){
+                        if(rootObjCount == 1){
                             var tempList = new List<GameObject>(revisedExportSet);
                             center = tempList[0].transform.position;
                             break;
