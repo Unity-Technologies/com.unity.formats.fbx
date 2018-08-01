@@ -984,10 +984,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            // Three steps:
+            // Two steps:
             // 0. Set up the map from bone to index.
-            // 1. Gather complete list of bones
-            // 2. Set the transforms.
+            // 1. Set the transforms.
 
             // Step 0: map transform to index so we can look up index by bone.
             Dictionary<Transform, int> index = new Dictionary<Transform, int>();
@@ -996,44 +995,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 index[unityBoneTransform] = boneIndex;
             }
 
-            // Step 1: gather all the bones
-            HashSet<Transform> boneSet = new HashSet<Transform> ();
-            var s = new Stack<Transform> (bones);
-            var root = skinnedMesh.rootBone;
-            while (s.Count > 0) {
-                var t = s.Pop ();
+            skinnedMeshToBonesMap.Add (skinnedMesh, bones);
 
-                if (!boneSet.Add (t)) {
-                    continue;
-                }
-
-                if (t.parent == null) {
-                    Debug.LogWarningFormat (
-                        "FbxExporter: {0} is a bone but not a descendant of {1}'s mesh's root bone.",
-                        t.name, skinnedMesh.name
-                    );
-                    continue;
-                }
-
-                // Each skinned mesh in Unity has one root bone, but may have objects
-                // between the root bone and leaf bones that are not in the bone list.
-                // However all objects between two bones in a hierarchy should be bones
-                // as well. 
-                // e.g. in rootBone -> bone1 -> obj1 -> bone2, obj1 should be a bone
-                //
-                // Traverse from all leaf bones to the root bone adding everything in between
-                // to the boneSet regardless of whether it is in the skinned mesh's bone list.
-                if (t != root && !boneSet.Contains(t.parent)) {
-                    s.Push (t.parent);
-                }
-            }
-
-            var boneList = boneSet.ToArray();
-            skinnedMeshToBonesMap.Add (skinnedMesh, boneList);
-
-            // Step 2: Set transforms
+            // Step 1: Set transforms
             var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, index);
-            foreach (var bone in boneList) {
+            foreach (var bone in bones) {
                 var fbxBone = MapUnityObjectToFbxNode [bone.gameObject];
                 ExportBoneTransform (fbxBone, fbxScene, bone, boneInfo);
             }
@@ -2826,7 +2792,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             SkinnedMeshBoneInfo parentBoneInfo = null;
-            if (boneInfo != null && boneInfo.skinnedMesh.rootBone != null && unityGo.transform != boneInfo.skinnedMesh.rootBone) {
+            if (boneInfo != null && boneInfo.skinnedMesh.rootBone != null &&
+                    unityGo.transform != boneInfo.skinnedMesh.rootBone && boneInfo.boneDict.ContainsKey(unityGo.transform.parent))
+            {
                 parentBoneInfo = boneInfo;
             }
 
@@ -2891,17 +2859,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             Matrix4x4 pose;
-            if (unityBone == rootBone) {
-                pose = (unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix * bindPose.inverse);
-            } else {
-                // get parent's bind pose
-                Matrix4x4 parentBindPose;
-                if (!boneInfo.boneToBindPose.TryGetValue (unityBone.parent, out parentBindPose)) {
-                    parentBindPose = GetBindPose (unityBone.parent, bindPoses, boneDict, skinnedMesh);
-                    boneInfo.boneToBindPose.Add (unityBone.parent, parentBindPose);
-                }
-                pose = parentBindPose * bindPose.inverse;
+            // get parent's bind pose
+            Matrix4x4 parentBindPose;
+            if (!boneInfo.boneToBindPose.TryGetValue (unityBone.parent, out parentBindPose)) {
+                parentBindPose = GetBindPose (unityBone.parent, bindPoses, boneDict, skinnedMesh);
+                boneInfo.boneToBindPose.Add (unityBone.parent, parentBindPose);
             }
+            pose = parentBindPose * bindPose.inverse;
 
             FbxVector4 translation, rotation, scale;
             GetTRSFromMatrix (pose, out translation, out rotation, out scale);
