@@ -553,29 +553,27 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         {
             public static System.Collections.IEnumerable SkinnedMeshCases {
                 get {
-                    // Basic Rig with one mesh and one standart hierarchy
+                    // Basic Rig with one mesh and one standard hierarchy
                     yield return "Models/MultiRootCharacters/BasicSeparateBind.fbx";
-                    // Basic Rig with one mesh and one standart hierarchy, with the Mesh parenting the bone structure
+                    // Basic Rig with one mesh and one standard hierarchy, with the Mesh parenting the bone structure
                     yield return "Models/MultiRootCharacters/BonesParentedInMesh.fbx";
                     // Basic Rig with random Alphanumeric bone names and a bone named "Root" in the middle of the spine
                     yield return "Models/MultiRootCharacters/ImproperRootNaming.fbx";
-                    // Locators in Hierarchy that act as Handles for some of the bones
+                    // Thigh-bone level Locators in Hierarchy that act as Handles for some of the bones
                     yield return "Models/MultiRootCharacters/LocatorsInHierachy.fbx";
-                    // Loose Locators included in the fbx.
+                    // Root-Level Locators included in the fbx.
                     yield return "Models/MultiRootCharacters/LooseLocators.fbx";
-                    // Loose Null Objects included in the fbx. 
+                    // Root-Level Null Objects included in the fbx. 
                     yield return "Models/MultiRootCharacters/LooseNulls.fbx";
-                    // Loose Locators included in the fbx.
-                    yield return "Models/MultiRootCharacters/LooseSkinnedJoints.fbx";
                     // Basic Rig with additional floating joints independant in hierarchy and skinned to the mesh.
+                    yield return "Models/MultiRootCharacters/LooseSkinnedJoints.fbx";
+                    // Unskinned meshes in hierarchy - eg. Sword & Shield as children of hand nodes
                     yield return "Models/MultiRootCharacters/MeshesInHierarchy.fbx";
-                    // Rig with one standart hierarchy but skinned to multiple meshes at once
-                    yield return "Models/MultiRootCharacters/MultipleMeshesOneHierarchy.fbx";
                     // Rig with one mesh but two bone Hierarchies
                     yield return "Models/MultiRootCharacters/MultipleRoots.fbx";
-                    // Rig with one standart hierarchy but skinned to multiple meshes at once, All parented under a Null Object
+                    // Rig with one standard hierarchy but skinned to multiple meshes at once, All parented under a Null Object
                     yield return "Models/MultiRootCharacters/NullRootMultipleMeshes.fbx";
-                    // Null Objects in Hierarchy that act as Handles for some of the bones
+                    // Thigh-bone level Null Objects in Hierarchy that act as Handles for some of the bones
                     yield return "Models/MultiRootCharacters/NullsInHierarchy.fbx";
                     // Characters from the asset store
                     yield return "Models/SimpleMan/SimpleMan.fbx";
