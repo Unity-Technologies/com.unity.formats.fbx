@@ -101,16 +101,6 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             }
         }
 
-        // Test exporting skinned meshes with various non-standard bone configurations.
-        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases3")]
-        public void TestMultiRoot (string fbxPath) {
-            fbxPath = FindPathInUnitTests (fbxPath);
-            Assert.That (fbxPath, Is.Not.Null);
-            var character = AddAssetToScene(fbxPath);
-            var exportedfbx = ModelExporter.ExportObject(GetRandomFbxFilePath(), character);
-            Assert.That (exportedfbx, Is.Not.Null);
-        }
-
         [Test]
         public void TestFindCenter ()
         {
@@ -561,19 +551,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
         public class SkinnedMeshTestDataClass
         {
-            public static System.Collections.IEnumerable TestCases1 {
-                get {
-                    // for now use this cowboy taken from the asset store as the test file
-                    // TODO: find a better/simpler test file
-                    yield return "Models/Cowboy/cowboyMidPoly(riged).fbx";
-                }
-            }
-            public static System.Collections.IEnumerable TestCases2 {
-                get {
-                    yield return "Models/SimpleMan/SimpleMan.fbx";
-                }
-            }
-            public static System.Collections.IEnumerable TestCases3 {
+            public static System.Collections.IEnumerable SkinnedMeshCases {
                 get {
                     yield return "Models/MultiRootCharacters/BasicSeparateBind.fbx";
                     yield return "Models/MultiRootCharacters/BonesParentedInMesh.fbx";
@@ -587,12 +565,14 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                     yield return "Models/MultiRootCharacters/MultipleRoots.fbx";
                     yield return "Models/MultiRootCharacters/NullRootMultipleMeshes.fbx";
                     yield return "Models/MultiRootCharacters/NullsInHierarchy.fbx";
+                    yield return "Models/SimpleMan/SimpleMan.fbx";
+                    yield return "Models/Cowboy/cowboyMidPoly(riged).fbx";
                 }
             }
         }
 
-        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases3")]
-        public void TestSkinnedMeshExport(string fbxPath){
+        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "SkinnedMeshCases")]
+        public void TestSkinnedMeshes (string fbxPath) {
             fbxPath = FindPathInUnitTests (fbxPath);
             Assert.That (fbxPath, Is.Not.Null);
 
@@ -652,23 +632,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 }
             }
 
-            // TODO: find a way to compare bone weights.
-            //       The boneweights are by vertex, and duplicate vertices
-            //       are removed on export so the lists are not necessarily
-            //       the same length or order.
-            var origWeights = origMesh.boneWeights;
-            Assert.IsNotNull (origWeights);
-            var expWeights = exportedMesh.boneWeights;
-            Assert.IsNotNull (expWeights);
-        }
-
-        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases3")]
-        public void TestBoneWeightExport(string fbxPath){
-            fbxPath = FindPathInUnitTests (fbxPath);
-            Assert.That (fbxPath, Is.Not.Null);
-
-            SkinnedMeshRenderer originalSkinnedMesh, exportedSkinnedMesh;
-            ExportSkinnedMesh (fbxPath, out originalSkinnedMesh, out exportedSkinnedMesh);
+            // Test Bone Weights
 
             var origVerts = originalSkinnedMesh.sharedMesh.vertices;
             Assert.That (origVerts, Is.Not.Null);
@@ -724,7 +688,6 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             }
             Debug.LogWarningFormat ("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
         }
-
 
         public class Vector3Comparer : IComparer<Vector3>
         {
