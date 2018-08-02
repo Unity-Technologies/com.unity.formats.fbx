@@ -762,13 +762,15 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "ColorBlendShapeCases")]
         public void TestBlendShapeColor(string fbxPath)
         {
-
+            fbxPath = FindPathInUnitTests (fbxPath);
+            Assert.That (fbxPath, Is.Not.Null);
         }
 
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "VertexNormalBlendShapeCases")]
         public void TestBlendShapeVertexNormals(string fbxPath)
         {
-
+            fbxPath = FindPathInUnitTests (fbxPath);
+            Assert.That (fbxPath, Is.Not.Null);
         }
 
         [Test]
