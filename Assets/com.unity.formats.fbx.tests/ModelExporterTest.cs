@@ -759,6 +759,18 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             }
         }
 
+        [Test, TestCaseSource(typeof(AnimationTestDataClass), "ColorBlendShapeCases")]
+        public void TestBlendShapeColor(string fbxPath)
+        {
+
+        }
+
+        [Test, TestCaseSource(typeof(AnimationTestDataClass), "VertexNormalBlendShapeCases")]
+        public void TestBlendShapeVertexNormals(string fbxPath)
+        {
+
+        }
+
         [Test]
         public void LODExportTest(){
             // Create the following test hierarchy:

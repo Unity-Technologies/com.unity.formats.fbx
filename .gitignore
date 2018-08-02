@@ -9,6 +9,7 @@
 [Oo]ut/
 [Bb]in/
 [Dd]ebug/
+.vscode/
 
 [Aa]ssets/FbxExporters/*.zip
 

@@ -80,8 +80,20 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
         public static IEnumerable BlendShapeTestCases {
             get {
-                yield return "Models/blendshape.fbx";
-                yield return "Models/blendshape_with_skinning.fbx";
+                yield return "Models/Blendshapes/blendshape.fbx";
+                yield return "Models/Blendshapes/blendshape_with_skinning.fbx";
+            }
+        }
+
+        public static IEnumerable ColorBlendShapeCases {
+            get {
+                yield return "Models/Blendshapes/BlendShape_Color.fbx";
+            }
+        }
+
+        public static IEnumerable VertexNormalBlendShapeCases {
+            get {
+                yield return "Models/Blendshapes/Blendshape_VertexNormal.fbx";
             }
         }
 
