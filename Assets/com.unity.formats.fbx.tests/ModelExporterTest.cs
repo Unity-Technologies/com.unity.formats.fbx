@@ -101,16 +101,14 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             }
         }
 
+        // Test exporting skinned meshes with various non-standard bone configurations.
         [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases3")]
         public void TestMultiRoot (string fbxPath) {
-        // Test exporting skinned meshes with various non-standard bone configurations.
             fbxPath = FindPathInUnitTests (fbxPath);
             Assert.That (fbxPath, Is.Not.Null);
-            Assert.That(fbxPath, Is.Not.Null);
-            var exportPath = GetRandomFbxFilePath ();
             var character = AddAssetToScene(fbxPath);
-            ModelExporter.ExportObject (exportPath, character);
-            Assert.That(exportPath, Is.Not.Null);
+            var exportedfbx = ModelExporter.ExportObject(GetRandomFbxFilePath(), character);
+            Assert.That (exportedfbx, Is.Not.Null);
         }
 
         [Test]
@@ -593,7 +591,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             }
         }
 
-        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases1")]
+        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases3")]
         public void TestSkinnedMeshExport(string fbxPath){
             fbxPath = FindPathInUnitTests (fbxPath);
             Assert.That (fbxPath, Is.Not.Null);
@@ -664,7 +662,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             Assert.IsNotNull (expWeights);
         }
 
-        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases2")]
+        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases3")]
         public void TestBoneWeightExport(string fbxPath){
             fbxPath = FindPathInUnitTests (fbxPath);
             Assert.That (fbxPath, Is.Not.Null);
