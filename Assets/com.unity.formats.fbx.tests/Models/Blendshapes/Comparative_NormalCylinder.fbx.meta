@@ -4,14 +4,23 @@ ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
     100000: //RootNode
+    100002: BlendShapeTower
+    100004: BlendShapeTower_Normal
     400000: //RootNode
+    400002: BlendShapeTower
+    400004: BlendShapeTower_Normal
     2100000: phong1
     2300000: //RootNode
+    2300002: BlendShapeTower
+    2300004: BlendShapeTower_Normal
     3300000: //RootNode
+    3300002: BlendShapeTower
+    3300004: BlendShapeTower_Normal
     4300000: BlendShapeTower_Normal
+    4300002: BlendShapeTower
   externalObjects: {}
   materials:
-    importMaterials: 1
+    importMaterials: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1

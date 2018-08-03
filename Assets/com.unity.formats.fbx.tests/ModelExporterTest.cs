@@ -1,5 +1,6 @@
 //#define DEBUG_UNITTEST
 using UnityEngine;
+using UnityEditor;
 using NUnit.Framework;
 using System.Collections.Generic;
 using Autodesk.Fbx;
@@ -765,16 +766,31 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             // Load the case blendshape fbx into the scene and turn it's blend value to 100
             fbxPath = FindPathInUnitTests (fbxPath);
             Assert.That (fbxPath, Is.Not.Null);
+            var blendInstance = (GameObject) Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath));
+            Assert.IsNotNull(blendInstance);
+            blendInstance.GetComponent<SkinnedMeshRenderer>().SetBlendShapeWeight(0,100f);
 
             // Load the comparative fbx that we can compare our mesh to
-            var comparativefbx = FindPathInUnitTests ("Models/BlendShapes/Comparative_VertexColorCylinder.fbx");
-            
-            // List the vertices of both meshes and compare their vertex colors
+            var comparativeFbxPath = FindPathInUnitTests ("Models/BlendShapes/Comparative_VertexColorCylinder.fbx");
+            var comparativeInstance = (GameObject) Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(comparativeFbxPath));
+            Assert.IsNotNull(comparativeInstance);
 
-            /*  If you can indeed import blendshapes containing complex information; try and see if the fbxexporter can handle a roundtrip of it.
-            SkinnedMeshRenderer originalSMR, exportedSMR;
-            ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
-            */  
+            // List the vertices of both meshes and compare their vertex colors
+            Vector3[] blendVertices = blendInstance.GetComponent<SkinnedMeshRenderer>().sharedMesh.vertices;
+            Vector3[] comparativeVertices = comparativeInstance.GetComponent<MeshFilter>().sharedMesh.vertices;
+            Assert.AreEqual(blendVertices.Length, comparativeVertices.Length);
+
+            Color[] blendColors = blendInstance.GetComponent<SkinnedMeshRenderer>().sharedMesh.colors;
+            Color[] comparativeColors = comparativeInstance.GetComponent<MeshFilter>().sharedMesh.colors;
+            Assert.AreEqual(blendColors.Length, comparativeColors.Length);
+
+            // The test fails here - it wont when full blendshape support will be implemented
+            for(int colorIndex = 0; colorIndex <= blendColors.Length; colorIndex++)
+            {
+             Assert.AreEqual(blendColors[colorIndex], comparativeColors[colorIndex]);
+            }
+
+            // TODO - If unity can at this point import blendshape vertex colors, can the FBXExporter now roundtrip an asset of the sort? Could be a separate test.
         }
 
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "VertexNormalBlendShapeCases")]
@@ -783,16 +799,33 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             // Load the case blendshape fbx into the scene and turn it's blend value to 100
             fbxPath = FindPathInUnitTests (fbxPath);
             Assert.That (fbxPath, Is.Not.Null);
+            var blendInstance = (GameObject) Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath));
+            Assert.IsNotNull(blendInstance);
+            blendInstance.GetComponent<SkinnedMeshRenderer>().SetBlendShapeWeight(0,100f);
 
             // Load the comparative fbx that we can compare our mesh to
-            var comparativefbx = FindPathInUnitTests ("Models/BlendShapes/Comparative_NormalCylinder.fbx");
+            var comparativeFbxPath = FindPathInUnitTests ("Models/BlendShapes/Comparative_NormalCylinder.fbx");
+            var comparativeInstance = (GameObject) Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(comparativeFbxPath));
+            Assert.IsNotNull(comparativeInstance);
 
-            // List the vertices of both meshes and compare their vertex normal angles
+            // List the vertices of both meshes and compare their vertex normals
+            Vector3[] blendVertices = blendInstance.GetComponent<SkinnedMeshRenderer>().sharedMesh.vertices;
+            Vector3[] comparativeVertices = comparativeInstance.GetComponent<MeshFilter>().sharedMesh.vertices;
+            Debug.Log(blendVertices.Length);
+            Debug.Log(comparativeVertices.Length);
+            Assert.AreEqual(blendVertices.Length, comparativeVertices.Length);
 
-            /*  If you can indeed import blendshapes containing complex information; try and see if the fbxexporter can handle a roundtrip of it.
-            SkinnedMeshRenderer originalSMR, exportedSMR;
-            ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
-            */  
+            Vector3[] blendNormals = blendInstance.GetComponent<SkinnedMeshRenderer>().sharedMesh.normals;
+            Vector3[] comparativeNormals = comparativeInstance.GetComponent<MeshFilter>().sharedMesh.normals;
+            Assert.AreEqual(blendNormals.Length, comparativeNormals.Length);
+
+            // The test fails here - it wont when full blendshape support will be implemented
+            for(int colorIndex = 0; colorIndex <= blendNormals.Length; colorIndex++)
+            {
+             Assert.AreEqual(blendNormals[colorIndex], comparativeNormals[colorIndex]);
+            }
+
+            // TODO - If unity can at this point import blendshape vertex normals, can the FBXExporter now roundtrip an asset of the sort? Could be a separate test. 
         }
 
         [Test]
