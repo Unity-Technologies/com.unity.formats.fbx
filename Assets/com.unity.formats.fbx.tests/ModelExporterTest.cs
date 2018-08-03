@@ -557,8 +557,6 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                     yield return "Models/MultiRootCharacters/BasicSeparateBind.fbx";
                     // Basic Rig with one mesh and one standard hierarchy, with the Mesh parenting the bone structure
                     yield return "Models/MultiRootCharacters/BonesParentedInMesh.fbx";
-                    // Basic Rig with random Alphanumeric bone names and a bone named "Root" in the middle of the spine
-                    yield return "Models/MultiRootCharacters/ImproperRootNaming.fbx";
                     // Thigh-bone level Locators in Hierarchy that act as Handles for some of the bones
                     yield return "Models/MultiRootCharacters/LocatorsInHierachy.fbx";
                     // Root-Level Locators included in the fbx.
