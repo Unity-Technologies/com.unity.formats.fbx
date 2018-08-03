@@ -776,11 +776,13 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             Assert.IsNotNull(comparativeInstance);
 
             // List the vertices of both meshes and compare their vertex colors
-            Vector3[] blendVertices = blendInstance.GetComponent<SkinnedMeshRenderer>().sharedMesh.vertices;
+            Mesh bakedVertices = new Mesh();
+            blendInstance.GetComponent<SkinnedMeshRenderer>().BakeMesh(bakedVertices);
+            Vector3[] blendVertices = bakedVertices.vertices;
             Vector3[] comparativeVertices = comparativeInstance.GetComponent<MeshFilter>().sharedMesh.vertices;
             Assert.AreEqual(blendVertices.Length, comparativeVertices.Length);
 
-            Color[] blendColors = blendInstance.GetComponent<SkinnedMeshRenderer>().sharedMesh.colors;
+            Color[] blendColors = bakedVertices.colors;
             Color[] comparativeColors = comparativeInstance.GetComponent<MeshFilter>().sharedMesh.colors;
             Assert.AreEqual(blendColors.Length, comparativeColors.Length);
 
@@ -809,13 +811,15 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             Assert.IsNotNull(comparativeInstance);
 
             // List the vertices of both meshes and compare their vertex normals
-            Vector3[] blendVertices = blendInstance.GetComponent<SkinnedMeshRenderer>().sharedMesh.vertices;
+            Mesh bakedVertices = new Mesh();
+            blendInstance.GetComponent<SkinnedMeshRenderer>().BakeMesh(bakedVertices);
+            Vector3[] blendVertices = bakedVertices.vertices;
             Vector3[] comparativeVertices = comparativeInstance.GetComponent<MeshFilter>().sharedMesh.vertices;
             Debug.Log(blendVertices.Length);
             Debug.Log(comparativeVertices.Length);
             Assert.AreEqual(blendVertices.Length, comparativeVertices.Length);
 
-            Vector3[] blendNormals = blendInstance.GetComponent<SkinnedMeshRenderer>().sharedMesh.normals;
+            Vector3[] blendNormals = bakedVertices.normals;
             Vector3[] comparativeNormals = comparativeInstance.GetComponent<MeshFilter>().sharedMesh.normals;
             Assert.AreEqual(blendNormals.Length, comparativeNormals.Length);
 
