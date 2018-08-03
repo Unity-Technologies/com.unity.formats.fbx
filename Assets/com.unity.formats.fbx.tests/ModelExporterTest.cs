@@ -762,15 +762,37 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "ColorBlendShapeCases")]
         public void TestBlendShapeColor(string fbxPath)
         {
+            // Load the case blendshape fbx into the scene and turn it's blend value to 100
             fbxPath = FindPathInUnitTests (fbxPath);
             Assert.That (fbxPath, Is.Not.Null);
+
+            // Load the comparative fbx that we can compare our mesh to
+            var comparativefbx = FindPathInUnitTests ("Models/BlendShapes/Comparative_VertexColorCylinder.fbx");
+            
+            // List the vertices of both meshes and compare their vertex colors
+
+            /*  If you can indeed import blendshapes containing complex information; try and see if the fbxexporter can handle a roundtrip of it.
+            SkinnedMeshRenderer originalSMR, exportedSMR;
+            ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
+            */  
         }
 
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "VertexNormalBlendShapeCases")]
         public void TestBlendShapeVertexNormals(string fbxPath)
         {
+            // Load the case blendshape fbx into the scene and turn it's blend value to 100
             fbxPath = FindPathInUnitTests (fbxPath);
             Assert.That (fbxPath, Is.Not.Null);
+
+            // Load the comparative fbx that we can compare our mesh to
+            var comparativefbx = FindPathInUnitTests ("Models/BlendShapes/Comparative_NormalCylinder.fbx");
+
+            // List the vertices of both meshes and compare their vertex normal angles
+
+            /*  If you can indeed import blendshapes containing complex information; try and see if the fbxexporter can handle a roundtrip of it.
+            SkinnedMeshRenderer originalSMR, exportedSMR;
+            ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
+            */  
         }
 
         [Test]
