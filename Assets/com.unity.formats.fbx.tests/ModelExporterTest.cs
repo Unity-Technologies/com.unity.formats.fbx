@@ -551,22 +551,37 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
 
         public class SkinnedMeshTestDataClass
         {
-            public static System.Collections.IEnumerable TestCases1 {
+            public static System.Collections.IEnumerable SkinnedMeshCases {
                 get {
-                    // for now use this cowboy taken from the asset store as the test file
-                    // TODO: find a better/simpler test file
-                    yield return "Models/Cowboy/cowboyMidPoly(riged).fbx";
-                }
-            }
-            public static System.Collections.IEnumerable TestCases2 {
-                get {
+                    // Basic Rig with one mesh and one standard hierarchy
+                    yield return "Models/MultiRootCharacters/BasicSeparateBind.fbx";
+                    // Basic Rig with one mesh and one standard hierarchy, with the Mesh parenting the bone structure
+                    yield return "Models/MultiRootCharacters/BonesParentedInMesh.fbx";
+                    // Thigh-bone level Locators in Hierarchy that act as Handles for some of the bones
+                    yield return "Models/MultiRootCharacters/LocatorsInHierachy.fbx";
+                    // Root-Level Locators included in the fbx.
+                    yield return "Models/MultiRootCharacters/LooseLocators.fbx";
+                    // Root-Level Null Objects included in the fbx. 
+                    yield return "Models/MultiRootCharacters/LooseNulls.fbx";
+                    // Basic Rig with additional floating joints independant in hierarchy and skinned to the mesh.
+                    yield return "Models/MultiRootCharacters/LooseSkinnedJoints.fbx";
+                    // Unskinned meshes in hierarchy - eg. Sword & Shield as children of hand nodes
+                    yield return "Models/MultiRootCharacters/MeshesInHierarchy.fbx";
+                    // Rig with one mesh but two bone Hierarchies
+                    yield return "Models/MultiRootCharacters/MultipleRoots.fbx";
+                    // Rig with one standard hierarchy but skinned to multiple meshes at once, All parented under a Null Object
+                    yield return "Models/MultiRootCharacters/NullRootMultipleMeshes.fbx";
+                    // Thigh-bone level Null Objects in Hierarchy that act as Handles for some of the bones
+                    yield return "Models/MultiRootCharacters/NullsInHierarchy.fbx";
+                    // Characters from the asset store
                     yield return "Models/SimpleMan/SimpleMan.fbx";
+                    yield return "Models/Cowboy/cowboyMidPoly(riged).fbx";
                 }
             }
         }
 
-        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases1")]
-        public void TestSkinnedMeshExport(string fbxPath){
+        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "SkinnedMeshCases")]
+        public void TestSkinnedMeshes (string fbxPath) {
             fbxPath = FindPathInUnitTests (fbxPath);
             Assert.That (fbxPath, Is.Not.Null);
 
@@ -626,23 +641,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 }
             }
 
-            // TODO: find a way to compare bone weights.
-            //       The boneweights are by vertex, and duplicate vertices
-            //       are removed on export so the lists are not necessarily
-            //       the same length or order.
-            var origWeights = origMesh.boneWeights;
-            Assert.IsNotNull (origWeights);
-            var expWeights = exportedMesh.boneWeights;
-            Assert.IsNotNull (expWeights);
-        }
-
-        [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "TestCases2")]
-        public void TestBoneWeightExport(string fbxPath){
-            fbxPath = FindPathInUnitTests (fbxPath);
-            Assert.That (fbxPath, Is.Not.Null);
-
-            SkinnedMeshRenderer originalSkinnedMesh, exportedSkinnedMesh;
-            ExportSkinnedMesh (fbxPath, out originalSkinnedMesh, out exportedSkinnedMesh);
+            // Test Bone Weights
 
             var origVerts = originalSkinnedMesh.sharedMesh.vertices;
             Assert.That (origVerts, Is.Not.Null);
@@ -698,7 +697,6 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             }
             Debug.LogWarningFormat ("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
         }
-
 
         public class Vector3Comparer : IComparer<Vector3>
         {
