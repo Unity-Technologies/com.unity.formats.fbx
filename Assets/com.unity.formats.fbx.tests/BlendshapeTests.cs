@@ -116,7 +116,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests {
 		}
 
 		[Test, TestCaseSource (typeof (AnimationTestDataClass), "ColorBlendShapeCases")]
-		public void TestBlendShapeColor (string fbxPath) {
+		public void TestGetSetCompareBlendshapeColors (string fbxPath) {
 			var blendinstance = InitBlendShape (fbxPath);
 			var comparativeInstance = InitComparativeInstance ("Models/BlendShapes/Comparative_VertexColorCylinder.fbx");
 			var blendVertices = BakeBlendshape (blendinstance);
@@ -134,7 +134,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests {
 		}
 
 		[Test, TestCaseSource (typeof (AnimationTestDataClass), "VertexNormalBlendShapeCases")]
-		public void TestBlendShapeVertexNormals (string fbxPath) {
+		public void TestGetSetCompareBlendshapeNormals (string fbxPath) {
 			var blendinstance = InitBlendShape (fbxPath);
 			var comparativeInstance = InitComparativeInstance ("Models/BlendShapes/Comparative_NormalCylinder.fbx");
 			var blendVertices = BakeBlendshape (blendinstance);
@@ -150,5 +150,37 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests {
 			}
 			// TODO - Uni-55429 - If unity can at this point import blendshape vertex normals, can the FBXExporter now roundtrip an asset of the sort? Could be a separate test. 
 		}
+
+		[Test, TestCaseSource (typeof (AnimationTestDataClass), "VertexNormalBlendShapeCases")]
+		public void TestGetSetCompareBlendshapeTangents (string fbxPath) {
+			var blendinstance = InitBlendShape (fbxPath);
+			var comparativeInstance = InitComparativeInstance ("Models/BlendShapes/Comparative_NormalCylinder.fbx");
+			var blendVertices = BakeBlendshape (blendinstance);
+
+			// Compare vertex normal from the blendshape mesh to the comparative fbx - The test fails here, it wont when full blendshape support will be implemented
+			Vector3[] comparativeVertices = comparativeInstance.GetComponent<MeshFilter> ().sharedMesh.vertices;
+			Assert.AreEqual (blendVertices.vertices.Length, comparativeVertices.Length);
+
+			Vector4[] blendTangents = blendVertices.tangents;
+			Vector4[] comparativeTangents = comparativeInstance.GetComponent<MeshFilter> ().sharedMesh.tangents;
+			Assert.AreEqual (blendTangents.Length, comparativeTangents.Length);
+			for (int tangentIndex = 0; tangentIndex <= blendTangents.Length; tangentIndex++) {
+				Assert.AreEqual (blendTangents[tangentIndex], comparativeTangents[tangentIndex]);
+			}
+			// TODO - Uni-55429 - If unity can at this point import blendshape vertex normals, can the FBXExporter now roundtrip an asset of the sort? Could be a separate test. 
+		}
+
+		[Test, TestCaseSource (typeof (AnimationTestDataClass), "GenericBlendShapeCases")]
+		public void TestGetSetCompareBlendshape (string fbxPath) {
+			var blendinstance = InitBlendShape (fbxPath);
+			var comparativeInstance = InitComparativeInstance ("Models/BlendShapes/Comparative_Blendshape.fbx");
+			var blendVertices = BakeBlendshape (blendinstance);
+			Vector3[] comparativeVertices = comparativeInstance.GetComponent<MeshFilter> ().sharedMesh.vertices;
+			Assert.AreEqual (blendVertices.vertices.Length, comparativeVertices.Length);
+			for (int normalIndex = 0; normalIndex < comparativeVertices.Length; normalIndex++) {
+				Assert.AreEqual (comparativeVertices[normalIndex].magnitude, blendVertices.vertices[normalIndex].magnitude);
+			}
+		}
+
 	}
 }
