@@ -3417,8 +3417,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     int exportProgress = 0;
                     IEnumerable<GameObject> revisedExportSet = null;
 
+                    // Total # of objects to be exported
+                    // Used by progress bar to show how many objects will be exported in total
+                    // i.e. exporting x/count... 
                     int count = 0;
-                    int rootObjCount = 0; // # of objects to export that are root objects
+
+                    // number of object hierarchies being exported.
+                    // Used to figure out exported transforms for root objects.
+                    // i.e. if we are exporting a single hierarchy at local position, then it's root is set to zero,
+                    // but if we are exporting multiple hierarchies at local position, then each hierarchy will be recentered according
+                    // to the center of the bounding box.
+                    int rootObjCount = 0; 
 
                     if(animOnly){
                         count = GetAnimOnlyHierarchyCount(exportData);
