@@ -1,5 +1,7 @@
 ﻿//#define DEBUG_UNITTEST
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Fbx;
 using NUnit.Framework;
 using UnityEditor;
@@ -8,21 +10,12 @@ using UnityEngine.Formats.Fbx.Exporter;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests {
 
-	public class BlendshapeTests : ExporterTestBase {
+	public class BlendshapeTests : ModelExporterTest {
 		[TearDown]
 		public override void Term () {
 #if (!DEBUG_UNITTEST)
 			base.Term ();
 #endif
-		}
-
-		public class Vector3Comparer : IComparer<Vector3> {
-			public int Compare (Vector3 a, Vector3 b) {
-				Assert.That (a.x, Is.EqualTo (b.x).Within (0.00001f));
-				Assert.That (a.y, Is.EqualTo (b.y).Within (0.00001f));
-				Assert.That (a.z, Is.EqualTo (b.z).Within (0.00001f));
-				return 0; // we're almost equal
-			}
 		}
 
 		private void ExportSkinnedMesh (string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh) {
@@ -108,17 +101,17 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests {
 			return comparativeInstance;
 		}
 
-		// Bakes the 100% blend blendshape into a mesh so that we can compare it to our comparative fbx cylinders.
+		// Bakes the 100% blend blendshape into a mesh so that we can compare it to our comparative fbx cylinders, otherwise it only compares basic sharedMeshes.
 		public Mesh BakeBlendshape (GameObject blendinstance) {
 			Mesh bakedShape = new Mesh ();
 			blendinstance.GetComponent<SkinnedMeshRenderer> ().BakeMesh (bakedShape);
 			return bakedShape;
 		}
 
-		[Test, TestCaseSource (typeof (AnimationTestDataClass), "ColorBlendShapeCases")]
-		public void TestGetSetCompareBlendshapeColors (string fbxPath) {
+		[Test, TestCaseSource (typeof (BlendshapesDataClass), "ColorBlendShapeCases")]
+		public void TestGetSetCompareBlendshapeColors (string fbxPath, string comparativeFbxPath) {
 			var blendinstance = InitBlendShape (fbxPath);
-			var comparativeInstance = InitComparativeInstance ("Models/BlendShapes/Comparative_VertexColorCylinder.fbx");
+			var comparativeInstance = InitComparativeInstance(comparativeFbxPath);
 			var blendVertices = BakeBlendshape (blendinstance);
 
 			// Compare vertex colors from the blendshape mesh to the comparative static fbx - The test fails here, it wont when full blendshape support will be implemented
@@ -133,10 +126,10 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests {
 			// TODO - Uni-55429 - If unity can at this point import blendshape vertex colors, can the FBXExporter now roundtrip an asset of the sort? Could be a separate test.
 		}
 
-		[Test, TestCaseSource (typeof (AnimationTestDataClass), "VertexNormalBlendShapeCases")]
-		public void TestGetSetCompareBlendshapeNormals (string fbxPath) {
+		[Test, TestCaseSource (typeof (BlendshapesDataClass), "VertexNormalBlendShapeCases")]
+		public void TestGetSetCompareBlendshapeNormals (string fbxPath, string comparativeFbxPath) {
 			var blendinstance = InitBlendShape (fbxPath);
-			var comparativeInstance = InitComparativeInstance ("Models/BlendShapes/Comparative_NormalCylinder.fbx");
+			var comparativeInstance = InitComparativeInstance (comparativeFbxPath);
 			var blendVertices = BakeBlendshape (blendinstance);
 
 			// Compare vertex normal from the blendshape mesh to the comparative fbx - The test fails here, it wont when full blendshape support will be implemented
@@ -151,10 +144,10 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests {
 			// TODO - Uni-55429 - If unity can at this point import blendshape vertex normals, can the FBXExporter now roundtrip an asset of the sort? Could be a separate test. 
 		}
 
-		[Test, TestCaseSource (typeof (AnimationTestDataClass), "VertexNormalBlendShapeCases")]
-		public void TestGetSetCompareBlendshapeTangents (string fbxPath) {
+		[Test, TestCaseSource (typeof (BlendshapesDataClass), "VertexNormalBlendShapeCases")]
+		public void TestGetSetCompareBlendshapeTangents (string fbxPath, string comparativeFbxPath) {
 			var blendinstance = InitBlendShape (fbxPath);
-			var comparativeInstance = InitComparativeInstance ("Models/BlendShapes/Comparative_NormalCylinder.fbx");
+			var comparativeInstance = InitComparativeInstance (comparativeFbxPath);
 			var blendVertices = BakeBlendshape (blendinstance);
 
 			// Compare vertex normal from the blendshape mesh to the comparative fbx - The test fails here, it wont when full blendshape support will be implemented
@@ -170,17 +163,27 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests {
 			// TODO - Uni-55429 - If unity can at this point import blendshape vertex normals, can the FBXExporter now roundtrip an asset of the sort? Could be a separate test. 
 		}
 
-		[Test, TestCaseSource (typeof (AnimationTestDataClass), "GenericBlendShapeCases")]
-		public void TestGetSetCompareBlendshape (string fbxPath) {
-			var blendinstance = InitBlendShape (fbxPath);
-			var comparativeInstance = InitComparativeInstance ("Models/BlendShapes/Comparative_Blendshape.fbx");
-			var blendVertices = BakeBlendshape (blendinstance);
-			Vector3[] comparativeVertices = comparativeInstance.GetComponent<MeshFilter> ().sharedMesh.vertices;
-			Assert.AreEqual (blendVertices.vertices.Length, comparativeVertices.Length);
-			for (int normalIndex = 0; normalIndex < comparativeVertices.Length; normalIndex++) {
-				Assert.AreEqual (comparativeVertices[normalIndex].magnitude, blendVertices.vertices[normalIndex].magnitude);
+	}
+
+	public class BlendshapesDataClass {
+		public static IEnumerable BlendShapeTestCases {
+			get {
+				yield return "Models/Blendshapes/blendshape.fbx";
+				yield return "Models/Blendshapes/blendshape_with_skinning.fbx";
 			}
 		}
 
+		public static IEnumerable ColorBlendShapeCases {
+			get {
+				yield return new TestCaseData ("Models/Blendshapes/BlendShape_Color.fbx","Models/BlendShapes/Comparative_VertexColorCylinder.fbx");
+			}
+		}
+
+		public static IEnumerable VertexNormalBlendShapeCases {
+			get {
+				yield return new TestCaseData ("Models/Blendshapes/Blendshape_VertexNormal.fbx","Models/BlendShapes/Comparative_NormalCylinder.fbx");
+			}
+		}
 	}
+
 }

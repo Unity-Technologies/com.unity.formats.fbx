@@ -77,32 +77,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
                 yield return "Models/DefaultMale/Male_DyingHitFromBack_Blend_T3_Cut01_James.fbx";
             }
         }
-
-        public static IEnumerable BlendShapeTestCases {
-            get {
-                yield return "Models/Blendshapes/blendshape.fbx";
-                yield return "Models/Blendshapes/blendshape_with_skinning.fbx";
-            }
-        }
-
-        public static IEnumerable GenericBlendShapeCases {
-            get {
-                yield return "Models/Blendshapes/blendshape.fbx";
-            }
-        }
-
-        public static IEnumerable ColorBlendShapeCases {
-            get {
-                yield return "Models/Blendshapes/BlendShape_Color.fbx";
-            }
-        }
-
-        public static IEnumerable VertexNormalBlendShapeCases {
-            get {
-                yield return "Models/Blendshapes/Blendshape_VertexNormal.fbx";
-            }
-        }
-
+        
         public static IEnumerable AnimOnlyTestCaases {
             get {
                 yield return new TestCaseData ("Models/DefaultMale/DefaultMale.prefab");
