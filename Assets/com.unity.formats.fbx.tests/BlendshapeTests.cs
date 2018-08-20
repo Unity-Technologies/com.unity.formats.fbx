@@ -10,7 +10,7 @@ using UnityEngine.Formats.Fbx.Exporter;
 
 namespace UnityEditor.Formats.Fbx.Exporter.UnitTests {
 
-	public class BlendshapeTests : ModelExporterTest {
+	public class BlendshapeTests : ExporterTestBase {
 		[TearDown]
 		public override void Term () {
 #if (!DEBUG_UNITTEST)
@@ -18,28 +18,7 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests {
 #endif
 		}
 
-		private void ExportSkinnedMesh (string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh) {
-			// add fbx to scene
-			GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath (fileToExport) as GameObject;
-			Assert.IsNotNull (originalFbxObj);
-			GameObject originalGO = GameObject.Instantiate (originalFbxObj);
-			Assert.IsTrue (originalGO);
-
-			// export fbx
-			// get GameObject
-			string filename = GetRandomFbxFilePath ();
-			ModelExporter.ExportObject (filename, originalGO);
-			GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath (filename) as GameObject;
-			Assert.IsTrue (fbxObj);
-
-			originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
-			Assert.IsNotNull (originalSkinnedMesh);
-
-			exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
-			Assert.IsNotNull (exportedSkinnedMesh);
-		}
-
-		[Test, TestCaseSource (typeof (AnimationTestDataClass), "BlendShapeTestCases")]
+		[Test, TestCaseSource (typeof (BlendshapesDataClass), "BlendShapeTestCases")]
 		public void TestBlendShapeExport (string fbxPath) {
 			fbxPath = FindPathInUnitTests (fbxPath);
 			Assert.That (fbxPath, Is.Not.Null);

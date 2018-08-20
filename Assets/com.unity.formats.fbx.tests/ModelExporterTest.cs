@@ -529,27 +529,6 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             Assert.AreEqual (mesh.tangents, fbxMesh.tangents);
         }
 
-        private void ExportSkinnedMesh(string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh){
-            // add fbx to scene
-            GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath(fileToExport) as GameObject;
-            Assert.IsNotNull (originalFbxObj);
-            GameObject originalGO = GameObject.Instantiate (originalFbxObj);
-            Assert.IsTrue (originalGO);
-
-            // export fbx
-            // get GameObject
-            string filename = GetRandomFbxFilePath();
-            ModelExporter.ExportObject (filename, originalGO);
-            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
-            Assert.IsTrue (fbxObj);
-
-            originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
-            Assert.IsNotNull (originalSkinnedMesh);
-
-            exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
-            Assert.IsNotNull (exportedSkinnedMesh);
-        }
-
         public class SkinnedMeshTestDataClass
         {
             public static System.Collections.IEnumerable TestCases1 {
@@ -700,18 +679,6 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             Debug.LogWarningFormat ("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
         }
 
-
-        public class Vector3Comparer : IComparer<Vector3>
-        {
-            public int Compare(Vector3 a, Vector3 b)
-            {
-                Assert.That(a.x, Is.EqualTo(b.x).Within(0.00001f));
-                Assert.That(a.y, Is.EqualTo(b.y).Within(0.00001f));
-                Assert.That(a.z, Is.EqualTo(b.z).Within(0.00001f));
-                return 0;  // we're almost equal
-            }
-        }
-
         [Test]
         public void LODExportTest(){
             // Create the following test hierarchy:
@@ -793,7 +760,6 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
             CompareGameObjectChildren (fbxObj, expectedChildren);
         }
-
 
         /// <summary>
         /// Compares obj's children to the expected children in the hashset.

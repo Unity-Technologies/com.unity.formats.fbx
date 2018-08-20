@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using NUnit.Framework;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor.Formats.Fbx.Exporter.API.UnitTests;
 
@@ -92,6 +93,38 @@ namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
             Assert.That (exportedFilePath, Is.EqualTo (filename));
             var exported = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             return exported;
+        }
+
+        internal void ExportSkinnedMesh(string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh){
+            // add fbx to scene
+            GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath(fileToExport) as GameObject;
+            Assert.IsNotNull (originalFbxObj);
+            GameObject originalGO = GameObject.Instantiate (originalFbxObj);
+            Assert.IsTrue (originalGO);
+
+            // export fbx
+            // get GameObject
+            string filename = GetRandomFbxFilePath();
+            ModelExporter.ExportObject (filename, originalGO);
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.IsTrue (fbxObj);
+
+            originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
+            Assert.IsNotNull (originalSkinnedMesh);
+
+            exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
+            Assert.IsNotNull (exportedSkinnedMesh);
+        }
+
+        public class Vector3Comparer : IComparer<Vector3>
+        {
+            public int Compare(Vector3 a, Vector3 b)
+            {
+                Assert.That(a.x, Is.EqualTo(b.x).Within(0.00001f));
+                Assert.That(a.y, Is.EqualTo(b.y).Within(0.00001f));
+                Assert.That(a.z, Is.EqualTo(b.z).Within(0.00001f));
+                return 0;  // we're almost equal
+            }
         }
 
     }
