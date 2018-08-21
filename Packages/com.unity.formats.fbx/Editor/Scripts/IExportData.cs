@@ -80,18 +80,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Object uniObj = AnimationUtility.GetAnimatedObject(rootObject, uniCurveBinding);
                 if (!uniObj)
                 {
-                    return;
+                    continue;
                 }
 
                 GameObject unityGo = ModelExporter.GetGameObject(uniObj);
                 if (!unityGo)
                 {
-                    return;
+                    continue;
                 }
 
                 if (!exportOptions.AnimateSkinnedMesh && unityGo.GetComponent<SkinnedMeshRenderer>())
                 {
-                    return;
+                    continue;
                 }
 
                 // If we have a clip driving a camera or light then force the export of FbxNodeAttribute
