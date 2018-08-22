@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using NUnit.Framework;
 using System.IO;
-using UnityEditor.Formats.Fbx.Exporter.API.UnitTests;
+using UnityEditor.Formats.Fbx.Exporter;
+using FbxExporter.UnitTests;
 
-namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
+namespace FbxExporter.UnitTests
 {
-    public abstract class ExporterTestBase: ExporterTestBaseAPI
+    public abstract class ExporterTestBase : ExporterTestBaseAPI
     {
         bool isAutoUpdaterOn;
 

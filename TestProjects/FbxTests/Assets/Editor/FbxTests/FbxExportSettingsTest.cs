@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEditor.Formats.Fbx.Exporter;
 using NUnit.Framework;
 
-namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
+namespace FbxExporter.UnitTests
 {
     public class FbxExportSettingsTest : ExporterTestBase
     {

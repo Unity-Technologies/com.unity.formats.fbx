@@ -3,15 +3,16 @@
 //#define DEBUG_UNITTEST
 
 using UnityEngine;
+using UnityEditor;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Formats.Fbx.Exporter;
+using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 
-namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
+namespace FbxExporter.UnitTests
 {
-    using CustomExtensions;
-
     public enum RotationCurveType {
         kEuler=3,
         kQuaternion=4

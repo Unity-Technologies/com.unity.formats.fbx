@@ -6,8 +6,9 @@ using UnityEditor.SceneManagement;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEditor.Formats.Fbx.Exporter;
 
-namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
+namespace FbxExporter.UnitTests
 {
     public class ExportTimelineClipTest : ExporterTestBase
     {

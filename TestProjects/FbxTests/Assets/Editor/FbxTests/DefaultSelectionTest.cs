@@ -2,8 +2,9 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using Autodesk.Fbx;
+using UnityEditor.Formats.Fbx.Exporter;
 
-namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
+namespace FbxExporter.UnitTests
 {
     /// <summary>
     /// Tests the default selection export behavior.

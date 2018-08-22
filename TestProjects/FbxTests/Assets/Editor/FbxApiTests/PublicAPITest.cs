@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using NUnit.Framework;
 using System.Diagnostics;
 using System.Linq;
+using UnityEditor.Formats.Fbx.Exporter;
 
-namespace UnityEditor.Formats.Fbx.Exporter.API.UnitTests
+namespace FbxExporter.UnitTests
 {
-    public class PublicAPITest: ExporterTestBaseAPI
+    public class PublicAPITest : ExporterTestBaseAPI
     {
         private GameObject[] m_toExport;
 

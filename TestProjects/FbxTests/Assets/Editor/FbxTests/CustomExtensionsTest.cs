@@ -7,7 +7,7 @@ using NUnit.Framework;
 using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 using Autodesk.Fbx;
 
-namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
+namespace FbxExporter.UnitTests
 {
     public class CustomExtensionsTest : ExporterTestBase
     {

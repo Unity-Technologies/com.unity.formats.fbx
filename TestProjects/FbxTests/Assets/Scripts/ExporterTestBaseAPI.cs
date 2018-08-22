@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using NUnit.Framework;
 using System.IO;
 
-namespace UnityEditor.Formats.Fbx.Exporter.API.UnitTests
+namespace FbxExporter.UnitTests
 {
     public abstract class ExporterTestBaseAPI
     {

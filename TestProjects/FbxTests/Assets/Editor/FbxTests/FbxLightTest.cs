@@ -9,7 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace UnityEditor.Formats.Fbx.Exporter.UnitTests
+namespace FbxExporter.UnitTests
 {
     public class LightAnimationTestDataClass
     {
