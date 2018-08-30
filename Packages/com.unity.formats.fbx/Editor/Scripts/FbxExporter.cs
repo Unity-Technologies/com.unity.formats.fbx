@@ -2792,10 +2792,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             SkinnedMeshBoneInfo parentBoneInfo = null;
-            // if this object was a bone but not the skinned mesh rootbone, and it's parent is also a bone, then
+            // if this object was a bone and it's parent is also a bone, then
             // pass the bone info when exporting the parent recursively.
-            if (boneInfo != null && boneInfo.skinnedMesh.rootBone != null &&
-                    unityGo.transform != boneInfo.skinnedMesh.rootBone && boneInfo.boneDict.ContainsKey(unityGo.transform.parent))
+            if (boneInfo != null && boneInfo.boneDict.ContainsKey(unityGo.transform.parent))
             {
                 parentBoneInfo = boneInfo;
             }
