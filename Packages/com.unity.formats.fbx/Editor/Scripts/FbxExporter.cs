@@ -2667,7 +2667,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // first export all the animated bones that are in the export set
             // as only a subset of bones are exported, but we still need to make sure the bone transforms are correct
-            ExportAnimatedBones(unityGO, fbxScene, ref numObjectsExported, objectCount, exportData);
+            if(!ExportAnimatedBones(unityGO, fbxScene, ref numObjectsExported, objectCount, exportData))
+            {
+                // export cancelled
+                return -1;
+            }
 
             // export everything else and make sure all nodes are connected
             foreach (var go in exportSet) {
