@@ -984,10 +984,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            // Three steps:
+            // Two steps:
             // 0. Set up the map from bone to index.
-            // 1. Gather complete list of bones
-            // 2. Set the transforms.
+            // 1. Set the transforms.
 
             // Step 0: map transform to index so we can look up index by bone.
             Dictionary<Transform, int> index = new Dictionary<Transform, int>();
@@ -996,44 +995,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 index[unityBoneTransform] = boneIndex;
             }
 
-            // Step 1: gather all the bones
-            HashSet<Transform> boneSet = new HashSet<Transform> ();
-            var s = new Stack<Transform> (bones);
-            var root = skinnedMesh.rootBone;
-            while (s.Count > 0) {
-                var t = s.Pop ();
+            skinnedMeshToBonesMap.Add (skinnedMesh, bones);
 
-                if (!boneSet.Add (t)) {
-                    continue;
-                }
-
-                if (t.parent == null) {
-                    Debug.LogWarningFormat (
-                        "FbxExporter: {0} is a bone but not a descendant of {1}'s mesh's root bone.",
-                        t.name, skinnedMesh.name
-                    );
-                    continue;
-                }
-
-                // Each skinned mesh in Unity has one root bone, but may have objects
-                // between the root bone and leaf bones that are not in the bone list.
-                // However all objects between two bones in a hierarchy should be bones
-                // as well. 
-                // e.g. in rootBone -> bone1 -> obj1 -> bone2, obj1 should be a bone
-                //
-                // Traverse from all leaf bones to the root bone adding everything in between
-                // to the boneSet regardless of whether it is in the skinned mesh's bone list.
-                if (t != root && !boneSet.Contains(t.parent)) {
-                    s.Push (t.parent);
-                }
-            }
-
-            var boneList = boneSet.ToArray();
-            skinnedMeshToBonesMap.Add (skinnedMesh, boneList);
-
-            // Step 2: Set transforms
+            // Step 1: Set transforms
             var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, index);
-            foreach (var bone in boneList) {
+            foreach (var bone in bones) {
                 var fbxBone = MapUnityObjectToFbxNode [bone.gameObject];
                 ExportBoneTransform (fbxBone, fbxScene, bone, boneInfo);
             }
@@ -2565,6 +2531,39 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
+        /// Create a fbxNode from unityGo.
+        /// </summary>
+        /// <param name="unityGo"></param>
+        /// <param name="fbxScene"></param>
+        /// <returns>the created FbxNode</returns>
+        private FbxNode CreateFbxNode(GameObject unityGo, FbxScene fbxScene)
+        {
+
+            string fbxName = unityGo.name;
+            if (ExportOptions.UseMayaCompatibleNames)
+            {
+                fbxName = ConvertToMayaCompatibleName(unityGo.name);
+                if (ExportOptions.AllowSceneModification)
+                {
+                    unityGo.name = fbxName;
+                }
+            }
+            
+            FbxNode fbxNode = FbxNode.Create(fbxScene, GetUniqueName(fbxName));
+
+            // Default inheritance type in FBX is RrSs, which causes scaling issues in Maya as
+            // both Maya and Unity use RSrs inheritance by default.
+            // Note: MotionBuilder uses RrSs inheritance by default as well, though it is possible
+            //       to select a different inheritance type in the UI.
+            // Use RSrs as the scaling inheritance instead.
+            fbxNode.SetTransformationInheritType(FbxTransform.EInheritType.eInheritRSrs);
+
+            MapUnityObjectToFbxNode[unityGo] = fbxNode;
+
+            return fbxNode;
+        }
+
+        /// <summary>
         /// Creates an FbxNode for each GameObject.
         /// </summary>
         /// <returns>The number of nodes exported.</returns>
@@ -2577,18 +2576,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             int numObjectsExported = exportProgress;
 
-            string fbxName = unityGo.name;
-            if (ExportOptions.UseMayaCompatibleNames) {
-                fbxName = ConvertToMayaCompatibleName (unityGo.name);
-                if (ExportOptions.AllowSceneModification)
-                {
-                    unityGo.name = fbxName;
-                }
-            }
-
-            // create an FbxNode and add it as a child of parent
-            FbxNode fbxNode = FbxNode.Create (fbxScene, GetUniqueName (fbxName));
-            MapUnityObjectToFbxNode [unityGo] = fbxNode;
+            FbxNode fbxNode = CreateFbxNode(unityGo, fbxScene);
 
             if (Verbose)
                 Debug.Log (string.Format ("exporting {0}", fbxNode.GetName ()));
@@ -2601,13 +2589,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // cancel silently
                 return -1;
             }
-
-            // Default inheritance type in FBX is RrSs, which causes scaling issues in Maya as
-            // both Maya and Unity use RSrs inheritance by default.
-            // Note: MotionBuilder uses RrSs inheritance by default as well, though it is possible
-            //       to select a different inheritance type in the UI.
-            // Use RSrs as the scaling inheritance instead.
-            fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
 
             ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
 
@@ -2675,48 +2656,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
             TransformExportType exportType = TransformExportType.Local
         ){
             AnimationOnlyExportData exportData = (AnimationOnlyExportData)data;
-
-            // export any bones
-            var skinnedMeshRenderers = unityGO.GetComponentsInChildren<SkinnedMeshRenderer> ();
             int numObjectsExported = exportProgress;
-
-            foreach (var skinnedMesh in skinnedMeshRenderers) {
-                var boneArray = skinnedMesh.bones;
-                var bones = new HashSet<GameObject>();
-                var boneDict = new Dictionary<Transform, int> ();
-
-                for (int i = 0; i < boneArray.Length; i++) {
-                    bones.Add (boneArray [i].gameObject);
-                    boneDict.Add (boneArray [i], i);
-                }
-
-                // get the bones that are also in the export set
-                bones.IntersectWith (exportData.Objects);
-
-                // remove the exported bones from the export set
-                exportData.Objects.ExceptWith (bones);
-
-                var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, boneDict);
-                foreach (var bone in bones) {
-                    FbxNode node;
-                    if (!ExportGameObjectAndParents (
-                        bone.gameObject, unityGO, fbxScene, out node, newCenter, 
-                        exportType, ref numObjectsExported, objectCount,
-                        boneInfo
-                        )) {
-                        // export cancelled
-                        return -1;
-                    }
-                }
-            }
 
             // make sure anim destination node is exported as well
             var exportSet = exportData.Objects;
-            if (ExportOptions.AnimationDest && ExportOptions.AnimationSource) {
-                exportSet.Add (ExportOptions.AnimationDest.gameObject);
+            if (ExportOptions.AnimationDest && ExportOptions.AnimationSource)
+            {
+                exportSet.Add(ExportOptions.AnimationDest.gameObject);
             }
 
-            // export everything else
+            // first export all the animated bones that are in the export set
+            // as only a subset of bones are exported, but we still need to make sure the bone transforms are correct
+            if(!ExportAnimatedBones(unityGO, fbxScene, ref numObjectsExported, objectCount, exportData))
+            {
+                // export cancelled
+                return -1;
+            }
+
+            // export everything else and make sure all nodes are connected
             foreach (var go in exportSet) {
                 FbxNode node;
                 if (!ExportGameObjectAndParents (
@@ -2765,6 +2722,57 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
+        private bool ExportAnimatedBones (
+            GameObject unityGo,
+            FbxScene fbxScene,
+            ref int exportProgress,
+            int objectCount,
+            AnimationOnlyExportData exportData
+            )
+        {
+            var skinnedMeshRenderers = unityGo.GetComponentsInChildren<SkinnedMeshRenderer>();
+            foreach (var skinnedMesh in skinnedMeshRenderers)
+            {
+                var boneArray = skinnedMesh.bones;
+                var bones = new HashSet<GameObject>();
+                var boneDict = new Dictionary<Transform, int>();
+
+                for (int i = 0; i < boneArray.Length; i++)
+                {
+                    bones.Add(boneArray[i].gameObject);
+                    boneDict.Add(boneArray[i], i);
+                }
+
+                // get the bones that are also in the export set
+                bones.IntersectWith(exportData.Objects);
+
+                var boneInfo = new SkinnedMeshBoneInfo(skinnedMesh, boneDict);
+                foreach (var bone in bones)
+                {
+                    FbxNode fbxNode;
+                    // bone already exported
+                    if (MapUnityObjectToFbxNode.TryGetValue(bone, out fbxNode))
+                    {
+                        continue;
+                    }
+                    fbxNode = CreateFbxNode(bone, fbxScene);
+
+                    exportProgress++;
+                    if (EditorUtility.DisplayCancelableProgressBar(
+                            ProgressBarTitle,
+                        string.Format("Creating FbxNode {0}/{1}", exportProgress, objectCount),
+                        (exportProgress / (float)objectCount) * 0.5f))
+                    {
+                        // cancel silently
+                        return false;
+                    }
+
+                    ExportBoneTransform(fbxNode, fbxScene, bone.transform, boneInfo);
+                }
+            }
+            return true;
+        }
+
         /// <summary>
         /// Exports the Gameobject and its ancestors.
         /// </summary>
@@ -2778,58 +2786,34 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Vector3 newCenter,
             TransformExportType exportType,
             ref int exportProgress,
-            int objectCount,
-            SkinnedMeshBoneInfo boneInfo = null)
+            int objectCount
+            )
         {
-            // node already exists
-            if (MapUnityObjectToFbxNode.TryGetValue (unityGo, out fbxNode)) {
+            // node doesn't exist so create it
+            if (!MapUnityObjectToFbxNode.TryGetValue(unityGo, out fbxNode))
+            {
+                fbxNode = CreateFbxNode(unityGo, fbxScene);
+
+                exportProgress++;
+                if (EditorUtility.DisplayCancelableProgressBar(
+                        ProgressBarTitle,
+                    string.Format("Creating FbxNode {0}/{1}", exportProgress, objectCount),
+                    (exportProgress / (float)objectCount) * 0.5f))
+                {
+                    // cancel silently
+                    return false;
+                }
+
+                ExportTransform(unityGo.transform, fbxNode, newCenter, exportType);
+            }
+
+            if (unityGo == rootObject || unityGo.transform.parent == null)
+            {
+                fbxScene.GetRootNode().AddChild(fbxNode);
                 return true;
             }
 
-            string fbxName = unityGo.name;
-            if (ExportOptions.UseMayaCompatibleNames) {
-                fbxName = ConvertToMayaCompatibleName (unityGo.name);
-            }
-
-            // create an FbxNode and add it as a child of parent
-            fbxNode = FbxNode.Create (fbxScene, GetUniqueName (fbxName));
-            MapUnityObjectToFbxNode [unityGo] = fbxNode;
-
-            exportProgress++;
-            if (EditorUtility.DisplayCancelableProgressBar (
-                    ProgressBarTitle,
-                string.Format ("Creating FbxNode {0}/{1}", exportProgress, objectCount),
-                (exportProgress / (float)objectCount) * 0.5f)) {
-                // cancel silently
-                return false;
-            }
-
-            // Default inheritance type in FBX is RrSs, which causes scaling issues in Maya as
-            // both Maya and Unity use RSrs inheritance by default.
-            // Note: MotionBuilder uses RrSs inheritance by default as well, though it is possible
-            //       to select a different inheritance type in the UI.
-            // Use RSrs as the scaling inhertiance instead.
-            fbxNode.SetTransformationInheritType (FbxTransform.EInheritType.eInheritRSrs);
-
-            // TODO: check if GO is a bone and export accordingly
-            var exportedBoneTransform = boneInfo != null? 
-                ExportBoneTransform (fbxNode, fbxScene, unityGo.transform, boneInfo) : false;
-
-            // export regular transform if we are not a bone or failed to export as a bone
-            if(!exportedBoneTransform){
-                ExportTransform (unityGo.transform, fbxNode, newCenter, exportType);
-            }
-
-            if (unityGo == rootObject || unityGo.transform.parent == null) {
-                fbxScene.GetRootNode ().AddChild (fbxNode);
-                return true;
-            }
-
-            SkinnedMeshBoneInfo parentBoneInfo = null;
-            if (boneInfo != null && boneInfo.skinnedMesh.rootBone != null && unityGo.transform != boneInfo.skinnedMesh.rootBone) {
-                parentBoneInfo = boneInfo;
-            }
-
+            // make sure all the nodes are connected and exported
             FbxNode fbxNodeParent;
             if (!ExportGameObjectAndParents (
                 unityGo.transform.parent.gameObject,
@@ -2839,8 +2823,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 newCenter,
                 TransformExportType.Local,
                 ref exportProgress,
-                objectCount,
-                parentBoneInfo
+                objectCount
             )) {
                 // export cancelled
                 return false;
@@ -2891,17 +2874,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             Matrix4x4 pose;
-            if (unityBone == rootBone) {
-                pose = (unityBone.parent.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix * bindPose.inverse);
-            } else {
-                // get parent's bind pose
-                Matrix4x4 parentBindPose;
-                if (!boneInfo.boneToBindPose.TryGetValue (unityBone.parent, out parentBindPose)) {
-                    parentBindPose = GetBindPose (unityBone.parent, bindPoses, boneDict, skinnedMesh);
-                    boneInfo.boneToBindPose.Add (unityBone.parent, parentBindPose);
-                }
-                pose = parentBindPose * bindPose.inverse;
+            // get parent's bind pose
+            Matrix4x4 parentBindPose;
+            if (!boneInfo.boneToBindPose.TryGetValue (unityBone.parent, out parentBindPose)) {
+                parentBindPose = GetBindPose (unityBone.parent, bindPoses, boneDict, skinnedMesh);
+                boneInfo.boneToBindPose.Add (unityBone.parent, parentBindPose);
             }
+            pose = parentBindPose * bindPose.inverse;
 
             FbxVector4 translation, rotation, scale;
             GetTRSFromMatrix (pose, out translation, out rotation, out scale);
