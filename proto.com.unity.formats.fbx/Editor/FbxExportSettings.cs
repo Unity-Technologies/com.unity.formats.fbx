@@ -49,16 +49,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             GUILayout.BeginVertical();
-            exportSettings.AutoUpdaterEnabled = EditorGUILayout.Toggle(
-                new GUIContent("Auto-Updater:",
-                    "Automatically updates prefabs with new fbx data that was imported."),
-                exportSettings.AutoUpdaterEnabled
-            );
-
-            exportSettings.ShowConvertToPrefabDialog = EditorGUILayout.Toggle(
-                new GUIContent("Show Convert UI:", "Enable Convert dialog when converting to a Linked Prefab"),
-                exportSettings.ShowConvertToPrefabDialog
-            );
+            
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             EditorGUI.indentLevel--;
@@ -140,36 +131,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUI.indentLevel--;
             EditorGUILayout.LabelField ("FBX Prefab Component Updater", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
-
-            EditorGUILayout.Space ();
-
-            var repairMissingScripts = new GUIContent (
-                                       "Run Component Updater",
-                                        "If FBX exporter version 1.3.0f1 or earlier was previously installed, then links to the FbxPrefab component will need updating.\n" +
-                                        "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
-
-            if (GUILayout.Button (repairMissingScripts)) {
-                var componentUpdater = new UnityEditor.Formats.Fbx.Exporter.RepairMissingScripts ();
-                var filesToRepairCount = componentUpdater.AssetsToRepairCount;
-                var dialogTitle = "FBX Prefab Component Updater";
-                if (filesToRepairCount > 0) {
-                    bool result = UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
-                        string.Format("Found {0} prefab(s) and/or scene(s) with components requiring update.\n\n" +
-                        "If you choose 'Go Ahead', the FbxPrefab components in these assets " +
-                        "will be automatically updated to work with the latest FBX exporter.\n" +
-                            "You should make a backup before proceeding.", filesToRepairCount),
-                        "I Made a Backup. Go Ahead!", "No Thanks");
-                    if (result) {
-                        componentUpdater.ReplaceGUIDInTextAssets ();
-                    } else {
-                        var assetsToRepair = componentUpdater.GetAssetsToRepair ();
-                        Debug.LogFormat ("Failed to update the FbxPrefab components in the following files:\n{0}", string.Join ("\n", assetsToRepair));
-                    }
-                } else {
-                    UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
-                        "Couldn't find any prefabs or scenes that require updating", "Ok");
-                }
-            }
 
             GUILayout.FlexibleSpace ();
             GUILayout.EndVertical();
@@ -395,15 +356,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        // Note: default values are set in LoadDefaults().
-        [SerializeField]
-        private bool autoUpdaterEnabled = true;
-        public bool AutoUpdaterEnabled
-        {
-            get { return autoUpdaterEnabled; }
-            set { autoUpdaterEnabled = value; }
-        }
-
         [SerializeField]
         private bool launchAfterInstallation = true;
         public bool LaunchAfterInstallation
@@ -426,14 +378,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         {
             get { return BakeAnimation; }
             set { BakeAnimation = value; }
-        }
-
-        [SerializeField]
-        private bool showConvertToPrefabDialog = true;
-        public bool ShowConvertToPrefabDialog
-        {
-            get { return showConvertToPrefabDialog; }
-            set { showConvertToPrefabDialog = value; }
         }
 
         [SerializeField]
@@ -519,21 +463,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         [SerializeField]
         private ExportModelSettingsSerialize exportModelSettingsSerialize;
 
-        [System.NonSerialized]
-        private ConvertToPrefabSettings m_convertToPrefabSettings;
-        internal ConvertToPrefabSettings ConvertToPrefabSettings
-        {
-            get { return m_convertToPrefabSettings; }
-            set { m_convertToPrefabSettings = value; }
-        }
-
-        [SerializeField]
-        private ConvertToPrefabSettingsSerialize convertToPrefabSettingsSerialize;
-
         internal override void LoadDefaults()
         {
-            AutoUpdaterEnabled = true;
-            ShowConvertToPrefabDialog = true;
             LaunchAfterInstallation = true;
             HideSendToUnityMenuProperty = true;
             prefabSavePaths = new List<string>(){ kDefaultSavePath };
@@ -544,8 +475,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             BakeAnimationProperty = true;
             ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             exportModelSettingsSerialize = ExportModelSettings.info;
-            ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
-            convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
         }
 
         /// <summary>
@@ -1336,18 +1265,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 instance.ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             }
             instance.ExportModelSettings.info = instance.exportModelSettingsSerialize;
-
-            if (!instance.ConvertToPrefabSettings) {
-                instance.ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
-            }
-            instance.ConvertToPrefabSettings.info = instance.convertToPrefabSettingsSerialize;
-
         }
 
         internal void Save()
         {
             exportModelSettingsSerialize = ExportModelSettings.info;
-            convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
             instance.Save (true);
         }
     }

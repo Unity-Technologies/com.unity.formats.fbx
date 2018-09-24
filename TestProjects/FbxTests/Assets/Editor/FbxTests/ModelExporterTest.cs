@@ -820,25 +820,6 @@ namespace FbxExporter.UnitTests
 
             expectedChildren = new HashSet<string> () { cubeLOD2.name };
             CompareGameObjectChildren (fbxObj, expectedChildren);
-
-            // test convert to prefab
-            // this should have the same result as "export all"
-            // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
-            // NOTE: Cylinder_LOD1 is not exported as it is not under the LODGroup hierarchy being exported
-            var convertedHierarchy = ConvertToModel.Convert(lodGroup,
-                    fbxFullPath: GetRandomFbxFilePath(),
-                    prefabFullPath: GetRandomPrefabAssetPath());
-            Assert.That (convertedHierarchy, Is.Not.Null);
-
-            // check both converted hierarchy and fbx
-            expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
-            CompareGameObjectChildren (convertedHierarchy, expectedChildren);
-
-            fbxObj = convertedHierarchy.GetComponent<FbxPrefab>().FbxModel;
-            Assert.IsTrue (fbxObj);
-
-            expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
-            CompareGameObjectChildren (fbxObj, expectedChildren);
         }
 
 
