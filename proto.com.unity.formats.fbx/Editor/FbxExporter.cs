@@ -1274,10 +1274,23 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            PrefabType unityPrefabType = PrefabUtility.GetPrefabType(unityGo);
+#if UNITY_2018_3_OR_NEWER
+            PrefabAssetType unityPrefabType = PrefabUtility.GetPrefabAssetType(unityGo);
 
+            // only export as an instace if the GameObject is part of a prefab instance
+            if((unityPrefabType != PrefabAssetType.Regular &&
+                unityPrefabType != PrefabAssetType.Model &&
+                unityPrefabType != PrefabAssetType.Variant) ||
+                PrefabUtility.GetPrefabInstanceStatus(unityGo) != PrefabInstanceStatus.Connected)
+            {
+                return false;
+            }
+#else
+            PrefabType unityPrefabType = PrefabUtility.GetPrefabType(unityGo);
+            
             if (unityPrefabType != PrefabType.PrefabInstance &&
                 unityPrefabType != PrefabType.ModelPrefabInstance) return false;
+#endif
 
             Object unityPrefabParent = PrefabUtility.GetCorrespondingObjectFromSource(unityGo);
 

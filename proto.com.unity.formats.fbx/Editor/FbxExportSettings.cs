@@ -46,13 +46,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 GUILayout.Label ("Version: " + version, EditorStyles.centeredGreyMiniLabel);
                 EditorGUILayout.Space ();
             }
-            EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
             GUILayout.BeginVertical();
             
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            EditorGUI.indentLevel--;
             EditorGUILayout.LabelField("Integration", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
