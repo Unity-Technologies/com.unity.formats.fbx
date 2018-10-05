@@ -1,0 +1,1 @@
++ UnityFbxForMaya {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya
