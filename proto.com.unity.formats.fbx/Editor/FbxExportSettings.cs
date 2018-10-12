@@ -127,6 +127,41 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.LabelField ("FBX Prefab Component Updater", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
+            EditorGUILayout.Space();
+            var repairMissingScripts = new GUIContent(
+                                        "Run Component Updater",
+                                        "If FBX exporter version 1.3.0f1 or earlier was previously installed, then links to the FbxPrefab component will need updating.\n" +
+                                        "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
+            if (GUILayout.Button(repairMissingScripts))
+            {
+                var componentUpdater = new UnityEditor.Formats.Fbx.Exporter.RepairMissingScripts();
+                var filesToRepairCount = componentUpdater.AssetsToRepairCount;
+                var dialogTitle = "FBX Prefab Component Updater";
+                if (filesToRepairCount > 0)
+                {
+                    bool result = UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
+                        string.Format("Found {0} prefab(s) and/or scene(s) with components requiring update.\n\n" +
+                        "If you choose 'Go Ahead', the FbxPrefab components in these assets " +
+                        "will be automatically updated to work with the latest FBX exporter.\n" +
+                            "You should make a backup before proceeding.", filesToRepairCount),
+                        "I Made a Backup. Go Ahead!", "No Thanks");
+                    if (result)
+                    {
+                        componentUpdater.ReplaceGUIDInTextAssets();
+                    }
+                    else
+                    {
+                        var assetsToRepair = componentUpdater.GetAssetsToRepair();
+                        Debug.LogFormat("Failed to update the FbxPrefab components in the following files:\n{0}", string.Join("\n", assetsToRepair));
+                    }
+                }
+                else
+                {
+                    UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
+                        "Couldn't find any prefabs or scenes that require updating", "Ok");
+                }
+            }
+
             GUILayout.FlexibleSpace ();
             GUILayout.EndVertical();
             GUILayout.EndScrollView ();
