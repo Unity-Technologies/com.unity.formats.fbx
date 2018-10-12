@@ -1278,9 +1278,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             PrefabAssetType unityPrefabType = PrefabUtility.GetPrefabAssetType(unityGo);
 
             // only export as an instance if the GameObject is part of a prefab instance
-            if((unityPrefabType != PrefabAssetType.Regular &&
-                unityPrefabType != PrefabAssetType.Model &&
-                unityPrefabType != PrefabAssetType.Variant) ||
+            if(unityPrefabType == PrefabAssetType.MissingAsset ||
+                unityPrefabType == PrefabAssetType.NotAPrefab ||
                 PrefabUtility.GetPrefabInstanceStatus(unityGo) != PrefabInstanceStatus.Connected)
             {
                 return false;
