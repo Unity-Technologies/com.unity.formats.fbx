@@ -1287,7 +1287,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 #else
             PrefabType unityPrefabType = PrefabUtility.GetPrefabType(unityGo);
-            
+
             if (unityPrefabType != PrefabType.PrefabInstance &&
                 unityPrefabType != PrefabType.ModelPrefabInstance) return false;
 #endif
