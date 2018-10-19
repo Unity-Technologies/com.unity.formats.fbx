@@ -1274,10 +1274,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
+#if UNITY_2018_3_OR_NEWER
+            PrefabAssetType unityPrefabType = PrefabUtility.GetPrefabAssetType(unityGo);
+            // only export as an instance if the GameObject is part of a prefab instance
+            if (unityPrefabType == PrefabAssetType.MissingAsset ||
+                unityPrefabType == PrefabAssetType.NotAPrefab ||
+                PrefabUtility.GetPrefabInstanceStatus(unityGo) != PrefabInstanceStatus.Connected)
+            {
+                return false;
+            }
+#else
             PrefabType unityPrefabType = PrefabUtility.GetPrefabType(unityGo);
-
             if (unityPrefabType != PrefabType.PrefabInstance &&
                 unityPrefabType != PrefabType.ModelPrefabInstance) return false;
+#endif
 
             Object unityPrefabParent = PrefabUtility.GetCorrespondingObjectFromSource(unityGo);
 
