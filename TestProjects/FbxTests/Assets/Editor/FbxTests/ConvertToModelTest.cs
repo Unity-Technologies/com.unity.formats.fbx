@@ -1,3 +1,4 @@
+#if !UNITY_2018_3_OR_NEWER
 using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
@@ -499,3 +500,4 @@ namespace FbxExporter.UnitTests
         }
     }
 }
+#endif // !UNITY_2018_3_OR_NEWER
