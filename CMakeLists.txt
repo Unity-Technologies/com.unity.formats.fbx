@@ -6,12 +6,28 @@ MESSAGE(STATUS "CMAKE_INSTALL_PREFIX is: " ${CMAKE_INSTALL_PREFIX})
 project (UnityFbxExporterEditorPackage NONE)
 
 ###########################################################################
-# Get git tag as package version
 
+# Get git tag as package version
 find_package(Git REQUIRED)
 execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags HEAD
-                OUTPUT_VARIABLE COM_UNITY_FORMATS_FBX_VERSION
-                OUTPUT_STRIP_TRAILING_WHITESPACE) 
+        OUTPUT_VARIABLE PACKAGE_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+# only keep x.y.z[-preview.n]
+string(REGEX REPLACE "^.*([0-9]\.[0-9]\.[0-9].*)$" "\\1" PACKAGE_VERSION "${PACKAGE_VERSION}")
+
+# Get git revision hash as package revision
+execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+        OUTPUT_VARIABLE PACKAGE_REVISION
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# Get git repo url
+execute_process(COMMAND ${GIT_EXECUTABLE} config --get remote.origin.url
+        OUTPUT_VARIABLE PACKAGE_REPO_URL
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+configure_file(${CMAKE_SOURCE_DIR}/proto.com.unity.formats.fbx/package.json.in ${CMAKE_BINARY_DIR}/package.json @ONLY)
+
+configure_file(${CMAKE_SOURCE_DIR}/proto.com.unity.formats.fbx/Documentation~/index.md.in ${CMAKE_BINARY_DIR}/index.md @ONLY)
 
 ###########################################################################
 # Zip integrations folder
@@ -67,12 +83,17 @@ add_custom_target(${MAX_INTEGRATION_ZIP_TARGET} ALL DEPENDS ${MAX_INTEGRATION_ZI
 install(
     DIRECTORY "${CMAKE_SOURCE_DIR}/proto.com.unity.formats.fbx/"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx"
+    PATTERN "*.in" EXCLUDE
 )
 install(
     FILES "${CMAKE_BINARY_DIR}/${MAYA_INTEGRATION_ZIP_NAME}" "${CMAKE_BINARY_DIR}/${MAX_INTEGRATION_ZIP_NAME}"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx/Editor/Integrations~"
 )
 install(
-    FILES "${CMAKE_SOURCE_DIR}/CHANGELOG.md" "${CMAKE_SOURCE_DIR}/LICENSE.md" 
+    FILES "${CMAKE_BINARY_DIR}/index.md"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx/Documentation~"
+)
+install(
+    FILES "${CMAKE_SOURCE_DIR}/CHANGELOG.md" "${CMAKE_SOURCE_DIR}/LICENSE.md" "${CMAKE_BINARY_DIR}/package.json"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx"
 )
