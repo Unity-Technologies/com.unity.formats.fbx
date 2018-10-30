@@ -11,4 +11,5 @@ In order to convert existing Linked Prefabs or new FBX files to Nested Prefabs, 
 ![](images/FBXExporter_CreatePrefabVariant.png)
 
 Note: If converting an existing Linked Prefab, then the components from the Linked Prefab will need to be manually copied to the variant.
+
 Note: With Variant Prefabs, the name remapping functionality will be lost, so make sure to fix any name discrepancies before converting.
