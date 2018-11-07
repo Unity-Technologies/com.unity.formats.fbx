@@ -46,10 +46,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 GUILayout.Label ("Version: " + version, EditorStyles.centeredGreyMiniLabel);
                 EditorGUILayout.Space ();
             }
+
+            GUILayout.BeginVertical();
 #if !UNITY_2018_3_OR_NEWER
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
-            GUILayout.BeginVertical();
             exportSettings.AutoUpdaterEnabled = EditorGUILayout.Toggle(
                 new GUIContent("Auto-Updater:",
                     "Automatically updates prefabs with new fbx data that was imported."),
