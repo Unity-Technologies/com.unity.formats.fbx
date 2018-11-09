@@ -1,0 +1,17 @@
+Editor
+-------
+Warning	CA1020	Consider merging the types defined in 'UnityEditor.Formats.Fbx.Exporter' with another namespace.
+	> No, we want to keep this namespace
+
+Warning	CA1064	Make exception class 'ConvertToLinkedPrefabException' public.
+Warning	CA1064	Make exception class 'ModelExportException' public.	Unity.Formats.Fbx.Editor	D:\projects\FbxExporters\Packages\com.unity.formats.fbx\Editor\Scripts\FbxExporter.cs	46	Active
+Warning	CA1064	Make exception class 'FbxExportSettingsException' public.	Unity.Formats.Fbx.Editor	D:\projects\FbxExporters\Packages\com.unity.formats.fbx\Editor\Scripts\FbxExportSettings.cs	12	Active
+Warning	CA1064	Make exception class 'FbxPrefabException' public.	Unity.Formats.Fbx.Editor	D:\projects\FbxExporters\Packages\com.unity.formats.fbx\Editor\Scripts\FbxPrefabAutoUpdater.cs	15	Active
+	> In another version of the API when we expose more things
+
+Warning	CA1801	(x5) Parameter 'xyz' of 'SomeMethod' is never used. Remove the parameter or use it in the method body.	Unity.Formats.Fbx.Editor	
+	> These are defined in Unity, we just do not use the parameters
+
+Runtime
+-------
+No warning
