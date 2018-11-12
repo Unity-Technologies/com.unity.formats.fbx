@@ -42,7 +42,7 @@ To create Prefab Variant from a Model Prefab:
 
 To convert existing Linked Prefabs to Prefab Variants, follow these steps:
 
-1. Fix any name discrepancies that were previously handled by the [name remapping functionality for Linked Prefabs](prefabs.md#Remapping) before converting.
+1. Fix any name discrepancies that were previously handled by the [name remapping functionality for Linked Prefabs](prefabs.md#Remapping) before converting. Prefab Variants do not handle name remapping, therefore, if you started to add game logic to components and the objects in the FBX get renamed, you are at risk of losing the components as the old GameObjects will be deleted and new objects with the new naming added in their place.
 
 2. Right-click the FBX file and select **Prefab Variant** from the context menu.
 
