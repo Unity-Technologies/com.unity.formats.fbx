@@ -1,3 +1,4 @@
+#if !UNITY_2018_3_OR_NEWER
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -934,7 +935,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     rectTransform.localPosition = tempTransform.localPosition;
                     rectTransform.localScale = tempTransform.localScale;
 
-                    #region force update of rect transform 2017.3 or newer 
+#region force update of rect transform 2017.3 or newer 
                     // using reflection so we can continue to compile against versions 2017.1
                     // Retrieve the method you are looking for
                     System.Reflection.MethodInfo methodInfo =
@@ -942,7 +943,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // Invoke the method on the instance 
                     if (methodInfo != null)
                         methodInfo.Invoke(rectTransform, null);
-                    #endregion
+#endregion
                 }
                 finally
                 {
@@ -1459,3 +1460,4 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 }
+#endif // !UNITY_2018_3_OR_NEWER

@@ -1,3 +1,4 @@
+#if !UNITY_2018_3_OR_NEWER
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -37,11 +38,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// </summary>
     internal class FbxPrefabAutoUpdater : UnityEditor.AssetPostprocessor
     {
-        #if COM_UNITY_FORMATS_FBX_AS_ASSET
+#if COM_UNITY_FORMATS_FBX_AS_ASSET
         public const string FbxPrefabFile = "/UnityFbxPrefab.dll";
-        #else
+#else
         public const string FbxPrefabFile = "Packages/com.unity.formats.fbx/Runtime/FbxPrefab.cs";
-        #endif
+#endif
 
         const string MenuItemName = "GameObject/Update from FBX";
         public static bool runningUnitTest = false;
@@ -326,3 +327,4 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 }
+#endif // !UNITY_2018_3_OR_NEWER

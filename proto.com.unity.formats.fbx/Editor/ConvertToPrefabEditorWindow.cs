@@ -1,3 +1,4 @@
+#if !UNITY_2018_3_OR_NEWER
 using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_2018_1_OR_NEWER
@@ -279,3 +280,4 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 }
+#endif // !UNITY_2018_3_OR_NEWER
