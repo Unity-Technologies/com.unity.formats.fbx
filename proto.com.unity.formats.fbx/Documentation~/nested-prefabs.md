@@ -16,15 +16,15 @@ In addition, Variants give you some additional control over receiving updates fr
 
 ## Creating a Model Prefab Variant
 
- by  and choosing “Prefab Variant”. 
+ by right-clicking on a Model Prefab and choosing “Prefab Variant”. 
 
 You can create a unidirectional link between your external 3D modeling application and your Unity Scene by setting up a Model Prefab Variant to inherit all changes from the Model Prefab. This means that updates to the FBX Model file will flow through to the Prefab. 
 
 To create Prefab Variant from a Model Prefab: 
 
-1. If you haven't already created a Prefab Model from the FBX Model file, drag the FBX file from the Project view into the Scene Hierarchy.
+1. If you haven't already created a Prefab Model instance from the FBX Model file, drag the FBX file from the Project view into the Scene Hierarchy.
 
-	A Model Prefab ![Prefab icon](images/FBXExporter_PrefabIcon.png) appears in the Hierarchy view.
+	A Model Prefab instance ![Prefab icon](images/FBXExporter_PrefabIcon.png) appears in the Hierarchy view.
 
 2. Drag the Prefab Model from the Scene Hierarchy to the Project view.
 
