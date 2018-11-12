@@ -1,7 +1,5 @@
 # FBX Exporter 
 
-__Version__: @PACKAGE_VERSION@
-
 The FBX Exporter package provides round-trip workflows between Unity and 3D modeling software. Use this workflow to send geometry, Lights, Cameras, and animation from Unity to Autodesk® Maya®, Autodesk® Maya LT™, or Autodesk® 3ds Max®, and back again, with minimal effort.
 
 The FBX Exporter package includes the following features:

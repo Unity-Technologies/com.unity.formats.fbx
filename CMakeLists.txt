@@ -27,8 +27,6 @@ execute_process(COMMAND ${GIT_EXECUTABLE} config --get remote.origin.url
 
 configure_file(${CMAKE_SOURCE_DIR}/proto.com.unity.formats.fbx/package.json.in ${CMAKE_BINARY_DIR}/package.json @ONLY)
 
-configure_file(${CMAKE_SOURCE_DIR}/proto.com.unity.formats.fbx/Documentation~/index.md.in ${CMAKE_BINARY_DIR}/index.md @ONLY)
-
 ###########################################################################
 # Zip integrations folder
 
@@ -88,10 +86,6 @@ install(
 install(
     FILES "${CMAKE_BINARY_DIR}/${MAYA_INTEGRATION_ZIP_NAME}" "${CMAKE_BINARY_DIR}/${MAX_INTEGRATION_ZIP_NAME}"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx/Editor/Integrations~"
-)
-install(
-    FILES "${CMAKE_BINARY_DIR}/index.md"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx/Documentation~"
 )
 install(
     FILES "${CMAKE_SOURCE_DIR}/CHANGELOG.md" "${CMAKE_SOURCE_DIR}/LICENSE.md" "${CMAKE_BINARY_DIR}/package.json"
