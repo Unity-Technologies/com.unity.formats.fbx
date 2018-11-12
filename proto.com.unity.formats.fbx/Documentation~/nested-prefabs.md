@@ -2,7 +2,7 @@
 
 > ***Note:*** Prefab Variants are only available in Unity version 2018.3. If you are using Unity version 2018.2, use [Linked Prefabs](prefabs.md) instead. 
 
-When a user imports a Model from a 3D modeling application such as Autodesk® Maya®, it is represented in Unity as a *Model Prefab*. You can't edit Model Prefabs in Unity, apart from [changing the import settings](https://docs.unity3d.com/2018.3/Documentation/Manual/class-FBXImporter.html). If someone saves changes to that Model file in an external application, the FBX Exporter automatically updates the imported Model Prefab. 
+When a user imports a Model from a 3D modeling application such as Autodesk® Maya®, it is represented in Unity as a *Model Prefab*. You can't edit Model Prefabs in Unity, apart from [changing the import settings](https://docs.unity3d.com/2018.3/Documentation/Manual/class-FBXImporter.html). If someone saves changes to that Model file in an external application, the FBX Importer automatically updates the imported Model Prefab. 
 
 ![A Model Prefab in the Scene and Hierarchy views](images/FBXExporter_ModelPrefab.png)
 
