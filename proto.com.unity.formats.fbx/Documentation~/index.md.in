@@ -16,7 +16,7 @@ The FBX Exporter package includes the following features:
 
 	* [Model Prefab Variants](nested-prefabs.md) (Unity 2018.3 only): 
 
-		Unity 2018.3 introduced [Nested Prefabs](https://docs.unity3d.com/2018.3/Documentation/Manual/NestedPrefabs.html) and [Prefab Variants](https://docs.unity3d.com/2018.3/Documentation/Manual/PrefabVariants.html) as new Prefab features. The FBX Exporter package allows you to import an FBX file as a *Model Prefab* and create Prefab Variants from them. Since Prefab Variants can override properties and children without affecting the original Prefab, you can use them in Unity without breaking the link to the file, and bring in updates.
+		Unity 2018.3 introduced [Nested Prefabs](https://docs.unity3d.com/2018.3/Documentation/Manual/NestedPrefabs.html) and [Prefab Variants](https://docs.unity3d.com/2018.3/Documentation/Manual/PrefabVariants.html) as new Prefab features. The FBX Importer allows you to import an FBX file as a *Model Prefab* and create Prefab Variants from them. Since Prefab Variants can override properties and children without affecting the original Prefab, you can use them in Unity without breaking the link to the file, and bring in updates.
 
 * [Unity Integration for 3D modeling software](integration.md): Effortlessly import and export Assets between Unity and Autodesk® Maya®, Autodesk® Maya LT™, or Autodesk® 3ds Max®. The 3D modeling software remembers where the files go, and what objects to export back to Unity.
 
