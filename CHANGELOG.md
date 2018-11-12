@@ -1,6 +1,17 @@
 # Changes in Fbx Exporter
 
 RELEASE NOTES
+
+## [2.0.1] - 2018-11-12
+NEW FEATURES
+* In Unity 2018.3 replace Linked Prefabs with Prefab Variants
+* Updated documentation
+
+FIXES
+* Fix error when exporting SkinnedMesh with bones that are not descendants of the root bone
+* Fix animation only export not exporting animation in 2.0.0
+* Fix calculating center of root objects when exporting "Local Pivot"/"Local Centered"
+
 ## [2.0.0] - 2018-06-22
 NEW FEATURES
 * FBX Exporter is now distributed via the Package Manager
