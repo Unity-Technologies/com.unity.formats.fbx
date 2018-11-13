@@ -2,7 +2,7 @@
 
 RELEASE NOTES
 
-## [2.0.1-preview] - 2018-11-12
+## [2.0.1-preview] - 2018-11-13
 NEW FEATURES
 * In Unity 2018.3 Prefab Variants replaces Linked Prefabs. The "Convert To Linked Prefab" menu items have been removed.
 * Updated documentation
