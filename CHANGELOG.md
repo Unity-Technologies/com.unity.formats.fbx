@@ -12,6 +12,9 @@ FIXES
 * Fix animation only export not exporting animation in 2.0.0
 * Fix calculating center of root objects when exporting "Local Pivot"/"Local Centered"
 
+KNOWN ISSUES
+* In Unity 2018.3 exported blendshape normals may not match original blendshape normals
+
 ## [2.0.0] - 2018-06-22
 NEW FEATURES
 * FBX Exporter is now distributed via the Package Manager
