@@ -20,6 +20,6 @@
 ### Package Status
 
 - No issues from current test plan or bugfixes.
-- Mesh offset bug when exporting the "Lu" character from the Adam character pack still present - card logged.
+- Mesh offset bug when exporting the "Lu" character from the Adam character pack still present.
 - "Fbx Export" settings still in their own tab whereas the other project settings have been integrated into their own dockable window.
-- A few errors in 2018.1 but we've deprecated support for it so it's fine
+- prefabUtility and usePhysicalCamera errors in 2018.1 but we've deprecated support for it so it's not an issue
