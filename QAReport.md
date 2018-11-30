@@ -2,6 +2,7 @@
 ## Version tested: 2.0.1-preview
 
 #### QA Owner: Alexis Morin
+### Tested On: Windows, MacOS
 
 ### Test strategy
 
