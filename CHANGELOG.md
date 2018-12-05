@@ -1,6 +1,12 @@
 # Changes in Fbx Exporter
 
-RELEASE NOTES
+## [2.0.1-preview.2] - 2018-12-05
+CHANGES
+* Updated dependency to com.autodesk.fbx@2.0.0-preview.4
+
+## [2.0.1-preview.1] - 2018-12-04
+CHANGES
+* Updated dependency to com.autodesk.fbx@2.0.0-preview.3
 
 ## [2.0.1-preview] - 2018-11-13
 NEW FEATURES
