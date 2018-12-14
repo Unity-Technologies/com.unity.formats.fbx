@@ -3,6 +3,7 @@
   "displayName": "FBX Exporter",
   "version": "@PACKAGE_VERSION@",
   "dependencies": {
+    "com.unity.timeline": "0.0.0-builtin",
     "com.autodesk.fbx": "2.0.0-preview.4"
   },
   "unity": "2018.2",
