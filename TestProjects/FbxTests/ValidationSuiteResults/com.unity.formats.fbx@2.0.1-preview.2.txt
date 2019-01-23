@@ -1,0 +1,61 @@
+Validation Suite Results for package "com.unity.formats.fbx"
+ - Path: /Users/markv/workspace/com.unity.formats.fbx/package/build/install/com.unity.formats.fbx
+ - Version: 2.0.1-preview.2
+ - Test Time: 2019-01-23 3:01:45 PM
+
+PACKAGE DEPENDENCIES:
+--------------------
+    - com.autodesk.fbx@2.0.0-preview.4
+
+VALIDATION RESULTS:
+-------------------
+
+Failed - "Tests Validation"
+Error: Preview and Production quality packages must include test for automated testing.
+
+Succeeded - "Assembly Definition Validation"
+Checking: {Package-Root}/Editor/Unity.Formats.Fbx.Editor.asmdef
+
+Checking: {Package-Root}/Runtime/Unity.Formats.Fbx.Runtime.asmdef
+
+Succeeded - "ChangeLog Validation"
+
+Succeeded - "Dependency Validation"
+
+Succeeded - "Documentation Validation"
+
+Succeeded - "Manifest Validation"
+Skipping Git tags check as this is a package in development.
+
+New dependency: "com.autodesk.fbx": "2.0.0-preview.4"
+
+Succeeded - "Meta Files Validation"
+
+Succeeded - "Required File Type Validation"
+
+Succeeded - "Restricted File Type Validation"
+Warning: /Users/markv/workspace/com.unity.formats.fbx/package/build/install/com.unity.formats.fbx/Editor/Integrations~/UnityFbxForMax.zip should not be included in packages unless absolutely necessary.  Please confirm that it's inclusion is deliberate and intentional.
+
+Warning: /Users/markv/workspace/com.unity.formats.fbx/package/build/install/com.unity.formats.fbx/Editor/Integrations~/UnityFbxForMaya.zip should not be included in packages unless absolutely necessary.  Please confirm that it's inclusion is deliberate and intentional.
+
+Succeeded - "Unity Version Validation"
+
+Succeeded - "Package Update Validation"
+
+NotRun - "API Validation"
+No previous package version. Skipping Semantic Versioning checks.
+
+NotRun - "Package Diff Evaluation"
+No previous package version. Skipping diff evaluation.
+
+NotRun - "Project Template Validation"
+com.unity.formats.fbx is not a project template.
+
+NotRun - "Samples Validation"
+No samples found. Skipping Samples Validation.
+
+NotImplementedYet - "Folder Structure Validation"
+
+NotImplementedYet - "License Validation"
+
+NotImplementedYet - "Signature Validation"

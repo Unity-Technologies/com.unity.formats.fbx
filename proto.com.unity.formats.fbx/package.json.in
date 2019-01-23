@@ -18,5 +18,8 @@
     "url": "@PACKAGE_REPO_URL@",
     "type": "git",
     "revision": "@PACKAGE_REVISION@"
+  },
+  "relatedPackages": {
+    "com.unity.formats.fbx.tests": "2.0.0-preview" 
   }
 }
