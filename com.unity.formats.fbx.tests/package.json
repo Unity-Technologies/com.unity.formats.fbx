@@ -1,0 +1,8 @@
+{
+  "type": "tests",
+  "name": "com.unity.formats.fbx.tests",
+  "displayName": "FBX Exporter Tests",
+  "version": "2.0.0-preview",
+  "unity": "2018.2",
+  "description": "This is not a user-facing package."
+}

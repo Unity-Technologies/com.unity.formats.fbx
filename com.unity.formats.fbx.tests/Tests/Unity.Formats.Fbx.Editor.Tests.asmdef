@@ -1,0 +1,15 @@
+{
+    "name": "Unity.Formats.Fbx.Editor.Tests",
+    "references": [
+        "Unity.Timeline",
+        "Autodesk.Fbx",
+        "Unity.Formats.Fbx.Editor",
+        "Unity.Formats.Fbx.Runtime"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}

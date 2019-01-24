@@ -1,0 +1,13 @@
+{
+    "name": "Unity.Formats.Fbx.Editor",
+    "references": [
+      "Unity.Timeline",
+      "Unity.Timeline.Editor",
+      "Unity.Formats.Fbx.Runtime",
+      "Autodesk.Fbx"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

@@ -1,12 +1,15 @@
 {
   "dependencies": {
-    "com.autodesk.fbx": "2.0.0-preview",
-    "com.unity.formats.fbx": "file:../../../build/install/com.unity.formats.fbx",
     "com.unity.ads": "2.0.8",
-    "com.unity.analytics": "2.0.16",
-    "com.unity.package-manager-ui": "1.9.11",
-    "com.unity.purchasing": "2.0.3",
-    "com.unity.textmeshpro": "1.2.4",
+    "com.unity.analytics": "3.2.2",
+    "com.unity.collab-proxy": "1.2.15",
+    "com.unity.formats.fbx": "file:../../../build/install/com.unity.formats.fbx",
+    "com.unity.formats.fbx.tests": "file:../../../com.unity.formats.fbx.tests",
+    "com.unity.package-manager-ui": "2.1.1",
+    "com.unity.package-validation-suite": "0.4.0-preview.13",
+    "com.unity.purchasing": "2.0.1",
+    "com.unity.textmeshpro": "1.3.0",
+    "com.unity.timeline": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
     "com.unity.modules.assetbundle": "1.0.0",
@@ -38,5 +41,8 @@
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
   },
-  "registry": "https://staging-packages.unity.com"
+  "registry": "https://staging-packages.unity.com",
+  "testables": [
+    "com.unity.formats.fbx.tests"
+  ]
 }
