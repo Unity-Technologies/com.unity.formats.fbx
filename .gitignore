@@ -72,3 +72,4 @@ TestProjects/FbxTests/Assets/Plugins*
 **/_safe_to_delete__*
 .DS_Store
 FbxExportSettings.asset
+**/ValidationSuiteResults/**
