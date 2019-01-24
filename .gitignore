@@ -73,3 +73,4 @@ TestProjects/FbxTests/Assets/Plugins*
 .DS_Store
 FbxExportSettings.asset
 **/ValidationSuiteResults/**
+TestProjects/FbxTests/Logs/*
