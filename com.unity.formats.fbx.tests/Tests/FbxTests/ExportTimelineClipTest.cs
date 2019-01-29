@@ -32,8 +32,10 @@ namespace FbxExporter.UnitTests
                 foreach (PlayableBinding output in pd.playableAsset.outputs) {
                     AnimationTrack at = output.sourceObject as AnimationTrack;
 
-                    GameObject atObject = pd.GetGenericBinding (output.sourceObject) as GameObject;
-                    Assert.That (atObject, Is.Not.Null);
+                    var atComponent = pd.GetGenericBinding(at) as Component;
+                    Assert.That (atComponent, Is.Not.Null);
+
+                    var atObject = atComponent.gameObject;
 
                     // One file by animation clip
                     foreach (TimelineClip timeLineClip in at.GetClips()) {

@@ -13,7 +13,7 @@ namespace FbxExporter.UnitTests
         /// Use this path if you want to load some data for testing, e.g. a
         /// material or scene or fbx.
         /// </summary>
-        public const string PathToTestData = "Assets";
+        public const string PathToTestData = "Packages/com.unity.formats.fbx.tests/Tests";
 
         /// <summary>
         /// Sleep an amount of time (in ms) so we can safely assume that the
@@ -220,11 +220,8 @@ namespace FbxExporter.UnitTests
         /// <returns>The new GameObject in the scene.</returns>
         /// <param name="assetPath">Asset path.</param>
         protected GameObject AddAssetToScene(string assetPath){
-            if (!assetPath.StartsWith("Assets/")) {
-                assetPath = "Assets/" + assetPath;
-            }
             GameObject originalObj = AssetDatabase.LoadMainAssetAtPath (assetPath) as GameObject;
-            Assert.IsNotNull (originalObj);
+            Assert.IsNotNull (originalObj, assetPath);
             GameObject originalGO = GameObject.Instantiate (originalObj);
             Assert.IsTrue (originalGO);
 

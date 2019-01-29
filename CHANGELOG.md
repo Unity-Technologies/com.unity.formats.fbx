@@ -4,6 +4,7 @@
 CHANGES
 * Moved tests to separate .tests package
 * Added Timeline dependency
+* Export of blendshapes is experimental, YMMV
 
 ## [2.0.1-preview.2] - 2018-12-05
 CHANGES

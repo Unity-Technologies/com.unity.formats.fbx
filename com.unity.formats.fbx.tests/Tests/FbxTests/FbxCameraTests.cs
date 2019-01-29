@@ -83,7 +83,6 @@ namespace FbxExporter.UnitTests
 
             // Configure FilmBack Super 8mm, 5.79f x 4.01mm
             origCam.usePhysicalProperties = true;
-            origCam.aspect = 4.01f / 5.79f;
             origCam.focalLength = 50f.Centimeters().ToMillimeters();
             origCam.sensorSize = new Vector2(5.79f, 4.01f);
 
@@ -108,7 +107,6 @@ namespace FbxExporter.UnitTests
             Assert.That( srcCam.usePhysicalProperties, Is.EqualTo(origCam.usePhysicalProperties));
             Assert.That( srcCam.lensShift.x, Is.EqualTo(origCam.lensShift.x).Within(EPSILON));
             Assert.That( srcCam.lensShift.y, Is.EqualTo(origCam.lensShift.y).Within(EPSILON));
-            Assert.That( srcCam.aspect, Is.EqualTo(origCam.aspect).Within(EPSILON));
             Assert.That( srcCam.nearClipPlane, Is.EqualTo(origCam.nearClipPlane));
             Assert.That( srcCam.farClipPlane, Is.EqualTo(origCam.farClipPlane));
         }
