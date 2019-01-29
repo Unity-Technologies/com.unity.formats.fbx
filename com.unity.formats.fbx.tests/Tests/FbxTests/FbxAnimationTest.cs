@@ -86,7 +86,7 @@ namespace FbxExporter.UnitTests
             }
         }
 
-        public static IEnumerable AnimOnlyTestCaases {
+        public static IEnumerable AnimOnlyTestCases {
             get {
                 yield return new TestCaseData ("Models/DefaultMale/DefaultMale.prefab");
             }
@@ -759,7 +759,7 @@ namespace FbxExporter.UnitTests
             return tester.DoIt() <= propertyNames.Length ? 1 : 0;
         }
 
-        [Test, TestCaseSource (typeof (AnimationTestDataClass), "AnimOnlyTestCaases")]
+        [Test, TestCaseSource (typeof (AnimationTestDataClass), "AnimOnlyTestCases")]
         public void AnimOnlyExportTest(string prefabPath)
         {
             prefabPath = FindPathInUnitTests (prefabPath);
