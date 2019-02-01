@@ -1,13 +1,20 @@
 {
     "name": "Unity.Formats.Fbx.Editor",
     "references": [
-      "Unity.Timeline",
-      "Unity.Timeline.Editor",
-      "Unity.Formats.Fbx.Runtime",
-      "Autodesk.Fbx"
+        "Unity.Timeline",
+        "Unity.Timeline.Editor",
+        "Unity.Formats.Fbx.Runtime",
+        "Autodesk.Fbx"
     ],
+    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
-    "excludePlatforms": []
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
 }

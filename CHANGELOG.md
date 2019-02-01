@@ -1,5 +1,10 @@
 # Changes in Fbx Exporter
 
+## [2.0.1-preview.5] - 2019-02-01
+CHANGES
+* Updated to com.autodesk.fbx 2.0.0-preview.6
+* Updated asmdefs to only include Editor platform
+
 ## [2.0.1-preview.4] - 2019-01-31
 CHANGES
 * Updated unityRelease version in package.json
