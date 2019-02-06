@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [2.0.1-preview.6] - 2019-02-06
+CHANGES
+* Updated package.json
+
 ## [2.0.1-preview.5] - 2019-02-01
 CHANGES
 * Updated to com.autodesk.fbx 2.0.0-preview.6
