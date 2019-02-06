@@ -4,6 +4,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -31,6 +32,24 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         const float BrowseButtonWidth = 25;
         const float FieldOffset = 18;
         const float BrowseButtonOffset = 5;
+
+        static class Style
+        {
+            public static GUIContent Application3D = new GUIContent(
+                "3D Application:",
+                "Select the 3D Application for which you would like to install the Unity integration.");
+            public static GUIContent KeepOpen = new GUIContent("Keep Open:",
+                "Keep the selected 3D application open after Unity integration install has completed.");
+            public static GUIContent HideNativeMenu = new GUIContent("Hide Native Menu:",
+                "Replace Maya's native 'Send to Unity' menu with the Unity Integration's menu");
+            public static GUIContent InstallIntegrationContent = new GUIContent(
+                "Install Unity Integration",
+                "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
+            public static GUIContent RepairMissingScripts = new GUIContent(
+                "Run Component Updater",
+                "If FBX exporter version 1.3.0f1 or earlier was previously installed, then links to the FbxPrefab component will need updating.\n" +
+                "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
+        }
 
         [SecurityPermission(SecurityAction.LinkDemand)]
         public override void OnInspectorGUI() {
@@ -69,9 +88,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUI.indentLevel++;
 
             GUILayout.BeginHorizontal ();
-            EditorGUILayout.LabelField(new GUIContent (
-                "3D Application:",
-                "Select the 3D Application for which you would like to install the Unity integration."), GUILayout.Width(LabelWidth - FieldOffset));
+            EditorGUILayout.LabelField(Style.Application3D, GUILayout.Width(LabelWidth - FieldOffset));
             
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
@@ -115,14 +132,12 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.Space();
 
             exportSettings.LaunchAfterInstallation = EditorGUILayout.Toggle(
-                new GUIContent("Keep Open:",
-                    "Keep the selected 3D application open after Unity integration install has completed."),
+                Style.KeepOpen,
                 exportSettings.LaunchAfterInstallation
             );
 
             exportSettings.HideSendToUnityMenuProperty = EditorGUILayout.Toggle(
-                new GUIContent("Hide Native Menu:",
-                    "Replace Maya's native 'Send to Unity' menu with the Unity Integration's menu"),
+                Style.HideNativeMenu,
                 exportSettings.HideSendToUnityMenuProperty
             );
 
@@ -130,10 +145,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             // disable button if no 3D application is available
             EditorGUI.BeginDisabledGroup (!ExportSettings.CanInstall());
-            var installIntegrationContent = new GUIContent(
-                    "Install Unity Integration",
-                    "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
-            if (GUILayout.Button (installIntegrationContent)) {
+            if (GUILayout.Button (Style.InstallIntegrationContent)) {
                 EditorApplication.delayCall += UnityEditor.Formats.Fbx.Exporter.IntegrationsUI.InstallDCCIntegration;
             }
             EditorGUI.EndDisabledGroup ();
@@ -145,13 +157,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUI.indentLevel++;
 
             EditorGUILayout.Space ();
-
-            var repairMissingScripts = new GUIContent (
-                                       "Run Component Updater",
-                                        "If FBX exporter version 1.3.0f1 or earlier was previously installed, then links to the FbxPrefab component will need updating.\n" +
-                                        "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
-
-            if (GUILayout.Button (repairMissingScripts)) {
+            
+            if (GUILayout.Button (Style.RepairMissingScripts)) {
                 var componentUpdater = new UnityEditor.Formats.Fbx.Exporter.RepairMissingScripts ();
                 var filesToRepairCount = componentUpdater.AssetsToRepairCount;
                 var dialogTitle = "FBX Prefab Component Updater";
@@ -227,6 +234,37 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             return newDccPath;
         }
 
+        [SettingsProvider]
+        static SettingsProvider CreateFbxExportSettingsProvider()
+        {
+            ExportSettings.instance.name = "FBX Export Settings";
+            ExportSettings.instance.Load();
+
+            var provider = AssetSettingsProvider.CreateProviderFromObject(
+                "Project/Fbx Export", ExportSettings.instance, GetSearchKeywordsFromGUIContentProperties(typeof(Style)));
+            provider.inspectorUpdateHandler += () =>
+            {
+                if (provider.settingsEditor != null &&
+                    provider.settingsEditor.serializedObject.UpdateIfRequiredOrScript())
+                {
+                    provider.Repaint();
+                }
+            };
+            return provider;
+        }
+
+        static IEnumerable<string> GetSearchKeywordsFromGUIContentProperties(Type type)
+        {
+            return type.GetFields(BindingFlags.Static | BindingFlags.Public)
+                .Where(field => typeof(GUIContent).IsAssignableFrom(field.FieldType))
+                .Select(field => ((GUIContent)field.GetValue(null)).text)
+                .Concat(type.GetProperties(BindingFlags.Static | BindingFlags.Public)
+                    .Where(prop => typeof(GUIContent).IsAssignableFrom(prop.PropertyType))
+                    .Select(prop => ((GUIContent)prop.GetValue(null, null)).text))
+                .Where(content => content != null)
+                .Select(content => content.ToLowerInvariant())
+                .Distinct();
+        }
     }
 
     [FilePath("ProjectSettings/FbxExportSettings.asset",FilePathAttribute.Location.ProjectFolder)]
@@ -1330,14 +1368,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 // Otherwise print out the path with the proper separator.
                 return String.Join("" + separator, dirs, 0, lastWriteIndex + 1);
             }
-        }
-
-        [MenuItem("Edit/Project Settings/FBX Export", priority = 300)]
-        static void ShowManager()
-        {
-            instance.name = "FBX Export Settings";
-            Selection.activeObject = instance;
-            instance.Load();
         }
 
         internal override void Load ()
