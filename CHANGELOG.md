@@ -3,6 +3,8 @@
 ## [2.0.1-preview.6] - 2019-02-06
 CHANGES
 * Updated package.json
+* Reverted change to Runtime asmdef
+* Fixed non-deterministic behaviour in tests
 
 ## [2.0.1-preview.5] - 2019-02-01
 CHANGES
