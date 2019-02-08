@@ -17,6 +17,8 @@ namespace FbxExporter.UnitTests
             #if (!DEBUG_UNITTEST)
             base.Term ();
             #endif
+            ModelExporter.UnRegisterAllMeshCallbacks();
+            ModelExporter.UnRegisterAllMeshObjectCallbacks();
         }
         
         [Test]
@@ -261,7 +263,7 @@ namespace FbxExporter.UnitTests
 
             // Unregister once => only one call per object, and no more for the prefab.
             ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
-            ModelExporter.UnRegisterMeshCallback(tester.CallbackForObject);
+            ModelExporter.UnRegisterMeshObjectCallback(tester.CallbackForObject);
             tester.Verify(0, n);
 
             // Legal to unregister if already unregistered.
@@ -269,11 +271,11 @@ namespace FbxExporter.UnitTests
             tester.Verify(0, n);
 
             // Register same callback twice gets back to original state.
-            ModelExporter.UnRegisterMeshCallback(tester.CallbackForObject);
+            ModelExporter.UnRegisterMeshObjectCallback(tester.CallbackForObject);
             tester.Verify(0, 0);
 
             // Legal to unregister if already unregistered.
-            ModelExporter.UnRegisterMeshCallback(tester.CallbackForObject);
+            ModelExporter.UnRegisterMeshObjectCallback(tester.CallbackForObject);
             tester.Verify(0, 0);
 
             ///////////////////////
@@ -321,7 +323,7 @@ namespace FbxExporter.UnitTests
                 };
             ModelExporter.RegisterMeshObjectCallback(callback);
             ModelExporter.ExportObject(filename, tree);
-            ModelExporter.UnRegisterMeshCallback(callback);
+            ModelExporter.UnRegisterMeshObjectCallback(callback);
 
             asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             assetMesh = asset.transform.Find("Parent1").GetComponent<MeshFilter>().sharedMesh;
@@ -588,7 +590,6 @@ namespace FbxExporter.UnitTests
                     yield return "Models/MultiRootCharacters/NullsInHierarchy.fbx";
                     // Characters from the asset store
                     yield return "Models/SimpleMan/SimpleMan.fbx";
-                    yield return "Models/Cowboy/cowboyMidPoly(riged).fbx";
                 }
             }
         }
