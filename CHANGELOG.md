@@ -1,10 +1,11 @@
 # Changes in Fbx Exporter
 
-## [2.0.1-preview.6] - 2019-02-06
+## [2.0.1-preview.6] - 2019-02-08
 CHANGES
 * Updated package.json
 * Reverted change to Runtime asmdef
 * Fixed non-deterministic behaviour in tests
+* Updated com.autodesk.fbx to 2.0.0-preview.7
 
 ## [2.0.1-preview.5] - 2019-02-01
 CHANGES
