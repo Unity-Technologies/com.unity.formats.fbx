@@ -3911,6 +3911,30 @@ namespace UnityEditor.Formats.Fbx.Exporter
             MeshForComponentCallbacks[t] = callback;
         }
 
+        /// <summary>
+        /// Forget the callback linked to a component of type T.
+        /// </summary>
+        internal static void UnRegisterMeshCallback<T>()
+        {
+            MeshForComponentCallbacks.Remove(typeof(T));
+        }
+
+        /// <summary>
+        /// Forget the callback linked to a component of type T.
+        /// </summary>
+        internal static void UnRegisterMeshCallback(System.Type t)
+        {
+            MeshForComponentCallbacks.Remove(t);
+        }
+
+        /// <summary>
+        /// Forget the callbacks linked to components.
+        /// </summary>
+        internal static void UnRegisterAllMeshCallbacks()
+        {
+            MeshForComponentCallbacks.Clear();
+        }
+        
         static List<GetMeshForObject> MeshForObjectCallbacks = new List<GetMeshForObject>();
 
         /// <summary>
@@ -3930,27 +3954,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Forget the callback linked to a component of type T.
-        /// </summary>
-        internal static void UnRegisterMeshCallback<T>()
-        {
-            MeshForComponentCallbacks.Remove(typeof(T));
-        }
-
-        /// <summary>
-        /// Forget the callback linked to a component of type T.
-        /// </summary>
-        internal static void UnRegisterMeshCallback(System.Type t)
-        {
-            MeshForComponentCallbacks.Remove(t);
-        }
-
-        /// <summary>
         /// Forget a GameObject-based callback.
         /// </summary>
-        internal static void UnRegisterMeshCallback(GetMeshForObject callback)
+        internal static void UnRegisterMeshObjectCallback(GetMeshForObject callback)
         {
             MeshForObjectCallbacks.Remove(callback);
+        }
+
+        /// <summary>
+        /// Forget all GameObject-based callbacks.
+        /// </summary>
+        internal static void UnRegisterAllMeshObjectCallbacks()
+        {
+            MeshForObjectCallbacks.Clear();
         }
 
         /// <summary>
