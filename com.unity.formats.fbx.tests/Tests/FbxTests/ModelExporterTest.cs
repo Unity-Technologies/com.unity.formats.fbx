@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using Autodesk.Fbx;
 using UnityEngine.Formats.Fbx.Exporter;
 using UnityEditor.Formats.Fbx.Exporter;
-using UnityEditor.SceneManagement;
 
 namespace FbxExporter.UnitTests
 {
