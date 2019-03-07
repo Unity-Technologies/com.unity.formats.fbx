@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.8)
 
-SET(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Install path prefix")
+SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}" CACHE PATH "Install path prefix")
 MESSAGE(STATUS "CMAKE_INSTALL_PREFIX is: " ${CMAKE_INSTALL_PREFIX})
 
 project (UnityFbxExporterEditorPackage NONE)
@@ -25,7 +25,7 @@ execute_process(COMMAND ${GIT_EXECUTABLE} config --get remote.origin.url
         OUTPUT_VARIABLE PACKAGE_REPO_URL
         OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-configure_file(${CMAKE_SOURCE_DIR}/proto.com.unity.formats.fbx/package.json.in ${CMAKE_BINARY_DIR}/package.json @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/package.json.in ${CMAKE_BINARY_DIR}/package.json @ONLY)
 
 ###########################################################################
 # Zip integrations folder
@@ -79,11 +79,6 @@ add_custom_target(${MAX_INTEGRATION_ZIP_TARGET} ALL DEPENDS ${MAX_INTEGRATION_ZI
 # Install project into build folder
 
 install(
-    DIRECTORY "${CMAKE_SOURCE_DIR}/proto.com.unity.formats.fbx/"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx"
-    PATTERN "*.in" EXCLUDE
-)
-install(
     FILES "${CMAKE_BINARY_DIR}/${MAYA_INTEGRATION_ZIP_NAME}" "${CMAKE_BINARY_DIR}/${MAX_INTEGRATION_ZIP_NAME}"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx/Editor/Integrations~"
 )
@@ -91,3 +86,4 @@ install(
     FILES "${CMAKE_SOURCE_DIR}/CHANGELOG.md" "${CMAKE_SOURCE_DIR}/LICENSE.md" "${CMAKE_BINARY_DIR}/package.json"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx"
 )
+
