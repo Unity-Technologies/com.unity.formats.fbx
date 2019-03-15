@@ -350,7 +350,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                 myProcess.StartInfo.CreateNoWindow = true;
                 myProcess.StartInfo.UseShellExecute = false;
-                myProcess.StartInfo.RedirectStandardError = true;
+
+                if (!ExportSettings.instance.LaunchAfterInstallation)
+                {
+                    myProcess.StartInfo.RedirectStandardError = true;
+                }
 
                 string commandString;
 
@@ -381,6 +385,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 if (!ExportSettings.instance.LaunchAfterInstallation)
                 {
+                    string stderr = myProcess.StandardError.ReadToEnd();
                     myProcess.WaitForExit();
                     ExitCode = myProcess.ExitCode;
                     Debug.Log(string.Format("Ran maya: [{0}]\nWith args [{1}]\nResult {2}",
@@ -388,7 +393,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     // see if we got any error messages
                     if(ExitCode != 0){
-                        string stderr = myProcess.StandardError.ReadToEnd();
                         if(!string.IsNullOrEmpty(stderr)){
                             Debug.LogError(string.Format("Maya installation error (exit code: {0}): {1}", ExitCode, stderr));
                         }
@@ -645,6 +649,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 myProcess.EnableRaisingEvents = true;
                 myProcess.Start();
+                string stderr = myProcess.StandardOutput.ReadToEnd();
                 myProcess.WaitForExit();
                 ExitCode = myProcess.ExitCode;
 
@@ -661,7 +666,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // print any errors
                 if(ExitCode != 0){
-                    string stderr = myProcess.StandardOutput.ReadToEnd();
                     if(!string.IsNullOrEmpty(stderr)){
                         Debug.LogError(string.Format("3ds Max installation error (exit code: {0}): {1}", ExitCode, stderr));
                     }
