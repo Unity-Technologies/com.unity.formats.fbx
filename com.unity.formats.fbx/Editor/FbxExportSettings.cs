@@ -67,15 +67,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
 
             GUILayout.BeginVertical();
-#if !UNITY_2018_3_OR_NEWER
+
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
+#if !UNITY_2018_3_OR_NEWER
             exportSettings.AutoUpdaterEnabled = EditorGUILayout.Toggle(
                 new GUIContent("Auto-Updater:",
                     "Automatically updates prefabs with new fbx data that was imported."),
                 exportSettings.AutoUpdaterEnabled
             );
-
+#endif
             exportSettings.ShowConvertToPrefabDialog = EditorGUILayout.Toggle(
                 new GUIContent("Show Convert UI:", "Enable Convert dialog when converting to a Linked Prefab"),
                 exportSettings.ShowConvertToPrefabDialog
@@ -83,7 +84,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             EditorGUI.indentLevel--;
-#endif
+
             EditorGUILayout.LabelField("Integration", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
@@ -470,8 +471,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             get { return BakeAnimation; }
             set { BakeAnimation = value; }
         }
-
-#if !UNITY_2018_3_OR_NEWER
+        
         [SerializeField]
         private bool showConvertToPrefabDialog = true;
         public bool ShowConvertToPrefabDialog
@@ -479,7 +479,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             get { return showConvertToPrefabDialog; }
             set { showConvertToPrefabDialog = value; }
         }
-#endif
 
         [SerializeField]
         private string integrationSavePath;
@@ -563,8 +562,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         // store contents of export model settings for serialization
         [SerializeField]
         private ExportModelSettingsSerialize exportModelSettingsSerialize;
-
-#if !UNITY_2018_3_OR_NEWER
+        
         [System.NonSerialized]
         private ConvertToPrefabSettings m_convertToPrefabSettings;
         internal ConvertToPrefabSettings ConvertToPrefabSettings
@@ -575,7 +573,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         [SerializeField]
         private ConvertToPrefabSettingsSerialize convertToPrefabSettingsSerialize;
-#endif
 
         internal override void LoadDefaults()
         {
@@ -591,10 +588,10 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             exportModelSettingsSerialize = ExportModelSettings.info;
 #if !UNITY_2018_3_OR_NEWER
             AutoUpdaterEnabled = true;
+#endif
             ShowConvertToPrefabDialog = true;
             ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
-#endif
         }
 
         /// <summary>
@@ -1377,22 +1374,17 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 instance.ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             }
             instance.ExportModelSettings.info = instance.exportModelSettingsSerialize;
-
-#if !UNITY_2018_3_OR_NEWER
+            
             if (!instance.ConvertToPrefabSettings) {
                 instance.ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
             }
             instance.ConvertToPrefabSettings.info = instance.convertToPrefabSettingsSerialize;
-#endif
         }
 
         internal void Save()
         {
             exportModelSettingsSerialize = ExportModelSettings.info;
-
-#if !UNITY_2018_3_OR_NEWER
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
-#endif
             instance.Save (true);
         }
     }

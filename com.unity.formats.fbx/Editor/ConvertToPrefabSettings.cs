@@ -1,6 +1,4 @@
-﻿#if !UNITY_2018_3_OR_NEWER
-using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -80,4 +78,3 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool AllowSceneModification { get { return true; } }
     }
 }
-#endif // !UNITY_2018_3_OR_NEWER
