@@ -346,7 +346,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     }
                 }
             }
-            return result;
+            return NormalizePath(result, false);
         }
 
         /// <summary>
@@ -367,7 +367,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 {
                     if (Directory.Exists(location))
                     {
-                        result.Add(location);
+                        result.Add(NormalizePath(location, false));
                     }
                 }
             }
