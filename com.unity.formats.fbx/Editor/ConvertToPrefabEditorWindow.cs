@@ -1,4 +1,3 @@
-#if !UNITY_2018_3_OR_NEWER
 using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_2018_1_OR_NEWER
@@ -51,7 +50,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 var go = ModelExporter.GetGameObject(GetToExport()[0]);
                 // check if the GameObject is a model instance, use as default filename and path if it is
-                var mainAsset = ConvertToModel.GetFbxAssetOrNull(go);
+                GameObject mainAsset = ConvertToNestedPrefab.GetFbxAssetOrNull(go);
                 if (!mainAsset)
                 {
                     // Use the game object's name
@@ -162,7 +161,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // Check if we'll be clobbering files. If so, warn the user
                 // first and let them cancel out.
-                if (ConvertToModel.WillCreatePrefab(go))
+               /* if (ConvertToModel.WillCreatePrefab(go))
                 {
                     if (!OverwriteExistingFile(prefabPath))
                     {
@@ -175,9 +174,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     {
                         return false;
                     }
-                }
+                }*/
 
-                ConvertToModel.Convert(
+                ConvertToNestedPrefab.Convert(
                     go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
                 );
                 return true;
@@ -187,9 +186,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 // Convert, automatically choosing a file path that won't clobber any existing files.
                 var go = ModelExporter.GetGameObject(obj);
-                ConvertToModel.Convert(
+                /*ConvertToModel.Convert(
                     go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
-                );
+                );*/
             }
             return true;
         }
@@ -280,4 +279,3 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 }
-#endif // !UNITY_2018_3_OR_NEWER
