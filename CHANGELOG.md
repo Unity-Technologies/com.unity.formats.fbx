@@ -1,5 +1,10 @@
 # Changes in Fbx Exporter
 
+## [2.0.1-preview.7] - 2019-03-20
+CHANGES
+* Fix Max 2020 integration installation hanging
+* Fix duplicate DCCs showing in integration install dropdown if MAYA_LOCATION set
+
 ## [2.0.1-preview.6] - 2019-02-08
 CHANGES
 * Updated package.json
