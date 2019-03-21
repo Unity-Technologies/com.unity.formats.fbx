@@ -211,7 +211,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Object.DestroyImmediate(temp);
 
             // replace hierarchy in the scene
-            if (!PrefabUtility.IsPartOfPrefabAsset(toConvert))
+            if (toConvert != null && !PrefabUtility.IsPartOfPrefabAsset(toConvert))
             {
                 var prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
                 prefabInstance.transform.parent = toConvert.transform.parent;
