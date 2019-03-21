@@ -34,8 +34,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     internal static class ConvertToNestedPrefab
     {
-        const string GameObjectMenuItemName = "GameObject/Convert To Nested Prefab Instance...";
-        const string AssetsMenuItemName = "Assets/Convert To Nested Prefab...";
+        const string GameObjectMenuItemName = "GameObject/Convert To Model Prefab Variant Instance...";
+        const string AssetsMenuItemName = "Assets/Convert To Model Prefab Variant...";
 
         /// <summary>
         /// OnContextItem is called either:
@@ -196,11 +196,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             // if root is a prefab instance, unpack it. Unpack everything below as well
-            bool isInstance = false;
             if (PrefabUtility.GetPrefabInstanceStatus(toConvert) == PrefabInstanceStatus.Connected)
             {
                 PrefabUtility.UnpackPrefabInstance(toConvert, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
-                isInstance = true;
             }
 
             // If we selected the something that's already backed by an
@@ -212,13 +210,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var prefab = PrefabUtility.SaveAsPrefabAsset(temp, ExportSettings.GetProjectRelativePath(prefabFullPath));
             Object.DestroyImmediate(temp);
 
-            // replace hierarchy in the scene with prefab if it's an instance
-            if (isInstance)
+            // replace hierarchy in the scene
+            if (!PrefabUtility.IsPartOfPrefabAsset(toConvert))
             {
-                var prefabInstance = PrefabUtility.InstantiatePrefab(prefab);
-                prefab.transform.parent = toConvert.transform.parent;
+                var prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+                prefabInstance.transform.parent = toConvert.transform.parent;
                 Object.DestroyImmediate(toConvert);
-                return prefabInstance as GameObject;
+                SceneManagement.EditorSceneManager.MarkSceneDirty(prefabInstance.scene);
+                Debug.LogWarning("prefab scene: " + prefabInstance.scene.name);
+                return prefabInstance;
             }
 
             // If we selected a prefab *instance* then break the
