@@ -207,17 +207,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // create prefab variant from the fbx
             var temp = PrefabUtility.InstantiatePrefab(mainAsset) as GameObject;
+
+            // copy components over
+            UpdateFromSourceRecursive(temp, toConvert);
+
             var prefab = PrefabUtility.SaveAsPrefabAsset(temp, ExportSettings.GetProjectRelativePath(prefabFullPath));
             Object.DestroyImmediate(temp);
 
             // replace hierarchy in the scene
             if (toConvert != null && !PrefabUtility.IsPartOfPrefabAsset(toConvert))
             {
+                // need to fix scene references on prefab instance
+
                 var prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
                 prefabInstance.transform.parent = toConvert.transform.parent;
                 Object.DestroyImmediate(toConvert);
+                /*if (SceneManagement.EditorSceneManager.IsPreviewSceneObject(toConvert))
+                {
+                    var prefabStage = Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+                    prefabStage.prefabContentsRoot = prefabInstance;
+                }*/
                 SceneManagement.EditorSceneManager.MarkSceneDirty(prefabInstance.scene);
-                Debug.LogWarning("prefab scene: " + prefabInstance.scene.name);
                 return prefabInstance;
             }
 
@@ -351,7 +361,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             // Copy the mesh/materials from the FBX
-            UpdateFromSourceRecursive(toConvert, unityMainAsset);
+            //UpdateFromSourceRecursive(toConvert, unityMainAsset);
 
             return unityMainAsset;
         }
@@ -636,6 +646,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // recurse over orig, for each transform finding the corresponding transform in the FBX
             // and copying the meshes and materials over from the FBX
             var goDict = MapNameToSourceRecursive(dest, source);
+            var reverseDict = MapNameToSourceRecursive(source, dest);
+
             var q = new Queue<Transform>();
             q.Enqueue(dest.transform);
             while (q.Count > 0)
@@ -647,7 +659,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     Debug.LogWarning(string.Format("Warning: Could not find Object {0} in FBX", t.name));
                     continue;
                 }
-                CopyComponents(t.gameObject, goDict[t.name]);
+                CopyComponents(t.gameObject, goDict[t.name], reverseDict);
                 foreach (Transform child in t)
                 {
                     q.Enqueue(child);
@@ -713,103 +725,128 @@ namespace UnityEditor.Formats.Fbx.Exporter
         ///
         /// The 'from' hierarchy is not modified.
         /// </summary>
-        internal static void CopyComponents(GameObject to, GameObject from)
+        internal static void CopyComponents(GameObject to, GameObject from, Dictionary<string, GameObject> nameMap)
         {
-            var originalComponents = new List<Component>(to.GetComponents<Component>());
+            // TODO: sometimes Skinned Mesh Renderer can be exported as a MeshFilter/MeshRenderer
 
-            // UNI-27534: This fixes the issue where the mesh collider would not update to point to the mesh in the fbx after export
-            // Point the mesh included in the mesh collider to the mesh in the FBX file, which is the same as the one in mesh filter
-            var toMeshCollider = to.GetComponent<MeshCollider>();
-            var toMeshFilter = to.GetComponent<MeshFilter>();
-            // if the mesh collider isn't pointing to the same mesh as in the current mesh filter then don't
-            // do anything as it's probably pointing to a mesh in a different fbx
-            if (toMeshCollider && toMeshFilter && toMeshCollider.sharedMesh == toMeshFilter.sharedMesh)
-            {
-                var fromFilter = from.GetComponent<MeshFilter>();
-                if (fromFilter)
-                {
-                    toMeshCollider.sharedMesh = fromFilter.sharedMesh;
-                }
-            }
-
-            // copy over meshes, materials, and nothing else
-            foreach (var component in from.GetComponents<Component>())
+            // copy components from to to. Don't want to copy over meshes and materials
+            var originalComponents = new List<Component>(from.GetComponents<Component>());
+            var destinationComponents = new List<Component>(to.GetComponents<Component>());
+            foreach(var fromComponent in originalComponents)
             {
                 // ignore missing components
-                if (component == null)
+                if (fromComponent == null)
                 {
                     continue;
                 }
 
-                var json = EditorJsonUtility.ToJson(component);
+                // ignore MeshFilter
+                if (fromComponent is MeshFilter)
+                {
+                    continue;
+                }
+
+                var json = EditorJsonUtility.ToJson(fromComponent);
                 if (string.IsNullOrEmpty(json))
                 {
                     // this happens for missing scripts
                     continue;
                 }
 
-                System.Type expectedType = component.GetType();
+                System.Type expectedType = fromComponent.GetType();
                 Component toComponent = null;
 
                 // Find the component to copy to.
-                for (int i = 0, n = originalComponents.Count; i < n; i++)
+                for (int i = 0, n = destinationComponents.Count; i < n; i++)
                 {
                     // ignore missing components
-                    if (originalComponents[i] == null)
+                    if (destinationComponents[i] == null)
                     {
                         continue;
                     }
 
-                    if (originalComponents[i].GetType() == expectedType)
+                    if (destinationComponents[i].GetType() == expectedType)
                     {
                         // We have found the component we are looking for,
                         // remove it so we don't try to copy to it again
-                        toComponent = originalComponents[i];
-                        originalComponents.RemoveAt(i);
+                        toComponent = destinationComponents[i];
+                        destinationComponents.RemoveAt(i);
                         break;
                     }
                 }
 
                 if (!toComponent)
                 {
-                    // copy over mesh filter and mesh renderer to replace
-                    // skinned mesh renderer
-                    if (component is MeshFilter)
-                    {
-                        var skinnedMesh = to.GetComponent<SkinnedMeshRenderer>();
-                        if (skinnedMesh)
-                        {
-                            toComponent = to.AddComponent(component.GetType());
-                            EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-
-                            var toRenderer = to.AddComponent<MeshRenderer>();
-                            var fromRenderer = from.GetComponent<MeshRenderer>();
-                            if (toRenderer && fromRenderer)
-                            {
-                                EditorJsonUtility.FromJsonOverwrite(EditorJsonUtility.ToJson(fromRenderer), toRenderer);
-                            }
-                            Object.DestroyImmediate(skinnedMesh);
-                        }
-                    }
-                    continue;
+                    toComponent = to.AddComponent(fromComponent.GetType());
                 }
 
-                if (toComponent is SkinnedMeshRenderer)
+                if (fromComponent is Renderer)
+                {
+                    var renderer = toComponent as Renderer;
+                    var sharedMaterials = renderer.sharedMaterials;
+                    EditorJsonUtility.FromJsonOverwrite(json, toComponent);
+                    var toRenderer = toComponent as Renderer;
+                    toRenderer.sharedMaterials = sharedMaterials;
+                }
+                else if (fromComponent is SkinnedMeshRenderer)
                 {
                     var skinnedMesh = toComponent as SkinnedMeshRenderer;
-                    var fromSkinnedMesh = component as SkinnedMeshRenderer;
-                    skinnedMesh.sharedMesh = fromSkinnedMesh.sharedMesh;
-                    skinnedMesh.sharedMaterials = fromSkinnedMesh.sharedMaterials;
+                    var mesh = skinnedMesh.sharedMesh;
+                    var materials = skinnedMesh.sharedMaterials;
+                    EditorJsonUtility.FromJsonOverwrite(json, toComponent);
+                    var toSkinnedMesh = toComponent as SkinnedMeshRenderer;
+                    toSkinnedMesh.sharedMesh = mesh;
+                    toSkinnedMesh.sharedMaterials = materials;
                 }
-                else if (toComponent is MeshFilter)
+                else
                 {
                     EditorJsonUtility.FromJsonOverwrite(json, toComponent);
                 }
-                else if (toComponent is Renderer)
+
+                if(fromComponent is MeshCollider)
                 {
-                    var toRenderer = toComponent as Renderer;
-                    var fromRenderer = component as Renderer;
-                    toRenderer.sharedMaterials = fromRenderer.sharedMaterials;
+                    // UNI-27534: This fixes the issue where the mesh collider would not update to point to the mesh in the fbx after export
+                    // Point the mesh included in the mesh collider to the mesh in the FBX file, which is the same as the one in mesh filter
+                    var fromMeshCollider = from.GetComponent<MeshCollider>();
+                    var fromMeshFilter = from.GetComponent<MeshFilter>();
+                    // if the mesh collider isn't pointing to the same mesh as in the current mesh filter then don't
+                    // do anything as it's probably pointing to a mesh in a different fbx
+                    if (fromMeshCollider && fromMeshFilter && fromMeshCollider.sharedMesh == fromMeshFilter.sharedMesh)
+                    {
+                        var toFilter = to.GetComponent<MeshFilter>();
+                        if (toFilter)
+                        {
+                            var toMeshCollider = toComponent as MeshCollider;
+                            toMeshCollider.sharedMesh = toFilter.sharedMesh;
+                        }
+                    }
+                }
+
+                var serFromComponent = new SerializedObject(fromComponent);
+                var fromProperty = serFromComponent.GetIterator();
+                while (fromProperty.Next(fromProperty.hasVisibleChildren))
+                {
+                    if (!fromProperty.hasVisibleChildren)
+                    {
+                        if (fromProperty.propertyPath != "m_GameObject" && fromProperty.objectReferenceValue && (fromProperty.objectReferenceValue is GameObject || fromProperty.objectReferenceValue is Component))
+                        {
+                            var serToComponent = new SerializedObject(toComponent);
+                            var toProperty = serToComponent.FindProperty(fromProperty.propertyPath);
+                            GameObject value;
+                            if (nameMap.TryGetValue(fromProperty.objectReferenceValue.name, out value))
+                            {
+                                if (fromProperty.objectReferenceValue is GameObject)
+                                {
+                                    toProperty.objectReferenceValue = value;
+                                }
+                                else
+                                {
+                                    toProperty.objectReferenceValue = value.GetComponent(fromProperty.objectReferenceValue.GetType());
+                                }
+                                serToComponent.ApplyModifiedProperties();
+                            }
+                        }
+                    }
                 }
             }
         }
