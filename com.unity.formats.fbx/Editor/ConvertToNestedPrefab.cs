@@ -341,7 +341,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         public static bool WillCreatePrefab(GameObject toConvert)
         {
-            return PrefabUtility.GetPrefabAssetType(toConvert) != PrefabAssetType.Regular || PrefabUtility.GetPrefabAssetType(toConvert) != PrefabAssetType.Variant;
+            return true;
         }
 
         /// <summary>
