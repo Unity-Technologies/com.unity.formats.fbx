@@ -186,9 +186,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 // Convert, automatically choosing a file path that won't clobber any existing files.
                 var go = ModelExporter.GetGameObject(obj);
-                /*ConvertToModel.Convert(
+                ConvertToNestedPrefab.Convert(
                     go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
-                );*/
+                );
             }
             return true;
         }
