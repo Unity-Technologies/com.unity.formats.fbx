@@ -360,9 +360,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 throw new ConvertToLinkedPrefabException("Failed to convert " + toConvert.name);
             }
 
-            // Copy the mesh/materials from the FBX
-            //UpdateFromSourceRecursive(toConvert, unityMainAsset);
-
             return unityMainAsset;
         }
 
@@ -373,10 +370,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Note that ApplyOrCreatePrefab will create in different
         /// circumstances than Convert will.
         /// </summary>
-        /*public static bool WillCreatePrefab(GameObject toConvert)
+        public static bool WillCreatePrefab(GameObject toConvert)
         {
-            return PrefabUtility.GetPrefabType(toConvert) != PrefabType.Prefab;
-        }*/
+            return PrefabUtility.GetPrefabAssetType(toConvert) != PrefabAssetType.Regular || PrefabUtility.GetPrefabAssetType(toConvert) != PrefabAssetType.Variant;
+        }
 
         /// <summary>
         /// Create a prefab from 'instance', or apply 'instance' to its
@@ -449,33 +446,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }*/
 
         /// <summary>
-        /// Connect 'toSetUp' to the main asset.
-        ///
-        /// Adds the FbxPrefab components and links it. Does not actually create or update a prefab asset.
-        /// </summary>
-        /// <param name="toSetUp">Instance in the scene that we want to link to the fbx asset.</param>
-        /// <param name="unityMainAsset">Main asset in the FBX.</param>
-        /*[SecurityPermission(SecurityAction.LinkDemand)]
-        public static void SetupFbxPrefab(GameObject toSetUp, GameObject unityMainAsset)
-        {
-            if (toSetUp == null)
-            {
-                throw new System.ArgumentNullException("toSetUp");
-            }
-
-            // Set up the FbxPrefab component so it will auto-update.
-            // Make sure to delete whatever FbxPrefab history we had.
-            var fbxPrefab = toSetUp.GetComponent<FbxPrefab>();
-            if (fbxPrefab)
-            {
-                Object.DestroyImmediate(fbxPrefab);
-            }
-            fbxPrefab = toSetUp.AddComponent<FbxPrefab>();
-            var fbxPrefabUtility = new FbxPrefabUtility(fbxPrefab);
-            fbxPrefabUtility.SetSourceModel(unityMainAsset);
-        }*/
-
-        /// <summary>
         /// Returns the fbx asset on disk corresponding to the same hierarchy as is selected.
         ///
         /// Returns go if go is the root of a model prefab.
@@ -529,31 +499,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 return null;
             }
-
-            /*PrefabType unityPrefabType = PrefabUtility.GetPrefabType(go);
-            switch (unityPrefabType)
-            {
-                case PrefabType.ModelPrefabInstance:
-                    if (go.Equals(PrefabUtility.FindPrefabRoot(go)))
-                    {
-                        return PrefabUtility.GetCorrespondingObjectFromSource(go) as GameObject;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                case PrefabType.ModelPrefab:
-                    if (go.Equals(PrefabUtility.FindPrefabRoot(go)))
-                    {
-                        return go;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                default:
-                    return null;
-            }*/
         }
 
         /// <summary>
@@ -727,8 +672,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         internal static void CopyComponents(GameObject to, GameObject from, Dictionary<string, GameObject> nameMap)
         {
-            // TODO: sometimes Skinned Mesh Renderer can be exported as a MeshFilter/MeshRenderer
-
             // copy components from to to. Don't want to copy over meshes and materials
             var originalComponents = new List<Component>(from.GetComponents<Component>());
             var destinationComponents = new List<Component>(to.GetComponents<Component>());

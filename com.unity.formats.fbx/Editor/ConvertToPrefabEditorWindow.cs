@@ -161,20 +161,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // Check if we'll be clobbering files. If so, warn the user
                 // first and let them cancel out.
-               /* if (ConvertToModel.WillCreatePrefab(go))
+                if (ConvertToNestedPrefab.WillCreatePrefab(go))
                 {
                     if (!OverwriteExistingFile(prefabPath))
                     {
                         return false;
                     }
                 }
-                if (ConvertToModel.WillExportFbx(go))
+                if (ConvertToNestedPrefab.WillExportFbx(go))
                 {
                     if (!OverwriteExistingFile(fbxPath))
                     {
                         return false;
                     }
-                }*/
+                }
 
                 ConvertToNestedPrefab.Convert(
                     go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
