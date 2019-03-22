@@ -10,23 +10,23 @@ using System.Security.Permissions;
 namespace UnityEditor.Formats.Fbx.Exporter
 {
     [System.Serializable]
-    internal class ConvertToLinkedPrefabException : System.Exception
+    internal class ConvertToNestedPrefabException : System.Exception
     {
-        public ConvertToLinkedPrefabException()
+        public ConvertToNestedPrefabException()
         {
         }
 
-        public ConvertToLinkedPrefabException(string message)
+        public ConvertToNestedPrefabException(string message)
             : base(message)
         {
         }
 
-        public ConvertToLinkedPrefabException(string message, System.Exception inner)
+        public ConvertToNestedPrefabException(string message, System.Exception inner)
             : base(message, inner)
         {
         }
 
-        protected ConvertToLinkedPrefabException(SerializationInfo info, StreamingContext context)
+        protected ConvertToNestedPrefabException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
@@ -195,6 +195,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return null; // cannot convert in this scenario
             }
 
+            // can't currently handle converting root of prefab in prefab preview scene
+            if (SceneManagement.EditorSceneManager.IsPreviewSceneObject(toConvert) && toConvert.transform.parent == null)
+            {
+                return null;
+            }
+
             // if root is a prefab instance, unpack it. Unpack everything below as well
             if (PrefabUtility.GetPrefabInstanceStatus(toConvert) == PrefabInstanceStatus.Connected)
             {
@@ -206,65 +212,28 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var mainAsset = GetOrCreateFbxAsset(toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
 
             // create prefab variant from the fbx
-            var temp = PrefabUtility.InstantiatePrefab(mainAsset) as GameObject;
+            var prefabInstance = PrefabUtility.InstantiatePrefab(mainAsset) as GameObject;
 
             // copy components over
-            UpdateFromSourceRecursive(temp, toConvert);
-
-            var prefab = PrefabUtility.SaveAsPrefabAsset(temp, ExportSettings.GetProjectRelativePath(prefabFullPath));
-            Object.DestroyImmediate(temp);
+            UpdateFromSourceRecursive(prefabInstance, toConvert);
+            
+            var prefab = PrefabUtility.SaveAsPrefabAssetAndConnect(prefabInstance, ExportSettings.GetProjectRelativePath(prefabFullPath), InteractionMode.AutomatedAction);
 
             // replace hierarchy in the scene
             if (toConvert != null && !PrefabUtility.IsPartOfPrefabAsset(toConvert))
             {
-                // need to fix scene references on prefab instance
-
-                var prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
                 prefabInstance.transform.parent = toConvert.transform.parent;
+                prefabInstance.transform.SetSiblingIndex(toConvert.transform.GetSiblingIndex());
+
                 Object.DestroyImmediate(toConvert);
-                /*if (SceneManagement.EditorSceneManager.IsPreviewSceneObject(toConvert))
-                {
-                    var prefabStage = Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
-                    prefabStage.prefabContentsRoot = prefabInstance;
-                }*/
                 SceneManagement.EditorSceneManager.MarkSceneDirty(prefabInstance.scene);
                 return prefabInstance;
             }
-
-            // If we selected a prefab *instance* then break the
-            // connection. We only want to update an existing prefab if
-            // we're converting an existing prefab (not an instance).
-           /* if (PrefabUtility.GetPrefabType(toConvert) == PrefabType.PrefabInstance)
-            {
-                PrefabUtility.DisconnectPrefabInstance(toConvert);
-            }*/
-
-            // Get 'toConvert' into an editable state. We can't edit
-            // assets, and toConvert might be an asset.
-            //var toConvertInstance = toConvert;// GetOrCreateInstance(toConvert);
-
-            // Set it up to track the FbxPrefab.
-            //SetupFbxPrefab(toConvertInstance, mainAsset);
-
-            // Now get 'toConvertInstance' into a prefab. If toConvert is
-            // already a prefab, this is equivalent to an 'apply' ; if it's
-            // not, we're creating a new prefab.
-            //var prefab = ApplyOrCreatePrefab(toConvertInstance, prefabDirectoryFullPath, prefabFullPath);
-
-            //if (toConvertInstance == toConvert)
-           // {
-                // If we were converting an instance, the caller expects
-                // the instance to have the name it got saved with.
-                //var path = AssetDatabase.GetAssetPath(prefab);
-                //var filename = Path.GetFileNameWithoutExtension(path);
-                //toConvert.name = filename;
-           /* }
             else
             {
-                // If 'toConvert' was an asset, we created a temp
-                // instance to add the component; destroy it.
-                Object.DestroyImmediate(toConvertInstance);
-            }*/
+                Object.DestroyImmediate(prefabInstance);
+            }
+
             return prefab;
         }
 
@@ -348,7 +317,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                                     );
                 if (fbxActualPath != fbxFullPath)
                 {
-                    throw new ConvertToLinkedPrefabException("Failed to convert " + toConvert.name);
+                    throw new ConvertToNestedPrefabException("Failed to convert " + toConvert.name);
                 }
             }
 
@@ -357,7 +326,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var unityMainAsset = AssetDatabase.LoadMainAssetAtPath(projectRelativePath) as GameObject;
             if (!unityMainAsset)
             {
-                throw new ConvertToLinkedPrefabException("Failed to convert " + toConvert.name);
+                throw new ConvertToNestedPrefabException("Failed to convert " + toConvert.name);
             }
 
             return unityMainAsset;
@@ -374,76 +343,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             return PrefabUtility.GetPrefabAssetType(toConvert) != PrefabAssetType.Regular || PrefabUtility.GetPrefabAssetType(toConvert) != PrefabAssetType.Variant;
         }
-
-        /// <summary>
-        /// Create a prefab from 'instance', or apply 'instance' to its
-        /// prefab if it's already an instance of a prefab.
-        ///
-        /// If it's an instance of a model prefab (an fbx file) we will
-        /// lose that connection and point to a new prefab file.
-        ///
-        /// To avoid applying to an existing prefab, break the prefab
-        /// connection with <c>PrefabUtility.DisconnectPrefabInstance</c>.
-        ///
-        /// Returns the new or updated prefab.
-        /// </summary>
-        /// <param name="instance">A GameObject in the scene. After this
-        /// call, it will be a prefab instance (it might already be
-        /// one).</param>
-        /// <param name="prefabFullPath">The full path to a prefab file we
-        /// will create. Ignored if <paramref name="instance"/> is a
-        /// prefab instance already. May be null, in which case we'll use <paramref
-        /// name="prefabDirectoryFullPath"/> to generate a new name</param>
-        /// <param name="prefabDirectoryFullPath">The full path to a
-        /// directory that will hold the new prefab. Ignored if <paramref
-        /// name="instance"/> is a prefab instance already. Ignored if
-        /// <paramref name="prefabFullPath"/> is provided. May be null, in
-        /// which case we'll use the project export settings.</param>
-        /// <returns>The new or existing prefab.</returns>
-        /*public static GameObject ApplyOrCreatePrefab(GameObject instance,
-            string prefabDirectoryFullPath = null,
-            string prefabFullPath = null)
-        {
-            if (instance == null)
-            {
-                throw new System.ArgumentNullException("instance");
-            }
-
-            if (PrefabUtility.GetPrefabType(instance) == PrefabType.PrefabInstance)
-            {
-                return PrefabUtility.ReplacePrefab(instance, PrefabUtility.GetCorrespondingObjectFromSource(instance));
-            }
-
-            // Otherwise, create a new prefab. First choose its filename/path.
-            if (string.IsNullOrEmpty(prefabFullPath))
-            {
-                // Generate a unique filename.
-                if (string.IsNullOrEmpty(prefabDirectoryFullPath))
-                {
-                    prefabDirectoryFullPath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.PrefabAbsoluteSavePath;
-                }
-                else
-                {
-                    prefabDirectoryFullPath = Path.GetFullPath(prefabDirectoryFullPath);
-                }
-                var prefabBasename = ModelExporter.ConvertToValidFilename(instance.name + ".prefab");
-
-                prefabFullPath = Path.Combine(prefabDirectoryFullPath, prefabBasename);
-                if (File.Exists(prefabFullPath))
-                {
-                    prefabFullPath = IncrementFileName(prefabDirectoryFullPath, prefabFullPath);
-                }
-            }
-            var prefabProjectRelativePath = ExportSettings.GetProjectRelativePath(prefabFullPath);
-            var prefabFileName = Path.ChangeExtension(prefabProjectRelativePath, ".prefab");
-
-            var prefab = PrefabUtility.CreatePrefab(prefabFileName, instance, ReplacePrefabOptions.ConnectToPrefab);
-            if (!prefab)
-            {
-                throw new ConvertToLinkedPrefabException(string.Format("Failed to create prefab asset in [{0}]", prefabFileName));
-            }
-            return prefab;
-        }*/
 
         /// <summary>
         /// Returns the fbx asset on disk corresponding to the same hierarchy as is selected.
@@ -590,11 +489,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             // recurse over orig, for each transform finding the corresponding transform in the FBX
             // and copying the meshes and materials over from the FBX
-            var goDict = MapNameToSourceRecursive(dest, source);
-            var reverseDict = MapNameToSourceRecursive(source, dest);
+            var goDict = MapNameToSourceRecursive(source, dest);
 
             var q = new Queue<Transform>();
-            q.Enqueue(dest.transform);
+            q.Enqueue(source.transform);
             while (q.Count > 0)
             {
                 var t = q.Dequeue();
@@ -604,7 +502,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     Debug.LogWarning(string.Format("Warning: Could not find Object {0} in FBX", t.name));
                     continue;
                 }
-                CopyComponents(t.gameObject, goDict[t.name], reverseDict);
+                CopyComponents(goDict[t.name], t.gameObject, goDict);
                 foreach (Transform child in t)
                 {
                     q.Enqueue(child);
@@ -773,8 +671,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     {
                         if (fromProperty.propertyType == SerializedPropertyType.ObjectReference && fromProperty.propertyPath != "m_GameObject" && fromProperty.objectReferenceValue && (fromProperty.objectReferenceValue is GameObject || fromProperty.objectReferenceValue is Component))
                         {
-                            var serToComponent = new SerializedObject(toComponent);
-                            var toProperty = serToComponent.FindProperty(fromProperty.propertyPath);
+                            var serializedToComponent = new SerializedObject(toComponent);
+                            var toProperty = serializedToComponent.FindProperty(fromProperty.propertyPath);
                             GameObject value;
                             if (nameMap.TryGetValue(fromProperty.objectReferenceValue.name, out value))
                             {
@@ -786,7 +684,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                                 {
                                     toProperty.objectReferenceValue = value.GetComponent(fromProperty.objectReferenceValue.GetType());
                                 }
-                                serToComponent.ApplyModifiedProperties();
+                                serializedToComponent.ApplyModifiedProperties();
                             }
                         }
                     }
