@@ -686,6 +686,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                                 }
                                 serializedToComponent.ApplyModifiedProperties();
                             }
+                            else
+                            {
+                                // try to make sure any references in the scene are maintained for prefab instances
+                                toProperty.objectReferenceValue = fromProperty.objectReferenceValue;
+                                serializedToComponent.ApplyModifiedProperties();
+                            }
                         }
                     }
                 }
