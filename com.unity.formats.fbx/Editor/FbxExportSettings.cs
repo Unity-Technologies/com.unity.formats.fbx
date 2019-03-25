@@ -70,13 +70,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
-#if !UNITY_2018_3_OR_NEWER
-            exportSettings.AutoUpdaterEnabled = EditorGUILayout.Toggle(
-                new GUIContent("Auto-Updater:",
-                    "Automatically updates prefabs with new fbx data that was imported."),
-                exportSettings.AutoUpdaterEnabled
-            );
-#endif
             exportSettings.ShowConvertToPrefabDialog = EditorGUILayout.Toggle(
                 new GUIContent("Show Convert UI:", "Enable Convert dialog when converting to a Linked Prefab"),
                 exportSettings.ShowConvertToPrefabDialog
@@ -437,17 +430,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-#if !UNITY_2018_3_OR_NEWER
-        // Note: default values are set in LoadDefaults().
-        [SerializeField]
-        private bool autoUpdaterEnabled = true;
-        public bool AutoUpdaterEnabled
-        {
-            get { return autoUpdaterEnabled; }
-            set { autoUpdaterEnabled = value; }
-        }
-#endif
-
         [SerializeField]
         private bool launchAfterInstallation = true;
         public bool LaunchAfterInstallation
@@ -586,9 +568,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             BakeAnimationProperty = true;
             ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             exportModelSettingsSerialize = ExportModelSettings.info;
-#if !UNITY_2018_3_OR_NEWER
-            AutoUpdaterEnabled = true;
-#endif
             ShowConvertToPrefabDialog = true;
             ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;

@@ -14,10 +14,6 @@ namespace FbxExporter.UnitTests
         [TearDown]
         public override void Term ()
         {
-#if !UNITY_2018_3_OR_NEWER
-            // Put back the initial setting for the auto-updater toggle
-            ExportSettings.instance.AutoUpdaterEnabled = isAutoUpdaterOn;
-#endif
             base.Term();
         }
 
@@ -25,10 +21,6 @@ namespace FbxExporter.UnitTests
         public override void Init()
         {
             base.Init();
-#if !UNITY_2018_3_OR_NEWER
-            isAutoUpdaterOn = ExportSettings.instance.AutoUpdaterEnabled;
-            ExportSettings.instance.AutoUpdaterEnabled = true;
-#endif
         }
 
         /// <summary>
