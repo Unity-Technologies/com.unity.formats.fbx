@@ -85,6 +85,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Selection.objects = CreateInstantiatedModelPrefab(selection);
         }
 
+        internal static void DisplayInvalidSelectionDialog(GameObject toConvert)
+        {
+            UnityEditor.EditorUtility.DisplayDialog(
+                string.Format("{0} Warning", "FBX Exporter"),
+                toConvert.name + " cannot be converted.",
+                "Ok");
+        }
+
         /// <summary>
         // Validate the menu items defined above.
         /// </summary>
@@ -121,6 +129,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             if (ExportSettings.instance.ShowConvertToPrefabDialog)
             {
+                if (toExport.Count == 1)
+                {
+                    var go = toExport.First();
+                    if (PrefabUtility.IsPartOfNonAssetPrefabInstance(go) && !PrefabUtility.IsOutermostPrefabInstanceRoot(go))
+                    {
+                        DisplayInvalidSelectionDialog(go);
+                        return null;
+                    }
+
+                    // can't currently handle converting root of prefab in prefab preview scene
+                    if (SceneManagement.EditorSceneManager.IsPreviewSceneObject(go) && go.transform.parent == null)
+                    {
+                        DisplayInvalidSelectionDialog(go);
+                        return null;
+                    }
+                }
                 ConvertToPrefabEditorWindow.Init(toExport);
                 return toExport.ToArray();
             }
