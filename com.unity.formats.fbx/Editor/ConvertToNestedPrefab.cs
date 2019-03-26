@@ -225,15 +225,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return null;
             }
 
+            // If we selected the something that's already backed by an
+            // FBX, don't export.
+            var mainAsset = GetOrCreateFbxAsset(toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
+
             // if root is a prefab instance, unpack it. Unpack everything below as well
             if (PrefabUtility.GetPrefabInstanceStatus(toConvert) == PrefabInstanceStatus.Connected)
             {
                 PrefabUtility.UnpackPrefabInstance(toConvert, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
             }
-
-            // If we selected the something that's already backed by an
-            // FBX, don't export.
-            var mainAsset = GetOrCreateFbxAsset(toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
 
             // create prefab variant from the fbx
             var prefabInstance = PrefabUtility.InstantiatePrefab(mainAsset) as GameObject;
@@ -721,33 +721,31 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var serFromComponent = new SerializedObject(fromComponent);
                 var fromProperty = serFromComponent.GetIterator();
                 fromProperty.Next(true); // skip generic field
-                while (fromProperty.Next(fromProperty.hasVisibleChildren))
+                while (fromProperty.Next(true))
                 {
-                    if (!fromProperty.hasVisibleChildren)
+                    if (fromProperty.propertyType == SerializedPropertyType.ObjectReference && fromProperty.propertyPath != "m_GameObject" &&
+                        fromProperty.objectReferenceValue && (fromProperty.objectReferenceValue is GameObject || fromProperty.objectReferenceValue is Component))
                     {
-                        if (fromProperty.propertyType == SerializedPropertyType.ObjectReference && fromProperty.propertyPath != "m_GameObject" && fromProperty.objectReferenceValue && (fromProperty.objectReferenceValue is GameObject || fromProperty.objectReferenceValue is Component))
+                        var serializedToComponent = new SerializedObject(toComponent);
+                        var toProperty = serializedToComponent.FindProperty(fromProperty.propertyPath);
+                        GameObject value;
+                        if (nameMap.TryGetValue(fromProperty.objectReferenceValue.name, out value))
                         {
-                            var serializedToComponent = new SerializedObject(toComponent);
-                            var toProperty = serializedToComponent.FindProperty(fromProperty.propertyPath);
-                            GameObject value;
-                            if (nameMap.TryGetValue(fromProperty.objectReferenceValue.name, out value))
+                            if (fromProperty.objectReferenceValue is GameObject)
                             {
-                                if (fromProperty.objectReferenceValue is GameObject)
-                                {
-                                    toProperty.objectReferenceValue = value;
-                                }
-                                else
-                                {
-                                    toProperty.objectReferenceValue = value.GetComponent(fromProperty.objectReferenceValue.GetType());
-                                }
-                                serializedToComponent.ApplyModifiedProperties();
+                                toProperty.objectReferenceValue = value;
                             }
                             else
                             {
-                                // try to make sure any references in the scene are maintained for prefab instances
-                                toProperty.objectReferenceValue = fromProperty.objectReferenceValue;
-                                serializedToComponent.ApplyModifiedProperties();
+                                toProperty.objectReferenceValue = value.GetComponent(fromProperty.objectReferenceValue.GetType());
                             }
+                            serializedToComponent.ApplyModifiedProperties();
+                        }
+                        else
+                        {
+                            // try to make sure any references in the scene are maintained for prefab instances
+                            toProperty.objectReferenceValue = fromProperty.objectReferenceValue;
+                            serializedToComponent.ApplyModifiedProperties();
                         }
                     }
                 }
