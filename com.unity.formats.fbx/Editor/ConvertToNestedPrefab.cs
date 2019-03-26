@@ -240,7 +240,28 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // copy components over
             UpdateFromSourceRecursive(prefabInstance, toConvert);
-            
+
+            // make sure we have a path for the prefab
+            if (string.IsNullOrEmpty(prefabFullPath))
+            {
+                // Generate a unique filename.
+                if (string.IsNullOrEmpty(prefabDirectoryFullPath))
+                {
+                    prefabDirectoryFullPath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.PrefabAbsoluteSavePath;
+                }
+                else
+                {
+                    prefabDirectoryFullPath = Path.GetFullPath(prefabDirectoryFullPath);
+                }
+                var prefabBasename = ModelExporter.ConvertToValidFilename(toConvert.name + ".prefab");
+
+                prefabFullPath = Path.Combine(prefabDirectoryFullPath, prefabBasename);
+                if (File.Exists(prefabFullPath))
+                {
+                    prefabFullPath = IncrementFileName(prefabDirectoryFullPath, prefabFullPath);
+                }
+            }
+
             var prefab = PrefabUtility.SaveAsPrefabAssetAndConnect(prefabInstance, ExportSettings.GetProjectRelativePath(prefabFullPath), InteractionMode.AutomatedAction);
 
             // replace hierarchy in the scene
