@@ -547,7 +547,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     Debug.LogWarning(string.Format("Warning: Could not find Object {0} in FBX", t.name));
                     continue;
                 }
-                CopyComponents(goDict[t.name], t.gameObject, goDict);
+                var destGO = goDict[t.name];
+                var sourceGO = t.gameObject;
+                CopyComponents(destGO, sourceGO, goDict);
+
+                // also make sure GameObject properties, such as tag and layer
+                // are copied over as well
+                destGO.SetActive(sourceGO.activeSelf);
+                destGO.isStatic = sourceGO.isStatic;
+                destGO.layer = sourceGO.layer;
+                destGO.tag = sourceGO.tag;
+
                 foreach (Transform child in t)
                 {
                     q.Enqueue(child);
