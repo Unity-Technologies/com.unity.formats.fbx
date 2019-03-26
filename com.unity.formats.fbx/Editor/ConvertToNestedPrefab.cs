@@ -720,6 +720,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 var serFromComponent = new SerializedObject(fromComponent);
                 var fromProperty = serFromComponent.GetIterator();
+                fromProperty.Next(true); // skip generic field
                 while (fromProperty.Next(fromProperty.hasVisibleChildren))
                 {
                     if (!fromProperty.hasVisibleChildren)
