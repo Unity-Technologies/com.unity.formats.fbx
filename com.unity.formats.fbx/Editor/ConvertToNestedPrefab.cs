@@ -549,6 +549,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
                 var destGO = goDict[t.name];
                 var sourceGO = t.gameObject;
+
+                if (PrefabUtility.GetPrefabInstanceStatus(sourceGO) == PrefabInstanceStatus.Connected)
+                {
+                    PrefabUtility.UnpackPrefabInstance(sourceGO, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+                }
+
                 CopyComponents(destGO, sourceGO, goDict);
 
                 // also make sure GameObject properties, such as tag and layer
