@@ -618,6 +618,38 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             return nameToGO;
         }
+        
+        /// <summary>
+        /// Copy the object reference from fromProperty to the matching property on serializedObject.
+        /// Use nameMap to find the correct object reference to use.
+        /// </summary>
+        /// <param name="serializedObject"></param>
+        /// <param name="fromProperty"></param>
+        /// <param name="nameMap"></param>
+        internal static void CopySerializedProperty(SerializedObject serializedObject, SerializedProperty fromProperty, Dictionary<string, GameObject> nameMap)
+        {
+            var toProperty = serializedObject.FindProperty(fromProperty.propertyPath);
+
+            GameObject value;
+            if (nameMap.TryGetValue(fromProperty.objectReferenceValue.name, out value))
+            {
+                if (fromProperty.objectReferenceValue is GameObject)
+                {
+                    toProperty.objectReferenceValue = value;
+                }
+                else
+                {
+                    toProperty.objectReferenceValue = value.GetComponent(fromProperty.objectReferenceValue.GetType());
+                }
+                serializedObject.ApplyModifiedProperties();
+            }
+            else
+            {
+                // try to make sure any references in the scene are maintained for prefab instances
+                toProperty.objectReferenceValue = fromProperty.objectReferenceValue;
+                serializedObject.ApplyModifiedProperties();
+            }
+        }
 
         /// <summary>
         /// Copy components on the 'from' object which is the FBX,
@@ -724,34 +756,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                 }
 
-                var serFromComponent = new SerializedObject(fromComponent);
-                var fromProperty = serFromComponent.GetIterator();
+                var serializedFromComponent = new SerializedObject(fromComponent);
+                var serializedToComponent = new SerializedObject(toComponent);
+                var fromProperty = serializedFromComponent.GetIterator();
                 fromProperty.Next(true); // skip generic field
-                while (fromProperty.Next(true))
+                // For SkinnedMeshRenderer, the bones array doesn't have visible children, but still needs to be copied over.
+                // For everything else, filtering by visible children in the while loop and then copying properties that don't have visible children,
+                // ensures that only the leaf properties are copied over. Copying other properties is not usually necessary and may break references that
+                // were not meant to be copied.
+                while (fromProperty.Next((fromComponent is SkinnedMeshRenderer)? fromProperty.hasChildren : fromProperty.hasVisibleChildren))
                 {
-                    if (fromProperty.propertyType == SerializedPropertyType.ObjectReference && fromProperty.propertyPath != "m_GameObject" &&
-                        fromProperty.objectReferenceValue && (fromProperty.objectReferenceValue is GameObject || fromProperty.objectReferenceValue is Component))
+                    if (!fromProperty.hasVisibleChildren)
                     {
-                        var serializedToComponent = new SerializedObject(toComponent);
-                        var toProperty = serializedToComponent.FindProperty(fromProperty.propertyPath);
-                        GameObject value;
-                        if (nameMap.TryGetValue(fromProperty.objectReferenceValue.name, out value))
+                        if (fromProperty.propertyType == SerializedPropertyType.ObjectReference && fromProperty.propertyPath != "m_GameObject" &&
+                        fromProperty.objectReferenceValue && (fromProperty.objectReferenceValue is GameObject || fromProperty.objectReferenceValue is Component))
                         {
-                            if (fromProperty.objectReferenceValue is GameObject)
-                            {
-                                toProperty.objectReferenceValue = value;
-                            }
-                            else
-                            {
-                                toProperty.objectReferenceValue = value.GetComponent(fromProperty.objectReferenceValue.GetType());
-                            }
-                            serializedToComponent.ApplyModifiedProperties();
-                        }
-                        else
-                        {
-                            // try to make sure any references in the scene are maintained for prefab instances
-                            toProperty.objectReferenceValue = fromProperty.objectReferenceValue;
-                            serializedToComponent.ApplyModifiedProperties();
+                            CopySerializedProperty(serializedToComponent, fromProperty, nameMap);
                         }
                     }
                 }
