@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 9052053956120447752}
   - component: {fileID: 1309292501042752234}
   - component: {fileID: 4070270799405395830}
-  - component: {fileID: 6666841018609085141}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -94,21 +93,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 14
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &6666841018609085141
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 307185290415180126}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ef515bb90edb78469a61f673ceba0bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_goList: []
-  m_transform: {fileID: 7638013790560888353}
-  m_collider: {fileID: 584766773133607467}
 --- !u!1 &1066971861360724511
 GameObject:
   m_ObjectHideFlags: 0
@@ -215,7 +199,6 @@ GameObject:
   - component: {fileID: 4572114264683957149}
   - component: {fileID: 401184425265385649}
   - component: {fileID: 5856369843265445838}
-  - component: {fileID: 1901583243466593607}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -297,20 +280,6 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!64 &1901583243466593607
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6614318371958642776}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Convex: 0
-  m_CookingOptions: 14
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &7495337692379934922
 GameObject:
   m_ObjectHideFlags: 0
@@ -422,8 +391,6 @@ MonoBehaviour:
   - {fileID: 1066971861360724511}
   - {fileID: 6614318371958642776}
   - {fileID: 8848352865554746816}
-  - {fileID: 307185290415180126}
-  - {fileID: 7495337692379934922}
   m_transform: {fileID: 5306572126851549296}
   m_collider: {fileID: 584766773133607467}
 --- !u!1 &8848352865554746816

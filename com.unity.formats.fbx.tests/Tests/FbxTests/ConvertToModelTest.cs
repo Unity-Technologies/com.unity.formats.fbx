@@ -34,26 +34,32 @@ namespace FbxExporter.UnitTests
             prefabPath = FindPathInUnitTests(prefabPath);
             Assert.That(prefabPath, Is.Not.Null);
 
-            // convert in a temporary location, either from the asset or in the scene (or both?)
-            // Get a random directory.
-            var path = GetRandomFbxFilePath();
-
             var go = AssetDatabase.LoadMainAssetAtPath(prefabPath) as GameObject;
             Assert.That(go);
 
-            // Convert it to a prefab
-            var prefab = ConvertToNestedPrefab.Convert(go,
-                fbxFullPath: path, prefabFullPath: Path.ChangeExtension(path, "prefab"));
+            ConvertAndComparePrefab(go);
+        }
 
+        protected GameObject ConvertAndComparePrefab(GameObject orig, string fbxPath = "")
+        {
+            if (string.IsNullOrEmpty(fbxPath))
+            {
+                fbxPath = GetRandomFbxFilePath();
+            }
+            // Convert it to a prefab
+            var prefab = ConvertToNestedPrefab.Convert(orig,
+                fbxFullPath: fbxPath, prefabFullPath: Path.ChangeExtension(fbxPath, "prefab"));
             Assert.That(prefab);
 
             // check that the hierarchy matches the original
-            AssertSameHierarchy(go, prefab, ignoreRootName: true, checkComponents: true);
+            AssertSameHierarchy(orig, prefab, ignoreRootName: true, checkComponents: true);
 
             // check that the meshes and materials are now from the fbx
-            var fbx = AssetDatabase.LoadMainAssetAtPath(path) as GameObject;
+            var fbx = AssetDatabase.LoadMainAssetAtPath(fbxPath) as GameObject;
             Assert.That(fbx);
             AssertSameMeshesAndMaterials(fbx, prefab);
+
+            return prefab;
         }
 
         protected void AssertSameMeshesAndMaterials(GameObject expectedHierarchy, GameObject actualHierarchy)
@@ -94,9 +100,40 @@ namespace FbxExporter.UnitTests
             }
         }
 
+        [Test]
         public void TestReferences()
         {
+            var prefabPath = FindPathInUnitTests("Prefabs/ReferenceTest.prefab");
+            var root = AssetDatabase.LoadMainAssetAtPath(prefabPath) as GameObject;
+            Assert.That(root);
 
+            var prefab = ConvertAndComparePrefab(root);
+
+            // check the references
+            var sphere = prefab.transform.Find("Sphere");
+            Assert.That(sphere);
+            var cylinder = prefab.transform.Find("Sphere/Cylinder");
+            Assert.That(cylinder);
+            var capsule = prefab.transform.Find("Sphere/Cylinder/Capsule");
+            Assert.That(capsule);
+            var plane = prefab.transform.Find("Plane");
+            Assert.That(plane);
+
+            var refComponent = cylinder.GetComponent<ReferenceComponent>();
+            Assert.That(refComponent);
+            Assert.That(refComponent.m_goList.Length, Is.EqualTo(3));
+            Assert.That(refComponent.m_goList[0], Is.EqualTo(prefab));
+            Assert.That(refComponent.m_goList[1], Is.EqualTo(sphere.gameObject));
+            Assert.That(refComponent.m_goList[2], Is.EqualTo(capsule.gameObject));
+
+            Assert.That(refComponent.m_transform, Is.EqualTo(plane));
+            Assert.That(refComponent.m_collider, Is.EqualTo(prefab.GetComponent<BoxCollider>()));
+
+            var meshCollider = plane.GetComponent<MeshCollider>();
+            Assert.That(meshCollider);
+            var meshPath = AssetDatabase.GetAssetPath(meshCollider.sharedMesh);
+            Assert.That(meshPath, Is.Not.Null);
+            Assert.That(Path.GetExtension(meshPath), Is.EqualTo(".fbx"));
         }
 
         public static List<string> ChildNames(Transform a) {
