@@ -229,6 +229,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // FBX, don't export.
             var mainAsset = GetOrCreateFbxAsset(toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
 
+            // if toConvert is part of a prefab asset and not an instance, make it an instance in the scene
+            // so that we can unpack it and avoid issues with nested prefab references.
+            bool isPrefabAsset = false;
+            if(PrefabUtility.IsPartOfPrefabAsset(toConvert) && PrefabUtility.GetPrefabInstanceStatus(toConvert) == PrefabInstanceStatus.NotAPrefab)
+            {
+                toConvert = PrefabUtility.InstantiatePrefab(toConvert) as GameObject;
+                isPrefabAsset = true;
+            }
+
             // if root is a prefab instance, unpack it. Unpack everything below as well
             if (PrefabUtility.GetPrefabInstanceStatus(toConvert) == PrefabInstanceStatus.Connected)
             {
@@ -236,10 +245,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             // create prefab variant from the fbx
-            var prefabInstance = PrefabUtility.InstantiatePrefab(mainAsset) as GameObject;
+            var fbxInstance = PrefabUtility.InstantiatePrefab(mainAsset) as GameObject;
 
             // copy components over
-            UpdateFromSourceRecursive(prefabInstance, toConvert);
+            UpdateFromSourceRecursive(fbxInstance, toConvert);
 
             // make sure we have a path for the prefab
             if (string.IsNullOrEmpty(prefabFullPath))
@@ -262,21 +271,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
-            var prefab = PrefabUtility.SaveAsPrefabAssetAndConnect(prefabInstance, ExportSettings.GetProjectRelativePath(prefabFullPath), InteractionMode.AutomatedAction);
+            var prefab = PrefabUtility.SaveAsPrefabAssetAndConnect(fbxInstance, ExportSettings.GetProjectRelativePath(prefabFullPath), InteractionMode.AutomatedAction);
 
             // replace hierarchy in the scene
-            if (toConvert != null && !PrefabUtility.IsPartOfPrefabAsset(toConvert))
+            if (!isPrefabAsset && toConvert != null)
             {
-                prefabInstance.transform.parent = toConvert.transform.parent;
-                prefabInstance.transform.SetSiblingIndex(toConvert.transform.GetSiblingIndex());
+                fbxInstance.transform.parent = toConvert.transform.parent;
+                fbxInstance.transform.SetSiblingIndex(toConvert.transform.GetSiblingIndex());
 
                 Object.DestroyImmediate(toConvert);
-                SceneManagement.EditorSceneManager.MarkSceneDirty(prefabInstance.scene);
-                return prefabInstance;
+                SceneManagement.EditorSceneManager.MarkSceneDirty(fbxInstance.scene);
+                return fbxInstance;
             }
             else
             {
-                Object.DestroyImmediate(prefabInstance);
+                Object.DestroyImmediate(fbxInstance);
+                Object.DestroyImmediate(toConvert);
             }
 
             return prefab;
@@ -375,18 +385,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             return unityMainAsset;
-        }
-
-        /// <summary>
-        /// Check whether <see>Convert</see> will be creating a new prefab, or
-        /// updating one.
-        ///
-        /// Note that ApplyOrCreatePrefab will create in different
-        /// circumstances than Convert will.
-        /// </summary>
-        public static bool WillCreatePrefab(GameObject toConvert)
-        {
-            return true;
         }
 
         /// <summary>
