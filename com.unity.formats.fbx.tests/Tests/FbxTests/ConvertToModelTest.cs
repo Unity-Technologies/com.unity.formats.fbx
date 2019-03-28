@@ -5,11 +5,54 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine.Formats.Fbx.Exporter;
 using UnityEditor.Formats.Fbx.Exporter;
+using System.Collections;
 
 namespace FbxExporter.UnitTests
 {
     public class ConvertToNestedPrefabTest : ExporterTestBase
     {
+        public static IEnumerable PrefabTestCases
+        {
+            get
+            {
+                yield return "Prefabs/RegularPrefab.prefab";
+                yield return "Prefabs/RegularPrefab_GO.prefab";
+                yield return "Prefabs/RegularPrefab_Model.prefab";
+                yield return "Prefabs/RegularPrefab_Regular.prefab";
+                yield return "Prefabs/RegularPrefab_Variant.prefab";
+                yield return "Prefabs/VariantPrefab.prefab";
+                yield return "Prefabs/VariantPrefab_GO.prefab";
+                yield return "Prefabs/VariantPrefab_Model.prefab";
+                yield return "Prefabs/VariantPrefab_Regular.prefab";
+                yield return "Prefabs/VariantPrefab_Variant.prefab";
+            }
+        }
+
+        [Test, TestCaseSource(typeof(ConvertToNestedPrefabTest), "PrefabTestCases")]
+        public void TestConversion(string prefabPath)
+        {
+            prefabPath = FindPathInUnitTests(prefabPath);
+            Assert.That(prefabPath, Is.Not.Null);
+
+            // convert in a temporary location, either from the asset or in the scene (or both?)
+            // Get a random directory.
+            var path = GetRandomFileNamePath(extName: "");
+
+            var go = AssetDatabase.LoadMainAssetAtPath(prefabPath) as GameObject;
+            Assert.That(go);
+
+            // Convert it to a prefab
+            var prefab = ConvertToNestedPrefab.Convert(go,
+                fbxDirectoryFullPath: path, prefabDirectoryFullPath: path);
+
+            Assert.That(prefab);
+            AssertSameHierarchy(go, prefab, ignoreRootName: true);
+
+            // check that the hierarchy matches the original
+            // check that the components match
+            // check that the meshes and materials are now from the fbx
+        }
+
         public static List<string> ChildNames(Transform a) {
             var names = new List<string>();
             foreach(Transform child in a) {
