@@ -228,6 +228,12 @@ namespace FbxExporter.UnitTests
             return originalGO;
         }
 
+        // helper for AssertSameHierarchy, for sorting components
+        protected static int CompareComponents(Component c1, Component c2)
+        {
+            return c1.GetType().FullName.CompareTo(c2.GetType().FullName);
+        }
+
         /// <summary>
         /// Compares two hierarchies, asserts that they match precisely.
         /// The root can be allowed to mismatch. That's normal with
@@ -235,7 +241,7 @@ namespace FbxExporter.UnitTests
         /// </summary>
         public static void AssertSameHierarchy (
             GameObject expectedHierarchy, GameObject actualHierarchy,
-            bool ignoreRootName = false, bool ignoreRootTransform = false)
+            bool ignoreRootName = false, bool ignoreRootTransform = false, bool checkComponents = false)
         {
             if (!ignoreRootName) {
                 Assert.AreEqual (expectedHierarchy.name, actualHierarchy.name);
@@ -250,10 +256,23 @@ namespace FbxExporter.UnitTests
 
             Assert.AreEqual (expectedTransform.childCount, actualTransform.childCount);
 
+            if (checkComponents)
+            {
+                // make sure that they each have the same components
+                var expectedComponents = expectedHierarchy.GetComponents<Component>();
+                var actualComponents = actualHierarchy.GetComponents<Component>();
+                System.Array.Sort(expectedComponents, CompareComponents);
+                System.Array.Sort(actualComponents, CompareComponents);
+                for(int i = 0; i < expectedComponents.Length; i++)
+                {
+                    Assert.That(expectedComponents[i].GetType(), Is.EqualTo(actualComponents[i].GetType()));
+                }
+            }
+
             foreach (Transform expectedChild in expectedTransform) {
                 var actualChild = actualTransform.Find (expectedChild.name);
                 Assert.IsNotNull (actualChild);
-                AssertSameHierarchy (expectedChild.gameObject, actualChild.gameObject);
+                AssertSameHierarchy (expectedChild.gameObject, actualChild.gameObject, checkComponents: checkComponents);
             }
         }
 

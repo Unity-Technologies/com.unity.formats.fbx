@@ -36,21 +36,67 @@ namespace FbxExporter.UnitTests
 
             // convert in a temporary location, either from the asset or in the scene (or both?)
             // Get a random directory.
-            var path = GetRandomFileNamePath(extName: "");
+            var path = GetRandomFbxFilePath();
 
             var go = AssetDatabase.LoadMainAssetAtPath(prefabPath) as GameObject;
             Assert.That(go);
 
             // Convert it to a prefab
             var prefab = ConvertToNestedPrefab.Convert(go,
-                fbxDirectoryFullPath: path, prefabDirectoryFullPath: path);
+                fbxFullPath: path, prefabFullPath: Path.ChangeExtension(path, "prefab"));
 
             Assert.That(prefab);
-            AssertSameHierarchy(go, prefab, ignoreRootName: true);
 
             // check that the hierarchy matches the original
-            // check that the components match
+            AssertSameHierarchy(go, prefab, ignoreRootName: true, checkComponents: true);
+
             // check that the meshes and materials are now from the fbx
+            var fbx = AssetDatabase.LoadMainAssetAtPath(path) as GameObject;
+            Assert.That(fbx);
+            AssertSameMeshesAndMaterials(fbx, prefab);
+        }
+
+        protected void AssertSameMeshesAndMaterials(GameObject expectedHierarchy, GameObject actualHierarchy)
+        {
+            // get mesh filter or skinned mesh renderer to compare meshes
+            var expectedMeshFilter = expectedHierarchy.GetComponent<MeshFilter>();
+            var actualMeshFilter = actualHierarchy.GetComponent<MeshFilter>();
+            if (expectedMeshFilter)
+            {
+                Assert.That(actualMeshFilter);
+                Assert.That(expectedMeshFilter.sharedMesh, Is.EqualTo(actualMeshFilter.sharedMesh));
+            }
+
+            var expectedSkinnedMesh = expectedHierarchy.GetComponent<SkinnedMeshRenderer>();
+            var actualSkinnedMesh = actualHierarchy.GetComponent<SkinnedMeshRenderer>();
+            if (expectedSkinnedMesh)
+            {
+                Assert.That(actualSkinnedMesh);
+                Assert.That(expectedSkinnedMesh.sharedMesh, Is.EqualTo(actualSkinnedMesh.sharedMesh));
+                Assert.That(expectedSkinnedMesh.sharedMaterial, Is.EqualTo(actualSkinnedMesh.sharedMaterial));
+            }
+
+            var expectedRenderer = expectedHierarchy.GetComponent<Renderer>();
+            var actualRenderer = actualHierarchy.GetComponent<Renderer>();
+            if (expectedRenderer)
+            {
+                Assert.That(actualRenderer);
+                Assert.That(expectedRenderer.sharedMaterial, Is.EqualTo(actualRenderer.sharedMaterial));
+            }
+
+            var expectedTransform = expectedHierarchy.transform;
+            var actualTransform = actualHierarchy.transform;
+            foreach (Transform expectedChild in expectedTransform)
+            {
+                var actualChild = actualTransform.Find(expectedChild.name);
+                Assert.IsNotNull(actualChild);
+                AssertSameMeshesAndMaterials(expectedChild.gameObject, actualChild.gameObject);
+            }
+        }
+
+        public void TestReferences()
+        {
+
         }
 
         public static List<string> ChildNames(Transform a) {
