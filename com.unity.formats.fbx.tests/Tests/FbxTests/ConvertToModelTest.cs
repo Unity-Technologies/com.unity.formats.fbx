@@ -15,6 +15,7 @@ namespace FbxExporter.UnitTests
         {
             get
             {
+                yield return "Prefabs/Camera.prefab";
                 yield return "Prefabs/RegularPrefab.prefab";
                 yield return "Prefabs/RegularPrefab_GO.prefab";
                 yield return "Prefabs/RegularPrefab_Model.prefab";
@@ -210,7 +211,7 @@ namespace FbxExporter.UnitTests
                 Assert.That(ConvertToNestedPrefab.WillExportFbx(a));
                 var aAsset = ConvertToNestedPrefab.GetOrCreateFbxAsset(a, fbxFullPath: GetRandomFbxFilePath());
                 Assert.AreNotEqual(a, aAsset);
-                AssertSameHierarchy(a, aAsset, ignoreRootName: true);
+                AssertSameHierarchy(a, aAsset, ignoreRootName: true, ignoreRootTransform: true);
                 Assert.AreEqual(PrefabAssetType.Model, PrefabUtility.GetPrefabAssetType(aAsset));
                 Assert.AreEqual(PrefabInstanceStatus.NotAPrefab, PrefabUtility.GetPrefabInstanceStatus(aAsset));
 
@@ -369,7 +370,8 @@ namespace FbxExporter.UnitTests
                 var aFbx = ExportToFbx(a);
                 var aConvert = ConvertToNestedPrefab.Convert(aFbx, fbxFullPath: GetRandomFbxFilePath(), prefabFullPath: GetRandomPrefabAssetPath());
                 Assert.AreNotEqual(aFbx, aConvert);
-                AssertSameHierarchy(a, aConvert, ignoreRootName: true);
+                // ignore root transform since the default functionality of the FBX exporter is to reset the root's position on export
+                AssertSameHierarchy(a, aConvert, ignoreRootName: true, ignoreRootTransform: true);
             }
 
             // Test Convert on an fbx instance
@@ -380,7 +382,7 @@ namespace FbxExporter.UnitTests
                 var aFbxInstance = PrefabUtility.InstantiatePrefab(aFbx) as GameObject;
                 var aConvert = ConvertToNestedPrefab.Convert(aFbxInstance, fbxFullPath: GetRandomFbxFilePath(), prefabFullPath: GetRandomPrefabAssetPath());
                 Assert.AreNotEqual(aFbx, aConvert);
-                AssertSameHierarchy(a, aConvert, ignoreRootName: true);
+                AssertSameHierarchy(a, aConvert, ignoreRootName: true, ignoreRootTransform: true);
             }
 
             // Test Convert on an fbx instance, but not the root.

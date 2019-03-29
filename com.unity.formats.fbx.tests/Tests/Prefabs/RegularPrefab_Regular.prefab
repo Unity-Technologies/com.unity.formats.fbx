@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7074375286036966451}
   - component: {fileID: 7627658680671674030}
   - component: {fileID: 541875091019459477}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: RegularPrefab_Regular
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -100,11 +100,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7029887748190987242}
     m_Modifications:
-    - target: {fileID: 6664918221329555178, guid: 8197bb0d2c95bdf4eb9830490f094134,
-        type: 3}
-      propertyPath: m_Name
-      value: RegularPrefab
-      objectReference: {fileID: 0}
     - target: {fileID: 822944882258698328, guid: 8197bb0d2c95bdf4eb9830490f094134,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -174,6 +169,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6664918221329555178, guid: 8197bb0d2c95bdf4eb9830490f094134,
+        type: 3}
+      propertyPath: m_Name
+      value: RegularPrefab
+      objectReference: {fileID: 0}
+    - target: {fileID: 6664918221329555178, guid: 8197bb0d2c95bdf4eb9830490f094134,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 6664918221329555178, guid: 8197bb0d2c95bdf4eb9830490f094134,
+        type: 3}
+      propertyPath: m_TagString
+      value: Player
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8197bb0d2c95bdf4eb9830490f094134, type: 3}

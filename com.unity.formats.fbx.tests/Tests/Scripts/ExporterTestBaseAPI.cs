@@ -234,6 +234,18 @@ namespace FbxExporter.UnitTests
             return c1.GetType().FullName.CompareTo(c2.GetType().FullName);
         }
 
+        protected static void AssertVector3(Vector3 expected, Vector3 actual, float delta)
+        {
+            float distance = Vector3.Distance(expected, actual);
+
+            var message = System.String.Format("Expected: Vector3({0}, {1}, {2})\nBut was:  Vector3({3}, {4}, {5})\nDistance: {6} is greated than allowed delta {7}",
+                                    expected.x, expected.y, expected.z,
+                                    actual.x, actual.y, actual.z,
+                                    distance, delta);
+
+            Assert.That(distance, Is.LessThanOrEqualTo(delta), message);
+        }
+
         /// <summary>
         /// Compares two hierarchies, asserts that they match precisely.
         /// The root can be allowed to mismatch. That's normal with
@@ -251,7 +263,9 @@ namespace FbxExporter.UnitTests
             var actualTransform = actualHierarchy.transform;
 
             if (!ignoreRootTransform) {
-                Assert.AreEqual (expectedTransform, actualTransform);
+                AssertVector3(actualTransform.localPosition, expectedTransform.localPosition, 0.0001f);
+                AssertVector3(actualTransform.localEulerAngles, expectedTransform.localEulerAngles, 0.0001f);
+                AssertVector3(actualTransform.localScale, expectedTransform.localScale, 0.0001f);
             }
 
             Assert.AreEqual (expectedTransform.childCount, actualTransform.childCount);
@@ -267,6 +281,12 @@ namespace FbxExporter.UnitTests
                 {
                     Assert.That(expectedComponents[i].GetType(), Is.EqualTo(actualComponents[i].GetType()));
                 }
+
+                // check GO properties as well
+                Assert.That(expectedHierarchy.activeSelf, Is.EqualTo(actualHierarchy.activeSelf));
+                Assert.That(expectedHierarchy.isStatic, Is.EqualTo(actualHierarchy.isStatic));
+                Assert.That(expectedHierarchy.layer, Is.EqualTo(actualHierarchy.layer));
+                Assert.That(expectedHierarchy.tag, Is.EqualTo(actualHierarchy.tag));
             }
 
             foreach (Transform expectedChild in expectedTransform) {
