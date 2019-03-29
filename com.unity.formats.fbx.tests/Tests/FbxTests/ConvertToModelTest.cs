@@ -194,6 +194,38 @@ namespace FbxExporter.UnitTests
             Assert.That(actualLight.color, Is.EqualTo(expectedLight.color));
         }
 
+        [Test]
+        public void TestSkinnedMeshReferences()
+        {
+            var fbxPath = FindPathInUnitTests("Prefabs/skin.fbx");
+            var root = AssetDatabase.LoadMainAssetAtPath(fbxPath) as GameObject;
+            Assert.That(root);
+
+            var exportPath = GetRandomFbxFilePath();
+
+            // Convert it to a prefab
+            var prefab = ConvertToNestedPrefab.Convert(root,
+                fbxFullPath: exportPath, prefabFullPath: Path.ChangeExtension(exportPath, "prefab"));
+            Assert.That(prefab);
+
+            AssertSameHierarchy(root, prefab, ignoreRootName: true, ignoreRootTransform: true);
+
+            // check that the bones make sense
+            var actualSkinnedMesh = prefab.GetComponentInChildren<SkinnedMeshRenderer>();
+            var expectedSkinnedMesh = root.GetComponentInChildren<SkinnedMeshRenderer>();
+
+            var rootBone = actualSkinnedMesh.rootBone;
+            var joint2 = rootBone.Find("joint2");
+            var joint3 = rootBone.Find("joint2/joint3");
+
+            Assert.That(actualSkinnedMesh.bones.Length, Is.EqualTo(3));
+            var bones = new HashSet<Transform>(actualSkinnedMesh.bones);
+            Assert.That(bones.Contains(rootBone));
+            Assert.That(bones.Contains(joint2));
+            Assert.That(bones.Contains(joint3));
+            Assert.That(!bones.Contains(expectedSkinnedMesh.rootBone));
+        }
+
         public static List<string> ChildNames(Transform a) {
             var names = new List<string>();
             foreach(Transform child in a) {
