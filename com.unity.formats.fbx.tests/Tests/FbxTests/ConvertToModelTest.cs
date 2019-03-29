@@ -397,11 +397,11 @@ namespace FbxExporter.UnitTests
 
                 var fromProp = aSerObj.FindProperty("m_transform");
                 Dictionary<string, GameObject> nameMap = new Dictionary<string, GameObject>(){
-                    {"test", b}
+                    {"test", a}
                 };
                 ConvertToNestedPrefab.CopySerializedProperty(bSerObj, fromProp, nameMap);
 
-                Assert.That(bReferenceComponent.m_transform.name, Is.EqualTo(b.transform.name));
+                Assert.That(bReferenceComponent.m_transform.name, Is.EqualTo(a.transform.name));
             }
         }
 
