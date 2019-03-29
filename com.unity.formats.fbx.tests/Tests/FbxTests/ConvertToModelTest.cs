@@ -379,6 +379,30 @@ namespace FbxExporter.UnitTests
                 Assert.That(prefab);
                 Assert.That(ConvertToNestedPrefab.GetFbxAssetOrNull(prefab), Is.Null);
             }
+
+            // Test CopySerializedProperty
+            {
+                // test with ReferenceComponent
+                var a = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                var aReferenceComponent = a.AddComponent<ReferenceComponent>();
+                aReferenceComponent.m_transform = a.transform;
+                a.name = "test";
+                var b = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                var bReferenceComponent = b.AddComponent<ReferenceComponent>();
+                bReferenceComponent.m_transform = b.transform;
+                b.name = "test2";
+
+                var aSerObj = new SerializedObject(aReferenceComponent);
+                var bSerObj = new SerializedObject(bReferenceComponent);
+
+                var fromProp = aSerObj.FindProperty("m_transform");
+                Dictionary<string, GameObject> nameMap = new Dictionary<string, GameObject>(){
+                    {"test", b}
+                };
+                ConvertToNestedPrefab.CopySerializedProperty(bSerObj, fromProp, nameMap);
+
+                Assert.That(bReferenceComponent.m_transform.name, Is.EqualTo(b.transform.name));
+            }
         }
 
         [Test]
