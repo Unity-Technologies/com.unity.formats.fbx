@@ -155,6 +155,45 @@ namespace FbxExporter.UnitTests
             Assert.That(Path.GetExtension(meshPath), Is.EqualTo(".fbx"));
         }
 
+        [Test]
+        public void TestComponents()
+        {
+            // more specific test that components are copied properly, than just checking
+            // if they are there
+            var prefabPath = FindPathInUnitTests("Prefabs/ComponentTest.prefab");
+            var root = AssetDatabase.LoadMainAssetAtPath(prefabPath) as GameObject;
+            Assert.That(root);
+
+            var prefab = ConvertAndComparePrefab(root);
+
+            var expectedParticleSystem = root.GetComponentInChildren<ParticleSystem>();
+            var actualParticleSystem = prefab.GetComponentInChildren<ParticleSystem>();
+            Assert.That(expectedParticleSystem);
+            Assert.That(actualParticleSystem);
+            Assert.That(actualParticleSystem.gameObject.name, Is.EqualTo(expectedParticleSystem.gameObject.name));
+
+            // compare a few parameters that differ from default
+            Assert.That(actualParticleSystem.main.startSize, Is.EqualTo(expectedParticleSystem.main.startSize));
+            var actualParticleRenderer = prefab.GetComponentInChildren<ParticleSystemRenderer>();
+            var expectedParticleRenderer = root.GetComponentInChildren<ParticleSystemRenderer>();
+            Assert.That(actualParticleRenderer.renderMode, Is.EqualTo(expectedParticleRenderer.renderMode));
+            Assert.That(actualParticleRenderer.mesh);
+            Assert.That(expectedParticleRenderer.mesh);
+            Assert.That(actualParticleRenderer.mesh.name, Is.EqualTo(expectedParticleRenderer.mesh.name));
+            Assert.That(actualParticleRenderer.sharedMaterial);
+            Assert.That(expectedParticleRenderer.sharedMaterial);
+            Assert.That(actualParticleRenderer.sharedMaterial.name, Is.EqualTo(expectedParticleRenderer.sharedMaterial.name));
+
+            // Compare light
+            var expectedLight = root.GetComponentInChildren<Light>();
+            var actualLight = prefab.GetComponentInChildren<Light>();
+
+            Assert.That(actualLight.type, Is.EqualTo(expectedLight.type));
+            Assert.That(actualLight.range, Is.EqualTo(expectedLight.range));
+            Assert.That(actualLight.spotAngle, Is.EqualTo(expectedLight.spotAngle));
+            Assert.That(actualLight.color, Is.EqualTo(expectedLight.color));
+        }
+
         public static List<string> ChildNames(Transform a) {
             var names = new List<string>();
             foreach(Transform child in a) {

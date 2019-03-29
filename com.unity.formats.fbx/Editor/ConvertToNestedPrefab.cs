@@ -707,18 +707,28 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                 }
 
+                // If it's a particle system renderer, then check to see if it hasn't already
+                // been added when adding the particle system.
+                // An object can only have on ParticleSystem so there shouldn't be an issue of the renderer
+                // belonging to a different ParticleSystem.
+                if(!toComponent && fromComponent is ParticleSystemRenderer)
+                {
+                    toComponent = to.GetComponent<ParticleSystemRenderer>();
+                }
+
                 if (!toComponent)
                 {
                     toComponent = to.AddComponent(fromComponent.GetType());
                 }
 
-                if (fromComponent is Renderer)
+                // Do not try to copy materials for ParticleSystemRenderer, since it is not in the
+                // FBX file
+                if (fromComponent is Renderer && !(fromComponent is ParticleSystemRenderer))
                 {
                     var renderer = toComponent as Renderer;
                     var sharedMaterials = renderer.sharedMaterials;
                     EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                    var toRenderer = toComponent as Renderer;
-                    toRenderer.sharedMaterials = sharedMaterials;
+                    renderer.sharedMaterials = sharedMaterials;
                 }
                 else if (fromComponent is SkinnedMeshRenderer)
                 {
