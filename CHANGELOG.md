@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [2.0.1-preview.8] - 2019-03-29
+FIXES
+* Fix FbxExportSettings compile error on 2018.3
+
 ## [2.0.1-preview.7] - 2019-03-22
 FIXES
 * Fix Max 2020 integration installation hanging
