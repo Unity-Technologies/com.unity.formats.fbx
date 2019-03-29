@@ -37,22 +37,40 @@ namespace FbxExporter.UnitTests
             var go = AssetDatabase.LoadMainAssetAtPath(prefabPath) as GameObject;
             Assert.That(go);
 
+            // first test converting prefab asset directly
             ConvertAndComparePrefab(go);
+
+            // then test adding it to the scene and then converting
+            var instance = PrefabUtility.InstantiatePrefab(go) as GameObject;
+            ConvertAndComparePrefab(instance, isInstance: true);
         }
 
-        protected GameObject ConvertAndComparePrefab(GameObject orig, string fbxPath = "")
+        protected GameObject ConvertAndComparePrefab(GameObject orig, string fbxPath = "", bool isInstance = false)
         {
             if (string.IsNullOrEmpty(fbxPath))
             {
                 fbxPath = GetRandomFbxFilePath();
             }
+
+            var prefabAsset = orig;
+            if (isInstance)
+            {
+                prefabAsset = PrefabUtility.GetCorrespondingObjectFromSource(orig) as GameObject;
+            }
+
             // Convert it to a prefab
             var prefab = ConvertToNestedPrefab.Convert(orig,
                 fbxFullPath: fbxPath, prefabFullPath: Path.ChangeExtension(fbxPath, "prefab"));
             Assert.That(prefab);
 
+            if (isInstance)
+            {
+                // original should be destroyed now
+                Assert.That(!orig);
+            }
+
             // check that the hierarchy matches the original
-            AssertSameHierarchy(orig, prefab, ignoreRootName: true, checkComponents: true);
+            AssertSameHierarchy(prefabAsset, prefab, ignoreRootName: true, checkComponents: true);
 
             // check that the meshes and materials are now from the fbx
             var fbx = AssetDatabase.LoadMainAssetAtPath(fbxPath) as GameObject;
