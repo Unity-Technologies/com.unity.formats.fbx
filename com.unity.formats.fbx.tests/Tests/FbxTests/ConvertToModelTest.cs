@@ -350,6 +350,35 @@ namespace FbxExporter.UnitTests
                 Assert.AreEqual ("BB", b.transform.GetChild (1).name);
                 Assert.AreEqual (a1.transform.localPosition, b1.transform.localPosition);
             }
+
+            // Test GetFbxAssetOrNull
+            {
+                // regular GO should return null
+                var a = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                var b = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                b.transform.parent = a.transform;
+                Assert.That(ConvertToNestedPrefab.GetFbxAssetOrNull(a), Is.Null);
+
+                // try root FBX asset
+                var fbx = ExportToFbx(a);
+                Assert.That(ConvertToNestedPrefab.GetFbxAssetOrNull(fbx), Is.EqualTo(fbx));
+
+                // try child of FBX asset
+                Assert.That(ConvertToNestedPrefab.GetFbxAssetOrNull(fbx.transform.GetChild(0).gameObject), Is.Null);
+
+                // try root of FBX instance
+                var fbxInstance = PrefabUtility.InstantiatePrefab(fbx) as GameObject;//GameObject.Instantiate(fbx) as GameObject;
+                Assert.That(fbxInstance);
+                Assert.That(ConvertToNestedPrefab.GetFbxAssetOrNull(fbxInstance), Is.EqualTo(fbx));
+
+                // try child of FBX instance
+                Assert.That(ConvertToNestedPrefab.GetFbxAssetOrNull(fbxInstance.transform.GetChild(0).gameObject), Is.Null);
+
+                // try root of prefab asset
+                var prefab = PrefabUtility.SaveAsPrefabAsset(fbxInstance, GetRandomPrefabAssetPath());
+                Assert.That(prefab);
+                Assert.That(ConvertToNestedPrefab.GetFbxAssetOrNull(prefab), Is.Null);
+            }
         }
 
         [Test]
