@@ -78,6 +78,18 @@ namespace FbxExporter.UnitTests
             Assert.That(fbx);
             AssertSameMeshesAndMaterials(fbx, prefab);
 
+            if (isInstance)
+            {
+                // test undo and redo
+                Undo.PerformUndo();
+                Assert.That(!prefab);
+                Assert.That(orig);
+
+                Undo.PerformRedo();
+                AssertSameHierarchy(prefabAsset, prefab, ignoreRootName: true, checkComponents: true);
+                AssertSameMeshesAndMaterials(fbx, prefab);
+            }
+
             return prefab;
         }
 
