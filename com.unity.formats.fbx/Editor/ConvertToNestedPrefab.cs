@@ -552,6 +552,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 if (PrefabUtility.GetPrefabInstanceStatus(sourceGO) == PrefabInstanceStatus.Connected)
                 {
+                    Undo.RegisterFullObjectHierarchyUndo(sourceGO, "unpack prefab instance");
                     PrefabUtility.UnpackPrefabInstance(sourceGO, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                 }
 
