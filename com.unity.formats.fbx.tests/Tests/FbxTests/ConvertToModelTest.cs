@@ -226,6 +226,38 @@ namespace FbxExporter.UnitTests
             Assert.That(!bones.Contains(expectedSkinnedMesh.rootBone));
         }
 
+        [Test]
+        public void TestConvertInPrefabScene()
+        {
+            var origPrefabPath = FindPathInUnitTests("Prefabs/RegularPrefab_Regular.prefab");
+            var root = AssetDatabase.LoadMainAssetAtPath(origPrefabPath) as GameObject;
+            var rootInstance = PrefabUtility.InstantiatePrefab(root) as GameObject;
+            Assert.That(rootInstance);
+            PrefabUtility.UnpackPrefabInstance(rootInstance, PrefabUnpackMode.OutermostRoot, InteractionMode.AutomatedAction);
+            var newPrefabPath = GetRandomPrefabAssetPath();
+            PrefabUtility.SaveAsPrefabAsset(rootInstance, newPrefabPath);
+
+            var newPrefab = PrefabUtility.LoadPrefabContents(newPrefabPath);
+            var childObj = newPrefab.transform.GetChild(0).gameObject;
+            var childDup = Object.Instantiate(childObj) as GameObject;
+            childDup.transform.parent = newPrefab.transform;
+            Assert.That(childObj);
+            Assert.That(childDup); // duplicate so we have an object to compare against
+            
+            var fbxPath = GetRandomFbxFilePath();
+
+            // Convert it to a prefab
+            var convertedObj = ConvertToNestedPrefab.Convert(childObj,
+                fbxFullPath: fbxPath, prefabFullPath: Path.ChangeExtension(fbxPath, "prefab"));
+            Assert.That(convertedObj);
+
+            AssertSameHierarchy(childDup, convertedObj, ignoreRootName: true, checkComponents: true);
+
+            Assert.That(!childObj); // replaced by convertedObj
+            Assert.That(convertedObj.transform.parent, Is.EqualTo(newPrefab.transform));
+            PrefabUtility.UnloadPrefabContents(newPrefab);
+        }
+
         public static List<string> ChildNames(Transform a) {
             var names = new List<string>();
             foreach(Transform child in a) {

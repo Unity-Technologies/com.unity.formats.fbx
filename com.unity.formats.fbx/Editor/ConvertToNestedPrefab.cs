@@ -780,7 +780,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     if (!fromProperty.hasVisibleChildren)
                     {
                         if (fromProperty.propertyType == SerializedPropertyType.ObjectReference && fromProperty.propertyPath != "m_GameObject" &&
-                        fromProperty.objectReferenceValue && (fromProperty.objectReferenceValue is GameObject || fromProperty.objectReferenceValue is Component))
+                            fromProperty.propertyPath != "m_Father" && fromProperty.objectReferenceValue &&
+                            (fromProperty.objectReferenceValue is GameObject || fromProperty.objectReferenceValue is Component))
                         {
                             CopySerializedProperty(serializedToComponent, fromProperty, nameMap);
                         }
