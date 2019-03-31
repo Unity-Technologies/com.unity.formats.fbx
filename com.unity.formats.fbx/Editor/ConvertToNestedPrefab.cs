@@ -241,6 +241,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // if root is a prefab instance, unpack it. Unpack everything below as well
             if (PrefabUtility.GetPrefabInstanceStatus(toConvert) == PrefabInstanceStatus.Connected)
             {
+                Undo.RegisterFullObjectHierarchyUndo(toConvert, "unpack prefab instance");
                 PrefabUtility.UnpackPrefabInstance(toConvert, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
             }
 
@@ -278,8 +279,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 fbxInstance.transform.parent = toConvert.transform.parent;
                 fbxInstance.transform.SetSiblingIndex(toConvert.transform.GetSiblingIndex());
-
-                Object.DestroyImmediate(toConvert);
+                
+                Undo.DestroyObjectImmediate(toConvert);
+                Undo.RegisterCreatedObjectUndo(fbxInstance, "Convert to Model Prefab Variant instance");
                 SceneManagement.EditorSceneManager.MarkSceneDirty(fbxInstance.scene);
                 return fbxInstance;
             }
