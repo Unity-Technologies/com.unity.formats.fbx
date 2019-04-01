@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [2.0.1-preview.10] - 2019-04-01
+FIXES
+* Fix integration files still missing. They were ignored by .npmignore created when running Package Validation
+
 ## [2.0.1-preview.9] - 2019-04-01
 FIXES
 * Fix missing integration files in previous release
