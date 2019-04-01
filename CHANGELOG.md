@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [2.0.1-preview.9] - 2019-04-01
+FIXES
+* Fix missing integration files in previous release
+
 ## [2.0.1-preview.8] - 2019-03-29
 FIXES
 * Fix FbxExportSettings compile error on 2018.3
