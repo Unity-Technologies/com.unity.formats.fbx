@@ -46,6 +46,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             TransferAnimationSource = null;
             TransferAnimationDest = null;
+
+            string fbxFileName = null;
             if (GetToExport().Length == 1)
             {
                 var go = ModelExporter.GetGameObject(GetToExport()[0]);
@@ -65,6 +67,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     m_prefabFileName = System.IO.Path.GetFileNameWithoutExtension(mainAssetRelPath);
                     ExportSettings.AddFbxSavePath(System.IO.Path.GetDirectoryName(mainAssetRelPath));
+
+                    fbxFileName = m_prefabFileName;
+                }
+
+                var fullPrefabPath = System.IO.Path.Combine(ExportSettings.PrefabAbsoluteSavePath, m_prefabFileName);
+                if (OverwriteExistingFile(fullPrefabPath))
+                {
+                    m_prefabFileName = System.IO.Path.GetFileNameWithoutExtension(ConvertToNestedPrefab.IncrementFileName(fullPrefabPath, m_prefabFileName));
                 }
 
                 // if only one object selected, set transfer source/dest to this object
@@ -79,7 +89,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 m_prefabFileName = "(automatic)";
             }
 
-            this.SetFilename(m_prefabFileName);
+            // if there is an existing fbx file then use its name, otherwise use the same name as for the prefab
+            this.SetFilename(fbxFileName != null? fbxFileName : m_prefabFileName);
         }
 
         protected override void OnEnable()
