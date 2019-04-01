@@ -225,6 +225,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return null;
             }
 
+            Undo.IncrementCurrentGroup();
+            Undo.SetCurrentGroupName(string.Format("Convert {0} to Model Prefab Variant", toConvert.name));
+
             // If we selected the something that's already backed by an
             // FBX, don't export.
             var mainAsset = GetOrCreateFbxAsset(toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
@@ -247,6 +250,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // create prefab variant from the fbx
             var fbxInstance = PrefabUtility.InstantiatePrefab(mainAsset) as GameObject;
+
+            // replace hierarchy in the scene
+            if (!isPrefabAsset && toConvert != null)
+            {
+                fbxInstance.transform.parent = toConvert.transform.parent;
+                fbxInstance.transform.SetSiblingIndex(toConvert.transform.GetSiblingIndex());
+            }
 
             // copy components over
             UpdateFromSourceRecursive(fbxInstance, toConvert);
@@ -277,12 +287,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // replace hierarchy in the scene
             if (!isPrefabAsset && toConvert != null)
             {
-                fbxInstance.transform.parent = toConvert.transform.parent;
-                fbxInstance.transform.SetSiblingIndex(toConvert.transform.GetSiblingIndex());
-                
                 Undo.DestroyObjectImmediate(toConvert);
                 Undo.RegisterCreatedObjectUndo(fbxInstance, "Convert to Model Prefab Variant instance");
                 SceneManagement.EditorSceneManager.MarkSceneDirty(fbxInstance.scene);
+                
+                Undo.IncrementCurrentGroup();
                 return fbxInstance;
             }
             else
@@ -290,6 +299,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Object.DestroyImmediate(fbxInstance);
                 Object.DestroyImmediate(toConvert);
             }
+            Undo.IncrementCurrentGroup();
 
             return prefab;
         }
@@ -779,6 +789,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     if (!fromProperty.hasVisibleChildren)
                     {
+                        // with Undo operations, copying m_Father reference causes issues. Also, it is not required as the reference is fixed when
+                        // the transform is parented under the correct hierarchy (which happens before this).
                         if (fromProperty.propertyType == SerializedPropertyType.ObjectReference && fromProperty.propertyPath != "m_GameObject" &&
                             fromProperty.propertyPath != "m_Father" && fromProperty.objectReferenceValue &&
                             (fromProperty.objectReferenceValue is GameObject || fromProperty.objectReferenceValue is Component))

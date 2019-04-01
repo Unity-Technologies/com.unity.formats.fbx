@@ -238,7 +238,7 @@ namespace FbxExporter.UnitTests
         {
             float distance = Vector3.Distance(expected, actual);
 
-            var message = System.String.Format("Expected: Vector3({0}, {1}, {2})\nBut was:  Vector3({3}, {4}, {5})\nDistance: {6} is greated than allowed delta {7}",
+            var message = System.String.Format("Expected: Vector3({0}, {1}, {2})\nBut was:  Vector3({3}, {4}, {5})\nDistance: {6} is greater than allowed delta {7}",
                                     expected.x, expected.y, expected.z,
                                     actual.x, actual.y, actual.z,
                                     distance, delta);
