@@ -1,5 +1,22 @@
 # Changes in Fbx Exporter
 
+## [2.0.1-preview.10] - 2019-04-01
+FIXES
+* Fix integration files still missing. They were ignored by .npmignore created when running Package Validation
+
+## [2.0.1-preview.9] - 2019-04-01
+FIXES
+* Fix missing integration files in previous release
+
+## [2.0.1-preview.8] - 2019-03-29
+FIXES
+* Fix FbxExportSettings compile error on 2018.3
+
+## [2.0.1-preview.7] - 2019-03-22
+FIXES
+* Fix Max 2020 integration installation hanging
+* Fix duplicate DCCs showing in integration install dropdown if MAYA_LOCATION set
+
 ## [2.0.1-preview.6] - 2019-02-08
 CHANGES
 * Updated package.json

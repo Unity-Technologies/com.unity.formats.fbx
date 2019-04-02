@@ -236,6 +236,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             var provider = AssetSettingsProvider.CreateProviderFromObject(
                 "Project/Fbx Export", ExportSettings.instance, GetSearchKeywordsFromGUIContentProperties(typeof(Style)));
+#if UNITY_2019_1_OR_NEWER
             provider.inspectorUpdateHandler += () =>
             {
                 if (provider.settingsEditor != null &&
@@ -244,6 +245,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     provider.Repaint();
                 }
             };
+#else
+            provider.activateHandler += (searchContext, rootElement) =>
+            {
+                if (provider.settingsEditor != null &&
+                    provider.settingsEditor.serializedObject.UpdateIfRequiredOrScript())
+                {
+                    provider.Repaint();
+                }
+            };
+#endif // UNITY_2019_1_OR_NEWER
             return provider;
         }
 
@@ -340,7 +351,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     }
                 }
             }
-            return result;
+            return NormalizePath(result, false);
         }
 
         /// <summary>
@@ -361,7 +372,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 {
                     if (Directory.Exists(location))
                     {
-                        result.Add(location);
+                        result.Add(NormalizePath(location, false));
                     }
                 }
             }
