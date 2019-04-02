@@ -10,5 +10,5 @@ Since Prefab Variants allow you to override its base Prefab's properties, you ca
 
 This type of connection is easy to maintain.
 
-* For information on Model Prefabs in general and how to create Model Prefab Variants from FBX files, see [Working with Model Prefab Variants](nested-prefabs.md). If you are upgrading from a previous version of Unity, you can also [convert any existing](nested-prefab.md#conversion) Linked Prefabs you may have to Variant Model Prefabs.
+* For information on Model Prefabs in general and how to create Model Prefab Variants from FBX files, see [Working with Model Prefab Variants](nested-prefabs.md). If you are upgrading from a previous version of Unity, you can also [convert any existing](nested-prefabs.md#conversion) Linked Prefabs you may have to Variant Model Prefabs.
 
