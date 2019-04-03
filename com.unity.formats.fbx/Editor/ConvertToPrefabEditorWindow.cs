@@ -71,10 +71,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     fbxFileName = m_prefabFileName;
                 }
 
-                var fullPrefabPath = System.IO.Path.Combine(ExportSettings.PrefabAbsoluteSavePath, m_prefabFileName);
-                if (OverwriteExistingFile(fullPrefabPath))
+                var fullPrefabPath = System.IO.Path.Combine(ExportSettings.PrefabAbsoluteSavePath, m_prefabFileName + ".prefab");
+                if (System.IO.File.Exists(fullPrefabPath))
                 {
-                    m_prefabFileName = System.IO.Path.GetFileNameWithoutExtension(ConvertToNestedPrefab.IncrementFileName(fullPrefabPath, m_prefabFileName));
+                    m_prefabFileName = System.IO.Path.GetFileNameWithoutExtension(ConvertToNestedPrefab.IncrementFileName(ExportSettings.PrefabAbsoluteSavePath, m_prefabFileName + ".prefab"));
                 }
 
                 // if only one object selected, set transfer source/dest to this object
