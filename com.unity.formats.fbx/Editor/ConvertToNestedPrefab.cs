@@ -155,7 +155,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             Undo.IncrementCurrentGroup();
             int groupIndex = Undo.GetCurrentGroup();
-            Undo.SetCurrentGroupName(string.Format(UndoConversionCreateObject));
+            Undo.SetCurrentGroupName(UndoConversionCreateObject);
             var converted = new List<GameObject>();
             var exportOptions = ExportSettings.instance.ConvertToPrefabSettings.info;
             foreach (var go in toExport)

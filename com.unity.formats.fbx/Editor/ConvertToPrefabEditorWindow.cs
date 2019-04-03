@@ -193,7 +193,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             Undo.IncrementCurrentGroup();
             int groupIndex = Undo.GetCurrentGroup();
-            Undo.SetCurrentGroupName(string.Format(ConvertToNestedPrefab.UndoConversionCreateObject));
+            Undo.SetCurrentGroupName(ConvertToNestedPrefab.UndoConversionCreateObject);
             foreach (var obj in GetToExport())
             {
                 // Convert, automatically choosing a file path that won't clobber any existing files.

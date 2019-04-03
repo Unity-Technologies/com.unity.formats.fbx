@@ -11,6 +11,7 @@ namespace FbxExporter.UnitTests
 {
     public class ConvertToNestedPrefabTest : ExporterTestBase
     {
+        // TestCaseSource requires the input to return IEnumerable
         public static IEnumerable PrefabTestCases
         {
             get
