@@ -1,11 +1,11 @@
 {
     "name": "Unity.Formats.Fbx.Editor.Tests",
     "references": [
-        "GUID:f06555f75b070af458a003d92f9efb00",
-        "GUID:2b82e46c4ca0a4eb697ab8ccdfb39af1",
-        "GUID:0f9e8f73c69964f1e8176f9a0b86f9b2",
-        "GUID:77fc2e1f5a4f24efab94081ad67fcb20",
-        "GUID:92b6c517cb2f6ba44ad2e0456121022d"
+        "Unity.Timeline",
+        "Autodesk.Fbx",
+        "Unity.Formats.Fbx.Editor",
+        "Unity.Formats.Fbx.Runtime",
+        "Unity.Formats.Fbx.Editor.Tests.Prefabs"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"
@@ -18,6 +18,5 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": []
+    "defineConstraints": []
 }
