@@ -191,6 +191,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return true;
             }
 
+            Undo.IncrementCurrentGroup();
+            int groupIndex = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName(string.Format(ConvertToNestedPrefab.UndoConversionCreateObject));
             foreach (var obj in GetToExport())
             {
                 // Convert, automatically choosing a file path that won't clobber any existing files.
@@ -199,6 +202,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
                 );
             }
+            Undo.CollapseUndoOperations(groupIndex);
+            Undo.IncrementCurrentGroup();
             return true;
         }
 

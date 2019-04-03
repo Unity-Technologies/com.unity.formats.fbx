@@ -36,6 +36,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
     {
         const string GameObjectMenuItemName = "GameObject/Convert To Model Prefab Variant Instance...";
         const string AssetsMenuItemName = "Assets/Convert To Model Prefab Variant...";
+        const string UndoConversionGroup = "Convert {0} to Model Prefab Variant";
+        internal const string UndoConversionCreateObject = "Convert to Model Prefab Variant instance";
 
         /// <summary>
         /// OnContextItem is called either:
@@ -85,11 +87,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Selection.objects = CreateInstantiatedModelPrefab(selection);
         }
 
-        internal static void DisplayInvalidSelectionDialog(GameObject toConvert)
+        internal static void DisplayInvalidSelectionDialog(GameObject toConvert, string message = "")
         {
             UnityEditor.EditorUtility.DisplayDialog(
                 string.Format("{0} Warning", "FBX Exporter"),
-                toConvert.name + " cannot be converted.",
+                string.Format("Failed to Convert: {0}\n{1}", toConvert.name, message),
                 "Ok");
         }
 
@@ -134,14 +136,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     var go = toExport.First();
                     if (PrefabUtility.IsPartOfNonAssetPrefabInstance(go) && !PrefabUtility.IsOutermostPrefabInstanceRoot(go))
                     {
-                        DisplayInvalidSelectionDialog(go);
+                        DisplayInvalidSelectionDialog(go, 
+                            "Children of a Prefab instance cannot be converted.\nYou can open the Prefab in Prefab Mode or unpack the Prefab instance to convert it's children");
                         return null;
                     }
 
                     // can't currently handle converting root of prefab in prefab preview scene
                     if (SceneManagement.EditorSceneManager.IsPreviewSceneObject(go) && go.transform.parent == null)
                     {
-                        DisplayInvalidSelectionDialog(go);
+                        DisplayInvalidSelectionDialog(go,
+                            "Cannot convert Prefab root in the Prefab Preview Scene.\nYou can convert a Prefab Instance or convert the Prefab Asset directly in the Project view");
                         return null;
                     }
                 }
@@ -149,6 +153,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return toExport.ToArray();
             }
 
+            Undo.IncrementCurrentGroup();
+            int groupIndex = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName(string.Format(UndoConversionCreateObject));
             var converted = new List<GameObject>();
             var exportOptions = ExportSettings.instance.ConvertToPrefabSettings.info;
             foreach (var go in toExport)
@@ -159,27 +166,29 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     converted.Add(convertedGO);
                 }
             }
+            Undo.CollapseUndoOperations(groupIndex);
+            Undo.IncrementCurrentGroup();
             return converted.ToArray();
         }
 
         /// <summary>
-        /// Convert one object (and the hierarchy below it) to an auto-updating prefab.
+        /// Convert one object (and the hierarchy below it) to a prefab variant of a model prefab.
         ///
         /// Returns the prefab asset that's linked to the fbx.
         ///
         /// If 'toConvert' is:
         /// <list>
         /// <item>An object in the scene, then the hierarchy will be exported
-        /// and a new auto-updating prefab created pointing to the new fbx.</item>
+        /// and a new prefab variant created pointing to the new fbx.</item>
         /// <item>The root of an fbx asset, or the root of an instance of an
-        /// fbx asset, then a new auto-updating prefab will be created
+        /// fbx asset, then a new prefab variant will be created
         /// pointing to the existing fbx.</item>
-        /// <item>A prefab asset (but *not* if it's an instance of a prefab),
-        /// then a new fbx asset will be exported and the prefab will be made
-        /// to auto-update from the new fbx.</item>
+        /// <item>A prefab asset,
+        /// then a new fbx asset will be exported and a new prefab variant created
+        /// pointing to the fbx.</item>
         /// </list>
         /// </summary>
-        /// <returns>The prefab asset linked to an fbx file.</returns>
+        /// <returns>The prefab variant linked to an fbx file.</returns>
         /// <param name="toConvert">Object to convert.</param>
         /// <param name="fbxFullPath">Absolute platform-specific path to
         /// the fbx file. If the file already exists, it will be overwritten.
@@ -226,7 +235,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             Undo.IncrementCurrentGroup();
-            Undo.SetCurrentGroupName(string.Format("Convert {0} to Model Prefab Variant", toConvert.name));
+            Undo.SetCurrentGroupName(string.Format(UndoConversionGroup, toConvert.name));
 
             // If we selected the something that's already backed by an
             // FBX, don't export.
@@ -288,7 +297,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (!isPrefabAsset && toConvert != null)
             {
                 Undo.DestroyObjectImmediate(toConvert);
-                Undo.RegisterCreatedObjectUndo(fbxInstance, "Convert to Model Prefab Variant instance");
+                Undo.RegisterCreatedObjectUndo(fbxInstance, UndoConversionCreateObject);
                 SceneManagement.EditorSceneManager.MarkSceneDirty(fbxInstance.scene);
                 
                 Undo.IncrementCurrentGroup();
@@ -417,41 +426,39 @@ namespace UnityEditor.Formats.Fbx.Exporter
             //      Cube
             //      -- Sphere
             //
-            // Both the Cube and Sphere will have ModelPrefabInstance as their prefab type.
+            // Both the Cube and Sphere will have ModelPrefab as their prefab type.
             // However, when selecting the Sphere to convert, we don't want to connect it to the
             // existing FBX but create a new FBX containing just the sphere.
-            if (PrefabUtility.IsPartOfModelPrefab(go))
-            {
-                PrefabInstanceStatus prefabStatus = PrefabUtility.GetPrefabInstanceStatus(go);
-                switch (prefabStatus)
-                {
-                    case PrefabInstanceStatus.Connected:
-                        // this is a prefab instance, get the object from source
-                        if (PrefabUtility.IsOutermostPrefabInstanceRoot(go))
-                        {
-                            return PrefabUtility.GetCorrespondingObjectFromSource(go) as GameObject;
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    case PrefabInstanceStatus.NotAPrefab:
-                        // a prefab asset
-                        if(go.transform.root.gameObject == go)
-                        {
-                            return go;
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    default:
-                        return null;
-                }
-            }
-            else
+            if (!PrefabUtility.IsPartOfModelPrefab(go))
             {
                 return null;
+            }
+
+            PrefabInstanceStatus prefabStatus = PrefabUtility.GetPrefabInstanceStatus(go);
+            switch (prefabStatus)
+            {
+                case PrefabInstanceStatus.Connected:
+                    // this is a prefab instance, get the object from source
+                    if (PrefabUtility.IsOutermostPrefabInstanceRoot(go))
+                    {
+                        return PrefabUtility.GetCorrespondingObjectFromSource(go) as GameObject;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                case PrefabInstanceStatus.NotAPrefab:
+                    // a prefab asset
+                    if(go.transform.root.gameObject == go)
+                    {
+                        return go;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                default:
+                    return null;
             }
         }
 
@@ -584,6 +591,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         /// <summary>
         /// Gets a dictionary linking dest GameObject name to source game object.
+        /// 
+        /// Before export we ensure that the hierarchy has unique names, so that we can map by name afterwards.
         /// </summary>
         /// <returns>Dictionary containing the name to source game object.</returns>
         /// <param name="dest">Destination GameObject.</param>
@@ -667,14 +676,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// over to the 'to' object which is the object in the
         /// scene we exported.
         ///
-        /// Only copy over meshes and materials, since that is all the FBX contains
-        /// that is not already in the scene.
+        /// Copy over everything except meshes and materials, since these
+        /// are already in the FBX.
         ///
         /// The 'from' hierarchy is not modified.
         /// </summary>
         internal static void CopyComponents(GameObject to, GameObject from, Dictionary<string, GameObject> nameMap)
         {
-            // copy components from to to. Don't want to copy over meshes and materials
+            // copy components on "from" to "to". Don't want to copy over meshes and materials that were exported
             var originalComponents = new List<Component>(from.GetComponents<Component>());
             var destinationComponents = new List<Component>(to.GetComponents<Component>());
             foreach(var fromComponent in originalComponents)
@@ -722,7 +731,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // If it's a particle system renderer, then check to see if it hasn't already
                 // been added when adding the particle system.
-                // An object can only have on ParticleSystem so there shouldn't be an issue of the renderer
+                // An object can have only one ParticleSystem so there shouldn't be an issue of the renderer
                 // belonging to a different ParticleSystem.
                 if(!toComponent && fromComponent is ParticleSystemRenderer)
                 {
@@ -743,6 +752,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     EditorJsonUtility.FromJsonOverwrite(json, toComponent);
                     renderer.sharedMaterials = sharedMaterials;
                 }
+                // SkinnedMeshRenderer stores both the mesh and materials.
+                // Make sure these do not get copied over when the SkinnedMeshRenderer is updated.
                 else if (fromComponent is SkinnedMeshRenderer)
                 {
                     var skinnedMesh = toComponent as SkinnedMeshRenderer;
