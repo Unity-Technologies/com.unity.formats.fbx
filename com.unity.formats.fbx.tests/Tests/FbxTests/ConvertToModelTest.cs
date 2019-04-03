@@ -248,6 +248,12 @@ namespace FbxExporter.UnitTests
             Assert.That(rootInstance);
             PrefabUtility.UnpackPrefabInstance(rootInstance, PrefabUnpackMode.OutermostRoot, InteractionMode.AutomatedAction);
             var newPrefabPath = GetRandomPrefabAssetPath();
+            // make sure the directory structure exists
+            var dirName = Path.GetDirectoryName(newPrefabPath);
+            if (!Directory.Exists(dirName))
+            {
+                Directory.CreateDirectory(dirName);
+            }
             PrefabUtility.SaveAsPrefabAsset(rootInstance, newPrefabPath);
 
             var newPrefab = PrefabUtility.LoadPrefabContents(newPrefabPath);

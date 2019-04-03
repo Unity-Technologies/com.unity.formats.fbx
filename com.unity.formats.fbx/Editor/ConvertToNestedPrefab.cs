@@ -247,6 +247,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if(PrefabUtility.IsPartOfPrefabAsset(toConvert) && PrefabUtility.GetPrefabInstanceStatus(toConvert) == PrefabInstanceStatus.NotAPrefab)
             {
                 toConvert = PrefabUtility.InstantiatePrefab(toConvert) as GameObject;
+                Undo.RegisterCreatedObjectUndo(toConvert, UndoConversionCreateObject);
                 isPrefabAsset = true;
             }
 
@@ -290,7 +291,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     prefabFullPath = IncrementFileName(prefabDirectoryFullPath, prefabFullPath);
                 }
             }
-
+            // make sure the directory structure exists
+            var dirName = Path.GetDirectoryName(prefabFullPath);
+            if (!Directory.Exists(dirName))
+            {
+                Directory.CreateDirectory(dirName);
+            }
             var prefab = PrefabUtility.SaveAsPrefabAssetAndConnect(fbxInstance, ExportSettings.GetProjectRelativePath(prefabFullPath), InteractionMode.AutomatedAction);
 
             // replace hierarchy in the scene
