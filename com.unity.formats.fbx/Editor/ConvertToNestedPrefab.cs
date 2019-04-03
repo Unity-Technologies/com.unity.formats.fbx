@@ -582,6 +582,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 destGO.layer = sourceGO.layer;
                 destGO.tag = sourceGO.tag;
 
+                GameObjectUtility.SetStaticEditorFlags(destGO, GameObjectUtility.GetStaticEditorFlags(sourceGO));
+
+                // set icon
+                System.Reflection.BindingFlags bindingFlags = System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic;
+                var sourceIcon = typeof(EditorGUIUtility).InvokeMember("GetIconForObject", bindingFlags, null, null, new object[] { sourceGO });
+                object[] args = new object[] { destGO, sourceIcon };
+                typeof(EditorGUIUtility).InvokeMember("SetIconForObject", bindingFlags, null, null, args);
+
                 foreach (Transform child in t)
                 {
                     q.Enqueue(child);
