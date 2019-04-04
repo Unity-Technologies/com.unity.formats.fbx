@@ -94,7 +94,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             else
             {
-                Debug.LogWarningFormat("{0} not found; update FbxPrefabFile variable in FbxPrefabAutoUpdater.cs to point to FbxPrefab.cs path.", FbxPrefabFile);
+                Debug.LogWarningFormat("{0} not found; update FbxPrefabFile variable in FbxExporterRepairMissingScripts.cs to point to FbxPrefab.cs path.", FbxPrefabFile);
                 return "";
             }
 #endif

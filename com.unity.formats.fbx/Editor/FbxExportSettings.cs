@@ -169,8 +169,30 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                         var assetsToRepair = componentUpdater.GetAssetsToRepair ();
                         Debug.LogFormat ("Failed to update the FbxPrefab components in the following files:\n{0}", string.Join ("\n", assetsToRepair));
                     }
-                } else {
-                    UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
+                }
+
+                var prefabUpdater = new RepairLinkedPrefabs();
+                var prefabsToUpdateCount = prefabUpdater.AssetsToRepairCount;
+                if (prefabsToUpdateCount > 0)
+                {
+                    bool result = UnityEditor.EditorUtility.DisplayDialog("Linked Prefab Updater",
+                        string.Format("Found {0} prefab(s) requiring update. If you choose 'Go Ahead', " +
+                        "these Linked Prefabs will be converted to a new Prefab Variant and FBX file.", prefabsToUpdateCount),
+                        "Go Ahead", "No Thanks"
+                        );
+                    if (result)
+                    {
+                        prefabUpdater.ConvertLinkedPrefabs();
+                    }
+                    else
+                    {
+                        var prefabsToUpdate = prefabUpdater.AssetsToRepair;
+                        Debug.LogFormat("Failed to convert following Linked Prefab files:\n{0}", string.Join("\n", prefabsToUpdate));
+                    }
+                }
+                else
+                {
+                    UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
                         "Couldn't find any prefabs or scenes that require updating", "Ok");
                 }
             }
