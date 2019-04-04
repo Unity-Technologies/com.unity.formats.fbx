@@ -718,8 +718,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     continue;
                 }
 
-                // ignore MeshFilter
-                if (fromComponent is MeshFilter)
+                // ignore MeshFilter and FbxPrefab (when converting LinkedPrefabs)
+                if (fromComponent is MeshFilter || fromComponent is UnityEngine.Formats.Fbx.Exporter.FbxPrefab)
                 {
                     continue;
                 }
