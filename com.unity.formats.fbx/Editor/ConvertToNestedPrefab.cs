@@ -234,21 +234,26 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return null;
             }
 
-            Undo.IncrementCurrentGroup();
-            Undo.SetCurrentGroupName(string.Format(UndoConversionGroup, toConvert.name));
-
             // If we selected the something that's already backed by an
             // FBX, don't export.
             var mainAsset = GetOrCreateFbxAsset(toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
 
-            // if toConvert is part of a prefab asset and not an instance, make it an instance in the scene
+            // if toConvert is part of a prefab asset and not an instance, make it an instance in a preview scene
             // so that we can unpack it and avoid issues with nested prefab references.
             bool isPrefabAsset = false;
+            UnityEngine.SceneManagement.Scene? previewScene = null;
             if(PrefabUtility.IsPartOfPrefabAsset(toConvert) && PrefabUtility.GetPrefabInstanceStatus(toConvert) == PrefabInstanceStatus.NotAPrefab)
             {
-                toConvert = PrefabUtility.InstantiatePrefab(toConvert) as GameObject;
-                Undo.RegisterCreatedObjectUndo(toConvert, UndoConversionCreateObject);
+                previewScene = SceneManagement.EditorSceneManager.NewPreviewScene();
+                toConvert = PrefabUtility.InstantiatePrefab(toConvert, previewScene.Value) as GameObject;
                 isPrefabAsset = true;
+            }
+
+            // don't need to undo if we are converting a prefab asset
+            if (!isPrefabAsset)
+            {
+                Undo.IncrementCurrentGroup();
+                Undo.SetCurrentGroupName(string.Format(UndoConversionGroup, toConvert.name));
             }
 
             // if root is a prefab instance, unpack it. Unpack everything below as well
@@ -311,10 +316,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             else
             {
+                Undo.ClearUndo(toConvert);
+                Undo.ClearUndo(fbxInstance);
                 Object.DestroyImmediate(fbxInstance);
                 Object.DestroyImmediate(toConvert);
             }
-            Undo.IncrementCurrentGroup();
+            if (previewScene.HasValue)
+            {
+                SceneManagement.EditorSceneManager.ClosePreviewScene(previewScene.Value);
+            }
 
             return prefab;
         }
