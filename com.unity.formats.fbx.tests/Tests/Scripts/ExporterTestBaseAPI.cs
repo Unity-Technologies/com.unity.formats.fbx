@@ -287,6 +287,7 @@ namespace FbxExporter.UnitTests
                 Assert.That(expectedHierarchy.isStatic, Is.EqualTo(actualHierarchy.isStatic));
                 Assert.That(expectedHierarchy.layer, Is.EqualTo(actualHierarchy.layer));
                 Assert.That(expectedHierarchy.tag, Is.EqualTo(actualHierarchy.tag));
+                Assert.That(GameObjectUtility.GetStaticEditorFlags(expectedHierarchy), Is.EqualTo(GameObjectUtility.GetStaticEditorFlags(actualHierarchy)));
             }
 
             foreach (Transform expectedChild in expectedTransform) {
