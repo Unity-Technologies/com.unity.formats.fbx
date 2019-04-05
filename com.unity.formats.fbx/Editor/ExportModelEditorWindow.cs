@@ -462,7 +462,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (System.IO.File.Exists (filePath)) {
                 bool overwrite = UnityEditor.EditorUtility.DisplayDialog (
                     string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), 
-                    string.Format("File {0} already exists.\nOverwrite cannot be undone", filePath), 
+                    string.Format("File {0} already exists.\nOverwrite cannot be undone.", filePath), 
                     "Overwrite", "Cancel");
                 if (!overwrite) {
                     if (GUI.changed) {

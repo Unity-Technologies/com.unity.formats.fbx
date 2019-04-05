@@ -161,6 +161,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         return null;
                     }
 
+                    if (PrefabUtility.IsPartOfPrefabAsset(go) && go.transform.parent != null)
+                    {
+                        DisplayInvalidSelectionDialog(go,
+                            "Children of a Prefab Asset cannot be converted.\nYou can open the Prefab in Prefab Mode or unpack the Prefab instance to convert it's children");
+                        return null;
+                    }
+
                     // can't currently handle converting root of prefab in prefab preview scene
                     if (SceneManagement.EditorSceneManager.IsPreviewSceneObject(go) && go.transform.parent == null)
                     {
