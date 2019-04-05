@@ -19,6 +19,9 @@ namespace FbxExporter.UnitTests
             EditorSceneManager.OpenScene(FindPathInUnitTests("Scene/TestScene.unity"));
         }
 
+#if !UNITY_2019_1_OR_NEWER
+        [Ignore("UT-1985 CubeSpecialTimeline asset broken in 2018.3")]
+#endif
         [Test]
         public void ExportSingleTimelineClipTest()
         {

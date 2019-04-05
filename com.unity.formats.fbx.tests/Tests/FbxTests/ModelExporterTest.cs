@@ -400,8 +400,12 @@ namespace FbxExporter.UnitTests
             ModelExporter.ExportObject (filename, obj);
 
             var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
+#if UNITY_2019_1_OR_NEWER
             importer.optimizeMeshPolygons = false;
             importer.optimizeMeshVertices = false;
+#else
+            importer.optimizeMesh = false;
+#endif // UNITY_2019_1_OR_NEWER
             importer.SaveAndReimport();
 
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
@@ -550,8 +554,12 @@ namespace FbxExporter.UnitTests
             ModelExporter.ExportObject (filename, originalGO);
 
             var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
+#if UNITY_2019_1_OR_NEWER
             importer.optimizeMeshPolygons = false;
             importer.optimizeMeshVertices = false;
+#else
+            importer.optimizeMesh = false;
+#endif // UNITY_2019_1_OR_NEWER
             importer.SaveAndReimport();
 
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
