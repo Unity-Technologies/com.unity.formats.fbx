@@ -191,9 +191,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return true;
             }
 
-            Undo.IncrementCurrentGroup();
-            int groupIndex = Undo.GetCurrentGroup();
-            Undo.SetCurrentGroupName(ConvertToNestedPrefab.UndoConversionCreateObject);
+            bool onlyPrefabAssets = ConvertToNestedPrefab.SetContainsOnlyPrefabAssets(GetToExport());
+            int groupIndex = -1;
+            // no need to undo if we aren't converting anything that's in the scene
+            if (!onlyPrefabAssets)
+            {
+                Undo.IncrementCurrentGroup();
+                groupIndex = Undo.GetCurrentGroup();
+                Undo.SetCurrentGroupName(ConvertToNestedPrefab.UndoConversionCreateObject);
+            }
             foreach (var obj in GetToExport())
             {
                 // Convert, automatically choosing a file path that won't clobber any existing files.
@@ -202,8 +208,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
                 );
             }
-            Undo.CollapseUndoOperations(groupIndex);
-            Undo.IncrementCurrentGroup();
+            if (!onlyPrefabAssets && groupIndex >= 0)
+            {
+                Undo.CollapseUndoOperations(groupIndex);
+                Undo.IncrementCurrentGroup();
+            }
             return true;
         }
 

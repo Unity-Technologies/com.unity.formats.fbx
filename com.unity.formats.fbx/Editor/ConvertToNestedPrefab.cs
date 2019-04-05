@@ -114,6 +114,26 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
+        /// Return true if the given set contains only prefab assets on disk,
+        /// and nothing from the scene.
+        /// </summary>
+        /// <returns></returns>
+        internal static bool SetContainsOnlyPrefabAssets(Object[] toConvert)
+        {
+            foreach (var obj in toConvert)
+            {
+                var go = ModelExporter.GetGameObject(obj);
+                if (go != null && !PrefabUtility.IsPartOfPrefabAsset(go))
+                {
+                    // return as soon as we find something that is not part of a prefab asset
+                    // on disk
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Create instantiated model prefabs from a selection of objects.
         ///
         /// Every hierarchy in the selection will be exported, under the name of the root.
@@ -153,9 +173,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return toExport.ToArray();
             }
 
-            Undo.IncrementCurrentGroup();
-            int groupIndex = Undo.GetCurrentGroup();
-            Undo.SetCurrentGroupName(UndoConversionCreateObject);
+            bool onlyPrefabAssets = ConvertToNestedPrefab.SetContainsOnlyPrefabAssets(unityGameObjectsToConvert);
+            int groupIndex = -1;
+            if (!onlyPrefabAssets)
+            {
+                Undo.IncrementCurrentGroup();
+                groupIndex = Undo.GetCurrentGroup();
+                Undo.SetCurrentGroupName(UndoConversionCreateObject);
+            }
             var converted = new List<GameObject>();
             var exportOptions = ExportSettings.instance.ConvertToPrefabSettings.info;
             foreach (var go in toExport)
@@ -166,8 +191,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     converted.Add(convertedGO);
                 }
             }
-            Undo.CollapseUndoOperations(groupIndex);
-            Undo.IncrementCurrentGroup();
+            if (!onlyPrefabAssets && groupIndex >= 0)
+            {
+                Undo.CollapseUndoOperations(groupIndex);
+                Undo.IncrementCurrentGroup();
+            }
             return converted.ToArray();
         }
 
