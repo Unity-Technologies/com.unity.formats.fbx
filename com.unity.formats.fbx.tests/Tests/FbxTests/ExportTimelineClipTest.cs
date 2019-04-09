@@ -12,20 +12,15 @@ namespace FbxExporter.UnitTests
 {
     public class ExportTimelineClipTest : ExporterTestBase
     {
-        [SetUp]
-        public override void Init()
-        {
-            base.Init ();
-            EditorSceneManager.OpenScene(FindPathInUnitTests("Scene/TestScene.unity"));
-        }
-
 #if !UNITY_2019_1_OR_NEWER
         [Ignore("UT-1985 CubeSpecialTimeline asset broken in 2018.3")]
 #endif
         [Test]
         public void ExportSingleTimelineClipTest()
         {
-            GameObject myCube = GameObject.Find("CubeSpecial");
+            string cubeSpecialPath = FindPathInUnitTests("Scene/CubeSpecial.prefab");
+
+            GameObject myCube = AddAssetToScene(cubeSpecialPath);
             string folderPath = GetRandomFileNamePath(extName: "");
             string filePath = null;
             var exportData = new Dictionary<GameObject, IExportData>();
