@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [2.0.1-preview.11] - 2019-04-09
+CHANGES
+* Fix ExportTimelineClipTest failing in unit tests
+
 ## [2.0.1-preview.10] - 2019-04-01
 FIXES
 * Fix integration files still missing. They were ignored by .npmignore created when running Package Validation

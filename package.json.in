@@ -22,6 +22,6 @@
     "revision": "@PACKAGE_REVISION@"
   },
   "relatedPackages": {
-    "com.unity.formats.fbx.tests": "2.0.0-preview.2" 
+    "com.unity.formats.fbx.tests": "2.0.0-preview.3" 
   }
 }
