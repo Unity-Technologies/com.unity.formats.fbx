@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [2.0.1-preview.11] - 2019-04-09
+## [2.0.1-preview.11] - 2019-04-10
 CHANGES
 * Fix ExportTimelineClipTest failing in unit tests
 
