@@ -159,10 +159,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected bool SelectionContainsPrefabInstanceWithAddedObjects()
         {
             var exportSet = GetToExport();
-            Queue<Object> queue = new Queue<Object>(exportSet);
-            while (queue.Count > 0)
+            Stack<Object> stack = new Stack<Object>(exportSet);
+            while (stack.Count > 0)
             {
-                var go = ModelExporter.GetGameObject(queue.Dequeue());
+                var go = ModelExporter.GetGameObject(stack.Pop());
                 if (!go)
                 {
                     continue;
@@ -175,7 +175,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 foreach (Transform child in go.transform)
                 {
-                    queue.Enqueue(child.gameObject);
+                    stack.Push(child.gameObject);
                 }
             }
             return false;

@@ -11,24 +11,20 @@ namespace FbxExporter.UnitTests
 {
     public class ConvertToNestedPrefabTest : ExporterTestBase
     {
-        // TestCaseSource requires the input to return IEnumerable
-        public static IEnumerable PrefabTestCases
+        public static string[] PrefabTestCases = new string[]
         {
-            get
-            {
-                yield return "Prefabs/Camera.prefab";
-                yield return "Prefabs/RegularPrefab.prefab";
-                yield return "Prefabs/RegularPrefab_GO.prefab";
-                yield return "Prefabs/RegularPrefab_Model.prefab";
-                yield return "Prefabs/RegularPrefab_Regular.prefab";
-                yield return "Prefabs/RegularPrefab_Variant.prefab";
-                yield return "Prefabs/VariantPrefab.prefab";
-                yield return "Prefabs/VariantPrefab_GO.prefab";
-                yield return "Prefabs/VariantPrefab_Model.prefab";
-                yield return "Prefabs/VariantPrefab_Regular.prefab";
-                yield return "Prefabs/VariantPrefab_Variant.prefab";
-            }
-        }
+            "Prefabs/Camera.prefab",
+            "Prefabs/RegularPrefab.prefab",
+            "Prefabs/RegularPrefab_GO.prefab",
+            "Prefabs/RegularPrefab_Model.prefab",
+            "Prefabs/RegularPrefab_Regular.prefab",
+            "Prefabs/RegularPrefab_Variant.prefab",
+            "Prefabs/VariantPrefab.prefab",
+            "Prefabs/VariantPrefab_GO.prefab",
+            "Prefabs/VariantPrefab_Model.prefab",
+            "Prefabs/VariantPrefab_Regular.prefab",
+            "Prefabs/VariantPrefab_Variant.prefab"
+        };
 
         [Test, TestCaseSource(typeof(ConvertToNestedPrefabTest), "PrefabTestCases")]
         public void TestConversion(string prefabPath)

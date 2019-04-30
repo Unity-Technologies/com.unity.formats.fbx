@@ -182,6 +182,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             bool onlyPrefabAssets = ConvertToNestedPrefab.SetContainsOnlyPrefabAssets(unityGameObjectsToConvert);
             int groupIndex = -1;
+            // If only Prefab Assets on disk are selected (nothing in the scene), then do not
+            // try to undo as modifications on disk cannot be undone.
             if (!onlyPrefabAssets)
             {
                 Undo.IncrementCurrentGroup();
