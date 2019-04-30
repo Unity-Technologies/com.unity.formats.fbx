@@ -500,6 +500,37 @@ namespace FbxExporter.UnitTests
 
                 Assert.That(bReferenceComponent.m_transform.name, Is.EqualTo(a.transform.name));
             }
+
+            // Test GetSceneReferencesToObject()
+            {
+                var a = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                var b = new GameObject();
+                var c = new GameObject();
+
+                var reference = b.AddComponent<ReferenceComponent>();
+                var constraint = c.AddComponent<UnityEngine.Animations.PositionConstraint>();
+
+                reference.m_collider = a.GetComponent<BoxCollider>();
+
+                var constraintSource = new UnityEngine.Animations.ConstraintSource();
+                constraintSource.sourceTransform = a.transform;
+                constraintSource.weight = 0.5f;
+                constraint.AddSource(constraintSource);
+                
+                var sceneRefs = ConvertToNestedPrefab.GetSceneReferencesToObject(a);
+                Assert.That(sceneRefs.Count, Is.EqualTo(2));
+                Assert.That(sceneRefs.Contains(a)); // GameObjects also reference themself
+                Assert.That(sceneRefs.Contains(b));
+
+                sceneRefs = ConvertToNestedPrefab.GetSceneReferencesToObject(a.GetComponent<BoxCollider>());
+                Assert.That(sceneRefs.Count, Is.EqualTo(1));
+                Assert.That(sceneRefs.Contains(b));
+
+                sceneRefs = ConvertToNestedPrefab.GetSceneReferencesToObject(a.transform);
+                Assert.That(sceneRefs.Count, Is.EqualTo(2));
+                Assert.That(sceneRefs.Contains(b));
+                Assert.That(sceneRefs.Contains(c));
+            }
         }
 
         [Test]
