@@ -217,7 +217,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="origObj"></param>
         /// <param name="newObj"></param>
         /// <param name="toConvertRoot"></param>
-        private static void FixSceneReferences(Object origObj, Object newObj, GameObject toConvertRoot)
+        internal static void FixSceneReferences(Object origObj, Object newObj, GameObject toConvertRoot)
         {
             var sceneObjs = GetSceneReferencesToObject(origObj);
 
@@ -261,11 +261,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
+        /// Helper for getting a property from an instance with reflection.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="isPublic"></param>
+        /// <returns></returns>
+        private static object GetPropertyReflection(object instance, string propertyName, bool isPublic)
+        {
+            return instance.GetType().GetProperty(propertyName, (isPublic ? System.Reflection.BindingFlags.Public : System.Reflection.BindingFlags.NonPublic) |
+                System.Reflection.BindingFlags.Instance).GetValue(instance, null);
+        }
+
+        /// <summary>
         /// Returns a list of GameObjects in the scene that contain references to the given object.
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        private static List<GameObject> GetSceneReferencesToObject(Object obj)
+        internal static List<GameObject> GetSceneReferencesToObject(Object obj)
         {
             var sceneHierarchyWindowType = typeof(UnityEditor.SearchableEditorWindow).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
             var sceneHierarchyWindow = EditorWindow.GetWindow(sceneHierarchyWindowType);
@@ -277,16 +290,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
             setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { string.Format(idFormat, instanceID), SearchableEditorWindow.SearchMode.All, true, false });
 
             // Get objects from list of instance IDs of currently visible objects
-            var sceneHierarchy = sceneHierarchyWindowType.GetProperty("sceneHierarchy", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).GetValue(sceneHierarchyWindow, null);
-            var treeView = sceneHierarchy.GetType().GetProperty("treeView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(sceneHierarchy, null);
-            var data = treeView.GetType().GetProperty("data").GetValue(treeView, null);
+            var sceneHierarchy = GetPropertyReflection(sceneHierarchyWindow, "sceneHierarchy", isPublic: true);
+            var treeView = GetPropertyReflection(sceneHierarchy, "treeView", isPublic: false);
+            var data = GetPropertyReflection(treeView, "data", isPublic: true);
             var getRows = data.GetType().GetMethod("GetRows");
             var rows = getRows.Invoke(data, null) as IEnumerable;
 
             var sceneObjects = new List<GameObject>();
             foreach (var row in rows)
             {
-                var id = (int)row.GetType().GetProperty("id").GetValue(row, null);
+                var id = (int)GetPropertyReflection(row, "id", isPublic: true);
                 var gameObject = EditorUtility.InstanceIDToObject(id) as GameObject;
                 if (gameObject)
                 {
