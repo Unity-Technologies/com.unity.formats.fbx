@@ -208,7 +208,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return converted.ToArray();
         }
         
-        private static void FixSceneReferences(Object origObj, Object newObj, GameObject toConvert)
+        /// <summary>
+        /// For all scene objects holding a reference to origObj, replaces the references to newObj.
+        /// 
+        /// If one of the scene objects is toConvertRoot or a child of it, then do not fix its references as it
+        /// will be deleted after conversion.
+        /// </summary>
+        /// <param name="origObj"></param>
+        /// <param name="newObj"></param>
+        /// <param name="toConvertRoot"></param>
+        private static void FixSceneReferences(Object origObj, Object newObj, GameObject toConvertRoot)
         {
             var sceneObjs = GetSceneReferencesToObject(origObj);
 
@@ -216,7 +225,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             foreach(var sceneObj in sceneObjs)
             {
                 var go = ModelExporter.GetGameObject(sceneObj);
-                if (go && go.transform.IsChildOf(toConvert.transform))
+                if (go && go.transform.IsChildOf(toConvertRoot.transform))
                 {
                     // if this is a child of what we are converting, don't update its references.
                     continue;
@@ -251,6 +260,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
+        /// <summary>
+        /// Returns a list of GameObjects in the scene that contain references to the given object.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         private static List<GameObject> GetSceneReferencesToObject(Object obj)
         {
             var sceneHierarchyWindowType = typeof(UnityEditor.SearchableEditorWindow).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
