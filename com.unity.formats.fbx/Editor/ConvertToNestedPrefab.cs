@@ -208,6 +208,82 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return converted.ToArray();
         }
 
+        private static void FixSceneReferencesForHierarchy(GameObject hierarchy)
+        {
+
+        }
+
+        // TODO: don't update references that are in the original hierarchy,
+        //       since it will be deleted anyway.
+        private static void FixSceneReferences(Object origObj, Object newObj)
+        {
+            var sceneObjs = GetSceneReferencesToObject(origObj);
+
+            // try to fix references on each component of each scene object, if applicable
+            foreach(var sceneObj in sceneObjs)
+            {
+                var components = sceneObj.GetComponents<Component>();
+                foreach(var component in components)
+                {
+                    var serializedComponent = new SerializedObject(component);
+                    var property = serializedComponent.GetIterator();
+                    property.Next(true); // skip generic field
+                    // For SkinnedMeshRenderer, the bones array doesn't have visible children, but may have references that need to be fixed.
+                    // For everything else, filtering by visible children in the while loop and then copying properties that don't have visible children,
+                    // ensures that only the leaf properties are copied over. Copying other properties is not usually necessary and may break references that
+                    // were not meant to be copied.
+                    while (property.Next((component is SkinnedMeshRenderer) ? property.hasChildren : property.hasVisibleChildren))
+                    {
+                        if (!property.hasVisibleChildren)
+                        {
+                            // with Undo operations, copying m_Father reference causes issues. Also, it is not required as the reference is fixed when
+                            // the transform is parented under the correct hierarchy (which happens before this).
+                            if (property.propertyType == SerializedPropertyType.ObjectReference && property.propertyPath != "m_GameObject" &&
+                                property.propertyPath != "m_Father" && property.objectReferenceValue &&
+                                (property.objectReferenceValue.GetInstanceID() == newObj.GetInstanceID()))
+                            {
+                                property.objectReferenceValue = newObj;
+                                serializedComponent.ApplyModifiedProperties();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static List<GameObject> GetSceneReferencesToObject(Object obj)
+        {
+            var sceneHierarchyWindowType = typeof(UnityEditor.SearchableEditorWindow).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
+            var sceneHierarchyWindow = EditorWindow.GetWindow(sceneHierarchyWindowType);
+            var instanceID = obj.GetInstanceID();
+            var idFormat = "ref:{0}:";
+
+            var setSearchFilterMethod = sceneHierarchyWindowType.GetMethod("SetSearchFilter", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            Debug.Log(setSearchFilterMethod.GetParameters().Length);
+            setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { string.Format(idFormat, instanceID), SearchableEditorWindow.SearchMode.All, true, false });
+
+            // Get objects from list of instance IDs of currently visible objects
+            var sceneHierarchy = sceneHierarchyWindowType.GetProperty("sceneHierarchy", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).GetValue(sceneHierarchyWindow, null);
+            var treeView = sceneHierarchy.GetType().GetProperty("treeView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(sceneHierarchy, null);
+            var data = treeView.GetType().GetProperty("data").GetValue(treeView, null);
+            var getRows = data.GetType().GetMethod("GetRows");
+            var rows = getRows.Invoke(data, null) as IEnumerable;
+
+            var sceneObjects = new List<GameObject>();
+            foreach (var row in rows)
+            {
+                var id = (int)row.GetType().GetProperty("id").GetValue(row, null);
+                var gameObject = EditorUtility.InstanceIDToObject(id) as GameObject;
+                if (gameObject)
+                {
+                    sceneObjects.Add(gameObject);
+                }
+            }
+
+            setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { "", SearchableEditorWindow.SearchMode.Name, true, false });
+            return sceneObjects;
+        }
+
         /// <summary>
         /// Convert one object (and the hierarchy below it) to a prefab variant of a model prefab.
         ///
@@ -312,6 +388,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // copy components over
             UpdateFromSourceRecursive(fbxInstance, toConvert);
+
+            // Fix scene references.
+            // Fixing afterwards in case any of the original components were modified
+
 
             // make sure we have a path for the prefab
             if (string.IsNullOrEmpty(prefabFullPath))
