@@ -258,6 +258,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var instanceID = obj.GetInstanceID();
             var idFormat = "ref:{0}:";
 
+            // Set the search filter to find all references in the scene to the given object
             var setSearchFilterMethod = sceneHierarchyWindowType.GetMethod("SetSearchFilter", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { string.Format(idFormat, instanceID), SearchableEditorWindow.SearchMode.All, true, false });
 
@@ -279,6 +280,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
+            // remove the filter when done
             setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { "", SearchableEditorWindow.SearchMode.Name, true, false });
             return sceneObjects;
         }
@@ -387,10 +389,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // copy components over
             UpdateFromSourceRecursive(fbxInstance, toConvert);
-
-            // Fix scene references.
-            // Fixing afterwards in case any of the original components were modified
-
 
             // make sure we have a path for the prefab
             if (string.IsNullOrEmpty(prefabFullPath))
