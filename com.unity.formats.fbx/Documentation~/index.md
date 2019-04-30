@@ -6,13 +6,8 @@ The FBX Exporter package includes the following features:
 
 * [FBX Exporter](exporting.md): Export geometry, animation, Lights, and Cameras as FBX files so you can transfer game data to any 3D modeling software. Record gameplay and export it to make cinematics. Start grey-boxing with [ProBuilder](https://docs.unity3d.com/Packages/com.unity.probuilder@latest/), then export to FBX to replace with final assets.
 
-* Connections via Prefabs. Which one you can use depends on the version of Unity you are using it with:
-
-	* [Linked Prefab](prefabs.md) (Unity 2018.2 only): 
-
-		Link a Prefab to a new or existing FBX file. When you later change the FBX file, Unity automatically updates the Prefab to integrate changes to the transforms and hierarchy (in addition to Meshes and Materials). This helps you avoid rebuilding your Prefabs from scratch.
-
-	* [Model Prefab Variants](nested-prefabs.md) (Unity 2018.3 only): 
+* Connections via Model Prefab Variants:
+	* [Model Prefab Variants](nested-prefabs.md): 
 
 		Unity 2018.3 introduced [Nested Prefabs](https://docs.unity3d.com/2018.3/Documentation/Manual/NestedPrefabs.html) and [Prefab Variants](https://docs.unity3d.com/2018.3/Documentation/Manual/PrefabVariants.html) as new Prefab features. The FBX Importer allows you to import an FBX file as a *Model Prefab* and create Prefab Variants from them. Since Prefab Variants can override properties and children without affecting the original Prefab, you can use them in Unity without breaking the link to the file, and bring in updates.
 
@@ -22,7 +17,7 @@ The FBX Exporter package includes the following features:
 
 The FBX Exporter package is compatible with the following versions of the Unity Editor:
 
-* 2018.2 and later
+* 2018.3 and later
 
 The Unity Integration for Autodesk® Maya® and Autodesk® Maya LT™ feature supports the following versions:
 

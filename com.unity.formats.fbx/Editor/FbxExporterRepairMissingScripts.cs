@@ -44,18 +44,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             get
             {
-#if UNITY_2018_3_OR_NEWER
                 var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FindFbxPrefabAssetPath());
-#else
-                var fbxPrefabObj = AssetDatabase.LoadMainAssetAtPath(FbxPrefabAutoUpdater.FindFbxPrefabAssetPath());
-#endif
                 string searchID = null;
                 string guid;
-#if UNITY_2018_2_OR_NEWER
                 long fileId;
-#else
-            int fileId;
-#endif
                 if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(fbxPrefabObj, out guid, out fileId))
                 {
                     searchID = string.Format(IdFormat, fileId, guid);
@@ -64,7 +56,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-#if UNITY_2018_3_OR_NEWER
 #if COM_UNITY_FORMATS_FBX_AS_ASSET
         public const string FbxPrefabFile = "/UnityFbxPrefab.dll";
 #else
@@ -103,12 +94,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             else
             {
-                Debug.LogWarningFormat("{0} not found; update FbxPrefabFile variable in FbxPrefabAutoUpdater.cs to point to FbxPrefab.cs path.", FbxPrefabFile);
+                Debug.LogWarningFormat("{0} not found; update FbxPrefabFile variable in FbxExporterRepairMissingScripts.cs to point to FbxPrefab.cs path.", FbxPrefabFile);
                 return "";
             }
 #endif
         }
-#endif // UNITY_2018_3_OR_NEWER
 
         public int AssetsToRepairCount
         {

@@ -156,6 +156,31 @@ namespace UnityEditor.Formats.Fbx.Exporter
             this.Repaint ();
         }
 
+        protected bool SelectionContainsPrefabInstanceWithAddedObjects()
+        {
+            var exportSet = GetToExport();
+            Stack<Object> stack = new Stack<Object>(exportSet);
+            while (stack.Count > 0)
+            {
+                var go = ModelExporter.GetGameObject(stack.Pop());
+                if (!go)
+                {
+                    continue;
+                }
+
+                if(PrefabUtility.IsAnyPrefabInstanceRoot(go) && PrefabUtility.GetAddedGameObjects(go).Count > 0)
+                {
+                    return true;
+                }
+
+                foreach (Transform child in go.transform)
+                {
+                    stack.Push(child.gameObject);
+                }
+            }
+            return false;
+        }
+
         protected abstract bool Export ();
 
         /// <summary>
@@ -399,6 +424,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 InnerEditor.OnInspectorGUI ();
             }
 
+            // if we are exporting or converting a prefab with overrides, then show a warning
+            if (SelectionContainsPrefabInstanceWithAddedObjects())
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.HelpBox("Prefab instance overrides will be exported", MessageType.Warning, true);
+            }
+
             GUILayout.FlexibleSpace ();
 
             GUILayout.BeginHorizontal ();
@@ -430,7 +462,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (System.IO.File.Exists (filePath)) {
                 bool overwrite = UnityEditor.EditorUtility.DisplayDialog (
                     string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), 
-                    string.Format("File {0} already exists.", filePath), 
+                    string.Format("File {0} already exists.\nOverwrite cannot be undone.", filePath), 
                     "Overwrite", "Cancel");
                 if (!overwrite) {
                     if (GUI.changed) {
