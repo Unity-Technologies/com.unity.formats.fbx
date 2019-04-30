@@ -259,7 +259,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var idFormat = "ref:{0}:";
 
             var setSearchFilterMethod = sceneHierarchyWindowType.GetMethod("SetSearchFilter", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            Debug.Log(setSearchFilterMethod.GetParameters().Length);
             setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { string.Format(idFormat, instanceID), SearchableEditorWindow.SearchMode.All, true, false });
 
             // Get objects from list of instance IDs of currently visible objects
@@ -822,6 +821,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// are already in the FBX.
         ///
         /// The 'from' hierarchy is not modified.
+        /// 
+        /// Note: 'root' is the root object that is being converted
         /// </summary>
         internal static void CopyComponents(GameObject to, GameObject from, GameObject root, Dictionary<string, GameObject> nameMap)
         {
@@ -836,8 +837,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     continue;
                 }
 
-                // ignore MeshFilter and FbxPrefab (when converting LinkedPrefabs)
-                if (fromComponent is MeshFilter || fromComponent is UnityEngine.Formats.Fbx.Exporter.FbxPrefab)
+                // ignore MeshFilter, but still ensure scene references are maintained
+                if (fromComponent is MeshFilter)
+                {
+                    FixSceneReferences(fromComponent, to.GetComponent<MeshFilter>(), root);
+                    continue;
+                }
+
+                // ignore FbxPrefab (when converting LinkedPrefabs)
+                if (fromComponent is UnityEngine.Formats.Fbx.Exporter.FbxPrefab)
                 {
                     continue;
                 }
