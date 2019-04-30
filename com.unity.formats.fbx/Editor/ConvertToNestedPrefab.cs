@@ -207,21 +207,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             return converted.ToArray();
         }
-
-        private static void FixSceneReferencesForHierarchy(GameObject hierarchy)
-        {
-
-        }
-
-        // TODO: don't update references that are in the original hierarchy,
-        //       since it will be deleted anyway.
-        private static void FixSceneReferences(Object origObj, Object newObj)
+        
+        private static void FixSceneReferences(Object origObj, Object newObj, GameObject toConvert)
         {
             var sceneObjs = GetSceneReferencesToObject(origObj);
 
             // try to fix references on each component of each scene object, if applicable
             foreach(var sceneObj in sceneObjs)
             {
+                var go = ModelExporter.GetGameObject(sceneObj);
+                if (go && go.transform.IsChildOf(toConvert.transform))
+                {
+                    // if this is a child of what we are converting, don't update its references.
+                    continue;
+                }
+
                 var components = sceneObj.GetComponents<Component>();
                 foreach(var component in components)
                 {
@@ -240,7 +240,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                             // the transform is parented under the correct hierarchy (which happens before this).
                             if (property.propertyType == SerializedPropertyType.ObjectReference && property.propertyPath != "m_GameObject" &&
                                 property.propertyPath != "m_Father" && property.objectReferenceValue &&
-                                (property.objectReferenceValue.GetInstanceID() == newObj.GetInstanceID()))
+                                (property.objectReferenceValue == origObj))
                             {
                                 property.objectReferenceValue = newObj;
                                 serializedComponent.ApplyModifiedProperties();
@@ -706,7 +706,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     PrefabUtility.UnpackPrefabInstance(sourceGO, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                 }
 
-                CopyComponents(destGO, sourceGO, goDict);
+                FixSceneReferences(sourceGO, destGO, source);
+                CopyComponents(destGO, sourceGO, source, goDict);
 
                 // also make sure GameObject properties, such as tag and layer
                 // are copied over as well
@@ -822,7 +823,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         ///
         /// The 'from' hierarchy is not modified.
         /// </summary>
-        internal static void CopyComponents(GameObject to, GameObject from, Dictionary<string, GameObject> nameMap)
+        internal static void CopyComponents(GameObject to, GameObject from, GameObject root, Dictionary<string, GameObject> nameMap)
         {
             // copy components on "from" to "to". Don't want to copy over meshes and materials that were exported
             var originalComponents = new List<Component>(from.GetComponents<Component>());
@@ -883,6 +884,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     toComponent = to.AddComponent(fromComponent.GetType());
                 }
+
+                FixSceneReferences(fromComponent, toComponent, root);
 
                 // Do not try to copy materials for ParticleSystemRenderer, since it is not in the
                 // FBX file

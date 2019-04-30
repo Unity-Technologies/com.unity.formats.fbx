@@ -357,7 +357,7 @@ namespace FbxExporter.UnitTests
                 Assert.AreEqual(Vector3.zero, b.transform.localPosition);
                 Assert.AreNotEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
                 var nameMap = ConvertToNestedPrefab.MapNameToSourceRecursive(b, a);
-                ConvertToNestedPrefab.CopyComponents(b, a, nameMap);
+                ConvertToNestedPrefab.CopyComponents(b, a, a, nameMap);
                 Assert.IsTrue(b.GetComponent<BoxCollider>());
                 Assert.AreEqual(a.transform.localPosition, b.transform.localPosition);
                 Assert.AreNotEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
