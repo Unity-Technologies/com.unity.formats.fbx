@@ -71,7 +71,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             exportSettings.ShowConvertToPrefabDialog = EditorGUILayout.Toggle(
-                new GUIContent("Show Convert UI:", "Enable Convert dialog when converting to a Linked Prefab"),
+                new GUIContent("Show Convert UI:", "Enable Convert dialog when converting to an FBX Linked Prefab"),
                 exportSettings.ShowConvertToPrefabDialog
             );
             EditorGUILayout.Space();
