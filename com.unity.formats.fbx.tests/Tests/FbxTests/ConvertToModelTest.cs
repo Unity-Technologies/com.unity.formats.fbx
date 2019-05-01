@@ -129,6 +129,56 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
+        public void TestReferencesInScene()
+        {
+            // test that references that scene objects hold to the converted object
+            // are maintained
+            var a = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var b = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            b.transform.SetParent(a.transform);
+
+            var c = new GameObject();
+            var reference = c.AddComponent<ReferenceComponent>();
+            reference.m_goList = new GameObject[] { a, b };
+            reference.m_collider = a.GetComponent<BoxCollider>();
+            reference.m_transform = b.transform;
+
+            var fbxPath = GetRandomFbxFilePath();
+
+            // Convert it to a prefab
+            var prefab = ConvertToNestedPrefab.Convert(a,
+                fbxFullPath: fbxPath, prefabFullPath: Path.ChangeExtension(fbxPath, "prefab"));
+            Assert.That(prefab);
+            Assert.That(!a);
+
+            var newA = prefab;
+            var newB = prefab.transform.GetChild(0).gameObject;
+
+            Assert.That(reference.m_goList.Length, Is.EqualTo(2));
+            Assert.That(reference.m_goList[0], Is.EqualTo(newA));
+            Assert.That(reference.m_goList[1], Is.EqualTo(newB));
+            Assert.That(reference.m_collider, Is.EqualTo(newA.GetComponent<BoxCollider>()));
+            Assert.That(reference.m_transform, Is.EqualTo(newB.transform));
+
+            // Test undo and redo still maintains the right references
+            Undo.PerformUndo();
+
+            Assert.That(reference.m_goList.Length, Is.EqualTo(2));
+            Assert.That(reference.m_goList[0], Is.EqualTo(a));
+            Assert.That(reference.m_goList[1], Is.EqualTo(b));
+            Assert.That(reference.m_collider, Is.EqualTo(a.GetComponent<BoxCollider>()));
+            Assert.That(reference.m_transform, Is.EqualTo(b.transform));
+
+            Undo.PerformRedo();
+
+            Assert.That(reference.m_goList.Length, Is.EqualTo(2));
+            Assert.That(reference.m_goList[0], Is.EqualTo(newA));
+            Assert.That(reference.m_goList[1], Is.EqualTo(newB));
+            Assert.That(reference.m_collider, Is.EqualTo(newA.GetComponent<BoxCollider>()));
+            Assert.That(reference.m_transform, Is.EqualTo(newB.transform));
+        }
+
+        [Test]
         public void TestReferences()
         {
             var prefabPath = FindPathInUnitTests("Prefabs/ReferenceTest.prefab");
@@ -357,7 +407,7 @@ namespace FbxExporter.UnitTests
                 Assert.AreEqual(Vector3.zero, b.transform.localPosition);
                 Assert.AreNotEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
                 var nameMap = ConvertToNestedPrefab.MapNameToSourceRecursive(b, a);
-                ConvertToNestedPrefab.CopyComponents(b, a, nameMap);
+                ConvertToNestedPrefab.CopyComponents(b, a, a, nameMap);
                 Assert.IsTrue(b.GetComponent<BoxCollider>());
                 Assert.AreEqual(a.transform.localPosition, b.transform.localPosition);
                 Assert.AreNotEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
@@ -449,6 +499,37 @@ namespace FbxExporter.UnitTests
                 ConvertToNestedPrefab.CopySerializedProperty(bSerObj, fromProp, nameMap);
 
                 Assert.That(bReferenceComponent.m_transform.name, Is.EqualTo(a.transform.name));
+            }
+
+            // Test GetSceneReferencesToObject()
+            {
+                var a = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                var b = new GameObject();
+                var c = new GameObject();
+
+                var reference = b.AddComponent<ReferenceComponent>();
+                var constraint = c.AddComponent<UnityEngine.Animations.PositionConstraint>();
+
+                reference.m_collider = a.GetComponent<BoxCollider>();
+
+                var constraintSource = new UnityEngine.Animations.ConstraintSource();
+                constraintSource.sourceTransform = a.transform;
+                constraintSource.weight = 0.5f;
+                constraint.AddSource(constraintSource);
+                
+                var sceneRefs = ConvertToNestedPrefab.GetSceneReferencesToObject(a);
+                Assert.That(sceneRefs.Count, Is.EqualTo(2));
+                Assert.That(sceneRefs.Contains(a)); // GameObjects also reference themself
+                Assert.That(sceneRefs.Contains(b));
+
+                sceneRefs = ConvertToNestedPrefab.GetSceneReferencesToObject(a.GetComponent<BoxCollider>());
+                Assert.That(sceneRefs.Count, Is.EqualTo(1));
+                Assert.That(sceneRefs.Contains(b));
+
+                sceneRefs = ConvertToNestedPrefab.GetSceneReferencesToObject(a.transform);
+                Assert.That(sceneRefs.Count, Is.EqualTo(2));
+                Assert.That(sceneRefs.Contains(b));
+                Assert.That(sceneRefs.Contains(c));
             }
         }
 

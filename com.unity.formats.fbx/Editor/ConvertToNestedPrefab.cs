@@ -207,6 +207,112 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             return converted.ToArray();
         }
+        
+        /// <summary>
+        /// For all scene objects holding a reference to origObj, replaces the references to newObj.
+        /// 
+        /// If one of the scene objects is toConvertRoot or a child of it, then do not fix its references as it
+        /// will be deleted after conversion.
+        /// </summary>
+        /// <param name="origObj"></param>
+        /// <param name="newObj"></param>
+        /// <param name="toConvertRoot"></param>
+        internal static void FixSceneReferences(Object origObj, Object newObj, GameObject toConvertRoot)
+        {
+            var sceneObjs = GetSceneReferencesToObject(origObj);
+
+            // try to fix references on each component of each scene object, if applicable
+            foreach(var sceneObj in sceneObjs)
+            {
+                var go = ModelExporter.GetGameObject(sceneObj);
+                if (go && go.transform.IsChildOf(toConvertRoot.transform))
+                {
+                    // if this is a child of what we are converting, don't update its references.
+                    continue;
+                }
+
+                var components = sceneObj.GetComponents<Component>();
+                foreach(var component in components)
+                {
+                    var serializedComponent = new SerializedObject(component);
+                    var property = serializedComponent.GetIterator();
+                    property.Next(true); // skip generic field
+                    // For SkinnedMeshRenderer, the bones array doesn't have visible children, but may have references that need to be fixed.
+                    // For everything else, filtering by visible children in the while loop and then copying properties that don't have visible children,
+                    // ensures that only the leaf properties are copied over. Copying other properties is not usually necessary and may break references that
+                    // were not meant to be copied.
+                    while (property.Next((component is SkinnedMeshRenderer) ? property.hasChildren : property.hasVisibleChildren))
+                    {
+                        if (!property.hasVisibleChildren)
+                        {
+                            // with Undo operations, copying m_Father reference causes issues. Also, it is not required as the reference is fixed when
+                            // the transform is parented under the correct hierarchy (which happens before this).
+                            if (property.propertyType == SerializedPropertyType.ObjectReference && property.propertyPath != "m_GameObject" &&
+                                property.propertyPath != "m_Father" && property.objectReferenceValue &&
+                                (property.objectReferenceValue == origObj))
+                            {
+                                property.objectReferenceValue = newObj;
+                                serializedComponent.ApplyModifiedProperties();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Helper for getting a property from an instance with reflection.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="isPublic"></param>
+        /// <returns></returns>
+        private static object GetPropertyReflection(object instance, string propertyName, bool isPublic)
+        {
+            return instance.GetType().GetProperty(propertyName, (isPublic ? System.Reflection.BindingFlags.Public : System.Reflection.BindingFlags.NonPublic) |
+                System.Reflection.BindingFlags.Instance).GetValue(instance, null);
+        }
+
+        /// <summary>
+        /// Returns a list of GameObjects in the scene that contain references to the given object.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        internal static List<GameObject> GetSceneReferencesToObject(Object obj)
+        {
+            var sceneHierarchyWindowType = typeof(UnityEditor.SearchableEditorWindow).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
+            var sceneHierarchyWindow = EditorWindow.GetWindow(sceneHierarchyWindowType);
+            var instanceID = obj.GetInstanceID();
+            var idFormat = "ref:{0}:";
+
+            var sceneHierarchy = GetPropertyReflection(sceneHierarchyWindow, "sceneHierarchy", isPublic: true);
+            var previousSearchFilter = sceneHierarchy.GetType().GetField("m_SearchFilter", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(sceneHierarchy);
+
+            // Set the search filter to find all references in the scene to the given object
+            var setSearchFilterMethod = sceneHierarchyWindowType.GetMethod("SetSearchFilter", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { string.Format(idFormat, instanceID), SearchableEditorWindow.SearchMode.All, true, false });
+
+            // Get objects from list of instance IDs of currently visible objects
+            var treeView = GetPropertyReflection(sceneHierarchy, "treeView", isPublic: false);
+            var data = GetPropertyReflection(treeView, "data", isPublic: true);
+            var getRows = data.GetType().GetMethod("GetRows");
+            var rows = getRows.Invoke(data, null) as IEnumerable;
+
+            var sceneObjects = new List<GameObject>();
+            foreach (var row in rows)
+            {
+                var id = (int)GetPropertyReflection(row, "id", isPublic: true);
+                var gameObject = EditorUtility.InstanceIDToObject(id) as GameObject;
+                if (gameObject)
+                {
+                    sceneObjects.Add(gameObject);
+                }
+            }
+
+            // remove the filter when done
+            setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { previousSearchFilter, SearchableEditorWindow.SearchMode.Name, true, false });
+            return sceneObjects;
+        }
 
         /// <summary>
         /// Convert one object (and the hierarchy below it) to a prefab variant of a model prefab.
@@ -626,7 +732,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     PrefabUtility.UnpackPrefabInstance(sourceGO, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                 }
 
-                CopyComponents(destGO, sourceGO, goDict);
+                FixSceneReferences(sourceGO, destGO, source);
+                CopyComponents(destGO, sourceGO, source, goDict);
 
                 // also make sure GameObject properties, such as tag and layer
                 // are copied over as well
@@ -741,8 +848,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// are already in the FBX.
         ///
         /// The 'from' hierarchy is not modified.
+        /// 
+        /// Note: 'root' is the root object that is being converted
         /// </summary>
-        internal static void CopyComponents(GameObject to, GameObject from, Dictionary<string, GameObject> nameMap)
+        internal static void CopyComponents(GameObject to, GameObject from, GameObject root, Dictionary<string, GameObject> nameMap)
         {
             // copy components on "from" to "to". Don't want to copy over meshes and materials that were exported
             var originalComponents = new List<Component>(from.GetComponents<Component>());
@@ -755,8 +864,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     continue;
                 }
 
-                // ignore MeshFilter and FbxPrefab (when converting LinkedPrefabs)
-                if (fromComponent is MeshFilter || fromComponent is UnityEngine.Formats.Fbx.Exporter.FbxPrefab)
+                // ignore MeshFilter, but still ensure scene references are maintained
+                if (fromComponent is MeshFilter)
+                {
+                    FixSceneReferences(fromComponent, to.GetComponent<MeshFilter>(), root);
+                    continue;
+                }
+
+                // ignore FbxPrefab (when converting LinkedPrefabs)
+                if (fromComponent is UnityEngine.Formats.Fbx.Exporter.FbxPrefab)
                 {
                     continue;
                 }
@@ -803,6 +919,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     toComponent = to.AddComponent(fromComponent.GetType());
                 }
+
+                FixSceneReferences(fromComponent, toComponent, root);
 
                 // Do not try to copy materials for ParticleSystemRenderer, since it is not in the
                 // FBX file
