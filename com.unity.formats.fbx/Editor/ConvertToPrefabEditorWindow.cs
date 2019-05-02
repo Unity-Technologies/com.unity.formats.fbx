@@ -103,18 +103,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
             m_prefabExtLabelWidth = FbxExtLabelStyle.CalcSize(new GUIContent(".prefab")).x;
         }
 
-        protected bool ExportSetContainsRectTransform(out List<string> roots)
+        /// <summary>
+        /// Get a list of all the export set objects that contain
+        /// RectTransforms or have children with RectTransforms.
+        /// </summary>
+        /// <param name="uiObjectNames">names of objects in set which contain RectTransforms</param>
+        /// <returns>Whethere there are any UI elements in the export set</returns>
+        protected bool GetUIElementsInExportSet(out List<string> uiObjectNames)
         {
-            roots = new List<string>();
+            uiObjectNames = new List<string>();
             foreach (var obj in GetToExport())
             {
                 var go = ModelExporter.GetGameObject(obj);
                 if (go.GetComponentInChildren<RectTransform>())
                 {
-                    roots.Add(go.name);
+                    uiObjectNames.Add(go.name);
                 }
             }
-            return roots.Count > 0;
+            return uiObjectNames.Count > 0;
         }
 
         protected bool ExportSetContainsAnimation()
@@ -158,13 +164,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             List<string> hierarchiesWithUI;
-            if (ExportSetContainsRectTransform(out hierarchiesWithUI))
+            if (GetUIElementsInExportSet(out hierarchiesWithUI))
             {
                 // Warn that UI elements will break if converted
-                string warning = string.Format("UI elements with RectTransform component present in the following hierarchies:\n\n{0}\n\nIf converted, RectTransform and other UI components may be lost",
+                string warning = string.Format("RectTransform and other UI components will be lost if the following GameObject hierarchies are converted:\n\n{0}\n",
                     string.Join("\n", hierarchiesWithUI));
                 bool result = UnityEditor.EditorUtility.DisplayDialog(
-                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "Continue", "Cancel");
+                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "Convert and lose UI", "Cancel");
 
                 if (!result)
                 {
