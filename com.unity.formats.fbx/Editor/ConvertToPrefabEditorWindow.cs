@@ -103,6 +103,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
             m_prefabExtLabelWidth = FbxExtLabelStyle.CalcSize(new GUIContent(".prefab")).x;
         }
 
+        protected bool ExportSetContainsRectTransform(out List<string> roots)
+        {
+            roots = new List<string>();
+            foreach (var obj in GetToExport())
+            {
+                var go = ModelExporter.GetGameObject(obj);
+                if (go.GetComponentInChildren<RectTransform>())
+                {
+                    roots.Add(go.name);
+                }
+            }
+            return roots.Count > 0;
+        }
+
         protected bool ExportSetContainsAnimation()
         {
             foreach (var obj in GetToExport())
@@ -141,6 +155,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 Debug.LogError("FbxExporter: missing object for conversion");
                 return false;
+            }
+
+            List<string> hierarchiesWithUI;
+            if (ExportSetContainsRectTransform(out hierarchiesWithUI))
+            {
+                // Warn that UI elements will break if converted
+                string warning = string.Format("UI elements with RectTransform component present in the following hierarchies:\n\n{0}\n\nIf converted, RectTransform and other UI components may be lost",
+                    string.Join("\n", hierarchiesWithUI));
+                bool result = UnityEditor.EditorUtility.DisplayDialog(
+                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "Continue", "Cancel");
+
+                if (!result)
+                {
+                    return false;
+                }
             }
 
             if (SettingsObject.UseMayaCompatibleNames && SettingsObject.AllowSceneModification)
