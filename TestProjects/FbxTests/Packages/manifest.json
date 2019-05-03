@@ -4,7 +4,6 @@
     "com.unity.analytics": "3.2.2",
     "com.unity.collab-proxy": "1.2.15",
     "com.unity.formats.fbx": "file:../../../com.unity.formats.fbx",
-    "com.unity.formats.fbx.tests": "file:../../../com.unity.formats.fbx.tests",
     "com.unity.package-manager-ui": "2.1.1",
     "com.unity.package-validation-suite": "0.4.0-preview.13",
     "com.unity.purchasing": "2.0.1",
