@@ -6,28 +6,6 @@ MESSAGE(STATUS "CMAKE_INSTALL_PREFIX is: " ${CMAKE_INSTALL_PREFIX})
 project (UnityFbxExporterEditorPackage NONE)
 
 ###########################################################################
-
-# Get git tag as package version
-find_package(Git REQUIRED)
-execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags HEAD
-        OUTPUT_VARIABLE PACKAGE_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-# only keep x.y.z[-preview.n]
-string(REGEX REPLACE "^.*([0-9]\.[0-9]\.[0-9].*)$" "\\1" PACKAGE_VERSION "${PACKAGE_VERSION}")
-
-# Get git revision hash as package revision
-execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
-        OUTPUT_VARIABLE PACKAGE_REVISION
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-# Get git repo url
-execute_process(COMMAND ${GIT_EXECUTABLE} config --get remote.origin.url
-        OUTPUT_VARIABLE PACKAGE_REPO_URL
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-configure_file(${CMAKE_SOURCE_DIR}/package.json.in ${CMAKE_BINARY_DIR}/package.json @ONLY)
-
-###########################################################################
 # Zip integrations folder
 
 set(MAYA_INTEGRATION_COPY_TARGET CopyMayaIntegration)
@@ -83,7 +61,7 @@ install(
     DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx/Editor/Integrations~"
 )
 install(
-    FILES "${CMAKE_SOURCE_DIR}/CHANGELOG.md" "${CMAKE_SOURCE_DIR}/LICENSE.md" "${CMAKE_BINARY_DIR}/package.json"
+    FILES "${CMAKE_SOURCE_DIR}/CHANGELOG.md" "${CMAKE_SOURCE_DIR}/LICENSE.md"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx"
 )
 

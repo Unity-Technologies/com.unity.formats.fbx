@@ -79,5 +79,3 @@ TestProjects/FbxTests/Logs/*
 com.unity.formats.fbx/Editor/Integrations~/**
 com.unity.formats.fbx/CHANGELOG.md
 com.unity.formats.fbx/LICENSE.md
-com.unity.formats.fbx/package.json
-
