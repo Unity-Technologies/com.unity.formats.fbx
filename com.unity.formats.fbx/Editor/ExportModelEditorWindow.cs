@@ -446,6 +446,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
             GUILayout.EndHorizontal ();
+            EditorGUILayout.Space(); // adding a space at bottom of dialog so buttons aren't right at the edge
 
             if (GUI.changed) {
                 SaveExportSettings ();

@@ -34,10 +34,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     internal static class ConvertToNestedPrefab
     {
-        const string GameObjectMenuItemName = "GameObject/Convert To Model Prefab Variant Instance...";
-        const string AssetsMenuItemName = "Assets/Convert To Model Prefab Variant...";
-        const string UndoConversionGroup = "Convert {0} to Model Prefab Variant";
-        internal const string UndoConversionCreateObject = "Convert to Model Prefab Variant instance";
+        const string GameObjectMenuItemName = "GameObject/Convert To FBX Linked Prefab...";
+        const string AssetsMenuItemName = "Assets/Convert To FBX Linked Prefab...";
+        const string UndoConversionGroup = "Convert {0} to FBX Linked Prefab";
+        internal const string UndoConversionCreateObject = "Convert to FBX Linked Prefab";
 
         /// <summary>
         /// OnContextItem is called either:
