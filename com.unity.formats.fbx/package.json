@@ -1,7 +1,7 @@
 {
   "name": "com.unity.formats.fbx",
   "displayName": "FBX Exporter",
-  "version": "@PACKAGE_VERSION@",
+  "version": "2.0.1-preview.11",
   "dependencies": {
     "com.unity.timeline": "1.0.0",
     "com.autodesk.fbx": "2.0.0-preview.7"
@@ -15,13 +15,5 @@
     "modeling",
     "maya",
     "max"
-  ],
-  "repository": {
-    "url": "@PACKAGE_REPO_URL@",
-    "type": "git",
-    "revision": "@PACKAGE_REVISION@"
-  },
-  "relatedPackages": {
-    "com.unity.formats.fbx.tests": "2.0.0-preview.3" 
-  }
+  ]
 }

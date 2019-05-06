@@ -103,6 +103,26 @@ namespace UnityEditor.Formats.Fbx.Exporter
             m_prefabExtLabelWidth = FbxExtLabelStyle.CalcSize(new GUIContent(".prefab")).x;
         }
 
+        /// <summary>
+        /// Get a list of all the export set objects that contain
+        /// RectTransforms or have children with RectTransforms.
+        /// </summary>
+        /// <param name="uiObjectNames">names of objects in set which contain RectTransforms</param>
+        /// <returns>Whethere there are any UI elements in the export set</returns>
+        protected bool GetUIElementsInExportSet(out List<string> uiObjectNames)
+        {
+            uiObjectNames = new List<string>();
+            foreach (var obj in GetToExport())
+            {
+                var go = ModelExporter.GetGameObject(obj);
+                if (go.GetComponentInChildren<RectTransform>())
+                {
+                    uiObjectNames.Add(go.name);
+                }
+            }
+            return uiObjectNames.Count > 0;
+        }
+
         protected bool ExportSetContainsAnimation()
         {
             foreach (var obj in GetToExport())
@@ -141,6 +161,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 Debug.LogError("FbxExporter: missing object for conversion");
                 return false;
+            }
+
+            List<string> hierarchiesWithUI;
+            if (GetUIElementsInExportSet(out hierarchiesWithUI))
+            {
+                // Warn that UI elements will break if converted
+                string warning = string.Format("RectTransform and other UI components will be lost if the following GameObject hierarchies are converted:\n\n{0}\n",
+                    string.Join("\n", hierarchiesWithUI));
+                bool result = UnityEditor.EditorUtility.DisplayDialog(
+                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "Convert and lose UI", "Cancel");
+
+                if (!result)
+                {
+                    return false;
+                }
             }
 
             if (SettingsObject.UseMayaCompatibleNames && SettingsObject.AllowSceneModification)

@@ -840,9 +840,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Copy components on the 'from' object which is the FBX,
-        /// over to the 'to' object which is the object in the
-        /// scene we exported.
+        /// Copy components on the 'from' object which is the object being converted,
+        /// over to the 'to' object which is the FBX.
         ///
         /// Copy over everything except meshes and materials, since these
         /// are already in the FBX.
@@ -872,7 +871,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 // ignore FbxPrefab (when converting LinkedPrefabs)
-                if (fromComponent is UnityEngine.Formats.Fbx.Exporter.FbxPrefab)
+                // Also ignore RectTransform, since it is not currently possible to switch transforms
+                // in a prefab.
+                if (fromComponent is UnityEngine.Formats.Fbx.Exporter.FbxPrefab ||
+                    fromComponent is RectTransform)
                 {
                     continue;
                 }
@@ -918,6 +920,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 if (!toComponent)
                 {
                     toComponent = to.AddComponent(fromComponent.GetType());
+                }
+
+                if (!toComponent)
+                {
+                    // Failed to add component
+                    Debug.LogWarningFormat("{0}: Failed to add component of type {1} to converted object", ModelExporter.PACKAGE_UI_NAME, fromComponent.GetType().Name);
+                    continue;
                 }
 
                 FixSceneReferences(fromComponent, toComponent, root);
