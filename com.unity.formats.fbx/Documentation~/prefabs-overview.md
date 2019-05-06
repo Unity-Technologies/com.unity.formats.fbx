@@ -16,3 +16,19 @@ Since Prefab Variants allow you to override its base Prefab's properties, you ca
 This type of connection is easy to maintain.
 
 * For information on Model Prefabs in general and how to create FBX Linked Prefabs from FBX files, see [Working with FBX Linked Prefabs](nested-prefabs.md). If you are upgrading from a previous version of Unity, you can also [convert any existing](nested-prefabs.md#conversion) Linked Prefabs you may have to the new FBX Linked Prefabs.
+
+
+## Terminology
+
+* Model Prefab: Generated on import of an FBX file. A Model Prefab is a read-only representation of the FBX contents, which updates when the FBX file is modified.
+
+* Prefab Variant: A Prefab generated from another Prefab (either Regular, Model, or from another Variant). It will inherit all data from the base Prefab, allowing additional modifications without affecting the base.
+                  For example, you can create a Variant of a button Prefab which has a different color but otherwise the same functionality.
+
+* Linked Prefab: A Regular Prefab containing an FbxPrefab component which connects to an FBX file. 
+                 The Prefab updates automatically when the FBX file is modified. Components are maintained and if object names or hierarchies change in the FBX file,
+                 it is possible to remap the objects by name on import.
+                 This is specific to previous versions of the FBX exporter, and requires Unity 2018.2 or lower.
+
+* FBX Linked Prefab: A Prefab Variant with a Model Prefab as its base. This feature replaces Linked Prefabs in Unity 2018.3 and above.
+                     A special component is no longer required, as FBX Linked Prefabs use only the Unity Prefab features.

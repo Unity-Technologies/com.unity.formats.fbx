@@ -5,3 +5,4 @@
 * [Integrating Unity with 3D modeling software](integration)
 * [Setting FBX Export options](options)
 * [Developer's guide](devguide)
+* [Troubleshooting](troubleshooting)
