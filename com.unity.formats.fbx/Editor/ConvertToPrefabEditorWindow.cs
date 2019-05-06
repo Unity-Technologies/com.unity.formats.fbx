@@ -104,23 +104,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get a list of all the export set objects that contain
-        /// RectTransforms or have children with RectTransforms.
+        /// Return the number of objects in the selection that contain RectTransforms.
         /// </summary>
-        /// <param name="uiObjectNames">names of objects in set which contain RectTransforms</param>
-        /// <returns>Whethere there are any UI elements in the export set</returns>
-        protected bool GetUIElementsInExportSet(out List<string> uiObjectNames)
+        protected int GetUIElementsInExportSetCount()
         {
-            uiObjectNames = new List<string>();
+            int count = 0;
             foreach (var obj in GetToExport())
             {
                 var go = ModelExporter.GetGameObject(obj);
-                if (go.GetComponentInChildren<RectTransform>())
-                {
-                    uiObjectNames.Add(go.name);
-                }
+                var rectTransforms = go.GetComponentsInChildren<RectTransform>();
+                count += rectTransforms.Length;
             }
-            return uiObjectNames.Count > 0;
+            return count;
         }
 
         protected bool ExportSetContainsAnimation()
@@ -163,14 +158,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            List<string> hierarchiesWithUI;
-            if (GetUIElementsInExportSet(out hierarchiesWithUI))
+            int rectTransformCount = GetUIElementsInExportSetCount();
+            if (rectTransformCount > 0)
             {
                 // Warn that UI elements will break if converted
-                string warning = string.Format("RectTransform and other UI components will be lost if the following GameObject hierarchies are converted:\n\n{0}\n",
-                    string.Join("\n", hierarchiesWithUI));
+                string warning = string.Format("Warning: UI Components (ie, RectTransform) are not saved when converting to FBX.\n{0} item(s) in the selection will lose their UI components.",
+                    rectTransformCount);
                 bool result = UnityEditor.EditorUtility.DisplayDialog(
-                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "Convert and lose UI", "Cancel");
+                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "Convert and Lose UI", "Cancel");
 
                 if (!result)
                 {
