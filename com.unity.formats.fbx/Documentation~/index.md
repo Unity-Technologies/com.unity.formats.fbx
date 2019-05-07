@@ -32,12 +32,6 @@ The Unity Integration for Autodesk® 3ds Max® feature supports the following ve
 * Autodesk® 3ds Max® 2019
 * Autodesk® 3ds Max® 2020
 
-## Known issues
-
-* When installing a new version of the FBX Exporter package after using version 1.3.0f1 or earlier, the link between Assets and FbxPrefab components may be lost. See [Updating from 1.3.0f1 or earlier](#Repairs_1_3_0f_1) for repairing instructions.
-
-* The FBX Exporter package does not support exporting `.asset` files.
-
 <a name="Repairs_1_3_0f_1"></a>
 ## Installing the FBX Exporter
 

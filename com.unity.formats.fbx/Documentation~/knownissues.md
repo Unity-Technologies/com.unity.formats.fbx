@@ -6,4 +6,4 @@
 
 * Name or path changes are ignored when converting a Model instance
 
-* Exporting animation only for animated lights and cameras is not currently supported
+* Exporting animation only for animated lights and cameras from Autodesk® Maya® and Maya LT™ is not currently supported
