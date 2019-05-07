@@ -42,6 +42,6 @@
   },
   "registry": "https://staging-packages.unity.com",
   "testables": [
-    "com.unity.formats.fbx.tests"
+    "com.unity.formats.fbx"
   ]
 }
