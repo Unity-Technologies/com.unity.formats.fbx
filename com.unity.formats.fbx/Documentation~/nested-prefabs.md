@@ -6,7 +6,7 @@ When a user imports a Model from a 3D modeling application such as Autodesk® Ma
 
 You can add components to a Model Prefab in the Scene, such as a collider. However, you cannot apply any change back to the Asset without breaking the link. In this way, a Model Prefab is a *read-only* Prefab, because it is non-editable except for overrides in the Scene.
 
-Using FBX Linked Prefabs is the best way to ensure that your Models continue to reflect any changes you make to your FBX files in external applications while still taking full advantage of the Prefab system. For example, while Linked Prefabs previously required the extra **FbxPrefab** component, the new FBX Linked Prefabs use only the Unity Prefab features. And you can create Variants of your Variants which all receive updates from the Model Prefab but provide a lot of flexibility. 
+Using FBX Linked Prefabs is the best way to ensure that your Models continue to reflect any changes you make to your FBX files in external applications while still taking full advantage of the Prefab system. For example, while Linked Prefabs previously required the extra **FbxPrefab** component, the new FBX Linked Prefabs use only the Unity Prefab features. And you can create Variants of your FBX Linked Prefabs which all receive updates from the Model Prefab but provide a lot of flexibility. 
 
 In addition, Variants give you some additional control over receiving updates from external applications. For example, if you have a Model with a Spot Light of size 10 and you override the size to 1 in your Variant, when the size and color change in the FBX file, the color will change but the size will remain 1.
 
@@ -77,26 +77,22 @@ When converting to an FBX Linked Prefab, the following window opens, displaying 
 | __Source__                | Transfer the transform animation from this object to the __Destination__ transform.<br/><br/>**Notes:**<br/> - __Source__ must be an ancestor of __Destination__.<br/> - __Source__ may be an ancestor of the selected object. |
 | __Destination__           | Which object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between __Source__ and __Destination__ as well as the animation on the __Source__ itself. |
 | __Export Format__         | Select the format for the FBX Exporter to use when exporting the FBX file (ASCII or binary). |
-| __Include__               | __Convert to FBX Linked Prefab...__ always exports both Models and Animation in the hierarchy. |
-| __LOD level__             | __Convert to FBX Linked Prefab...__ always exports All levels of detail (LOD) available in the hierarchy for LOD groups. |
-| __Object(s) Position__    | __Convert to FBX Linked Prefab...__ always resets the root object's transform during export. However, the Prefab maintains the global transform for the root object. |
+| __Include__               | __Convert to FBX Linked Prefab__ always exports both Models and Animation in the hierarchy. |
+| __LOD level__             | __Convert to FBX Linked Prefab__ always exports All levels of detail (LOD) available in the hierarchy for LOD groups. |
+| __Object(s) Position__    | __Convert to FBX Linked Prefab__ always resets the root object's transform during export. However, the Prefab maintains the global transform for the root object. |
 | __Animated Skinned Mesh__ | Check this option to export animation on objects with skinned meshes.<br/><br/>If unchecked, the FBX Exporter does not export animation on skinned meshes. |
 | __Compatible Naming__     | Check this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and Autodesk® Maya® and Autodesk® Maya LT™. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("\_"). Invalid characters are all non-alphanumeric characters, except for colon (":").<br/> - Adds an underscore ("\_") to names that begin with a number. - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>**Note:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
-| __Don't ask me again__    | Check this option to use the same **Convert Option** properties and hide this window when converting to Linked Prefabs in the future. You can reset this option by turning on the **Show Convert UI** option under **Edit** > **Project Settings** > **Fbx Export** in Unity's top menu. |
+| __Don't ask me again__    | Check this option to use the same **Convert Option** properties and hide this window when converting to FBX Linked Prefabs in the future. You can reset this option by turning on the **Show Convert UI** option under **Edit** > **Project Settings** > **Fbx Export** in Unity's top menu. |
 
 > ***Note:*** For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters may differ between file systems.
 
-## Known issues
-
-* Name or path changes are ignored when converting a Model instance.
-
 <a name="conversion"></a>
 
-## Converting from Linked Prefabs to Prefab Variants
+## Converting from Linked Prefabs to FBX Linked Prefabs
 
-To convert existing Linked Prefabs to Prefab Variants, follow these steps:
+To convert existing Linked Prefabs to FBX Linked Prefabs, follow these steps:
 
-1. Fix any name discrepancies that were previously handled by the [name remapping functionality for Linked Prefabs](prefabs.md#Remapping) before converting. Prefab Variants do not handle name remapping. If you start to add game logic to components, and then the objects in the FBX get renamed, you are at risk of losing the components. This can happen because the old GameObjects are deleted and new objects with the new names are added in their place.
+1. Fix any name discrepancies that were previously handled by the name remapping functionality for Linked Prefabs before converting. FBX Linked Prefabs do not handle name remapping. If you start to add game logic to components, and then the objects in the FBX get renamed, you are at risk of losing the components. This can happen because the old GameObjects are deleted and new objects with the new names are added in their place.
 
 2. Right-click the Linked Prefab file and select **Convert to FBX Linked Prefab...** from the context menu.
 
