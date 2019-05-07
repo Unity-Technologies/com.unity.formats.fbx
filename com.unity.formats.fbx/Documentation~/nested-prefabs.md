@@ -28,7 +28,7 @@ To replace the GameObject hierarchy with an instance of an FBX Linked Prefab:
 
 1. Right-click on the GameObject in the Hierarchy view and select __Convert To FBX Linked Prefab...__ from the context menu.
 
-	![Convert GameObject to FBX Linked Prefab](images/FBXExporter_LinkedPrefab-GameObject.png)
+	![Convert GameObject to FBX Linked Prefab](images/FBXExporter_FBXLinkedPrefab-GameObject.png)
 
 	Alternatively, you can use the main menu: __GameObject__ > __Convert To FBX Linked Prefab...__ with the GameObject selected.
 
@@ -46,7 +46,7 @@ To generate the FBX Linked Prefab from the selected file without modifying the s
 
 1. Right-click on an FBX or Prefab Asset file in the Project view and select __Convert To FBX Linked Prefab...__ from the context menu.
 
-	![Convert Prefab file to FBX Linked Prefab](images/FBXExporter_LinkedPrefab-PrefabFile.png)
+	![Convert Prefab file to FBX Linked Prefab](images/FBXExporter_FBXLinkedPrefab-Asset.png)
 
 	Alternatively, you can use the main menu: __Assets__ > __Convert To FBX Linked Prefab...__.
 
@@ -96,6 +96,6 @@ To convert existing Linked Prefabs to FBX Linked Prefabs, follow these steps:
 
 2. Right-click the Linked Prefab file and select **Convert to FBX Linked Prefab...** from the context menu.
 
-	![Create a Prefab variant from the file's context menu](images/FBXExporter_CreatePrefabVariant.png)
+	![Create a Prefab variant from the file's context menu](images/FBXExporter_FBXLinkedPrefab-Asset.png)
 
 > ***Note:*** This will reexport the Linked Prefab to a new FBX file, and it will no longer be connected to the original FBX.
