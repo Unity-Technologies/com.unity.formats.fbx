@@ -152,15 +152,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>The GameObject bound to the editor clip or null if none.</returns>
         private static GameObject GetGameObjectBoundToEditorClip(object editorClip)
         {
-            object clipItem = GetPropertyReflection(editorClip, "item");
-            object parentTrack = GetPropertyReflection(clipItem, "parentTrack");
+            var timelineClip = GetTimelineClipFromEditorClip(editorClip);
+            object parentTrack = timelineClip.parentTrack;
             AnimationTrack animTrack = parentTrack as AnimationTrack;
-
-#if UNITY_2018_2_OR_NEWER
+            
             Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.inspectedDirector.GetGenericBinding(animTrack);
-#else // UNITY_2018_2_OR_NEWER
-                    Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.playableDirector.GetGenericBinding(animTrack);
-#endif // UNITY_2018_2_OR_NEWER
 
             GameObject animationTrackGO = null;
             if (animationTrackObject is GameObject)
