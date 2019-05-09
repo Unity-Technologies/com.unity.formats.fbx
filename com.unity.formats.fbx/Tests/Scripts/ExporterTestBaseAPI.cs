@@ -14,6 +14,7 @@ namespace FbxExporter.UnitTests
         /// material or scene or fbx.
         /// </summary>
         public const string PathToTestData = "Packages/com.unity.formats.fbx/Tests";
+        public const string AltPathToTestData = "Packages/com.unity.formats.fbx.tests/Tests";
 
         /// <summary>
         /// Sleep an amount of time (in ms) so we can safely assume that the
@@ -306,6 +307,11 @@ namespace FbxExporter.UnitTests
         public string FindPathInUnitTests(string path) {
             // This used to be complicated; not so much anymore.
             var virtualPath = PathToTestData + '/' + path;
+            if (!System.IO.File.Exists(virtualPath))
+            {
+                virtualPath = AltPathToTestData + '/' + path;
+            }
+
             if (!System.IO.File.Exists(virtualPath)) {
                 return null;
             }
