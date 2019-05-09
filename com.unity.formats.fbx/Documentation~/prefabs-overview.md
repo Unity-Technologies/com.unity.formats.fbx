@@ -2,7 +2,7 @@
 
 In version 2018.3, Unity introduced a new way of working with Prefabs: [Nested Prefabs](https://docs.unity3d.com/2018.3/Documentation/Manual/NestedPrefabs.html) allow you to create Prefabs inside other Prefabs, and [Prefab Variants](https://docs.unity3d.com/2018.3/Documentation/Manual/PrefabVariants.html) allow you to save a variation on an existing Prefab. However, this changes the way you work with the FBX Exporter, because you can no longer use *Linked Prefabs* to maintain a connection between Unity and your 3D modeling application. 
 
-Previously, Linked Prefabs were created by adding an FbxPrefab component to a Regular Prefab in order to connect it to an FBX file. 
+In Unity 2018.2 as well as FBX exporter 2.0.1 and earlier, Linked Prefabs were created by adding an FbxPrefab component to a Regular Prefab in order to connect it to an FBX file. 
 From Unity 2018.3 onwards, FBX Linked Prefabs will instead be created as Prefab Variants of the exported FBX's Model Prefab.
 
 Since Prefab Variants allow you to override its base Prefab's properties, you can use an FBX Linked Prefab to add components, Materials, or change most other property values without affecting the original FBX file.

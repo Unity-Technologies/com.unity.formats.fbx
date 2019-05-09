@@ -31,8 +31,8 @@ A workaround for this is to first prepare the hierarchy so that it has no GameOb
 <a name="OverwritingFiles"></a>
 ### Overwriting FBX files
 
-In some situations, overwriting an FBX file that is used by an FBX Linked Prefab instance, may lead to unexpected results such as additional objects being added to the Prefab hierarchy.
-Therefore, we recommend not to overwrite an FBX file that is used by an FBX Linked Prefab.
+If you have a variant of an FBX model, avoid exporting your variant onto the FBX file, otherwise your changes might be applied twice after the export.
+For example, if your variant adds an object, then after exporting, you'll have two copies of the object: the one in the new FBX model you just exported, plus the one that you had previously added to the variant.
     
 <a name="EditableTree"></a>
 ### Tree primitive no longer editable after conversion
