@@ -40,7 +40,7 @@ The FBX Exporter exports multiple copies of the same Mesh as instances. The FBX 
 
 The FBX Exporter exports both Game Cameras and Physical Cameras.
 
-> ***Note:*** In Unity's Inspector, a Camera's **Physical Camera** property determines whether it is a *Physical Camera* or a *Game Camera*.
+> **NOTE:** In Unity's Inspector, a Camera's **Physical Camera** property determines whether it is a *Physical Camera* or a *Game Camera*.
 
 ### Physical Cameras
 
@@ -210,17 +210,17 @@ When exporting an FBX file, the following Export Options window opens, displayin
 | :------------------------ | :----------------------------------------------------------- |
 | __Export Name__           | Specify the name of the FBX file to export.                  |
 | __Export Path__           | Specify the location where the FBX Exporter will save the FBX file. |
-| __Source__                | Transfer the transform animation from this object to the __Destination__ transform. <br/><br/>**Notes:**<br/> - __Source__ must be an ancestor of __Destination__<br/> - __Source__ may be an ancestor of the selected object. |
+| __Source__                | Transfer the transform animation from this object to the __Destination__ transform. <br/><br/>**NOTES:**<br/> - __Source__ must be an ancestor of __Destination__<br/> - __Source__ may be an ancestor of the selected object. |
 | __Destination__           | Which object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between __Source__ and __Destination__ as well as the animation on the Source itself. |
 | __Export Format__         | Select the format to use in the FBX file (ASCII or Binary).  |
 | __Include__               | Choose whether to export both Models and Animation, only Models, or only Animations. |
-| __LOD level__             | For level of detail (LOD) groups, choose the desired level of detail to export (all, highest, or lowest). <br/><br/>**Notes:**<br/> - The FBX Exporter ignores LODs outside of selected hierarchy.<br/> - The FBX Exporter does not filter out objects that are used as LODs and doesn't export them if they aren’t direct descendants of their respective LOD Group |
+| __LOD level__             | For level of detail (LOD) groups, choose the desired level of detail to export (all, highest, or lowest). <br/><br/>**NOTES:**<br/> - The FBX Exporter ignores LODs outside of selected hierarchy.<br/> - The FBX Exporter does not filter out objects that are used as LODs and doesn't export them if they aren’t direct descendants of their respective LOD Group |
 | __Object(s) Position__    | Choose whether to reset the exported objects to world center, or keep world transforms during export.<br/><br/>If you select multiple objects for export, and you choose __Local Centered__ from this drop-down menu, the FBX Exporter centers objects around a shared root while keeping their relative placement unchanged. |
 | __Animated Skinned Mesh__ | Check this option to export animation on objects with skinned meshes.<br/><br/>If unchecked, the FBX Exporter does not export animation on skinned meshes. |
-| __Compatible Naming__     | Check this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and Autodesk® Maya® and Autodesk® Maya LT™. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("\_"). Invalid characters are all non-alphanumeric characters, except for the colon (":").<br/> - Adds an underscore ("\_") to names that begin with a number.<br/> - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>**Note:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
+| __Compatible Naming__     | Check this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and Autodesk® Maya® and Autodesk® Maya LT™. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("\_"). Invalid characters are all non-alphanumeric characters, except for the colon (":").<br/> - Adds an underscore ("\_") to names that begin with a number.<br/> - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>**NOTE:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
 | __Export Unrendered__     | Check this option to export meshes that either don't have a renderer component, or that have a disabled renderer component. For example, a simplified mesh used as a Mesh collider. |
 
-**Note:** For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters may differ between file systems.
+> **NOTE:** For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters may differ between file systems.
 
 ## Exporting animation from the Timeline
 
@@ -236,12 +236,3 @@ In Autodesk® 3ds Max®, it is recommended to set the system units to centimeter
 There are no specific import options to adjust between Unity and Autodesk® Maya® and Autodesk® Maya LT™. When working in Autodesk® Maya® and Autodesk® Maya LT™, you can set the working units to meters if you prefer. 
 
 When working with large models in Autodesk® Maya® and Autodesk® Maya LT™, to ensure that the models clip to meters, adjust the scale of the near and far clipping planes for all cameras by 100x. In addition, you should scale lights and cameras by 100x so that objects display in the viewport.
-
-## Known issues
-
-* Bind pose of animated skinned mesh is lost on export. For example, if you export an animated skinned mesh from Unity and import it into Autodesk® Maya® and Autodesk® Maya LT™ you will not be able to set the character into the bind pose using the **Rigging** > **Skin** > **Go to Bind Pose** command.
-
-* Animated skinned meshes may not export with the correct skinning if they are not in the bind pose on export (that is, not being previewed in the Animation or Timeline windows, and the original Rig's FBX must not contain animation)
-
-* For skinned meshes all bones must be descendants of the root bone. For example, if the root bone is "hips" and the right leg for the same skinned mesh is not a descendant of hips, export will fail.
-
