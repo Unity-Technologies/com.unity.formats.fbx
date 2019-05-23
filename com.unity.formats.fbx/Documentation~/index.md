@@ -6,8 +6,8 @@ The FBX Exporter package includes the following features:
 
 * [FBX Exporter](exporting.md): Export geometry, animation, Lights, and Cameras as FBX files so you can transfer game data to any 3D modeling software. Record gameplay and export it to make cinematics. Start grey-boxing with [ProBuilder](https://docs.unity3d.com/Packages/com.unity.probuilder@latest/), then export to FBX to replace with final assets.
 
-* Connections via Model Prefab Variants:
-	* [Model Prefab Variants](nested-prefabs.md): 
+* Connections via FBX Linked Prefabs:
+	* [FBX Linked Prefabs](nested-prefabs.md): 
 
 		Unity 2018.3 introduced [Nested Prefabs](https://docs.unity3d.com/2018.3/Documentation/Manual/NestedPrefabs.html) and [Prefab Variants](https://docs.unity3d.com/2018.3/Documentation/Manual/PrefabVariants.html) as new Prefab features. The FBX Importer allows you to import an FBX file as a *Model Prefab* and create Prefab Variants from them. Since Prefab Variants can override properties and children without affecting the original Prefab, you can use them in Unity without breaking the link to the file, and bring in updates.
 
@@ -23,24 +23,21 @@ The Unity Integration for Autodesk® Maya® and Autodesk® Maya LT™ feature su
 
 * Autodesk® Maya® and Autodesk® Maya LT™ 2017
 * Autodesk® Maya® and Autodesk® Maya LT™ 2018
+* Autodesk® Maya® and Autodesk® Maya LT™ 2019
 
 The Unity Integration for Autodesk® 3ds Max® feature supports the following versions of Autodesk® 3ds Max®:
 
 * Autodesk® 3ds Max® 2017
 * Autodesk® 3ds Max® 2018
-
-## Known issues
-
-* When installing a new version of the FBX Exporter package after using version 1.3.0f1 or earlier, the link between Assets and FbxPrefab components may be lost. See [Updating from 1.3.0f1 or earlier](#Repairs_1_3_0f_1) for repairing instructions.
-
-* The FBX Exporter package does not support exporting `.asset` files.
+* Autodesk® 3ds Max® 2019
+* Autodesk® 3ds Max® 2020
 
 <a name="Repairs_1_3_0f_1"></a>
 ## Installing the FBX Exporter
 
 To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest).
 
-Verify that the FBX Exporter is correctly installed by opening it (from the top menu: **GameObject** > **Export To FBX**).
+Verify that the FBX Exporter is correctly installed by opening it (from the top menu: **GameObject** > **Export To FBX...**).
 
 ### Updating from 1.3.0f1 or earlier
 

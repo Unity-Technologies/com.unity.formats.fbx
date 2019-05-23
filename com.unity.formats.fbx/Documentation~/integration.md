@@ -127,11 +127,6 @@ In order to export objects from the desired export set, you can select one or mo
 
 If you select multiple sets or objects from multiple sets, then the FBX Exporter exports each set to its respective file defined in the attributes of the set.
 
-
-### Known Issues
-
-* Exporting animation only for animated lights and cameras is not currently supported
-
 ## Working with Autodesk® 3ds Max® 2017+
 
 ### Importing from Unity
