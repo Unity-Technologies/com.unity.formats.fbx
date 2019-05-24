@@ -96,7 +96,7 @@ When converting to an FBX Linked Prefab, the following window opens, displaying 
 
 To convert existing Linked Prefabs to FBX Linked Prefabs, follow these steps:
 
-1. Fix any name discrepancies that were previously handled by the name remapping functionality for Linked Prefabs before converting. FBX Linked Prefabs do not handle name remapping. If you start to add game logic to components, and then the objects in the FBX get renamed, you are at risk of losing the components. This can happen because the old GameObjects are deleted and new objects with the new names are added in their place.
+1. Fix any name discrepancies before converting. FBX Linked Prefabs do not handle name remapping. If you start to add game logic to components, and then the objects in the FBX get renamed, you are at risk of losing the components. This can happen because the old GameObjects are deleted and new objects with the new names are added in their place.
 
 2. Right-click the Linked Prefab file and select **Convert to FBX Linked Prefab** from the context menu.
 

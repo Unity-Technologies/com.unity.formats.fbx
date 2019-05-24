@@ -29,7 +29,7 @@ Before exporting the animated skinned Mesh, make sure that:
 * The skinned mesh animation is not being previewed in the Animation of Timeline windows, as this may cause issues on export.
 
 * The original Rig's FBX does not contain animation. 
-    
+  
     **NOTE**: It is currently not possible to fix this issue in Unity. You need to separate your animation from the Rig in a separate modeling software such as Autodesk® Maya® first.
 
 
@@ -48,11 +48,10 @@ To work around this:
 
 
 <a name="OverwritingFiles"></a>
+
 ## Overwriting FBX files
 
-In some situations, overwriting an FBX file used by an FBX Linked Prefab instance may lead to unexpected results, such as additional objects being added to the Prefab hierarchy. 
-
-For this reason, we recommend not to overwrite an FBX file that is used by an FBX Linked Prefab.
+If you have a Variant of an FBX Model, avoid exporting your Variant to the FBX file; otherwise your changes might be applied twice after the export. For example, if your Variant adds an object, then after exporting, you'll have two copies of the object: the one in the new FBX Model you just exported, plus the one that you had previously added to the Variant.
 
 
 
