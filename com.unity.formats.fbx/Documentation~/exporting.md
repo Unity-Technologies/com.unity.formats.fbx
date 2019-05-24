@@ -201,7 +201,7 @@ In addition, it also exports the following animated attributes:
 
 When exporting an FBX file, the following Export Options window opens, displaying options for specifying what gets exported.
 
-![Export Options window](images/FBXExporter_ExportOptionsWindow.png)
+![Export Options window](images/FBXExporter_ConvertOptionsWindow.png)
 
 
 ### Export Options Properties
