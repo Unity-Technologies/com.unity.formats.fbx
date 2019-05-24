@@ -50,7 +50,7 @@ Before you install the FBX Exporter Package, follow these steps (recommended):
 
 4. Install the FBX Exporter from the [Package Manager](https://docs.unity3d.com/Manual/upm-ui-install.html).
 
-Some Assets in your Project may lose their FbxPrefab components. To repair this issue, follow these steps: 
+If you were using an older version of the FBX Exporter, some Assets in your Project may have missing scripts where the obsolete FbxPrefab component was used. In order to fix these issues, follow these steps: 
 
 1. If your Project Assets are serialized as Binary, select __Edit__ > __Project Settings__ > __Editor__ to view the Editor Settings. 
 
@@ -62,4 +62,4 @@ Some Assets in your Project may lose their FbxPrefab components. To repair this 
 
   ![Run Component Updated button](images/FBXExporter_RunComponentUpdater.png)
 
-5. Click the __Run Component Updater__ button to repair all text serialized Prefab and Scene Assets in the Project containing the FbxPrefab component.
+5. Click the __Run Component Updater__ button to repair all text serialized Prefab and Scene Assets in the Project containing the obsolete FbxPrefab component.
