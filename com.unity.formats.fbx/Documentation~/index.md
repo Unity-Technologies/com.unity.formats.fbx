@@ -34,7 +34,7 @@ The Unity Integration for Autodesk® 3ds Max® feature supports the following ve
 
 To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Manual/upm-ui-install.html).
 
-Verify that the FBX Exporter is correctly installed by opening it (from the top menu: **GameObject** > **Export To FBX**).
+Verify that the FBX Exporter is correctly installed by opening it (from the top menu: **GameObject** > **Export To FBX...**).
 
 ### Updating from 1.3.0f1 or earlier
 
