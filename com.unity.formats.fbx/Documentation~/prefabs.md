@@ -71,8 +71,7 @@ When converting to an FBX Linked Prefab, the following window opens, displaying 
 
 ![Convert Options for an FBX Linked Prefab](images/FBXExporter_ConvertOptionsWindow.png)
 
-
-#### Convert Option Properties
+#### Convert Option properties
 
 | Property:                 | Function:                                                    |
 | :------------------------ | :----------------------------------------------------------- |
