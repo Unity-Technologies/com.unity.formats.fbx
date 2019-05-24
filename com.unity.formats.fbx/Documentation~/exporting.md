@@ -199,11 +199,11 @@ In addition, it also exports the following animated attributes:
 
 ## Export Options window
 
-When exporting an FBX file, the following **Convert Options** window opens, displaying options for specifying what gets exported.
+When exporting an FBX file, the following **Export Options** window opens, displaying options for specifying what gets exported.
 
-![Export Options window](images/FBXExporter_ConvertOptionsWindow.png)
+![Export Options window](images/FBXExporter_ExportOptionsWindow.png)
 
-### Convert Options Properties
+### Export Options properties
 
 | Property:                 | Function:                                                    |
 | :------------------------ | :----------------------------------------------------------- |

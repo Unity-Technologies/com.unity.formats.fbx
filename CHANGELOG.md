@@ -6,8 +6,8 @@
 
 NEW FEATURES
 
-* FBX Linked Prefabs replace Prefab Variants and the FBX Exporter now creates FBX Linked Prefabs as Prefab Variants of the exported FBX's Model Prefab.
-* The **Convert To Model Prefab Variant** and **Convert To Model Prefab Variant Instance** menu items have been removed.
+* It is no longer necessary to manually update Linked Prefabs or create Prefab Variants for FBX files. 
+* Added **Convert to FBX Linked Prefab** menu item for creating FBX Linked Prefabs. FBX Linked Prefabs are Prefab Variants of the exported FBX's Model Prefab.
 * Updated the documentation.
 
 ## [2.0.1-preview.11] - 2019-04-10

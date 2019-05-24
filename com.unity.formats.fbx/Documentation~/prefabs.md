@@ -8,17 +8,15 @@ When Unity imports a Model from a 3D modeling application such as Autodesk® May
 
 If you want to add components, Materials, or change most other property values without affecting the original FBX file in Unity, convert the Model Prefab to an **FBX Linked Prefab**. This is a Prefab Variant of the exported FBX's Model Prefab. Prefab Variants allow you to override their base Prefabs' properties.
 
-> **NOTE:** While this method allows you to override properties, you cannot change the internal hierarchy of the Variant without breaking the link to the Model Prefab. This means you can add components to a Model Prefab in the Scene, such as a collider. However, you cannot apply any change back to the Asset without breaking the link. In this way, a Model Prefab is a *read-only* Prefab, because it is non-editable except for overrides in the Scene.
+Using FBX Linked Prefabs is the best way to ensure that your Models continue to reflect any changes you make to your FBX files in external applications while still taking full advantage of the Prefab system.
 
-Using FBX Linked Prefabs is the best way to ensure that your Models continue to reflect any changes you make to your FBX files in external applications while still taking full advantage of the Prefab system. For example, while Linked Prefabs previously required the extra **FbxPrefab** component, FBX Linked Prefabs use only the Unity Prefab features. And you can create Variants of your FBX Linked Prefabs which all receive updates from the Model Prefab but provide a lot of flexibility. 
-
-In addition, Variants give you some additional control over receiving updates from external applications. For example, if you have a Model with a Spot Light of size 10 and you override the size to 1 in your Variant, when the size and color change in the FBX file, the color changes but the size remains 1.
+In addition, you can use Variants to control updates from external applications. For example, if you have a Model with a Spot Light of size 10 and you override the size to 1 in your Variant, when the size and color change in the FBX file, the color changes but the size remains 1.
 
 > **IMPORTANT:** Because the Prefab Variant inherits data from the base Model Prefab, you cannot make structural changes to the Prefab Variant. This means that you cannot delete inherited child objects or re-arrange the order of inherited child objects on the Prefab Variant. 
 
 ### Creating an FBX Linked Prefab
 
-You can either create an FBX Linked Prefab [from a GameObject](#fromGameObject) or generate it directly [from the selected .fbx or .prefab file](#fromFBXorAssetFile). If you are upgrading from a previous version of Unity, you can also [convert any existing](#conversion) Linked Prefabs you may have to the new FBX Linked Prefabs.
+You can either create an FBX Linked Prefab [from a GameObject](#fromGameObject) or generate it directly [from the selected .fbx or .prefab file](#fromFBXorAssetFile). If you are upgrading from version 2.0.1-preview or earlier of the FBX Exporter, you can also [convert any existing](#conversion) Linked Prefabs you may have to the new FBX Linked Prefabs.
 
 When you convert a GameObject to an FBX Linked Prefab, the FBX Exporter exports each selected GameObject hierarchy and writes an FBX file and a Prefab Variant (`.prefab`) with the FBX as its base. 
 
@@ -98,7 +96,7 @@ When converting to an FBX Linked Prefab, the following window opens, displaying 
 
 To convert existing Linked Prefabs to FBX Linked Prefabs, follow these steps:
 
-1. Fix any name discrepancies that were previously handled by the [name remapping functionality for Linked Prefabs](prefabs.md#Remapping) before converting. FBX Linked Prefabs do not handle name remapping. If you start to add game logic to components, and then the objects in the FBX get renamed, you are at risk of losing the components. This can happen because the old GameObjects are deleted and new objects with the new names are added in their place.
+1. Fix any name discrepancies that were previously handled by the name remapping functionality for Linked Prefabs before converting. FBX Linked Prefabs do not handle name remapping. If you start to add game logic to components, and then the objects in the FBX get renamed, you are at risk of losing the components. This can happen because the old GameObjects are deleted and new objects with the new names are added in their place.
 
 2. Right-click the Linked Prefab file and select **Convert to FBX Linked Prefab** from the context menu.
 

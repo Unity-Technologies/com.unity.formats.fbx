@@ -2,7 +2,7 @@
 	* [Exporting FBX files](exporting)
 	* [FBX Linked Prefabs](prefabs)
 	* [Integration](integration)
-	* [FBX Export options](options)
+	* [FBX Export settings](options)
 	* [Limitations](knownissues)
 	* [Troubleshooting](troubleshooting)
 	* [Developer's guide](devguide)
