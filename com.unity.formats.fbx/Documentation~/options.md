@@ -1,4 +1,4 @@
-# Setting FBX Export options
+# FBX Export settings
 
 Use the Fbx Export Settings window to show or hide the Convert to Model Prefab Variant UI and to install the [Unity Integration](integration.html) for Autodesk® Maya®, Autodesk® Maya LT™, or Autodesk® 3ds Max®.
 
@@ -16,6 +16,6 @@ Use the Fbx Export Settings window to show or hide the Convert to Model Prefab V
 | __Keep Open__                 | Check this option to keep the selected 3D modeling software open after installing it. |
 | __Hide Native Menu__          | Check this option to hide the native __Send to Unity__ menu in Autodesk® Maya® and Autodesk® Maya LT™. |
 | __Install Unity Integration__ | Click this button to install [Unity Integration](integration.html) for the selected __3D Application__. |
-| __Run Component Updater__     | Click this button to run the [Component Updater](index.html#Repairs_1_3_0f_1) to repair any broken FbxPrefab components if you were using a previous version of the FBX Exporter package. |
+| __Run Component Updater__     | Click this button to run the [Component Updater](index.html#Repairs_1_3_0f_1) to repair any missing FbxPrefab components if you were using version 1.3.0f1 or earlier of the FBX Exporter package. |
 
 

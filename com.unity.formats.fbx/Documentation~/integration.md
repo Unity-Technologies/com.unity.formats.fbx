@@ -57,7 +57,7 @@ To manually install an Autodesk® Maya® or Autodesk® Maya LT™ Integration, f
   * On Mac:<br/>*$HOME/Library/Preferences/Autodesk/Maya/modules/UnityFbxForMaya.mod*
 
 4. In *UnityFbxForMaya.mod*, modify the following line (mel code): <br/>
-  ```UnityFbxForMaya {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya```
+    ```UnityFbxForMaya {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya```
 
   Set `{Version}` = `2.0.0` (or your version number of the FBX Exporter package) and `{UnityIntegrationsPath}` = the location where you unzipped *UnityFbxForMaya.zip* in step 1.
 
@@ -67,14 +67,14 @@ To manually install an Autodesk® Maya® or Autodesk® Maya LT™ Integration, f
   * On Mac: <br/>*$HOME/Library/Preferences/Autodesk/Maya/scripts/userSetup.mel*
 
 6. Add this line (mel code):
-  ```if(`exists unitySetupUI`){ unitySetupUI; }```
+    ```if(`exists unitySetupUI`){ unitySetupUI; }```
 
 7. Open Autodesk® Maya® or Autodesk® Maya LT™, and then open the Script Editor:
 
   ![](images/FBXExporter_MayaAccessScriptEditor.png) 
 
 8. Run the following (mel code): <br/>
-  ```unityConfigure "{UnityProjectPath}" "{ExportSettingsPath}" "{ImportSettingsPath}" 0 0;```
+    ```unityConfigure "{UnityProjectPath}" "{ExportSettingsPath}" "{ImportSettingsPath}" 0 0;```
 
   Where you replace `{UnityProjectPath}` with the path to your Unity Project, and  `{ExportSettingsPath}` with the path to *Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel* and `{ImportSettingsPath}` with the path to *Integrations/Autodesk/maya/scripts/unityFbxImportSettings.mel*.
 
@@ -121,11 +121,13 @@ __File__ > __Unity__ > __Export Model Only__ exports all Models in the selected 
 
 __File__ > __Unity__ > __Export Animation Only__ exports only the animation applied to the objects in the export set as well as the minimum components required for the animation (such as transforms).
 
-> ***Note:*** If no animation file with the **@** notation has been imported, then this option has no effect. The workaround for exporting a new animation is to first import an empty FBX file with the **@** notation (*{model}@anim.fbx*), so that the export set is configured correctly.
+> **NOTE:** If no animation file with the **@** notation has been imported, then this option has no effect. The workaround for exporting a new animation is to first import an empty FBX file with the **@** notation (*{model}@anim.fbx*), so that the export set is configured correctly.
 
 In order to export objects from the desired export set, you can select one or more objects in the set or the set itself. In either case, the FBX Exporter exports the entire contents of the set.
 
 If you select multiple sets or objects from multiple sets, then the FBX Exporter exports each set to its respective file defined in the attributes of the set.
+
+
 
 ## Working with Autodesk® 3ds Max® 2017+
 
@@ -161,7 +163,7 @@ For instance, if you import a file called *model@anim.fbx*, the export set is ba
 
 This allows you to easily import animation files and apply them to the appropriate objects in the Scene. A single animation file is supported per Model file. Importing a new animation overwrites the existing animation in the Scene.
 
-**Note:** Exporting animation only from Autodesk® 3ds Max® is not supported.
+> **NOTE:** Exporting animation only from Autodesk® 3ds Max® is not supported.
 
 ![FBX import file browser in Autodesk® 3ds Max®](images/FBXExporter_MaxUnityFileBrowser.png)
 
@@ -212,7 +214,7 @@ To add an object to a set, select the set, select an object and click the __Add 
 
 To remove an object from a set, select the object in the set and click the __Subtract Selected Objects__ button. 
 
-> ***Tip:*** You can also right-click the UnityExportSets and add or remove objects using the context menu.
+> **TIP:** You can also right-click the UnityExportSets and add or remove objects using the context menu.
 
 ![Named Selection Sets in Autodesk® 3ds Max®](images/FBXExporter_MaxNamedSelectionSets.png)
 

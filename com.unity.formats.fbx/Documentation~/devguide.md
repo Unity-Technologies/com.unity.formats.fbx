@@ -2,7 +2,7 @@
 
 As a developer you have access to the FBX Exporter from C# scripting. You can use the basic API by providing a single GameObject or a list of GameObjects. Note that default export settings are used for exporting the GameObjects to the FBX file.
 
-You can call the FBX Exporter from C# using methods found in the [**UnityEditor.Formats.Fbx.Exporter** ](../api/UnityEditor.Formats.Fbx.Exporter.html) namespace, for example:
+You can call the FBX Exporter from C# using methods found in the [UnityEditor.Formats.Fbx.Exporter](../api/UnityEditor.Formats.Fbx.Exporter.html) namespace, for example:
 
 ```
 using System.IO;
