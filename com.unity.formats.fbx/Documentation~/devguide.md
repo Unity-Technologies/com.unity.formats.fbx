@@ -84,5 +84,4 @@ protected void ImportScene (string fileName)
 
 ### Limitations
 
-* IL2CPP is not supported
 * Only 64 bit Windows and MacOS standalone player builds are supported
