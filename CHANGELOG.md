@@ -6,9 +6,12 @@
 
 NEW FEATURES
 
-* It is no longer necessary to manually update Linked Prefabs or create Prefab Variants for FBX files. 
+* It is no longer necessary to manually create Prefab Variants for FBX files. 
 * Added **Convert to FBX Linked Prefab** menu item for creating FBX Linked Prefabs. FBX Linked Prefabs are Prefab Variants of the exported FBX's Model Prefab.
 * Updated the documentation.
+
+FIXES
+* Fixed error when exporting selected Timeline Clip
 
 ## [2.0.1-preview.11] - 2019-04-10
 
