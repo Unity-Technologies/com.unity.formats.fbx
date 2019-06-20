@@ -32,7 +32,7 @@ build.cmd
 ./build.sh
 ```
 
-The package will be built in build/install/com.unity.formats.fbx.
+The package will be built in-place in com.unity.formats.fbx.
 
 Testing
 -------
