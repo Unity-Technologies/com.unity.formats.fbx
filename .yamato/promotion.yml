@@ -25,7 +25,7 @@ promotion_test_{{ platform.name }}_{{ editor.version }}:
     UPMCI_PROMOTION: 1
   commands:
     - npm install upm-ci-utils@latest -g --registry https://api.bintray.com/npm/unity/unity-npm
-    - upm-ci package test --unity-version {{ editor.version }}
+    - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.fbx
   artifacts:
     logs:
       paths:
@@ -65,7 +65,7 @@ promote:
     UPMCI_PROMOTION: 1
   commands:
     - npm install upm-ci-utils@latest -g --registry https://api.bintray.com/npm/unity/unity-npm
-    - upm-ci package promote
+    - upm-ci package promote --package-path com.unity.formats.fbx
   triggers:
     tags:
       only:
