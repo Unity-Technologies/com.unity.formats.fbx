@@ -7,7 +7,7 @@ See LICENSE.md file in the project root for full license information.
 Requirements
 ------------
 
-* [FBX SDK C# Bindings](https://github.com/Unity-Technologies/FbxSharp) package
+* [FBX SDK C# Bindings](https://github.com/Unity-Technologies/com.autodesk.fbx) package
 
 Packaging
 ---------
@@ -15,8 +15,8 @@ Packaging
 Get the source the first time:
 ```
 # clone the source
-git clone https://github.com/Unity-Technologies/FbxExporters.git
-cd FbxExporters
+git clone https://github.com/Unity-Technologies/com.unity.formats.fbx.git
+cd com.unity.formats.fbx
 ```
 
 Build the package.
