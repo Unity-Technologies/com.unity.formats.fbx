@@ -1,5 +1,4 @@
 # By default we are ignoring .zip files, which breaks integrations.
 #
-# This empty .npmignore clobbers that behaviour.
-# But we also want it to ignore itself.
-.npmignore
+# We need to explicitly not exclude .zip files.
+!*.zip
