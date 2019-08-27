@@ -1,7 +1,7 @@
 {
   "name": "com.unity.formats.fbx",
   "displayName": "FBX Exporter",
-  "version": "2.0.2-preview.1",
+  "version": "2.0.3-preview.1",
   "dependencies": {
     "com.unity.timeline": "1.0.0",
     "com.autodesk.fbx": "2.0.1-preview.1"
