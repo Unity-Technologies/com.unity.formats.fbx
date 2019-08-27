@@ -61,7 +61,7 @@ install(
     DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx/Editor/Integrations~"
 )
 install(
-    FILES "${CMAKE_SOURCE_DIR}/CHANGELOG.md" "${CMAKE_SOURCE_DIR}/LICENSE.md"
+    FILES "${CMAKE_SOURCE_DIR}/CHANGELOG.md" "${CMAKE_SOURCE_DIR}/LICENSE.md" "${CMAKE_SOURCE_DIR}/.npmignore"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/com.unity.formats.fbx"
 )
 
