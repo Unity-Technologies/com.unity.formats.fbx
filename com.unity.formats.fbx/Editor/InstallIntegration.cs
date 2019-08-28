@@ -96,7 +96,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     {
         public override string DccDisplayName { get { return "Maya"; } }
 
-        public override string IntegrationZipPath { get { return "UnityFbxForMaya.zip"; } }
+        public override string IntegrationZipPath { get { return "UnityFbxForMaya.7z"; } }
 
         private string FBX_EXPORT_SETTINGS_PATH { get { return "/Integrations/Autodesk/maya/scripts/unityFbxExportSettings.mel"; } }
 
@@ -589,7 +589,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private const string ExportSettingsTag = "UnityFbxExportSettings";
         private const string ImportSettingsTag = "UnityFbxImportSettings";
 
-        public override string IntegrationZipPath { get { return "UnityFbxForMax.zip"; } }
+        public override string IntegrationZipPath { get { return "UnityFbxForMax.7z"; } }
 
         /// <summary>
         /// Gets the absolute Unity path for relative path in Integrations folder.
