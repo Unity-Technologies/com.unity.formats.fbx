@@ -1,4 +1,0 @@
-# By default we are ignoring .zip files, which breaks integrations.
-#
-# We need to explicitly not exclude .zip files.
-!*.zip
