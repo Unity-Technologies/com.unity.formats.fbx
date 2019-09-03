@@ -4,7 +4,7 @@
 ## [2.0.3-preview.1] - 2019-08-27
 
 FIXES
-* Integrations were missing in 2.0.2 and 2.0.1 due to a packaging bug that automatically removed .zip files. They are back now.
+* Integrations were missing in 2.0.2 and 2.0.1 due to a packaging bug. They are back now.
 
 ## [2.0.2-preview.1] - 2019-06-20
 
