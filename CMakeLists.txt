@@ -10,10 +10,10 @@ project (UnityFbxExporterEditorPackage NONE)
 
 set(MAYA_INTEGRATION_COPY_TARGET CopyMayaIntegration)
 set(MAYA_INTEGRATION_ZIP_TARGET ZipMayaIntegration)
-set(MAYA_INTEGRATION_ZIP_NAME "UnityFbxForMaya.zip")
+set(MAYA_INTEGRATION_ZIP_NAME "UnityFbxForMaya.7z")
 
 set(MAX_INTEGRATION_ZIP_TARGET ZipMaxIntegration)
-set(MAX_INTEGRATION_ZIP_NAME "UnityFbxForMax.zip")
+set(MAX_INTEGRATION_ZIP_NAME "UnityFbxForMax.7z")
 
 configure_file("${CMAKE_SOURCE_DIR}/Integrations/Autodesk/maya/scripts/unitySetupUI.mel.in"
     "${CMAKE_BINARY_DIR}/Integrations/Autodesk/maya/scripts/unitySetupUI.mel"
@@ -36,7 +36,7 @@ add_custom_command(OUTPUT ${MAYA_INTEGRATION_FILES}
 add_custom_target(${MAYA_INTEGRATION_COPY_TARGET} ALL DEPENDS ${MAYA_INTEGRATION_FILES})
 
 add_custom_command(OUTPUT ${MAYA_INTEGRATION_ZIP_NAME}
-    COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_BINARY_DIR}/${MAYA_INTEGRATION_ZIP_NAME} --format=zip
+    COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_BINARY_DIR}/${MAYA_INTEGRATION_ZIP_NAME} --format=7zip
        "${CMAKE_BINARY_DIR}/Integrations/Autodesk/maya"
     MAIN_DEPENDENCY "${CMAKE_SOURCE_DIR}/Integrations/Autodesk/maya" 
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -46,7 +46,7 @@ add_custom_target(${MAYA_INTEGRATION_ZIP_TARGET} ALL DEPENDS ${MAYA_INTEGRATION_
 add_dependencies(${MAYA_INTEGRATION_ZIP_TARGET} ${MAYA_INTEGRATION_COPY_TARGET})
 
 add_custom_command(OUTPUT ${MAX_INTEGRATION_ZIP_NAME}
-    COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_BINARY_DIR}/${MAX_INTEGRATION_ZIP_NAME} --format=zip
+    COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${CMAKE_BINARY_DIR}/${MAX_INTEGRATION_ZIP_NAME} --format=7zip
        "${CMAKE_SOURCE_DIR}/Integrations/Autodesk/max"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Zipping 3DsMax Integration folder"
