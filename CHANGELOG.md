@@ -1,7 +1,7 @@
 # Changes in Fbx Exporter
 
 
-## [2.0.4-preview.1] - 2019-09-09
+## [2.0.4-preview.3] - 2019-09-10
 
 (Skipped 2.0.3-preview.1)
 
