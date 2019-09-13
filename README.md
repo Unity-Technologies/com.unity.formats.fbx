@@ -38,3 +38,8 @@ Testing
 -------
 
 Open `TestProjects/FbxTests` in Unity 2018.2+ and run using the Test Runner.
+
+Reporting Bugs
+--------------
+
+Please create a minimal project that reproduces the bug and use the Unity Bug Report (built in to the Unity Editor).
