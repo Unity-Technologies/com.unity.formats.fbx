@@ -1,16 +1,17 @@
+# Promotion tests are theoretically platform-independent so
+# we can run them just on 2019.1/win.
+#
+# The promotion job depends on the publish-to-candidates job, which runs
+# every test on every platform and version, so we're not actually skipping
+# tests.
+#
 test_editors:
-  - version: 2018.3
   - version: 2019.1
-  - version: 2019.2
 test_platforms:
   - name: win
     type: Unity::VM
     image: package-ci/win10:stable
     flavor: b1.medium
-  - name: mac
-    type: Unity::VM::osx
-    image: buildfarm/mac:stable
-    flavor: m1.mac
 ---
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
@@ -29,6 +30,9 @@ promotion_test_{{ platform.name }}_{{ editor.version }}:
     logs:
       paths:
         - "upm-ci~/test-results/**/*"
+    packages:
+      paths:
+        - "upm-ci~/packages/**/*"
   dependencies:
     - .yamato/upm-ci.yml#pack
 {% endfor %}
@@ -74,7 +78,7 @@ promote:
       paths:
         - "upm-ci~/packages/*.tgz"
   dependencies:
-    - .yamato/upm-ci.yml#pack
+    - .yamato/upm-ci.yml#publish
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
     - .yamato/promotion.yml#promotion_test_{{ platform.name }}_{{ editor.version }}
