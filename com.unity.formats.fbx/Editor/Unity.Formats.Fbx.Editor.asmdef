@@ -4,9 +4,10 @@
         "Unity.Timeline",
         "Unity.Timeline.Editor",
         "Unity.Formats.Fbx.Runtime",
-        "Autodesk.Fbx"
+        "Autodesk.Fbx",
+        "Unity.Recorder.Editor",
+        "Unity.Recorder"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
@@ -16,5 +17,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }
