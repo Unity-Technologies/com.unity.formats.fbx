@@ -4,14 +4,14 @@ using UnityEngine;
 using UnityEditor.Recorder;
 using UnityEditor;
 
-namespace UnityEditor.Recorder
+namespace UnityEditor.Formats.Fbx.Exporter
 {
-    [CustomEditor(typeof(AnimationRecorderSettings))]
+    [CustomEditor(typeof(FbxRecorderSettings))]
     class FbxRecorderSettingsEditor : RecorderEditor
     {
         protected override void FileTypeAndFormatGUI()
         {
-            EditorGUILayout.LabelField("Format", "Fbx");
+            EditorGUILayout.LabelField("Format", "FBX");
         }
     }
 }

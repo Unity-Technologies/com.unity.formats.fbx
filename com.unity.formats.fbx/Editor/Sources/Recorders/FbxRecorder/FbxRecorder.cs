@@ -5,9 +5,9 @@ using UnityEditor.Recorder;
 using UnityEditor.Recorder.Input;
 using UnityEditor;
 
-namespace UnityEditor.Recorder
+namespace UnityEditor.Formats.Fbx.Exporter
 {
-    class FbxRecorder : GenericRecorder<FbxRecorderSettings>
+    class FbxRecorder : GenericRecorder<FbxRecorderSettings>//GenericRecorder<FbxRecorderSettings>
     {
         public override void RecordFrame(RecordingSession ctx)
         {
@@ -16,7 +16,7 @@ namespace UnityEditor.Recorder
 
         public override void EndRecording(RecordingSession session)
         {
-            /*var ars = (AnimationRecorderSettings)session.settings;
+            var ars = (FbxRecorderSettings)session.settings;
 
             foreach (var input in m_Inputs)
             {
@@ -33,17 +33,27 @@ namespace UnityEditor.Recorder
                 var absolutePath = FileNameGenerator.SanitizePath(ars.fileNameGenerator.BuildAbsolutePath(session));
                 var clipName = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
 
-                //AssetDatabase.CreateAsset(clip, clipName);
+                //var tempClipName = System.IO.Path.ChangeExtension(clipName, ".asset");
+                //AssetDatabase.CreateAsset(clip, tempClipName);
 #if UNITY_2018_3_OR_NEWER
                 aInput.gameObjectRecorder.SaveToClip(clip, ars.frameRate);
 #else
                 aInput.gameObjectRecorder.SaveToClip(clip);
 #endif
+                var root = ((AnimationInputSettings)aInput.settings).gameObject;
+                clip.name = "recorded_clip";
+                Animation animator = root.AddComponent<Animation>();
+                AnimationUtility.SetAnimationClips(animator, new AnimationClip[] { clip });
+                var exportSettings = new ExportModelSettingsSerialize();
+                exportSettings.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+                ModelExporter.ExportObject(clipName, root, exportSettings);
 
+
+                Object.DestroyImmediate(animator);
                 aInput.gameObjectRecorder.ResetRecording();
             }
 
-            base.EndRecording(session);*/
+            base.EndRecording(session);
         }
     }
 }
