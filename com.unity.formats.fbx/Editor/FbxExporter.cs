@@ -1804,7 +1804,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// a Cubic curve using the default tangents.
         /// </summary>
         internal void ExportAnimationKeys (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve, 
-            UnityToMayaConvertSceneHelper convertSceneHelper)
+            UnityToMayaConvertSceneHelper convertSceneHelper, string uniPropertyName)
         {
             // TODO: complete the mapping between key tangents modes Unity and FBX
             Dictionary<AnimationUtility.TangentMode, List<FbxAnimCurveDef.ETangentMode>> MapUnityKeyTangentModeToFBX =
@@ -1831,14 +1831,47 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     int fbxKeyIndex = fbxAnimCurve.KeyAdd (fbxTime);
 
-                    fbxAnimCurve.KeySet (fbxKeyIndex, 
-                        fbxTime, 
-                        convertSceneHelper.Convert(uniKeyFrame.value)
-                    );
 
                     // configure tangents
                     var lTangent = AnimationUtility.GetKeyLeftTangentMode(uniAnimCurve, keyIndex);
                     var rTangent = AnimationUtility.GetKeyRightTangentMode(uniAnimCurve, keyIndex);
+                    FbxAnimCurveDef.ETangentMode tanMode = FbxAnimCurveDef.ETangentMode.eTangentAuto;
+                    FbxAnimCurveDef.EInterpolationType interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationCubic;
+                    switch (rTangent)
+                    {
+                        case AnimationUtility.TangentMode.Auto:
+                        case AnimationUtility.TangentMode.ClampedAuto:
+                            break;
+                        case AnimationUtility.TangentMode.Free:
+                            tanMode = FbxAnimCurveDef.ETangentMode.eTangentUser;
+                            break;
+                        case AnimationUtility.TangentMode.Linear:
+                            interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationLinear;
+                            break;
+                        case AnimationUtility.TangentMode.Constant:
+                            interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationConstant;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    float tangentMultiplier = 100;
+                    if(uniPropertyName == "m_LocalPosition.x")
+                    {
+                        tangentMultiplier *= -1; // have to negate x when switching between Unity->Maya axes
+                    }
+
+                    fbxAnimCurve.KeySet (fbxKeyIndex, 
+                        fbxTime, 
+                        convertSceneHelper.Convert(uniKeyFrame.value),
+                        interpMode,//FbxAnimCurveDef.EInterpolationType.eInterpolationCubic,
+                        tanMode,//FbxAnimCurveDef.ETangentMode.eTangentBreak,
+                        tangentMultiplier*uniKeyFrame.outTangent,
+                        keyIndex < uniAnimCurve.length -1 ? tangentMultiplier*uniAnimCurve[keyIndex+1].inTangent : 0,
+                        FbxAnimCurveDef.EWeightedMode.eWeightedAll,
+                        uniKeyFrame.outWeight,
+                        keyIndex < uniAnimCurve.length - 1 ? uniAnimCurve[keyIndex + 1].inWeight : 0
+                    );
 
                     if (!(MapUnityKeyTangentModeToFBX.ContainsKey(lTangent) && MapUnityKeyTangentModeToFBX.ContainsKey(rTangent)))
                     {
@@ -1995,11 +2028,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // TODO: we'll resample the curve so we don't have to 
                 // configure tangents
-                if (ModelExporter.ExportSettings.BakeAnimationProperty) {
+                /*if (ModelExporter.ExportSettings.BakeAnimationProperty) {
                     ExportAnimationSamples (uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
-                } else {
-                    ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper);
-                }
+                } else {*/
+                    ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper, uniPropertyName);
+               // }
             }
         }
 
