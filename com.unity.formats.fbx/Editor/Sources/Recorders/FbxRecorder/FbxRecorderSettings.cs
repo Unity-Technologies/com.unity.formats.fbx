@@ -9,6 +9,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
     [RecorderSettings(typeof(FbxRecorder), "FBX", "fbx_recorder")]
     public class FbxRecorderSettings : RecorderSettings
     {
+        [SerializeField] bool m_exportGeometry = true;
+        public bool ExportGeometry
+        {
+            get
+            {
+                return m_exportGeometry;
+            }
+            set
+            {
+                m_exportGeometry = value;
+            }
+        }
+
         [SerializeField] AnimationInputSettings m_AnimationInputSettings = new AnimationInputSettings();
 
         public AnimationInputSettings animationInputSettings
