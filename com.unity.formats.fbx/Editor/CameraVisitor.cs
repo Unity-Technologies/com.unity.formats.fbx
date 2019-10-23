@@ -1,6 +1,7 @@
 using UnityEngine;
 using Autodesk.Fbx;
 using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
+using System.Collections.Generic;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -8,6 +9,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
     {
         internal static class CameraVisitor
         {
+            private static Dictionary<Camera.GateFitMode, FbxCamera.EGateFit> s_mapGateFit = new Dictionary<Camera.GateFitMode, FbxCamera.EGateFit>()
+            {
+                { Camera.GateFitMode.Fill, FbxCamera.EGateFit.eFitFill },
+                { Camera.GateFitMode.Horizontal, FbxCamera.EGateFit.eFitHorizontal },
+                { Camera.GateFitMode.None, FbxCamera.EGateFit.eFitNone },
+                { Camera.GateFitMode.Overscan, FbxCamera.EGateFit.eFitOverscan },
+                { Camera.GateFitMode.Vertical, FbxCamera.EGateFit.eFitVertical }
+            };
+
             /// <summary>
             /// Visit Object and configure FbxCamera
             /// </summary>
@@ -56,6 +66,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return ;
             }
 
+            public static Vector2 GetSizeOfMainGameView()
+            {
+                System.Type T = System.Type.GetType("UnityEditor.GameView,UnityEditor");
+                System.Reflection.MethodInfo GetSizeOfMainGameView = T.GetMethod("GetSizeOfMainGameView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                System.Object Res = GetSizeOfMainGameView.Invoke(null, null);
+                return (Vector2)Res;
+            }
+
             /// <summary>
             /// Configure FbxCameras from a Physical Camera 
             /// </summary>
@@ -80,11 +98,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 fbxCamera.ProjectionType.Set(projectionType);
                 fbxCamera.FilmAspectRatio.Set(aspectRatio);
+
+                Vector2 gameViewSize = GetSizeOfMainGameView();
+                fbxCamera.SetAspect(FbxCamera.EAspectRatioMode.eFixedRatio, gameViewSize.x/gameViewSize.y, 1.0);
                 fbxCamera.SetApertureWidth (apertureWidthInInches);
                 fbxCamera.SetApertureHeight (apertureHeightInInches);
 
                 // Fit the resolution gate horizontally within the film gate.
-                fbxCamera.GateFit.Set(FbxCamera.EGateFit.eFitHorizontal);
+                fbxCamera.GateFit.Set(s_mapGateFit[unityCamera.gateFit]);
 
                 // Lens Shift ( Film Offset ) as a percentage 0..1
                 // FBX FilmOffset is in inches
