@@ -109,8 +109,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // Lens Shift ( Film Offset ) as a percentage 0..1
                 // FBX FilmOffset is in inches
-                fbxCamera.FilmOffsetX.Set(apertureWidthInInches * Mathf.Clamp(unityCamera.lensShift.x, 0f, 1f));
-                fbxCamera.FilmOffsetY.Set(apertureHeightInInches * Mathf.Clamp(unityCamera.lensShift.y, 0f, 1f));
+                fbxCamera.FilmOffsetX.Set(apertureWidthInInches * Mathf.Clamp(Mathf.Abs(unityCamera.lensShift.x), 0f, 1f) * Mathf.Sign(unityCamera.lensShift.x));
+                fbxCamera.FilmOffsetY.Set(apertureHeightInInches * Mathf.Clamp(Mathf.Abs(unityCamera.lensShift.y), 0f, 1f) * Mathf.Sign(unityCamera.lensShift.y));
 
                 // Focal Length
                 fbxCamera.SetApertureMode (FbxCamera.EApertureMode.eFocalLength); 
@@ -123,7 +123,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // FarPlane
                 fbxCamera.SetFarPlane ((float)unityCamera.farClipPlane.Meters().ToCentimeters());
-
                 return ;
             }
         }
