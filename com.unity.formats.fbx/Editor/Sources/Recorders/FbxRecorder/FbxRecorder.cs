@@ -21,61 +21,67 @@ namespace UnityEditor.Formats.Fbx.Exporter
             foreach (var input in m_Inputs)
             {
 
-                var aInput = (AnimationInput)input;
+                var aInput = (FbxInput)input;
 
-                if (aInput.gameObjectRecorder == null)
+                var recorders = aInput.gameObjectRecorder;
+                var gameObjects = ((FbxInputSettings)aInput.settings).gameObjects;
+                if (recorders == null || recorders.Length <= 0)
                     continue;
 
-                var clip = new AnimationClip();
+                var clips = new AnimationClip[recorders.Length];
+                for (int i = 0; i < recorders.Length; i++)
+                {
+                    clips[i] = new AnimationClip();
 
-                ars.fileNameGenerator.CreateDirectory(session);
+                    ars.fileNameGenerator.CreateDirectory(session);
 
-                var absolutePath = FileNameGenerator.SanitizePath(ars.fileNameGenerator.BuildAbsolutePath(session));
-                var clipName = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
-                
-                //AssetDatabase.CreateAsset(clip, clipName);
-#if UNITY_2018_3_OR_NEWER
-                aInput.gameObjectRecorder.SaveToClip(clip, ars.frameRate);
+                    var absolutePath = FileNameGenerator.SanitizePath(ars.fileNameGenerator.BuildAbsolutePath(session));
+                    var clipName = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
+
+                    //AssetDatabase.CreateAsset(clip, clipName);
+    #if UNITY_2018_3_OR_NEWER
+                        recorders[i].SaveToClip(clips[i], ars.frameRate);
 #else
-                aInput.gameObjectRecorder.SaveToClip(clip);
+                        recorder.SaveToClip(clip);
 #endif
-                var root = ((AnimationInputSettings)aInput.settings).gameObject;
-                clip.name = "recorded_clip";
-                clip.legacy = true;
-                Animation animator = root.GetComponent<Animation>();
-                bool hasAnimComponent = true;
-                if (!animator)
-                {
-                    animator = root.AddComponent<Animation>();
-                    hasAnimComponent = false;
-                }
+                    var root = gameObjects[i];
+                    clips[i].name = "recorded_clip";
+                    clips[i].legacy = true;
+                    Animation animator = root.GetComponent<Animation>();
+                    bool hasAnimComponent = true;
+                    if (!animator)
+                    {
+                        animator = root.AddComponent<Animation>();
+                        hasAnimComponent = false;
+                    }
 
-                AnimationClip[] prevAnimClips = null;
-                if (hasAnimComponent)
-                {
-                    prevAnimClips = AnimationUtility.GetAnimationClips(root);
-                }
+                    AnimationClip[] prevAnimClips = null;
+                    if (hasAnimComponent)
+                    {
+                        prevAnimClips = AnimationUtility.GetAnimationClips(root);
+                    }
 
-                AnimationUtility.SetAnimationClips(animator, new AnimationClip[] { clip });
-                var exportSettings = new ExportModelSettingsSerialize();
-                var toInclude = ExportSettings.Include.ModelAndAnim;
-                if (!ars.ExportGeometry)
-                {
-                    toInclude = ExportSettings.Include.Anim;
-                } 
-                exportSettings.SetModelAnimIncludeOption(toInclude);
-                ModelExporter.ExportObject(clipName, root, exportSettings);
+                    AnimationUtility.SetAnimationClips(animator, new AnimationClip[] { clips[i] });
+                    var exportSettings = new ExportModelSettingsSerialize();
+                    var toInclude = ExportSettings.Include.ModelAndAnim;
+                    if (!ars.ExportGeometry)
+                    {
+                        toInclude = ExportSettings.Include.Anim;
+                    } 
+                    exportSettings.SetModelAnimIncludeOption(toInclude);
+                    ModelExporter.ExportObject(clipName, root, exportSettings);
 
 
-                if (hasAnimComponent)
-                {
-                    AnimationUtility.SetAnimationClips(animator, prevAnimClips);
+                    if (hasAnimComponent)
+                    {
+                        AnimationUtility.SetAnimationClips(animator, prevAnimClips);
+                    }
+                    else
+                    {
+                        Object.DestroyImmediate(animator);
+                    }
+                    recorders[i].ResetRecording();
                 }
-                else
-                {
-                    Object.DestroyImmediate(animator);
-                }
-                aInput.gameObjectRecorder.ResetRecording();
             }
             base.EndRecording(session);
         }
