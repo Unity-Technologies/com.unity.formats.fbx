@@ -22,9 +22,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        [SerializeField] FbxInputSettings m_AnimationInputSettings = new FbxInputSettings();
+        [SerializeField] AnimationInputSettings m_AnimationInputSettings = new AnimationInputSettings();
 
-        public FbxInputSettings animationInputSettings
+        public AnimationInputSettings animationInputSettings
         {
             get { return m_AnimationInputSettings; }
             set { m_AnimationInputSettings = value; }
@@ -32,26 +32,26 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public FbxRecorderSettings()
         {
-            //var goWildcard = DefaultWildcard.GeneratePattern("GameObject");
+            var goWildcard = DefaultWildcard.GeneratePattern("GameObject");
 
-            //fileNameGenerator.AddWildcard(goWildcard, GameObjectNameResolver);
+            fileNameGenerator.AddWildcard(goWildcard, GameObjectNameResolver);
             fileNameGenerator.AddWildcard(DefaultWildcard.GeneratePattern("GameObjectScene"), GameObjectSceneNameResolver);
 
             fileNameGenerator.forceAssetsFolder = true;
             fileNameGenerator.root = OutputPath.Root.AssetsFolder;
-            fileNameGenerator.fileName = "animation_" /*+ goWildcard*/ + "@" + DefaultWildcard.Take;
+            fileNameGenerator.fileName = "animation_" + goWildcard + "_" + DefaultWildcard.Take;
         }
 
         string GameObjectNameResolver(RecordingSession session)
         {
-            var go = m_AnimationInputSettings.gameObjects;
-            return /*go != null ? go[0].name :*/ "None";
+            var go = m_AnimationInputSettings.gameObject;
+            return go != null ? go.name : "None";
         }
 
         string GameObjectSceneNameResolver(RecordingSession session)
         {
-            var go = m_AnimationInputSettings.gameObjects;
-            return go != null && go.Length > 0 ? go[0].scene.name : "None";
+            var go = m_AnimationInputSettings.gameObject;
+            return go != null ? go.scene.name : "None";
         }
 
         public override bool isPlatformSupported
@@ -73,7 +73,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var ok = base.ValidityCheck(errors);
 
-            if (m_AnimationInputSettings.gameObjects == null)
+            if (m_AnimationInputSettings.gameObject == null)
             {
                 ok = false;
                 errors.Add("No input object set");
