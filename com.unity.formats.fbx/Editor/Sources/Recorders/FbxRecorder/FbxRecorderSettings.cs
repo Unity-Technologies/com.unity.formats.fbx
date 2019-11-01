@@ -37,7 +37,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             fileNameGenerator.AddWildcard(goWildcard, GameObjectNameResolver);
             fileNameGenerator.AddWildcard(DefaultWildcard.GeneratePattern("GameObjectScene"), GameObjectSceneNameResolver);
 
-            fileNameGenerator.forceAssetsFolder = true;
+            fileNameGenerator.forceAssetsFolder = false;
             fileNameGenerator.root = OutputPath.Root.AssetsFolder;
             fileNameGenerator.fileName = "animation_" + goWildcard + "_" + DefaultWildcard.Take;
         }
