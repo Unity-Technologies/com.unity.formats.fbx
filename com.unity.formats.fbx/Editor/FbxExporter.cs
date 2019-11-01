@@ -1835,16 +1835,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // configure tangents
                     var lTangent = AnimationUtility.GetKeyLeftTangentMode(uniAnimCurve, keyIndex);
                     var rTangent = AnimationUtility.GetKeyRightTangentMode(uniAnimCurve, keyIndex);
-                    FbxAnimCurveDef.ETangentMode tanMode = FbxAnimCurveDef.ETangentMode.eTangentAuto;
+                    FbxAnimCurveDef.ETangentMode tanMode = FbxAnimCurveDef.ETangentMode.eTangentBreak;
                     FbxAnimCurveDef.EInterpolationType interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationCubic;
                     switch (rTangent)
                     {
-                        case AnimationUtility.TangentMode.Auto:
+                        /*case AnimationUtility.TangentMode.Auto:
                         case AnimationUtility.TangentMode.ClampedAuto:
+                            tanMode = FbxAnimCurveDef.ETangentMode.eTangentAuto;
                             break;
                         case AnimationUtility.TangentMode.Free:
                             tanMode = FbxAnimCurveDef.ETangentMode.eTangentUser;
-                            break;
+                            break;*/
                         case AnimationUtility.TangentMode.Linear:
                             interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationLinear;
                             break;
