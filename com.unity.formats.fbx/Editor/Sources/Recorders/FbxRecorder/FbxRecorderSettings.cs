@@ -34,12 +34,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var goWildcard = DefaultWildcard.GeneratePattern("GameObject");
 
-            fileNameGenerator.AddWildcard(goWildcard, GameObjectNameResolver);
-            fileNameGenerator.AddWildcard(DefaultWildcard.GeneratePattern("GameObjectScene"), GameObjectSceneNameResolver);
+            FileNameGenerator.AddWildcard(goWildcard, GameObjectNameResolver);
+            FileNameGenerator.AddWildcard(DefaultWildcard.GeneratePattern("GameObjectScene"), GameObjectSceneNameResolver);
 
-            fileNameGenerator.forceAssetsFolder = false;
-            fileNameGenerator.root = OutputPath.Root.AssetsFolder;
-            fileNameGenerator.fileName = "animation_" + goWildcard + "_" + DefaultWildcard.Take;
+            FileNameGenerator.ForceAssetsFolder = false;
+            FileNameGenerator.Root = OutputPath.Root.AssetsFolder;
+            FileNameGenerator.FileName = "animation_" + goWildcard + "_" + DefaultWildcard.Take;
         }
 
         string GameObjectNameResolver(RecordingSession session)
@@ -54,7 +54,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return go != null ? go.scene.name : "None";
         }
 
-        public override bool isPlatformSupported
+        public override bool IsPlatformSupported
         {
             get
             {
@@ -64,12 +64,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        public override IEnumerable<RecorderInputSettings> inputsSettings
+        public override IEnumerable<RecorderInputSettings> InputsSettings
         {
             get { yield return m_AnimationInputSettings; }
         }
 
-        internal override bool ValidityCheck(List<string> errors)
+        protected override bool ValidityCheck(List<string> errors)
         {
             var ok = base.ValidityCheck(errors);
 
@@ -92,7 +92,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             m_AnimationInputSettings.ClearExposedReference();
         }
 
-        public override string extension
+        protected override string Extension
         {
             get { return "fbx"; }
         }

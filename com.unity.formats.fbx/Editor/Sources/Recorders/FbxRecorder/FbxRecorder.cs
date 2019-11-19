@@ -9,12 +9,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 {
     class FbxRecorder : GenericRecorder<FbxRecorderSettings>
     {
-        public override void RecordFrame(RecordingSession ctx)
+        protected override void RecordFrame(RecordingSession ctx)
         {
 
         }
 
-        public override void EndRecording(RecordingSession session)
+        protected override void EndRecording(RecordingSession session)
         {
             var ars = (FbxRecorderSettings)session.settings;
 
@@ -23,19 +23,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 var aInput = (AnimationInput)input;
 
-                if (aInput.gameObjectRecorder == null)
+                if (aInput.GameObjectRecorder == null)
                     continue;
 
                 var clip = new AnimationClip();
 
-                ars.fileNameGenerator.CreateDirectory(session);
+                ars.FileNameGenerator.CreateDirectory(session);
 
-                var absolutePath = FileNameGenerator.SanitizePath(ars.fileNameGenerator.BuildAbsolutePath(session));
+                var absolutePath = FileNameGenerator.SanitizePath(ars.FileNameGenerator.BuildAbsolutePath(session));
                 var clipName = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
                 
                 //AssetDatabase.CreateAsset(clip, clipName);
 #if UNITY_2018_3_OR_NEWER
-                aInput.gameObjectRecorder.SaveToClip(clip, ars.frameRate);
+                aInput.GameObjectRecorder.SaveToClip(clip, ars.FrameRate);
 #else
                 aInput.gameObjectRecorder.SaveToClip(clip);
 #endif
@@ -75,7 +75,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     Object.DestroyImmediate(animator);
                 }
-                aInput.gameObjectRecorder.ResetRecording();
+                aInput.GameObjectRecorder.ResetRecording();
             }
             base.EndRecording(session);
         }
