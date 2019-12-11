@@ -170,14 +170,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // The final animation, including the effect of pre-rotation.
             // If we have no curve, assume the node has the correct rotation right now.
             // We need to evaluate since we might only have keys in one of the axes.
-            var unityFinalAnimation = Quaternion.Euler (
+            var unityFinalAnimation = new Vector3 (
                 (x == null) ? eulerRest [0] : x.Evaluate (seconds),
                 (y == null) ? eulerRest [1] : y.Evaluate (seconds),
                 (z == null) ? eulerRest [2] : z.Evaluate (seconds)
             );
 
             // convert the final animation to righthanded coords
-            var finalEuler = ModelExporter.ConvertQuaternionToXYZEuler(unityFinalAnimation);
+            var finalEuler = ModelExporter.ToFbxDouble3(unityFinalAnimation);
 
             return ModelExporter.EulerToQuaternion (new FbxVector4(finalEuler));
         }
@@ -236,10 +236,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 (z == null) ? restRotation[2] : z.Evaluate(seconds),
                 (w == null) ? restRotation[3] : w.Evaluate(seconds));
 
-            // convert the final animation to righthanded coords
-            var finalEuler = ModelExporter.ConvertQuaternionToXYZEuler(fbxFinalAnimation);
-
-            return ModelExporter.EulerToQuaternion (finalEuler);
+            return fbxFinalAnimation;
         }
     }
 
