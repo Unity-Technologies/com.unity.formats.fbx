@@ -43,21 +43,6 @@ namespace FbxExporter.UnitTests
             var b = new Vector3(0,0,1);
             var crossLeft = Vector3.Cross(a,b);
 
-            var afbx = ModelExporter.ConvertToRightHanded(a);
-            var bfbx = ModelExporter.ConvertToRightHanded(b);
-            Assert.AreEqual(ModelExporter.ConvertToRightHanded(crossLeft), bfbx.CrossProduct(afbx));
-
-            // Test scale conversion. Nothing complicated here...
-            var afbxPosition = ModelExporter.ConvertToRightHanded(a, ModelExporter.UnitScaleFactor);
-            Assert.AreEqual(100, afbxPosition.Length());
-
-            // Test rotation conversion.
-            var q = Quaternion.Euler(new Vector3(0, 90, 0));
-            var fbxAngles = ModelExporter.ConvertQuaternionToXYZEuler(q);
-            Assert.AreEqual(fbxAngles.X, 0);
-            Assert.That(fbxAngles.Y, Is.InRange(-90.001, -89.999));
-            Assert.AreEqual(fbxAngles.Z, 0);
-
             Assert.That(ModelExporter.DefaultMaterial);
 
             // Test non-static functions.

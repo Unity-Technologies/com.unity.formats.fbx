@@ -1959,7 +1959,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         internal class UnityToMayaConvertSceneHelper
         {
             bool convertDistance = false;
-            bool convertLtoR = false;
             bool convertToRadian = false;
 
             float unitScaleFactor = 1f;
