@@ -1191,6 +1191,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Can't just set the rotation order to ZXY on export as Maya incorrectly imports the
             // rotation. Appears to first convert to XYZ rotation then set rotation order to ZXY.
             fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
+            fbxNode.SetRotationActive(true);
 
             UnityEngine.Vector3 unityTranslate;
             FbxDouble3 fbxRotate;
@@ -3346,7 +3347,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // https://forums.autodesk.com/t5/fbx-forum/get-confused-with-fbxaxissystem-convertscene/td-p/4265472
                     fbxSettings.SetAxisSystem (new FbxAxisSystem(
                         FbxAxisSystem.EUpVector.eYAxis,
-                        (FbxAxisSystem.EFrontVector)(-((int)FbxAxisSystem.EFrontVector.eParityOdd)),
+                        FbxAxisSystem.EFrontVector.eParityOdd,
                         FbxAxisSystem.ECoordSystem.eLeftHanded));
 
                     // export set of object
