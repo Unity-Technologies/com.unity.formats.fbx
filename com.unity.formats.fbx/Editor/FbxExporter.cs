@@ -829,14 +829,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 switch (topology) {
                     case MeshTopology.Triangles:
                         polySize = 3;
-                        // flip winding order so that Maya and Unity import it properly
-                        //vertOrder = new int[] { 0, 2, 1 };
                         vertOrder = new int[] { 0, 1, 2 };
                         break;
                     case MeshTopology.Quads:
                         polySize = 4;
-                        // flip winding order so that Maya and Unity import it properly
-                        //vertOrder = new int[] { 0, 3, 2, 1 };
                         vertOrder = new int[] { 0, 1, 2, 3 };
                         break;
                     case MeshTopology.Lines:
@@ -1185,11 +1181,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         internal bool ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, Vector3 newCenter, TransformExportType exportType)
         {
             // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
-            // This causes issues when converting euler to quaternion, causing the final
-            // rotation to be slighlty off.
-            // Fixed by exporting the rotations as eulers with XYZ rotation order.
-            // Can't just set the rotation order to ZXY on export as Maya incorrectly imports the
-            // rotation. Appears to first convert to XYZ rotation then set rotation order to ZXY.
+            // Also, DeepConvert does not convert the rotation order (assumes XYZ), unless RotationActive is true.
             fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
             fbxNode.SetRotationActive(true);
 
