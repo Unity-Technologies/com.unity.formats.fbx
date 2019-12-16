@@ -1160,21 +1160,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="euler">Euler.</param>
         internal static FbxQuaternion EulerToQuaternion(FbxVector4 euler)
         {
+            var unityQuat = Quaternion.Euler(new Vector3((float)euler.X, (float)euler.Y, (float)euler.Z));
+            return new FbxQuaternion(unityQuat.x, unityQuat.y, unityQuat.z, unityQuat.w);
+        }
+
+        internal static FbxQuaternion EulerToQuaternionXYZ(FbxVector4 euler)
+        {
             FbxAMatrix m = new FbxAMatrix ();
             m.SetR (euler);
             return m.GetQ ();
-        }
-
-        /// <summary>
-        /// Quaternion to euler without axis conversion.
-        /// </summary>
-        /// <returns>a euler.</returns>
-        /// <param name="quat">Quaternion.</param>
-        internal static FbxVector4 QuaternionToEuler(FbxQuaternion quat)
-        {
-            FbxAMatrix m = new FbxAMatrix ();
-            m.SetQ (quat);
-            return m.GetR ();
         }
 
         // get a fbxNode's global default position.
@@ -2715,6 +2709,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         return false;
                     }
 
+                    // Rotation order and rotation active must be set before setting the transform, otherwise
+                    // values may change if setting the rotation order afterwards.
+                    if (!fbxNode.GetRotationActive())
+                    {
+                        fbxNode.SetRotationOrder(FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
+                        fbxNode.SetRotationActive(true);
+                    }
                     ExportBoneTransform(fbxNode, fbxScene, bone.transform, boneInfo);
                 }
             }
@@ -3336,10 +3337,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // The Maya axis system has Y up, Z forward, X to the left (right handed system with odd parity).
                     // We need to export right-handed for Maya because ConvertScene can't switch handedness:
                     // https://forums.autodesk.com/t5/fbx-forum/get-confused-with-fbxaxissystem-convertscene/td-p/4265472
-                    fbxSettings.SetAxisSystem (new FbxAxisSystem(
+                    var unityAxisSystem = new FbxAxisSystem(
                         FbxAxisSystem.EUpVector.eYAxis,
                         FbxAxisSystem.EFrontVector.eParityOdd,
-                        FbxAxisSystem.ECoordSystem.eLeftHanded));
+                        FbxAxisSystem.ECoordSystem.eLeftHanded);
+                    fbxSettings.SetAxisSystem (unityAxisSystem);
 
                     // export set of object
                     FbxNode fbxRootNode = fbxScene.GetRootNode ();

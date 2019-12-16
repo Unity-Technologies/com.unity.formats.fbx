@@ -54,7 +54,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 : new FbxVector4();
 
             // Get the inverse of the prerotation
-            var fbxPreRotationInverse = ModelExporter.EulerToQuaternion (fbxPreRotationEuler);
+            var fbxPreRotationInverse = ModelExporter.EulerToQuaternionXYZ (fbxPreRotationEuler);
             fbxPreRotationInverse.Inverse();
 
             // Find when we have keys set.
@@ -76,10 +76,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 //      then animation.
                 var fbxFinalQuat = fbxPreRotationInverse * fbxFinalAnimation;
 
+                var finalUnityQuat = new Quaternion((float)fbxFinalQuat.X, (float)fbxFinalQuat.Y, (float)fbxFinalQuat.Z, (float)fbxFinalQuat.W);
+
                 // Store the key so we can sort them later.
                 Key key = new Key();
                 key.time = FbxTime.FromSecondDouble(seconds);
-                key.euler = ModelExporter.QuaternionToEuler (fbxFinalQuat);
+                key.euler = ModelExporter.ConvertToFbxVector4(finalUnityQuat.eulerAngles);
                 keys[i++] = key;
             }
 
