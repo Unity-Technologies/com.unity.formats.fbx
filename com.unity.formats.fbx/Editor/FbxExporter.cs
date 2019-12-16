@@ -1158,9 +1158,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns>a quaternion.</returns>
         /// <param name="euler">Euler.</param>
-        internal static FbxQuaternion EulerToQuaternion(FbxVector4 euler)
+        internal static FbxQuaternion EulerToQuaternionZXY(Vector3 euler)
         {
-            var unityQuat = Quaternion.Euler(new Vector3((float)euler.X, (float)euler.Y, (float)euler.Z));
+            var unityQuat = Quaternion.Euler(euler);
             return new FbxQuaternion(unityQuat.x, unityQuat.y, unityQuat.z, unityQuat.w);
         }
 

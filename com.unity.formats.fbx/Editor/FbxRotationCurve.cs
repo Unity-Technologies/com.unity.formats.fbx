@@ -123,9 +123,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Uni-35616 unroll curves to preserve continuous rotations
             var fbxCurveNode = fbxNode.LclRotation.GetCurveNode(fbxAnimLayer, false /*should already exist*/);
 
-            FbxAnimCurveFilterUnroll fbxAnimUnrollFilter = new FbxAnimCurveFilterUnroll();
-            fbxAnimUnrollFilter.Apply(fbxCurveNode);
-
             if (Verbose) {
                 Debug.Log("Exported rotation animation for " + fbxNode.GetName());
             }
@@ -179,9 +176,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             );
 
             // convert the final animation to righthanded coords
-            var finalEuler = ModelExporter.ToFbxDouble3(unityFinalAnimation);
 
-            return ModelExporter.EulerToQuaternion (new FbxVector4(finalEuler));
+            return ModelExporter.EulerToQuaternionZXY (unityFinalAnimation);
         }
     }
 
