@@ -88,6 +88,32 @@ namespace FbxExporter.UnitTests
                 ModelExporter.ExportObject(GetRandomFbxFilePath(), character);
                 Assert.AreEqual(meshCount, Object.FindObjectsOfType<Mesh>().Length);
             }
+
+            // Test euler to quaternion conversion
+            {
+                // EulerToQuaternionZXY
+                var v = new Vector3(50, 45, 190);
+                var quat = ModelExporter.EulerToQuaternionZXY(v);
+                var unityQuat = Quaternion.Euler(v);
+                Assert.That((float)quat.X, Is.EqualTo(unityQuat.x));
+                Assert.That((float)quat.Y, Is.EqualTo(unityQuat.y));
+                Assert.That((float)quat.Z, Is.EqualTo(unityQuat.z));
+                Assert.That((float)quat.W, Is.EqualTo(unityQuat.w));
+
+                // EulerToQuaternionXYZ
+                var fbxV = new FbxVector4(v.x, v.y, v.z);
+                var xyzQuat = ModelExporter.EulerToQuaternionXYZ(fbxV);
+
+                // get the vector from the quaternion
+                FbxAMatrix m = new FbxAMatrix();
+                m.SetR(fbxV);
+                var actualQuat = m.GetQ();
+                
+                // since this quaternion is XYZ instead of ZXY, it should not match the quaternion
+                // created with EulerToQuaternionZXY
+                Assert.That(xyzQuat, Is.Not.EqualTo(quat));
+                Assert.That(xyzQuat, Is.EqualTo(actualQuat));
+            }
         }
 
         [Test]
