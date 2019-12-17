@@ -1148,22 +1148,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return new FbxDouble3(v.X, v.Y, v.Z);
         }
 
-        internal static FbxVector4 ToFbxVector4(FbxDouble3 v)
-        {
-            return new FbxVector4(v.X, v.Y, v.Z);
-        }
-
         /// <summary>
-        /// Euler to quaternion without axis conversion.
+        /// Euler (roll/pitch/yaw (ZXY rotation order) to quaternion.
         /// </summary>
         /// <returns>a quaternion.</returns>
-        /// <param name="euler">Euler.</param>
+        /// <param name="euler">ZXY Euler.</param>
         internal static FbxQuaternion EulerToQuaternionZXY(Vector3 euler)
         {
             var unityQuat = Quaternion.Euler(euler);
             return new FbxQuaternion(unityQuat.x, unityQuat.y, unityQuat.z, unityQuat.w);
         }
 
+        /// <summary>
+        /// Euler X/Y/Z rotation order to quaternion.
+        /// </summary>
+        /// <param name="euler">XYZ Euler.</param>
+        /// <returns>a quaternion</returns>
         internal static FbxQuaternion EulerToQuaternionXYZ(FbxVector4 euler)
         {
             FbxAMatrix m = new FbxAMatrix ();
@@ -1174,11 +1174,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         // get a fbxNode's global default position.
         internal bool ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, Vector3 newCenter, TransformExportType exportType)
         {
-            // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
-            // Also, DeepConvert does not convert the rotation order (assumes XYZ), unless RotationActive is true.
-            fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
-            fbxNode.SetRotationActive(true);
-
             UnityEngine.Vector3 unityTranslate;
             FbxDouble3 fbxRotate;
             UnityEngine.Vector3 unityScale;
@@ -1638,7 +1633,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var fbxTranslationOffset = ConvertToFbxVector4(uniTranslationOffset, UnitScaleFactor);
                 fbxParentConstraint.SetTranslationOffset(uniSource.node, fbxTranslationOffset);
                     
-                var fbxRotationOffset = ToFbxVector4(ToFbxDouble3(uniRotationOffset));
+                var fbxRotationOffset = ConvertToFbxVector4(uniRotationOffset);
                 fbxParentConstraint.SetRotationOffset(uniSource.node, fbxRotationOffset);
             }
             ExportCommonConstraintProperties(uniParentConstraint, fbxParentConstraint, fbxNode);
@@ -2500,6 +2495,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Use RSrs as the scaling inheritance instead.
             fbxNode.SetTransformationInheritType(FbxTransform.EInheritType.eInheritRSrs);
 
+            // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
+            // Also, DeepConvert does not convert the rotation order (assumes XYZ), unless RotationActive is true.
+            fbxNode.SetRotationOrder(FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
+            fbxNode.SetRotationActive(true);
+
             MapUnityObjectToFbxNode[unityGo] = fbxNode;
 
             return fbxNode;
@@ -2707,14 +2707,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     {
                         // cancel silently
                         return false;
-                    }
-
-                    // Rotation order and rotation active must be set before setting the transform, otherwise
-                    // values may change if setting the rotation order afterwards.
-                    if (!fbxNode.GetRotationActive())
-                    {
-                        fbxNode.SetRotationOrder(FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
-                        fbxNode.SetRotationActive(true);
                     }
                     ExportBoneTransform(fbxNode, fbxScene, bone.transform, boneInfo);
                 }
@@ -3334,13 +3326,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     fbxSettings.SetSystemUnit (FbxSystemUnit.cm);
 
                     // The Unity axis system has Y up, Z forward, X to the right (left handed system with odd parity).
-                    // The Maya axis system has Y up, Z forward, X to the left (right handed system with odd parity).
-                    // We need to export right-handed for Maya because ConvertScene can't switch handedness:
-                    // https://forums.autodesk.com/t5/fbx-forum/get-confused-with-fbxaxissystem-convertscene/td-p/4265472
-                    var unityAxisSystem = new FbxAxisSystem(
-                        FbxAxisSystem.EUpVector.eYAxis,
-                        FbxAxisSystem.EFrontVector.eParityOdd,
-                        FbxAxisSystem.ECoordSystem.eLeftHanded);
+                    // DirectX has the same axis system, so use this constant.
+                    var unityAxisSystem = FbxAxisSystem.DirectX;
                     fbxSettings.SetAxisSystem (unityAxisSystem);
 
                     // export set of object
@@ -3425,6 +3412,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // Set the scene's default camera.
                     SetDefaultCamera (fbxScene);
 
+                    // The Maya axis system has Y up, Z forward, X to the left (right handed system with odd parity).
+                    // We need to export right-handed for Maya because ConvertScene (used by Maya and Max importers) can't switch handedness:
+                    // https://forums.autodesk.com/t5/fbx-forum/get-confused-with-fbxaxissystem-convertscene/td-p/4265472
+                    // This needs to be done last so that everything is converted properly.
                     FbxAxisSystem.MayaYUp.DeepConvertScene(fbxScene);
 
                     // Export the scene to the file.
