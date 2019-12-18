@@ -1763,7 +1763,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // configure tangents
                     var lTangent = AnimationUtility.GetKeyLeftTangentMode(uniAnimCurve, keyIndex);
                     var rTangent = AnimationUtility.GetKeyRightTangentMode(uniAnimCurve, keyIndex);
+
+                    // Always set tangent mode to eTangentBreak, as other modes are not handled the same in FBX as in
+                    // Unity, thus leading to discrepancies in animation curves.
                     FbxAnimCurveDef.ETangentMode tanMode = FbxAnimCurveDef.ETangentMode.eTangentBreak;
+
+                    // Default to cubic interpolation, which is the default for KeySet
                     FbxAnimCurveDef.EInterpolationType interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationCubic;
                     switch (rTangent)
                     {
