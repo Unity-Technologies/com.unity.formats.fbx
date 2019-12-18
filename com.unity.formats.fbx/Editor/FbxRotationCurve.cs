@@ -58,10 +58,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             fbxPreRotationInverse.Inverse();
 
             // Find when we have keys set.
-            var keyTimes = 
-                (UnityEditor.Formats.Fbx.Exporter.ModelExporter.ExportSettings.BakeAnimationProperty) 
-                ? ModelExporter.GetSampleTimes(GetCurves(), SampleRate) 
-                : ModelExporter.GetKeyTimes(GetCurves());
+            var keyTimes = ModelExporter.GetSampleTimes(GetCurves(), SampleRate);
 
             // Convert to the Key type.
             var keys = new Key[keyTimes.Count];
@@ -119,9 +116,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     fbxAnimCurveZ.KeySet(i, key.time, (float)key.euler.Z);
                 }
             }
-
-            // Uni-35616 unroll curves to preserve continuous rotations
-            var fbxCurveNode = fbxNode.LclRotation.GetCurveNode(fbxAnimLayer, false /*should already exist*/);
 
             if (Verbose) {
                 Debug.Log("Exported rotation animation for " + fbxNode.GetName());

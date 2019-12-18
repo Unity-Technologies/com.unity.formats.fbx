@@ -1745,23 +1745,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// NOTE : This is a work in progress (WIP). We only export the key time and value on
         /// a Cubic curve using the default tangents.
         /// </summary>
-        internal void ExportAnimationKeys (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve, 
+        internal static void ExportAnimationKeys (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve, 
             UnityToMayaConvertSceneHelper convertSceneHelper, string uniPropertyName)
         {
-            // TODO: complete the mapping between key tangents modes Unity and FBX
-            Dictionary<AnimationUtility.TangentMode, List<FbxAnimCurveDef.ETangentMode>> MapUnityKeyTangentModeToFBX =
-                new Dictionary<AnimationUtility.TangentMode, List<FbxAnimCurveDef.ETangentMode>>
-            {
-                //TangeantAuto|GenericTimeIndependent|GenericClampProgressive
-                {AnimationUtility.TangentMode.Free, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericClampProgressive}},
-
-                //TangeantAuto|GenericTimeIndependent
-                {AnimationUtility.TangentMode.Auto, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericTimeIndependent}},
-
-                //TangeantAuto|GenericTimeIndependent|GenericClampProgressive
-                {AnimationUtility.TangentMode.ClampedAuto, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericClampProgressive}},
-            };
-
             // Copy Unity AnimCurve to FBX AnimCurve.
             // NOTE: only cubic keys are supported by the FbxImporter
             using (new FbxAnimCurveModifyHelper(new List<FbxAnimCurve>{fbxAnimCurve}))
@@ -1781,13 +1767,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     FbxAnimCurveDef.EInterpolationType interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationCubic;
                     switch (rTangent)
                     {
-                        /*case AnimationUtility.TangentMode.Auto:
-                        case AnimationUtility.TangentMode.ClampedAuto:
-                            tanMode = FbxAnimCurveDef.ETangentMode.eTangentAuto;
-                            break;
-                        case AnimationUtility.TangentMode.Free:
-                            tanMode = FbxAnimCurveDef.ETangentMode.eTangentUser;
-                            break;*/
                         case AnimationUtility.TangentMode.Linear:
                             interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationLinear;
                             break;
@@ -1799,21 +1778,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
                             break;
                     }
 
-                    float tangentMultiplier = 100;
+                    float tangentMultiplier = UnitScaleFactor;
                     if(uniPropertyName.StartsWith("localEulerAnglesRaw"))
                     {
                         tangentMultiplier = 1;
-                    }
-                    if(uniPropertyName == "m_LocalPosition.x" || uniPropertyName == "localEulerAnglesRaw.y" || uniPropertyName == "localEulerAnglesRaw.z")
-                    {
-                        tangentMultiplier *= -1; // have to negate x when switching between Unity->Maya axes
                     }
 
                     fbxAnimCurve.KeySet (fbxKeyIndex, 
                         fbxTime, 
                         convertSceneHelper.Convert(uniKeyFrame.value),
-                        interpMode,//FbxAnimCurveDef.EInterpolationType.eInterpolationCubic,
-                        tanMode,//FbxAnimCurveDef.ETangentMode.eTangentBreak,
+                        interpMode,
+                        tanMode,
                         tangentMultiplier*uniKeyFrame.outTangent,
                         keyIndex < uniAnimCurve.length -1 ? tangentMultiplier*uniAnimCurve[keyIndex+1].inTangent : 0,
                         FbxAnimCurveDef.EWeightedMode.eWeightedAll,
@@ -1822,16 +1797,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     );
 
                     Debug.LogWarning(uniPropertyName + ": tangents: " + uniKeyFrame.inTangent + ", " + uniKeyFrame.outTangent + ", weights: " + uniKeyFrame.inWeight + ", " + uniKeyFrame.outWeight);
-
-                    if (!(MapUnityKeyTangentModeToFBX.ContainsKey(lTangent) && MapUnityKeyTangentModeToFBX.ContainsKey(rTangent)))
-                    {
-                        Debug.LogWarning(string.Format("key[{0}] missing tangent mapping ({1},{2})", keyIndex, lTangent.ToString(), rTangent.ToString()));
-                        continue;
-                    }
-
-                    // TODO : handle broken tangents
-
-                    // TODO : set key tangents
                 }
             }
         }
@@ -1975,13 +1940,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // AxisSystem (LeftHanded to RightHanded) and FBX's default units 
                 // (Meters to Centimetres)
                 var convertSceneHelper = new UnityToMayaConvertSceneHelper (uniPropertyName);
-
-                // TODO: we'll resample the curve so we don't have to 
-                // configure tangents
+                
                 /*if (ModelExporter.ExportSettings.BakeAnimationProperty) {
                     ExportAnimationSamples (uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
                 } else {*/
-                    ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper, uniPropertyName);
+                ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper, uniPropertyName);
                // }
             }
         }
@@ -2158,12 +2121,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         continue;
                     } 
 
-                    /*index = EulerCurve.GetEulerIndex (propertyName);
-                    if (index >= 0) {
+                    // If this is an euler curve with a prerotation, then need to sample animations to remove the prerotation.
+                    // Otherwise can export normally with tangents.
+                    index = EulerCurve.GetEulerIndex (propertyName);
+                    if (index >= 0 && fbxNode.GetPreRotation(FbxNode.EPivotSet.eSourcePivot).Distance(new FbxVector4()) > 0) {
                         RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
                         rotCurve.SetCurve (index, uniAnimCurve);
                         continue;
-                    }*/
+                    }
 
                     // simple property (e.g. intensity), export right away
                     ExportAnimationCurve (fbxNode, uniAnimCurve, uniAnimClip.frameRate, 
