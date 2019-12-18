@@ -1857,7 +1857,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
 
                     float tangentMultiplier = 100;
-                    if(uniPropertyName == "m_LocalPosition.x")
+                    if(uniPropertyName.StartsWith("localEulerAnglesRaw"))
+                    {
+                        tangentMultiplier = 1;
+                    }
+                    if(uniPropertyName == "m_LocalPosition.x" || uniPropertyName == "localEulerAnglesRaw.y" || uniPropertyName == "localEulerAnglesRaw.z")
                     {
                         tangentMultiplier *= -1; // have to negate x when switching between Unity->Maya axes
                     }
@@ -2052,8 +2056,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 bool partT = uniPropertyName.StartsWith("m_LocalPosition.", cc) || uniPropertyName.StartsWith("m_TranslationOffset", cc);
                 bool partTx = uniPropertyName.EndsWith("Position.x", cc) || uniPropertyName.EndsWith("T.x", cc) || (uniPropertyName.StartsWith("m_TranslationOffset") && uniPropertyName.EndsWith(".x", cc));
                 bool partRyz = uniPropertyName.StartsWith("m_RotationOffset", cc) && (uniPropertyName.EndsWith(".y") || uniPropertyName.EndsWith(".z"));
+                partRyz = partRyz || (uniPropertyName.StartsWith("localEulerAnglesRaw", cc) && (uniPropertyName.EndsWith(".y") || uniPropertyName.EndsWith(".z")));
+                //bool partR = uniPropertyName.StartsWith("localEulerAnglesRaw.", cc);
 
                 convertLtoR |= partTx;
+                convertLtoR |= partRyz;
                 convertLtoR |= partRyz;
 
                 convertDistance |= partT;
@@ -2218,12 +2225,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         continue;
                     } 
 
-                    index = EulerCurve.GetEulerIndex (propertyName);
+                    /*index = EulerCurve.GetEulerIndex (propertyName);
                     if (index >= 0) {
                         RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
                         rotCurve.SetCurve (index, uniAnimCurve);
                         continue;
-                    }
+                    }*/
 
                     // simple property (e.g. intensity), export right away
                     ExportAnimationCurve (fbxNode, uniAnimCurve, uniAnimClip.frameRate, 
