@@ -1787,10 +1787,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         convertSceneHelper.Convert(uniKeyFrame.value),
                         interpMode,
                         tanMode,
+                        // value of right slope
                         convertSceneHelper.Convert(uniKeyFrame.outTangent),
+                        // value of next left slope
                         keyIndex < uniAnimCurve.length -1 ? convertSceneHelper.Convert(uniAnimCurve[keyIndex+1].inTangent) : 0,
                         FbxAnimCurveDef.EWeightedMode.eWeightedAll,
+                        // weight for right slope
                         uniKeyFrame.outWeight,
+                        // weight for next left slope
                         keyIndex < uniAnimCurve.length - 1 ? uniAnimCurve[keyIndex + 1].inWeight : 0
                     );
                 }
