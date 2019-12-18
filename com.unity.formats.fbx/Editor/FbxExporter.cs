@@ -1715,6 +1715,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 lastTime = System.Math.Max(lastTime, ac[ac.length-1].time);
             }
 
+            // if these values didn't get set there were no valid anim curves,
+            // so don't return any keys
+            if(firstTime == double.MaxValue || lastTime == double.MinValue)
+            {
+                return keyTimes;
+            }
+
             int firstframe = (int)System.Math.Floor(firstTime * sampleRate);
             int lastframe = (int)System.Math.Ceiling(lastTime * sampleRate);
             for (int i = firstframe; i <= lastframe; i++) {
