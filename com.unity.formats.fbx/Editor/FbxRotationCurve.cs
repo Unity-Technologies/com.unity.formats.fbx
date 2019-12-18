@@ -54,7 +54,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 : new FbxVector4();
 
             // Get the inverse of the prerotation
-            var fbxPreRotationInverse = ModelExporter.EulerToQuaternion (fbxPreRotationEuler);
+            var fbxPreRotationInverse = ModelExporter.EulerToQuaternionXYZ (fbxPreRotationEuler);
             fbxPreRotationInverse.Inverse();
 
             // Find when we have keys set.
@@ -76,10 +76,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 //      then animation.
                 var fbxFinalQuat = fbxPreRotationInverse * fbxFinalAnimation;
 
+                var finalUnityQuat = new Quaternion((float)fbxFinalQuat.X, (float)fbxFinalQuat.Y, (float)fbxFinalQuat.Z, (float)fbxFinalQuat.W);
+
                 // Store the key so we can sort them later.
                 Key key = new Key();
                 key.time = FbxTime.FromSecondDouble(seconds);
-                key.euler = ModelExporter.QuaternionToEuler (fbxFinalQuat);
+                key.euler = ModelExporter.ConvertToFbxVector4(finalUnityQuat.eulerAngles);
                 keys[i++] = key;
             }
 
@@ -120,9 +122,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // Uni-35616 unroll curves to preserve continuous rotations
             var fbxCurveNode = fbxNode.LclRotation.GetCurveNode(fbxAnimLayer, false /*should already exist*/);
-
-            FbxAnimCurveFilterUnroll fbxAnimUnrollFilter = new FbxAnimCurveFilterUnroll();
-            fbxAnimUnrollFilter.Apply(fbxCurveNode);
 
             if (Verbose) {
                 Debug.Log("Exported rotation animation for " + fbxNode.GetName());
@@ -170,16 +169,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // The final animation, including the effect of pre-rotation.
             // If we have no curve, assume the node has the correct rotation right now.
             // We need to evaluate since we might only have keys in one of the axes.
-            var unityFinalAnimation = Quaternion.Euler (
+            var unityFinalAnimation = new Vector3 (
                 (x == null) ? eulerRest [0] : x.Evaluate (seconds),
                 (y == null) ? eulerRest [1] : y.Evaluate (seconds),
                 (z == null) ? eulerRest [2] : z.Evaluate (seconds)
             );
 
             // convert the final animation to righthanded coords
-            var finalEuler = ModelExporter.ConvertQuaternionToXYZEuler(unityFinalAnimation);
 
-            return ModelExporter.EulerToQuaternion (new FbxVector4(finalEuler));
+            return ModelExporter.EulerToQuaternionZXY (unityFinalAnimation);
         }
     }
 
@@ -236,10 +234,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 (z == null) ? restRotation[2] : z.Evaluate(seconds),
                 (w == null) ? restRotation[3] : w.Evaluate(seconds));
 
-            // convert the final animation to righthanded coords
-            var finalEuler = ModelExporter.ConvertQuaternionToXYZEuler(fbxFinalAnimation);
-
-            return ModelExporter.EulerToQuaternion (finalEuler);
+            return fbxFinalAnimation;
         }
     }
 

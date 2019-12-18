@@ -329,7 +329,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     for (int n = 0; n < unmergedTriangles.Length; n++) {
                         int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (ConvertToRightHanded (mesh.Normals [unityTriangle]));
+                        fbxElementArray.Add (ConvertToFbxVector4 (mesh.Normals [unityTriangle]));
                     }
 
                     fbxLayer.SetNormals (fbxLayerElement);
@@ -348,7 +348,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     for (int n = 0; n < unmergedTriangles.Length; n++) {
                         int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (ConvertToRightHanded (mesh.Binormals [unityTriangle]));
+                        fbxElementArray.Add (ConvertToFbxVector4 (mesh.Binormals [unityTriangle]));
                     }
                     fbxLayer.SetBinormals (fbxLayerElement);
                 }
@@ -366,7 +366,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     for (int n = 0; n < unmergedTriangles.Length; n++) {
                         int unityTriangle = unmergedTriangles [n];
-                        fbxElementArray.Add (ConvertToRightHanded (
+                        fbxElementArray.Add (ConvertToFbxVector4 (
                             new Vector3 (
                                 mesh.Tangents [unityTriangle] [0],
                                 mesh.Tangents [unityTriangle] [1],
@@ -507,7 +507,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     {
                         int ni = ControlPointToIndex[basePoints[vi]];
                         var v = basePoints[vi] + deltaPoints[vi];
-                        fbxShape.SetControlPointAt(ConvertToRightHanded(v, UnitScaleFactor), ni);
+                        fbxShape.SetControlPointAt(ConvertToFbxVector4(v, UnitScaleFactor), ni);
                     }
 
                     // normals
@@ -522,7 +522,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         {
                             int vi = unmergedTriangles[ii];
                             var n = baseNormals[vi] + deltaNormals[vi];
-                            dstNormals.SetAt(ii, ConvertToRightHanded(n));
+                            dstNormals.SetAt(ii, ConvertToFbxVector4(n));
                         }
                     }
 
@@ -538,7 +538,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         {
                             int vi = unmergedTriangles[ii];
                             var t = (Vector3)baseTangents[vi] + deltaTangents[vi];
-                            dstTangents.SetAt(ii, ConvertToRightHanded(t));
+                            dstTangents.SetAt(ii, ConvertToFbxVector4(t));
                         }
                     }
                 }
@@ -555,11 +555,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         ///
         /// Remember you also need to flip the winding order on your polygons.
         /// </summary>
-        internal static FbxVector4 ConvertToRightHanded(Vector3 leftHandedVector, float unitScale = 1f)
+        internal static FbxVector4 ConvertToFbxVector4(Vector3 leftHandedVector, float unitScale = 1f)
         {
             // negating the x component of the vector converts it from left to right handed coordinates
             return unitScale * new FbxVector4 (
-                -leftHandedVector[0],
+                leftHandedVector[0],
                 leftHandedVector[1],
                 leftHandedVector[2]);
         }
@@ -813,7 +813,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 foreach (var kvp in ControlPointToIndex) {
                     var controlPoint = kvp.Key;
                     var index = kvp.Value;
-                    fbxMesh.SetControlPointAt (ConvertToRightHanded(controlPoint, UnitScaleFactor), index);
+                    fbxMesh.SetControlPointAt (ConvertToFbxVector4(controlPoint, UnitScaleFactor), index);
                 }
             }
 
@@ -829,13 +829,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 switch (topology) {
                     case MeshTopology.Triangles:
                         polySize = 3;
-                        // flip winding order so that Maya and Unity import it properly
-                        vertOrder = new int[] { 0, 2, 1 };
+                        vertOrder = new int[] { 0, 1, 2 };
                         break;
                     case MeshTopology.Quads:
                         polySize = 4;
-                        // flip winding order so that Maya and Unity import it properly
-                        vertOrder = new int[] { 0, 3, 2, 1 };
+                        vertOrder = new int[] { 0, 1, 2, 3 };
                         break;
                     case MeshTopology.Lines:
                         throw new System.NotImplementedException();
@@ -1139,39 +1137,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             return true;
         }
-
-        /// <summary>
-        /// Takes a Quaternion and returns a Euler with XYZ rotation order.
-        /// Also converts from left (Unity) to righthanded (Maya) coordinates.
-        /// 
-        /// Note: Cannot simply use the FbxQuaternion.DecomposeSphericalXYZ()
-        ///       function as this returns the angle in spherical coordinates 
-        ///       instead of Euler angles, which Maya does not import properly. 
-        /// </summary>
-        /// <returns>Euler with XYZ rotation order.</returns>
-        internal static FbxDouble3 ConvertQuaternionToXYZEuler(Quaternion q)
-        {
-            FbxQuaternion quat = new FbxQuaternion (q.x, q.y, q.z, q.w);
-            FbxAMatrix m = new FbxAMatrix ();
-            m.SetQ (quat);
-            var vector4 = m.GetR ();
-
-            // Negate the y and z values of the rotation to convert 
-            // from Unity to Maya coordinates (left to righthanded).
-            return new FbxDouble3 (vector4.X, -vector4.Y, -vector4.Z);
-        }
-
-        internal static FbxVector4 ConvertQuaternionToXYZEuler (FbxQuaternion quat)
-        {
-            FbxAMatrix m = new FbxAMatrix ();
-            m.SetQ (quat);
-            var vector4 = m.GetR ();
-
-            // Negate the y and z values of the rotation to convert 
-            // from Unity to Maya coordinates (left to righthanded).
-            return new FbxVector4 (vector4.X, -vector4.Y, -vector4.Z, vector4.W);
-        }
-
+        
         internal static FbxDouble3 ToFbxDouble3(Vector3 v)
         {
             return new FbxDouble3(v.x, v.y, v.z);
@@ -1182,53 +1148,32 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return new FbxDouble3(v.X, v.Y, v.Z);
         }
 
-        internal static FbxVector4 ToFbxVector4(FbxDouble3 v)
+        /// <summary>
+        /// Euler (roll/pitch/yaw (ZXY rotation order) to quaternion.
+        /// </summary>
+        /// <returns>a quaternion.</returns>
+        /// <param name="euler">ZXY Euler.</param>
+        internal static FbxQuaternion EulerToQuaternionZXY(Vector3 euler)
         {
-            return new FbxVector4(v.X, v.Y, v.Z);
-        }
-
-        internal static FbxDouble3 ConvertToRightHandedEuler(Vector3 rot)
-        {
-            rot.y *= -1;
-            rot.z *= -1;
-            return ToFbxDouble3(rot);
+            var unityQuat = Quaternion.Euler(euler);
+            return new FbxQuaternion(unityQuat.x, unityQuat.y, unityQuat.z, unityQuat.w);
         }
 
         /// <summary>
-        /// Euler to quaternion without axis conversion.
+        /// Euler X/Y/Z rotation order to quaternion.
         /// </summary>
-        /// <returns>a quaternion.</returns>
-        /// <param name="euler">Euler.</param>
-        internal static FbxQuaternion EulerToQuaternion(FbxVector4 euler)
+        /// <param name="euler">XYZ Euler.</param>
+        /// <returns>a quaternion</returns>
+        internal static FbxQuaternion EulerToQuaternionXYZ(FbxVector4 euler)
         {
             FbxAMatrix m = new FbxAMatrix ();
             m.SetR (euler);
             return m.GetQ ();
         }
 
-        /// <summary>
-        /// Quaternion to euler without axis conversion.
-        /// </summary>
-        /// <returns>a euler.</returns>
-        /// <param name="quat">Quaternion.</param>
-        internal static FbxVector4 QuaternionToEuler(FbxQuaternion quat)
-        {
-            FbxAMatrix m = new FbxAMatrix ();
-            m.SetQ (quat);
-            return m.GetR ();
-        }
-
         // get a fbxNode's global default position.
         internal bool ExportTransform (UnityEngine.Transform unityTransform, FbxNode fbxNode, Vector3 newCenter, TransformExportType exportType)
         {
-            // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
-            // This causes issues when converting euler to quaternion, causing the final
-            // rotation to be slighlty off.
-            // Fixed by exporting the rotations as eulers with XYZ rotation order.
-            // Can't just set the rotation order to ZXY on export as Maya incorrectly imports the
-            // rotation. Appears to first convert to XYZ rotation then set rotation order to ZXY.
-            fbxNode.SetRotationOrder (FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderXYZ);
-
             UnityEngine.Vector3 unityTranslate;
             FbxDouble3 fbxRotate;
             UnityEngine.Vector3 unityScale;
@@ -1241,18 +1186,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     break;
                 case TransformExportType.Global:
                     unityTranslate = GetRecenteredTranslation(unityTransform, newCenter);
-                    fbxRotate = ConvertQuaternionToXYZEuler(unityTransform.rotation);
+                    fbxRotate = ToFbxDouble3(unityTransform.eulerAngles);
                     unityScale = unityTransform.lossyScale;
                     break;
                 default: /*case TransformExportType.Local*/
                     unityTranslate = unityTransform.localPosition;
-                    fbxRotate = ConvertQuaternionToXYZEuler(unityTransform.localRotation);
+                    fbxRotate = ToFbxDouble3(unityTransform.localEulerAngles);
                     unityScale = unityTransform.localScale;
                     break;
             }
 
             // Transfer transform data from Unity to Fbx
-            var fbxTranslate = ConvertToRightHanded(unityTranslate, UnitScaleFactor);
+            var fbxTranslate = ConvertToFbxVector4(unityTranslate, UnitScaleFactor);
             var fbxScale = new FbxDouble3 (unityScale.x, unityScale.y, unityScale.z);
 
             // set the local position of fbxNode
@@ -1520,11 +1465,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             fbxPosConstraint.AffectY.Set((uniAffectedAxes & Axis.Y) == Axis.Y);
             fbxPosConstraint.AffectZ.Set((uniAffectedAxes & Axis.Z) == Axis.Z);
 
-            var fbxTranslationOffset = ConvertToRightHanded(uniPosConstraint.translationOffset, UnitScaleFactor);
+            var fbxTranslationOffset = ConvertToFbxVector4(uniPosConstraint.translationOffset, UnitScaleFactor);
             fbxPosConstraint.Translation.Set(ToFbxDouble3(fbxTranslationOffset));
 
             // rest position is the position of the fbx node
-            var fbxRestTranslation = ConvertToRightHanded(uniPosConstraint.translationAtRest, UnitScaleFactor);
+            var fbxRestTranslation = ConvertToFbxVector4(uniPosConstraint.translationAtRest, UnitScaleFactor);
             // set the local position of fbxNode
             fbxNode.LclTranslation.Set(ToFbxDouble3(fbxRestTranslation));
             return true;
@@ -1553,13 +1498,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // Not converting rotation offset to XYZ euler as it gives the incorrect result in both Maya and Unity.
             var uniRotationOffset = uniRotConstraint.rotationOffset;
-            var fbxRotationOffset = ConvertToRightHandedEuler(uniRotationOffset);
+            var fbxRotationOffset = ToFbxDouble3(uniRotationOffset);
 
             fbxRotConstraint.Rotation.Set(fbxRotationOffset);
 
             // rest rotation is the rotation of the fbx node
-            var uniRestRotationQuat = Quaternion.Euler(uniRotConstraint.rotationAtRest);
-            var fbxRestRotation = ConvertQuaternionToXYZEuler(uniRestRotationQuat);
+            var fbxRestRotation = ToFbxDouble3(uniRotConstraint.rotationAtRest);
             // set the local rotation of fbxNode
             fbxNode.LclRotation.Set(fbxRestRotation);
             return true;
@@ -1620,12 +1564,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             fbxAimConstraint.AffectZ.Set((uniAffectedAxes & Axis.Z) == Axis.Z);
 
             var uniRotationOffset = uniAimConstraint.rotationOffset;
-            var fbxRotationOffset = ConvertToRightHandedEuler(uniRotationOffset);
+            var fbxRotationOffset = ToFbxDouble3(uniRotationOffset);
             fbxAimConstraint.RotationOffset.Set(fbxRotationOffset);
 
             // rest rotation is the rotation of the fbx node
-            var uniRestRotationQuat = Quaternion.Euler(uniAimConstraint.rotationAtRest);
-            var fbxRestRotation = ConvertQuaternionToXYZEuler(uniRestRotationQuat);
+            var fbxRestRotation = ToFbxDouble3(uniAimConstraint.rotationAtRest);
             // set the local rotation of fbxNode
             fbxNode.LclRotation.Set(fbxRestRotation);
 
@@ -1652,7 +1595,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             fbxAimConstraint.WorldUpType.Set((int)fbxWorldUpType);
                 
-            var uniAimVector = ConvertToRightHanded(uniAimConstraint.aimVector);
+            var uniAimVector = ConvertToFbxVector4(uniAimConstraint.aimVector);
             fbxAimConstraint.AimVector.Set(ToFbxDouble3(uniAimVector));
             fbxAimConstraint.UpVector.Set(ToFbxDouble3(uniAimConstraint.upVector));
             fbxAimConstraint.WorldUpVector.Set(ToFbxDouble3(uniAimConstraint.worldUpVector));
@@ -1687,10 +1630,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 fbxParentConstraint.AddConstraintSource(uniSource.node, uniSource.weight);
                     
-                var fbxTranslationOffset = ConvertToRightHanded(uniTranslationOffset, UnitScaleFactor);
+                var fbxTranslationOffset = ConvertToFbxVector4(uniTranslationOffset, UnitScaleFactor);
                 fbxParentConstraint.SetTranslationOffset(uniSource.node, fbxTranslationOffset);
                     
-                var fbxRotationOffset = ToFbxVector4(ConvertToRightHandedEuler(uniRotationOffset));
+                var fbxRotationOffset = ConvertToFbxVector4(uniRotationOffset);
                 fbxParentConstraint.SetRotationOffset(uniSource.node, fbxRotationOffset);
             }
             ExportCommonConstraintProperties(uniParentConstraint, fbxParentConstraint, fbxNode);
@@ -1706,13 +1649,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             fbxParentConstraint.AffectRotationZ.Set((uniRotationAxes & Axis.Z) == Axis.Z);
 
             // rest position is the position of the fbx node
-            var fbxRestTranslation = ConvertToRightHanded(uniParentConstraint.translationAtRest, UnitScaleFactor);
+            var fbxRestTranslation = ConvertToFbxVector4(uniParentConstraint.translationAtRest, UnitScaleFactor);
             // set the local position of fbxNode
             fbxNode.LclTranslation.Set(ToFbxDouble3(fbxRestTranslation));
 
             // rest rotation is the rotation of the fbx node
-            var uniRestRotationQuat = Quaternion.Euler(uniParentConstraint.rotationAtRest);
-            var fbxRestRotation = ConvertQuaternionToXYZEuler(uniRestRotationQuat);
+            var fbxRestRotation = ToFbxDouble3(uniParentConstraint.rotationAtRest);
             // set the local rotation of fbxNode
             fbxNode.LclRotation.Set(fbxRestRotation);
             return true;
@@ -2047,7 +1989,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         internal class UnityToMayaConvertSceneHelper
         {
             bool convertDistance = false;
-            bool convertLtoR = false;
             bool convertToRadian = false;
 
             float unitScaleFactor = 1f;
@@ -2057,14 +1998,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 System.StringComparison cc = System.StringComparison.CurrentCulture;
 
                 bool partT = uniPropertyName.StartsWith("m_LocalPosition.", cc) || uniPropertyName.StartsWith("m_TranslationOffset", cc);
-                bool partTx = uniPropertyName.EndsWith("Position.x", cc) || uniPropertyName.EndsWith("T.x", cc) || (uniPropertyName.StartsWith("m_TranslationOffset") && uniPropertyName.EndsWith(".x", cc));
-                bool partRyz = uniPropertyName.StartsWith("m_RotationOffset", cc) && (uniPropertyName.EndsWith(".y") || uniPropertyName.EndsWith(".z"));
-                partRyz = partRyz || (uniPropertyName.StartsWith("localEulerAnglesRaw", cc) && (uniPropertyName.EndsWith(".y") || uniPropertyName.EndsWith(".z")));
-                //bool partR = uniPropertyName.StartsWith("localEulerAnglesRaw.", cc);
-
-                convertLtoR |= partTx;
-                convertLtoR |= partRyz;
-                convertLtoR |= partRyz;
 
                 convertDistance |= partT;
                 convertDistance |= uniPropertyName.StartsWith ("m_Intensity", cc);
@@ -2075,9 +2008,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 if (convertDistance)
                     unitScaleFactor = ModelExporter.UnitScaleFactor;
-
-                if (convertLtoR)
-                    unitScaleFactor = -unitScaleFactor;
 
                 if (convertToRadian)
                 {
@@ -2606,6 +2536,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Use RSrs as the scaling inheritance instead.
             fbxNode.SetTransformationInheritType(FbxTransform.EInheritType.eInheritRSrs);
 
+            // Fbx rotation order is XYZ, but Unity rotation order is ZXY.
+            // Also, DeepConvert does not convert the rotation order (assumes XYZ), unless RotationActive is true.
+            fbxNode.SetRotationOrder(FbxNode.EPivotSet.eSourcePivot, FbxEuler.EOrder.eOrderZXY);
+            fbxNode.SetRotationActive(true);
+
             MapUnityObjectToFbxNode[unityGo] = fbxNode;
 
             return fbxNode;
@@ -2814,7 +2749,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         // cancel silently
                         return false;
                     }
-
                     ExportBoneTransform(fbxNode, fbxScene, bone.transform, boneInfo);
                 }
             }
@@ -2935,14 +2869,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // Export bones with zero rotation, using a pivot instead to set the rotation
             // so that the bones are easier to animate and the rotation shows up as the "joint orientation" in Maya.
-            fbxNode.LclTranslation.Set (new FbxDouble3(-translation.X*UnitScaleFactor, translation.Y*UnitScaleFactor, translation.Z*UnitScaleFactor));
+            fbxNode.LclTranslation.Set (new FbxDouble3(translation.X*UnitScaleFactor, translation.Y*UnitScaleFactor, translation.Z*UnitScaleFactor));
             fbxNode.LclRotation.Set (new FbxDouble3(0,0,0));
             fbxNode.LclScaling.Set (new FbxDouble3 (scale.X, scale.Y, scale.Z));
 
             // TODO (UNI-34294): add detailed comment about why we export rotation as pre-rotation
             fbxNode.SetRotationActive (true);
             fbxNode.SetPivotState (FbxNode.EPivotSet.eSourcePivot, FbxNode.EPivotState.ePivotReference);
-            fbxNode.SetPreRotation (FbxNode.EPivotSet.eSourcePivot, new FbxVector4 (rotation.X, -rotation.Y, -rotation.Z));
+            fbxNode.SetPreRotation (FbxNode.EPivotSet.eSourcePivot, new FbxVector4 (rotation.X, rotation.Y, rotation.Z));
 
             return true;
         }
@@ -3433,10 +3367,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     fbxSettings.SetSystemUnit (FbxSystemUnit.cm);
 
                     // The Unity axis system has Y up, Z forward, X to the right (left handed system with odd parity).
-                    // The Maya axis system has Y up, Z forward, X to the left (right handed system with odd parity).
-                    // We need to export right-handed for Maya because ConvertScene can't switch handedness:
-                    // https://forums.autodesk.com/t5/fbx-forum/get-confused-with-fbxaxissystem-convertscene/td-p/4265472
-                    fbxSettings.SetAxisSystem (FbxAxisSystem.MayaYUp);
+                    // DirectX has the same axis system, so use this constant.
+                    var unityAxisSystem = FbxAxisSystem.DirectX;
+                    fbxSettings.SetAxisSystem (unityAxisSystem);
 
                     // export set of object
                     FbxNode fbxRootNode = fbxScene.GetRootNode ();
@@ -3519,6 +3452,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     // Set the scene's default camera.
                     SetDefaultCamera (fbxScene);
+
+                    // The Maya axis system has Y up, Z forward, X to the left (right handed system with odd parity).
+                    // We need to export right-handed for Maya because ConvertScene (used by Maya and Max importers) can't switch handedness:
+                    // https://forums.autodesk.com/t5/fbx-forum/get-confused-with-fbxaxissystem-convertscene/td-p/4265472
+                    // This needs to be done last so that everything is converted properly.
+                    FbxAxisSystem.MayaYUp.DeepConvertScene(fbxScene);
 
                     // Export the scene to the file.
                     status = fbxExporter.Export (fbxScene);
