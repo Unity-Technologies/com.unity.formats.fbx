@@ -1941,11 +1941,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // (Meters to Centimetres)
                 var convertSceneHelper = new UnityToMayaConvertSceneHelper (uniPropertyName);
                 
-                /*if (ModelExporter.ExportSettings.BakeAnimationProperty) {
+                if (ModelExporter.ExportSettings.BakeAnimationProperty) {
                     ExportAnimationSamples (uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
-                } else {*/
-                ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper, uniPropertyName);
-               // }
+                } else {
+                    ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper, uniPropertyName);
+                }
             }
         }
 
@@ -2124,7 +2124,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // If this is an euler curve with a prerotation, then need to sample animations to remove the prerotation.
                     // Otherwise can export normally with tangents.
                     index = EulerCurve.GetEulerIndex (propertyName);
-                    if (index >= 0 && fbxNode.GetPreRotation(FbxNode.EPivotSet.eSourcePivot).Distance(new FbxVector4()) > 0) {
+                    if (index >= 0 && 
+                        // still need to sample euler curves if baking is specified
+                        (ModelExporter.ExportSettings.BakeAnimationProperty ||
+                        // also need to make sure to sample if there is a prerotation, as this is baked into the Unity curves
+                        fbxNode.GetPreRotation(FbxNode.EPivotSet.eSourcePivot).Distance(new FbxVector4()) > 0)) {
+
                         RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
                         rotCurve.SetCurve (index, uniAnimCurve);
                         continue;

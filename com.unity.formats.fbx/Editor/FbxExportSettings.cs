@@ -460,7 +460,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         }
 
         [SerializeField]
-        private bool BakeAnimation = true;
+        private bool BakeAnimation = false;
         internal bool BakeAnimationProperty
         {
             get { return BakeAnimation; }
