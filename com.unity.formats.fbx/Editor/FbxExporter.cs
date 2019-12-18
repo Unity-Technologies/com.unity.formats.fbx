@@ -1853,6 +1853,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                             interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationConstant;
                             break;
                         default:
+                            Debug.LogError("interpolation: " + rTangent);
                             break;
                     }
 
@@ -1877,6 +1878,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         uniKeyFrame.outWeight,
                         keyIndex < uniAnimCurve.length - 1 ? uniAnimCurve[keyIndex + 1].inWeight : 0
                     );
+
+                    Debug.LogWarning(uniPropertyName + ": tangents: " + uniKeyFrame.inTangent + ", " + uniKeyFrame.outTangent + ", weights: " + uniKeyFrame.inWeight + ", " + uniKeyFrame.outWeight);
 
                     if (!(MapUnityKeyTangentModeToFBX.ContainsKey(lTangent) && MapUnityKeyTangentModeToFBX.ContainsKey(rTangent)))
                     {
