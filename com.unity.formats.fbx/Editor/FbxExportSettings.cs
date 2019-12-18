@@ -578,7 +578,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             integrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
-            BakeAnimationProperty = true;
+            BakeAnimationProperty = false;
             ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             exportModelSettingsSerialize = ExportModelSettings.info;
             ShowConvertToPrefabDialog = true;

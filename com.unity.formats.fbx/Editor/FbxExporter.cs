@@ -1778,19 +1778,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                             break;
                     }
 
-                    float tangentMultiplier = UnitScaleFactor;
-                    if(uniPropertyName.StartsWith("localEulerAnglesRaw"))
-                    {
-                        tangentMultiplier = 1;
-                    }
-
                     fbxAnimCurve.KeySet (fbxKeyIndex, 
                         fbxTime, 
                         convertSceneHelper.Convert(uniKeyFrame.value),
                         interpMode,
                         tanMode,
-                        tangentMultiplier*uniKeyFrame.outTangent,
-                        keyIndex < uniAnimCurve.length -1 ? tangentMultiplier*uniAnimCurve[keyIndex+1].inTangent : 0,
+                        convertSceneHelper.Convert(uniKeyFrame.outTangent),
+                        keyIndex < uniAnimCurve.length -1 ? convertSceneHelper.Convert(uniAnimCurve[keyIndex+1].inTangent) : 0,
                         FbxAnimCurveDef.EWeightedMode.eWeightedAll,
                         uniKeyFrame.outWeight,
                         keyIndex < uniAnimCurve.length - 1 ? uniAnimCurve[keyIndex + 1].inWeight : 0
