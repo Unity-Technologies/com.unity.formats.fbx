@@ -1753,7 +1753,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// a Cubic curve using the default tangents.
         /// </summary>
         internal static void ExportAnimationKeys (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve, 
-            UnityToMayaConvertSceneHelper convertSceneHelper, string uniPropertyName)
+            UnityToMayaConvertSceneHelper convertSceneHelper)
         {
             // Copy Unity AnimCurve to FBX AnimCurve.
             // NOTE: only cubic keys are supported by the FbxImporter
@@ -1951,7 +1951,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 if (ModelExporter.ExportSettings.BakeAnimationProperty) {
                     ExportAnimationSamples (uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
                 } else {
-                    ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper, uniPropertyName);
+                    ExportAnimationKeys (uniAnimCurve, fbxAnimCurve, convertSceneHelper);
                 }
             }
         }
