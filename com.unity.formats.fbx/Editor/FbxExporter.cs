@@ -1984,14 +1984,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     Debug.LogError (string.Format ("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
                     return;
                 }
+                if (!fbxProperty.GetFlag(FbxPropertyFlags.EFlags.eAnimatable))
+                {
+                    Debug.LogErrorFormat("fbx property {0} found on node {1} is not animatable", fbxPropertyChannelPair.Property, fbxNode.GetName());
+                }
 
                 // Create the AnimCurve on the channel
                 FbxAnimCurve fbxAnimCurve = fbxProperty.GetCurve (fbxAnimLayer, fbxPropertyChannelPair.Channel, true);
+                if(fbxAnimCurve == null)
+                {
+                    return;
+                }
 
                 // create a convert scene helper so that we can convert from Unity to Maya
                 // AxisSystem (LeftHanded to RightHanded) and FBX's default units 
                 // (Meters to Centimetres)
-                var convertSceneHelper = new UnityToMayaConvertSceneHelper (uniPropertyName);
+                var convertSceneHelper = new UnityToMayaConvertSceneHelper (uniPropertyName, fbxNode);
 
                 // TODO: we'll resample the curve so we don't have to 
                 // configure tangents
@@ -2008,10 +2016,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
             bool convertDistance = false;
             bool convertLtoR = false;
             bool convertToRadian = false;
+            bool convertLensShiftX = false;
+            bool convertLensShiftY = false;
+
+            FbxCamera camera = null;
 
             float unitScaleFactor = 1f;
 
-            public UnityToMayaConvertSceneHelper(string uniPropertyName)
+            public UnityToMayaConvertSceneHelper(string uniPropertyName, FbxNode fbxNode)
             {
                 System.StringComparison cc = System.StringComparison.CurrentCulture;
 
@@ -2025,6 +2037,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 convertDistance |= partT;
                 convertDistance |= uniPropertyName.StartsWith ("m_Intensity", cc);
                 convertDistance |= uniPropertyName.ToLower().EndsWith("weight", cc);
+                convertLensShiftX |= uniPropertyName.StartsWith("m_LensShift.x", cc);
+                convertLensShiftY |= uniPropertyName.StartsWith("m_LensShift.y", cc);
+                if (convertLensShiftX || convertLensShiftY)
+                {
+                    camera = fbxNode.GetCamera();
+                }
 
                 // The ParentConstraint's source Rotation Offsets are read in as radians, so make sure they are exported as radians
                 convertToRadian = uniPropertyName.StartsWith("m_RotationOffsets.Array.data", cc);
@@ -2043,9 +2061,26 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             public float Convert(float value)
             {
+                float convertedValue = value;
+                if (convertLensShiftX || convertLensShiftY)
+                {
+                    convertedValue = Mathf.Clamp(Mathf.Abs(value), 0f, 1f)*Mathf.Sign(value);
+                }
+                if (camera != null)
+                {
+                    if (convertLensShiftX)
+                    {
+                        convertedValue *= (float)camera.GetApertureWidth();
+                    }
+                    else if (convertLensShiftY)
+                    {
+                        convertedValue *= (float)camera.GetApertureHeight();
+                    }
+                }
+
                 // left handed to right handed conversion
                 // meters to centimetres conversion
-                return unitScaleFactor * value;
+                return unitScaleFactor * convertedValue;
             }
 
         }
