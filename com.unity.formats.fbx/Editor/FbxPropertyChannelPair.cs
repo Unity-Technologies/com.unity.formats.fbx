@@ -92,8 +92,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 { "field of view", "FieldOfView" },
                 { "m_Weight", "Weight" },
                 { "m_FocalLength", "FocalLength" },
-                {"m_LensShift.x", "FilmOffsetX" },
-                {"m_LensShift.y", "FilmOffsetY" }
+                { "m_LensShift.x", "FilmOffsetX" },
+                { "m_LensShift.y", "FilmOffsetY" }
             };
 
         /// <summary>

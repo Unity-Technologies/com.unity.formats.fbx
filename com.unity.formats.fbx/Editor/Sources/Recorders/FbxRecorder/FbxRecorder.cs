@@ -16,7 +16,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected override void EndRecording(RecordingSession session)
         {
-            var ars = (FbxRecorderSettings)session.settings;
+            var settings = (FbxRecorderSettings)session.settings;
 
             foreach (var input in m_Inputs)
             {
@@ -28,14 +28,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 var clip = new AnimationClip();
 
-                ars.FileNameGenerator.CreateDirectory(session);
+                settings.FileNameGenerator.CreateDirectory(session);
 
-                var absolutePath = FileNameGenerator.SanitizePath(ars.FileNameGenerator.BuildAbsolutePath(session));
+                var absolutePath = FileNameGenerator.SanitizePath(settings.FileNameGenerator.BuildAbsolutePath(session));
                 var clipName = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
                 
-                //AssetDatabase.CreateAsset(clip, clipName);
 #if UNITY_2018_3_OR_NEWER
-                aInput.GameObjectRecorder.SaveToClip(clip, ars.FrameRate);
+                aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate);
 #else
                 aInput.gameObjectRecorder.SaveToClip(clip);
 #endif
@@ -59,7 +58,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 AnimationUtility.SetAnimationClips(animator, new AnimationClip[] { clip });
                 var exportSettings = new ExportModelSettingsSerialize();
                 var toInclude = ExportSettings.Include.ModelAndAnim;
-                if (!ars.ExportGeometry)
+                if (!settings.ExportGeometry)
                 {
                     toInclude = ExportSettings.Include.Anim;
                 } 
