@@ -84,3 +84,4 @@ You can do this by right clicking on the FBX recorders in the Recorder Window or
 If you have already uninstalled the FBX Exporter package and are now having issues with the Unity Recorder, follow these steps:
 1. Reinstall the FBX Exporter package
 2. Find and remove all FBX recorder instances (right click and Delete from the Recorder Window and Timeline(s))
+3. Uninstall the FBX Exporter from the Package Manager
