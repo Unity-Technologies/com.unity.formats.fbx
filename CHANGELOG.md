@@ -3,9 +3,13 @@
 ## [3.0.0-preview.1] - 2020-01-08
 ### Added
 - Added FBX Recorder to record animations from the Unity Recorder directly to FBX (adds dependency to Unity Recorder)
+- Export animated focal length and lens shift of cameras
 
 ### Changed
 - Updated dependency to com.autodesk.fbx version 3.0.0-preview.1
+
+### Fixed
+- Fixed camera aspect and gate fit exporting as incorrect values
 
 ## [2.0.3-preview.3] - 2019-09-24
 
