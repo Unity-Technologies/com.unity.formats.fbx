@@ -3,7 +3,7 @@
 	* [FBX Linked Prefabs](prefabs)
 	* [Integration](integration)
 	* [FBX Export settings](options)
-    * [FBX Recorder](recorder)
+	* [FBX Recorder](recorder)
 	* [Limitations](knownissues)
 	* [Troubleshooting](troubleshooting)
 	* [Developer's guide](devguide)

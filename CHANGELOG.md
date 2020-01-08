@@ -6,7 +6,7 @@
 - Export animated focal length and lens shift of cameras
 
 ### Changed
-- Updated dependency to com.autodesk.fbx version 3.0.0-preview.1
+- Updated dependency to com.autodesk.fbx version 3.0.0-preview.1, which means we update to [FBX SDK 2020](http://help.autodesk.com/view/FBX/2020/ENU/)
 
 ### Fixed
 - Fixed camera aspect and gate fit exporting as incorrect values
