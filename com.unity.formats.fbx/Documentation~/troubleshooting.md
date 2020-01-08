@@ -8,6 +8,7 @@ This section covers the following issues:
 * [Overwriting FBX files](#OverwritingFiles)
 * [Tree primitive no longer editable after conversion](#EditableTree)
 * [Trail and line particles lose material after being converted](#ParticlesLoseMaterial)
+* [Uninstalling FBX Exporter breaks Unity Recorder](#BrokenRecorder)
 
 
 
@@ -71,3 +72,15 @@ To avoid this, make sure to convert only the Tree when finished editing. Otherwi
 
 If you lose Materials when converting trail or line particles, you need to re-apply the Materials to the FBX Linked Prefab after conversion.
 
+
+
+<a name="BrokenRecorder"></a>
+
+## Uninstalling FBX Exporter breaks Unity Recorder
+
+If you are uninstalling the FBX Exporter package but would like to continue using the Unity Recorder make sure to first remove all existing FBX Recorders.
+You can do this by right clicking on the FBX recorders in the Recorder Window or Timeline and selecting "Delete".
+
+If you have already uninstalled the FBX Exporter package and are now having issues with the Unity Recorder, follow these steps:
+1. Reinstall the FBX Exporter package
+2. Find and remove all FBX recorder instances (right click and Delete from the Recorder Window and Timeline(s))
