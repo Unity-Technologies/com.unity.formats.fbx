@@ -16,6 +16,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected override void EndRecording(RecordingSession session)
         {
+            if(session == null)
+            {
+                throw new System.ArgumentNullException("session");
+            }
+
             var settings = (FbxRecorderSettings)session.settings;
 
             foreach (var input in m_Inputs)

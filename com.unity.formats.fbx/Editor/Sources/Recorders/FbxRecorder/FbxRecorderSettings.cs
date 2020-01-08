@@ -76,6 +76,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (m_AnimationInputSettings.gameObject == null)
             {
                 ok = false;
+                if(errors == null)
+                {
+                    throw new System.ArgumentNullException("errors");
+                }
                 errors.Add("No input object set");
             }
 
