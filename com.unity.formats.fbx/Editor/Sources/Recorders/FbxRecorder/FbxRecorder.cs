@@ -62,6 +62,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 AnimationUtility.SetAnimationClips(animator, new AnimationClip[] { clip });
                 var exportSettings = new ExportModelSettingsSerialize();
+                exportSettings.SetAnimationSource(settings.TransferAnimationSource);
+                exportSettings.SetAnimationDest(settings.TransferAnimationDest);
                 var toInclude = ExportSettings.Include.ModelAndAnim;
                 if (!settings.ExportGeometry)
                 {
