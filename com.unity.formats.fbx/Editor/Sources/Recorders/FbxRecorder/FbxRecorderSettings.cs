@@ -7,7 +7,7 @@ using UnityEditor.Recorder.Input;
 namespace UnityEditor.Formats.Fbx.Exporter
 {
     [RecorderSettings(typeof(FbxRecorder), "FBX", "fbx_recorder")]
-    public class FbxRecorderSettings : RecorderSettings
+    internal class FbxRecorderSettings : RecorderSettings
     {
         [SerializeField] AnimationInputSettings m_AnimationInputSettings = new AnimationInputSettings();
 
