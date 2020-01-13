@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [3.0.0-preview.1] - 2020-01-13
+## [3.0.0-preview.2] - 2020-01-13
 ### Added
 - Added FBX Recorder to record animations from the Unity Recorder directly to FBX (adds dependency to Unity Recorder).
 - Export animated focal length and lens shift of cameras.
