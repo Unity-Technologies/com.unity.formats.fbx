@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [3.0.0-preview.1] - 2020-01-08
+## [3.0.0-preview.1] - 2020-01-13
 ### Added
 - Added FBX Recorder to record animations from the Unity Recorder directly to FBX (adds dependency to Unity Recorder)
 - Export animated focal length and lens shift of cameras
@@ -10,6 +10,9 @@
 
 ### Fixed
 - Fixed camera aspect and gate fit exporting as incorrect values
+
+### Known Issues
+- Recording animated skinned meshes/bone hierarchies may lead to unexpected results when importing in Maya
 
 ## [2.0.3-preview.3] - 2019-09-24
 
