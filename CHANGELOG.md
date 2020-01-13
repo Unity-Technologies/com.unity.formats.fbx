@@ -12,7 +12,7 @@
 - Fixed camera aspect and gate fit exporting as incorrect values
 
 ### Known Issues
-- Recording animated skinned meshes/bone hierarchies may lead to unexpected results when importing in Maya
+- Recording animated skinned meshes/bone hierarchies may lead to unexpected results when imported into Autodesk® Maya® and Autodesk® 3ds Max®
 
 ## [2.0.3-preview.3] - 2019-09-24
 
