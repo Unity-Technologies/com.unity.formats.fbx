@@ -1715,6 +1715,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 lastTime = System.Math.Max(lastTime, ac[ac.length-1].time);
             }
 
+            // if these values didn't get set there were no valid anim curves,
+            // so don't return any keys
+            if(firstTime == double.MaxValue || lastTime == double.MinValue)
+            {
+                return keyTimes;
+            }
+
             int firstframe = (int)System.Math.Floor(firstTime * sampleRate);
             int lastframe = (int)System.Math.Ceiling(lastTime * sampleRate);
             for (int i = firstframe; i <= lastframe; i++) {
@@ -1745,23 +1752,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// NOTE : This is a work in progress (WIP). We only export the key time and value on
         /// a Cubic curve using the default tangents.
         /// </summary>
-        internal void ExportAnimationKeys (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve, 
+        internal static void ExportAnimationKeys (AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve, 
             UnityToMayaConvertSceneHelper convertSceneHelper)
         {
-            // TODO: complete the mapping between key tangents modes Unity and FBX
-            Dictionary<AnimationUtility.TangentMode, List<FbxAnimCurveDef.ETangentMode>> MapUnityKeyTangentModeToFBX =
-                new Dictionary<AnimationUtility.TangentMode, List<FbxAnimCurveDef.ETangentMode>>
-            {
-                //TangeantAuto|GenericTimeIndependent|GenericClampProgressive
-                {AnimationUtility.TangentMode.Free, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericClampProgressive}},
-
-                //TangeantAuto|GenericTimeIndependent
-                {AnimationUtility.TangentMode.Auto, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericTimeIndependent}},
-
-                //TangeantAuto|GenericTimeIndependent|GenericClampProgressive
-                {AnimationUtility.TangentMode.ClampedAuto, new List<FbxAnimCurveDef.ETangentMode>{FbxAnimCurveDef.ETangentMode.eTangentAuto,FbxAnimCurveDef.ETangentMode.eTangentGenericClampProgressive}},
-            };
-
             // Copy Unity AnimCurve to FBX AnimCurve.
             // NOTE: only cubic keys are supported by the FbxImporter
             using (new FbxAnimCurveModifyHelper(new List<FbxAnimCurve>{fbxAnimCurve}))
@@ -1773,24 +1766,44 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     int fbxKeyIndex = fbxAnimCurve.KeyAdd (fbxTime);
 
-                    fbxAnimCurve.KeySet (fbxKeyIndex, 
-                        fbxTime, 
-                        convertSceneHelper.Convert(uniKeyFrame.value)
-                    );
 
                     // configure tangents
                     var lTangent = AnimationUtility.GetKeyLeftTangentMode(uniAnimCurve, keyIndex);
                     var rTangent = AnimationUtility.GetKeyRightTangentMode(uniAnimCurve, keyIndex);
 
-                    if (!(MapUnityKeyTangentModeToFBX.ContainsKey(lTangent) && MapUnityKeyTangentModeToFBX.ContainsKey(rTangent)))
+                    // Always set tangent mode to eTangentBreak, as other modes are not handled the same in FBX as in
+                    // Unity, thus leading to discrepancies in animation curves.
+                    FbxAnimCurveDef.ETangentMode tanMode = FbxAnimCurveDef.ETangentMode.eTangentBreak;
+
+                    // Default to cubic interpolation, which is the default for KeySet
+                    FbxAnimCurveDef.EInterpolationType interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationCubic;
+                    switch (rTangent)
                     {
-                        Debug.LogWarning(string.Format("key[{0}] missing tangent mapping ({1},{2})", keyIndex, lTangent.ToString(), rTangent.ToString()));
-                        continue;
+                        case AnimationUtility.TangentMode.Linear:
+                            interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationLinear;
+                            break;
+                        case AnimationUtility.TangentMode.Constant:
+                            interpMode = FbxAnimCurveDef.EInterpolationType.eInterpolationConstant;
+                            break;
+                        default:
+                            break;
                     }
 
-                    // TODO : handle broken tangents
-
-                    // TODO : set key tangents
+                    fbxAnimCurve.KeySet (fbxKeyIndex, 
+                        fbxTime, 
+                        convertSceneHelper.Convert(uniKeyFrame.value),
+                        interpMode,
+                        tanMode,
+                        // value of right slope
+                        convertSceneHelper.Convert(uniKeyFrame.outTangent),
+                        // value of next left slope
+                        keyIndex < uniAnimCurve.length -1 ? convertSceneHelper.Convert(uniAnimCurve[keyIndex+1].inTangent) : 0,
+                        FbxAnimCurveDef.EWeightedMode.eWeightedAll,
+                        // weight for right slope
+                        uniKeyFrame.outWeight,
+                        // weight for next left slope
+                        keyIndex < uniAnimCurve.length - 1 ? uniAnimCurve[keyIndex + 1].inWeight : 0
+                    );
                 }
             }
         }
@@ -1934,9 +1947,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // AxisSystem (LeftHanded to RightHanded) and FBX's default units 
                 // (Meters to Centimetres)
                 var convertSceneHelper = new UnityToMayaConvertSceneHelper (uniPropertyName);
-
-                // TODO: we'll resample the curve so we don't have to 
-                // configure tangents
+                
                 if (ModelExporter.ExportSettings.BakeAnimationProperty) {
                     ExportAnimationSamples (uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
                 } else {
@@ -2117,8 +2128,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         continue;
                     } 
 
+                    // If this is an euler curve with a prerotation, then need to sample animations to remove the prerotation.
+                    // Otherwise can export normally with tangents.
                     index = EulerCurve.GetEulerIndex (propertyName);
-                    if (index >= 0) {
+                    if (index >= 0 && 
+                        // still need to sample euler curves if baking is specified
+                        (ModelExporter.ExportSettings.BakeAnimationProperty ||
+                        // also need to make sure to sample if there is a prerotation, as this is baked into the Unity curves
+                        fbxNode.GetPreRotation(FbxNode.EPivotSet.eSourcePivot).Distance(new FbxVector4()) > 0)) {
+
                         RotationCurve rotCurve = GetRotationCurve<EulerCurve> (uniGO, uniAnimClip.frameRate, ref rotations);
                         rotCurve.SetCurve (index, uniAnimCurve);
                         continue;
