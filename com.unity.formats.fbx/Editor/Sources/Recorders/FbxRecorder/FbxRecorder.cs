@@ -45,42 +45,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
 #endif
                 var root = ((AnimationInputSettings)aInput.settings).gameObject;
                 clip.name = "recorded_clip";
-                clip.legacy = true;
-                Animation animator = root.GetComponent<Animation>();
-                bool hasAnimComponent = true;
-                if (!animator)
-                {
-                    animator = root.AddComponent<Animation>();
-                    hasAnimComponent = false;
-                }
 
-                AnimationClip[] prevAnimClips = null;
-                if (hasAnimComponent)
-                {
-                    prevAnimClips = AnimationUtility.GetAnimationClips(root);
-                }
-
-                AnimationUtility.SetAnimationClips(animator, new AnimationClip[] { clip });
                 var exportSettings = new ExportModelSettingsSerialize();
                 exportSettings.SetAnimationSource(settings.TransferAnimationSource);
                 exportSettings.SetAnimationDest(settings.TransferAnimationDest);
+                exportSettings.SetObjectPosition(ExportSettings.ObjectPosition.WorldAbsolute);
                 var toInclude = ExportSettings.Include.ModelAndAnim;
                 if (!settings.ExportGeometry)
                 {
                     toInclude = ExportSettings.Include.Anim;
                 } 
                 exportSettings.SetModelAnimIncludeOption(toInclude);
-                ModelExporter.ExportObject(clipName, root, exportSettings);
 
+                var exportData = new AnimationOnlyExportData();
+                exportData.CollectDependencies(clip, root, exportSettings);
+                var exportDataContainer = new Dictionary<GameObject, IExportData>();
+                exportDataContainer.Add(root, exportData);
 
-                if (hasAnimComponent)
-                {
-                    AnimationUtility.SetAnimationClips(animator, prevAnimClips);
-                }
-                else
-                {
-                    Object.DestroyImmediate(animator);
-                }
+                ModelExporter.ExportObjects(clipName, new UnityEngine.Object[] { root }, exportSettings, exportDataContainer);
+
                 aInput.GameObjectRecorder.ResetRecording();
             }
             base.EndRecording(session);
