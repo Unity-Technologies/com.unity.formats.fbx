@@ -557,7 +557,7 @@ namespace FbxExporter.UnitTests
                     #if DEBUG_UNITTEST
                     Debug.Log(string.Format("key time={0} expected={1} actual={2} delta={3}", expectedKeyTime.ToString(), expectedKeyValue.ToString(), actualKeyValue.ToString(), Mathf.Abs(expectedKeyValue-actualKeyValue).ToString()));
                     #endif
-                    Assert.That(expectedKeyValue, Is.EqualTo(actualKeyValue).Within(0.000001), string.Format("{0} key ({1}) doesn't match", message, expectedKeyTime));
+                    Assert.That(expectedKeyValue, Is.EqualTo(actualKeyValue).Within(0.0001), string.Format("{0} key ({1}) doesn't match", message, expectedKeyTime));
                 }
             }
 
