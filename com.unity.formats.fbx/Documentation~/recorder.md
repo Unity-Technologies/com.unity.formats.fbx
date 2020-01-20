@@ -18,6 +18,7 @@ Alternatively, the FBX Recorder can be added as a track in the Timeline.
 
 | Property:                     | Function:                                                    |
 | :---------------------------- | :----------------------------------------------------------- |
+| __Export Geometry__              | Check this option to export the geometry of the recorded GameObject to FBX, if any. |
 | __File Name__            | The filename for the exported FBX. |
 | __Path__                 | The path to export the FBX to. Can be outside of the Assets folder. |
 | __Take Number__          | The take number can be set and used in the filename. It automatically increments after each recording. |

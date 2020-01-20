@@ -63,6 +63,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 AnimationUtility.SetAnimationClips(animator, new AnimationClip[] { clip });
                 var exportSettings = new ExportModelSettingsSerialize();
                 var toInclude = ExportSettings.Include.ModelAndAnim;
+                if (!settings.ExportGeometry)
+                {
+                    toInclude = ExportSettings.Include.Anim;
+                } 
                 exportSettings.SetModelAnimIncludeOption(toInclude);
                 ModelExporter.ExportObject(clipName, root, exportSettings);
 

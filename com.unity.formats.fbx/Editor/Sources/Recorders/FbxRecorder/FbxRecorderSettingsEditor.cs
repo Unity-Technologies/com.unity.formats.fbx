@@ -14,6 +14,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUILayout.LabelField("Format", "FBX");
 
             FbxRecorderSettings settings = target as FbxRecorderSettings;
+
+            settings.ExportGeometry = EditorGUILayout.Toggle("Export Geometry", settings.ExportGeometry);
         }
     }
 }
