@@ -7,21 +7,8 @@ using UnityEditor.Recorder.Input;
 namespace UnityEditor.Formats.Fbx.Exporter
 {
     [RecorderSettings(typeof(FbxRecorder), "FBX", "fbx_recorder")]
-    public class FbxRecorderSettings : RecorderSettings
+    internal class FbxRecorderSettings : RecorderSettings
     {
-        [SerializeField] bool m_exportGeometry = true;
-        public bool ExportGeometry
-        {
-            get
-            {
-                return m_exportGeometry;
-            }
-            set
-            {
-                m_exportGeometry = value;
-            }
-        }
-
         [SerializeField] AnimationInputSettings m_AnimationInputSettings = new AnimationInputSettings();
 
         public AnimationInputSettings animationInputSettings
@@ -76,6 +63,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (m_AnimationInputSettings.gameObject == null)
             {
                 ok = false;
+                if(errors == null)
+                {
+                    throw new System.ArgumentNullException("errors");
+                }
                 errors.Add("No input object set");
             }
 
