@@ -25,3 +25,5 @@ Alternatively, the FBX Recorder can be added as a track in the Timeline.
 | __Game Object__ | Set the Game Object in the scene to record. |
 | __Recorded Target(s)__     | Select which components of the selected GameObject to record. |
 | __Recorded Hierarchy__     | Check to record other objects in the hierarchy of the GameObject in addition to the selected GameObject. |
+| __Source__                | Transfer the transform animation from this object to the __Destination__ transform. <br/><br/>**NOTES:**<br/> - __Source__ must be an ancestor of __Destination__<br/> - __Source__ may be an ancestor of the selected object. |
+| __Destination__           | Which object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between __Source__ and __Destination__ as well as the animation on the Source itself. |
