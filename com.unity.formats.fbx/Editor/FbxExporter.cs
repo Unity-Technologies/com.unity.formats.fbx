@@ -3490,6 +3490,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                             continue;
                         }
                         var data = iData as AnimationOnlyExportData;
+                        if(data == null)
+                        {
+                            Debug.LogWarningFormat("FBX Exporter: no animation export data found for {0}", unityGo.name);
+                            continue;
+                        }
                         // export animation
                         // export default clip first
                         if (data.defaultClip != null)

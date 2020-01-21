@@ -73,6 +73,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
+        /// <summary>
+        /// Get the Unity object (in this case transform), associated with the given binding ID.
+        /// </summary>
+        /// <param name="id">Binding ID</param>
+        /// <returns>Transform associated with binding ID</returns>
         static Transform GetBinding(string id)
         {
             // return BindingManager.Get(m_BindingId) as GameObject;
@@ -80,6 +85,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return method.Invoke(null, new object[] { id }) as Transform;
         }
 
+        /// <summary>
+        /// Set the binding ID to be associated with the given Unity object.
+        /// This information will be saved on domain reload, so that the object can still be found
+        /// with the binding ID.
+        /// </summary>
+        /// <param name="id">Binding ID</param>
+        /// <param name="obj">Unity Object</param>
         static void SetBinding(string id, UnityEngine.Object obj)
         {
             // BindingManager.Set(m_BindingId, value);
@@ -87,6 +99,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             method.Invoke(null, new object[] { id, obj });
         }
 
+        /// <summary>
+        /// Get a binding ID for the transform, so that the reference survives domain reload. Maintaining a direct reference would not work
+        /// as all scene objects are destroyed and recreated on reload (e.g. when entering/exiting playmode).
+        /// </summary>
+        /// <returns>Binding ID</returns>
         static string GenerateBindingId()
         {
             return GUID.Generate().ToString();
