@@ -498,7 +498,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     var weight = umesh.GetBlendShapeFrameWeight(bi, fi);
                     umesh.GetBlendShapeFrameVertices(bi, fi, deltaPoints, deltaNormals, deltaTangents);
 
-                    var fbxShape = FbxShape.Create(fbxScene, "");
+                    var fbxShapeName = bsName;
+
+                    if (numFrames > 1)
+                    {
+                        fbxShapeName += "_" + fi;
+                    }
+
+                    var fbxShape = FbxShape.Create(fbxScene, fbxShapeName);
                     fbxChannel.AddTargetShape(fbxShape, weight);
 
                     // control points
