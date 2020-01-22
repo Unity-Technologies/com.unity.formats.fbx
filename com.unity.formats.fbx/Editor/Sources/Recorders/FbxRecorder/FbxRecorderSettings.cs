@@ -74,6 +74,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
+        /// Get a binding ID for the transform, so that the reference survives domain reload. Maintaining a direct reference would not work
+        /// as all scene objects are destroyed and recreated on reload (e.g. when entering/exiting playmode).
+        /// </summary>
+        /// <returns>Binding ID</returns>
+        static string GenerateBindingId()
+        {
+            return GUID.Generate().ToString();
+        }
+
+        /// <summary>
         /// Get the Unity object (in this case transform), associated with the given binding ID.
         /// </summary>
         /// <param name="id">Binding ID</param>
@@ -97,16 +107,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // BindingManager.Set(m_BindingId, value);
             var method = Type.GetType("UnityEditor.Recorder.BindingManager,Unity.Recorder.Editor").GetMethod("Set", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
             method.Invoke(null, new object[] { id, obj });
-        }
-
-        /// <summary>
-        /// Get a binding ID for the transform, so that the reference survives domain reload. Maintaining a direct reference would not work
-        /// as all scene objects are destroyed and recreated on reload (e.g. when entering/exiting playmode).
-        /// </summary>
-        /// <returns>Binding ID</returns>
-        static string GenerateBindingId()
-        {
-            return GUID.Generate().ToString();
         }
 
         /// <summary>
