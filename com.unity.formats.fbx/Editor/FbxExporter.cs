@@ -3482,31 +3482,35 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         }
                     }
 
-                    foreach (var unityGo in revisedExportSet)
+                    // Export animation if any
+                    if (exportData != null)
                     {
-                        IExportData iData;
-                        if(!exportData.TryGetValue(unityGo, out iData))
+                        foreach (var unityGo in revisedExportSet)
                         {
-                            continue;
-                        }
-                        var data = iData as AnimationOnlyExportData;
-                        if(data == null)
-                        {
-                            Debug.LogWarningFormat("FBX Exporter: no animation export data found for {0}", unityGo.name);
-                            continue;
-                        }
-                        // export animation
-                        // export default clip first
-                        if (data.defaultClip != null)
-                        {
-                            var defaultClip = data.defaultClip;
-                            ExportAnimationClip(defaultClip, data.animationClips[defaultClip], fbxScene);
-                            data.animationClips.Remove(defaultClip);
-                        }
+                            IExportData iData;
+                            if (!exportData.TryGetValue(unityGo, out iData))
+                            {
+                                continue;
+                            }
+                            var data = iData as AnimationOnlyExportData;
+                            if (data == null)
+                            {
+                                Debug.LogWarningFormat("FBX Exporter: no animation export data found for {0}", unityGo.name);
+                                continue;
+                            }
+                            // export animation
+                            // export default clip first
+                            if (data.defaultClip != null)
+                            {
+                                var defaultClip = data.defaultClip;
+                                ExportAnimationClip(defaultClip, data.animationClips[defaultClip], fbxScene);
+                                data.animationClips.Remove(defaultClip);
+                            }
 
-                        foreach (var animClip in data.animationClips)
-                        {
-                            ExportAnimationClip(animClip.Key, animClip.Value, fbxScene);
+                            foreach (var animClip in data.animationClips)
+                            {
+                                ExportAnimationClip(animClip.Key, animClip.Value, fbxScene);
+                            }
                         }
                     }
                     // Set the scene's default camera.
