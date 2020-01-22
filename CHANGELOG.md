@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [3.0.1-preview.1] - 2020-01-22
+## [3.0.1-preview.2] - 2020-01-22
 ### Added
 - Added option to export geometry when recording with the FBX recorder (in previous version geometry was always exported).
 - Added settings to transfer animation between two transforms in the recorded hierarchy.
