@@ -3,7 +3,6 @@
   "displayName": "FBX Exporter",
   "version": "3.0.0-preview.2",
   "dependencies": {
-    "com.unity.recorder": "2.1.0-preview.1",
     "com.unity.timeline": "1.0.0",
     "com.autodesk.fbx": "3.0.0-preview.1"
   },

@@ -17,6 +17,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.recorder",
+            "expression": "",
+            "define": "COM_UNITY_RECORDER"
+        }
+    ],
     "noEngineReferences": false
 }
