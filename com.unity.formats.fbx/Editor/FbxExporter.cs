@@ -2274,7 +2274,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 for (int k = 0; k < 3; k++) {
                     posKeyFrames [k][keyIndex] = new Keyframe(currSampleTime, (float)translation [k]);
-                    rotKeyFrames [k][keyIndex] = new Keyframe(currSampleTime, (float)rot [k]);
+                    rotKeyFrames [k][keyIndex] = new Keyframe(currSampleTime, rot [k]);
                     scaleKeyFrames [k][keyIndex] = new Keyframe(currSampleTime, (float)scale [k]);
                 }
                 keyIndex++;
@@ -2690,18 +2690,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
-            // export animation
-            // export default clip first
-            if (exportData.defaultClip != null) {
-                var defaultClip = exportData.defaultClip;
-                ExportAnimationClip (defaultClip, exportData.animationClips[defaultClip], fbxScene);
-                exportData.animationClips.Remove (defaultClip);
-            }
-
-            foreach (var animClip in exportData.animationClips) {
-                ExportAnimationClip (animClip.Key, animClip.Value, fbxScene);
-            }
-
             return numObjectsExported;
         }
 
@@ -2967,7 +2955,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             Dictionary<GameObject, IExportData>  exportData = new Dictionary<GameObject, IExportData>();
 
-            if (exportOptions.ModelAnimIncludeOption != ExportSettings.Include.Anim)
+            if (exportOptions.ModelAnimIncludeOption == ExportSettings.Include.Model)
             {
                 return null;
             }
@@ -3129,21 +3117,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 ExportConstraints(unityGo, fbxScene, fbxNode);
-
-                // check if this object contains animation, keep track of it
-                // if it does
-                if (exportAnim && GameObjectHasAnimation (unityGo) ) {
-                    animationNodes.Add (unityGo);
-                }
             }
-
-            // export all GameObjects that have animation
-            if (animationNodes.Count > 0) {
-                foreach (var go in animationNodes) {
-                    ExportAnimation (go, fbxScene);
-                }
-            }
-
             return true;
         }
 
@@ -3321,7 +3295,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             try {
-                bool animOnly = exportData != null ;
+                bool animOnly = exportData != null && ExportOptions.ModelAnimIncludeOption == ExportSettings.Include.Anim;
                 bool status = false;
                 // Create the FBX manager
                 using (var fbxManager = FbxManager.Create ()) {
@@ -3462,6 +3436,37 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         }
                     }
 
+                    // Export animation if any
+                    if (exportData != null)
+                    {
+                        foreach (var unityGo in revisedExportSet)
+                        {
+                            IExportData iData;
+                            if (!exportData.TryGetValue(unityGo, out iData))
+                            {
+                                continue;
+                            }
+                            var data = iData as AnimationOnlyExportData;
+                            if (data == null)
+                            {
+                                Debug.LogWarningFormat("FBX Exporter: no animation export data found for {0}", unityGo.name);
+                                continue;
+                            }
+                            // export animation
+                            // export default clip first
+                            if (data.defaultClip != null)
+                            {
+                                var defaultClip = data.defaultClip;
+                                ExportAnimationClip(defaultClip, data.animationClips[defaultClip], fbxScene);
+                                data.animationClips.Remove(defaultClip);
+                            }
+
+                            foreach (var animClip in data.animationClips)
+                            {
+                                ExportAnimationClip(animClip.Key, animClip.Value, fbxScene);
+                            }
+                        }
+                    }
                     // Set the scene's default camera.
                     SetDefaultCamera (fbxScene);
 

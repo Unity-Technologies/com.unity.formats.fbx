@@ -1,5 +1,13 @@
 # Changes in Fbx Exporter
 
+## [3.0.1-preview.2] - 2020-01-22
+### Added
+- Added option to export geometry when recording with the FBX recorder (in previous version geometry was always exported).
+- Added settings to transfer animation between two transforms in the recorded hierarchy.
+
+### Fixed
+- It is now possible to record animated characters with the FBX recorder.
+
 ## [3.0.0-preview.2] - 2020-01-13
 ### Added
 - Added FBX Recorder to record animations from the Unity Recorder directly to FBX (adds dependency to Unity Recorder).
