@@ -3,6 +3,7 @@ editors:
   - version: 2018.4
   - version: 2019.1
   - version: 2019.2
+  - version: 2019.3
 platforms:
   - name: win
     type: Unity::VM
@@ -54,12 +55,6 @@ test_{{ platform.name }}_{{ editor.version }}:
 
 test_trigger:
   name: Tests Trigger
-  agent:
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.small
-  commands:
-    - dir
   triggers:
     branches:
       only:
