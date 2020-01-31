@@ -61,13 +61,6 @@ test_trigger:
         - "/.*/"
       except:
         - master
-  artifacts:
-    logs:
-      paths:
-        - "upm-ci~/test-results/**/*"
-    packages:
-      paths:
-        - "upm-ci~/packages/**/*"
   dependencies:
     - .yamato/upm-ci.yml#pack
 {% for editor in editors %}
