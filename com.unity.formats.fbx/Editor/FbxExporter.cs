@@ -2887,8 +2887,28 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 fbxSkeleton.Size.Set (1.0f * UnitScaleFactor);
                 fbxNode.SetNodeAttribute (fbxSkeleton);
             }
-            var fbxSkeletonType = rootBone != unityBone
-                ? FbxSkeleton.EType.eLimbNode : FbxSkeleton.EType.eRoot;
+            var fbxSkeletonType = FbxSkeleton.EType.eLimbNode;
+
+            // Only set the rootbone's skeleton type to FbxSkeleton.EType.eRoot
+            // if it has at least one child that is also a bone.
+            // Otherwise if it is marked as Root but has no bones underneath,
+            // Maya will import it as a Null object instead of a bone.
+            if (rootBone == unityBone && rootBone.childCount > 0)
+            {
+                var hasChildBone = false;
+                foreach (Transform child in unityBone)
+                {
+                    if (boneDict.ContainsKey(child))
+                    {
+                        hasChildBone = true;
+                        break;
+                    }
+                }
+                if (hasChildBone)
+                {
+                    fbxSkeletonType = FbxSkeleton.EType.eRoot;
+                }
+            }
             fbxSkeleton.SetSkeletonType (fbxSkeletonType);
 
             var bindPoses = skinnedMesh.sharedMesh.bindposes;
