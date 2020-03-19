@@ -1,5 +1,10 @@
 # Changes in Fbx Exporter
 
+## [3.0.2-preview.1] - 2020-03-19
+### Fixed
+- Blendshapes naming in FBX so that multiple blendshapes all import correctly in Maya.
+- Don't override transforms when creating FBX Linked Prefab, so that the prefab updates properly when the FBX transforms are modified.
+
 ## [3.0.1-preview.2] - 2020-01-22
 ### Added
 - Added option to export geometry when recording with the FBX recorder (in previous version geometry was always exported).
