@@ -412,7 +412,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // replace hierarchy in the scene
             if (!isPrefabAsset && toConvert != null)
             {
-                fbxInstance.transform.parent = toConvert.transform.parent;
+                // don't worry about keeping the world position in the prefab, as we will fix the transform on the instance root
+                fbxInstance.transform.SetParent(toConvert.transform.parent, worldPositionStays: false);
                 fbxInstance.transform.SetSiblingIndex(toConvert.transform.GetSiblingIndex());
             }
 
