@@ -451,10 +451,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // replace hierarchy in the scene
             if (!isPrefabAsset && toConvert != null)
             {
-                // keep the transform of the root of the prefab instance the same
-                var jsonTransform = EditorJsonUtility.ToJson(toConvert.transform);
-                EditorJsonUtility.FromJsonOverwrite(jsonTransform, fbxInstance.transform);
-
                 Undo.DestroyObjectImmediate(toConvert);
                 Undo.RegisterCreatedObjectUndo(fbxInstance, UndoConversionCreateObject);
                 SceneManagement.EditorSceneManager.MarkSceneDirty(fbxInstance.scene);
@@ -869,10 +865,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 // ignore MeshFilter and Transform, but still ensure scene references are maintained.
-                // Don't need to copy regular transform as the values should already be correct in the FBX.
+                // Don't need to copy regular transform (except for the root object) as the values should already be correct in the FBX.
                 // Furthermore, copying transform values may result in overrides in the prefab, which is undesired as if
                 // the transform is updated in the FBX, it won't be in the prefab.
-                if (fromComponent is MeshFilter || fromComponent is Transform)
+                if (fromComponent is MeshFilter || (fromComponent is Transform && from != root))
                 {
                     FixSceneReferences(fromComponent, to.GetComponent(fromComponent.GetType()), root);
                     continue;
