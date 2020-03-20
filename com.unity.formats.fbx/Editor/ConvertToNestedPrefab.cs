@@ -930,27 +930,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 FixSceneReferences(fromComponent, toComponent, root);
-
-                // Do not try to copy materials for ParticleSystemRenderer, since it is not in the
-                // FBX file
-                if (fromComponent is Renderer && !(fromComponent is ParticleSystemRenderer))
-                {
-                    var renderer = toComponent as Renderer;
-                    var sharedMaterials = renderer.sharedMaterials;
-                    EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                    renderer.sharedMaterials = sharedMaterials;
-                }
+                
                 // SkinnedMeshRenderer stores both the mesh and materials.
                 // Make sure these do not get copied over when the SkinnedMeshRenderer is updated.
-                else if (fromComponent is SkinnedMeshRenderer)
+                if (fromComponent is SkinnedMeshRenderer)
                 {
                     var skinnedMesh = toComponent as SkinnedMeshRenderer;
                     var mesh = skinnedMesh.sharedMesh;
-                    var materials = skinnedMesh.sharedMaterials;
                     EditorJsonUtility.FromJsonOverwrite(json, toComponent);
                     var toSkinnedMesh = toComponent as SkinnedMeshRenderer;
                     toSkinnedMesh.sharedMesh = mesh;
-                    toSkinnedMesh.sharedMaterials = materials;
                 }
                 else
                 {

@@ -107,7 +107,8 @@ namespace FbxExporter.UnitTests
             {
                 Assert.That(actualSkinnedMesh);
                 Assert.That(expectedSkinnedMesh.sharedMesh, Is.EqualTo(actualSkinnedMesh.sharedMesh));
-                Assert.That(expectedSkinnedMesh.sharedMaterial, Is.EqualTo(actualSkinnedMesh.sharedMaterial));
+                // material should not equal what is in the FBX, but what was originally in the scene
+                Assert.That(expectedSkinnedMesh.sharedMaterial, Is.Not.EqualTo(actualSkinnedMesh.sharedMaterial));
             }
 
             var expectedRenderer = expectedHierarchy.GetComponent<Renderer>();
@@ -115,7 +116,8 @@ namespace FbxExporter.UnitTests
             if (expectedRenderer)
             {
                 Assert.That(actualRenderer);
-                Assert.That(expectedRenderer.sharedMaterial, Is.EqualTo(actualRenderer.sharedMaterial));
+                // material should not equal what is in the FBX, but what was originally in the scene
+                Assert.That(expectedRenderer.sharedMaterial, Is.Not.EqualTo(actualRenderer.sharedMaterial));
             }
 
             var expectedTransform = expectedHierarchy.transform;
