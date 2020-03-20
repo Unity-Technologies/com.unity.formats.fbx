@@ -868,22 +868,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     continue;
                 }
 
-                // ignore MeshFilter, but still ensure scene references are maintained
-                if (fromComponent is MeshFilter)
+                // ignore MeshFilter and Transform, but still ensure scene references are maintained.
+                // Don't need to copy regular transform as the values should already be correct in the FBX.
+                // Furthermore, copying transform values may result in overrides in the prefab, which is undesired as if
+                // the transform is updated in the FBX, it won't be in the prefab.
+                if (fromComponent is MeshFilter || fromComponent is Transform)
                 {
-                    FixSceneReferences(fromComponent, to.GetComponent<MeshFilter>(), root);
+                    FixSceneReferences(fromComponent, to.GetComponent(fromComponent.GetType()), root);
                     continue;
                 }
 
                 // ignore FbxPrefab (when converting LinkedPrefabs)
                 // Also ignore RectTransform, since it is not currently possible to switch transforms
                 // in a prefab.
-                // Don't need to copy regular transform either as the values should already be correct in the FBX.
-                // Furthermore, copying transform values may result in overrides in the prefab, which is undesired as if
-                // the transform is updated in the FBX, it won't be in the prefab.
                 if (fromComponent is UnityEngine.Formats.Fbx.Exporter.FbxPrefab ||
-                    fromComponent is RectTransform ||
-                    fromComponent is Transform)
+                    fromComponent is RectTransform)
                 {
                     continue;
                 }
