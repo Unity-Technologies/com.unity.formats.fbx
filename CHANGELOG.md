@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [3.0.2-preview.1] - 2020-03-23
+### Fixed
+- Changed FBX Linked Prefab to keep Unity materials instead of using materials exported to FBX file.
+
 ## [3.0.1-preview.2] - 2020-01-22
 ### Added
 - Added option to export geometry when recording with the FBX recorder (in previous version geometry was always exported).
