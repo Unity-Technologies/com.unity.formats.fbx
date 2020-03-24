@@ -412,7 +412,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // replace hierarchy in the scene
             if (!isPrefabAsset && toConvert != null)
             {
-                fbxInstance.transform.parent = toConvert.transform.parent;
+                // don't worry about keeping the world position in the prefab, as we will fix the transform on the instance root
+                fbxInstance.transform.SetParent(toConvert.transform.parent, worldPositionStays: false);
                 fbxInstance.transform.SetSiblingIndex(toConvert.transform.GetSiblingIndex());
             }
 
@@ -863,10 +864,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     continue;
                 }
 
-                // ignore MeshFilter, but still ensure scene references are maintained
-                if (fromComponent is MeshFilter)
+                // ignore MeshFilter and Transform, but still ensure scene references are maintained.
+                // Don't need to copy regular transform (except for the root object) as the values should already be correct in the FBX.
+                // Furthermore, copying transform values may result in overrides in the prefab, which is undesired as if
+                // the transform is updated in the FBX, it won't be in the prefab.
+                if (fromComponent is MeshFilter || (fromComponent is Transform && from != root))
                 {
-                    FixSceneReferences(fromComponent, to.GetComponent<MeshFilter>(), root);
+                    FixSceneReferences(fromComponent, to.GetComponent(fromComponent.GetType()), root);
                     continue;
                 }
 
