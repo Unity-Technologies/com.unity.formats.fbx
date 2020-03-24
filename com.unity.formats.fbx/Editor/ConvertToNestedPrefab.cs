@@ -931,15 +931,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 FixSceneReferences(fromComponent, toComponent, root);
                 
-                // SkinnedMeshRenderer stores both the mesh and materials.
-                // Make sure these do not get copied over when the SkinnedMeshRenderer is updated.
+                // SkinnedMeshRenderer also stores the mesh.
+                // Make sure this is not copied over when the SkinnedMeshRenderer is updated,
+                // as we want to keep the mesh from the FBX not the scene.
                 if (fromComponent is SkinnedMeshRenderer)
                 {
                     var skinnedMesh = toComponent as SkinnedMeshRenderer;
                     var mesh = skinnedMesh.sharedMesh;
                     EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                    var toSkinnedMesh = toComponent as SkinnedMeshRenderer;
-                    toSkinnedMesh.sharedMesh = mesh;
+                    skinnedMesh.sharedMesh = mesh;
                 }
                 else
                 {
