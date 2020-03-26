@@ -412,7 +412,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // replace hierarchy in the scene
             if (!isPrefabAsset && toConvert != null)
             {
-                fbxInstance.transform.parent = toConvert.transform.parent;
+                // don't worry about keeping the world position in the prefab, as we will fix the transform on the instance root
+                fbxInstance.transform.SetParent(toConvert.transform.parent, worldPositionStays: false);
                 fbxInstance.transform.SetSiblingIndex(toConvert.transform.GetSiblingIndex());
             }
 
@@ -863,10 +864,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     continue;
                 }
 
-                // ignore MeshFilter, but still ensure scene references are maintained
-                if (fromComponent is MeshFilter)
+                // ignore MeshFilter and Transform, but still ensure scene references are maintained.
+                // Don't need to copy regular transform (except for the root object) as the values should already be correct in the FBX.
+                // Furthermore, copying transform values may result in overrides in the prefab, which is undesired as if
+                // the transform is updated in the FBX, it won't be in the prefab.
+                if (fromComponent is MeshFilter || (fromComponent is Transform && from != root))
                 {
-                    FixSceneReferences(fromComponent, to.GetComponent<MeshFilter>(), root);
+                    FixSceneReferences(fromComponent, to.GetComponent(fromComponent.GetType()), root);
                     continue;
                 }
 
@@ -930,27 +934,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 FixSceneReferences(fromComponent, toComponent, root);
-
-                // Do not try to copy materials for ParticleSystemRenderer, since it is not in the
-                // FBX file
-                if (fromComponent is Renderer && !(fromComponent is ParticleSystemRenderer))
-                {
-                    var renderer = toComponent as Renderer;
-                    var sharedMaterials = renderer.sharedMaterials;
-                    EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                    renderer.sharedMaterials = sharedMaterials;
-                }
-                // SkinnedMeshRenderer stores both the mesh and materials.
-                // Make sure these do not get copied over when the SkinnedMeshRenderer is updated.
-                else if (fromComponent is SkinnedMeshRenderer)
+                
+                // SkinnedMeshRenderer also stores the mesh.
+                // Make sure this is not copied over when the SkinnedMeshRenderer is updated,
+                // as we want to keep the mesh from the FBX not the scene.
+                if (fromComponent is SkinnedMeshRenderer)
                 {
                     var skinnedMesh = toComponent as SkinnedMeshRenderer;
                     var mesh = skinnedMesh.sharedMesh;
-                    var materials = skinnedMesh.sharedMaterials;
                     EditorJsonUtility.FromJsonOverwrite(json, toComponent);
-                    var toSkinnedMesh = toComponent as SkinnedMeshRenderer;
-                    toSkinnedMesh.sharedMesh = mesh;
-                    toSkinnedMesh.sharedMaterials = materials;
+                    skinnedMesh.sharedMesh = mesh;
                 }
                 else
                 {

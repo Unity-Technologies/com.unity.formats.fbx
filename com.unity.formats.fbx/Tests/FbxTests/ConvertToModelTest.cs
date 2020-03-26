@@ -107,7 +107,8 @@ namespace FbxExporter.UnitTests
             {
                 Assert.That(actualSkinnedMesh);
                 Assert.That(expectedSkinnedMesh.sharedMesh, Is.EqualTo(actualSkinnedMesh.sharedMesh));
-                Assert.That(expectedSkinnedMesh.sharedMaterial, Is.EqualTo(actualSkinnedMesh.sharedMaterial));
+                // material should not equal what is in the FBX, but what was originally in the scene
+                Assert.That(expectedSkinnedMesh.sharedMaterial, Is.Not.EqualTo(actualSkinnedMesh.sharedMaterial));
             }
 
             var expectedRenderer = expectedHierarchy.GetComponent<Renderer>();
@@ -115,7 +116,8 @@ namespace FbxExporter.UnitTests
             if (expectedRenderer)
             {
                 Assert.That(actualRenderer);
-                Assert.That(expectedRenderer.sharedMaterial, Is.EqualTo(actualRenderer.sharedMaterial));
+                // material should not equal what is in the FBX, but what was originally in the scene
+                Assert.That(expectedRenderer.sharedMaterial, Is.Not.EqualTo(actualRenderer.sharedMaterial));
             }
 
             var expectedTransform = expectedHierarchy.transform;
@@ -433,6 +435,7 @@ namespace FbxExporter.UnitTests
                 b2.transform.parent = b.transform; // in alpha order
                 a.AddComponent<BoxCollider> ();
                 a1.transform.localPosition = new Vector3 (1, 2, 3);
+                a.transform.localPosition = new Vector3(4, 5, 6);
 
                 Assert.AreNotEqual(b.GetComponent<MeshFilter>().sharedMesh, a.GetComponent<MeshFilter>().sharedMesh);
                 Assert.IsFalse (b.GetComponent<BoxCollider> ());
@@ -441,11 +444,12 @@ namespace FbxExporter.UnitTests
 
                 ConvertToNestedPrefab.UpdateFromSourceRecursive (b, a);
 
-                // everything except the mesh + materials should change
+                // everything except the mesh + materials and child transforms should change
                 Assert.AreNotEqual(b.GetComponent<MeshFilter>().sharedMesh, a.GetComponent<MeshFilter>().sharedMesh);
                 Assert.IsTrue (b.GetComponent<BoxCollider> ());
                 Assert.AreEqual ("BB", b.transform.GetChild (1).name);
-                Assert.AreEqual (a1.transform.localPosition, b1.transform.localPosition);
+                Assert.AreEqual(a.transform.localPosition, b.transform.localPosition);
+                Assert.AreNotEqual (a1.transform.localPosition, b1.transform.localPosition);
             }
 
             // Test GetFbxAssetOrNull
