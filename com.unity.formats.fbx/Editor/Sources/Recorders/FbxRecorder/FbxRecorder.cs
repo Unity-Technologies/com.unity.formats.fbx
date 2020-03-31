@@ -39,7 +39,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var clipName = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
                 
 #if UNITY_2018_3_OR_NEWER
-                aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate);
+                var options = new Animations.CurveFilterOptions();
+                options.keyframeReduction = false;
+                aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate, options);
 #else
                 aInput.gameObjectRecorder.SaveToClip(clip);
 #endif
