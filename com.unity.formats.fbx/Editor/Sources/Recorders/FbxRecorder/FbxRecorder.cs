@@ -43,7 +43,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 options.keyframeReduction = false;
                 aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate, options);
 #else
-                aInput.gameObjectRecorder.SaveToClip(clip, settings.FrameRate);
+                aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate);
 #endif
                 var root = ((AnimationInputSettings)aInput.settings).gameObject;
                 clip.name = "recorded_clip";
