@@ -8,7 +8,7 @@
     - To revert to using the FBX materials in the Linked Prefab, open the prefab editor and remove the material overrides.
 - Fix issue where Maya imports root bone as null object if it doesn't have any descendants that are also bones.
 - Don't reduce keyframes after recording as it can create unnecessary errors/discrepancies in the exported curve.
-- Update to FBX bindings to fix error when building for non-standalone platforms.
+- Updated to latest com.autodesk.fbx (3.0.1-preview.1), to fix DLL not found errors if building for non-standalone platforms (e.g. Android, WebGL).
 
 ## [3.0.1-preview.2] - 2020-01-22
 ### Added
