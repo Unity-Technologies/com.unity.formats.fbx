@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [3.1.0-preview.1] - 2020-04-01
+## [3.1.0-preview.1] - 2020-04-02
 ### Fixed
 - Blendshapes naming in FBX so that multiple blendshapes all import correctly in Maya. Thank you to @lazlo-bonin for the fix.
 - Don't override transforms when creating FBX Linked Prefab, so that the prefab updates properly when the FBX transforms are modified.
