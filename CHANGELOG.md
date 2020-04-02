@@ -1,5 +1,13 @@
 # Changes in Fbx Exporter
 
+## [4.0.0-preview.1] - 2020-04-02
+### Changed
+- Use DeepConvertScene from Autodesk® FBX SDK to convert from Unity (left handed system with odd parity) to Maya (right handed system with odd parity) axis system.
+    - Previously the conversion was performed by the FBX exporter.
+- Export animation curve tangents instead of baking animation.
+    - With the exception of rotation curves for objects with a prerotation (i.e. bones of skinned meshes), as prerotation and rotation are combined in Unity but separated on export.
+- Do not search for Autodesk® installs in `D:/Program Files/Autodesk` (not a standard drive).
+    
 ## [3.0.2-preview.1] - 2020-03-25
 ### Fixed
 - Blendshapes naming in FBX so that multiple blendshapes all import correctly in Maya. Thank you to @lazlo-bonin for the fix.
