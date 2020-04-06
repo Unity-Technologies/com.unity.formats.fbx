@@ -68,7 +68,7 @@ proc storeAttribute(string $node, string $attr, string $attrValue){
 
 
 proc int setExists(string $setName){
-    return stringArrayContains($setName, `listSets -allSets`);
+    return stringArrayContains($setName, `ls -sets`);
 }
 
 proc int loadUnityPlugin(string $plugin){
@@ -561,7 +561,7 @@ proc string[] getUnityExportSets(){
     //if the selection set ends w "_UnityExportSet" and it has at least the custom attributes UnityFbxModelFilePath & UnityFbxModelFileName then it's one of ours.
     string $unityExportSets[];
     
-    string $mayaSets[] = `listSets -allSets`;
+    string $mayaSets[] = `ls -sets`;
     
     int $i = 0;
     for($k=0; $k<size($mayaSets); ++$k){
