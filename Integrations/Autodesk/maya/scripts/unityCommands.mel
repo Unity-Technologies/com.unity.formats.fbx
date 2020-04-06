@@ -755,3 +755,13 @@ global proc unityExportModelAnim(){
     global int $UnityExportModelAnim;
     unityExport($UnityExportModelAnim);
 }
+
+global proc unityCreateExportSet(){
+    $origSelection = `ls -sl`;
+    if(size($origSelection) <= 0){
+        // nothing selected
+        print ("Nothing selected");
+        return;
+    }
+    setupNewExportSet("", 0, $origSelection);
+}
