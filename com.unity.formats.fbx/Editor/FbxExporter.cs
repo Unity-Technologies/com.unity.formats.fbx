@@ -3106,7 +3106,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// This function exports the other components and animation.
         /// </summary>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        private bool ExportComponents(FbxScene fbxScene, bool exportAnim = true)
+        private bool ExportComponents(FbxScene fbxScene)
         {
             var animationNodes = new HashSet<GameObject> ();
 
@@ -3457,7 +3457,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
 
                     if(!animOnly){
-                        if(!ExportComponents(fbxScene, ExportOptions.ModelAnimIncludeOption != ExportSettings.Include.Model)){
+                        if(!ExportComponents(fbxScene)){
                             Debug.LogWarning ("Export Cancelled");
                             return 0;
                         }

@@ -1,11 +1,14 @@
 # Changes in Fbx Exporter
 
-## [3.0.2-preview.1] - 2020-03-25
+## [3.1.0-preview.1] - 2020-04-02
 ### Fixed
 - Blendshapes naming in FBX so that multiple blendshapes all import correctly in Maya. Thank you to @lazlo-bonin for the fix.
 - Don't override transforms when creating FBX Linked Prefab, so that the prefab updates properly when the FBX transforms are modified.
 - Changed FBX Linked Prefab to keep Unity materials instead of using materials exported to FBX file.
+    - To revert to using the FBX materials in the Linked Prefab, open the prefab editor and remove the material overrides.
 - Fix issue where Maya imports root bone as null object if it doesn't have any descendants that are also bones.
+- Don't reduce keyframes after recording as it can create unnecessary errors/discrepancies in the exported curve.
+- Updated to latest com.autodesk.fbx (3.0.1-preview.1), to fix DLL not found errors if building for non-standalone platforms (e.g. Android, WebGL).
 
 ## [3.0.1-preview.2] - 2020-01-22
 ### Added

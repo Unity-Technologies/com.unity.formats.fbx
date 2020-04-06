@@ -38,10 +38,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var absolutePath = FileNameGenerator.SanitizePath(settings.FileNameGenerator.BuildAbsolutePath(session));
                 var clipName = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
                 
-#if UNITY_2018_3_OR_NEWER
-                aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate);
+#if UNITY_2019_3_OR_NEWER
+                var options = new Animations.CurveFilterOptions();
+                options.keyframeReduction = false;
+                aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate, options);
 #else
-                aInput.gameObjectRecorder.SaveToClip(clip);
+                aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate);
 #endif
                 var root = ((AnimationInputSettings)aInput.settings).gameObject;
                 clip.name = "recorded_clip";
