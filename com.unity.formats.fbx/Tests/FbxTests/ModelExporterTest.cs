@@ -568,6 +568,10 @@ namespace FbxExporter.UnitTests
 #if UNITY_2019_1_OR_NEWER
             importer.optimizeMeshPolygons = false;
             importer.optimizeMeshVertices = false;
+            importer.meshCompression = ModelImporterMeshCompression.Off;
+            importer.importBlendShapeNormals = ModelImporterNormals.None;
+            importer.importBlendShapes = true;
+            importer.weldVertices = true;
 #else
             importer.optimizeMesh = false;
 #endif // UNITY_2019_1_OR_NEWER
@@ -731,21 +735,41 @@ namespace FbxExporter.UnitTests
             Debug.LogWarningFormat ("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
         }
 
-        public class Vector3Comparer : IComparer<Vector3>
+        private delegate float GetDistance<T>(T x, T y);
+        private static float ComputeHausdorffDistance<T>(T[] orig, T[] converted, GetDistance<T> getDistance)
         {
-            public int Compare(Vector3 a, Vector3 b)
+            Assert.AreEqual(orig.Length, converted.Length);
+            // Compute the Hausdorff distance to determine if two meshes have the same vertices as
+            // we can't rely on the vertex order matching.
+            float maxDistance = 0;
+            for (int j = 0; j < orig.Length; j++)
             {
-                Assert.That(a.x, Is.EqualTo(b.x).Within(0.00001f));
-                Assert.That(a.y, Is.EqualTo(b.y).Within(0.00001f));
-                Assert.That(a.z, Is.EqualTo(b.z).Within(0.00001f));
-                return 0;  // we're almost equal
+                float minDistance = float.PositiveInfinity;
+                var pos = orig[j];
+                for (int k = 0; k < orig.Length; k++)
+                {
+                    // find closest vertex in convertedMeshes
+                    var convertedPos = converted[k];
+
+                    var distance = getDistance(pos, convertedPos);
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                    }
+                }
+                if (minDistance > maxDistance)
+                {
+                    maxDistance = minDistance;
+                }
             }
+            return maxDistance;
         }
 
-        [Ignore("Blendshapes not working yet")]
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "BlendShapeTestCases")]
         public void TestBlendShapeExport(string fbxPath)
         {
+            const float epsilon = 0.001f;
+
             fbxPath = FindPathInUnitTests (fbxPath);
             Assert.That (fbxPath, Is.Not.Null);
 
@@ -768,6 +792,8 @@ namespace FbxExporter.UnitTests
                 var fbxDeltaNormals = new Vector3[exportedMesh.vertexCount];
                 var fbxDeltaTangents = new Vector3[exportedMesh.vertexCount];
 
+                Assert.AreEqual(deltaVertices.Length, fbxDeltaVertices.Length);
+
                 for (int bi = 0; bi < originalMesh.blendShapeCount; ++bi)
                 {
                     Assert.That(originalMesh.GetBlendShapeName(bi), Is.EqualTo(exportedMesh.GetBlendShapeName(bi)));
@@ -781,10 +807,17 @@ namespace FbxExporter.UnitTests
                         originalMesh.GetBlendShapeFrameVertices(bi, fi, deltaVertices, deltaNormals, deltaTangents);
                         exportedMesh.GetBlendShapeFrameVertices(bi, fi, fbxDeltaVertices, fbxDeltaNormals, fbxDeltaTangents);
 
-                        var v3comparer = new Vector3Comparer();
-                        Assert.That(deltaVertices, Is.EqualTo(fbxDeltaVertices).Using<Vector3>(v3comparer), string.Format("delta vertices don't match"));
-                        Assert.That(deltaNormals, Is.EqualTo(fbxDeltaNormals).Using<Vector3>(v3comparer), string.Format("delta normals don't match"));
-                        Assert.That(deltaTangents, Is.EqualTo(fbxDeltaTangents).Using<Vector3>(v3comparer), string.Format("delta tangents don't match"));
+                        var worldVertices = new Vector3[originalSMR.sharedMesh.vertices.Length];
+                        var exportedWorldVertices = new Vector3[exportedSMR.sharedMesh.vertices.Length];
+                        for (int k = 0; k < worldVertices.Length; k++)
+                        {
+                            worldVertices[k] = originalSMR.transform.TransformPoint(originalMesh.vertices[k] + deltaVertices[k]);
+                            exportedWorldVertices[k] = exportedSMR.transform.TransformPoint(exportedMesh.vertices[k] + fbxDeltaVertices[k]);
+                        }
+                        // Compute the Hausdorff distance to determine if two meshes have the same vertices as
+                        // we can't rely on the vertex order matching.
+                        var hausdorffDistance = ComputeHausdorffDistance<Vector3>(worldVertices, exportedWorldVertices, (Vector3 a, Vector3 b) => Vector3.Distance(a, b));
+                        Assert.That(hausdorffDistance, Is.LessThan(epsilon), "Maximum distance between two vertices greater than epsilon");
 
                     }
                 }
