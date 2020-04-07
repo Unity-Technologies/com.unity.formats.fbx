@@ -570,7 +570,7 @@ namespace FbxExporter.UnitTests
             importer.optimizeMeshPolygons = false;
             importer.optimizeMeshVertices = false;
             importer.meshCompression = ModelImporterMeshCompression.Off;
-            // If blendshape normals are imported or weldVertices is turned off,
+            // If either blendshape normals are imported or weldVertices is turned off (or both),
             // the vertex count between the original and exported meshes does not match.
             importer.importBlendShapeNormals = ModelImporterNormals.None;
             importer.weldVertices = true;
@@ -769,6 +769,8 @@ namespace FbxExporter.UnitTests
             return maxDistance;
         }
 
+        // Test for bug where exporting FbxShapes with empty names would fail to import all
+        // blendshapes except the first in Maya (fixed by UT-3216)
         private void TestFbxShapeNamesNotEmpty(FbxNode node)
         {
             var mesh = node.GetMesh();
@@ -841,10 +843,6 @@ namespace FbxExporter.UnitTests
                 // Get blendshapes and check that the FbxShapes all have names
                 var rootNode = fbxScene.GetRootNode();
                 TestFbxShapeNamesNotEmpty(rootNode);
-
-                // cleanup
-                fbxScene.Destroy();
-                fbxImporter.Destroy();
             }
         }
 
@@ -899,7 +897,7 @@ namespace FbxExporter.UnitTests
                         }
                         // Compute the Hausdorff distance to determine if two meshes have the same vertices as
                         // we can't rely on the vertex order matching.
-                        var hausdorffDistance = ComputeHausdorffDistance<Vector3>(worldVertices, exportedWorldVertices, (Vector3 a, Vector3 b) => Vector3.Distance(a, b));
+                        var hausdorffDistance = ComputeHausdorffDistance<Vector3>(worldVertices, exportedWorldVertices, Vector3.Distance);
                         Assert.That(hausdorffDistance, Is.LessThan(epsilon), "Maximum distance between two vertices greater than epsilon");
 
                         // TODO: Investigate importing blendshape normals without discrepancy in vertex count between the original/exported meshes
