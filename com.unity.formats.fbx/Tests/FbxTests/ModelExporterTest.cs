@@ -566,11 +566,13 @@ namespace FbxExporter.UnitTests
 
             var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
 #if UNITY_2019_1_OR_NEWER
+            importer.importBlendShapes = true;
             importer.optimizeMeshPolygons = false;
             importer.optimizeMeshVertices = false;
             importer.meshCompression = ModelImporterMeshCompression.Off;
+            // If blendshape normals are imported or weldVertices is turned off,
+            // the vertex count between the original and exported meshes does not match.
             importer.importBlendShapeNormals = ModelImporterNormals.None;
-            importer.importBlendShapes = true;
             importer.weldVertices = true;
 #else
             importer.optimizeMesh = false;
@@ -900,6 +902,8 @@ namespace FbxExporter.UnitTests
                         var hausdorffDistance = ComputeHausdorffDistance<Vector3>(worldVertices, exportedWorldVertices, (Vector3 a, Vector3 b) => Vector3.Distance(a, b));
                         Assert.That(hausdorffDistance, Is.LessThan(epsilon), "Maximum distance between two vertices greater than epsilon");
 
+                        // TODO: Investigate importing blendshape normals without discrepancy in vertex count between the original/exported meshes
+                        //       and add test to compare blendshape normals and tangents.
                     }
                 }
             }
