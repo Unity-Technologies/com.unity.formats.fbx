@@ -552,7 +552,7 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual (mesh.tangents, fbxMesh.tangents);
         }
 
-        private void ExportSkinnedMesh(string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh){
+        private string ExportSkinnedMesh(string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh){
             // add fbx to scene
             GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath(fileToExport) as GameObject;
             Assert.IsNotNull (originalFbxObj);
@@ -585,6 +585,8 @@ namespace FbxExporter.UnitTests
 
             exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
             Assert.IsNotNull (exportedSkinnedMesh);
+
+            return filename;
         }
 
         public class SkinnedMeshTestDataClass
@@ -765,6 +767,85 @@ namespace FbxExporter.UnitTests
             return maxDistance;
         }
 
+        private void TestFbxShapeNamesNotEmpty(FbxNode node)
+        {
+            var mesh = node.GetMesh();
+            if (mesh != null)
+            {
+                for (int i = 0; i < mesh.GetDeformerCount(); i++)
+                {
+                    var blendshape = mesh.GetBlendShapeDeformer(i);
+                    if (blendshape == null)
+                    {
+                        continue;
+                    }
+
+                    for(int j = 0; j < blendshape.GetBlendShapeChannelCount(); j++)
+                    {
+                        var blendShapeChannel = blendshape.GetBlendShapeChannel(j);
+                        for (int k = 0; k < blendShapeChannel.GetTargetShapeCount(); k++)
+                        {
+                            var shape = blendShapeChannel.GetTargetShape(k);
+                            Assert.That(string.IsNullOrEmpty(shape.GetName()), Is.False, string.Format("FbxShape missing name on blendshape {0}", blendshape.GetName()));
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < node.GetChildCount(); i++)
+            {
+                TestFbxShapeNamesNotEmpty(node.GetChild(i));
+            }
+        }
+
+        private void FbxImportAndTestBlendshapes(string fbxPath)
+        {
+            // Create the FBX manager
+            using (var fbxManager = FbxManager.Create())
+            {
+                FbxIOSettings fbxIOSettings = FbxIOSettings.Create(fbxManager, Globals.IOSROOT);
+
+                // Configure the IO settings.
+                fbxManager.SetIOSettings(fbxIOSettings);
+
+                // Create the importer 
+                var fbxImporter = FbxImporter.Create(fbxManager, "Importer");
+
+                // Initialize the importer.
+                int fileFormat = -1;
+
+                bool status = fbxImporter.Initialize(fbxPath, fileFormat, fbxIOSettings);
+                FbxStatus fbxStatus = fbxImporter.GetStatus();
+
+                Assert.That(status, Is.True, fbxStatus.GetErrorString());
+                Assert.That(fbxImporter.IsFBX(), "file does not contain FBX data");
+
+                // Import options. Determine what kind of data is to be imported.
+                // The default is true, but here we set the options explictly.
+                fbxIOSettings.SetBoolProp(Globals.IMP_FBX_MATERIAL, false);
+                fbxIOSettings.SetBoolProp(Globals.IMP_FBX_TEXTURE, false);
+                fbxIOSettings.SetBoolProp(Globals.IMP_FBX_ANIMATION, false);
+                fbxIOSettings.SetBoolProp(Globals.IMP_FBX_EXTRACT_EMBEDDED_DATA, false);
+                fbxIOSettings.SetBoolProp(Globals.IMP_FBX_GLOBAL_SETTINGS, true);
+
+                // Create a scene
+                var fbxScene = FbxScene.Create(fbxManager, "Scene");
+
+                // Import the scene to the file.
+                status = fbxImporter.Import(fbxScene);
+                fbxStatus = fbxImporter.GetStatus();
+                Assert.That(status, Is.True, fbxStatus.GetErrorString());
+                
+                // Get blendshapes and check that the FbxShapes all have names
+                var rootNode = fbxScene.GetRootNode();
+                TestFbxShapeNamesNotEmpty(rootNode);
+
+                // cleanup
+                fbxScene.Destroy();
+                fbxImporter.Destroy();
+            }
+        }
+
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "BlendShapeTestCases")]
         public void TestBlendShapeExport(string fbxPath)
         {
@@ -774,7 +855,7 @@ namespace FbxExporter.UnitTests
             Assert.That (fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSMR, exportedSMR;
-            ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
+            var exportedFbxPath = ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
 
             var originalMesh = originalSMR.sharedMesh;
             var exportedMesh = exportedSMR.sharedMesh;
@@ -822,6 +903,8 @@ namespace FbxExporter.UnitTests
                     }
                 }
             }
+
+            FbxImportAndTestBlendshapes(exportedFbxPath);
         }
 
         [Test]
