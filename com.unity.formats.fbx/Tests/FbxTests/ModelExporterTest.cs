@@ -541,7 +541,7 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual (mesh.tangents, fbxMesh.tangents);
         }
 
-        private void ExportSkinnedMesh(string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh){
+        private string ExportSkinnedMesh(string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh){
             // add fbx to scene
             GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath(fileToExport) as GameObject;
             Assert.IsNotNull (originalFbxObj);
@@ -555,8 +555,14 @@ namespace FbxExporter.UnitTests
 
             var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
 #if UNITY_2019_1_OR_NEWER
+            importer.importBlendShapes = true;
             importer.optimizeMeshPolygons = false;
             importer.optimizeMeshVertices = false;
+            importer.meshCompression = ModelImporterMeshCompression.Off;
+            // If either blendshape normals are imported or weldVertices is turned off (or both),
+            // the vertex count between the original and exported meshes does not match.
+            importer.importBlendShapeNormals = ModelImporterNormals.None;
+            importer.weldVertices = true;
 #else
             importer.optimizeMesh = false;
 #endif // UNITY_2019_1_OR_NEWER
@@ -570,6 +576,8 @@ namespace FbxExporter.UnitTests
 
             exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
             Assert.IsNotNull (exportedSkinnedMesh);
+
+            return filename;
         }
 
         public class SkinnedMeshTestDataClass
@@ -720,26 +728,123 @@ namespace FbxExporter.UnitTests
             Debug.LogWarningFormat ("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
         }
 
-        public class Vector3Comparer : IComparer<Vector3>
+        private delegate float GetDistance<T>(T x, T y);
+        private static float ComputeHausdorffDistance<T>(T[] orig, T[] converted, GetDistance<T> getDistance)
         {
-            public int Compare(Vector3 a, Vector3 b)
+            Assert.AreEqual(orig.Length, converted.Length);
+            // Compute the Hausdorff distance to determine if two meshes have the same vertices as
+            // we can't rely on the vertex order matching.
+            float maxDistance = 0;
+            for (int j = 0; j < orig.Length; j++)
             {
-                Assert.That(a.x, Is.EqualTo(b.x).Within(0.00001f));
-                Assert.That(a.y, Is.EqualTo(b.y).Within(0.00001f));
-                Assert.That(a.z, Is.EqualTo(b.z).Within(0.00001f));
-                return 0;  // we're almost equal
+                float minDistance = float.PositiveInfinity;
+                var pos = orig[j];
+                for (int k = 0; k < orig.Length; k++)
+                {
+                    // find closest vertex in convertedMeshes
+                    var convertedPos = converted[k];
+
+                    var distance = getDistance(pos, convertedPos);
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                    }
+                }
+                if (minDistance > maxDistance)
+                {
+                    maxDistance = minDistance;
+                }
+            }
+            return maxDistance;
+        }
+
+        // Test for bug where exporting FbxShapes with empty names would fail to import all
+        // blendshapes except the first in Maya (fixed by UT-3216)
+        private void TestFbxShapeNamesNotEmpty(FbxNode node)
+        {
+            var mesh = node.GetMesh();
+            if (mesh != null)
+            {
+                for (int i = 0; i < mesh.GetDeformerCount(); i++)
+                {
+                    var blendshape = mesh.GetBlendShapeDeformer(i);
+                    if (blendshape == null)
+                    {
+                        continue;
+                    }
+
+                    for(int j = 0; j < blendshape.GetBlendShapeChannelCount(); j++)
+                    {
+                        var blendShapeChannel = blendshape.GetBlendShapeChannel(j);
+                        for (int k = 0; k < blendShapeChannel.GetTargetShapeCount(); k++)
+                        {
+                            var shape = blendShapeChannel.GetTargetShape(k);
+                            Assert.That(string.IsNullOrEmpty(shape.GetName()), Is.False, string.Format("FbxShape missing name on blendshape {0}", blendshape.GetName()));
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < node.GetChildCount(); i++)
+            {
+                TestFbxShapeNamesNotEmpty(node.GetChild(i));
             }
         }
 
-        [Ignore("Blendshapes not working yet")]
+        private void FbxImportAndTestBlendshapes(string fbxPath)
+        {
+            // Create the FBX manager
+            using (var fbxManager = FbxManager.Create())
+            {
+                FbxIOSettings fbxIOSettings = FbxIOSettings.Create(fbxManager, Globals.IOSROOT);
+
+                // Configure the IO settings.
+                fbxManager.SetIOSettings(fbxIOSettings);
+
+                // Create the importer 
+                var fbxImporter = FbxImporter.Create(fbxManager, "Importer");
+
+                // Initialize the importer.
+                int fileFormat = -1;
+
+                bool status = fbxImporter.Initialize(fbxPath, fileFormat, fbxIOSettings);
+                FbxStatus fbxStatus = fbxImporter.GetStatus();
+
+                Assert.That(status, Is.True, fbxStatus.GetErrorString());
+                Assert.That(fbxImporter.IsFBX(), "file does not contain FBX data");
+
+                // Import options. Determine what kind of data is to be imported.
+                // The default is true, but here we set the options explictly.
+                fbxIOSettings.SetBoolProp(Globals.IMP_FBX_MATERIAL, false);
+                fbxIOSettings.SetBoolProp(Globals.IMP_FBX_TEXTURE, false);
+                fbxIOSettings.SetBoolProp(Globals.IMP_FBX_ANIMATION, false);
+                fbxIOSettings.SetBoolProp(Globals.IMP_FBX_EXTRACT_EMBEDDED_DATA, false);
+                fbxIOSettings.SetBoolProp(Globals.IMP_FBX_GLOBAL_SETTINGS, true);
+
+                // Create a scene
+                var fbxScene = FbxScene.Create(fbxManager, "Scene");
+
+                // Import the scene to the file.
+                status = fbxImporter.Import(fbxScene);
+                fbxStatus = fbxImporter.GetStatus();
+                Assert.That(status, Is.True, fbxStatus.GetErrorString());
+                
+                // Get blendshapes and check that the FbxShapes all have names
+                var rootNode = fbxScene.GetRootNode();
+                TestFbxShapeNamesNotEmpty(rootNode);
+            }
+        }
+
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "BlendShapeTestCases")]
         public void TestBlendShapeExport(string fbxPath)
         {
+            const float epsilon = 0.001f;
+
             fbxPath = FindPathInUnitTests (fbxPath);
             Assert.That (fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSMR, exportedSMR;
-            ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
+            var exportedFbxPath = ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
 
             var originalMesh = originalSMR.sharedMesh;
             var exportedMesh = exportedSMR.sharedMesh;
@@ -757,6 +862,8 @@ namespace FbxExporter.UnitTests
                 var fbxDeltaNormals = new Vector3[exportedMesh.vertexCount];
                 var fbxDeltaTangents = new Vector3[exportedMesh.vertexCount];
 
+                Assert.AreEqual(deltaVertices.Length, fbxDeltaVertices.Length);
+
                 for (int bi = 0; bi < originalMesh.blendShapeCount; ++bi)
                 {
                     Assert.That(originalMesh.GetBlendShapeName(bi), Is.EqualTo(exportedMesh.GetBlendShapeName(bi)));
@@ -770,14 +877,25 @@ namespace FbxExporter.UnitTests
                         originalMesh.GetBlendShapeFrameVertices(bi, fi, deltaVertices, deltaNormals, deltaTangents);
                         exportedMesh.GetBlendShapeFrameVertices(bi, fi, fbxDeltaVertices, fbxDeltaNormals, fbxDeltaTangents);
 
-                        var v3comparer = new Vector3Comparer();
-                        Assert.That(deltaVertices, Is.EqualTo(fbxDeltaVertices).Using<Vector3>(v3comparer), string.Format("delta vertices don't match"));
-                        Assert.That(deltaNormals, Is.EqualTo(fbxDeltaNormals).Using<Vector3>(v3comparer), string.Format("delta normals don't match"));
-                        Assert.That(deltaTangents, Is.EqualTo(fbxDeltaTangents).Using<Vector3>(v3comparer), string.Format("delta tangents don't match"));
+                        var worldVertices = new Vector3[originalSMR.sharedMesh.vertices.Length];
+                        var exportedWorldVertices = new Vector3[exportedSMR.sharedMesh.vertices.Length];
+                        for (int k = 0; k < worldVertices.Length; k++)
+                        {
+                            worldVertices[k] = originalSMR.transform.TransformPoint(originalMesh.vertices[k] + deltaVertices[k]);
+                            exportedWorldVertices[k] = exportedSMR.transform.TransformPoint(exportedMesh.vertices[k] + fbxDeltaVertices[k]);
+                        }
+                        // Compute the Hausdorff distance to determine if two meshes have the same vertices as
+                        // we can't rely on the vertex order matching.
+                        var hausdorffDistance = ComputeHausdorffDistance<Vector3>(worldVertices, exportedWorldVertices, Vector3.Distance);
+                        Assert.That(hausdorffDistance, Is.LessThan(epsilon), "Maximum distance between two vertices greater than epsilon");
 
+                        // TODO: Investigate importing blendshape normals without discrepancy in vertex count between the original/exported meshes
+                        //       and add test to compare blendshape normals and tangents.
                     }
                 }
             }
+
+            FbxImportAndTestBlendshapes(exportedFbxPath);
         }
 
         [Test]
