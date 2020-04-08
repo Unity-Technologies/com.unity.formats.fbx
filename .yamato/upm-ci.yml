@@ -34,7 +34,7 @@ pack:
        - "upm-ci~/**/*"
 
 
-{% for editor in test_trigger_editors %}
+{% for editor in publish_editors %}
 {% for platform in platforms %}
 test_{{ platform.name }}_{{ editor.version }}:
   name : Test version {{ editor.version }} on {{ platform.name }}
