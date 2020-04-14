@@ -3680,6 +3680,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         internal static bool IsEditorClip(object obj)
         {
+            if (obj == null)
+                return false;
+
             return obj.GetType().Name.Contains("EditorClip");
         }
 
