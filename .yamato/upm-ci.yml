@@ -1,9 +1,13 @@
-editors:
+test_trigger_editors:
+  - version: 2018.4
+  - version: 2019.3
+publish_trigger_editors:
   - version: 2018.3
   - version: 2018.4
   - version: 2019.1
   - version: 2019.2
   - version: 2019.3
+  - version: 2020.1
 platforms:
   - name: win
     type: Unity::VM
@@ -30,7 +34,7 @@ pack:
        - "upm-ci~/**/*"
 
 
-{% for editor in editors %}
+{% for editor in publish_trigger_editors %}
 {% for platform in platforms %}
 test_{{ platform.name }}_{{ editor.version }}:
   name : Test version {{ editor.version }} on {{ platform.name }}
@@ -63,11 +67,26 @@ test_trigger:
         - master
   dependencies:
     - .yamato/upm-ci.yml#pack
-{% for editor in editors %}
+{% for editor in test_trigger_editors %}
 {% for platform in platforms %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
 {% endfor %}
 {% endfor %}
+
+publish_test_trigger:
+  name: Publish Tests Trigger
+  triggers:
+    tags:
+      only:
+        - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?
+  dependencies:
+    - .yamato/upm-ci.yml#pack
+{% for editor in publish_trigger_editors %}
+{% for platform in platforms %}
+    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+{% endfor %}
+{% endfor %}  
+      
 
 publish:
   name: Publish to Internal Registry
@@ -88,8 +107,5 @@ publish:
         - "upm-ci~/packages/*.tgz"
   dependencies:
     - .yamato/upm-ci.yml#pack
-{% for editor in editors %}
-{% for platform in platforms %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-{% endfor %}
-{% endfor %}
+    - .yamato/upm-ci.yml#test_trigger
+    - .yamato/upm-ci.yml#publish_test_trigger
