@@ -5,6 +5,11 @@ global string $UnityFbxAnimFileNameAttr = "unityFbxAnimFileName";
 global string $UnityFbxNamespaceAttr = "unityFbxNamespace";
 global string $UnityExportSetNameFormat = "^1s_UnityExportSet";
 
+// global string $UnityModuleName = "UnityFbxForMaya";
+
+global string $UnityDefaultImportSettingsFileName = "unityFbxImportSettings.mel";
+global string $UnityDefaultExportSettingsFileName = "unityFbxExportSettings.mel";
+
 global int $UnityFbxFilePathIndex = 0;
 global int $UnityFbxFileNameIndex = 1;
 global int $UnityFbxAnimFilePathIndex = 2;
@@ -28,9 +33,12 @@ global proc unityRemoveNativeMenuOnLoad(){
 proc int loadUnityFbxSettings(string $fileName, string $settingType){
     // check if the file exists
     if (`file -q -ex $fileName` == false){
-        error ("Failed to find Unity Fbx "+$settingType+" Settings at: " + $fileName);
-        return false;
+        //error ("Failed to find Unity Fbx "+$settingType+" Settings at: " + $fileName);
+        //return false;
+        
+        // create file with default settings
     }
+    
     eval ("source \"" + $fileName + "\"");
     return true;
 }
@@ -46,6 +54,14 @@ proc int loadUnityFbxExportSettings(){
 // Load the Import Settings from a file
 proc int loadUnityFbxImportSettings(){
     $fileName = `optionVar -q "UnityFbxImportSettings"`;
+    
+    // if no filename set (optionVar cleared), reset it to default filename
+    if ($fileName == 0){
+        //$modulePath = `moduleInfo -moduleName $UnityModuleName -path`;
+        // {$modulePath}/scripts/{$UnityDefaultImportSettingsFileName}
+        
+    }
+    
     return loadUnityFbxSettings($fileName, "Import");
 }
 
