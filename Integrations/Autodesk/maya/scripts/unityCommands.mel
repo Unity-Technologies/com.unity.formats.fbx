@@ -778,11 +778,11 @@ global proc unityOpenFileDialog(string $textField)
 }
 
 proc string createFilePathField(string $label, string $parent){
-    string $layout = `rowLayout
+    rowLayout
         -numberOfColumns 3
         -columnWidth3 150 250 50
         -columnAlign3 "right" "left" "left"
-        -p $parent`;
+        -p $parent;
         
     string $unityProject = `optionVar -q "UnityProject"`;
     $unityProject = $unityProject + "/Assets";
@@ -791,6 +791,19 @@ proc string createFilePathField(string $label, string $parent){
     string $textField = `textField -width 250 -text $unityProject`;
     button -label "..." -recomputeSize false -height 15 -command ("unityOpenFileDialog " + $textField);
     
+    return $textField;
+}
+
+proc string createTextFieldWithLabel(string $label, string $parent)
+{
+    rowLayout 
+        -numberOfColumns 2 
+        -columnWidth2 150 250
+        -columnAlign2 "right" "left"
+        -p $parent;
+    
+    text -label $label;
+    string $textField = `textField -width 250`;
     return $textField;
 }
 
@@ -803,23 +816,20 @@ global proc unityCreateExportSet(){
     }
     
     // open up a dialog for choosing the export set options
-    string $window = `window -title "FBX Export Options" -iconName "Short Name" -widthHeight 475 100`;
+    string $window = `window -title "FBX Export Options" -iconName "Short Name" -widthHeight 475 250`;
     
     string $container = `formLayout -numberOfDivisions 100`;
     
     string $mainOptions = `columnLayout -adjustableColumn true -p $container`;
     
     // get namespace
-    string $namespaceName = `rowLayout 
-        -numberOfColumns 2 
-        -columnWidth2 150 250
-        -columnAlign2 "right" "left"
-        -p $mainOptions`;
-    
-    text -label "Unity FBX namespace";
-    string $namespaceField = `textField -width 250`;
+    string $namespaceField = createTextFieldWithLabel("Unity FBX namespace", $mainOptions);
     
     string $modelFilePath = createFilePathField("Unity FBX Model File Path", $mainOptions);
+    string $modelFileName = createTextFieldWithLabel("Unity FBX Model File Name", $mainOptions);
+    
+    string $animFilePath = createFilePathField("Unity FBX Anim File Path", $mainOptions);
+    string $animFileName = createTextFieldWithLabel("Unity FBX Anim File Name", $mainOptions);
            
     string $buttons = `rowLayout
           -numberOfColumns 3
@@ -837,6 +847,7 @@ global proc unityCreateExportSet(){
         -attachForm $buttons "left" 1
         -attachPosition $buttons "right" 1 99
         -attachForm $mainOptions "left" 10
+        -attachForm $mainOptions "top" 10
     $container;
      
     setParent ..;
