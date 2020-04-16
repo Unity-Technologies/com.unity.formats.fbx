@@ -756,6 +756,44 @@ global proc unityExportModelAnim(){
     unityExport($UnityExportModelAnim);
 }
 
+global proc onCreateExportSet(string $window, string $contents){
+    print ("\n" + $contents + "\n");
+    string $text = `textField -q -text $contents`;
+    print ("contents: " + $text);
+    
+    deleteUI -window $window;
+}
+
+global proc unityOpenFileDialog(string $textField)
+{
+    string $currentPath = `textField -q -text $textField`;
+    
+    string $exportPaths[] = `fileDialog2 -ds 2 -cap "FBX Export Selection" -dir $currentPath -fm 3`;
+    if(size($exportPaths)<=0){
+        return;
+    }
+    string $exportFilePath = $exportPaths[0];
+    
+    textField -e -text $exportFilePath $textField;
+}
+
+proc string createFilePathField(string $label, string $parent){
+    string $layout = `rowLayout
+        -numberOfColumns 3
+        -columnWidth3 150 250 50
+        -columnAlign3 "right" "left" "left"
+        -p $parent`;
+        
+    string $unityProject = `optionVar -q "UnityProject"`;
+    $unityProject = $unityProject + "/Assets";
+    
+    text -label $label;
+    string $textField = `textField -width 250 -text $unityProject`;
+    button -label "..." -recomputeSize false -height 15 -command ("unityOpenFileDialog " + $textField);
+    
+    return $textField;
+}
+
 global proc unityCreateExportSet(){
     $origSelection = `ls -sl`;
     if(size($origSelection) <= 0){
@@ -765,20 +803,23 @@ global proc unityCreateExportSet(){
     }
     
     // open up a dialog for choosing the export set options
-    string $window = `window -title "FBX Export Options" -iconName "Short Name" -widthHeight 300 100`;
+    string $window = `window -title "FBX Export Options" -iconName "Short Name" -widthHeight 475 100`;
     
     string $container = `formLayout -numberOfDivisions 100`;
     
     string $mainOptions = `columnLayout -adjustableColumn true -p $container`;
     
     // get namespace
-    string $namespaceName = `rowLayout -numberOfColumns 2 -p $mainOptions`;
+    string $namespaceName = `rowLayout 
+        -numberOfColumns 2 
+        -columnWidth2 150 250
+        -columnAlign2 "right" "left"
+        -p $mainOptions`;
     
     text -label "Unity FBX namespace";
-    textField;
+    string $namespaceField = `textField -width 250`;
     
-    //button -label "Do Nothing" -p $mainOptions;
-    //button -label "Close" -command ("deleteUI -window " + $window)-p $mainOptions;
+    string $modelFilePath = createFilePathField("Unity FBX Model File Path", $mainOptions);
            
     string $buttons = `rowLayout
           -numberOfColumns 3
@@ -787,7 +828,7 @@ global proc unityCreateExportSet(){
           -columnAlign3 "center" "center" "center" -p $container`;
 
     button -label "Create Set and Export" -command "sphere" -p $buttons;
-    button -label "Create Set" -command "cone" -p $buttons;
+    button -label "Create Set" -command ("onCreateExportSet " + $window + " " + $namespaceField) -p $buttons;
     button -label "Cancel" -command ("deleteUI -window " + $window) -p $buttons;
     
     
@@ -795,6 +836,7 @@ global proc unityCreateExportSet(){
         -attachForm $buttons "bottom" 1
         -attachForm $buttons "left" 1
         -attachPosition $buttons "right" 1 99
+        -attachForm $mainOptions "left" 10
     $container;
      
     setParent ..;
