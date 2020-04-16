@@ -763,5 +763,42 @@ global proc unityCreateExportSet(){
         print ("Nothing selected");
         return;
     }
-    setupNewExportSet("", 0, $origSelection);
+    
+    // open up a dialog for choosing the export set options
+    string $window = `window -title "FBX Export Options" -iconName "Short Name" -widthHeight 300 100`;
+    
+    string $container = `formLayout -numberOfDivisions 100`;
+    
+    string $mainOptions = `columnLayout -adjustableColumn true -p $container`;
+    
+    // get namespace
+    string $namespaceName = `rowLayout -numberOfColumns 2 -p $mainOptions`;
+    
+    text -label "Unity FBX namespace";
+    textField;
+    
+    //button -label "Do Nothing" -p $mainOptions;
+    //button -label "Close" -command ("deleteUI -window " + $window)-p $mainOptions;
+           
+    string $buttons = `rowLayout
+          -numberOfColumns 3
+          -adjustableColumn3 1
+          //-columnWidth3 120 120 120
+          -columnAlign3 "center" "center" "center" -p $container`;
+
+    button -label "Create Set and Export" -command "sphere" -p $buttons;
+    button -label "Create Set" -command "cone" -p $buttons;
+    button -label "Cancel" -command ("deleteUI -window " + $window) -p $buttons;
+    
+    
+    formLayout -edit 
+        -attachForm $buttons "bottom" 1
+        -attachForm $buttons "left" 1
+        -attachPosition $buttons "right" 1 99
+    $container;
+     
+    setParent ..;
+    showWindow $window;
+        
+    //setupNewExportSet("", 0, $origSelection);
 }
