@@ -783,6 +783,13 @@ proc string createTextFieldWithLabel(string $label, string $parent)
 }
 
 proc createExportSetDialog(int $exportType){
+    $origSelection = `ls -sl`;
+    if(size($origSelection) <= 0){
+        // nothing selected
+        print ("Nothing selected");
+        return;
+    }
+
     $exportAnim = false;
     $exportAnimOnly = false;
     switch($exportType){
@@ -803,9 +810,27 @@ proc createExportSetDialog(int $exportType){
     string $container = `formLayout -numberOfDivisions 100`;
     
     string $mainOptions = `columnLayout -adjustableColumn true -p $container`;
+
+    // go through selection to find common namespace to set as default
+    string $commonNamespace = ":";
+    int $maxNamespaceCount = 0;
+    for($i = 0; $i < size($origSelection); $i++){
+        string $currNamespace = getObjectNamespace($origSelection[$i]);
+        while ($currNamespace != ":"){
+            // get contents of namespace
+            string $namespaceContents[] = `namespaceInfo -ls $currNamespace`;
+            string $intersection[] = getIntersection($origSelection, $namespaceContents);
+            if(size($intersection) > $maxNamespaceCount){
+                $commonNamespace = $currNamespace;
+                $maxNamespaceCount = size($intersection);
+            }
+            $currNamespace = `namespaceInfo -p $currNamespace`;
+        }
+    }
     
     // get namespace
     string $namespaceField = createTextFieldWithLabel("Unity FBX namespace", $mainOptions);
+    textField -e -text $commonNamespace $namespaceField;
     
     string $modelFilePath = " 0 0";
     if(!$exportAnimOnly){
@@ -942,13 +967,6 @@ global proc unityExportModelAnim(){
 }
 
 global proc unityCreateExportSet(){
-    $origSelection = `ls -sl`;
-    if(size($origSelection) <= 0){
-        // nothing selected
-        print ("Nothing selected");
-        return;
-    }
-
     global int $UnityExportModelAnim;
     createExportSetDialog($UnityExportModelAnim);
 }
