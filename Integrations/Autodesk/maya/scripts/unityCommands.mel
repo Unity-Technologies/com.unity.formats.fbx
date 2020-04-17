@@ -573,7 +573,7 @@ proc string[] getUnityExportSets(){
     return $unityExportSets;
 }
 
-proc setupNewExportSet2(
+proc setupNewExportSet(
     string $namespace,
     string $modelPath,
     string $modelFilename,
@@ -581,6 +581,7 @@ proc setupNewExportSet2(
     string $animFilename,
     string $selectedObjects[]){
     
+    // make sure all necessary variables are set
     if ($modelFilename == "" && $animFilename == ""){
         return;
     }
@@ -589,6 +590,26 @@ proc setupNewExportSet2(
         return;
     }
     
+    if ($modelFilename == ""){
+        if(match("@", basename($animFilename, ".fbx")) != ""){
+            $modelFilename = match("[^@]+", $animFilename) + ".fbx";
+        }
+        else{
+            $modelFilename = basename($animFilename, ".fbx") + "_modelOnly.fbx";
+        }
+    }
+
+    if ($animFilename == ""){
+        $animFilename = basename($modelFilename, ".fbx") + "@Take1.fbx";
+    }
+
+    if($modelPath == ""){
+        $modelPath = $animPath;
+    }
+    else if($animPath == ""){
+        $animPath = $modelPath;
+    }
+
     string $exportFileNameWithoutExt = formValidObjectName(basename($modelFilename, ".fbx"));
     
     $unityExportSet = getNewExportSetName($exportFileNameWithoutExt);
@@ -614,6 +635,18 @@ proc setupNewExportSet2(
     
     // Get or create the Unity Fbx Export Set
     $setCreated = getOrCreateExportSet($unityExportSet, $origNamespace);
+
+    if(!$setCreated){
+        // warn user
+        if(!showConfirmDialog("Warning",
+            "Creating set will overwrite contents of " + $unityExportSet + " export set. To export selection + contents of existing set, first add selection to set.",
+            "Continue", "Cancel"
+                )){
+                // cancelled, don't export this fbx
+                print ("Cancelled set creation");
+                return;
+        }
+    }
     
     global int $UnityFbxFilePathIndex;
     global int $UnityFbxFileNameIndex;
@@ -629,7 +662,7 @@ proc setupNewExportSet2(
     $exportAttrs[$UnityFbxAnimFileNameIndex] = $animFilename;
     $exportAttrs[$UnityFileNameWithoutExtIndex] = $exportFileNameWithoutExt;
     
-    setExportSetAttributes($unityExportSet, /*$isAnimFile*/ false, $setCreated, $exportAttrs, $namespace);
+    setExportSetAttributes($unityExportSet, /*isAnimOnly*/ false, $setCreated, $exportAttrs, $namespace);
     
     if (setExists($unityExportSet) == true){
         // clear contents of set
@@ -653,73 +686,175 @@ proc setupNewExportSet2(
     switchUnityProject($modelPath);
 }
 
-proc setupNewExportSet(string $exportPath, int $exportAnimOnly, string $selectedObjects[]){
-    global int $UnityFbxFilePathIndex;
-    global int $UnityFbxFileNameIndex;
-    global int $UnityFbxAnimFilePathIndex;
-    global int $UnityFbxAnimFileNameIndex;
-    global int $UnityFileNameWithoutExtIndex;
+// ==== Functions for creating export set dialog ==========
 
-    $isAnimFile = $exportAnimOnly;
+global proc unityOnCreateExportSet(
+    string $window,
+    string $namespaceField,
+    string $modelPathField,
+    string $modelFileField,
+    string $animPathField,
+    string $animFileField){
     
-    // Get the export set attributes
-    $exportAttrs = getExportSetAttributes($exportPath, $exportAnimOnly);
-    $exportDir = $exportAttrs[$UnityFbxFilePathIndex];
-    $exportFileName = $exportAttrs[$UnityFbxFileNameIndex];
-    $exportAnimDir = $exportAttrs[$UnityFbxAnimFilePathIndex];
-    $exportAnimFileName = $exportAttrs[$UnityFbxAnimFileNameIndex];
-    $fileNameWithoutExt = $exportAttrs[$UnityFileNameWithoutExtIndex];
-    
-    $unityExportSet = getNewExportSetName($fileNameWithoutExt);
-    
-    string $origNamespace = `namespaceInfo -cur -an`;
-    string $targetNamespace = getTargetNamespaceName($fileNameWithoutExt);
-    
-    $setNamespace = getSetNamespace($unityExportSet);
-    $setNamespaceExists = ($setNamespace != "");
-    if($setNamespaceExists){
-        $targetNamespace = $setNamespace;
-    }
-    else{
-        // warn if namespace already exists
-        if(`namespace -exists $targetNamespace`){
-            if(!showConfirmDialog("Warning: " + $exportFileName,
-                $targetNamespace + " namespace already exists, the selected objects will be added to the existing namespace and export set.",
-                "Continue", "Cancel"
-               )){
-                // cancelled, don't import this fbx
-                return;
-            }
-        }
-        else{
-            namespace -add $targetNamespace;
-        }
+    $origSelection = `ls -sl`;
+    if(size($origSelection) <= 0){
+        // nothing selected
+        print ("Nothing selected");
+        return;
     }
     
-    // Get or create the Unity Fbx Export Set
-    $setCreated = getOrCreateExportSet($unityExportSet, $origNamespace);
-    
-    setExportSetAttributes($unityExportSet, $isAnimFile, $setCreated, $exportAttrs, $targetNamespace);
-    
-    if (setExists($unityExportSet) == true){
-        // clear contents of set
-        sets -clear $unityExportSet;
-        
-        // add newly imported items to set
-        if (size($selectedObjects) > 0){
-            sets -include $unityExportSet $selectedObjects;
+    string $namespace = `textField -q -text $namespaceField`;
+    if ($namespace == ""){
+        $namespace = ":";
+    }
+
+    string $modelPath = "";
+    string $modelFilename = "";
+    if($modelPathField != 0){
+        $modelPath = `textField -q -text $modelPathField`;
+        $modelFilename = `textField -q -text $modelFileField`;
+        if ($modelFilename != "" && !endsWith($modelFilename, ".fbx")){
+            $modelFilename = $modelFilename + ".fbx";
+        }
+    }
+
+    string $animPath = "";
+    string $animFilename = "";
+    if($animPathField != 0){
+        $animPath = `textField -q -text $animPathField`;
+        $animFilename = `textField -q -text $animFileField`;
+        if ($animFilename != "" && !endsWith($animFilename, ".fbx")){
+            $animFilename = $animFilename + ".fbx";
         }
     }
     
-    // add to the targetNamespace
-    // iterate over all selected objects and rename
-    for($object in $selectedObjects){
-        rename $object ($targetNamespace + ":" + $object);
-    }
+    setupNewExportSet(
+        $namespace,
+        $modelPath,
+        $modelFilename,
+        $animPath,
+        $animFilename,
+        $origSelection);
     
-    // switch project if file exported to a different Unity project
-    switchUnityProject($exportPath);
+    deleteUI -window $window;
 }
+
+global proc unityOpenFileDialog(string $textField)
+{
+    string $currentPath = `textField -q -text $textField`;
+    
+    string $exportPaths[] = `fileDialog2 -ds 2 -cap "FBX Export Selection" -dir $currentPath -fm 3`;
+    if(size($exportPaths)<=0){
+        return;
+    }
+    string $exportFilePath = $exportPaths[0];
+    
+    textField -e -text $exportFilePath $textField;
+}
+
+proc string createFilePathField(string $label, string $parent){
+    rowLayout
+        -numberOfColumns 3
+        -columnWidth3 150 250 50
+        -columnAlign3 "right" "left" "left"
+        -p $parent;
+        
+    string $unityProject = `optionVar -q "UnityProject"`;
+    $unityProject = $unityProject + "/Assets";
+    
+    text -label $label;
+    string $textField = `textField -width 250 -text $unityProject`;
+    button -label "..." -recomputeSize false -height 15 -command ("unityOpenFileDialog " + $textField);
+    
+    return $textField;
+}
+
+proc string createTextFieldWithLabel(string $label, string $parent)
+{
+    rowLayout 
+        -numberOfColumns 2 
+        -columnWidth2 150 250
+        -columnAlign2 "right" "left"
+        -p $parent;
+    
+    text -label $label;
+    string $textField = `textField -width 250`;
+    return $textField;
+}
+
+proc createExportSetDialog(int $exportType){
+    $exportAnim = false;
+    $exportAnimOnly = false;
+    switch($exportType){
+    case 0 /* export animation only */:
+        $exportAnim = true;
+        $exportAnimOnly = true;
+        break;
+    case 1 /* export model only */:
+        break;
+    default: /* export model + animation */
+        $exportAnim = true;
+        break;
+    }
+
+        // open up a dialog for choosing the export set options
+    string $window = `window -title "FBX Export Options" -iconName "Short Name" -widthHeight 475 250`;
+    
+    string $container = `formLayout -numberOfDivisions 100`;
+    
+    string $mainOptions = `columnLayout -adjustableColumn true -p $container`;
+    
+    // get namespace
+    string $namespaceField = createTextFieldWithLabel("Unity FBX namespace", $mainOptions);
+    
+    string $modelFilePath = " 0 0";
+    if(!$exportAnimOnly){
+        string $modelFilePathField = createFilePathField("Unity FBX Model File Path", $mainOptions);
+        string $modelFileNameField = createTextFieldWithLabel("Unity FBX Model File Name", $mainOptions);
+        $modelFilePath = " " + $modelFilePathField + " " + $modelFileNameField;
+    }
+    
+    string $animFilePath = " 0 0";
+    if($exportAnim){
+        string $animFilePathField = createFilePathField("Unity FBX Anim File Path", $mainOptions);
+        string $animFileNameField = createTextFieldWithLabel("Unity FBX Anim File Name", $mainOptions);
+        $animFilePath = " " + $animFilePathField + " " + $animFileNameField;
+    }
+    
+    int $buttonWidth = 158;
+    string $buttons = `rowLayout
+          -numberOfColumns 3
+          -adjustableColumn3 1
+          -columnWidth3 $buttonWidth $buttonWidth $buttonWidth
+          -columnAlign3 "center" "center" "center" -p $container`;
+
+    string $createExportSetCommand = "unityOnCreateExportSet " + $window + " " + $namespaceField + $modelFilePath + $animFilePath;
+          
+    button -label "Create Set and Export"
+        -width $buttonWidth
+        -command ($createExportSetCommand + ";" + "unityExportModelAnim()")
+        -p $buttons;
+    button -label "Create Set" 
+        -width $buttonWidth
+        -command ($createExportSetCommand)
+        -p $buttons;
+    button -label "Cancel"
+        -width $buttonWidth
+        -command ("deleteUI -window " + $window)
+        -p $buttons;
+    
+    formLayout -edit 
+        -attachForm $buttons "bottom" 1
+        -attachForm $buttons "left" 1
+        -attachPosition $buttons "right" 1 99
+        -attachForm $mainOptions "left" 10
+        -attachForm $mainOptions "top" 10
+    $container;
+     
+    setParent ..;
+    showWindow $window;
+}
+// =========================================
 
 proc unityExport(int $exportType){
     
@@ -776,37 +911,7 @@ proc unityExport(int $exportType){
     
     // if selection doesn't belong to a set, export to a new file
     if(size($setsToExport) <= 0){
-        $unityProject = `optionVar -q "UnityProject"`;
-        $unityProject = $unityProject + "/Assets";
-        $exportPaths = `fileDialog2 -ds 2 -cap "FBX Export Selection" -dir $unityProject -ff "*.fbx" -fm 0`;
-        if(size($exportPaths)<=0){
-            return;
-        }
-        $exportFilePath = $exportPaths[0];
-        
-        // check if export set with this filename already exists in the scene, and warn user that
-        // if it does the existing set will be overriden
-        global int $UnityFileNameWithoutExtIndex;
-    
-        // Get the export set attributes
-        $exportAttrs = getExportSetAttributes($exportFilePath, $exportAnimOnly);
-        $exportSetName = getNewExportSetName($exportAttrs[$UnityFileNameWithoutExtIndex]);
-        if(setExists($exportSetName)){
-            // warn user
-            if(!showConfirmDialog("Warning",
-                "Exporting to " + $exportFilePath + " will overwrite contents of " + $exportSetName + " export set. To export selection + contents of set, first add selection to set.",
-                "Continue", "Cancel"
-                   )){
-                    // cancelled, don't export this fbx
-                    print ("Cancelled export to "  + $exportFilePath);
-                    return;
-            }
-        }
-        
-        $exportCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $exportFilePath + "\"";
-        eval $exportCmd;
-        
-        setupNewExportSet($exportFilePath, $exportAnimOnly, $origSelection);
+        createExportSetDialog($exportType);
         return;
     }
     
@@ -836,90 +941,6 @@ global proc unityExportModelAnim(){
     unityExport($UnityExportModelAnim);
 }
 
-global proc unityOnCreateExportSet(
-    string $window,
-    string $namespaceField,
-    string $modelPathField,
-    string $modelFileField,
-    string $animPathField,
-    string $animFileField){
-    
-    $origSelection = `ls -sl`;
-    if(size($origSelection) <= 0){
-        // nothing selected
-        print ("Nothing selected");
-        return;
-    }
-    
-    string $namespace = `textField -q -text $namespaceField`;
-    if ($namespace == ""){
-        $namespace = ":";
-    }
-    string $modelPath = `textField -q -text $modelPathField`;
-    string $modelFilename = `textField -q -text $modelFileField`;
-    if ($modelFilename != "" && !endsWith($modelFilename, ".fbx")){
-        $modelFilename = $modelFilename + ".fbx";
-    }
-    string $animPath = `textField -q -text $animPathField`;
-    string $animFilename = `textField -q -text $animFileField`;
-    if ($animFilename != "" && !endsWith($animFilename, ".fbx")){
-        $animFilename = $animFilename + ".fbx";
-    }
-    
-    setupNewExportSet2(
-        $namespace,
-        $modelPath,
-        $modelFilename,
-        $animPath,
-        $animFilename,
-        $origSelection);
-    
-    deleteUI -window $window;
-}
-
-global proc unityOpenFileDialog(string $textField)
-{
-    string $currentPath = `textField -q -text $textField`;
-    
-    string $exportPaths[] = `fileDialog2 -ds 2 -cap "FBX Export Selection" -dir $currentPath -fm 3`;
-    if(size($exportPaths)<=0){
-        return;
-    }
-    string $exportFilePath = $exportPaths[0];
-    
-    textField -e -text $exportFilePath $textField;
-}
-
-proc string createFilePathField(string $label, string $parent){
-    rowLayout
-        -numberOfColumns 3
-        -columnWidth3 150 250 50
-        -columnAlign3 "right" "left" "left"
-        -p $parent;
-        
-    string $unityProject = `optionVar -q "UnityProject"`;
-    $unityProject = $unityProject + "/Assets";
-    
-    text -label $label;
-    string $textField = `textField -width 250 -text $unityProject`;
-    button -label "..." -recomputeSize false -height 15 -command ("unityOpenFileDialog " + $textField);
-    
-    return $textField;
-}
-
-proc string createTextFieldWithLabel(string $label, string $parent)
-{
-    rowLayout 
-        -numberOfColumns 2 
-        -columnWidth2 150 250
-        -columnAlign2 "right" "left"
-        -p $parent;
-    
-    text -label $label;
-    string $textField = `textField -width 250`;
-    return $textField;
-}
-
 global proc unityCreateExportSet(){
     $origSelection = `ls -sl`;
     if(size($origSelection) <= 0){
@@ -927,55 +948,7 @@ global proc unityCreateExportSet(){
         print ("Nothing selected");
         return;
     }
-    
-    // open up a dialog for choosing the export set options
-    string $window = `window -title "FBX Export Options" -iconName "Short Name" -widthHeight 475 250`;
-    
-    string $container = `formLayout -numberOfDivisions 100`;
-    
-    string $mainOptions = `columnLayout -adjustableColumn true -p $container`;
-    
-    // get namespace
-    string $namespaceField = createTextFieldWithLabel("Unity FBX namespace", $mainOptions);
-    
-    string $modelFilePathField = createFilePathField("Unity FBX Model File Path", $mainOptions);
-    string $modelFileNameField = createTextFieldWithLabel("Unity FBX Model File Name", $mainOptions);
-    
-    string $animFilePathField = createFilePathField("Unity FBX Anim File Path", $mainOptions);
-    string $animFileNameField = createTextFieldWithLabel("Unity FBX Anim File Name", $mainOptions);
-    
-    int $buttonWidth = 158;
-    string $buttons = `rowLayout
-          -numberOfColumns 3
-          -adjustableColumn3 1
-          -columnWidth3 $buttonWidth $buttonWidth $buttonWidth
-          -columnAlign3 "center" "center" "center" -p $container`;
 
-    string $modelFilePath = " " + $modelFilePathField + " " + $modelFileNameField;
-    string $animFilePath = " " + $animFilePathField + " " + $animFileNameField;
-    string $createExportSetCommand = "unityOnCreateExportSet " + $window + " " + $namespaceField + $modelFilePath + $animFilePath;
-          
-    button -label "Create Set and Export"
-        -width $buttonWidth
-        -command ($createExportSetCommand + ";" + "unityExportModelAnim()")
-        -p $buttons;
-    button -label "Create Set" 
-        -width $buttonWidth
-        -command ($createExportSetCommand)
-        -p $buttons;
-    button -label "Cancel"
-        -width $buttonWidth
-        -command ("deleteUI -window " + $window)
-        -p $buttons;
-    
-    formLayout -edit 
-        -attachForm $buttons "bottom" 1
-        -attachForm $buttons "left" 1
-        -attachPosition $buttons "right" 1 99
-        -attachForm $mainOptions "left" 10
-        -attachForm $mainOptions "top" 10
-    $container;
-     
-    setParent ..;
-    showWindow $window;
+    global int $UnityExportModelAnim;
+    createExportSetDialog($UnityExportModelAnim);
 }
