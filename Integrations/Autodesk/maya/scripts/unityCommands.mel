@@ -696,7 +696,7 @@ global proc unityOnCreateExportSet(
     $origSelection = `ls -sl`;
     if(size($origSelection) <= 0){
         // nothing selected
-        print ("Nothing selected");
+        error ("Unity FBX Export Set Creation: Nothing selected");
         return;
     }
 
@@ -723,6 +723,17 @@ global proc unityOnCreateExportSet(
         if ($animFilename != "" && !endsWith($animFilename, ".fbx")){
             $animFilename = $animFilename + ".fbx";
         }
+    }
+
+    // make sure all necessary variables are set
+    if ($modelFilename == "" && $animFilename == ""){
+        error ("Unity FBX Export Set Creation: Missing filename for export.");
+        return;
+    }
+    
+    if ($modelPath == "" && $animPath == ""){
+        error ("Unity FBX Export Set Creation: Missing filepath for export.");
+        return;
     }
     
     setupNewExportSet(
