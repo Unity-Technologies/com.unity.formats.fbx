@@ -509,7 +509,9 @@ namespace FbxExporter.UnitTests
                         AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, impCurveBinding);
                         Assert.That (animCurveImported, Is.Not.Null);
 
-                        AnimTester.KeyValuesTest(animCurveImported, animCurveOrig,
+                        AnimTester.KeyValuesTest(
+                            animCurveImported, 
+                            animCurveOrig,
                             string.Format("path: {0}, property: {1}", curveBinding.path, curveBinding.propertyName),
                             isRotation);
                     }
