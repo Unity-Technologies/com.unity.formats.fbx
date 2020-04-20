@@ -807,7 +807,8 @@ proc string getCommonNamespace(string $origSelection[]){
             // prefer more specific namespaces
             ($maxNamespaceCount > 0 &&
              $intersectionSize == $maxNamespaceCount &&
-             size($currNamespace) > size($commonNamespace))){
+             size($currNamespace) > size($commonNamespace)))
+        {
             $commonNamespace = $currNamespace;
             $maxNamespaceCount = $intersectionSize;
         }
@@ -837,7 +838,7 @@ proc createExportSetDialog(int $exportType){
         break;
     }
 
-        // open up a dialog for choosing the export set options
+    // open up a dialog for choosing the export set options
     string $window = `window -title "Unity FBX Export Options" -iconName "Short Name" -widthHeight 475 250`;
     
     string $container = `formLayout -numberOfDivisions 100`;
