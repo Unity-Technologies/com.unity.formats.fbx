@@ -525,7 +525,12 @@ proc exportSet(string $unitySet, int $exportAnim){
     
     string $unityFbxFilePath = getAttribute($unitySet, $pathAttr);
     string $unityFbxFileName = getAttribute($unitySet, $nameAttr);
-    
+
+    // make sure the file path exists
+    if(!(`filetest -d $unityFbxFilePath`)){
+        sysFile -makeDir $unityFbxFilePath;
+    }
+
     $strCmd = "";
     if ($unityFbxFilePath != "" && $unityFbxFileName != ""){
         // export selected, relative to given namespace
@@ -616,20 +621,7 @@ proc setupNewExportSet(
     
     string $origNamespace = `namespaceInfo -cur -an`;
     
-    if($namespace == ":"){
-        // do nothing
-    }
-    // warn if namespace already exists
-    else if(`namespace -exists $namespace`){
-        if(!showConfirmDialog("Warning: " + $modelFilename,
-            $namespace + " namespace already exists, the selected objects will be added to the existing namespace and export set.",
-            "Continue", "Cancel"
-           )){
-            // cancelled, don't import this fbx
-            return;
-        }
-    }
-    else{
+    if($namespace != ":" && !(`namespace -exists $namespace`)){
         namespace -add $namespace;
     }
     
@@ -676,9 +668,14 @@ proc setupNewExportSet(
     
     // add to the targetNamespace
     // iterate over all selected objects and rename
-    if ($namespace != ""){
+    if ($namespace != ":"){
+        // remove the colon from the beginning of the namespace
+        // because the $object name does not start with a colon.
+        $namespace = `substring $namespace 2 (size($namespace))`;
         for($object in $selectedObjects){
-            rename $object ($namespace + ":" + $object);
+            if(!startsWith($object, $namespace)){
+                rename $object ($namespace + ":" + $object);
+            }
         }
     }
     
@@ -752,10 +749,10 @@ global proc unityOpenFileDialog(string $textField)
     textField -e -text $exportFilePath $textField;
 }
 
-proc string createFilePathField(string $label, string $parent){
+proc string createFilePathField(string $label, string $parent, int $labelSize, int $textFieldSize){
     rowLayout
         -numberOfColumns 3
-        -columnWidth3 150 250 50
+        -columnWidth3 $labelSize $textFieldSize 50
         -columnAlign3 "right" "left" "left"
         -p $parent;
         
@@ -763,54 +760,26 @@ proc string createFilePathField(string $label, string $parent){
     $unityProject = $unityProject + "/Assets";
     
     text -label $label;
-    string $textField = `textField -width 250 -text $unityProject`;
+    string $textField = `textField -width $textFieldSize -text $unityProject`;
     button -label "..." -recomputeSize false -height 15 -command ("unityOpenFileDialog " + $textField);
     
     return $textField;
 }
 
-proc string createTextFieldWithLabel(string $label, string $parent)
+proc string createTextFieldWithLabel(string $label, string $parent, int $labelSize, int $textFieldSize)
 {
     rowLayout 
         -numberOfColumns 2 
-        -columnWidth2 150 250
+        -columnWidth2 $labelSize $textFieldSize
         -columnAlign2 "right" "left"
         -p $parent;
     
     text -label $label;
-    string $textField = `textField -width 250`;
+    string $textField = `textField -width $textFieldSize`;
     return $textField;
 }
 
-proc createExportSetDialog(int $exportType){
-    $origSelection = `ls -sl`;
-    if(size($origSelection) <= 0){
-        // nothing selected
-        print ("Nothing selected");
-        return;
-    }
-
-    $exportAnim = false;
-    $exportAnimOnly = false;
-    switch($exportType){
-    case 0 /* export animation only */:
-        $exportAnim = true;
-        $exportAnimOnly = true;
-        break;
-    case 1 /* export model only */:
-        break;
-    default: /* export model + animation */
-        $exportAnim = true;
-        break;
-    }
-
-        // open up a dialog for choosing the export set options
-    string $window = `window -title "FBX Export Options" -iconName "Short Name" -widthHeight 475 250`;
-    
-    string $container = `formLayout -numberOfDivisions 100`;
-    
-    string $mainOptions = `columnLayout -adjustableColumn true -p $container`;
-
+proc string getCommonNamespace(string $origSelection[]){
     // gather up all the unique namespaces
     string $selectedNamespaces[];
     for($i = 0; $i < size($origSelection); $i++){
@@ -836,29 +805,91 @@ proc createExportSetDialog(int $exportType){
         int $intersectionSize = size($intersection);
         if($intersectionSize > $maxNamespaceCount ||
             // prefer more specific namespaces
-            ($maxNamespaceCount > 0  &&
+            ($maxNamespaceCount > 0 &&
              $intersectionSize == $maxNamespaceCount &&
              size($currNamespace) > size($commonNamespace))){
             $commonNamespace = $currNamespace;
             $maxNamespaceCount = $intersectionSize;
         }
     }
+    return $commonNamespace;
+}
+
+proc createExportSetDialog(int $exportType){
+    $origSelection = `ls -sl`;
+    if(size($origSelection) <= 0){
+        // nothing selected
+        print ("Nothing selected");
+        return;
+    }
+
+    $exportAnim = false;
+    $exportAnimOnly = false;
+    switch($exportType){
+    case 0 /* export animation only */:
+        $exportAnim = true;
+        $exportAnimOnly = true;
+        break;
+    case 1 /* export model only */:
+        break;
+    default: /* export model + animation */
+        $exportAnim = true;
+        break;
+    }
+
+        // open up a dialog for choosing the export set options
+    string $window = `window -title "Unity FBX Export Options" -iconName "Short Name" -widthHeight 475 250`;
     
+    string $container = `formLayout -numberOfDivisions 100`;
+    
+    string $mainOptions = `columnLayout -adjustableColumn true -p $container`;
+
+    // go through selection to find common namespace to set as default
+    string $commonNamespace = getCommonNamespace($origSelection);
+    
+    string $modelFilename = "Untitled";
+    // if one item selected, take the name of it as the filename
+    if (size($origSelection) == 1){
+        // take the name of the selection without the namespace
+        string $nTokens[];
+        int $nNumTokens = `tokenize ("" + $origSelection[0]) ":" $nTokens`;
+        $modelFilename = $nTokens[$nNumTokens-1];
+    }
+    else{
+        // if multi items selected, but one of them is the root, then take the name of the root as the filename
+        for($i = 0; $i < size($origSelection); $i++){
+            string $descendents[] = `listRelatives -type "transform" -allDescendents $origSelection[$i]`;
+            string $intersection[] = getIntersection($origSelection, $descendents);
+            if (size($intersection) == size($origSelection)-1){
+                // take the name of the selection without the namespace
+                string $nTokens[];
+                int $nNumTokens = `tokenize ("" + $origSelection[$i]) ":" $nTokens`;
+                $modelFilename = $nTokens[$nNumTokens-1];
+                break;
+            }
+        }
+    }
+
+    int $labelSize = 120;
+    int $textFieldSize = 300;
+
     // get namespace
-    string $namespaceField = createTextFieldWithLabel("Unity FBX namespace", $mainOptions);
+    string $namespaceField = createTextFieldWithLabel("Namespace", $mainOptions, $labelSize, $textFieldSize);
     textField -e -text $commonNamespace $namespaceField;
     
     string $modelFilePath = " 0 0";
     if(!$exportAnimOnly){
-        string $modelFilePathField = createFilePathField("Unity FBX Model File Path", $mainOptions);
-        string $modelFileNameField = createTextFieldWithLabel("Unity FBX Model File Name", $mainOptions);
+        string $modelFilePathField = createFilePathField("Model File Path", $mainOptions, $labelSize, $textFieldSize);
+        string $modelFileNameField = createTextFieldWithLabel("Model File Name", $mainOptions, $labelSize, $textFieldSize);
+        textField -e -text ($modelFilename + ".fbx") $modelFileNameField;
         $modelFilePath = " " + $modelFilePathField + " " + $modelFileNameField;
     }
     
     string $animFilePath = " 0 0";
     if($exportAnim){
-        string $animFilePathField = createFilePathField("Unity FBX Anim File Path", $mainOptions);
-        string $animFileNameField = createTextFieldWithLabel("Unity FBX Anim File Name", $mainOptions);
+        string $animFilePathField = createFilePathField("Anim File Path", $mainOptions, $labelSize, $textFieldSize);
+        string $animFileNameField = createTextFieldWithLabel("Anim File Name", $mainOptions, $labelSize, $textFieldSize);
+        textField -e -text ($modelFilename + "@Take1.fbx") $animFileNameField;
         $animFilePath = " " + $animFilePathField + " " + $animFileNameField;
     }
     
