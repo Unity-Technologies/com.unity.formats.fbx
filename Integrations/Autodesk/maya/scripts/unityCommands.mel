@@ -702,7 +702,7 @@ global proc unityOnCreateExportSet(
         print ("Nothing selected");
         return;
     }
-    
+
     string $namespace = `textField -q -text $namespaceField`;
     if ($namespace == ""){
         $namespace = ":";
@@ -811,20 +811,36 @@ proc createExportSetDialog(int $exportType){
     
     string $mainOptions = `columnLayout -adjustableColumn true -p $container`;
 
+    // gather up all the unique namespaces
+    string $selectedNamespaces[];
+    for($i = 0; $i < size($origSelection); $i++){
+        string $currNamespace = getObjectNamespace($origSelection[$i]);
+        while ($currNamespace != ":" && !stringArrayContains($currNamespace, $selectedNamespaces)){
+            $selectedNamespaces[size($selectedNamespaces)] = $currNamespace;
+            $currNamespace = `namespaceInfo -p $currNamespace`;
+            // make sure the namespace always starts with a colon
+            if(!startsWith($currNamespace, ":")){
+                $currNamespace = ":" + $currNamespace;
+            }
+        }
+    }
+
     // go through selection to find common namespace to set as default
     string $commonNamespace = ":";
     int $maxNamespaceCount = 0;
-    for($i = 0; $i < size($origSelection); $i++){
-        string $currNamespace = getObjectNamespace($origSelection[$i]);
-        while ($currNamespace != ":"){
-            // get contents of namespace
-            string $namespaceContents[] = `namespaceInfo -ls $currNamespace`;
-            string $intersection[] = getIntersection($origSelection, $namespaceContents);
-            if(size($intersection) > $maxNamespaceCount){
-                $commonNamespace = $currNamespace;
-                $maxNamespaceCount = size($intersection);
-            }
-            $currNamespace = `namespaceInfo -p $currNamespace`;
+    for($i = 0; $i < size($selectedNamespaces); $i++){
+        $currNamespace = $selectedNamespaces[$i];
+        // get contents of namespace
+        string $namespaceContents[] = `namespaceInfo -ls $currNamespace -r`;
+        string $intersection[] = getIntersection($origSelection, $namespaceContents);
+        int $intersectionSize = size($intersection);
+        if($intersectionSize > $maxNamespaceCount ||
+            // prefer more specific namespaces
+            ($maxNamespaceCount > 0  &&
+             $intersectionSize == $maxNamespaceCount &&
+             size($currNamespace) > size($commonNamespace))){
+            $commonNamespace = $currNamespace;
+            $maxNamespaceCount = $intersectionSize;
         }
     }
     
