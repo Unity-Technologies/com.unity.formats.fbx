@@ -416,6 +416,9 @@ namespace FbxExporter.UnitTests
                     bool hasQuatBinding = 
                         MapEulerToQuaternionPropertyName.TryGetValue (propertyBinding, out propertyBinding);
 
+                    bool isRotation = AnimationTestDataClass.m_rotationEulerNames.Contains(curveBinding.propertyName) ||
+                        AnimationTestDataClass.m_rotationQuaternionNames.Contains(curveBinding.propertyName);
+
                     if (id==-1)
                         id = keyData.GetIndexOf (propertyBinding);
 
@@ -439,13 +442,13 @@ namespace FbxExporter.UnitTests
                             else
                             {
                                 // compare by sampled keyvalues against original keydata
-                                KeyValuesTest (keyData.keyTimes, keyData.GetAltKeyValues (id), animCurveImported, curveBinding.propertyName);
+                                KeyValuesTest (keyData.keyTimes, keyData.GetAltKeyValues (id), animCurveImported, curveBinding.propertyName, isRotation);
                             }
                         }
                         else
                         {
                             // compare by sampled keyvalues against original animCurve
-                            KeyValuesTest (animCurvesOriginal[id], animCurveImported, curveBinding.propertyName);
+                            KeyValuesTest (animCurvesOriginal[id], animCurveImported, curveBinding.propertyName, isRotation);
                         }
                         result++;
                     }
@@ -497,14 +500,20 @@ namespace FbxExporter.UnitTests
                             continue;
                         }
 
+                        bool isRotation = AnimationTestDataClass.m_rotationEulerNames.Contains(curveBinding.propertyName) ||
+                        AnimationTestDataClass.m_rotationQuaternionNames.Contains(curveBinding.propertyName);
+
                         AnimationCurve animCurveOrig = AnimationUtility.GetEditorCurve (animClipOriginal, curveBinding);
                         Assert.That (animCurveOrig, Is.Not.Null);
 
                         AnimationCurve animCurveImported = AnimationUtility.GetEditorCurve (animClipImported, impCurveBinding);
                         Assert.That (animCurveImported, Is.Not.Null);
 
-                        AnimTester.KeyValuesTest(animCurveImported, animCurveOrig,
-                            string.Format("path: {0}, property: {1}", curveBinding.path, curveBinding.propertyName));
+                        AnimTester.KeyValuesTest(
+                            animCurveImported, 
+                            animCurveOrig,
+                            string.Format("path: {0}, property: {1}", curveBinding.path, curveBinding.propertyName),
+                            isRotation);
                     }
                 }
             }
@@ -545,7 +554,7 @@ namespace FbxExporter.UnitTests
                 return ;
             }
 
-            public static void KeyValuesTest (float [] expectedKeyTimes, float [] expectedKeyValues, AnimationCurve actualAnimCurve, string message)
+            public static void KeyValuesTest (float [] expectedKeyTimes, float [] expectedKeyValues, AnimationCurve actualAnimCurve, string message, bool isRotationCurve = false)
             {
                 for (var i=0; i < expectedKeyTimes.Length; ++i)
                 {
@@ -554,23 +563,45 @@ namespace FbxExporter.UnitTests
 
                     float actualKeyValue = actualAnimCurve.Evaluate(expectedKeyTime);
 
-                    #if DEBUG_UNITTEST
+#if DEBUG_UNITTEST
                     Debug.Log(string.Format("key time={0} expected={1} actual={2} delta={3}", expectedKeyTime.ToString(), expectedKeyValue.ToString(), actualKeyValue.ToString(), Mathf.Abs(expectedKeyValue-actualKeyValue).ToString()));
-                    #endif
-                    Assert.That(expectedKeyValue, Is.EqualTo(actualKeyValue).Within(0.0001), string.Format("{0} key ({1}) doesn't match", message, expectedKeyTime));
+#endif
+                    // also handles values that are equal but different signs (i.e. -90 == 270)
+                    if (isRotationCurve)
+                    {
+                        var expectedQuat = Quaternion.Euler(new Vector3(expectedKeyValue, 0, 0));
+                        var actualQuat = Quaternion.Euler(new Vector3(actualKeyValue, 0, 0));
+                        Assert.That(Quaternion.Angle(expectedQuat, actualQuat), Is.LessThan(0.1), string.Format("{0} key ({1}) doesn't match", message, expectedKeyTime));
+                    }
+                    else
+                    {
+                        Assert.That(expectedKeyValue, Is.EqualTo(actualKeyValue).Within(0.0001), string.Format("{0} key ({1}) doesn't match", message, expectedKeyTime));
+                    }
                 }
             }
 
-            public static void KeyValuesTest (AnimationCurve expectedAnimCurve, AnimationCurve actualAnimCurve, string message)
+            public static void KeyValuesTest (AnimationCurve expectedAnimCurve, AnimationCurve actualAnimCurve, string message, bool isRotationCurve = false)
             {
                 foreach (var key in expectedAnimCurve.keys)
                 {
                     float actualKeyValue = actualAnimCurve.Evaluate(key.time);
 
-                    #if DEBUG_UNITTEST
+#if DEBUG_UNITTEST
                     Debug.Log(string.Format("key time={0} actual={1} expected={2} delta={3}", key.time.ToString(), key.value.ToString(), actualKeyValue.ToString(), Mathf.Abs(key.value-actualKeyValue).ToString()));
-                    #endif
-                    Assert.That(key.value, Is.EqualTo(actualKeyValue).Within(0.1), string.Format("{0} key ({1}) doesn't match", message, key.time));
+#endif
+                    var expectedKeyValue = key.value;
+
+                    // also handles values that are equal but different signs (i.e. -90 == 270)
+                    if (isRotationCurve)
+                    {
+                        var expectedQuat = Quaternion.Euler(new Vector3(expectedKeyValue, 0, 0));
+                        var actualQuat = Quaternion.Euler(new Vector3(actualKeyValue, 0, 0));
+                        Assert.That(Quaternion.Angle(expectedQuat, actualQuat), Is.LessThan(0.1), string.Format("{0} key ({1}) doesn't match", message, key.time));
+                    }
+                    else
+                    {
+                        Assert.That(expectedKeyValue, Is.EqualTo(actualKeyValue).Within(0.1), string.Format("{0} key ({1}) doesn't match", message, key.time));
+                    }
                 }
             }
 
