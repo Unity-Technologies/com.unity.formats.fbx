@@ -588,10 +588,12 @@ proc setupNewExportSet(
     
     // make sure all necessary variables are set
     if ($modelFilename == "" && $animFilename == ""){
+        error ("Unity FBX Export Set Creation: Missing filename for export.");
         return;
     }
     
     if ($modelPath == "" && $animPath == ""){
+        error ("Unity FBX Export Set Creation: Missing filepath for export.");
         return;
     }
     
@@ -790,6 +792,20 @@ proc string createTextFieldWithLabel(string $label, string $parent, int $labelSi
     return $textField;
 }
 
+// Find the most common namespace among the selected objects. If there are multiple (because of nested namespaces),
+// prefer the most specific. For example if you have:
+//
+// test1:test2:sphere
+// test1:test3:cube
+// test1:test2:cylinder
+//
+// test1 will be returned because all objects have that namespace in common. However if you have:
+//
+// test1:test2:sphere
+// test1:test2:cube
+// test1:test2:cylinder
+//
+// Then it will return test1:test2.
 proc string getCommonNamespace(string $origSelection[]){
     // gather up all the unique namespaces
     string $selectedNamespaces[];
