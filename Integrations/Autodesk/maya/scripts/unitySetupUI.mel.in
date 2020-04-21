@@ -29,7 +29,6 @@ global string $unityCreateExportSetCommand = "unityCreateExportSet";
 
 global proc string unityWhatsNewVersion(){
     return `about -q -version`;
-
 }
 
 global proc unitySetupUI(){
@@ -42,6 +41,7 @@ global proc unitySetupUI(){
     
     eval ("source " + $unityCommandsFile);
     loadUnityDependencies();
+    scriptJob -event "PostSceneRead" unityUpdateReferencedSetNamespace -protected;
 
     evalDeferred -lowestPriority "unityInstallUI";
 }

@@ -1051,3 +1051,34 @@ global proc unityCreateExportSet(){
     global int $UnityExportModelAnim;
     createExportSetDialog($UnityExportModelAnim);
 }
+
+global proc unityUpdateReferencedSetNamespace(){
+    global string $UnityFbxNamespaceAttr;
+    // check export sets to see if their namespace needs to be updated
+    // (i.e. if they were imported as a reference).
+    string $unityExportSets[] = getUnityExportSets();
+    for($i = 0; $i < size($unityExportSets); $i++){
+        string $currSet = $unityExportSets[$i];
+        // ignore sets that aren't references
+        if(!`referenceQuery -isNodeReferenced $currSet`){
+            continue;
+        }
+
+        // Export set namespace can only be changed by importing it as a reference (cannot manually change the namespace because it is locked)
+        // Export set will always be created in the root namespace
+        string $referenceNamespace = getObjectNamespace($currSet);
+        if (`namespaceInfo -isRootNamespace $referenceNamespace`){
+            continue;
+        }
+        
+        // There are three possibilities:
+        // 1. The namespace on the set is still the correct one (setNamespace)
+        // 2. The reference was imported for the first time and added to a new namespace (referenceNamespace + setNamespace)
+        // 3. The reference namespace was changed and the reference reimported (referenceNamespace + parsedNamespace)
+        // Simplest is to find the most common namespace in the set and update the attribute
+        string $unitySetContents[] = `listConnections $currSet`;
+        string $commonNamespace = getCommonNamespace($unitySetContents);
+
+        storeAttribute($currSet, $UnityFbxNamespaceAttr, $commonNamespace);
+    }
+}
