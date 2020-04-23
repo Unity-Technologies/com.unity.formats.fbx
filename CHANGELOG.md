@@ -23,7 +23,7 @@
 - Don't override transforms when creating FBX Linked Prefab, so that the prefab updates properly when the FBX transforms are modified.
 - Changed FBX Linked Prefab to keep Unity materials instead of using materials exported to FBX file.
     - To revert to using the FBX materials in the Linked Prefab, open the prefab editor and remove the material overrides.
-- Fix issue where Autodesk® Maya® imports root bone as null object if it doesn't have any descendants that are also bones.
+- Fix issue where root bone is imported as null object in Autodesk® Maya® if it doesn't have any descendants that are also bones.
 - Don't reduce keyframes after recording as it can create unnecessary errors/discrepancies in the exported curve.
 - Updated to latest com.autodesk.fbx (3.0.1-preview.1), to fix DLL not found errors if building for non-standalone platforms (e.g. Android, WebGL).
 
