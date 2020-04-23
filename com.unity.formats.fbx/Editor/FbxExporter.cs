@@ -669,8 +669,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             var unityID = unityMaterial.GetInstanceID();
-            if (MaterialMap.ContainsKey (unityID)) {
-                fbxNode.AddMaterial (MaterialMap [unityID]);
+            FbxSurfaceMaterial mappedMaterial;
+            if (MaterialMap.TryGetValue (unityID, out mappedMaterial)) {
+                fbxNode.AddMaterial (mappedMaterial);
                 return true;
             }
 
@@ -682,9 +683,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             if (Verbose) {
                 if (unityName != fbxName) {
-                    Debug.Log (string.Format ("exporting material {0} as {1}", unityID, fbxName));
+                    Debug.Log (string.Format ("exporting material {0} as {1}", unityName, fbxName));
                 } else {
-                    Debug.Log(string.Format("exporting material {0}", unityID));
+                    Debug.Log(string.Format("exporting material {0}", unityName));
                 }
             }
 
@@ -2536,19 +2537,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns>Unique name</returns>
         /// <param name="name">Name</param>
-        /// <param name="nameToIndexMap">The dictionary to use to map name to # of occurences</param>
-        private string GetUniqueName(string name, ref Dictionary<string, int> nameToIndexMap)
+        /// <param name="nameToCountMap">The dictionary to use to map name to # of occurences</param>
+        private string GetUniqueName(string name, Dictionary<string, int> nameToCountMap)
         {
             var uniqueName = name;
-            if (nameToIndexMap.ContainsKey(name))
+            int count;
+            if (nameToCountMap.TryGetValue(name, out count))
             {
-                uniqueName = string.Format(UniqueNameFormat, name, nameToIndexMap[name]);
-                nameToIndexMap[name]++;
+                uniqueName = string.Format(UniqueNameFormat, name, count);
             }
             else
             {
-                nameToIndexMap[name] = 1;
+                count = 0;
             }
+            nameToCountMap[name] = count + 1;
             return uniqueName;
         }
 
@@ -2561,7 +2563,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="name">Name</param>
         private string GetUniqueFbxNodeName(string name)
         {
-            return GetUniqueName(name, ref NameToIndexMap);
+            return GetUniqueName(name, NameToIndexMap);
         }
 
         /// <summary>
@@ -2573,7 +2575,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>Unique material name</returns>
         private string GetUniqueMaterialName(string name)
         {
-            return GetUniqueName(name, ref MaterialNameToIndexMap);
+            return GetUniqueName(name, MaterialNameToIndexMap);
         }
 
         /// <summary>
@@ -2585,7 +2587,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>Unique texture name</returns>
         private string GetUniqueTextureName(string name)
         {
-            return GetUniqueName(name, ref TextureNameToIndexMap);
+            return GetUniqueName(name, TextureNameToIndexMap);
         }
 
         /// <summary>
