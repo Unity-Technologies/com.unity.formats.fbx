@@ -938,6 +938,29 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // add bind pose
                 ExportBindPose (unitySkin, fbxNode, fbxScene, skinnedMeshToBonesMap);
+
+                // now that the skin and bindpose are set, make sure that each of the bones
+                // is set to its original position
+                var bones = unitySkin.bones;
+                foreach (var bone in bones)
+                {
+                    var fbxBone = MapUnityObjectToFbxNode[bone.gameObject];
+                    ExportTransform(bone, fbxBone, newCenter: Vector3.zero, TransformExportType.Local);
+
+                    // cancel out the pre-rotation from the exported rotation
+                    var fbxPreRotationEuler = fbxBone.GetPreRotation(FbxNode.EPivotSet.eSourcePivot);
+                    // Get the inverse of the prerotation
+                    var fbxPreRotationInverse = ModelExporter.EulerToQuaternion(fbxPreRotationEuler);
+                    fbxPreRotationInverse.Inverse();
+
+                    var fbxFinalQuat = fbxPreRotationInverse * EulerToQuaternion(new FbxVector4(fbxBone.LclRotation.Get()));
+
+                    var finalUnityQuat = new FbxQuaternion((float)fbxFinalQuat.X, (float)fbxFinalQuat.Y, (float)fbxFinalQuat.Z, (float)fbxFinalQuat.W);
+
+                    var quatToEulerMatrix = new FbxAMatrix();
+                    quatToEulerMatrix.SetQ(finalUnityQuat);
+                    fbxBone.LclRotation.Set(ToFbxDouble3(quatToEulerMatrix.GetR()));
+                }
             }
 
             return true;
