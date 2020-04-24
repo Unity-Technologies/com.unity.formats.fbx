@@ -561,6 +561,7 @@ namespace FbxExporter.UnitTests
             importer.meshCompression = ModelImporterMeshCompression.Off;
             // If either blendshape normals are imported or weldVertices is turned off (or both),
             // the vertex count between the original and exported meshes does not match.
+            // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
             importer.importBlendShapeNormals = ModelImporterNormals.None;
             importer.weldVertices = true;
 #else
@@ -569,6 +570,7 @@ namespace FbxExporter.UnitTests
             importer.meshCompression = ModelImporterMeshCompression.Off;
             // If either blendshape normals are imported or weldVertices is turned off (or both),
             // the vertex count between the original and exported meshes does not match.
+            // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
             importer.importBlendShapeNormals = ModelImporterNormals.None;
             importer.weldVertices = true;
 #endif // UNITY_2019_1_OR_NEWER
