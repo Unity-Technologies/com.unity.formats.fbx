@@ -5,10 +5,48 @@ global string $UnityFbxAnimFileNameAttr = "unityFbxAnimFileName";
 global string $UnityFbxNamespaceAttr = "unityFbxNamespace";
 global string $UnityExportSetNameFormat = "^1s_UnityExportSet";
 
-// global string $UnityModuleName = "UnityFbxForMaya";
+global string $UnityModuleName = "UnityFbxForMaya";
+
+global string $UnityImportSettingsOptionVar = "UnityFbxImportSettings";
+global string $UnityExportSettingsOptionVar = "UnityFbxExportSettings";
 
 global string $UnityDefaultImportSettingsFileName = "unityFbxImportSettings.mel";
 global string $UnityDefaultExportSettingsFileName = "unityFbxExportSettings.mel";
+
+global string $UnityDefaultImportSettings = "\
+FBXResetImport;\n\
+FBXImportAxisConversionEnable -v true;\n\
+FBXImportCameras -v true;\n\
+FBXImportLights -v true;\n\
+FBXImportSetTake -takeIndex -1;\n\
+// Add and update animation\n\
+FBXImportMode -v merge;";
+
+global string $UnityDefaultExportSettings = "\
+FBXResetExport;\n\
+// FBX file format\n\
+FBXExportInAscii -v false;\n\
+FBXExportFileVersion -v FBX201600;\n\
+\n\
+// Geometry\n\
+FBXExportSmoothMesh -v false;\n\
+FBXExportInstances -v true;\n\
+FBXExportReferencedAssetsContent -v false;\n\
+\n\
+// Animation\n\
+FBXExportAnimationOnly -v false;\n\
+\n\
+FBXExportCameras -v true;\n\
+FBXExportLights -v true;\n\
+\n\
+FBXExportEmbeddedTextures -v false;\n\
+\n\
+// Units\n\
+FBXExportScaleFactor 1;\n\
+FBXExportConvertUnitString cm;\n\
+\n\
+// Axis Conversion\n\
+FBXExportUpAxis y;";
 
 global int $UnityFbxFilePathIndex = 0;
 global int $UnityFbxFileNameIndex = 1;
@@ -30,13 +68,34 @@ global proc unityRemoveNativeMenuOnLoad(){
 }
 
 // Load a specified settings file
-proc int loadUnityFbxSettings(string $fileName, string $settingType){
+proc int loadUnityFbxSettings(string $settingType, string $optionVarName, string $defaultSettingsFileName, string $defaultSettings){
+    global string $UnityModuleName;
+
+    $fileName = `optionVar -q $optionVarName`;
+
+    // if no filename set (optionVar cleared), reset it to default filename
+    if ($fileName == 0){
+        $modulePath = `moduleInfo -moduleName $UnityModuleName -path`;
+        // {$modulePath}/scripts/{$defaultSettingsFileName}
+        $modulePath = $modulePath + "/scripts/" + $defaultSettingsFileName;
+
+        $fileName = $modulePath;
+        optionVar -stringValue $optionVarName $fileName;
+    }
+
     // check if the file exists
     if (`file -q -ex $fileName` == false){
-        //error ("Failed to find Unity Fbx "+$settingType+" Settings at: " + $fileName);
-        //return false;
-        
         // create file with default settings
+        $fileId = `fopen $fileName "w"`;
+        fprint $fileId $defaultSettings;
+        fclose $fileId;
+    }
+
+    // if the file still doesn't exist (failed to create)
+    // print an error message.
+    if (`file -q -ex $fileName` == false){
+        error ("Failed to find Unity Fbx "+$settingType+" Settings at: " + $fileName);
+        return false;
     }
     
     eval ("source \"" + $fileName + "\"");
@@ -46,23 +105,29 @@ proc int loadUnityFbxSettings(string $fileName, string $settingType){
 
 // Load the Export Settings from file
 proc int loadUnityFbxExportSettings(){
-    $fileName = `optionVar -q "UnityFbxExportSettings"`;
-    return loadUnityFbxSettings($fileName, "Export");
+    global string $UnityExportSettingsOptionVar;
+    global string $UnityDefaultExportSettings;
+    global string $UnityDefaultExportSettingsFileName;
+    return loadUnityFbxSettings(
+        "Export",
+        $UnityExportSettingsOptionVar,
+        $UnityDefaultExportSettingsFileName,
+        $UnityDefaultExportSettings
+    );
 }
 
 
 // Load the Import Settings from a file
 proc int loadUnityFbxImportSettings(){
-    $fileName = `optionVar -q "UnityFbxImportSettings"`;
-    
-    // if no filename set (optionVar cleared), reset it to default filename
-    if ($fileName == 0){
-        //$modulePath = `moduleInfo -moduleName $UnityModuleName -path`;
-        // {$modulePath}/scripts/{$UnityDefaultImportSettingsFileName}
-        
-    }
-    
-    return loadUnityFbxSettings($fileName, "Import");
+    global string $UnityImportSettingsOptionVar;
+    global string $UnityDefaultImportSettings;
+    global string $UnityDefaultImportSettingsFileName;
+    return loadUnityFbxSettings(
+        "Import",
+        $UnityImportSettingsOptionVar,
+        $UnityDefaultImportSettingsFileName,
+        $UnityDefaultImportSettings
+    );
 }
 
 
