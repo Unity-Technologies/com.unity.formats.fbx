@@ -165,9 +165,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>> MapConstrainedObjectToConstraints = new Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>>();
 
         /// <summary>
-        /// Map Unity material name to FBX material object
+        /// Map Unity material ID to FBX material object
         /// </summary>
-        Dictionary<string, FbxSurfaceMaterial> MaterialMap = new Dictionary<string, FbxSurfaceMaterial> ();
+        Dictionary<int, FbxSurfaceMaterial> MaterialMap = new Dictionary<int, FbxSurfaceMaterial> ();
 
         /// <summary>
         /// Map texture filename name to FBX texture object
@@ -175,15 +175,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
         Dictionary<string, FbxTexture> TextureMap = new Dictionary<string, FbxTexture> ();
 
         /// <summary>
-        /// Map the name of a prefab to an FbxMesh (for preserving instances) 
+        /// Map the ID of a prefab to an FbxMesh (for preserving instances) 
         /// </summary>
-        Dictionary<string, FbxMesh> SharedMeshes = new Dictionary<string, FbxMesh> ();
+        Dictionary<int, FbxMesh> SharedMeshes = new Dictionary<int, FbxMesh> ();
 
         /// <summary>
         /// Map for the Name of an Object to number of objects with this name.
         /// Used for enforcing unique names on export.
         /// </summary>
         Dictionary<string, int> NameToIndexMap = new Dictionary<string, int> ();
+
+        /// <summary>
+        /// Map for the Material Name to number of materials with this name.
+        /// Used for enforcing unique names on export.
+        /// </summary>
+        Dictionary<string, int> MaterialNameToIndexMap = new Dictionary<string, int>();
+
+        /// <summary>
+        /// Map for the Texture Name to number of textures with this name.
+        /// Used for enforcing unique names on export.
+        /// </summary>
+        Dictionary<string, int> TextureNameToIndexMap = new Dictionary<string, int>();
 
         /// <summary>
         /// Format for creating unique names
@@ -620,7 +632,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // Find or create an fbx texture and link it up to the fbx material.
             if (!TextureMap.ContainsKey (textureSourceFullPath)) {
-                var fbxTexture = FbxFileTexture.Create (fbxMaterial, fbxPropName + "_Texture");
+                var textureName = GetUniqueTextureName(fbxPropName + "_Texture");
+                var fbxTexture = FbxFileTexture.Create (fbxMaterial, textureName);
                 fbxTexture.SetFileName (textureSourceFullPath);
                 fbxTexture.SetTextureUse (FbxTexture.ETextureUse.eStandard);
                 fbxTexture.SetMappingType (FbxTexture.EMappingType.eUV);
@@ -655,14 +668,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 unityMaterial = DefaultMaterial;
             }
 
-            var unityName = unityMaterial.name;
-            if (MaterialMap.ContainsKey (unityName)) {
-                fbxNode.AddMaterial (MaterialMap [unityName]);
+            var unityID = unityMaterial.GetInstanceID();
+            FbxSurfaceMaterial mappedMaterial;
+            if (MaterialMap.TryGetValue (unityID, out mappedMaterial)) {
+                fbxNode.AddMaterial (mappedMaterial);
                 return true;
             }
 
+            var unityName = unityMaterial.name;
             var fbxName = ExportOptions.UseMayaCompatibleNames
                 ? ConvertToMayaCompatibleName(unityName) : unityName;
+
+            fbxName = GetUniqueMaterialName(fbxName);
 
             if (Verbose) {
                 if (unityName != fbxName) {
@@ -700,7 +717,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 ExportTexture (unityMaterial, "_SpecGlosMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
             }
 
-            MaterialMap.Add (unityName, fbxMaterial);
+            MaterialMap.Add (unityID, fbxMaterial);
             fbxNode.AddMaterial (fbxMaterial);
             return true;
         }
@@ -1219,7 +1236,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// if this game object is a model prefab then export with shared components
         /// </summary>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        private bool ExportInstance(GameObject unityGo, FbxNode fbxNode)
+        private bool ExportInstance(GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
         {
             if (!unityGo || fbxNode == null)
             {
@@ -1242,10 +1259,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             FbxMesh fbxMesh = null;
 
-            if (!SharedMeshes.TryGetValue (unityPrefabParent.name, out fbxMesh))
+            if (!SharedMeshes.TryGetValue (unityPrefabParent.GetInstanceID(), out fbxMesh))
             {
                 if (ExportMesh (unityGo, fbxNode) && fbxNode.GetMesh() != null) {
-                    SharedMeshes [unityPrefabParent.name] = fbxNode.GetMesh ();
+                    SharedMeshes [unityPrefabParent.GetInstanceID()] = fbxNode.GetMesh ();
                     return true;
                 }
                 return false;
@@ -1259,9 +1276,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (materials != null)
             {
                 foreach (var mat in materials) {
-                    if (MaterialMap.TryGetValue(mat.name, out newMaterial))
+                    if (MaterialMap.TryGetValue(mat.GetInstanceID(), out newMaterial))
                     {
                         fbxNode.AddMaterial(newMaterial);
+                    }
+                    else
+                    {
+                        // create new material
+                        ExportMaterial(mat, fbxScene, fbxNode);
                     }
                 }
             }
@@ -2515,16 +2537,57 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns>Unique name</returns>
         /// <param name="name">Name</param>
-        private string GetUniqueName(string name)
+        /// <param name="nameToCountMap">The dictionary to use to map name to # of occurences</param>
+        private string GetUniqueName(string name, Dictionary<string, int> nameToCountMap)
         {
             var uniqueName = name;
-            if (NameToIndexMap.ContainsKey (name)) {
-                uniqueName = string.Format (UniqueNameFormat, name, NameToIndexMap [name]);
-                NameToIndexMap [name]++;
-            } else {
-                NameToIndexMap [name] = 1;
+            int count;
+            if (nameToCountMap.TryGetValue(name, out count))
+            {
+                uniqueName = string.Format(UniqueNameFormat, name, count);
             }
+            else
+            {
+                count = 0;
+            }
+            nameToCountMap[name] = count + 1;
             return uniqueName;
+        }
+
+        /// <summary>
+        /// Ensures that the inputted name is unique.
+        /// If a duplicate name is found, then it is incremented.
+        /// e.g. Sphere becomes Sphere_1
+        /// </summary>
+        /// <returns>Unique name</returns>
+        /// <param name="name">Name</param>
+        private string GetUniqueFbxNodeName(string name)
+        {
+            return GetUniqueName(name, NameToIndexMap);
+        }
+
+        /// <summary>
+        /// Ensures that the inputted material name is unique.
+        /// If a duplicate name is found, then it is incremented.
+        /// e.g. mat becomes mat_1
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <returns>Unique material name</returns>
+        private string GetUniqueMaterialName(string name)
+        {
+            return GetUniqueName(name, MaterialNameToIndexMap);
+        }
+
+        /// <summary>
+        /// Ensures that the inputted texture name is unique.
+        /// If a duplicate name is found, then it is incremented.
+        /// e.g. tex becomes tex_1
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <returns>Unique texture name</returns>
+        private string GetUniqueTextureName(string name)
+        {
+            return GetUniqueName(name, TextureNameToIndexMap);
         }
 
         /// <summary>
@@ -2546,7 +2609,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
             
-            FbxNode fbxNode = FbxNode.Create(fbxScene, GetUniqueName(fbxName));
+            FbxNode fbxNode = FbxNode.Create(fbxScene, GetUniqueFbxNodeName(fbxName));
 
             // Default inheritance type in FBX is RrSs, which causes scaling issues in Maya as
             // both Maya and Unity use RSrs inheritance by default.
@@ -3126,7 +3189,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var fbxNode = entry.Value;
 
                 // try export mesh
-                bool exportedMesh = ExportInstance (unityGo, fbxNode);
+                bool exportedMesh = ExportInstance (unityGo, fbxScene, fbxNode);
 
                 if (!exportedMesh) {
                     exportedMesh = ExportMesh (unityGo, fbxNode);
