@@ -957,11 +957,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     fbxPreRotationQuaternion.Inverse();
 
                     // Multiply LclRotation by pre-rotation inverse to get the LclRotation without pre-rotation applied
-                    var fbxFinalQuat = fbxPreRotationQuaternion * EulerToQuaternion(new FbxVector4(fbxBone.LclRotation.Get()));
+                    var finalLclRotationQuat = fbxPreRotationQuaternion * EulerToQuaternion(new FbxVector4(fbxBone.LclRotation.Get()));
 
-                    var quatToEulerMatrix = new FbxAMatrix();
-                    quatToEulerMatrix.SetQ(fbxFinalQuat);
-                    fbxBone.LclRotation.Set(ToFbxDouble3(quatToEulerMatrix.GetR()));
+                    // Convert to Euler without axis conversion (Pre-rotation and LclRotation were already in Maya axis)
+                    // and update LclRotation
+                    fbxBone.LclRotation.Set(ToFbxDouble3(QuaternionToEuler(finalLclRotationQuat)));
                 }
             }
 
