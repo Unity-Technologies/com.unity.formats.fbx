@@ -564,7 +564,13 @@ namespace FbxExporter.UnitTests
             importer.importBlendShapeNormals = ModelImporterNormals.None;
             importer.weldVertices = true;
 #else
+            importer.importBlendShapes = true;
             importer.optimizeMesh = false;
+            importer.meshCompression = ModelImporterMeshCompression.Off;
+            // If either blendshape normals are imported or weldVertices is turned off (or both),
+            // the vertex count between the original and exported meshes does not match.
+            importer.importBlendShapeNormals = ModelImporterNormals.None;
+            importer.weldVertices = true;
 #endif // UNITY_2019_1_OR_NEWER
             importer.SaveAndReimport();
 
