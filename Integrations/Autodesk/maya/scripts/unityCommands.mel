@@ -2,7 +2,8 @@ global string $UnityFbxFilePathAttr = "unityFbxModelFilePath";
 global string $UnityFbxFileNameAttr = "unityFbxModelFileName";
 global string $UnityFbxAnimFilePathAttr = "unityFbxAnimFilePath";
 global string $UnityFbxAnimFileNameAttr = "unityFbxAnimFileName";
-global string $UnityFbxNamespaceAttr = "unityFbxStripAllNamespaces";
+global string $UnityFbxStripNamespaceAttr = "unityFbxStripNamespaces";
+global string $UnityFbxNamespaceAttr = "unityFbxNamespace";
 global string $UnityExportSetNameFormat = "^1s_UnityExportSet";
 
 global int $UnityFbxFilePathIndex = 0;
@@ -57,6 +58,13 @@ proc string getAttribute(string $node, string $attr){
     return "";
 }
 
+proc int getBoolAttribute(string $node, string $attr){
+        if (`attributeExists $attr $node`){
+        return `getAttr ($node + "." + $attr)`;
+    }
+    return 0;
+}
+
 proc storeBoolAttribute(string $node, string $attr, int $attrValue){
     if (!attributeExists($attr, $node)){
         addAttr -shortName $attr -storable true -attributeType bool $node;
@@ -105,26 +113,6 @@ proc int showConfirmDialog(string $title, string $message, string $confirmButton
 proc string getObjectNamespace(string $objectName){
     string $lsResult[] = `ls -showNamespace -an $objectName`;
     return $lsResult[1];
-}
-
-proc string getNewNamespace(string $n1, string $n2){
-    string $n2Tokens[];
-    int $n2NumTokens = `tokenize $n2 ":" $n2Tokens`;
-    
-    string $newNamespace = ":";
-    string $n1BaseName = `namespaceInfo -baseName $n1`;
-    
-    for($i=$n2NumTokens-1; $i>=0; --$i){
-        if($n2Tokens[$i] == $n1BaseName){
-            break;
-        }
-        $n2Tokens[$i] = "";
-    }
-    $newNamespace = $newNamespace + stringArrayToString($n2Tokens, ":");
-    if($newNamespace == ":"){
-        return $n2;
-    }
-    return $newNamespace;
 }
 
 // =======================
@@ -214,6 +202,24 @@ proc int getOrCreateExportSet(string $unityExportSet, string $origNamespace){
     return true;
 }
 
+global proc unityOnToggleStripNamespace(string $exportSetName)
+{
+    global string $UnityFbxStripNamespaceAttr;
+    global string $UnityFbxNamespaceAttr;
+
+    int $stripNamespaces = `getAttr ($exportSetName + "." + $UnityFbxStripNamespaceAttr)`;
+
+    $stripNamespaceAttrName = ($exportSetName + "." + $UnityFbxNamespaceAttr);
+
+    // temporarily unlock to be able to modify namespace attr
+    lockNode -lock false $exportSetName;
+
+    setAttr -lock (!$stripNamespaces) $stripNamespaceAttrName;
+
+    // lock set so it doesn't get deleted when empty
+    lockNode -lock true $exportSetName;
+}
+
 // Add or update the following five attributes of the given export set, to be used for exporting:
 // - export directory
 // - export file name
@@ -229,6 +235,7 @@ proc setExportSetAttributes(
     global string $UnityFbxFileNameAttr;
     global string $UnityFbxAnimFilePathAttr;
     global string $UnityFbxAnimFileNameAttr;
+    global string $UnityFbxStripNamespaceAttr;
     global string $UnityFbxNamespaceAttr;
     
     global int $UnityFbxFilePathIndex;
@@ -262,8 +269,14 @@ proc setExportSetAttributes(
         storeStringAttribute($unityExportSet,$UnityFbxAnimFileNameAttr,$exportAnimFileName);
     }
 
-    storeBoolAttribute($unityExportSet, $UnityFbxNamespaceAttr, $stripNamespaces);
-    
+    storeBoolAttribute($unityExportSet, $UnityFbxStripNamespaceAttr, $stripNamespaces);
+
+    storeStringAttribute($unityExportSet, $UnityFbxNamespaceAttr, "");
+
+    $stripNamespaceAttrName = ($unityExportSet + "." + $UnityFbxStripNamespaceAttr);
+    setAttr -lock (!$stripNamespaces) $stripNamespaceAttrName;
+    scriptJob -attributeChange $stripNamespaceAttrName ("unityOnToggleStripNamespace " + $unityExportSet) -protected;
+
     // lock set so it doesn't get deleted when empty
     lockNode -lock true $unityExportSet;
 }
@@ -440,15 +453,81 @@ proc string[] getIntersection(string $set1[], string $set2[]){
     return $intersection;
 }
 
+// Find the most common namespace among the selected objects. If there are multiple (because of nested namespaces),
+// prefer the most specific. For example if you have:
+//
+// test1:test2:sphere
+// test1:test3:cube
+// test1:test2:cylinder
+//
+// test1 will be returned because all objects have that namespace in common. However if you have:
+//
+// test1:test2:sphere
+// test1:test2:cube
+// test1:test2:cylinder
+//
+// Then it will return test1:test2.
+proc string getCommonNamespace(string $origSelection[]){
+    // gather up all the unique namespaces
+    string $selectedNamespaces[];
+    for($i = 0; $i < size($origSelection); $i++){
+        string $currNamespace = getObjectNamespace($origSelection[$i]);
+        while ($currNamespace != ":" && !stringArrayContains($currNamespace, $selectedNamespaces)){
+            $selectedNamespaces[size($selectedNamespaces)] = $currNamespace;
+            $currNamespace = `namespaceInfo -p $currNamespace`;
+            // make sure the namespace always starts with a colon
+            if(!startsWith($currNamespace, ":")){
+                $currNamespace = ":" + $currNamespace;
+            }
+        }
+    }
+
+    // go through selection to find common namespace to set as default
+    string $commonNamespace = ":";
+    int $maxNamespaceCount = 0;
+    for($i = 0; $i < size($selectedNamespaces); $i++){
+        $currNamespace = $selectedNamespaces[$i];
+        // get contents of namespace
+        string $namespaceContents[] = `namespaceInfo -ls $currNamespace -r`;
+        string $intersection[] = getIntersection($origSelection, $namespaceContents);
+        int $intersectionSize = size($intersection);
+        if($intersectionSize > $maxNamespaceCount ||
+            // prefer more specific namespaces
+            ($maxNamespaceCount > 0 &&
+             $intersectionSize == $maxNamespaceCount &&
+             size($currNamespace) > size($commonNamespace)))
+        {
+            $commonNamespace = $currNamespace;
+            $maxNamespaceCount = $intersectionSize;
+        }
+    }
+    return $commonNamespace;
+}
+
 proc exportSet(string $unitySet, int $exportAnim){
     global string $UnityFbxFilePathAttr;
     global string $UnityFbxFileNameAttr;
     global string $UnityFbxAnimFilePathAttr;
     global string $UnityFbxAnimFileNameAttr;
+    global string $UnityFbxStripNamespaceAttr;
     global string $UnityFbxNamespaceAttr;
 
     string $unitySetContents[] = `listConnections $unitySet`;
-    int $stripNamespaces = getAttribute($unitySet, $UnityFbxNamespaceAttr);
+    int $stripNamespaces = getBoolAttribute($unitySet, $UnityFbxStripNamespaceAttr);
+    string $namespaceToStrip = getAttribute($unitySet, $UnityFbxNamespaceAttr);
+
+    // if there is no namespace manually set, find the common namespace
+    if ($stripNamespaces){
+        if ($namespaceToStrip == ""){
+            $namespaceToStrip = getCommonNamespace($unitySetContents);
+        }
+        else {
+            // make sure the namespace to strip is an absolute namespace
+            if(!startsWith($namespaceToStrip, ":")){
+                $namespaceToStrip = ":" + $namespaceToStrip;
+            }
+        }
+    }
         
     string $animatedObjectSet = "";
     if($exportAnim){
@@ -484,8 +563,12 @@ proc exportSet(string $unitySet, int $exportAnim){
     $strCmd = "";
     if ($unityFbxFilePath != "" && $unityFbxFileName != ""){
         // export selected, relative to given namespace
-        string $exportFormat = "file -force -options \"\" -typ \"FBX export\" -es \"^2s/^3s\"";
-        $strCmd = `format -s $unityFbxFilePath -s $unityFbxFileName $exportFormat`;
+        string $exportFormat = "file -force -options \"\" -typ \"FBX export\" -relativeNamespace \"^1s\" -es \"^2s/^3s\"";
+        string $relativeNamespace = ":";
+        if ($stripNamespaces){
+            $relativeNamespace = $namespaceToStrip;
+        }
+        $strCmd = `format -s $relativeNamespace -s $unityFbxFilePath -s $unityFbxFileName $exportFormat`;
         eval $strCmd;
     }
     
@@ -758,57 +841,6 @@ proc string createCheckboxWithLabelLeft(string $label, string $parent, int $labe
     return `checkBox -value true -label " "`;
 }
 
-// Find the most common namespace among the selected objects. If there are multiple (because of nested namespaces),
-// prefer the most specific. For example if you have:
-//
-// test1:test2:sphere
-// test1:test3:cube
-// test1:test2:cylinder
-//
-// test1 will be returned because all objects have that namespace in common. However if you have:
-//
-// test1:test2:sphere
-// test1:test2:cube
-// test1:test2:cylinder
-//
-// Then it will return test1:test2.
-proc string getCommonNamespace(string $origSelection[]){
-    // gather up all the unique namespaces
-    string $selectedNamespaces[];
-    for($i = 0; $i < size($origSelection); $i++){
-        string $currNamespace = getObjectNamespace($origSelection[$i]);
-        while ($currNamespace != ":" && !stringArrayContains($currNamespace, $selectedNamespaces)){
-            $selectedNamespaces[size($selectedNamespaces)] = $currNamespace;
-            $currNamespace = `namespaceInfo -p $currNamespace`;
-            // make sure the namespace always starts with a colon
-            if(!startsWith($currNamespace, ":")){
-                $currNamespace = ":" + $currNamespace;
-            }
-        }
-    }
-
-    // go through selection to find common namespace to set as default
-    string $commonNamespace = ":";
-    int $maxNamespaceCount = 0;
-    for($i = 0; $i < size($selectedNamespaces); $i++){
-        $currNamespace = $selectedNamespaces[$i];
-        // get contents of namespace
-        string $namespaceContents[] = `namespaceInfo -ls $currNamespace -r`;
-        string $intersection[] = getIntersection($origSelection, $namespaceContents);
-        int $intersectionSize = size($intersection);
-        if($intersectionSize > $maxNamespaceCount ||
-            // prefer more specific namespaces
-            ($maxNamespaceCount > 0 &&
-             $intersectionSize == $maxNamespaceCount &&
-             size($currNamespace) > size($commonNamespace)))
-        {
-            $commonNamespace = $currNamespace;
-            $maxNamespaceCount = $intersectionSize;
-        }
-    }
-    return $commonNamespace;
-}
-
 proc createExportSetDialog(int $exportType){
     $origSelection = `ls -sl`;
     if(size($origSelection) <= 0){
@@ -864,7 +896,7 @@ proc createExportSetDialog(int $exportType){
         }
     }
 
-    int $labelSize = 145;
+    int $labelSize = 150;
     int $textFieldSize = 300;
 
     // get namespace
