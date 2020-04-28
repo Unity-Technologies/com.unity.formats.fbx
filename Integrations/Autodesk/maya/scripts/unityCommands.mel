@@ -92,10 +92,11 @@ proc int loadUnityFbxSettings(string $settingType, string $optionVarName, string
     }
 
     // if the file still doesn't exist (failed to create)
-    // print an error message.
+    // load the default settings and print a warning
     if (`file -q -ex $fileName` == false){
-        error ("Failed to find Unity Fbx "+$settingType+" Settings at: " + $fileName);
-        return false;
+        warning ("Failed to find Unity Fbx "+$settingType+" Settings at: " + $fileName + ", loading default settings.");
+        eval ($defaultSettings);
+        return true;
     }
     
     eval ("source \"" + $fileName + "\"");
