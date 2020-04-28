@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [3.2.0-preview.1] - 2020-04-23
+## [3.2.0-preview.1] - 2020-04-28
 ### Added
 - Added an option to the Autodesk® Maya® integration Unity menu for creating an export set.
     - The option can be found in File > Unity > Create Export Set
@@ -16,6 +16,7 @@
 - Added a null check when inspecting whether a Timline Clip is selected for export. This fixes a NullReferenceException when an object in the selection is null.
 - Fix issue where different Materials and Meshes with identical names export as a single material/mesh.
 - Fix skinned mesh always exports in bind pose regardless of current pose.
+- Import/Export in Maya Integration fails if FBX Import/Export settings file missing.
 
 ## [3.1.0-preview.1] - 2020-04-02
 ### Fixed
