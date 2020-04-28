@@ -952,7 +952,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // Get prerotation
                     var fbxPreRotationEuler = fbxBone.GetPreRotation(FbxNode.EPivotSet.eSourcePivot);
                     // Convert the prerotation to a Quaternion
-                    var fbxPreRotationQuaternion = ModelExporter.EulerToQuaternion(fbxPreRotationEuler);
+                    var fbxPreRotationQuaternion = EulerToQuaternion(fbxPreRotationEuler);
                     // Inverse of the prerotation
                     fbxPreRotationQuaternion.Inverse();
 
