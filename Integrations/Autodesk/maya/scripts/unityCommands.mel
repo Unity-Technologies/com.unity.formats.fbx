@@ -694,7 +694,6 @@ proc string[] getUnityExportSets(){
 }
 
 proc setupNewExportSet(
-    string $namespace,
     string $modelPath,
     string $modelFilename,
     string $animPath,
@@ -739,10 +738,6 @@ proc setupNewExportSet(
     
     string $origNamespace = `namespaceInfo -cur -an`;
     
-    if($namespace != ":" && !(`namespace -exists $namespace`)){
-        namespace -add $namespace;
-    }
-    
     // Get or create the Unity Fbx Export Set
     $setCreated = getOrCreateExportSet($unityExportSet, $origNamespace);
 
@@ -784,19 +779,6 @@ proc setupNewExportSet(
         }
     }
     
-    // add to the targetNamespace
-    // iterate over all selected objects and rename
-    if ($namespace != ":"){
-        // remove the colon from the beginning of the namespace
-        // because the $object name does not start with a colon.
-        $namespace = `substring $namespace 2 (size($namespace))`;
-        for($object in $selectedObjects){
-            if(!startsWith($object, $namespace)){
-                rename $object ($namespace + ":" + $object);
-            }
-        }
-    }
-    
     // switch project if file exported to a different Unity project
     switchUnityProject($modelPath);
 }
@@ -805,7 +787,6 @@ proc setupNewExportSet(
 
 global proc unityOnCreateExportSet(
     string $window,
-    string $namespaceField,
     string $modelPathField,
     string $modelFileField,
     string $animPathField,
@@ -817,11 +798,6 @@ global proc unityOnCreateExportSet(
         // nothing selected
         error ("Unity FBX Export Set Creation: Nothing selected");
         return;
-    }
-
-    string $namespace = `textField -q -text $namespaceField`;
-    if ($namespace == ""){
-        $namespace = ":";
     }
 
     string $modelPath = "";
@@ -858,7 +834,6 @@ global proc unityOnCreateExportSet(
     int $stripNamespaces = `checkBox -q -value $stripNamespaceCheckbox`;
     
     setupNewExportSet(
-        $namespace,
         $modelPath,
         $modelFilename,
         $animPath,
@@ -980,10 +955,6 @@ proc createExportSetDialog(int $exportType){
 
     int $labelSize = 150;
     int $textFieldSize = 300;
-
-    // get namespace
-    string $namespaceField = createTextFieldWithLabel("Namespace", $mainOptions, $labelSize, $textFieldSize);
-    textField -e -text $commonNamespace $namespaceField;
     
     string $modelFilePath = " 0 0";
     if(!$exportAnimOnly){
@@ -1010,7 +981,7 @@ proc createExportSetDialog(int $exportType){
           -columnWidth3 $buttonWidth $buttonWidth $buttonWidth
           -columnAlign3 "center" "center" "center" -p $container`;
 
-    string $createExportSetCommand = "unityOnCreateExportSet " + $window + " " + $namespaceField + $modelFilePath + $animFilePath + " " + $stripNamespaceCheckbox;
+    string $createExportSetCommand = "unityOnCreateExportSet " + $window + " " + $modelFilePath + $animFilePath + " " + $stripNamespaceCheckbox;
           
     button -label "Create Set and Export"
         -width $buttonWidth
