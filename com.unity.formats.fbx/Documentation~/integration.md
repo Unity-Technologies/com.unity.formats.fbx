@@ -149,7 +149,6 @@ After selecting one of the above menu items, the following dialog will appear to
 
 | Property:                     | Function:                                                    |
 | :---------------------------- | :----------------------------------------------------------- |
-| __Namespace__              | Select the namespace to add all the objects in the set to. Will not modify namespace of objects already in the desired namespace. |
 | __Model File Path__        | The file path to export to when calling __File__ > __Unity__ > __Export__ and __File__ > __Unity__ > __Export Model Only__. |
 | __Model File Name__        | The file name to export to when calling __File__ > __Unity__ > __Export__ and __File__ > __Unity__ > __Export Model Only__. |
 | __Anim File Path__         | The file path to export to when calling __File__ > __Unity__ > __Export Animation Only__. |
@@ -166,7 +165,7 @@ on the set. In order to do so, select the set, go to the Attribute Editor, and m
 
 > **NOTE:** If Arnold is installed, the attributes may appear in the Attribute Editor under __Arnold__ > __Extra Attributes__
 
-![](images/FBXExporter_MayaExportSetAttributes.png)
+![](images/FBXExporter_MayaExportSetAttributes.PNG)
 
 | Property:                     | Function:                                                    |
 | :---------------------------- | :----------------------------------------------------------- |
