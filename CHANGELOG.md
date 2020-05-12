@@ -4,8 +4,7 @@
 ### Added
 - Added an option to the Autodesk® Maya® integration Unity menu for creating an export set.
     - The option can be found in File > Unity > Create Export Set
-    - Selecting this option will open a dialog allowing the user to select the desired namespace for the set contents
-      as well as the export locations for model and animation files.
+    - Selecting this option will open a dialog allowing the user to select the desired export locations for model and animation files.
     - File > Unity > Export [Model Only|Animation Only] will also open the same dialog if the objects selected for export
       are not already in an export set.
 
@@ -13,7 +12,7 @@
 - Do not search for Autodesk® installs in `D:/Program Files/Autodesk` (not a standard drive).
 
 ### Fixed
-- Added a null check when inspecting whether a Timline Clip is selected for export. This fixes a NullReferenceException when an object in the selection is null.
+- Added a null check when inspecting whether a Timeline Clip is selected for export. This fixes a NullReferenceException when an object in the selection is null.
 - Fix issue where different Materials and Meshes with identical names export as a single material/mesh.
 - Fix skinned mesh always exports in bind pose regardless of current pose.
 - Import/Export in Maya Integration fails if FBX Import/Export settings file missing.
