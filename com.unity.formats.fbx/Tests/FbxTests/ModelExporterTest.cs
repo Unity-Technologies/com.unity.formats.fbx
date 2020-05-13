@@ -541,7 +541,21 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual (mesh.tangents, fbxMesh.tangents);
         }
 
-        private string ExportSkinnedMesh(string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh){
+        private delegate void SetImportSettings(ModelImporter importer);
+        private string ExportSkinnedMesh(
+            string fileToExport, 
+            out SkinnedMeshRenderer originalSkinnedMesh,
+            out SkinnedMeshRenderer exportedSkinnedMesh,
+            SetImportSettings setImportSettings = null)
+        {
+            // change import settings of original FBX
+            if(setImportSettings != null)
+            {
+                var origImporter = AssetImporter.GetAtPath(fileToExport) as ModelImporter;
+                setImportSettings(origImporter);
+                origImporter.SaveAndReimport();
+            }
+
             // add fbx to scene
             GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath(fileToExport) as GameObject;
             Assert.IsNotNull (originalFbxObj);
@@ -553,28 +567,12 @@ namespace FbxExporter.UnitTests
             string filename = GetRandomFbxFilePath();
             ModelExporter.ExportObject (filename, originalGO);
 
-            var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
-#if UNITY_2019_1_OR_NEWER
-            importer.importBlendShapes = true;
-            importer.optimizeMeshPolygons = false;
-            importer.optimizeMeshVertices = false;
-            importer.meshCompression = ModelImporterMeshCompression.Off;
-            // If either blendshape normals are imported or weldVertices is turned off (or both),
-            // the vertex count between the original and exported meshes does not match.
-            // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
-            importer.importBlendShapeNormals = ModelImporterNormals.None;
-            importer.weldVertices = true;
-#else
-            importer.importBlendShapes = true;
-            importer.optimizeMesh = false;
-            importer.meshCompression = ModelImporterMeshCompression.Off;
-            // If either blendshape normals are imported or weldVertices is turned off (or both),
-            // the vertex count between the original and exported meshes does not match.
-            // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
-            importer.importBlendShapeNormals = ModelImporterNormals.None;
-            importer.weldVertices = true;
-#endif // UNITY_2019_1_OR_NEWER
-            importer.SaveAndReimport();
+            if (setImportSettings != null)
+            {
+                var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
+                setImportSettings(importer);
+                importer.SaveAndReimport();
+            }
 
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             Assert.IsTrue (fbxObj);
@@ -852,7 +850,40 @@ namespace FbxExporter.UnitTests
             Assert.That (fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSMR, exportedSMR;
-            var exportedFbxPath = ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
+            SetImportSettings setImportSettings = (importer) =>
+            {
+#if UNITY_2019_1_OR_NEWER
+                importer.importBlendShapes = true;
+                importer.optimizeMeshPolygons = false;
+                importer.optimizeMeshVertices = false;
+                importer.meshCompression = ModelImporterMeshCompression.Off;
+
+                importer.importNormals = ModelImporterNormals.Import;
+                importer.importTangents = ModelImporterTangents.CalculateMikk;
+
+                // If either blendshape normals are imported or weldVertices is turned off (or both),
+                // the vertex count between the original and exported meshes does not match.
+                // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
+                importer.importBlendShapeNormals = ModelImporterNormals.None;
+                importer.weldVertices = true;
+#else
+                importer.importBlendShapes = true;
+                importer.optimizeMesh = false;
+                importer.meshCompression = ModelImporterMeshCompression.Off;
+
+                // In 2018.3, the vertices still do not match unless no normals
+                // are imported.
+                importer.importNormals = ModelImporterNormals.None;
+
+                // If either blendshape normals are imported or weldVertices is turned off (or both),
+                // the vertex count between the original and exported meshes does not match.
+                // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
+                importer.importBlendShapeNormals = ModelImporterNormals.None;
+                importer.weldVertices = true;
+#endif // UNITY_2019_1_OR_NEWER
+            };
+
+            var exportedFbxPath = ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR, setImportSettings);
 
             var originalMesh = originalSMR.sharedMesh;
             var exportedMesh = exportedSMR.sharedMesh;
