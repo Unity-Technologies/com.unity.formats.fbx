@@ -852,24 +852,15 @@ namespace FbxExporter.UnitTests
             SkinnedMeshRenderer originalSMR, exportedSMR;
             SetImportSettings setImportSettings = (importer) =>
             {
-#if UNITY_2019_1_OR_NEWER
                 importer.importBlendShapes = true;
+                importer.meshCompression = ModelImporterMeshCompression.Off;
+
+#if UNITY_2019_1_OR_NEWER
                 importer.optimizeMeshPolygons = false;
                 importer.optimizeMeshVertices = false;
-                importer.meshCompression = ModelImporterMeshCompression.Off;
-
-                importer.importNormals = ModelImporterNormals.Import;
-                importer.importTangents = ModelImporterTangents.CalculateMikk;
-
-                // If either blendshape normals are imported or weldVertices is turned off (or both),
-                // the vertex count between the original and exported meshes does not match.
-                // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
-                importer.importBlendShapeNormals = ModelImporterNormals.None;
-                importer.weldVertices = true;
 #else
-                importer.importBlendShapes = true;
                 importer.optimizeMesh = false;
-                importer.meshCompression = ModelImporterMeshCompression.Off;
+#endif // UNITY_2019_1_OR_NEWER
 
 #if UNITY_2018_4_OR_NEWER
                 importer.importNormals = ModelImporterNormals.Import;
@@ -879,13 +870,11 @@ namespace FbxExporter.UnitTests
                 // are imported.
                 importer.importNormals = ModelImporterNormals.None;
 #endif
-
                 // If either blendshape normals are imported or weldVertices is turned off (or both),
                 // the vertex count between the original and exported meshes does not match.
                 // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
                 importer.importBlendShapeNormals = ModelImporterNormals.None;
                 importer.weldVertices = true;
-#endif // UNITY_2019_1_OR_NEWER
             };
 
             var exportedFbxPath = ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR, setImportSettings);
