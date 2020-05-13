@@ -871,9 +871,14 @@ namespace FbxExporter.UnitTests
                 importer.optimizeMesh = false;
                 importer.meshCompression = ModelImporterMeshCompression.Off;
 
+#if UNITY_2018_4_OR_NEWER
+                importer.importNormals = ModelImporterNormals.Import;
+                importer.importTangents = ModelImporterTangents.CalculateMikk;
+#else
                 // In 2018.3, the vertices still do not match unless no normals
                 // are imported.
                 importer.importNormals = ModelImporterNormals.None;
+#endif
 
                 // If either blendshape normals are imported or weldVertices is turned off (or both),
                 // the vertex count between the original and exported meshes does not match.
