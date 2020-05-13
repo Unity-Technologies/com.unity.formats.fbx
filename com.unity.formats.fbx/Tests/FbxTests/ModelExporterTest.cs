@@ -542,10 +542,8 @@ namespace FbxExporter.UnitTests
         }
 
         private delegate void SetImportSettings(ModelImporter importer);
-        private string ExportSkinnedMesh(
+        private (string filename, SkinnedMeshRenderer originalSkinnedMesh, SkinnedMeshRenderer exportedSkinnedMesh) ExportSkinnedMesh(
             string fileToExport, 
-            out SkinnedMeshRenderer originalSkinnedMesh,
-            out SkinnedMeshRenderer exportedSkinnedMesh,
             SetImportSettings setImportSettings = null)
         {
             // change import settings of original FBX
@@ -577,13 +575,13 @@ namespace FbxExporter.UnitTests
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             Assert.IsTrue (fbxObj);
 
-            originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
+            var originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
             Assert.IsNotNull (originalSkinnedMesh);
 
-            exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
+            var exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
             Assert.IsNotNull (exportedSkinnedMesh);
 
-            return filename;
+            return (filename, originalSkinnedMesh, exportedSkinnedMesh);
         }
 
         public class SkinnedMeshTestDataClass
@@ -622,7 +620,9 @@ namespace FbxExporter.UnitTests
             Assert.That (fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSkinnedMesh, exportedSkinnedMesh;
-            ExportSkinnedMesh (fbxPath, out originalSkinnedMesh, out exportedSkinnedMesh);
+            var exportResult = ExportSkinnedMesh (fbxPath);
+            originalSkinnedMesh = exportResult.originalSkinnedMesh;
+            exportedSkinnedMesh = exportResult.exportedSkinnedMesh;
 
             Assert.IsTrue (originalSkinnedMesh.name == exportedSkinnedMesh.name ||
                 (originalSkinnedMesh.transform.parent == null && exportedSkinnedMesh.transform.parent == null));
@@ -877,7 +877,11 @@ namespace FbxExporter.UnitTests
                 importer.weldVertices = true;
             };
 
-            var exportedFbxPath = ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR, setImportSettings);
+            var exportResult = ExportSkinnedMesh (fbxPath, setImportSettings);
+            var exportedFbxPath = exportResult.filename;
+            originalSMR = exportResult.originalSkinnedMesh;
+            exportedSMR = exportResult.exportedSkinnedMesh;
+
 
             var originalMesh = originalSMR.sharedMesh;
             var exportedMesh = exportedSMR.sharedMesh;
