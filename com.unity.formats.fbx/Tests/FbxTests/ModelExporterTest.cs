@@ -541,7 +541,19 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual (mesh.tangents, fbxMesh.tangents);
         }
 
-        private string ExportSkinnedMesh(string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh){
+        private delegate void SetImportSettings(ModelImporter importer);
+        private (string filename, SkinnedMeshRenderer originalSkinnedMesh, SkinnedMeshRenderer exportedSkinnedMesh) ExportSkinnedMesh(
+            string fileToExport, 
+            SetImportSettings setImportSettings = null)
+        {
+            // change import settings of original FBX
+            if(setImportSettings != null)
+            {
+                var origImporter = AssetImporter.GetAtPath(fileToExport) as ModelImporter;
+                setImportSettings(origImporter);
+                origImporter.SaveAndReimport();
+            }
+
             // add fbx to scene
             GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath(fileToExport) as GameObject;
             Assert.IsNotNull (originalFbxObj);
@@ -553,39 +565,23 @@ namespace FbxExporter.UnitTests
             string filename = GetRandomFbxFilePath();
             ModelExporter.ExportObject (filename, originalGO);
 
-            var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
-#if UNITY_2019_1_OR_NEWER
-            importer.importBlendShapes = true;
-            importer.optimizeMeshPolygons = false;
-            importer.optimizeMeshVertices = false;
-            importer.meshCompression = ModelImporterMeshCompression.Off;
-            // If either blendshape normals are imported or weldVertices is turned off (or both),
-            // the vertex count between the original and exported meshes does not match.
-            // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
-            importer.importBlendShapeNormals = ModelImporterNormals.None;
-            importer.weldVertices = true;
-#else
-            importer.importBlendShapes = true;
-            importer.optimizeMesh = false;
-            importer.meshCompression = ModelImporterMeshCompression.Off;
-            // If either blendshape normals are imported or weldVertices is turned off (or both),
-            // the vertex count between the original and exported meshes does not match.
-            // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
-            importer.importBlendShapeNormals = ModelImporterNormals.None;
-            importer.weldVertices = true;
-#endif // UNITY_2019_1_OR_NEWER
-            importer.SaveAndReimport();
+            if (setImportSettings != null)
+            {
+                var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
+                setImportSettings(importer);
+                importer.SaveAndReimport();
+            }
 
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             Assert.IsTrue (fbxObj);
 
-            originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
+            var originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
             Assert.IsNotNull (originalSkinnedMesh);
 
-            exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
+            var exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
             Assert.IsNotNull (exportedSkinnedMesh);
 
-            return filename;
+            return (filename, originalSkinnedMesh, exportedSkinnedMesh);
         }
 
         public class SkinnedMeshTestDataClass
@@ -624,7 +620,9 @@ namespace FbxExporter.UnitTests
             Assert.That (fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSkinnedMesh, exportedSkinnedMesh;
-            ExportSkinnedMesh (fbxPath, out originalSkinnedMesh, out exportedSkinnedMesh);
+            var exportResult = ExportSkinnedMesh (fbxPath);
+            originalSkinnedMesh = exportResult.originalSkinnedMesh;
+            exportedSkinnedMesh = exportResult.exportedSkinnedMesh;
 
             Assert.IsTrue (originalSkinnedMesh.name == exportedSkinnedMesh.name ||
                 (originalSkinnedMesh.transform.parent == null && exportedSkinnedMesh.transform.parent == null));
@@ -852,7 +850,38 @@ namespace FbxExporter.UnitTests
             Assert.That (fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSMR, exportedSMR;
-            var exportedFbxPath = ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
+            SetImportSettings setImportSettings = (importer) =>
+            {
+                importer.importBlendShapes = true;
+                importer.meshCompression = ModelImporterMeshCompression.Off;
+
+#if UNITY_2019_1_OR_NEWER
+                importer.optimizeMeshPolygons = false;
+                importer.optimizeMeshVertices = false;
+#else
+                importer.optimizeMesh = false;
+#endif // UNITY_2019_1_OR_NEWER
+
+#if UNITY_2018_4_OR_NEWER
+                importer.importNormals = ModelImporterNormals.Import;
+                importer.importTangents = ModelImporterTangents.CalculateMikk;
+#else
+                // In 2018.3, the vertices still do not match unless no normals
+                // are imported.
+                importer.importNormals = ModelImporterNormals.None;
+#endif
+                // If either blendshape normals are imported or weldVertices is turned off (or both),
+                // the vertex count between the original and exported meshes does not match.
+                // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
+                importer.importBlendShapeNormals = ModelImporterNormals.None;
+                importer.weldVertices = true;
+            };
+
+            var exportResult = ExportSkinnedMesh (fbxPath, setImportSettings);
+            var exportedFbxPath = exportResult.filename;
+            originalSMR = exportResult.originalSkinnedMesh;
+            exportedSMR = exportResult.exportedSkinnedMesh;
+
 
             var originalMesh = originalSMR.sharedMesh;
             var exportedMesh = exportedSMR.sharedMesh;
