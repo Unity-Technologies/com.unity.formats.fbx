@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [3.2.0-preview.1] - 2020-04-28
+## [3.2.0-preview.2] - 2020-05-19
 ### Added
 - Added an option to the Autodesk® Maya® integration Unity menu for creating an export set.
     - The option can be found in File > Unity > Create Export Set
@@ -10,6 +10,7 @@
 
 ### Changed
 - Do not search for Autodesk® installs in `D:/Program Files/Autodesk` (not a standard drive).
+- Update Unity Recorder dependency to version 2.2.0-preview.4.
 
 ### Fixed
 - Added a null check when inspecting whether a Timeline Clip is selected for export. This fixes a NullReferenceException when an object in the selection is null.
