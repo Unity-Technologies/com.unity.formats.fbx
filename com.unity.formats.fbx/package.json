@@ -4,7 +4,7 @@
   "version": "3.2.0-preview.2",
   "dependencies": {
     "com.unity.recorder": "2.2.0-preview.4",
-    "com.unity.timeline": "1.0.0",
+    "com.unity.timeline": "1.2.6",
     "com.autodesk.fbx": "3.0.1-preview.1"
   },
   "unity": "2018.3",
