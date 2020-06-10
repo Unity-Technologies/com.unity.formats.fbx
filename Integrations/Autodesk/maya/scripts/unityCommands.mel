@@ -2,8 +2,52 @@ global string $UnityFbxFilePathAttr = "unityFbxModelFilePath";
 global string $UnityFbxFileNameAttr = "unityFbxModelFileName";
 global string $UnityFbxAnimFilePathAttr = "unityFbxAnimFilePath";
 global string $UnityFbxAnimFileNameAttr = "unityFbxAnimFileName";
+global string $UnityFbxStripNamespaceAttr = "unityFbxStripNamespaces";
 global string $UnityFbxNamespaceAttr = "unityFbxNamespace";
 global string $UnityExportSetNameFormat = "^1s_UnityExportSet";
+
+global string $UnityModuleName = "UnityFbxForMaya";
+
+global string $UnityImportSettingsOptionVar = "UnityFbxImportSettings";
+global string $UnityExportSettingsOptionVar = "UnityFbxExportSettings";
+
+global string $UnityDefaultImportSettingsFileName = "unityFbxImportSettings.mel";
+global string $UnityDefaultExportSettingsFileName = "unityFbxExportSettings.mel";
+
+global string $UnityDefaultImportSettings = "\
+FBXResetImport;\n\
+FBXImportAxisConversionEnable -v true;\n\
+FBXImportCameras -v true;\n\
+FBXImportLights -v true;\n\
+FBXImportSetTake -takeIndex -1;\n\
+// Add and update animation\n\
+FBXImportMode -v merge;";
+
+global string $UnityDefaultExportSettings = "\
+FBXResetExport;\n\
+// FBX file format\n\
+FBXExportInAscii -v false;\n\
+FBXExportFileVersion -v FBX201600;\n\
+\n\
+// Geometry\n\
+FBXExportSmoothMesh -v false;\n\
+FBXExportInstances -v true;\n\
+FBXExportReferencedAssetsContent -v false;\n\
+\n\
+// Animation\n\
+FBXExportAnimationOnly -v false;\n\
+\n\
+FBXExportCameras -v true;\n\
+FBXExportLights -v true;\n\
+\n\
+FBXExportEmbeddedTextures -v false;\n\
+\n\
+// Units\n\
+FBXExportScaleFactor 1;\n\
+FBXExportConvertUnitString cm;\n\
+\n\
+// Axis Conversion\n\
+FBXExportUpAxis y;";
 
 global int $UnityFbxFilePathIndex = 0;
 global int $UnityFbxFileNameIndex = 1;
@@ -25,12 +69,37 @@ global proc unityRemoveNativeMenuOnLoad(){
 }
 
 // Load a specified settings file
-proc int loadUnityFbxSettings(string $fileName, string $settingType){
+proc int loadUnityFbxSettings(string $settingType, string $optionVarName, string $defaultSettingsFileName, string $defaultSettings){
+    global string $UnityModuleName;
+
+    $fileName = `optionVar -q $optionVarName`;
+
+    // if no filename set (optionVar cleared), reset it to default filename
+    if ($fileName == 0){
+        $modulePath = `moduleInfo -moduleName $UnityModuleName -path`;
+        // {$modulePath}/scripts/{$defaultSettingsFileName}
+        $modulePath = $modulePath + "/scripts/" + $defaultSettingsFileName;
+
+        $fileName = $modulePath;
+        optionVar -stringValue $optionVarName $fileName;
+    }
+
     // check if the file exists
     if (`file -q -ex $fileName` == false){
-        error ("Failed to find Unity Fbx "+$settingType+" Settings at: " + $fileName);
-        return false;
+        // create file with default settings
+        $fileId = `fopen $fileName "w"`;
+        fprint $fileId $defaultSettings;
+        fclose $fileId;
     }
+
+    // if the file still doesn't exist (failed to create)
+    // load the default settings and print a warning
+    if (`file -q -ex $fileName` == false){
+        warning ("Failed to find Unity Fbx "+$settingType+" Settings at: " + $fileName + ", loading default settings.");
+        eval ($defaultSettings);
+        return true;
+    }
+    
     eval ("source \"" + $fileName + "\"");
     return true;
 }
@@ -38,15 +107,29 @@ proc int loadUnityFbxSettings(string $fileName, string $settingType){
 
 // Load the Export Settings from file
 proc int loadUnityFbxExportSettings(){
-    $fileName = `optionVar -q "UnityFbxExportSettings"`;
-    return loadUnityFbxSettings($fileName, "Export");
+    global string $UnityExportSettingsOptionVar;
+    global string $UnityDefaultExportSettings;
+    global string $UnityDefaultExportSettingsFileName;
+    return loadUnityFbxSettings(
+        "Export",
+        $UnityExportSettingsOptionVar,
+        $UnityDefaultExportSettingsFileName,
+        $UnityDefaultExportSettings
+    );
 }
 
 
 // Load the Import Settings from a file
 proc int loadUnityFbxImportSettings(){
-    $fileName = `optionVar -q "UnityFbxImportSettings"`;
-    return loadUnityFbxSettings($fileName, "Import");
+    global string $UnityImportSettingsOptionVar;
+    global string $UnityDefaultImportSettings;
+    global string $UnityDefaultImportSettingsFileName;
+    return loadUnityFbxSettings(
+        "Import",
+        $UnityImportSettingsOptionVar,
+        $UnityDefaultImportSettingsFileName,
+        $UnityDefaultImportSettings
+    );
 }
 
 
@@ -57,9 +140,22 @@ proc string getAttribute(string $node, string $attr){
     return "";
 }
 
+proc int getBoolAttribute(string $node, string $attr){
+        if (`attributeExists $attr $node`){
+        return `getAttr ($node + "." + $attr)`;
+    }
+    return 0;
+}
 
-proc storeAttribute(string $node, string $attr, string $attrValue){
-    $attrType="string";
+proc storeBoolAttribute(string $node, string $attr, int $attrValue){
+    if (!attributeExists($attr, $node)){
+        addAttr -shortName $attr -storable true -attributeType bool $node;
+    }
+    setAttr ($node+"."+$attr) $attrValue;
+}
+
+proc storeStringAttribute(string $node, string $attr, string $attrValue){
+    $attrType = "string";
     if (!attributeExists($attr, $node)){
         addAttr -shortName $attr -storable true -dataType $attrType $node;
     }
@@ -68,7 +164,7 @@ proc storeAttribute(string $node, string $attr, string $attrValue){
 
 
 proc int setExists(string $setName){
-    return stringArrayContains($setName, `listSets -allSets`);
+    return stringArrayContains($setName, `ls -sets`);
 }
 
 proc int loadUnityPlugin(string $plugin){
@@ -99,44 +195,6 @@ proc int showConfirmDialog(string $title, string $message, string $confirmButton
 proc string getObjectNamespace(string $objectName){
     string $lsResult[] = `ls -showNamespace -an $objectName`;
     return $lsResult[1];
-}
-
-proc string getNewNamespace(string $n1, string $n2){
-    string $n2Tokens[];
-    int $n2NumTokens = `tokenize $n2 ":" $n2Tokens`;
-    
-    string $newNamespace = ":";
-    string $n1BaseName = `namespaceInfo -baseName $n1`;
-    
-    for($i=$n2NumTokens-1; $i>=0; --$i){
-        if($n2Tokens[$i] == $n1BaseName){
-            break;
-        }
-        $n2Tokens[$i] = "";
-    }
-    $newNamespace = $newNamespace + stringArrayToString($n2Tokens, ":");
-    if($newNamespace == ":"){
-        return $n2;
-    }
-    return $newNamespace;
-}
-
-proc string checkNamespaceNeedsUpdate(string $unitySet, string $unityFbxNamespace, string $objectNamespace){
-    global string $UnityFbxNamespaceAttr;
-
-    string $newNamespace = getNewNamespace($unityFbxNamespace, $objectNamespace);
-    if($unityFbxNamespace != $newNamespace){
-        // popup asking to change namespace value to new namespace
-        if(showConfirmDialog($unitySet,
-            "Set namespace has been modified from "+$unityFbxNamespace+" to "+$newNamespace+", update export set namespace attribute?",
-            "Yes", "No"
-           )){
-           storeAttribute($unitySet, $UnityFbxNamespaceAttr, $newNamespace);
-           
-           return $newNamespace;
-        }
-    }
-    return $unityFbxNamespace;
 }
 
 // =======================
@@ -200,31 +258,6 @@ proc string getTargetNamespaceName(string $fileNameWithoutExt){
     return $targetNamespace;
 }
 
-// Get the name of the namespace containing the contents of the given export set
-// or "" if none.
-// The name of the namespace is stored as an attribute on the set.
-proc string getSetNamespace(string $unityExportSet){
-    global string $UnityFbxNamespaceAttr;
-    
-    if (!setExists($unityExportSet)){
-        return "";
-    }
-        
-    string $unitySetContents[] = `listConnections $unityExportSet`;
-    
-    // get namespace from set
-    $setNamespace = getAttribute($unityExportSet, $UnityFbxNamespaceAttr);
-    if(size($unitySetContents) > 0){
-        $setNamespace = checkNamespaceNeedsUpdate($unityExportSet, $setNamespace, getObjectNamespace($unitySetContents[0]));
-    }
-    
-    // check if the namespace exists
-    if($setNamespace != "" && `namespace -exists $setNamespace`){
-        return $setNamespace;
-    }
-    return "";
-}
-
 // Get or create the export set in the root namespace.
 // Return true if a set has been created, and false if it already exists.
 proc int getOrCreateExportSet(string $unityExportSet, string $origNamespace){
@@ -251,6 +284,24 @@ proc int getOrCreateExportSet(string $unityExportSet, string $origNamespace){
     return true;
 }
 
+global proc unityOnToggleStripNamespace(string $exportSetName)
+{
+    global string $UnityFbxStripNamespaceAttr;
+    global string $UnityFbxNamespaceAttr;
+
+    int $stripNamespaces = `getAttr ($exportSetName + "." + $UnityFbxStripNamespaceAttr)`;
+
+    $stripNamespaceAttrName = ($exportSetName + "." + $UnityFbxNamespaceAttr);
+
+    // temporarily unlock to be able to modify namespace attr
+    lockNode -lock false $exportSetName;
+
+    setAttr -lock (!$stripNamespaces) $stripNamespaceAttrName;
+
+    // lock set so it doesn't get deleted when empty
+    lockNode -lock true $exportSetName;
+}
+
 // Add or update the following five attributes of the given export set, to be used for exporting:
 // - export directory
 // - export file name
@@ -258,12 +309,15 @@ proc int getOrCreateExportSet(string $unityExportSet, string $origNamespace){
 // - export animation file name
 // - target namespace name (namespace that the contents of set belong to)
 proc setExportSetAttributes(
-    string $unityExportSet, int $isAnimFile, int $setCreated, string $exportAttrs[], string $targetNamespace
+    string $unityExportSet, int $isAnimFile, int $setCreated, 
+    string $exportAttrs[], int $stripNamespaces
     ){
+
     global string $UnityFbxFilePathAttr;
     global string $UnityFbxFileNameAttr;
     global string $UnityFbxAnimFilePathAttr;
     global string $UnityFbxAnimFileNameAttr;
+    global string $UnityFbxStripNamespaceAttr;
     global string $UnityFbxNamespaceAttr;
     
     global int $UnityFbxFilePathIndex;
@@ -282,25 +336,29 @@ proc setExportSetAttributes(
     lockNode -lock false $unityExportSet;
     
     if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $exportDir != ""){
-        storeAttribute($unityExportSet, $UnityFbxFilePathAttr, $exportDir);
+        storeStringAttribute($unityExportSet, $UnityFbxFilePathAttr, $exportDir);
     }
     
     if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $exportFileName != ""){
-        storeAttribute($unityExportSet,$UnityFbxFileNameAttr,$exportFileName);
+        storeStringAttribute($unityExportSet,$UnityFbxFileNameAttr,$exportFileName);
     }
     
     if($exportAnimDir != ""){
-        storeAttribute($unityExportSet,$UnityFbxAnimFilePathAttr,$exportAnimDir);
+        storeStringAttribute($unityExportSet,$UnityFbxAnimFilePathAttr,$exportAnimDir);
     }
     
     if($exportAnimFileName != ""){
-        storeAttribute($unityExportSet,$UnityFbxAnimFileNameAttr,$exportAnimFileName);
+        storeStringAttribute($unityExportSet,$UnityFbxAnimFileNameAttr,$exportAnimFileName);
     }
-    
-    if($fileNameWithoutExt != ""){
-        storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, $targetNamespace);
-    }
-    
+
+    storeBoolAttribute($unityExportSet, $UnityFbxStripNamespaceAttr, $stripNamespaces);
+
+    storeStringAttribute($unityExportSet, $UnityFbxNamespaceAttr, "");
+
+    $stripNamespaceAttrName = ($unityExportSet + "." + $UnityFbxStripNamespaceAttr);
+    setAttr -lock (!$stripNamespaces) $stripNamespaceAttrName;
+    scriptJob -attributeChange $stripNamespaceAttrName ("unityOnToggleStripNamespace " + $unityExportSet) -protected;
+
     // lock set so it doesn't get deleted when empty
     lockNode -lock true $unityExportSet;
 }
@@ -333,7 +391,6 @@ proc importFile(string $filePathStr){
     global string $UnityFbxFileNameAttr;
     global string $UnityFbxAnimFilePathAttr;
     global string $UnityFbxAnimFileNameAttr;
-    global string $UnityFbxNamespaceAttr;
     
     global int $UnityFbxFilePathIndex;
     global int $UnityFbxFileNameIndex;
@@ -360,25 +417,18 @@ proc importFile(string $filePathStr){
     string $origNamespace = `namespaceInfo -cur -an`;
     string $targetNamespace = getTargetNamespaceName($fileNameWithoutExt);
     
-    $setNamespace = getSetNamespace($unityExportSet);
-    $setNamespaceExists = ($setNamespace != "");
-    if($setNamespaceExists){
-        $targetNamespace = $setNamespace;
+    // warn if namespace already exists
+    if(`namespace -exists $targetNamespace`){
+        if(!showConfirmDialog("Warning: " + $fileName,
+            $targetNamespace + " namespace already exists, the imported objects will be added to the existing namespace and export set.",
+            "Continue", "Cancel"
+            )){
+            // cancelled, don't import this fbx
+            return;
+        }
     }
     else{
-        // warn if namespace already exists
-        if(`namespace -exists $targetNamespace`){
-            if(!showConfirmDialog("Warning: " + $fileName,
-                $targetNamespace + " namespace already exists, the imported objects will be added to the existing namespace and export set.",
-                "Continue", "Cancel"
-               )){
-                // cancelled, don't import this fbx
-                return;
-            }
-        }
-        else{
-            namespace -add $targetNamespace;
-        }
+        namespace -add $targetNamespace;
     }
     
     // Gather everything that is in the scene
@@ -392,9 +442,8 @@ proc importFile(string $filePathStr){
     
     if(!$isAnimFile){
         // reset attribute values, in case import fails
-        storeAttribute($unityExportSet, $UnityFbxFilePathAttr, "");
-        storeAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
-        storeAttribute($unityExportSet, $UnityFbxNamespaceAttr, "");
+        storeStringAttribute($unityExportSet, $UnityFbxFilePathAttr, "");
+        storeStringAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
     }
 
     if(`namespaceInfo -cur -an` != $targetNamespace){
@@ -406,7 +455,7 @@ proc importFile(string $filePathStr){
         namespace -set $origNamespace;
     }
     
-    setExportSetAttributes($unityExportSet, $isAnimFile, $setCreated, $exportAttrs, $targetNamespace);
+    setExportSetAttributes($unityExportSet, $isAnimFile, $setCreated, $exportAttrs, /*strip namespaces*/ true);
     
     if (setExists($unityExportSet) == true){
         // figure out what has been added after import
@@ -486,18 +535,80 @@ proc string[] getIntersection(string $set1[], string $set2[]){
     return $intersection;
 }
 
+// Find the most common namespace among the selected objects. If there are multiple (because of nested namespaces),
+// prefer the most specific. For example if you have:
+//
+// test1:test2:sphere
+// test1:test3:cube
+// test1:test2:cylinder
+//
+// test1 will be returned because all objects have that namespace in common. However if you have:
+//
+// test1:test2:sphere
+// test1:test2:cube
+// test1:test2:cylinder
+//
+// Then it will return test1:test2.
+proc string getCommonNamespace(string $origSelection[]){
+    // gather up all the unique namespaces
+    string $selectedNamespaces[];
+    for($i = 0; $i < size($origSelection); $i++){
+        string $currNamespace = getObjectNamespace($origSelection[$i]);
+        while ($currNamespace != ":" && !stringArrayContains($currNamespace, $selectedNamespaces)){
+            $selectedNamespaces[size($selectedNamespaces)] = $currNamespace;
+            $currNamespace = `namespaceInfo -p $currNamespace`;
+            // make sure the namespace always starts with a colon
+            if(!startsWith($currNamespace, ":")){
+                $currNamespace = ":" + $currNamespace;
+            }
+        }
+    }
+
+    // go through selection to find common namespace to set as default
+    string $commonNamespace = ":";
+    int $maxNamespaceCount = 0;
+    for($i = 0; $i < size($selectedNamespaces); $i++){
+        $currNamespace = $selectedNamespaces[$i];
+        // get contents of namespace
+        string $namespaceContents[] = `namespaceInfo -ls $currNamespace -r`;
+        string $intersection[] = getIntersection($origSelection, $namespaceContents);
+        int $intersectionSize = size($intersection);
+        if($intersectionSize > $maxNamespaceCount ||
+            // prefer more specific namespaces
+            ($maxNamespaceCount > 0 &&
+             $intersectionSize == $maxNamespaceCount &&
+             size($currNamespace) > size($commonNamespace)))
+        {
+            $commonNamespace = $currNamespace;
+            $maxNamespaceCount = $intersectionSize;
+        }
+    }
+    return $commonNamespace;
+}
+
 proc exportSet(string $unitySet, int $exportAnim){
     global string $UnityFbxFilePathAttr;
     global string $UnityFbxFileNameAttr;
     global string $UnityFbxAnimFilePathAttr;
     global string $UnityFbxAnimFileNameAttr;
+    global string $UnityFbxStripNamespaceAttr;
     global string $UnityFbxNamespaceAttr;
 
     string $unitySetContents[] = `listConnections $unitySet`;
-    string $unityFbxNamespace = getAttribute($unitySet, $UnityFbxNamespaceAttr);    
-        
-    if(size($unitySetContents) > 0){
-        $unityFbxNamespace = checkNamespaceNeedsUpdate($unitySet, $unityFbxNamespace, getObjectNamespace($unitySetContents[0]));
+    int $stripNamespaces = getBoolAttribute($unitySet, $UnityFbxStripNamespaceAttr);
+    string $namespaceToStrip = getAttribute($unitySet, $UnityFbxNamespaceAttr);
+
+    // if there is no namespace manually set, find the common namespace
+    if ($stripNamespaces){
+        if ($namespaceToStrip == ""){
+            $namespaceToStrip = getCommonNamespace($unitySetContents);
+        }
+        else {
+            // make sure the namespace to strip is an absolute namespace
+            if(!startsWith($namespaceToStrip, ":")){
+                $namespaceToStrip = ":" + $namespaceToStrip;
+            }
+        }
     }
         
     string $animatedObjectSet = "";
@@ -525,12 +636,21 @@ proc exportSet(string $unitySet, int $exportAnim){
     
     string $unityFbxFilePath = getAttribute($unitySet, $pathAttr);
     string $unityFbxFileName = getAttribute($unitySet, $nameAttr);
-    
+
+    // make sure the file path exists
+    if(!(`filetest -d $unityFbxFilePath`)){
+        sysFile -makeDir $unityFbxFilePath;
+    }
+
     $strCmd = "";
     if ($unityFbxFilePath != "" && $unityFbxFileName != ""){
         // export selected, relative to given namespace
         string $exportFormat = "file -force -options \"\" -typ \"FBX export\" -relativeNamespace \"^1s\" -es \"^2s/^3s\"";
-        $strCmd = `format -s $unityFbxNamespace -s $unityFbxFilePath -s $unityFbxFileName $exportFormat`;
+        string $relativeNamespace = ":";
+        if ($stripNamespaces){
+            $relativeNamespace = $namespaceToStrip;
+        }
+        $strCmd = `format -s $relativeNamespace -s $unityFbxFilePath -s $unityFbxFileName $exportFormat`;
         eval $strCmd;
     }
     
@@ -561,7 +681,7 @@ proc string[] getUnityExportSets(){
     //if the selection set ends w "_UnityExportSet" and it has at least the custom attributes UnityFbxModelFilePath & UnityFbxModelFileName then it's one of ours.
     string $unityExportSets[];
     
-    string $mayaSets[] = `listSets -allSets`;
+    string $mayaSets[] = `ls -sets`;
     
     int $i = 0;
     for($k=0; $k<size($mayaSets); ++$k){
@@ -573,53 +693,81 @@ proc string[] getUnityExportSets(){
     return $unityExportSets;
 }
 
-proc setupNewExportSet(string $exportPath, int $exportAnimOnly, string $selectedObjects[]){
+proc setupNewExportSet(
+    string $modelPath,
+    string $modelFilename,
+    string $animPath,
+    string $animFilename,
+    int $stripNamespaces,
+    string $selectedObjects[]){
+    
+    // make sure all necessary variables are set
+    if ($modelFilename == "" && $animFilename == ""){
+        error ("Unity FBX Export Set Creation: Missing filename for export.");
+        return;
+    }
+    
+    if ($modelPath == "" && $animPath == ""){
+        error ("Unity FBX Export Set Creation: Missing filepath for export.");
+        return;
+    }
+    
+    if ($modelFilename == ""){
+        if(match("@", basename($animFilename, ".fbx")) != ""){
+            $modelFilename = match("[^@]+", $animFilename) + ".fbx";
+        }
+        else{
+            $modelFilename = basename($animFilename, ".fbx") + "_modelOnly.fbx";
+        }
+    }
+
+    if ($animFilename == ""){
+        $animFilename = basename($modelFilename, ".fbx") + "@Take1.fbx";
+    }
+
+    if($modelPath == ""){
+        $modelPath = $animPath;
+    }
+    else if($animPath == ""){
+        $animPath = $modelPath;
+    }
+
+    string $exportFileNameWithoutExt = formValidObjectName(basename($modelFilename, ".fbx"));
+    
+    $unityExportSet = getNewExportSetName($exportFileNameWithoutExt);
+    
+    string $origNamespace = `namespaceInfo -cur -an`;
+    
+    // Get or create the Unity Fbx Export Set
+    $setCreated = getOrCreateExportSet($unityExportSet, $origNamespace);
+
+    if(!$setCreated){
+        // warn user
+        if(!showConfirmDialog("Warning",
+            "Creating set will overwrite contents of " + $unityExportSet + " export set. To export selection + contents of existing set, first add selection to set.",
+            "Continue", "Cancel"
+                )){
+                // cancelled, don't export this fbx
+                print ("Cancelled set creation");
+                return;
+        }
+    }
+    
     global int $UnityFbxFilePathIndex;
     global int $UnityFbxFileNameIndex;
     global int $UnityFbxAnimFilePathIndex;
     global int $UnityFbxAnimFileNameIndex;
     global int $UnityFileNameWithoutExtIndex;
-
-    $isAnimFile = $exportAnimOnly;
     
     // Get the export set attributes
-    $exportAttrs = getExportSetAttributes($exportPath, $exportAnimOnly);
-    $exportDir = $exportAttrs[$UnityFbxFilePathIndex];
-    $exportFileName = $exportAttrs[$UnityFbxFileNameIndex];
-    $exportAnimDir = $exportAttrs[$UnityFbxAnimFilePathIndex];
-    $exportAnimFileName = $exportAttrs[$UnityFbxAnimFileNameIndex];
-    $fileNameWithoutExt = $exportAttrs[$UnityFileNameWithoutExtIndex];
+    string $exportAttrs[5];
+    $exportAttrs[$UnityFbxFilePathIndex] = $modelPath;
+    $exportAttrs[$UnityFbxFileNameIndex] = $modelFilename;
+    $exportAttrs[$UnityFbxAnimFilePathIndex] = $animPath;
+    $exportAttrs[$UnityFbxAnimFileNameIndex] = $animFilename;
+    $exportAttrs[$UnityFileNameWithoutExtIndex] = $exportFileNameWithoutExt;
     
-    $unityExportSet = getNewExportSetName($fileNameWithoutExt);
-    
-    string $origNamespace = `namespaceInfo -cur -an`;
-    string $targetNamespace = getTargetNamespaceName($fileNameWithoutExt);
-    
-    $setNamespace = getSetNamespace($unityExportSet);
-    $setNamespaceExists = ($setNamespace != "");
-    if($setNamespaceExists){
-        $targetNamespace = $setNamespace;
-    }
-    else{
-        // warn if namespace already exists
-        if(`namespace -exists $targetNamespace`){
-            if(!showConfirmDialog("Warning: " + $exportFileName,
-                $targetNamespace + " namespace already exists, the selected objects will be added to the existing namespace and export set.",
-                "Continue", "Cancel"
-               )){
-                // cancelled, don't import this fbx
-                return;
-            }
-        }
-        else{
-            namespace -add $targetNamespace;
-        }
-    }
-    
-    // Get or create the Unity Fbx Export Set
-    $setCreated = getOrCreateExportSet($unityExportSet, $origNamespace);
-    
-    setExportSetAttributes($unityExportSet, $isAnimFile, $setCreated, $exportAttrs, $targetNamespace);
+    setExportSetAttributes($unityExportSet, /*isAnimOnly*/ false, $setCreated, $exportAttrs, $stripNamespaces);
     
     if (setExists($unityExportSet) == true){
         // clear contents of set
@@ -631,15 +779,235 @@ proc setupNewExportSet(string $exportPath, int $exportAnimOnly, string $selected
         }
     }
     
-    // add to the targetNamespace
-    // iterate over all selected objects and rename
-    for($object in $selectedObjects){
-        rename $object ($targetNamespace + ":" + $object);
+    // switch project if file exported to a different Unity project
+    switchUnityProject($modelPath);
+}
+
+// ==== Functions for creating export set dialog ==========
+
+global proc unityOnCreateExportSet(
+    string $window,
+    string $modelPathField,
+    string $modelFileField,
+    string $animPathField,
+    string $animFileField,
+    string $stripNamespaceCheckbox){
+    
+    $origSelection = `ls -sl`;
+    if(size($origSelection) <= 0){
+        // nothing selected
+        error ("Unity FBX Export Set Creation: Nothing selected");
+        return;
+    }
+
+    string $modelPath = "";
+    string $modelFilename = "";
+    if($modelPathField != 0){
+        $modelPath = `textField -q -text $modelPathField`;
+        $modelFilename = `textField -q -text $modelFileField`;
+        if ($modelFilename != "" && !endsWith($modelFilename, ".fbx")){
+            $modelFilename = $modelFilename + ".fbx";
+        }
+    }
+
+    string $animPath = "";
+    string $animFilename = "";
+    if($animPathField != 0){
+        $animPath = `textField -q -text $animPathField`;
+        $animFilename = `textField -q -text $animFileField`;
+        if ($animFilename != "" && !endsWith($animFilename, ".fbx")){
+            $animFilename = $animFilename + ".fbx";
+        }
+    }
+
+    // make sure all necessary variables are set
+    if ($modelFilename == "" && $animFilename == ""){
+        error ("Unity FBX Export Set Creation: Missing filename for export.");
+        return;
     }
     
-    // switch project if file exported to a different Unity project
-    switchUnityProject($exportPath);
+    if ($modelPath == "" && $animPath == ""){
+        error ("Unity FBX Export Set Creation: Missing filepath for export.");
+        return;
+    }
+
+    int $stripNamespaces = `checkBox -q -value $stripNamespaceCheckbox`;
+    
+    setupNewExportSet(
+        $modelPath,
+        $modelFilename,
+        $animPath,
+        $animFilename,
+        $stripNamespaces,
+        $origSelection);
+    
+    deleteUI -window $window;
 }
+
+global proc unityOpenFileDialog(string $textField)
+{
+    string $currentPath = `textField -q -text $textField`;
+    
+    string $exportPaths[] = `fileDialog2 -ds 2 -cap "FBX Export Selection" -dir $currentPath -fm 3`;
+    if(size($exportPaths)<=0){
+        return;
+    }
+    string $exportFilePath = $exportPaths[0];
+    
+    textField -e -text $exportFilePath $textField;
+}
+
+proc string createFilePathField(string $label, string $parent, int $labelSize, int $textFieldSize){
+    rowLayout
+        -numberOfColumns 3
+        -columnWidth3 $labelSize $textFieldSize 50
+        -columnAlign3 "right" "left" "left"
+        -p $parent;
+        
+    string $unityProject = `optionVar -q "UnityProject"`;
+    $unityProject = $unityProject + "/Assets";
+    
+    text -label $label;
+    string $textField = `textField -width $textFieldSize -text $unityProject`;
+    button -label "..." -recomputeSize false -height 15 -command ("unityOpenFileDialog " + $textField);
+    
+    return $textField;
+}
+
+proc string createTextFieldWithLabel(string $label, string $parent, int $labelSize, int $textFieldSize)
+{
+    rowLayout 
+        -numberOfColumns 2 
+        -columnWidth2 $labelSize $textFieldSize
+        -columnAlign2 "right" "left"
+        -p $parent;
+    
+    text -label $label;
+    string $textField = `textField -width $textFieldSize`;
+    return $textField;
+}
+
+proc string createCheckboxWithLabelLeft(string $label, string $parent, int $labelSize, int $fieldSize){
+    rowLayout 
+        -numberOfColumns 2 
+        -columnWidth2 $labelSize $fieldSize
+        -columnAlign2 "left" "left"
+        -p $parent;
+    
+    text -label $label;
+    return `checkBox -value true -label " "`;
+}
+
+proc createExportSetDialog(int $exportType){
+    $origSelection = `ls -sl`;
+    if(size($origSelection) <= 0){
+        // nothing selected
+        print ("Nothing selected");
+        return;
+    }
+
+    $exportAnim = false;
+    $exportAnimOnly = false;
+    switch($exportType){
+    case 0 /* export animation only */:
+        $exportAnim = true;
+        $exportAnimOnly = true;
+        break;
+    case 1 /* export model only */:
+        break;
+    default: /* export model + animation */
+        $exportAnim = true;
+        break;
+    }
+
+    // open up a dialog for choosing the export set options
+    string $window = `window -title "Unity FBX Export Options" -iconName "Short Name" -widthHeight 500 250`;
+    
+    string $container = `formLayout -numberOfDivisions 100`;
+    
+    string $mainOptions = `columnLayout -adjustableColumn true -p $container`;
+
+    // go through selection to find common namespace to set as default
+    string $commonNamespace = getCommonNamespace($origSelection);
+    
+    string $modelFilename = "Untitled";
+    // if one item selected, take the name of it as the filename
+    if (size($origSelection) == 1){
+        // take the name of the selection without the namespace
+        string $nTokens[];
+        int $nNumTokens = `tokenize ("" + $origSelection[0]) ":" $nTokens`;
+        $modelFilename = $nTokens[$nNumTokens-1];
+    }
+    else{
+        // if multi items selected, but one of them is the root, then take the name of the root as the filename
+        for($i = 0; $i < size($origSelection); $i++){
+            string $descendents[] = `listRelatives -type "transform" -allDescendents $origSelection[$i]`;
+            string $intersection[] = getIntersection($origSelection, $descendents);
+            if (size($intersection) == size($origSelection)-1){
+                // take the name of the selection without the namespace
+                string $nTokens[];
+                int $nNumTokens = `tokenize ("" + $origSelection[$i]) ":" $nTokens`;
+                $modelFilename = $nTokens[$nNumTokens-1];
+                break;
+            }
+        }
+    }
+
+    int $labelSize = 150;
+    int $textFieldSize = 300;
+    
+    string $modelFilePath = " 0 0";
+    if(!$exportAnimOnly){
+        string $modelFilePathField = createFilePathField("Model File Path", $mainOptions, $labelSize, $textFieldSize);
+        string $modelFileNameField = createTextFieldWithLabel("Model File Name", $mainOptions, $labelSize, $textFieldSize);
+        textField -e -text ($modelFilename + ".fbx") $modelFileNameField;
+        $modelFilePath = " " + $modelFilePathField + " " + $modelFileNameField;
+    }
+    
+    string $animFilePath = " 0 0";
+    if($exportAnim){
+        string $animFilePathField = createFilePathField("Anim File Path", $mainOptions, $labelSize, $textFieldSize);
+        string $animFileNameField = createTextFieldWithLabel("Anim File Name", $mainOptions, $labelSize, $textFieldSize);
+        textField -e -text ($modelFilename + "@Take1.fbx") $animFileNameField;
+        $animFilePath = " " + $animFilePathField + " " + $animFileNameField;
+    }
+
+    string $stripNamespaceCheckbox = createCheckboxWithLabelLeft("Strip Namespaces on Export", $mainOptions, $labelSize, $textFieldSize);
+    
+    int $buttonWidth = 166;
+    string $buttons = `rowLayout
+          -numberOfColumns 3
+          -adjustableColumn3 1
+          -columnWidth3 $buttonWidth $buttonWidth $buttonWidth
+          -columnAlign3 "center" "center" "center" -p $container`;
+
+    string $createExportSetCommand = "unityOnCreateExportSet " + $window + " " + $modelFilePath + $animFilePath + " " + $stripNamespaceCheckbox;
+          
+    button -label "Create Set and Export"
+        -width $buttonWidth
+        -command ($createExportSetCommand + ";" + "unityExportModelAnim()")
+        -p $buttons;
+    button -label "Create Set" 
+        -width $buttonWidth
+        -command ($createExportSetCommand)
+        -p $buttons;
+    button -label "Cancel"
+        -width $buttonWidth
+        -command ("deleteUI -window " + $window)
+        -p $buttons;
+    
+    formLayout -edit 
+        -attachForm $buttons "bottom" 1
+        -attachForm $buttons "left" 1
+        -attachPosition $buttons "right" 1 99
+        -attachForm $mainOptions "left" 10
+        -attachForm $mainOptions "top" 10
+    $container;
+     
+    setParent ..;
+    showWindow $window;
+}
+// =========================================
 
 proc unityExport(int $exportType){
     
@@ -696,37 +1064,7 @@ proc unityExport(int $exportType){
     
     // if selection doesn't belong to a set, export to a new file
     if(size($setsToExport) <= 0){
-        $unityProject = `optionVar -q "UnityProject"`;
-        $unityProject = $unityProject + "/Assets";
-        $exportPaths = `fileDialog2 -ds 2 -cap "FBX Export Selection" -dir $unityProject -ff "*.fbx" -fm 0`;
-        if(size($exportPaths)<=0){
-            return;
-        }
-        $exportFilePath = $exportPaths[0];
-        
-        // check if export set with this filename already exists in the scene, and warn user that
-        // if it does the existing set will be overriden
-        global int $UnityFileNameWithoutExtIndex;
-    
-        // Get the export set attributes
-        $exportAttrs = getExportSetAttributes($exportFilePath, $exportAnimOnly);
-        $exportSetName = getNewExportSetName($exportAttrs[$UnityFileNameWithoutExtIndex]);
-        if(setExists($exportSetName)){
-            // warn user
-            if(!showConfirmDialog("Warning",
-                "Exporting to " + $exportFilePath + " will overwrite contents of " + $exportSetName + " export set. To export selection + contents of set, first add selection to set.",
-                "Continue", "Cancel"
-                   )){
-                    // cancelled, don't export this fbx
-                    print ("Cancelled export to "  + $exportFilePath);
-                    return;
-            }
-        }
-        
-        $exportCmd = "file -force -options \"\" -typ \"FBX export\" -pr -es \"" + $exportFilePath + "\"";
-        eval $exportCmd;
-        
-        setupNewExportSet($exportFilePath, $exportAnimOnly, $origSelection);
+        createExportSetDialog($exportType);
         return;
     }
     
@@ -754,4 +1092,9 @@ global proc unityExportModel(){
 global proc unityExportModelAnim(){
     global int $UnityExportModelAnim;
     unityExport($UnityExportModelAnim);
+}
+
+global proc unityCreateExportSet(){
+    global int $UnityExportModelAnim;
+    createExportSetDialog($UnityExportModelAnim);
 }

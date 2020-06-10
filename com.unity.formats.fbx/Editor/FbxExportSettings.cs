@@ -386,7 +386,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         {
             if (Application.platform == RuntimePlatform.WindowsEditor)
             {
-                HashSet<string> windowsDefaults = new HashSet<string>() { "C:/Program Files/Autodesk", "D:/Program Files/Autodesk" };
+                HashSet<string> windowsDefaults = new HashSet<string>() { "C:/Program Files/Autodesk" };
                 HashSet<string> existingDirectories = new HashSet<string>();
                 foreach (string path in windowsDefaults)
                 {

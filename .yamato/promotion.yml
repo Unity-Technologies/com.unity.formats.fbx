@@ -6,7 +6,7 @@
 # tests.
 #
 test_editors:
-  - version: 2019.1
+  - version: 2019.3
 test_platforms:
   - name: win
     type: Unity::VM
@@ -24,7 +24,7 @@ promotion_test_{{ platform.name }}_{{ editor.version }}:
   variables:
     UPMCI_PROMOTION: 1
   commands:
-    - npm install upm-ci-utils@stable -g --registry https://api.bintray.com/npm/unity/unity-npm
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.fbx
   artifacts:
     logs:
@@ -38,26 +38,6 @@ promotion_test_{{ platform.name }}_{{ editor.version }}:
 {% endfor %}
 {% endfor %}
 
-promotion_test_trigger:
-  name: Promotion Tests Trigger
-  agent:
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.small
-  artifacts:
-    logs:
-      paths:
-        - "upm-ci~/test-results/**/*"
-    packages:
-      paths:
-        - "upm-ci~/packages/**/*"
-  dependencies:
-{% for editor in test_editors %}
-{% for platform in test_platforms %}
-    - .yamato/promotion.yml#promotion_test_{{platform.name}}_{{editor.version}}
-{% endfor %}
-{% endfor %}
-
 promote:
   name: Promote to Production
   agent:
@@ -67,7 +47,7 @@ promote:
   variables:
     UPMCI_PROMOTION: 1
   commands:
-    - npm install upm-ci-utils@latest -g --registry https://api.bintray.com/npm/unity/unity-npm
+    - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package promote --package-path com.unity.formats.fbx
   triggers:
     tags:
