@@ -281,7 +281,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
         internal static List<GameObject> GetSceneReferencesToObject(Object obj)
         {
             var sceneHierarchyWindowType = typeof(UnityEditor.SearchableEditorWindow).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
-            var sceneHierarchyWindow = EditorWindow.GetWindow(sceneHierarchyWindowType);
+
+            // bug 1242332: don't grab the focus!
+            // The arguments aren't actually optional so they must all be named.
+            //
+            // todo: We should cache all the window-getting and reflection so it
+            // happens not once per object but once per convert.
+            var sceneHierarchyWindow = EditorWindow.GetWindow(
+                    t: sceneHierarchyWindowType,
+                    utility: false,
+                    title: null,
+                    focus: false);
             var instanceID = obj.GetInstanceID();
             var idFormat = "ref:{0}:";
 
