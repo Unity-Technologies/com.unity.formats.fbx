@@ -173,8 +173,8 @@ on the set. In order to do so, select the set, go to the Attribute Editor, and m
 | __Unity Fbx Model File Name__ | The file name to export to when calling __File__ > __Unity__ > __Export__ and __File__ > __Unity__ > __Export Model Only__. |
 | __Unity Fbx Anim File Path__  | The file path to export to when calling __File__ > __Unity__ > __Export Animation Only__. |
 | __Unity Fbx Anim File Name__  | The file name to export to when calling __File__ > __Unity__ > __Export Animation Only__. |
-| __Unity Fbx Strip Namespaces__ | Check this option to automatically strip the most common namespace in the set on export (e.g. if most objects are in namespace `model:`, then `model:` will be stripped on export). |
-| __Unity Fbx Namespace__        | (Optional) Specify a custom namespace to strip on export. If the `Unity Fbx Strip Namespaces` checkbox is checked and the Namespace field is empty, then it will find the most common namespace to strip. Otherwise, if the checkbox is checked and the namespace field is not empty, then the namespace specified in this field will be stripped. |
+| __Unity Fbx Strip Namespace__ | Check this option to automatically strip the most common namespace in the set on export (e.g. if most objects are in namespace `model:`, then `model:` will be stripped on export). |
+| __Strip Specific Namespace__        | (Optional) Specify a custom namespace to strip on export. When the `Unity Fbx Strip Namespace` checkbox is checked, the namespace in `Strip Specific Namespace` will be stripped; otherwise the most common namespace will be stripped if `Strip Specific Namespace` is left empty.|
 
 ## Working with Autodesk® 3ds Max® 2017+
 
