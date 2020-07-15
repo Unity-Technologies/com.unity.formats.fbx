@@ -2,8 +2,8 @@ global string $UnityFbxFilePathAttr = "unityFbxModelFilePath";
 global string $UnityFbxFileNameAttr = "unityFbxModelFileName";
 global string $UnityFbxAnimFilePathAttr = "unityFbxAnimFilePath";
 global string $UnityFbxAnimFileNameAttr = "unityFbxAnimFileName";
-global string $UnityFbxStripNamespaceAttr = "unityFbxStripNamespaces";
-global string $UnityFbxNamespaceAttr = "stripCustomNamespace";
+global string $UnityFbxStripNamespaceAttr = "unityFbxStripNamespace";
+global string $UnityFbxNamespaceAttr = "unityFbxStripSpecificNamespace";
 global string $UnityExportSetNameFormat = "^1s_UnityExportSet";
 
 global string $UnityModuleName = "UnityFbxForMaya";
