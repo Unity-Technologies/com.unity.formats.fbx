@@ -16,7 +16,7 @@ In addition, you can use Variants to control updates from external applications.
 
 ### Creating an FBX Prefab Variant
 
-You can either create an FBX Prefab Variant [from a GameObject](#fromGameObject) or generate it directly [from the selected .fbx or .prefab file](#fromFBXorAssetFile). If you are upgrading from version 2.0.1-preview or earlier of the FBX Exporter, you can also [convert any existing](#conversion) Prefab Variants you may have to the new FBX Prefab Variants.
+You can either create an FBX Prefab Variant [from a GameObject](#fromGameObject) or generate it directly [from the selected .fbx or .prefab file](#fromFBXorAssetFile). If you are upgrading from version 2.0.1-preview or earlier of the FBX Exporter, you can also [convert any existing](#conversion) Linked Prefabs you may have to the new FBX Prefab Variants.
 
 When you convert a GameObject to an FBX Prefab Variant, the FBX Exporter exports each selected GameObject hierarchy and writes an FBX file and a Prefab Variant (`.prefab`) with the FBX as its base. 
 
@@ -34,7 +34,7 @@ To replace the GameObject hierarchy with an instance of an FBX Prefab Variant:
 
 1. Right-click on the GameObject in the Hierarchy view and select __Convert To FBX Prefab Variant__ from the context menu.
 
-	![Convert GameObject to FBX Prefab Variant](images/FBXExporter_FBXLinkedPrefab-GameObject_Updated.png)
+	![Convert GameObject to FBX Prefab Variant](images/FBXExporter_FBXLinkedPrefab-GameObject.png)
 
 	Alternatively, you can use the main menu: __GameObject__ > __Convert To FBX Prefab Variant__ with the GameObject selected.
 
@@ -51,7 +51,7 @@ To generate the FBX Prefab Variant from the selected file without modifying the 
 
 1. Right-click on an FBX or Prefab Asset file in the Project view and select __Convert To FBX Prefab Variant__ from the context menu.
 
-	![Convert Prefab file to FBX Linked Prefab](images/FBXExporter_FBXLinkedPrefab-Asset_Updated.png)
+	![Convert Prefab file to FBX Linked Prefab](images/FBXExporter_FBXLinkedPrefab-Asset.png)
 
 	Alternatively, you can use the main menu: __Assets__ > __Convert To FBX Prefab Variant__.
 
@@ -92,14 +92,14 @@ When converting to an FBX Prefab Variant, the following window opens, displaying
 
 
 <a name="conversion"></a>
-### Converting from Prefab Variants to FBX Prefab Variants
+### Converting from Linked Prefabs to FBX Prefab Variants
 
-To convert existing Prefab Variants to FBX Prefab Variants, follow these steps:
+To convert existing Linked Prefabs to FBX Prefab Variants, follow these steps:
 
 1. Fix any name discrepancies before converting. FBX Prefab Variants do not handle name remapping. If you start to add game logic to components, and then the objects in the FBX get renamed, you are at risk of losing the components. This can happen because the old GameObjects are deleted and new objects with the new names are added in their place.
 
-2. Right-click the Prefab Variant file and select **Convert to FBX Prefab Variant** from the context menu.
+2. Right-click the Linked Prefab file and select **Convert to FBX Prefab Variant** from the context menu.
 
-	![Create a Prefab variant from the file's context menu](images/FBXExporter_FBXLinkedPrefab-Asset_Updated.png)
+	![Create a Prefab variant from the file's context menu](images/FBXExporter_FBXLinkedPrefab-Asset.png)
 
-> **NOTE:** This re-exports the Prefab Variant to a new FBX file, and it is no longer connected to the original FBX.
+> **NOTE:** This re-exports the Linked Prefab to a new FBX file, and it is no longer connected to the original FBX.
