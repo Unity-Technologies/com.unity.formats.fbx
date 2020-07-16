@@ -297,7 +297,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 string initialPath = Application.dataPath;
 
                 string fullPath = EditorUtility.OpenFolderPanel(
-                    "Select FBX Prefab Variants Save Path", initialPath, null
+                    "Select FBX Prefab Variant Save Path", initialPath, null
                 );
 
                 // Unless the user canceled, make sure they chose something in the Assets folder.
