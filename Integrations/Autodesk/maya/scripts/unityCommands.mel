@@ -2,8 +2,9 @@ global string $UnityFbxFilePathAttr = "unityFbxModelFilePath";
 global string $UnityFbxFileNameAttr = "unityFbxModelFileName";
 global string $UnityFbxAnimFilePathAttr = "unityFbxAnimFilePath";
 global string $UnityFbxAnimFileNameAttr = "unityFbxAnimFileName";
-global string $UnityFbxStripNamespaceAttr = "unityFbxStripNamespaces";
-global string $UnityFbxNamespaceAttr = "unityFbxNamespace";
+global string $UnityFbxStripNamespaceAttr = "unityFbxStripNamespace";
+global string $UnityFbxNamespaceAttr = "unityFbxStripSpecificNamespace";
+global string $UnityFbxNamespaceAttrNiceName = "Strip Specific Namespace";
 global string $UnityExportSetNameFormat = "^1s_UnityExportSet";
 
 global string $UnityModuleName = "UnityFbxForMaya";
@@ -154,10 +155,15 @@ proc storeBoolAttribute(string $node, string $attr, int $attrValue){
     setAttr ($node+"."+$attr) $attrValue;
 }
 
-proc storeStringAttribute(string $node, string $attr, string $attrValue){
+proc storeStringAttribute(string $node, string $attr, string $attrValue, string $niceName){
     $attrType = "string";
     if (!attributeExists($attr, $node)){
-        addAttr -shortName $attr -storable true -dataType $attrType $node;
+		if ($niceName != ""){
+		    addAttr -shortName $attr -niceName $niceName -storable true -dataType $attrType $node;
+		}
+		else {
+		    addAttr -shortName $attr -storable true -dataType $attrType $node;
+		}
     }
     setAttr ($node+"."+$attr) -type $attrType $attrValue;
 }
@@ -319,6 +325,7 @@ proc setExportSetAttributes(
     global string $UnityFbxAnimFileNameAttr;
     global string $UnityFbxStripNamespaceAttr;
     global string $UnityFbxNamespaceAttr;
+    global string $UnityFbxNamespaceAttrNiceName;
     
     global int $UnityFbxFilePathIndex;
     global int $UnityFbxFileNameIndex;
@@ -336,24 +343,24 @@ proc setExportSetAttributes(
     lockNode -lock false $unityExportSet;
     
     if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $exportDir != ""){
-        storeStringAttribute($unityExportSet, $UnityFbxFilePathAttr, $exportDir);
+        storeStringAttribute($unityExportSet, $UnityFbxFilePathAttr, $exportDir, "");
     }
     
     if ((!$isAnimFile || ($isAnimFile && $setCreated)) && $exportFileName != ""){
-        storeStringAttribute($unityExportSet,$UnityFbxFileNameAttr,$exportFileName);
+        storeStringAttribute($unityExportSet,$UnityFbxFileNameAttr,$exportFileName, "");
     }
     
     if($exportAnimDir != ""){
-        storeStringAttribute($unityExportSet,$UnityFbxAnimFilePathAttr,$exportAnimDir);
+        storeStringAttribute($unityExportSet,$UnityFbxAnimFilePathAttr,$exportAnimDir, "");
     }
     
     if($exportAnimFileName != ""){
-        storeStringAttribute($unityExportSet,$UnityFbxAnimFileNameAttr,$exportAnimFileName);
+        storeStringAttribute($unityExportSet,$UnityFbxAnimFileNameAttr,$exportAnimFileName, "");
     }
 
     storeBoolAttribute($unityExportSet, $UnityFbxStripNamespaceAttr, $stripNamespaces);
 
-    storeStringAttribute($unityExportSet, $UnityFbxNamespaceAttr, "");
+    storeStringAttribute($unityExportSet, $UnityFbxNamespaceAttr, "", $UnityFbxNamespaceAttrNiceName);
 
     $stripNamespaceAttrName = ($unityExportSet + "." + $UnityFbxStripNamespaceAttr);
     setAttr -lock (!$stripNamespaces) $stripNamespaceAttrName;
@@ -442,8 +449,8 @@ proc importFile(string $filePathStr){
     
     if(!$isAnimFile){
         // reset attribute values, in case import fails
-        storeStringAttribute($unityExportSet, $UnityFbxFilePathAttr, "");
-        storeStringAttribute($unityExportSet, $UnityFbxFileNameAttr, "");
+        storeStringAttribute($unityExportSet, $UnityFbxFilePathAttr, "", "");
+        storeStringAttribute($unityExportSet, $UnityFbxFileNameAttr, "", "");
     }
 
     if(`namespaceInfo -cur -an` != $targetNamespace){
