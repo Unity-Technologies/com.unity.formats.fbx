@@ -3657,7 +3657,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 AssetDatabase.Refresh();
 
                 // rewrite meta file to save import settings
-                File.WriteAllLines(m_lastFilePath + ".meta", metafile);
+                if (metafile.Count > 0)
+                {
+                    File.WriteAllLines(m_lastFilePath + ".meta", metafile);
+                }
 
                 return status == true ? NumNodes : 0;
             }
