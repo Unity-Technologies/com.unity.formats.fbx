@@ -3643,9 +3643,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     Debug.LogWarning ("Export Cancelled");
                     return 0;
                 }
+
+                // save metafile
+                var metafile = new List<string>();
+
+                if (File.Exists(m_lastFilePath))
+                {
+                    metafile.AddRange(File.ReadAllLines(m_lastFilePath + ".meta"));
+                }
+
                 // delete old file, move temp file
                 ReplaceFile();
                 AssetDatabase.Refresh();
+
+                // rewrite meta file to save import settings
+                File.WriteAllLines(m_lastFilePath + ".meta", metafile);
 
                 return status == true ? NumNodes : 0;
             }
