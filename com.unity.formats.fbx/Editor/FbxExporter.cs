@@ -3660,7 +3660,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     ReplaceMetafile();
                 }
 
-                    return status == true ? NumNodes : 0;
+                return status == true ? NumNodes : 0;
             }
             finally {
                 // You must clear the progress bar when you're done,
