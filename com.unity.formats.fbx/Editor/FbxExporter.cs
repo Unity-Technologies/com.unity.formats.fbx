@@ -3645,9 +3645,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 // make a temporary copy original metafile
+                string originalMetafilePath = "";
                 if (ExportOptions.PreserveImportSettings && File.Exists(m_lastFilePath))
                 {
-                    SaveMetafile();
+                    originalMetafilePath = SaveMetafile();
                 }
 
                 // delete old file, move temp file
@@ -3655,9 +3656,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 AssetDatabase.Refresh();
                 
                 // replace with original metafile if specified to
-                if (ExportOptions.PreserveImportSettings && File.Exists(m_lastFilePath))
+                if (ExportOptions.PreserveImportSettings && originalMetafilePath != "")
                 {
-                    ReplaceMetafile();
+                    ReplaceMetafile(originalMetafilePath);
                 }
 
                 return status == true ? NumNodes : 0;
@@ -3742,37 +3743,40 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        private void SaveMetafile()
+        private string SaveMetafile()
         {
             // create temp file for original metafile
             try {
-                m_tempMetafilePath = Path.GetTempFileName();
+                var tempMetafilePath = Path.GetTempFileName();
+                
+                // get relative path for original fbx's metafile
+                var metafile = VersionControl.Provider.GetAssetByPath("Assets" + m_lastFilePath.Substring(Application.dataPath.Length)).metaPath;
+            
+                // save it to a temp file
+                try {
+                    File.Copy(metafile, tempMetafilePath, true);
+                } catch(IOException) {
+                    Debug.LogWarning (string.Format("Failed to copy file {0} to {1}", metafile, tempMetafilePath));
+                }
+
+                return tempMetafilePath;
             }
             catch(IOException) {
-                return;
-            }
-            
-            // get original fbx's metafile
-            // TODO: use UnityEditor.VersionControl.Asset.metaPath instead
-            
-            // save it to temp file
-            try {
-                File.Copy(m_lastFilePath + ".meta", m_tempMetafilePath, true);
-            } catch(IOException) {
-                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}", m_lastFilePath, m_tempMetafilePath));
+                return "";
             }
         }
 
-        private void ReplaceMetafile()
+        private void ReplaceMetafile(string metafilePath)
         {
-            // get new fbx metafile path
-            // TODO: use UnityEditor.VersionControl.Asset.metaPath instead
+            // get relative path for new fbx's metafile
+            var fbxAsset = VersionControl.Provider.GetAssetByPath("Assets" + m_lastFilePath.Substring(Application.dataPath.Length));
+            var metafile = fbxAsset.metaPath;
             
-            // replace metafile with one in temp folder
+            // replace metafile with original one in temp file
             try {
-                File.Copy(m_tempMetafilePath, m_lastFilePath + ".meta", true);
+                File.Copy(metafilePath, metafile, true);
             } catch(IOException) {
-                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}", m_tempMetafilePath, m_lastFilePath));
+                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}", metafilePath, m_lastFilePath));
             }
         }
 
@@ -4286,7 +4290,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         static string LastFilePath { get; set; }
         private string m_tempFilePath { get; set; }
         private string m_lastFilePath { get; set; }
-        private string m_tempMetafilePath { get; set; }
 
         const string kFBXFileExtension = "fbx";
 			
