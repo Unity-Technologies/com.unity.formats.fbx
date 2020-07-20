@@ -3644,25 +3644,23 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     return 0;
                 }
 
-                // save metafile
-                var metafile = new List<string>();
-
-                if (File.Exists(m_lastFilePath))
+                // copy old metafile to temp file
+                if (ExportOptions.PreserveImportSettings && File.Exists(m_lastFilePath))
                 {
-                    metafile.AddRange(File.ReadAllLines(m_lastFilePath + ".meta"));
+                    SaveMetafile();
                 }
 
                 // delete old file, move temp file
                 ReplaceFile();
                 AssetDatabase.Refresh();
-
-                // rewrite meta file to save import settings
-                if (metafile.Count > 0)
+                
+                // replace with original metafile if specified to
+                if (ExportOptions.PreserveImportSettings && File.Exists(m_lastFilePath))
                 {
-                    File.WriteAllLines(m_lastFilePath + ".meta", metafile);
+                    ReplaceMetafile();
                 }
 
-                return status == true ? NumNodes : 0;
+                    return status == true ? NumNodes : 0;
             }
             finally {
                 // You must clear the progress bar when you're done,
@@ -3741,6 +3739,40 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 File.Move(m_tempFilePath, m_lastFilePath);
             } catch(IOException){
                 Debug.LogWarning (string.Format("Failed to move file {0} to {1}", m_tempFilePath, m_lastFilePath));
+            }
+        }
+
+        private static void SaveMetafile()
+        {
+            // create temp file for original metafile
+            try{
+                m_tempMetafilePath = Path.GetTempFileName();
+            }
+            catch(IOException){
+                return;
+            }
+            
+            // get original fbx metafile
+            var metafile = "";
+            
+            // save it to temp file
+            try{
+                File.Copy(metafile, m_tempMetafilePath);
+            } catch(IOException){
+                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}", metafile, m_tempMetafilePath));
+            }
+        }
+
+        private static void ReplaceMetafile()
+        {
+            // get new fbx metafile path
+            var newMetafile = "";
+            
+            // replace metafile with one in temp folder
+            try{
+                File.Copy(m_tempMetafilePath, newMetafile);
+            } catch(IOException){
+                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}", m_tempMetafilePath, newMetafile));
             }
         }
 
@@ -4254,6 +4286,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         static string LastFilePath { get; set; }
         private string m_tempFilePath { get; set; }
         private string m_lastFilePath { get; set; }
+        private static string m_tempMetafilePath { get; set; }
 
         const string kFBXFileExtension = "fbx";
 			
