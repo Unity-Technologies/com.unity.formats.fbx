@@ -1,9 +1,5 @@
 # Changes in Fbx Exporter
 
-## [3.2.1-preview.1] - 2020-07-16
-### Changed
-- Do not create an empty FBX file when user tries to export from 3ds Max with no object or export set selected.
-
 ## [3.2.0-preview.2] - 2020-05-19
 ### Added
 - Added an option to the Autodesk® Maya® integration Unity menu for creating an export set.
