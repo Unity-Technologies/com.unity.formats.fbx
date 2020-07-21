@@ -1034,5 +1034,31 @@ namespace FbxExporter.UnitTests
                 expectedChildren.Remove (child.name);
             }
         }
+
+        [Test]
+        public void TestPreserveImportSettings()
+        {
+            // create a primitive object and export to an fbx
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var filename = GetRandomFbxFilePath();
+            ModelExporter.ExportObject(filename, cube);
+
+            // change an import setting
+            var modelImporter = (ModelImporter)AssetImporter.GetAtPath(filename);
+            modelImporter.importAnimation = false;
+
+            // re-export with preserve import settings true and verify guid and settings are the same
+            var exportOptions = new IExportOptions();
+            exportOptions.SetPreserveImportSettings(true);
+            ModelExporter.ExportObjects(filename, cube, exportOptions);
+            
+            Assert.IsFalse(modelImporter.importAnimation);
+
+            // re-export with preserve import settings false and verify guid is same but settings are different
+            exportOptions.SetPreserveImportSettings(false);
+            ModelExporter.ExportObjects(filename, cube, exportOptions)
+
+            Assert.IsTrue(modelImporter.importAnimation);
+        }
     }
 }
