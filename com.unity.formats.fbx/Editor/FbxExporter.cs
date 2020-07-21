@@ -3747,8 +3747,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var tempMetafilePath = Path.GetTempFileName();
                 
-            // get relative path for original fbx's metafile
-            var metafile = VersionControl.Provider.GetAssetByPath("Assets" + m_lastFilePath.Substring(Application.dataPath.Length)).metaPath;
+            // check if path is relative or absolute
+            var fbxPath = AssetDatabase.LoadAssetAtPath(m_lastFilePath, typeof(Object)) != null ? m_lastFilePath : "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+            // get metafile for original fbx file
+            var metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
             
             // save it to a temp file
             try {
@@ -3763,9 +3765,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private void ReplaceMetafile(string metafilePath)
         {
-            // get relative path for new fbx's metafile
-            var fbxAsset = VersionControl.Provider.GetAssetByPath("Assets" + m_lastFilePath.Substring(Application.dataPath.Length));
-            var metafile = fbxAsset.metaPath;
+            // check if path is relative or absolute
+            var fbxPath = AssetDatabase.LoadAssetAtPath(m_lastFilePath, typeof(Object)) != null ? m_lastFilePath : "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+            // get metafile for new fbx file
+            var metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
             
             // replace metafile with original one in temp file
             try {
