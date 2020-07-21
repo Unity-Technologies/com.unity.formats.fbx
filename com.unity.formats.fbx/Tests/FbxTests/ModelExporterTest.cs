@@ -1056,7 +1056,7 @@ namespace FbxExporter.UnitTests
 
             // re-export with preserve import settings false and verify guid is same but settings are different
             exportOptions.SetPreserveImportSettings(false);
-            ModelExporter.ExportObjects(filename, cube, exportOptions)
+            ModelExporter.ExportObjects(filename, cube, exportOptions);
 
             Assert.IsTrue(modelImporter.importAnimation);
         }
