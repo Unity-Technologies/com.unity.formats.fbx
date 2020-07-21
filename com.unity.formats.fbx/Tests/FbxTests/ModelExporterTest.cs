@@ -1048,18 +1048,29 @@ namespace FbxExporter.UnitTests
             importer.importBlendShapes = false;
             importer.SaveAndReimport();
 
-            // re-export with preserve import settings true and verify guid and settings are the same
+            // save original fbx's guid
+            var originalGuid = AssetDatabase.AssetPathToGUID(filename);
+
+            // re-export with preserve import settings true and verify settings are the same
             ModelExporter.ExportObjects(filename, new Object[] { cube });
             importer.SaveAndReimport();
             Assert.IsFalse(importer.importBlendShapes);
 
-            // re-export with preserve import settings false and verify guid is same but settings are different
+            // verify guids still match
+            var newGuid = AssetDatabase.AssetPathToGUID(filename);
+            Assert.AreEqual(originalGuid, newGuid);
+
+            // re-export with preserve import settings false and verify settings are different
             var exportOptions = new ExportModelSettingsSerialize();
 
             exportOptions.SetPreserveImportSettings(false);
             ModelExporter.ExportObjects(filename, new Object[] { cube }, exportOptions);
             importer.SaveAndReimport();
             Assert.IsTrue(importer.importBlendShapes);
+
+            // verify guids still match
+            newGuid = AssetDatabase.AssetPathToGUID(filename);
+            Assert.AreEqual(originalGuid, newGuid);
         }
     }
 }
