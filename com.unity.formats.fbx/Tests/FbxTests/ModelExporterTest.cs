@@ -1044,21 +1044,19 @@ namespace FbxExporter.UnitTests
             ModelExporter.ExportObject(filename, cube);
 
             // change an import setting
-            var modelImporter = (ModelImporter)AssetImporter.GetAtPath(filename);
-            modelImporter.importAnimation = false;
+            var modelImporter = AssetImporter.GetAtPath(filename) as ModelImporter;
+            modelImporter.importBlendShapes = false;
 
-            // re-export with preserve import settings true and verify guid and settings are the same
-            var exportOptions = new IExportOptions();
-            exportOptions.SetPreserveImportSettings(true);
-            ModelExporter.ExportObjects(filename, cube, exportOptions);
-            
-            Assert.IsFalse(modelImporter.importAnimation);
+            // re-export with preserve import settings true and verify settings are the same
+            ModelExporter.ExportObjects(filename, new Object[] { cube });
+            Assert.IsFalse(modelImporter.importBlendShapes);
 
-            // re-export with preserve import settings false and verify guid is same but settings are different
+            // re-export with preserve import settings false and verify settings are different
+            var exportOptions = new ExportModelSettingsSerialize();
+
             exportOptions.SetPreserveImportSettings(false);
-            ModelExporter.ExportObjects(filename, cube, exportOptions);
-
-            Assert.IsTrue(modelImporter.importAnimation);
+            ModelExporter.ExportObjects(filename, new Object[] { cube }, exportOptions);
+            Assert.IsTrue(modelImporter.importBlendShapes);
         }
     }
 }
