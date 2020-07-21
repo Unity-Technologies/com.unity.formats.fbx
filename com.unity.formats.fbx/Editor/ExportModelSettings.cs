@@ -100,7 +100,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUILayout.LabelField(new GUIContent("Preserve Import Settings for Existing FBX",
                 "If checked, the import settings from the overwritten FBX will be carried over to the new version."), GUILayout.Width(LabelWidth - FieldOffset));
             exportSettings.SetPreserveImportSettings(EditorGUILayout.Toggle(exportSettings.PreserveImportSettings));
-            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
         }
     }
