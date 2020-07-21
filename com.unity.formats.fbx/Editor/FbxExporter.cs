@@ -3644,7 +3644,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     return 0;
                 }
 
-                // make a temporary copy original metafile
+                // make a temporary copy of the original metafile
                 string originalMetafilePath = "";
                 if (ExportOptions.PreserveImportSettings && File.Exists(m_lastFilePath))
                 {
@@ -3745,25 +3745,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private string SaveMetafile()
         {
-            // create temp file for original metafile
-            try {
-                var tempMetafilePath = Path.GetTempFileName();
+            var tempMetafilePath = Path.GetTempFileName();
                 
-                // get relative path for original fbx's metafile
-                var metafile = VersionControl.Provider.GetAssetByPath("Assets" + m_lastFilePath.Substring(Application.dataPath.Length)).metaPath;
+            // get relative path for original fbx's metafile
+            var metafile = VersionControl.Provider.GetAssetByPath("Assets" + m_lastFilePath.Substring(Application.dataPath.Length)).metaPath;
             
-                // save it to a temp file
-                try {
-                    File.Copy(metafile, tempMetafilePath, true);
-                } catch(IOException) {
-                    Debug.LogWarning (string.Format("Failed to copy file {0} to {1}", metafile, tempMetafilePath));
-                }
-
-                return tempMetafilePath;
-            }
-            catch(IOException) {
+            // save it to a temp file
+            try {
+                File.Copy(metafile, tempMetafilePath, true);
+            } catch(IOException) {
+                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}. Import settings will be reset to default values.", metafile, tempMetafilePath));
                 return "";
             }
+
+            return tempMetafilePath;
         }
 
         private void ReplaceMetafile(string metafilePath)
@@ -3776,7 +3771,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             try {
                 File.Copy(metafilePath, metafile, true);
             } catch(IOException) {
-                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}", metafilePath, m_lastFilePath));
+                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}. Import settings will be reset to default values.", metafilePath, m_lastFilePath));
             }
         }
 
