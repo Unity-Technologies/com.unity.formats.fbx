@@ -3746,9 +3746,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private string SaveMetafile()
         {
             var tempMetafilePath = Path.GetTempFileName();
-                
-            // check if path is relative or absolute
-            var fbxPath = AssetDatabase.LoadAssetAtPath(m_lastFilePath, typeof(Object)) != null ? m_lastFilePath : "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+            
+            // Try as a relative path
+            var fbxPath = m_lastFilePath;
+            if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+            {
+                // Try as an absolute path
+                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+                if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+                {
+                    Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
+                    return "";
+                }
+            }
+            
             // get metafile for original fbx file
             var metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
             
@@ -3765,8 +3776,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private void ReplaceMetafile(string metafilePath)
         {
-            // check if path is relative or absolute
-            var fbxPath = AssetDatabase.LoadAssetAtPath(m_lastFilePath, typeof(Object)) != null ? m_lastFilePath : "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+            // Try as a relative path
+            var fbxPath = m_lastFilePath;
+            if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+            {
+                // Try as an absolute path
+                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+                if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+                {
+                    Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
+                    return;
+                }
+            }
+            
             // get metafile for new fbx file
             var metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
             
