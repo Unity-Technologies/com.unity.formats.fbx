@@ -3643,9 +3643,23 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     Debug.LogWarning ("Export Cancelled");
                     return 0;
                 }
+
+                // make a temporary copy of the original metafile
+                string originalMetafilePath = "";
+                if (ExportOptions.PreserveImportSettings && File.Exists(m_lastFilePath))
+                {
+                    originalMetafilePath = SaveMetafile();
+                }
+
                 // delete old file, move temp file
                 ReplaceFile();
                 AssetDatabase.Refresh();
+                
+                // replace with original metafile if specified to
+                if (ExportOptions.PreserveImportSettings && originalMetafilePath != "")
+                {
+                    ReplaceMetafile(originalMetafilePath);
+                }
 
                 return status == true ? NumNodes : 0;
             }
@@ -3726,6 +3740,71 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 File.Move(m_tempFilePath, m_lastFilePath);
             } catch(IOException){
                 Debug.LogWarning (string.Format("Failed to move file {0} to {1}", m_tempFilePath, m_lastFilePath));
+            }
+        }
+
+        private string SaveMetafile()
+        {
+            var tempMetafilePath = Path.GetTempFileName();
+            
+            // Try as an absolute path
+            var fbxPath = m_lastFilePath;
+            if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+            {
+                // Try as a relative path
+                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+                if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+                {
+                    Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
+                    return "";
+                }
+            }
+            
+            // get metafile for original fbx file
+            var metafile = fbxPath + ".meta";
+
+#if UNITY_2019_1_OR_NEWER
+            metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
+#endif
+
+            // save it to a temp file
+            try {
+                File.Copy(metafile, tempMetafilePath, true);
+            } catch(IOException) {
+                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}. Import settings will be reset to default values.", metafile, tempMetafilePath));
+                return "";
+            }
+
+            return tempMetafilePath;
+        }
+
+        private void ReplaceMetafile(string metafilePath)
+        {
+            // Try as an absolute path
+            var fbxPath = m_lastFilePath;
+            if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+            {
+                // Try as a relative path
+                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+                if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+                {
+                    Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
+                    return;
+                }
+            }
+            
+            // get metafile for new fbx file
+            var metafile = fbxPath + ".meta";
+
+#if UNITY_2019_1_OR_NEWER
+            metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
+#endif
+
+            // replace metafile with original one in temp file
+            try {
+                File.Copy(metafilePath, metafile, true);
+            } catch(IOException) {
+                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}. Import settings will be reset to default values.", metafilePath, m_lastFilePath));
             }
         }
 

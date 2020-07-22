@@ -1034,5 +1034,44 @@ namespace FbxExporter.UnitTests
                 expectedChildren.Remove (child.name);
             }
         }
+
+        [Test]
+        public void TestPreserveImportSettings()
+        {
+            // create a primitive object and export to an fbx
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var filename = GetRandomFbxFilePath();
+            ModelExporter.ExportObject(filename, cube);
+
+            // change an import setting
+            var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
+            importer.importBlendShapes = !importer.importBlendShapes;
+            importer.SaveAndReimport();
+
+            // save original fbx's guid and import setting change
+            var originalGuid = AssetDatabase.AssetPathToGUID(filename);
+            var originalImportBlendShapes = importer.importBlendShapes;
+
+            // re-export with preserve import settings true and verify settings are the same
+            ModelExporter.ExportObjects(filename, new Object[] { cube });
+            importer.SaveAndReimport();
+            Assert.AreEqual(originalImportBlendShapes, importer.importBlendShapes);
+
+            // verify guids still match
+            var newGuid = AssetDatabase.AssetPathToGUID(filename);
+            Assert.AreEqual(originalGuid, newGuid);
+
+            // re-export with preserve import settings false and verify settings are different
+            var exportOptions = new ExportModelSettingsSerialize();
+
+            exportOptions.SetPreserveImportSettings(false);
+            ModelExporter.ExportObjects(filename, new Object[] { cube }, exportOptions);
+            importer.SaveAndReimport();
+            Assert.AreNotEqual(originalImportBlendShapes, importer.importBlendShapes);
+
+            // verify guids still match
+            newGuid = AssetDatabase.AssetPathToGUID(filename);
+            Assert.AreEqual(originalGuid, newGuid);
+        }
     }
 }
