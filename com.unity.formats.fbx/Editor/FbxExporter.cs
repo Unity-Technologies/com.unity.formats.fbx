@@ -3747,11 +3747,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var tempMetafilePath = Path.GetTempFileName();
             
-            // Try as a relative path
+            // Try as an absolute path
             var fbxPath = m_lastFilePath;
             if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
             {
-                // Try as an absolute path
+                // Try as a relative path
                 fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
                 if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
                 {
@@ -3776,11 +3776,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private void ReplaceMetafile(string metafilePath)
         {
-            // Try as a relative path
+            // Try as an absolute path
             var fbxPath = m_lastFilePath;
             if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
             {
-                // Try as an absolute path
+                // Try as a relative path
                 fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
                 if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
                 {
