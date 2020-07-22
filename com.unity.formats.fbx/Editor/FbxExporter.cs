@@ -3761,8 +3761,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             
             // get metafile for original fbx file
-            var metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
-            
+            var metafile = fbxPath + ".meta";
+
+#if UNITY_2019_1_OR_NEWER
+            metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
+#endif
+
             // save it to a temp file
             try {
                 File.Copy(metafile, tempMetafilePath, true);
@@ -3790,8 +3794,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             
             // get metafile for new fbx file
-            var metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
-            
+            var metafile = fbxPath + ".meta";
+
+#if UNITY_2019_1_OR_NEWER
+            metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
+#endif
+
             // replace metafile with original one in temp file
             try {
                 File.Copy(metafilePath, metafile, true);
