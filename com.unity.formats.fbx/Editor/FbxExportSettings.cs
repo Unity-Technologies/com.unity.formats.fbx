@@ -1107,11 +1107,33 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // that affects the dropdown layout.
             string forwardslash = " \u2044 ";
             for (int i = 0; i < relSavePaths.Length; i++) {
-                // TODO format better
                 //relSavePaths [i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
                 relSavePaths[i] = exportSavePaths[i].Replace("/", forwardslash);
             }
             return relSavePaths;
+        }
+
+        internal static string[] GetDisplaySavePaths(List<string> exportSavePaths)
+        {
+            string[] displayPaths = new string[exportSavePaths.Count];
+            string forwardslash = " \u2044 ";
+            for (int i = 0; i < displayPaths.Length; i++)
+            {
+                // if path is in Assets folder, shorten it
+                if (!Path.IsPathRooted(exportSavePaths[i]))
+                {
+                    displayPaths[i] = string.Format("Assets{0}{1}", forwardslash,
+                        exportSavePaths[i] == "."
+                            ? ""
+                            : NormalizePath(exportSavePaths[i], isRelative: true).Replace("/", forwardslash));
+                }
+                else
+                {
+                    displayPaths[i] = exportSavePaths[i].Replace("/", forwardslash);
+                }
+            }
+
+            return displayPaths;
         }
 
         /// <summary>
@@ -1130,6 +1152,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         internal static string[] GetRelativePrefabSavePaths(){
             return GetRelativeSavePaths(instance.prefabSavePaths);
+        }
+
+        internal static string[] GetDisplayFbxSavePaths()
+        {
+            return GetDisplaySavePaths(instance.fbxSavePaths);
         }
 
         /// <summary>

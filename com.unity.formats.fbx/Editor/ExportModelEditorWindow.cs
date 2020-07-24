@@ -366,8 +366,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 "Export Path",
                 "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
 
-            // TODO change how displayed
-            var pathLabels = ExportSettings.GetRelativeFbxSavePaths();
+            var pathLabels = ExportSettings.GetDisplayFbxSavePaths();
 
             ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
@@ -379,7 +378,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     "Select Export Model Path", initialPath, null
                 );
 
-                // Unless the user canceled, make sure they chose something in the Assets folder.
+                // Unless the user canceled, mark if they chose something in the Assets folder.
                 if (!string.IsNullOrEmpty(fullPath))
                 {
                     var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
@@ -634,7 +633,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Debug.LogError ("FbxExporter: Please specify an fbx filename");
                 return false;
             }
-            // TODO fix this
             var folderPath = ExportSettings.FbxAbsoluteSavePath;
             var filePath = System.IO.Path.Combine (folderPath, ExportFileName + ".fbx");
 
