@@ -1183,7 +1183,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             var absolutePath = Path.Combine(Application.dataPath, relativePath);
             absolutePath = NormalizePath(absolutePath, isRelative: false, separator: Path.DirectorySeparatorChar);
             
-            // check if path is actually absolute
+            // check if path is outside Assets folder
             if (string.IsNullOrEmpty(ExportSettings.ConvertToAssetRelativePath(absolutePath)))
             {
                 return relativePath;
