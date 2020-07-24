@@ -1154,6 +1154,10 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             return GetRelativeSavePaths(instance.prefabSavePaths);
         }
 
+        /// <summary>
+        /// The paths formatted for display in the menu.
+        /// Paths outside the Assets folder are kept as they are and ones inside are shortened. 
+        /// </summary>
         internal static string[] GetDisplayFbxSavePaths()
         {
             return GetDisplaySavePaths(instance.fbxSavePaths);

@@ -378,7 +378,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     "Select Export Model Path", initialPath, null
                 );
 
-                // Unless the user canceled, mark if they chose something in the Assets folder.
+                // Unless the user canceled, save path.
                 if (!string.IsNullOrEmpty(fullPath))
                 {
                     var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
