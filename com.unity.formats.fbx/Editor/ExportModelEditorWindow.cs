@@ -366,6 +366,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 "Export Path",
                 "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
 
+            // TODO change how displayed
             var pathLabels = ExportSettings.GetRelativeFbxSavePaths();
 
             ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
@@ -384,17 +385,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
                     if (string.IsNullOrEmpty(relativePath))
                     {
-                        Debug.LogWarning("Please select a location in the Assets folder");
+                        // Set a flag that we're exporting outside Assets folder
+                        ExportSettings.AddFbxSavePath(fullPath, true);
                     }
                     else
                     {
                         ExportSettings.AddFbxSavePath(relativePath);
-
-                        // Make sure focus is removed from the selectable label
-                        // otherwise it won't update
-                        GUIUtility.hotControl = 0;
-                        GUIUtility.keyboardControl = 0;
                     }
+                    // Make sure focus is removed from the selectable label
+                    // otherwise it won't update
+                    GUIUtility.hotControl = 0;
+                    GUIUtility.keyboardControl = 0;
                 }
             }
             GUILayout.EndHorizontal();
@@ -633,6 +634,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Debug.LogError ("FbxExporter: Please specify an fbx filename");
                 return false;
             }
+            // TODO fix this
             var folderPath = ExportSettings.FbxAbsoluteSavePath;
             var filePath = System.IO.Path.Combine (folderPath, ExportFileName + ".fbx");
 

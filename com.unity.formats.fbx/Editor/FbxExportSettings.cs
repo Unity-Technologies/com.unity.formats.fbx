@@ -1107,7 +1107,9 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // that affects the dropdown layout.
             string forwardslash = " \u2044 ";
             for (int i = 0; i < relSavePaths.Length; i++) {
-                relSavePaths [i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
+                // TODO format better
+                //relSavePaths [i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
+                relSavePaths[i] = exportSavePaths[i].Replace("/", forwardslash);
             }
             return relSavePaths;
         }
@@ -1135,13 +1137,21 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         /// <param name="savePath">Save path.</param>
         /// <param name="exportSavePaths">Export save paths.</param>
-        private static void AddSavePath(string savePath, ref List<string> exportSavePaths){
+        private static void AddSavePath(string savePath, ref List<string> exportSavePaths, bool absolute = false){
             if(exportSavePaths == null)
             {
                 return;
             }
 
-            savePath = NormalizePath (savePath, isRelative: true);
+            if (absolute)
+            {
+                savePath = NormalizePath(savePath, isRelative: false);
+            }
+            else
+            {
+                savePath = NormalizePath(savePath, isRelative: true);
+            }
+
             if (exportSavePaths.Contains (savePath)) {
                 // move to first place if it isn't already
                 if (exportSavePaths [0] == savePath) {
@@ -1158,8 +1168,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             exportSavePaths.Insert (0, savePath);
         }
 
-        internal static void AddFbxSavePath(string savePath){
-            AddSavePath (savePath, ref instance.fbxSavePaths);
+        internal static void AddFbxSavePath(string savePath, bool absolute = false){
+            AddSavePath (savePath, ref instance.fbxSavePaths, absolute);
             instance.SelectedFbxPath = 0;
         }
 
@@ -1168,10 +1178,18 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             instance.SelectedPrefabPath = 0;
         }
 
+        // TODO fix this
         internal static string GetAbsoluteSavePath(string relativePath){
             var absolutePath = Path.Combine(Application.dataPath, relativePath);
-            return NormalizePath(absolutePath, isRelative: false,
-                separator: Path.DirectorySeparatorChar);
+            absolutePath = NormalizePath(absolutePath, isRelative: false, separator: Path.DirectorySeparatorChar);
+            
+            // check if path is actually absolute
+            if (string.IsNullOrEmpty(ExportSettings.ConvertToAssetRelativePath(absolutePath)))
+            {
+                return relativePath;
+            }
+
+            return absolutePath;
         }
 
         internal static string FbxAbsoluteSavePath{
