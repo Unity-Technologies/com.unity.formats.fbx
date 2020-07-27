@@ -366,7 +366,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 "Export Path",
                 "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
 
-            var pathLabels = ExportSettings.GetDisplayFbxSavePaths();
+            var pathLabels = ExportSettings.GetMixedFbxSavePaths();
 
             if (this is ConvertToPrefabEditorWindow)
             {

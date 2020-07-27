@@ -1113,10 +1113,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 {
                     relSavePaths[i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "." ? "" : NormalizePath(exportSavePaths[i], isRelative: true).Replace("/", forwardslash));
                 }
-                else
-                {
-                    continue;
-                }
             }
             return relSavePaths;
         }
@@ -1125,7 +1121,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// Returns the paths for display in the menu.
 		/// Paths inside the Assets folder are relative, while those outside are kept absolute.
         /// </summary>
-        internal static string[] GetDisplaySavePaths(List<string> exportSavePaths)
+        internal static string[] GetMixedSavePaths(List<string> exportSavePaths)
         {
             string[] displayPaths = new string[exportSavePaths.Count];
             string forwardslash = " \u2044 ";
@@ -1167,9 +1163,9 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// The paths formatted for display in the menu.
         /// Paths outside the Assets folder are kept as they are and ones inside are shortened. 
         /// </summary>
-        internal static string[] GetDisplayFbxSavePaths()
+        internal static string[] GetMixedFbxSavePaths()
         {
-            return GetDisplaySavePaths(instance.fbxSavePaths);
+            return GetMixedSavePaths(instance.fbxSavePaths);
         }
 
         /// <summary>
