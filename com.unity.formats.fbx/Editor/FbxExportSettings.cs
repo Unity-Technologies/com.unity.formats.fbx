@@ -1107,12 +1107,15 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // that affects the dropdown layout.
             string forwardslash = " \u2044 ";
             for (int i = 0; i < relSavePaths.Length; i++) {
-                //relSavePaths [i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
-                relSavePaths[i] = exportSavePaths[i].Replace("/", forwardslash);
+                relSavePaths [i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
             }
             return relSavePaths;
         }
 
+        /// <summary>
+        /// Returns the paths for display in the menu.
+		/// Paths inside the Assets folder are relative, while those outside are kept absolute.
+        /// </summary>
         internal static string[] GetDisplaySavePaths(List<string> exportSavePaths)
         {
             string[] displayPaths = new string[exportSavePaths.Count];
@@ -1122,10 +1125,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 // if path is in Assets folder, shorten it
                 if (!Path.IsPathRooted(exportSavePaths[i]))
                 {
-                    displayPaths[i] = string.Format("Assets{0}{1}", forwardslash,
-                        exportSavePaths[i] == "."
-                            ? ""
-                            : NormalizePath(exportSavePaths[i], isRelative: true).Replace("/", forwardslash));
+					displayPaths[i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
                 }
                 else
                 {
