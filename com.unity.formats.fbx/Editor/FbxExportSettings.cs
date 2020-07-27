@@ -285,6 +285,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 
+        public bool ExportOutsideProject;
+
         internal const string kDefaultSavePath = ".";
         private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};
         //Any additional names require a space after the name
@@ -1168,13 +1170,13 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         /// <param name="savePath">Save path.</param>
         /// <param name="exportSavePaths">Export save paths.</param>
-        private static void AddSavePath(string savePath, ref List<string> exportSavePaths, bool absolute = false){
+        private static void AddSavePath(string savePath, ref List<string> exportSavePaths){
             if(exportSavePaths == null)
             {
                 return;
             }
 
-            if (absolute)
+            if (ExportSettings.instance.ExportOutsideProject)
             {
                 savePath = NormalizePath(savePath, isRelative: false);
             }
@@ -1199,8 +1201,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             exportSavePaths.Insert (0, savePath);
         }
 
-        internal static void AddFbxSavePath(string savePath, bool absolute = false){
-            AddSavePath (savePath, ref instance.fbxSavePaths, absolute);
+        internal static void AddFbxSavePath(string savePath){
+            AddSavePath (savePath, ref instance.fbxSavePaths);
             instance.SelectedFbxPath = 0;
         }
 

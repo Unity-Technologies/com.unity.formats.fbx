@@ -99,7 +99,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Preserve Import Settings for Existing FBX",
                 "If checked, the import settings from the overwritten FBX will be carried over to the new version."), GUILayout.Width(LabelWidth - FieldOffset));
+            // greyed out if exporting outside assets folder
+            EditorGUI.BeginDisabledGroup(ExportSettings.instance.ExportOutsideProject);
             exportSettings.SetPreserveImportSettings(EditorGUILayout.Toggle(exportSettings.PreserveImportSettings));
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
         }
     }
@@ -185,7 +188,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool ExportUnrendered { get { return exportUnrendered; } }
         public void SetExportUnredererd(bool exportUnrendered){ this.exportUnrendered = exportUnrendered; }
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }
-        public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings; }
+        public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings && !ExportSettings.instance.ExportOutsideProject; }
         public override bool AllowSceneModification { get { return false; } }
     }
 }

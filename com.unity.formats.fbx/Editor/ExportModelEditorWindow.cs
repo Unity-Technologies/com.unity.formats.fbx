@@ -370,6 +370,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
+            // Set export setting for exporting outside the project on choosing a path
+            if (pathLabels[ExportSettings.instance.SelectedFbxPath].Contains("Assets"))
+            {
+                ExportSettings.instance.ExportOutsideProject = false;
+            }
+            else
+            {
+                ExportSettings.instance.ExportOutsideProject = true;
+            }
+
             if (GUILayout.Button(new GUIContent("...", "Browse to a new location to export to"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
                 string initialPath = Application.dataPath;
@@ -384,11 +394,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
                     if (string.IsNullOrEmpty(relativePath))
                     {
-                        // Set a flag that we're exporting outside Assets folder
-                        ExportSettings.AddFbxSavePath(fullPath, true);
+                        // We're exporting outside Assets folder, so store the full path
+                        ExportSettings.AddFbxSavePath(fullPath);
                     }
                     else
                     {
+                        // Store the relative path
                         ExportSettings.AddFbxSavePath(relativePath);
                     }
                     // Make sure focus is removed from the selectable label
