@@ -1211,7 +1211,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             instance.SelectedPrefabPath = 0;
         }
 
-        // TODO fix this
         internal static string GetAbsoluteSavePath(string relativePath){
             var absolutePath = Path.Combine(Application.dataPath, relativePath);
             absolutePath = NormalizePath(absolutePath, isRelative: false, separator: Path.DirectorySeparatorChar);
