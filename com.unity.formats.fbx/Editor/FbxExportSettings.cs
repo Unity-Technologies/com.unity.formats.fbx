@@ -1109,7 +1109,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // that affects the dropdown layout.
             string forwardslash = " \u2044 ";
             for (int i = 0; i < relSavePaths.Length; i++) {
-                relSavePaths [i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
+                if ((!Path.IsPathRooted(exportSavePaths[i])))
+                {
+                    relSavePaths[i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "." ? "" : NormalizePath(exportSavePaths[i], isRelative: true).Replace("/", forwardslash));
+                }
+                else
+                {
+                    continue;
+                }
             }
             return relSavePaths;
         }

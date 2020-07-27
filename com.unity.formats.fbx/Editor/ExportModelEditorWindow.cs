@@ -368,6 +368,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             var pathLabels = ExportSettings.GetDisplayFbxSavePaths();
 
+            if (this is ConvertToPrefabEditorWindow)
+            {
+                pathLabels = ExportSettings.GetRelativeFbxSavePaths();
+            }
+
             ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
             // Set export setting for exporting outside the project on choosing a path
@@ -392,7 +397,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 if (!string.IsNullOrEmpty(fullPath))
                 {
                     var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
-                    if (string.IsNullOrEmpty(relativePath))
+                    if (this is ConvertToPrefabEditorWindow && string.IsNullOrEmpty(relativePath))
+                    {
+                        // if exporting a prefab, not allowed to export outside project
+                        Debug.LogWarning("Please select a location in the Assets folder");
+                    }
+                    else if (string.IsNullOrEmpty(relativePath))
                     {
                         // We're exporting outside Assets folder, so store the full path
                         ExportSettings.AddFbxSavePath(fullPath);
