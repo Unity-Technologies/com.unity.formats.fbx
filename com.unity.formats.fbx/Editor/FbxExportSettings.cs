@@ -1109,10 +1109,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // that affects the dropdown layout.
             string forwardslash = " \u2044 ";
             for (int i = 0; i < relSavePaths.Length; i++) {
-                if ((!Path.IsPathRooted(exportSavePaths[i])))
-                {
-                    relSavePaths[i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "." ? "" : NormalizePath(exportSavePaths[i], isRelative: true).Replace("/", forwardslash));
-                }
+                relSavePaths[i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "." ? "" : NormalizePath(exportSavePaths[i], isRelative: true).Replace("/", forwardslash));
             }
             return relSavePaths;
         }
@@ -1145,9 +1142,20 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// The path where Export model will save the new fbx.
         /// This is relative to the Application.dataPath ; it uses '/' as the
         /// separator on all platforms.
+        /// Only returns the paths within the Assets folder of the project.
         /// </summary>
         internal static string[] GetRelativeFbxSavePaths(){
-            return GetRelativeSavePaths(instance.fbxSavePaths);
+            // sort the list of paths, putting project paths first
+            instance.fbxSavePaths.Sort((x, y) => Path.IsPathRooted(x).CompareTo(Path.IsPathRooted(y)));
+            var relPathCount = instance.fbxSavePaths.FindAll(x => !Path.IsPathRooted(x)).Count;
+
+            // reset selected path if it's out of range
+            if (instance.SelectedFbxPath > relPathCount - 1)
+            {
+                instance.SelectedFbxPath = 0;
+            }
+
+            return GetRelativeSavePaths(instance.fbxSavePaths.GetRange(0, relPathCount));
         }
 
         /// <summary>
