@@ -364,7 +364,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent(
                 "Export Path",
-                "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
+                "Location where the FBX will be saved."),GUILayout.Width(LabelWidth - FieldOffset));
 
             var pathLabels = ExportSettings.GetMixedFbxSavePaths();
 
