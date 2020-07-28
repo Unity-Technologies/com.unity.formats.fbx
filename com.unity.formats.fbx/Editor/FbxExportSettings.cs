@@ -1109,14 +1109,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // that affects the dropdown layout.
             string forwardslash = " \u2044 ";
             for (int i = 0; i < relSavePaths.Length; i++) {
-                relSavePaths[i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "." ? "" : NormalizePath(exportSavePaths[i], isRelative: true).Replace("/", forwardslash));
+                relSavePaths [i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
             }
             return relSavePaths;
         }
 
         /// <summary>
         /// Returns the paths for display in the menu.
-		/// Paths inside the Assets folder are relative, while those outside are kept absolute.
+        /// Paths inside the Assets folder are relative, while those outside are kept absolute.
         /// </summary>
         internal static string[] GetMixedSavePaths(List<string> exportSavePaths)
         {
@@ -1222,17 +1222,17 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             instance.SelectedPrefabPath = 0;
         }
 
-        internal static string GetAbsoluteSavePath(string relativePath){
-            var absolutePath = Path.Combine(Application.dataPath, relativePath);
-            absolutePath = NormalizePath(absolutePath, isRelative: false, separator: Path.DirectorySeparatorChar);
+        internal static string GetAbsoluteSavePath(string savePath){
+            var projectAbsolutePath = Path.Combine(Application.dataPath, savePath);
+            projectAbsolutePath = NormalizePath(projectAbsolutePath, isRelative: false, separator: Path.DirectorySeparatorChar);
             
-            // check if path is outside Assets folder
-            if (string.IsNullOrEmpty(ExportSettings.ConvertToAssetRelativePath(absolutePath)))
+            // if path is outside Assets folder, it's already absolute so return the original path
+            if (string.IsNullOrEmpty(ExportSettings.ConvertToAssetRelativePath(projectAbsolutePath)))
             {
-                return relativePath;
+                return savePath;
             }
 
-            return absolutePath;
+            return projectAbsolutePath;
         }
 
         internal static string FbxAbsoluteSavePath{

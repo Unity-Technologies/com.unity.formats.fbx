@@ -397,19 +397,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 if (!string.IsNullOrEmpty(fullPath))
                 {
                     var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
+
+                    // If exporting an fbx for a prefab, not allowed to export outside the Assets folder
                     if (this is ConvertToPrefabEditorWindow && string.IsNullOrEmpty(relativePath))
                     {
-                        // if exporting a prefab, not allowed to export outside project
                         Debug.LogWarning("Please select a location in the Assets folder");
                     }
+                    // We're exporting outside Assets folder, so store the absolute path
                     else if (string.IsNullOrEmpty(relativePath))
                     {
-                        // We're exporting outside Assets folder, so store the full path
                         ExportSettings.AddFbxSavePath(fullPath);
                     }
+                    // Store the relative path to the Assets folder
                     else
                     {
-                        // Store the relative path
                         ExportSettings.AddFbxSavePath(relativePath);
                     }
                     // Make sure focus is removed from the selectable label
