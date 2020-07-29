@@ -3438,17 +3438,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Dictionary<GameObject, IExportData> exportData)
         {
             exportCancelled = false;
+            
+            m_lastFilePath = LastFilePath;
 
             // Export first to a temporary file
             // in case the export is cancelled.
             // This way we won't overwrite existing files.
-            try{
-                m_tempFilePath = Path.GetTempFileName();
+            try
+            {
+                var exportDir = Path.GetDirectoryName(m_lastFilePath);
+                var tempFileName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+                
+                m_tempFilePath = exportDir + "/" + tempFileName + ".fbx";
             }
             catch(IOException){
                 return 0;
             }
-            m_lastFilePath = LastFilePath;
 
             if (string.IsNullOrEmpty (m_tempFilePath)) {
                 return 0;
