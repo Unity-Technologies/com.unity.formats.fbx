@@ -77,6 +77,7 @@ namespace FbxExporter.UnitTests
             }
         }
 
+        // UT-3305 Test exporting an fbx outside the Assets folder of the project
         [Test]
         public void TestExportOutsideProject()
         {
