@@ -961,6 +961,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var bones = unitySkin.bones;
                 foreach (var bone in bones)
                 {
+                    // ignore null bones
                     if (bone != null)
                     {
                         var fbxBone = MapUnityObjectToFbxNode[bone.gameObject];
@@ -1044,6 +1045,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Dictionary<Transform, int> index = new Dictionary<Transform, int>();
             for (int boneIndex = 0; boneIndex < bones.Length; boneIndex++) {
                 Transform unityBoneTransform = bones [boneIndex];
+
+                // ignore null bones
                 if (unityBoneTransform != null)
                 {
                     index[unityBoneTransform] = boneIndex;
@@ -1055,6 +1058,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Step 1: Set transforms
             var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, index);
             foreach (var bone in bones) {
+                // ignore null bones
                 if (bone != null)
                 {
                     var fbxBone = MapUnityObjectToFbxNode[bone.gameObject];
@@ -1079,6 +1083,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Dictionary<int, FbxCluster> boneCluster = new Dictionary<int, FbxCluster> ();
 
             for(int i = 0; i < skinnedMesh.bones.Length; i++) {
+                // ignore null bones
                 if (skinnedMesh.bones[i] != null)
                 {
                     FbxNode fbxBoneNode = MapUnityObjectToFbxNode[skinnedMesh.bones[i].gameObject];
@@ -1176,6 +1181,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
             for (int i = 0; i < bones.Length; i++) {
+                // ignore null bones
                 if (bones[i] != null)
                 {
                     FbxNode fbxBoneNode = MapUnityObjectToFbxNode[bones[i].gameObject];
