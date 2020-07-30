@@ -3448,7 +3448,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 // create a temp file in the same directory where the fbx will be exported
                 var exportDir = Path.GetDirectoryName(m_lastFilePath);
-                var tempFileName = Path.ChangeExtension(Path.GetRandomFileName(), ".fbx");
+                var lastFileName = Path.GetFileName(m_lastFilePath);
+                var tempFileName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + "_" + lastFileName;
                 m_tempFilePath = Path.Combine(new string[] { exportDir, tempFileName });
             }
             catch(IOException){
