@@ -1075,5 +1075,23 @@ namespace FbxExporter.UnitTests
             newGuid = AssetDatabase.AssetPathToGUID(filename);
             Assert.AreEqual(originalGuid, newGuid);
         }
+
+        [Test]
+        public void TestInstanceExport()
+        {
+            // create root with 2 identical children
+            var filename = GetRandomFbxFilePath();
+            GameObject root = new GameObject("root");
+            GameObject child1 = CreateGameObject("child1", root.transform);
+            GameObject child2 = CreateGameObject("child2", root.transform);
+
+            // export and check that there is 1 fbx file both objects reference
+            var result = ModelExporter.ExportObject(filename, root);
+            Assert.That(result, Is.Not.Null);
+            Assert.AreEqual(filename, result);
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.AreEqual(fbxObj.transform.GetChild(0).GetComponent<Meshfilter>().sharedMesh.name, fbxObj.transform.GetChild(1).GetComponent<Meshfilter>().sharedMesh.name);
+        }
     }
 }
