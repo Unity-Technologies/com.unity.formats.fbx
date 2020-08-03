@@ -1323,6 +1323,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
             
+            /**
             PrefabAssetType unityPrefabType = PrefabUtility.GetPrefabAssetType(unityGo);
             // only export as an instance if the GameObject is part of a prefab instance
             if (unityPrefabType == PrefabAssetType.MissingAsset ||
@@ -1331,6 +1332,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 return false;
             }
+            **/
 
             Object unityPrefabParent = PrefabUtility.GetCorrespondingObjectFromSource(unityGo);
 
@@ -1339,13 +1341,33 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             FbxMesh fbxMesh = null;
 
-            if (!SharedMeshes.TryGetValue (unityPrefabParent.GetInstanceID(), out fbxMesh))
+            if (unityPrefabParent != null && !SharedMeshes.TryGetValue (unityPrefabParent.GetInstanceID(), out fbxMesh))
             {
                 if (ExportMesh (unityGo, fbxNode) && fbxNode.GetMesh() != null) {
                     SharedMeshes [unityPrefabParent.GetInstanceID()] = fbxNode.GetMesh ();
                     return true;
                 }
                 return false;
+            }
+            // check if mesh is shared between 2 objects that are not prefabs
+            else if (unityPrefabParent == null)
+            {
+                foreach (var go in MapUnityObjectToFbxNode.Keys)
+                {
+                    MeshFilter goMesh, unityGoMesh;
+                    // a duplicate mesh hasn't been exported yet
+                    if (go == unityGo)
+                    {
+                        return false;
+                    }
+                    // check if gameobjects have the same mesh
+                    else if (go.TryGetComponent<MeshFilter>(out goMesh) && unityGo.TryGetComponent<MeshFilter>(out unityGoMesh)
+                        && goMesh.sharedMesh.name.Equals(unityGoMesh.sharedMesh.name))
+                    {
+                        fbxMesh = MapUnityObjectToFbxNode[go].GetMesh();
+                        break;
+                    }
+                }
             }
 
             // We don't export the mesh because we already have it from the parent, but we still need to assign the material
