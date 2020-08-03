@@ -1085,13 +1085,14 @@ namespace FbxExporter.UnitTests
             GameObject child1 = CreateGameObject("child1", root.transform);
             GameObject child2 = CreateGameObject("child2", root.transform);
 
-            // export and check that there is 1 fbx file both objects reference
+            // check export was successful
             var result = ModelExporter.ExportObject(filename, root);
             Assert.That(result, Is.Not.Null);
             Assert.AreEqual(filename, result);
 
+            // check that both children reference the same mesh
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
-            Assert.AreEqual(fbxObj.transform.GetChild(0).GetComponent<Meshfilter>().sharedMesh.name, fbxObj.transform.GetChild(1).GetComponent<Meshfilter>().sharedMesh.name);
+            Assert.AreEqual(fbxObj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.name, fbxObj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh.name);
         }
     }
 }
