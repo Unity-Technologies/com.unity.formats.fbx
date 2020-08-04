@@ -177,7 +177,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private ExportSettings.ObjectPosition objectPosition = ExportSettings.ObjectPosition.LocalCentered;
         [SerializeField]
         private bool exportUnrendered = true;
-        private bool preserveImportSettings = true;
+        private bool preserveImportSettings = false;
 
         public override ExportSettings.Include ModelAnimIncludeOption { get { return include; } }
         public void SetModelAnimIncludeOption(ExportSettings.Include include) { this.include = include; }
