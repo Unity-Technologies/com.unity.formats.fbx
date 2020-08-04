@@ -196,6 +196,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Used for enforcing unique names on export.
         /// </summary>
         Dictionary<string, int> TextureNameToIndexMap = new Dictionary<string, int>();
+        
+        Dictionary<Mesh, FbxNode> MeshToFbxNodeMap = new Dictionary<Mesh, FbxNode>();
 
         /// <summary>
         /// Format for creating unique names
@@ -1341,22 +1343,23 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // check if mesh is shared between 2 objects that are not prefabs
             else if (unityPrefabParent == null)
             {
-                foreach (var go in MapUnityObjectToFbxNode.Keys)
+                // check if same mesh has already been exported
+                MeshFilter unityGoMesh;
+                if (unityGo.TryGetComponent<MeshFilter>(out unityGoMesh) && MeshToFbxNodeMap.ContainsKey(unityGoMesh.sharedMesh))
                 {
-                    MeshFilter goMesh, unityGoMesh;
-                    // a duplicate mesh hasn't been exported yet
-                    if (go == unityGo)
-                    {
-                        return false;
-                    }
-                    // check if gameobjects have the same mesh
-                    else if (go.TryGetComponent<MeshFilter>(out goMesh) && unityGo.TryGetComponent<MeshFilter>(out unityGoMesh)
-                        && goMesh.sharedMesh.name.Equals(unityGoMesh.sharedMesh.name))
-                    {
-                        fbxMesh = MapUnityObjectToFbxNode[go].GetMesh();
-                        break;
-                    }
+                    fbxMesh = MeshToFbxNodeMap[unityGoMesh.sharedMesh].GetMesh();
                 }
+                // export mesh as normal and add it to list
+                else if (unityGoMesh != null)
+                {
+                    MeshToFbxNodeMap.Add(unityGoMesh.sharedMesh, fbxNode);
+                    return false;
+                }
+            }
+
+            if (fbxMesh == null)
+            {
+                return false;
             }
 
             // We don't export the mesh because we already have it from the parent, but we still need to assign the material
