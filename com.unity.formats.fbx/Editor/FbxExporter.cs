@@ -1350,16 +1350,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     fbxMesh = MeshToFbxNodeMap[unityGoMesh.sharedMesh].GetMesh();
                 }
                 // export mesh as normal and add it to list
-                else if (unityGoMesh != null)
+                else
                 {
-                    MeshToFbxNodeMap.Add(unityGoMesh.sharedMesh, fbxNode);
+                    if (unityGoMesh != null)
+                    {
+                        MeshToFbxNodeMap.Add(unityGoMesh.sharedMesh, fbxNode);
+                    }
                     return false;
                 }
-            }
-
-            if (fbxMesh == null)
-            {
-                return false;
             }
 
             // We don't export the mesh because we already have it from the parent, but we still need to assign the material
