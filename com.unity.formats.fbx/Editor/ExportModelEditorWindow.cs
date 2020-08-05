@@ -364,11 +364,26 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent(
                 "Export Path",
-                "Relative path for saving Model Prefabs."),GUILayout.Width(LabelWidth - FieldOffset));
+                "Location where the FBX will be saved."),GUILayout.Width(LabelWidth - FieldOffset));
 
-            var pathLabels = ExportSettings.GetRelativeFbxSavePaths();
+            var pathLabels = ExportSettings.GetMixedFbxSavePaths();
+
+            if (this is ConvertToPrefabEditorWindow)
+            {
+                pathLabels = ExportSettings.GetRelativeFbxSavePaths();
+            }
 
             ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+
+            // Set export setting for exporting outside the project on choosing a path
+            if (string.IsNullOrEmpty(ExportSettings.ConvertToAssetRelativePath(ExportSettings.FbxAbsoluteSavePath)))
+            {
+                ExportSettings.instance.ExportOutsideProject = true;
+            }
+            else
+            {
+                ExportSettings.instance.ExportOutsideProject = false;
+            }
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new location to export to"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
@@ -378,23 +393,30 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     "Select Export Model Path", initialPath, null
                 );
 
-                // Unless the user canceled, make sure they chose something in the Assets folder.
+                // Unless the user canceled, save path.
                 if (!string.IsNullOrEmpty(fullPath))
                 {
                     var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
-                    if (string.IsNullOrEmpty(relativePath))
+
+                    // If exporting an fbx for a prefab, not allowed to export outside the Assets folder
+                    if (this is ConvertToPrefabEditorWindow && string.IsNullOrEmpty(relativePath))
                     {
                         Debug.LogWarning("Please select a location in the Assets folder");
                     }
+                    // We're exporting outside Assets folder, so store the absolute path
+                    else if (string.IsNullOrEmpty(relativePath))
+                    {
+                        ExportSettings.AddFbxSavePath(fullPath);
+                    }
+                    // Store the relative path to the Assets folder
                     else
                     {
                         ExportSettings.AddFbxSavePath(relativePath);
-
-                        // Make sure focus is removed from the selectable label
-                        // otherwise it won't update
-                        GUIUtility.hotControl = 0;
-                        GUIUtility.keyboardControl = 0;
                     }
+                    // Make sure focus is removed from the selectable label
+                    // otherwise it won't update
+                    GUIUtility.hotControl = 0;
+                    GUIUtility.keyboardControl = 0;
                 }
             }
             GUILayout.EndHorizontal();

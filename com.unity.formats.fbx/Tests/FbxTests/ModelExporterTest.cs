@@ -1053,7 +1053,10 @@ namespace FbxExporter.UnitTests
             var originalImportBlendShapes = importer.importBlendShapes;
 
             // re-export with preserve import settings true and verify settings are the same
-            ModelExporter.ExportObjects(filename, new Object[] { cube });
+            var exportOptions = new ExportModelSettingsSerialize();
+            exportOptions.SetPreserveImportSettings(true);
+
+            ModelExporter.ExportObjects(filename, new Object[] { cube }, exportOptions);
             importer = AssetImporter.GetAtPath(filename) as ModelImporter;
             importer.SaveAndReimport();
             Assert.AreEqual(originalImportBlendShapes, importer.importBlendShapes);
@@ -1063,7 +1066,8 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual(originalGuid, newGuid);
 
             // re-export with preserve import settings false and verify settings are different
-            var exportOptions = new ExportModelSettingsSerialize();
+            exportOptions = new ExportModelSettingsSerialize();
+            exportOptions.SetPreserveImportSettings(false);
 
             exportOptions.SetPreserveImportSettings(false);
             ModelExporter.ExportObjects(filename, new Object[] { cube }, exportOptions);

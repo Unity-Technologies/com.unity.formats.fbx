@@ -76,5 +76,19 @@ namespace FbxExporter.UnitTests
                 Assert.Greater(mesh.triangles.Length, 0);
             }
         }
+
+        // UT-3305 Test exporting an fbx outside the Assets folder of the project
+        [Test]
+        public void TestExportOutsideProject()
+        {
+            Assert.IsNotNull(m_toExport);
+            Assert.Greater(m_toExport.Length, 1);
+            var filename = GetTempOutsideFilePath();
+
+            var fbxFileName = ModelExporter.ExportObjects(filename, m_toExport);
+
+            Assert.IsNotNull(fbxFileName);
+            Assert.AreEqual(fbxFileName, filename);
+        }
     }
 }
