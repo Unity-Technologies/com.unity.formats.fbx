@@ -267,11 +267,11 @@ namespace FbxExporter.UnitTests
             // Unregister once => only one call per object, and no more for the prefab.
             ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
             ModelExporter.UnRegisterMeshObjectCallback(tester.CallbackForObject);
-            tester.Verify(0, nbTransforms);
+            tester.Verify(0, nbMeshCallbacks);
 
             // Legal to unregister if already unregistered.
             ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
-            tester.Verify(0, nbTransforms);
+            tester.Verify(0, nbMeshCallbacks);
 
             // Register same callback twice gets back to original state.
             ModelExporter.UnRegisterMeshObjectCallback(tester.CallbackForObject);
@@ -305,11 +305,12 @@ namespace FbxExporter.UnitTests
             ModelExporter.ExportObject(filename, tree);
             ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
 
+            // UT-3419 Parent1 and Parent2 are instances the same mesh, so they should point to the same mesh
             asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             assetMesh = asset.transform.Find("Parent1").GetComponent<MeshFilter>().sharedMesh;
             Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
             assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
-            Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
+            Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
 
             // Try again, but this time pick on Parent2 by name (different just
             // to make sure we don't pass if the previous pass didn't
@@ -328,11 +329,12 @@ namespace FbxExporter.UnitTests
             ModelExporter.ExportObject(filename, tree);
             ModelExporter.UnRegisterMeshObjectCallback(callback);
 
+            // UT-3419 Parent1 and Parent2 are instances the same mesh, so they should point to the same mesh
             asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             assetMesh = asset.transform.Find("Parent1").GetComponent<MeshFilter>().sharedMesh;
             Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
             assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
-            Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
+            Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
         }
 
         [Test]

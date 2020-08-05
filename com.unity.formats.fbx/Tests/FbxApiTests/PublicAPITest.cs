@@ -34,7 +34,7 @@ namespace FbxExporter.UnitTests
         /// <returns>The game object to export.</returns>
         private GameObject CreateGameObjectToExport (PrimitiveType type = PrimitiveType.Sphere)
         {
-            return GameObject.CreatePrimitive (PrimitiveType.Sphere);
+            return GameObject.CreatePrimitive (type);
         }
 
         [Test]
