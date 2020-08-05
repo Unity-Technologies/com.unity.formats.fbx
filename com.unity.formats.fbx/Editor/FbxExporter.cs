@@ -1344,8 +1344,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             else if (unityPrefabParent == null)
             {
                 // check if same mesh has already been exported
-                MeshFilter unityGoMesh;
-                if (unityGo.TryGetComponent<MeshFilter>(out unityGoMesh) && MeshToFbxNodeMap.ContainsKey(unityGoMesh.sharedMesh))
+                MeshFilter unityGoMesh = unityGo.GetComponent<MeshFilter>();
+                if (unityGoMesh != null && MeshToFbxNodeMap.ContainsKey(unityGoMesh.sharedMesh))
                 {
                     fbxMesh = MeshToFbxNodeMap[unityGoMesh.sharedMesh].GetMesh();
                 }
