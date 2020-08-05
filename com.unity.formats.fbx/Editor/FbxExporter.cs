@@ -1360,6 +1360,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
+            if (fbxMesh == null)
+            {
+                return false;
+            }
+
             // We don't export the mesh because we already have it from the parent, but we still need to assign the material
             var renderer = unityGo.GetComponent<Renderer>();
             var materials = renderer ? renderer.sharedMaterials : null;
