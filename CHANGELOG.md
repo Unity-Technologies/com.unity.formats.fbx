@@ -1,5 +1,21 @@
 # Changes in Fbx Exporter
 
+## [3.2.1-preview.1] - 2020-08-05
+### Added
+- Add an export option to preserve model import settings when overwriting an fbx file.
+- Add the option to export FBX files outside of the Assets folder.
+
+### Changed
+- Changed label name in Autodesk® Maya® from Unity Fbx Namespace to Strip Specific Namespace.
+- Changed Export as FBX Linked Prefab to Export as FBX Prefab Variant.
+- Mesh instances are now exported as instances of a single mesh instead of exporting multiple, identical meshes.
+- Updated to latest com.autodesk.fbx (3.1.0-preview.2).
+
+### Fixed
+- No longer intiate export if no objects are selected in Autodesk® 3DS Max®.
+- Added a null check for bones, so export no longer fails if skeleton has missing bones.
+- Fix incorrect relative paths for textures in FBX files.
+
 ## [3.2.0-preview.2] - 2020-05-19
 ### Added
 - Added an option to the Autodesk® Maya® integration Unity menu for creating an export set.
