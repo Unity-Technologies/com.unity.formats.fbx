@@ -165,7 +165,7 @@ on the set. In order to do so, select the set, go to the Attribute Editor, and m
 
 > **NOTE:** If Arnold is installed, the attributes may appear in the Attribute Editor under __Arnold__ > __Extra Attributes__
 
-![](images/FBXExporter_MayaExportSetAttributes_Updated.png)
+![](images/FBXExporter_MayaExportSetAttributes.PNG)
 
 | Property:                     | Function:                                                    |
 | :---------------------------- | :----------------------------------------------------------- |
