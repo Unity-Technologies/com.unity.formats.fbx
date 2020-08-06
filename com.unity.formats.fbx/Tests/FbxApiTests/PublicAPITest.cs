@@ -15,7 +15,7 @@ namespace FbxExporter.UnitTests
         public override void Init()
         {
             base.Init();
-            m_toExport = new GameObject[] {CreateGameObjectToExport(), CreateGameObjectToExport()};
+            m_toExport = new GameObject[] {CreateGameObjectToExport(PrimitiveType.Cube), CreateGameObjectToExport(PrimitiveType.Sphere) };
         }
 
         [TearDown]
@@ -32,9 +32,9 @@ namespace FbxExporter.UnitTests
         /// Creates a GameObject to export.
         /// </summary>
         /// <returns>The game object to export.</returns>
-        private GameObject CreateGameObjectToExport ()
+        private GameObject CreateGameObjectToExport (PrimitiveType type = PrimitiveType.Sphere)
         {
-            return GameObject.CreatePrimitive (PrimitiveType.Sphere);
+            return GameObject.CreatePrimitive (type);
         }
 
         [Test]
