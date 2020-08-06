@@ -97,7 +97,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.EndHorizontal ();
             
             GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent("Preserve Import Settings for Existing FBX",
+            EditorGUILayout.LabelField(new GUIContent("Preserve Import Settings",
                 "If checked, the import settings from the overwritten FBX will be carried over to the new version."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if exporting outside assets folder
             EditorGUI.BeginDisabledGroup(ExportSettings.instance.ExportOutsideProject);
