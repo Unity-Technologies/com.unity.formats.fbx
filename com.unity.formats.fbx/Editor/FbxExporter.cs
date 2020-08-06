@@ -983,6 +983,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         // and update LclRotation
                         fbxBone.LclRotation.Set(ToFbxDouble3(QuaternionToEuler(finalLclRotationQuat)));
                     }
+                    else
+                    {
+                        Debug.Log("Warning: One or more bones are null. Skeleton may not export correctly.");
+                    }
                 }
             }
 
