@@ -12,8 +12,8 @@
 - Updated to latest com.autodesk.fbx (3.1.0-preview.2).
 
 ### Fixed
-- No longer intiate export if no objects are selected in Autodesk® 3DS Max®.
-- Added a null check for bones, so export no longer fails if skeleton has missing bones.
+- No longer initiate export if no objects are selected in Autodesk® 3DS Max®.
+- Added a null check for bones, so export no longer fails if a skeleton has missing bones.
 - Fix incorrect relative paths for textures in FBX files.
 
 ## [3.2.0-preview.2] - 2020-05-19
