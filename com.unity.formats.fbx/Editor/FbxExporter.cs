@@ -963,24 +963,32 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var bones = unitySkin.bones;
                 foreach (var bone in bones)
                 {
-                    var fbxBone = MapUnityObjectToFbxNode[bone.gameObject];
-                    ExportTransform(bone, fbxBone, newCenter: Vector3.zero, TransformExportType.Local);
+                    // ignore null bones
+                    if (bone != null)
+                    {
+                        var fbxBone = MapUnityObjectToFbxNode[bone.gameObject];
+                        ExportTransform(bone, fbxBone, newCenter: Vector3.zero, TransformExportType.Local);
 
-                    // Cancel out the pre-rotation from the exported rotation
+                        // Cancel out the pre-rotation from the exported rotation
 
-                    // Get prerotation
-                    var fbxPreRotationEuler = fbxBone.GetPreRotation(FbxNode.EPivotSet.eSourcePivot);
-                    // Convert the prerotation to a Quaternion
-                    var fbxPreRotationQuaternion = EulerToQuaternion(fbxPreRotationEuler);
-                    // Inverse of the prerotation
-                    fbxPreRotationQuaternion.Inverse();
+                        // Get prerotation
+                        var fbxPreRotationEuler = fbxBone.GetPreRotation(FbxNode.EPivotSet.eSourcePivot);
+                        // Convert the prerotation to a Quaternion
+                        var fbxPreRotationQuaternion = EulerToQuaternion(fbxPreRotationEuler);
+                        // Inverse of the prerotation
+                        fbxPreRotationQuaternion.Inverse();
 
-                    // Multiply LclRotation by pre-rotation inverse to get the LclRotation without pre-rotation applied
-                    var finalLclRotationQuat = fbxPreRotationQuaternion * EulerToQuaternion(new FbxVector4(fbxBone.LclRotation.Get()));
+                        // Multiply LclRotation by pre-rotation inverse to get the LclRotation without pre-rotation applied
+                        var finalLclRotationQuat = fbxPreRotationQuaternion * EulerToQuaternion(new FbxVector4(fbxBone.LclRotation.Get()));
 
-                    // Convert to Euler without axis conversion (Pre-rotation and LclRotation were already in Maya axis)
-                    // and update LclRotation
-                    fbxBone.LclRotation.Set(ToFbxDouble3(QuaternionToEuler(finalLclRotationQuat)));
+                        // Convert to Euler without axis conversion (Pre-rotation and LclRotation were already in Maya axis)
+                        // and update LclRotation
+                        fbxBone.LclRotation.Set(ToFbxDouble3(QuaternionToEuler(finalLclRotationQuat)));
+                    }
+                    else
+                    {
+                        Debug.Log("Warning: One or more bones are null. Skeleton may not export correctly.");
+                    }
                 }
             }
 
@@ -1043,7 +1051,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Dictionary<Transform, int> index = new Dictionary<Transform, int>();
             for (int boneIndex = 0; boneIndex < bones.Length; boneIndex++) {
                 Transform unityBoneTransform = bones [boneIndex];
-                index[unityBoneTransform] = boneIndex;
+
+                // ignore null bones
+                if (unityBoneTransform != null)
+                {
+                    index[unityBoneTransform] = boneIndex;
+                }
             }
 
             skinnedMeshToBonesMap.Add (skinnedMesh, bones);
@@ -1051,8 +1064,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Step 1: Set transforms
             var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, index);
             foreach (var bone in bones) {
-                var fbxBone = MapUnityObjectToFbxNode [bone.gameObject];
-                ExportBoneTransform (fbxBone, fbxScene, bone, boneInfo);
+                // ignore null bones
+                if (bone != null)
+                {
+                    var fbxBone = MapUnityObjectToFbxNode[bone.gameObject];
+                    ExportBoneTransform(fbxBone, fbxScene, bone, boneInfo);
+                }
             }
             return true;
         }
@@ -1072,24 +1089,28 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Dictionary<int, FbxCluster> boneCluster = new Dictionary<int, FbxCluster> ();
 
             for(int i = 0; i < skinnedMesh.bones.Length; i++) {
-                FbxNode fbxBoneNode = MapUnityObjectToFbxNode [skinnedMesh.bones[i].gameObject];
+                // ignore null bones
+                if (skinnedMesh.bones[i] != null)
+                {
+                    FbxNode fbxBoneNode = MapUnityObjectToFbxNode[skinnedMesh.bones[i].gameObject];
 
-                // Create the deforming cluster
-                FbxCluster fbxCluster = FbxCluster.Create (fbxScene, "BoneWeightCluster");
+                    // Create the deforming cluster
+                    FbxCluster fbxCluster = FbxCluster.Create(fbxScene, "BoneWeightCluster");
 
-                fbxCluster.SetLink (fbxBoneNode);
-                fbxCluster.SetLinkMode (FbxCluster.ELinkMode.eNormalize);
+                    fbxCluster.SetLink(fbxBoneNode);
+                    fbxCluster.SetLinkMode(FbxCluster.ELinkMode.eNormalize);
 
-                boneCluster.Add (i, fbxCluster);
+                    boneCluster.Add(i, fbxCluster);
 
-                // set the Transform and TransformLink matrix
-                fbxCluster.SetTransformMatrix (fbxMeshMatrix);
+                    // set the Transform and TransformLink matrix
+                    fbxCluster.SetTransformMatrix(fbxMeshMatrix);
 
-                FbxAMatrix fbxLinkMatrix = fbxBoneNode.EvaluateGlobalTransform ();
-                fbxCluster.SetTransformLinkMatrix (fbxLinkMatrix);
+                    FbxAMatrix fbxLinkMatrix = fbxBoneNode.EvaluateGlobalTransform();
+                    fbxCluster.SetTransformLinkMatrix(fbxLinkMatrix);
 
-                // add the cluster to the skin
-                fbxSkin.AddCluster (fbxCluster);
+                    // add the cluster to the skin
+                    fbxSkin.AddCluster(fbxCluster);
+                }
             }
 
             // set the vertex weights for each bone
@@ -1166,21 +1187,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
             for (int i = 0; i < bones.Length; i++) {
-                FbxNode fbxBoneNode = MapUnityObjectToFbxNode [bones[i].gameObject];
+                // ignore null bones
+                if (bones[i] != null)
+                {
+                    FbxNode fbxBoneNode = MapUnityObjectToFbxNode[bones[i].gameObject];
 
-                // EvaluateGlobalTransform returns an FbxAMatrix (affine matrix)
-                // which has to be converted to an FbxMatrix so that it can be passed to fbxPose.Add().
-                // The hierarchy for FbxMatrix and FbxAMatrix is as follows:
-                //
-                //      FbxDouble4x4
-                //      /           \
-                // FbxMatrix     FbxAMatrix
-                //
-                // Therefore we can't convert directly from FbxAMatrix to FbxMatrix,
-                // however FbxMatrix has a constructor that takes an FbxAMatrix.
-                FbxMatrix fbxBindMatrix = new FbxMatrix(fbxBoneNode.EvaluateGlobalTransform ());
+                    // EvaluateGlobalTransform returns an FbxAMatrix (affine matrix)
+                    // which has to be converted to an FbxMatrix so that it can be passed to fbxPose.Add().
+                    // The hierarchy for FbxMatrix and FbxAMatrix is as follows:
+                    //
+                    //      FbxDouble4x4
+                    //      /           \
+                    // FbxMatrix     FbxAMatrix
+                    //
+                    // Therefore we can't convert directly from FbxAMatrix to FbxMatrix,
+                    // however FbxMatrix has a constructor that takes an FbxAMatrix.
+                    FbxMatrix fbxBindMatrix = new FbxMatrix(fbxBoneNode.EvaluateGlobalTransform());
 
-                fbxPose.Add (fbxBoneNode, fbxBindMatrix);
+                    fbxPose.Add(fbxBoneNode, fbxBindMatrix);
+                }
             }
 
             fbxPose.Add (fbxMeshNode, new FbxMatrix (fbxMeshNode.EvaluateGlobalTransform ()));
