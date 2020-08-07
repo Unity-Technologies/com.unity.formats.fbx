@@ -10,6 +10,7 @@
 - Renamed Export as FBX Linked Prefab to Export as FBX Prefab Variant.
 - Mesh instances are now exported as instances of a single mesh instead of exporting multiple, identical meshes.
 - Updated to latest com.autodesk.fbx (3.1.0-preview.2).
+- Updated minimum supported Unity version to 2018.4.
 
 ### Fixed
 - No longer initiate export if no objects are selected in Autodesk® 3ds Max®.
