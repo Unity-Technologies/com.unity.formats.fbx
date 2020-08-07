@@ -15,6 +15,7 @@
 - No longer initiate export if no objects are selected in Autodesk® 3ds Max®.
 - Added a null check for bones, so export no longer fails if a skeleton has missing bones.
 - Fix incorrect relative paths for textures in FBX files.
+- Fix for Editor focus lockup on Mac.
 
 ## [3.2.0-preview.2] - 2020-05-19
 ### Added
