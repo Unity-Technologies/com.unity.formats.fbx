@@ -1059,6 +1059,7 @@ namespace FbxExporter.UnitTests
 
             // re-export with preserve import settings true and verify settings are the same
             var exportOptions = new ExportModelSettingsSerialize();
+            ExportSettings.instance.ExportOutsideProject = false;
             exportOptions.SetPreserveImportSettings(true);
 
             ModelExporter.ExportObjects(filename, new Object[] { cube }, exportOptions);
