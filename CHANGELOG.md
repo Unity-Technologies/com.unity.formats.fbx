@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [3.2.1-preview.1] - 2020-08-05
+## [3.2.1-preview.2] - 2020-08-05
 ### Added
 - Add an export option to preserve model import settings when overwriting an fbx file.
 - Add the option to export FBX files outside of the Assets folder.
