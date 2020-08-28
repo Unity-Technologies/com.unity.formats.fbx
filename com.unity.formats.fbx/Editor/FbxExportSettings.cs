@@ -285,7 +285,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 
-        public bool ExportOutsideProject;
+        public bool ExportOutsideProject = false;
 
         internal const string kDefaultSavePath = ".";
         private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};

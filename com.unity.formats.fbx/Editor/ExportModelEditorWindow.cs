@@ -376,7 +376,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
             // Set export setting for exporting outside the project on choosing a path
-            if (string.IsNullOrEmpty(ExportSettings.ConvertToAssetRelativePath(ExportSettings.FbxAbsoluteSavePath)))
+            if (!pathLabels[ExportSettings.instance.SelectedFbxPath].Substring(0, 6).Equals("Assets"))
             {
                 ExportSettings.instance.ExportOutsideProject = true;
             }
@@ -406,6 +406,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // We're exporting outside Assets folder, so store the absolute path
                     else if (string.IsNullOrEmpty(relativePath))
                     {
+                        ExportSettings.instance.ExportOutsideProject = true;
                         ExportSettings.AddFbxSavePath(fullPath);
                     }
                     // Store the relative path to the Assets folder

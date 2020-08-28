@@ -1,6 +1,6 @@
 * [FBX Exporter](index)
 	* [Exporting FBX files](exporting)
-	* [FBX Linked Prefabs](prefabs)
+	* [FBX Prefab Variants](prefabs)
 	* [Integration](integration)
 	* [FBX Export settings](options)
 	* [FBX Recorder](recorder)

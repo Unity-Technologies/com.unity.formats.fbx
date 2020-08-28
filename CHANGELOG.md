@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [3.2.1-preview.1] - 2020-08-05
+## [3.2.1-preview.2] - 2020-08-05
 ### Added
 - Add an export option to preserve model import settings when overwriting an fbx file.
 - Add the option to export FBX files outside of the Assets folder.
@@ -10,11 +10,13 @@
 - Renamed Export as FBX Linked Prefab to Export as FBX Prefab Variant.
 - Mesh instances are now exported as instances of a single mesh instead of exporting multiple, identical meshes.
 - Updated to latest com.autodesk.fbx (3.1.0-preview.2).
+- Updated minimum supported Unity version to 2018.4.
 
 ### Fixed
 - No longer initiate export if no objects are selected in Autodesk® 3ds Max®.
 - Added a null check for bones, so export no longer fails if a skeleton has missing bones.
 - Fix incorrect relative paths for textures in FBX files.
+- Fix for Editor focus lockup when creating an FBX Prefab Variant on Mac.
 
 ## [3.2.0-preview.2] - 2020-05-19
 ### Added

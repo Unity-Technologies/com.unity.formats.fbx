@@ -3704,7 +3704,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 AssetDatabase.Refresh();
                 
                 // replace with original metafile if specified to
-                if (ExportOptions.PreserveImportSettings && originalMetafilePath != "")
+                if (ExportOptions.PreserveImportSettings && !string.IsNullOrEmpty(originalMetafilePath))
                 {
                     ReplaceMetafile(originalMetafilePath);
                 }
