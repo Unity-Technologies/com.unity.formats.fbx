@@ -196,6 +196,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Used for enforcing unique names on export.
         /// </summary>
         Dictionary<string, int> TextureNameToIndexMap = new Dictionary<string, int>();
+        
+        Dictionary<Mesh, FbxNode> MeshToFbxNodeMap = new Dictionary<Mesh, FbxNode>();
 
         /// <summary>
         /// Format for creating unique names
@@ -953,6 +955,39 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // add bind pose
                 ExportBindPose (unitySkin, fbxNode, fbxScene, skinnedMeshToBonesMap);
+
+                // now that the skin and bindpose are set, make sure that each of the bones
+                // is set to its original position
+                var bones = unitySkin.bones;
+                foreach (var bone in bones)
+                {
+                    // ignore null bones
+                    if (bone != null)
+                    {
+                        var fbxBone = MapUnityObjectToFbxNode[bone.gameObject];
+                        ExportTransform(bone, fbxBone, newCenter: Vector3.zero, TransformExportType.Local);
+
+                        // Cancel out the pre-rotation from the exported rotation
+
+                        // Get prerotation
+                        var fbxPreRotationEuler = fbxBone.GetPreRotation(FbxNode.EPivotSet.eSourcePivot);
+                        // Convert the prerotation to a Quaternion
+                        var fbxPreRotationQuaternion = EulerToQuaternionXYZ(fbxPreRotationEuler);
+                        // Inverse of the prerotation
+                        fbxPreRotationQuaternion.Inverse();
+
+                        // Multiply LclRotation by pre-rotation inverse to get the LclRotation without pre-rotation applied
+                        var finalLclRotationQuat = fbxPreRotationQuaternion * EulerToQuaternionZXY(bone.localEulerAngles);
+
+                        // Convert to Euler with Unity axis system and update LclRotation
+                        var finalUnityQuat = new Quaternion((float)finalLclRotationQuat.X, (float)finalLclRotationQuat.Y, (float)finalLclRotationQuat.Z, (float)finalLclRotationQuat.W);
+                        fbxBone.LclRotation.Set(ToFbxDouble3(finalUnityQuat.eulerAngles));
+                    }
+                    else
+                    {
+                        Debug.Log("Warning: One or more bones are null. Skeleton may not export correctly.");
+                    }
+                }
             }
 
             return true;
@@ -1014,7 +1049,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Dictionary<Transform, int> index = new Dictionary<Transform, int>();
             for (int boneIndex = 0; boneIndex < bones.Length; boneIndex++) {
                 Transform unityBoneTransform = bones [boneIndex];
-                index[unityBoneTransform] = boneIndex;
+
+                // ignore null bones
+                if (unityBoneTransform != null)
+                {
+                    index[unityBoneTransform] = boneIndex;
+                }
             }
 
             skinnedMeshToBonesMap.Add (skinnedMesh, bones);
@@ -1022,8 +1062,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Step 1: Set transforms
             var boneInfo = new SkinnedMeshBoneInfo (skinnedMesh, index);
             foreach (var bone in bones) {
-                var fbxBone = MapUnityObjectToFbxNode [bone.gameObject];
-                ExportBoneTransform (fbxBone, fbxScene, bone, boneInfo);
+                // ignore null bones
+                if (bone != null)
+                {
+                    var fbxBone = MapUnityObjectToFbxNode[bone.gameObject];
+                    ExportBoneTransform(fbxBone, fbxScene, bone, boneInfo);
+                }
             }
             return true;
         }
@@ -1043,24 +1087,28 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Dictionary<int, FbxCluster> boneCluster = new Dictionary<int, FbxCluster> ();
 
             for(int i = 0; i < skinnedMesh.bones.Length; i++) {
-                FbxNode fbxBoneNode = MapUnityObjectToFbxNode [skinnedMesh.bones[i].gameObject];
+                // ignore null bones
+                if (skinnedMesh.bones[i] != null)
+                {
+                    FbxNode fbxBoneNode = MapUnityObjectToFbxNode[skinnedMesh.bones[i].gameObject];
 
-                // Create the deforming cluster
-                FbxCluster fbxCluster = FbxCluster.Create (fbxScene, "BoneWeightCluster");
+                    // Create the deforming cluster
+                    FbxCluster fbxCluster = FbxCluster.Create(fbxScene, "BoneWeightCluster");
 
-                fbxCluster.SetLink (fbxBoneNode);
-                fbxCluster.SetLinkMode (FbxCluster.ELinkMode.eNormalize);
+                    fbxCluster.SetLink(fbxBoneNode);
+                    fbxCluster.SetLinkMode(FbxCluster.ELinkMode.eNormalize);
 
-                boneCluster.Add (i, fbxCluster);
+                    boneCluster.Add(i, fbxCluster);
 
-                // set the Transform and TransformLink matrix
-                fbxCluster.SetTransformMatrix (fbxMeshMatrix);
+                    // set the Transform and TransformLink matrix
+                    fbxCluster.SetTransformMatrix(fbxMeshMatrix);
 
-                FbxAMatrix fbxLinkMatrix = fbxBoneNode.EvaluateGlobalTransform ();
-                fbxCluster.SetTransformLinkMatrix (fbxLinkMatrix);
+                    FbxAMatrix fbxLinkMatrix = fbxBoneNode.EvaluateGlobalTransform();
+                    fbxCluster.SetTransformLinkMatrix(fbxLinkMatrix);
 
-                // add the cluster to the skin
-                fbxSkin.AddCluster (fbxCluster);
+                    // add the cluster to the skin
+                    fbxSkin.AddCluster(fbxCluster);
+                }
             }
 
             // set the vertex weights for each bone
@@ -1137,21 +1185,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
             for (int i = 0; i < bones.Length; i++) {
-                FbxNode fbxBoneNode = MapUnityObjectToFbxNode [bones[i].gameObject];
+                // ignore null bones
+                if (bones[i] != null)
+                {
+                    FbxNode fbxBoneNode = MapUnityObjectToFbxNode[bones[i].gameObject];
 
-                // EvaluateGlobalTransform returns an FbxAMatrix (affine matrix)
-                // which has to be converted to an FbxMatrix so that it can be passed to fbxPose.Add().
-                // The hierarchy for FbxMatrix and FbxAMatrix is as follows:
-                //
-                //      FbxDouble4x4
-                //      /           \
-                // FbxMatrix     FbxAMatrix
-                //
-                // Therefore we can't convert directly from FbxAMatrix to FbxMatrix,
-                // however FbxMatrix has a constructor that takes an FbxAMatrix.
-                FbxMatrix fbxBindMatrix = new FbxMatrix(fbxBoneNode.EvaluateGlobalTransform ());
+                    // EvaluateGlobalTransform returns an FbxAMatrix (affine matrix)
+                    // which has to be converted to an FbxMatrix so that it can be passed to fbxPose.Add().
+                    // The hierarchy for FbxMatrix and FbxAMatrix is as follows:
+                    //
+                    //      FbxDouble4x4
+                    //      /           \
+                    // FbxMatrix     FbxAMatrix
+                    //
+                    // Therefore we can't convert directly from FbxAMatrix to FbxMatrix,
+                    // however FbxMatrix has a constructor that takes an FbxAMatrix.
+                    FbxMatrix fbxBindMatrix = new FbxMatrix(fbxBoneNode.EvaluateGlobalTransform());
 
-                fbxPose.Add (fbxBoneNode, fbxBindMatrix);
+                    fbxPose.Add(fbxBoneNode, fbxBindMatrix);
+                }
             }
 
             fbxPose.Add (fbxMeshNode, new FbxMatrix (fbxMeshNode.EvaluateGlobalTransform ()));
@@ -1233,7 +1285,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// if this game object is a model prefab then export with shared components
+        /// if this game object is a model prefab or the model has already been exported, then export with shared components
         /// </summary>
         [SecurityPermission(SecurityAction.LinkDemand)]
         private bool ExportInstance(GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
@@ -1242,29 +1294,44 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 return false;
             }
-            
-            PrefabAssetType unityPrefabType = PrefabUtility.GetPrefabAssetType(unityGo);
-            // only export as an instance if the GameObject is part of a prefab instance
-            if (unityPrefabType == PrefabAssetType.MissingAsset ||
-                unityPrefabType == PrefabAssetType.NotAPrefab ||
-                PrefabUtility.GetPrefabInstanceStatus(unityGo) != PrefabInstanceStatus.Connected)
-            {
-                return false;
-            }
 
             Object unityPrefabParent = PrefabUtility.GetCorrespondingObjectFromSource(unityGo);
 
-            if (Verbose)
-                Debug.Log (string.Format ("exporting instance {0}({1})", unityGo.name, unityPrefabParent.name));
-
             FbxMesh fbxMesh = null;
 
-            if (!SharedMeshes.TryGetValue (unityPrefabParent.GetInstanceID(), out fbxMesh))
+            if (unityPrefabParent != null && !SharedMeshes.TryGetValue (unityPrefabParent.GetInstanceID(), out fbxMesh))
             {
+                if (Verbose)
+                    Debug.Log (string.Format ("exporting instance {0}({1})", unityGo.name, unityPrefabParent.name));
+                
                 if (ExportMesh (unityGo, fbxNode) && fbxNode.GetMesh() != null) {
                     SharedMeshes [unityPrefabParent.GetInstanceID()] = fbxNode.GetMesh ();
                     return true;
                 }
+                return false;
+            }
+            // check if mesh is shared between 2 objects that are not prefabs
+            else if (unityPrefabParent == null)
+            {
+                // check if same mesh has already been exported
+                MeshFilter unityGoMesh = unityGo.GetComponent<MeshFilter>();
+                if (unityGoMesh != null && MeshToFbxNodeMap.ContainsKey(unityGoMesh.sharedMesh))
+                {
+                    fbxMesh = MeshToFbxNodeMap[unityGoMesh.sharedMesh].GetMesh();
+                }
+                // export mesh as normal and add it to list
+                else
+                {
+                    if (unityGoMesh != null)
+                    {
+                        MeshToFbxNodeMap.Add(unityGoMesh.sharedMesh, fbxNode);
+                    }
+                    return false;
+                }
+            }
+
+            if (fbxMesh == null)
+            {
                 return false;
             }
 
@@ -3368,17 +3435,23 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Dictionary<GameObject, IExportData> exportData)
         {
             exportCancelled = false;
+            
+            m_lastFilePath = LastFilePath;
 
             // Export first to a temporary file
             // in case the export is cancelled.
             // This way we won't overwrite existing files.
-            try{
-                m_tempFilePath = Path.GetTempFileName();
+            try
+            {
+                // create a temp file in the same directory where the fbx will be exported
+                var exportDir = Path.GetDirectoryName(m_lastFilePath);
+                var lastFileName = Path.GetFileName(m_lastFilePath);
+                var tempFileName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + "_" + lastFileName;
+                m_tempFilePath = Path.Combine(new string[] { exportDir, tempFileName });
             }
             catch(IOException){
                 return 0;
             }
-            m_lastFilePath = LastFilePath;
 
             if (string.IsNullOrEmpty (m_tempFilePath)) {
                 return 0;
@@ -3578,9 +3651,23 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     Debug.LogWarning ("Export Cancelled");
                     return 0;
                 }
+
+                // make a temporary copy of the original metafile
+                string originalMetafilePath = "";
+                if (ExportOptions.PreserveImportSettings && File.Exists(m_lastFilePath))
+                {
+                    originalMetafilePath = SaveMetafile();
+                }
+
                 // delete old file, move temp file
                 ReplaceFile();
                 AssetDatabase.Refresh();
+                
+                // replace with original metafile if specified to
+                if (ExportOptions.PreserveImportSettings && !string.IsNullOrEmpty(originalMetafilePath))
+                {
+                    ReplaceMetafile(originalMetafilePath);
+                }
 
                 return status == true ? NumNodes : 0;
             }
@@ -3661,6 +3748,71 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 File.Move(m_tempFilePath, m_lastFilePath);
             } catch(IOException){
                 Debug.LogWarning (string.Format("Failed to move file {0} to {1}", m_tempFilePath, m_lastFilePath));
+            }
+        }
+
+        private string SaveMetafile()
+        {
+            var tempMetafilePath = Path.GetTempFileName();
+            
+            // Try as an absolute path
+            var fbxPath = m_lastFilePath;
+            if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+            {
+                // Try as a relative path
+                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+                if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+                {
+                    Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
+                    return "";
+                }
+            }
+            
+            // get metafile for original fbx file
+            var metafile = fbxPath + ".meta";
+
+#if UNITY_2019_1_OR_NEWER
+            metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
+#endif
+
+            // save it to a temp file
+            try {
+                File.Copy(metafile, tempMetafilePath, true);
+            } catch(IOException) {
+                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}. Import settings will be reset to default values.", metafile, tempMetafilePath));
+                return "";
+            }
+
+            return tempMetafilePath;
+        }
+
+        private void ReplaceMetafile(string metafilePath)
+        {
+            // Try as an absolute path
+            var fbxPath = m_lastFilePath;
+            if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+            {
+                // Try as a relative path
+                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+                if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
+                {
+                    Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
+                    return;
+                }
+            }
+            
+            // get metafile for new fbx file
+            var metafile = fbxPath + ".meta";
+
+#if UNITY_2019_1_OR_NEWER
+            metafile = VersionControl.Provider.GetAssetByPath(fbxPath).metaPath;
+#endif
+
+            // replace metafile with original one in temp file
+            try {
+                File.Copy(metafilePath, metafile, true);
+            } catch(IOException) {
+                Debug.LogWarning (string.Format("Failed to copy file {0} to {1}. Import settings will be reset to default values.", metafilePath, m_lastFilePath));
             }
         }
 

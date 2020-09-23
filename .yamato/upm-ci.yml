@@ -1,12 +1,12 @@
 test_trigger_editors:
   - version: 2018.4
-  - version: 2019.3
+  - version: 2019.4
 publish_trigger_editors:
-  - version: 2018.3
   - version: 2018.4
   - version: 2019.1
   - version: 2019.2
   - version: 2019.3
+  - version: 2019.4
   - version: 2020.1
 platforms:
   - name: win
@@ -15,8 +15,8 @@ platforms:
     flavor: b1.medium
   - name: mac
     type: Unity::VM::osx
-    image: buildfarm/mac:stable
-    flavor: m1.mac
+    image: package-ci/mac:stable
+    flavor: b1.medium
 ---
 pack:
   name: Pack

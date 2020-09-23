@@ -34,10 +34,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     internal static class ConvertToNestedPrefab
     {
-        const string GameObjectMenuItemName = "GameObject/Convert To FBX Linked Prefab...";
-        const string AssetsMenuItemName = "Assets/Convert To FBX Linked Prefab...";
-        const string UndoConversionGroup = "Convert {0} to FBX Linked Prefab";
-        internal const string UndoConversionCreateObject = "Convert to FBX Linked Prefab";
+        const string GameObjectMenuItemName = "GameObject/Convert To FBX Prefab Variant...";
+        const string AssetsMenuItemName = "Assets/Convert To FBX Prefab Variant...";
+        const string UndoConversionGroup = "Convert {0} to FBX Prefab Variant";
+        internal const string UndoConversionCreateObject = "Convert to FBX Prefab Variant";
 
         /// <summary>
         /// OnContextItem is called either:
@@ -281,7 +281,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
         internal static List<GameObject> GetSceneReferencesToObject(Object obj)
         {
             var sceneHierarchyWindowType = typeof(UnityEditor.SearchableEditorWindow).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
-            var sceneHierarchyWindow = EditorWindow.GetWindow(sceneHierarchyWindowType);
+
+            // bug 1242332: don't grab the focus!
+            // The arguments aren't actually optional so they must all be named.
+            //
+            // todo: We should cache all the window-getting and reflection so it
+            // happens not once per object but once per convert.
+            var sceneHierarchyWindow = EditorWindow.GetWindow(
+                    t: sceneHierarchyWindowType,
+                    utility: false,
+                    title: null,
+                    focus: false);
             var instanceID = obj.GetInstanceID();
             var idFormat = "ref:{0}:";
 

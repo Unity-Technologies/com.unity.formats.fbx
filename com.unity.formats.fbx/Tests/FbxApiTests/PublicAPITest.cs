@@ -15,7 +15,7 @@ namespace FbxExporter.UnitTests
         public override void Init()
         {
             base.Init();
-            m_toExport = new GameObject[] {CreateGameObjectToExport(), CreateGameObjectToExport()};
+            m_toExport = new GameObject[] {CreateGameObjectToExport(PrimitiveType.Cube), CreateGameObjectToExport(PrimitiveType.Sphere) };
         }
 
         [TearDown]
@@ -32,9 +32,9 @@ namespace FbxExporter.UnitTests
         /// Creates a GameObject to export.
         /// </summary>
         /// <returns>The game object to export.</returns>
-        private GameObject CreateGameObjectToExport ()
+        private GameObject CreateGameObjectToExport (PrimitiveType type = PrimitiveType.Sphere)
         {
-            return GameObject.CreatePrimitive (PrimitiveType.Sphere);
+            return GameObject.CreatePrimitive (type);
         }
 
         [Test]
@@ -75,6 +75,20 @@ namespace FbxExporter.UnitTests
             {
                 Assert.Greater(mesh.triangles.Length, 0);
             }
+        }
+
+        // UT-3305 Test exporting an fbx outside the Assets folder of the project
+        [Test]
+        public void TestExportOutsideProject()
+        {
+            Assert.IsNotNull(m_toExport);
+            Assert.Greater(m_toExport.Length, 1);
+            var filename = GetTempOutsideFilePath();
+
+            var fbxFileName = ModelExporter.ExportObjects(filename, m_toExport);
+
+            Assert.IsNotNull(fbxFileName);
+            Assert.AreEqual(fbxFileName, filename);
         }
     }
 }

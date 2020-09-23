@@ -286,7 +286,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent(
                 "Prefab Path",
-                "Relative path for saving Linked Prefabs."), GUILayout.Width(LabelWidth - FieldOffset));
+                "Relative path for saving FBX Prefab Variants."), GUILayout.Width(LabelWidth - FieldOffset));
 
             var pathLabels = ExportSettings.GetRelativePrefabSavePaths();
 
@@ -297,7 +297,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 string initialPath = Application.dataPath;
 
                 string fullPath = EditorUtility.OpenFolderPanel(
-                    "Select Linked Prefab Save Path", initialPath, null
+                    "Select FBX Prefab Variant Save Path", initialPath, null
                 );
 
                 // Unless the user canceled, make sure they chose something in the Assets folder.

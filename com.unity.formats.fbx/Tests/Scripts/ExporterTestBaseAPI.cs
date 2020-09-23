@@ -123,6 +123,14 @@ namespace FbxExporter.UnitTests
         }
 
         /// <summary>
+        /// Returns a temp file path outside the Unity project.
+        /// </summary>
+        protected string GetTempOutsideFilePath()
+        {
+            return Path.GetTempFileName();
+        }
+
+        /// <summary>
         /// Creates a test hierarchy of cubes.
         ///      Root
         ///      -> Parent1

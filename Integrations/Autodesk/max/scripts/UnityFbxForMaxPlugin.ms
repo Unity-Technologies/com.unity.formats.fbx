@@ -298,43 +298,42 @@ struct UnityExportHelpers (
         )
         
         origSelection = getCurrentSelection()
-        
-        local origUnits = units.SystemType
-        units.SystemType = #Centimeters
-        
-        -- get all the unity export sets
-        local unityExportSets = UnityExportHelpers.getUnityExportSets()
-        
-        -- find all sets that contain at least one object from the current selection
-        local setsToExport = #()
-        for expSet in unityExportSets do (
-            for obj in origSelection do (
-                -- append export set as set to export if obj is in the set or obj is
-                -- dummy for this set
-                if (findItem expSet obj > 0) or (obj.name == expSet.name and (isProperty obj "modelFilePath")) do (
-                    appendIfUnique setsToExport expSet
-                    break
+
+        if origSelection != undefined and origSelection.count > 0 then (
+            local origUnits = units.SystemType
+            units.SystemType = #Centimeters
+            
+            -- get all the unity export sets
+            local unityExportSets = UnityExportHelpers.getUnityExportSets()
+            
+            -- find all sets that contain at least one object from the current selection
+            local setsToExport = #()
+            for expSet in unityExportSets do (
+                for obj in origSelection do (
+                    -- append export set as set to export if obj is in the set or obj is
+                    -- dummy for this set
+                    if (findItem expSet obj > 0) or (obj.name == expSet.name and (isProperty obj "modelFilePath")) do (
+                        appendIfUnique setsToExport expSet
+                        break
+                    )
                 )
             )
-        )
-        
-        -- if no sets are selected, then export selection, otherwise export each set to its corresponding file
-        if (setsToExport.count <= 0) then (
-            local unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
-            local exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:(unityProjectPath + "/Assets/") types:"FBX (*.fbx)|*.fbx|"
-            if exportFileName != undefined do (
-                exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
+            
+            -- if no sets are selected, then export selection, otherwise export each set to its corresponding file
+            if (setsToExport.count <= 0) then (
+                local unityProjectPath = getINISetting (GetMAXIniFile()) "Unity" "UnityProject"
+                local exportFileName = getSaveFileName caption:"Export FBX to Unity" filename:(unityProjectPath + "/Assets/") types:"FBX (*.fbx)|*.fbx|"
+                if exportFileName != undefined do (
+                    exportFile exportFileName #noPrompt selectedOnly:true using:FBXEXP
+                )
             )
-        )
-        else (
-            for expSet in setsToExport do (
-                UnityExportHelpers.exportUnitySet expSet
+            else (
+                for expSet in setsToExport do (
+                    UnityExportHelpers.exportUnitySet expSet
+                )
             )
-        )
-        
-        units.SystemType = origUnits
-        
-        if origSelection != undefined then (
+            
+            units.SystemType = origUnits
             select origSelection
         )
     )

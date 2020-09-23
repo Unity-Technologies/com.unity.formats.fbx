@@ -1,12 +1,48 @@
 # Changes in Fbx Exporter
 
+## [3.2.1-preview.2] - 2020-08-05
+### Added
+- Add an export option to preserve model import settings when overwriting an fbx file.
+- Add the option to export FBX files outside of the Assets folder.
+
+### Changed
+- Renamed label in Autodesk® Maya® from Unity Fbx Namespace to Strip Specific Namespace.
+- Renamed Export as FBX Linked Prefab to Export as FBX Prefab Variant.
+- Mesh instances are now exported as instances of a single mesh instead of exporting multiple, identical meshes.
+- Updated to latest com.autodesk.fbx (3.1.0-preview.2).
+- Updated minimum supported Unity version to 2018.4.
+
+### Fixed
+- No longer initiate export if no objects are selected in Autodesk® 3ds Max®.
+- Added a null check for bones, so export no longer fails if a skeleton has missing bones.
+- Fix incorrect relative paths for textures in FBX files.
+- Fix for Editor focus lockup when creating an FBX Prefab Variant on Mac.
+
+## [3.2.0-preview.2] - 2020-05-19
+### Added
+- Added an option to the Autodesk® Maya® integration Unity menu for creating an export set.
+    - The option can be found in File > Unity > Create Export Set
+    - Selecting this option will open a dialog allowing the user to select the desired export locations for model and animation files.
+    - File > Unity > Export [Model Only|Animation Only] will also open the same dialog if the objects selected for export
+      are not already in an export set.
+
+### Changed
+- Do not search for Autodesk® installs in `D:/Program Files/Autodesk` (not a standard drive).
+- Update Unity Recorder dependency to version 2.2.0-preview.4.
+
+### Fixed
+- Added a null check when inspecting whether a Timeline Clip is selected for export. This fixes a NullReferenceException when an object in the selection is null.
+- Fix issue where different Materials and Meshes with identical names export as a single material/mesh.
+- Fix skinned mesh always exports in bind pose regardless of current pose.
+- Import/Export in Maya Integration fails if FBX Import/Export settings file missing.
+
 ## [3.1.0-preview.1] - 2020-04-02
 ### Fixed
-- Blendshapes naming in FBX so that multiple blendshapes all import correctly in Maya. Thank you to @lazlo-bonin for the fix.
+- Blendshapes naming in FBX so that multiple blendshapes all import correctly in Autodesk® Maya®. Thank you to @lazlo-bonin for the fix.
 - Don't override transforms when creating FBX Linked Prefab, so that the prefab updates properly when the FBX transforms are modified.
 - Changed FBX Linked Prefab to keep Unity materials instead of using materials exported to FBX file.
     - To revert to using the FBX materials in the Linked Prefab, open the prefab editor and remove the material overrides.
-- Fix issue where Maya imports root bone as null object if it doesn't have any descendants that are also bones.
+- Fix issue where root bone is imported as null object in Autodesk® Maya® if it doesn't have any descendants that are also bones.
 - Don't reduce keyframes after recording as it can create unnecessary errors/discrepancies in the exported curve.
 - Updated to latest com.autodesk.fbx (3.0.1-preview.1), to fix DLL not found errors if building for non-standalone platforms (e.g. Android, WebGL).
 

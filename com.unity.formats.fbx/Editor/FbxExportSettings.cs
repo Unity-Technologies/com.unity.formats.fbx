@@ -71,7 +71,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             exportSettings.ShowConvertToPrefabDialog = EditorGUILayout.Toggle(
-                new GUIContent("Show Convert UI:", "Show the Convert dialog when converting to an FBX Linked Prefab"),
+                new GUIContent("Show Convert UI:", "Show the Convert dialog when converting to an FBX Prefab Variant"),
                 exportSettings.ShowConvertToPrefabDialog
             );
             EditorGUILayout.Space();
@@ -284,6 +284,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/}
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
+
+        public bool ExportOutsideProject = false;
 
         internal const string kDefaultSavePath = ".";
         private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};
@@ -1113,12 +1115,47 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         }
 
         /// <summary>
+        /// Returns the paths for display in the menu.
+        /// Paths inside the Assets folder are relative, while those outside are kept absolute.
+        /// </summary>
+        internal static string[] GetMixedSavePaths(List<string> exportSavePaths)
+        {
+            string[] displayPaths = new string[exportSavePaths.Count];
+            string forwardslash = " \u2044 ";
+            for (int i = 0; i < displayPaths.Length; i++)
+            {
+                // if path is in Assets folder, shorten it
+                if (!Path.IsPathRooted(exportSavePaths[i]))
+                {
+					displayPaths[i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
+                }
+                else
+                {
+                    displayPaths[i] = exportSavePaths[i].Replace("/", forwardslash);
+                }
+            }
+
+            return displayPaths;
+        }
+
+        /// <summary>
         /// The path where Export model will save the new fbx.
         /// This is relative to the Application.dataPath ; it uses '/' as the
         /// separator on all platforms.
+        /// Only returns the paths within the Assets folder of the project.
         /// </summary>
         internal static string[] GetRelativeFbxSavePaths(){
-            return GetRelativeSavePaths(instance.fbxSavePaths);
+            // sort the list of paths, putting project paths first
+            instance.fbxSavePaths.Sort((x, y) => Path.IsPathRooted(x).CompareTo(Path.IsPathRooted(y)));
+            var relPathCount = instance.fbxSavePaths.FindAll(x => !Path.IsPathRooted(x)).Count;
+
+            // reset selected path if it's out of range
+            if (instance.SelectedFbxPath > relPathCount - 1)
+            {
+                instance.SelectedFbxPath = 0;
+            }
+
+            return GetRelativeSavePaths(instance.fbxSavePaths.GetRange(0, relPathCount));
         }
 
         /// <summary>
@@ -1128,6 +1165,15 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         internal static string[] GetRelativePrefabSavePaths(){
             return GetRelativeSavePaths(instance.prefabSavePaths);
+        }
+
+        /// <summary>
+        /// The paths formatted for display in the menu.
+        /// Paths outside the Assets folder are kept as they are and ones inside are shortened. 
+        /// </summary>
+        internal static string[] GetMixedFbxSavePaths()
+        {
+            return GetMixedSavePaths(instance.fbxSavePaths);
         }
 
         /// <summary>
@@ -1141,7 +1187,15 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 return;
             }
 
-            savePath = NormalizePath (savePath, isRelative: true);
+            if (ExportSettings.instance.ExportOutsideProject)
+            {
+                savePath = NormalizePath(savePath, isRelative: false);
+            }
+            else
+            {
+                savePath = NormalizePath(savePath, isRelative: true);
+            }
+
             if (exportSavePaths.Contains (savePath)) {
                 // move to first place if it isn't already
                 if (exportSavePaths [0] == savePath) {
@@ -1168,10 +1222,17 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             instance.SelectedPrefabPath = 0;
         }
 
-        internal static string GetAbsoluteSavePath(string relativePath){
-            var absolutePath = Path.Combine(Application.dataPath, relativePath);
-            return NormalizePath(absolutePath, isRelative: false,
-                separator: Path.DirectorySeparatorChar);
+        internal static string GetAbsoluteSavePath(string savePath){
+            var projectAbsolutePath = Path.Combine(Application.dataPath, savePath);
+            projectAbsolutePath = NormalizePath(projectAbsolutePath, isRelative: false, separator: Path.DirectorySeparatorChar);
+            
+            // if path is outside Assets folder, it's already absolute so return the original path
+            if (string.IsNullOrEmpty(ExportSettings.ConvertToAssetRelativePath(projectAbsolutePath)))
+            {
+                return savePath;
+            }
+
+            return projectAbsolutePath;
         }
 
         internal static string FbxAbsoluteSavePath{

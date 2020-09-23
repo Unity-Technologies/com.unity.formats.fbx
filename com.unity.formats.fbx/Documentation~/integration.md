@@ -104,7 +104,6 @@ For instance, if you import a file called *model@anim.fbx*, the export set and n
 
 This allows animation files to be easily imported and applied to the appropriate objects in the Scene. Autodesk® Maya® and Autodesk® Maya LT™ store the animation filename and path for easy export. A single animation file is supported per model file. Importing a new animation overwrites the existing animation in the Scene.
 
-
 ### Exporting to Unity
 
 There are three options available for export in Autodesk® Maya® and Autodesk® Maya LT™: 
@@ -121,13 +120,61 @@ __File__ > __Unity__ > __Export Model Only__ exports all Models in the selected 
 
 __File__ > __Unity__ > __Export Animation Only__ exports only the animation applied to the objects in the export set as well as the minimum components required for the animation (such as transforms).
 
-> **NOTE:** If no animation file with the **@** notation has been imported, then this option has no effect. The workaround for exporting a new animation is to first import an empty FBX file with the **@** notation (*{model}@anim.fbx*), so that the export set is configured correctly.
-
 In order to export objects from the desired export set, you can select one or more objects in the set or the set itself. In either case, the FBX Exporter exports the entire contents of the set.
 
 If you select multiple sets or objects from multiple sets, then the FBX Exporter exports each set to its respective file defined in the attributes of the set.
 
+### Create a New Export Set in Maya
 
+In order to export objects that are not part of an existing export set, follow these steps to prepare an export set.
+First select the desired objects for export. Next, select one of the following menu items:
+
+![](images/FBXExporter_MayaUnityMenuItems.png)
+
+__File__ > __Unity__ > __Create Export Set__
+
+__File__ > __Unity__ > __Export__ 
+
+Select either of these options to create an export set with settings for exporting animation and model FBX files.
+
+__File__ > __Unity__ > __Export Model Only__
+
+__File__ > __Unity__ > __Export Animation Only__ 
+
+Select Model Only or Animation Only export to setup an export set for exporting a model or animation file.
+
+After selecting one of the above menu items, the following dialog will appear to set the options for the export set:
+
+![](images/FBXExporter_MayaCreateExportSetDialog.png)
+
+| Property:                     | Function:                                                    |
+| :---------------------------- | :----------------------------------------------------------- |
+| __Model File Path__        | The file path to export to when calling __File__ > __Unity__ > __Export__ and __File__ > __Unity__ > __Export Model Only__. |
+| __Model File Name__        | The file name to export to when calling __File__ > __Unity__ > __Export__ and __File__ > __Unity__ > __Export Model Only__. |
+| __Anim File Path__         | The file path to export to when calling __File__ > __Unity__ > __Export Animation Only__. |
+| __Anim File Name__         | The file name to export to when calling __File__ > __Unity__ > __Export Animation Only__. |
+| __Strip Namespaces on Export__  | Check this option to automatically strip the most common namespace in the set on export (e.g. if most objects are in namespace `model:`, then `model:` will be stripped on export). |
+| __Create Set And Export__  | Creates the set and immediately exports selection. |
+| __Create Set__             | Creates set without exporting. |
+| __Cancel__                | Cancels set creation and closes dialog. |
+
+### Editing Export Set Attributes
+
+After an export set has been created (through __File__ > __Unity__ > __Import__, __File__ > __Unity__ > __Create Export Set__, or one of the export options), it is possible to edit the export options
+on the set. In order to do so, select the set, go to the Attribute Editor, and modify the Unity attributes under the Extra Attributes header.
+
+> **NOTE:** If Arnold is installed, the attributes may appear in the Attribute Editor under __Arnold__ > __Extra Attributes__
+
+![](images/FBXExporter_MayaExportSetAttributes.PNG)
+
+| Property:                     | Function:                                                    |
+| :---------------------------- | :----------------------------------------------------------- |
+| __Unity Fbx Model File Path__ | The file path to export to when calling __File__ > __Unity__ > __Export__ and __File__ > __Unity__ > __Export Model Only__. |
+| __Unity Fbx Model File Name__ | The file name to export to when calling __File__ > __Unity__ > __Export__ and __File__ > __Unity__ > __Export Model Only__. |
+| __Unity Fbx Anim File Path__  | The file path to export to when calling __File__ > __Unity__ > __Export Animation Only__. |
+| __Unity Fbx Anim File Name__  | The file name to export to when calling __File__ > __Unity__ > __Export Animation Only__. |
+| __Unity Fbx Strip Namespace__ | Check this option to automatically strip the most common namespace in the set on export (e.g. if most objects are in namespace `model:`, then `model:` will be stripped on export). |
+| __Strip Specific Namespace__        | (Optional) Specify a custom namespace to strip on export. When the `Unity Fbx Strip Namespace` checkbox is checked, the namespace in `Strip Specific Namespace` will be stripped; otherwise the most common namespace will be stripped if `Strip Specific Namespace` is left empty.|
 
 ## Working with Autodesk® 3ds Max® 2017+
 

@@ -243,7 +243,10 @@ namespace FbxExporter.UnitTests
         {
             var tree = CreateHierarchy();
             var tester = new CallbackTester(tree.transform, GetRandomFbxFilePath());
-            var n = tree.GetComponentsInChildren<Transform>().Length;
+            var nbTransforms = tree.GetComponentsInChildren<Transform>().Length;
+            // UT-3419: because cubes are duplicates, there are less model callbacks than transforms
+            // 1 for the root and 1 for the cube model all the gameobjects share
+            var nbMeshCallbacks = 2;
 
             // No callbacks registered => no calls.
             tester.Verify(0, 0);
@@ -252,14 +255,14 @@ namespace FbxExporter.UnitTests
             ModelExporter.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab);
 
             // No fbprefab => no component calls, but every object called.
-            tester.Verify(0, n);
+            tester.Verify(0, nbMeshCallbacks);
 
             // Add a fbxprefab, check every object called and the prefab called.
             tree.transform.Find("Parent1").gameObject.AddComponent<FbxPrefab>();
-            tester.Verify(1, n);
+            tester.Verify(1, nbTransforms);
 
             // Make the object report it's replacing everything => no component calls.
-            tester.Verify(0, n, objectResult: true);
+            tester.Verify(0, nbTransforms, objectResult: true);
 
             // Make sure we can't register for a component twice, but we can
             // for an object.  Register twice for an object means two calls per
@@ -267,19 +270,19 @@ namespace FbxExporter.UnitTests
             Assert.That( () => ModelExporter.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab),
                     Throws.Exception);
             ModelExporter.RegisterMeshObjectCallback(tester.CallbackForObject);
-            tester.Verify(1, 2 * n);
+            tester.Verify(1, 2 * nbTransforms);
 
             // Register twice but return true => only one call per object.
-            tester.Verify(0, n, objectResult: true);
+            tester.Verify(0, nbTransforms, objectResult: true);
 
             // Unregister once => only one call per object, and no more for the prefab.
             ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
             ModelExporter.UnRegisterMeshObjectCallback(tester.CallbackForObject);
-            tester.Verify(0, n);
+            tester.Verify(0, nbMeshCallbacks);
 
             // Legal to unregister if already unregistered.
             ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
-            tester.Verify(0, n);
+            tester.Verify(0, nbMeshCallbacks);
 
             // Register same callback twice gets back to original state.
             ModelExporter.UnRegisterMeshObjectCallback(tester.CallbackForObject);
@@ -313,11 +316,12 @@ namespace FbxExporter.UnitTests
             ModelExporter.ExportObject(filename, tree);
             ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
 
+            // UT-3419 Parent1 and Parent2 are instances the same mesh, so they should point to the same mesh
             asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             assetMesh = asset.transform.Find("Parent1").GetComponent<MeshFilter>().sharedMesh;
             Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
             assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
-            Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
+            Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
 
             // Try again, but this time pick on Parent2 by name (different just
             // to make sure we don't pass if the previous pass didn't
@@ -336,11 +340,12 @@ namespace FbxExporter.UnitTests
             ModelExporter.ExportObject(filename, tree);
             ModelExporter.UnRegisterMeshObjectCallback(callback);
 
+            // UT-3419 Parent1 and Parent2 are instances the same mesh, so they should point to the same mesh
             asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             assetMesh = asset.transform.Find("Parent1").GetComponent<MeshFilter>().sharedMesh;
             Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
             assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
-            Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
+            Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
         }
 
         [Test]
@@ -552,7 +557,19 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual (mesh.tangents, fbxMesh.tangents);
         }
 
-        private string ExportSkinnedMesh(string fileToExport, out SkinnedMeshRenderer originalSkinnedMesh, out SkinnedMeshRenderer exportedSkinnedMesh){
+        private delegate void SetImportSettings(ModelImporter importer);
+        private (string filename, SkinnedMeshRenderer originalSkinnedMesh, SkinnedMeshRenderer exportedSkinnedMesh) ExportSkinnedMesh(
+            string fileToExport, 
+            SetImportSettings setImportSettings = null)
+        {
+            // change import settings of original FBX
+            if(setImportSettings != null)
+            {
+                var origImporter = AssetImporter.GetAtPath(fileToExport) as ModelImporter;
+                setImportSettings(origImporter);
+                origImporter.SaveAndReimport();
+            }
+
             // add fbx to scene
             GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath(fileToExport) as GameObject;
             Assert.IsNotNull (originalFbxObj);
@@ -564,31 +581,23 @@ namespace FbxExporter.UnitTests
             string filename = GetRandomFbxFilePath();
             ModelExporter.ExportObject (filename, originalGO);
 
-            var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
-#if UNITY_2019_1_OR_NEWER
-            importer.importBlendShapes = true;
-            importer.optimizeMeshPolygons = false;
-            importer.optimizeMeshVertices = false;
-            importer.meshCompression = ModelImporterMeshCompression.Off;
-            // If either blendshape normals are imported or weldVertices is turned off (or both),
-            // the vertex count between the original and exported meshes does not match.
-            importer.importBlendShapeNormals = ModelImporterNormals.None;
-            importer.weldVertices = true;
-#else
-            importer.optimizeMesh = false;
-#endif // UNITY_2019_1_OR_NEWER
-            importer.SaveAndReimport();
+            if (setImportSettings != null)
+            {
+                var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
+                setImportSettings(importer);
+                importer.SaveAndReimport();
+            }
 
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             Assert.IsTrue (fbxObj);
 
-            originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
+            var originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
             Assert.IsNotNull (originalSkinnedMesh);
 
-            exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
+            var exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
             Assert.IsNotNull (exportedSkinnedMesh);
 
-            return filename;
+            return (filename, originalSkinnedMesh, exportedSkinnedMesh);
         }
 
         public class SkinnedMeshTestDataClass
@@ -627,7 +636,9 @@ namespace FbxExporter.UnitTests
             Assert.That (fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSkinnedMesh, exportedSkinnedMesh;
-            ExportSkinnedMesh (fbxPath, out originalSkinnedMesh, out exportedSkinnedMesh);
+            var exportResult = ExportSkinnedMesh (fbxPath);
+            originalSkinnedMesh = exportResult.originalSkinnedMesh;
+            exportedSkinnedMesh = exportResult.exportedSkinnedMesh;
 
             Assert.IsTrue (originalSkinnedMesh.name == exportedSkinnedMesh.name ||
                 (originalSkinnedMesh.transform.parent == null && exportedSkinnedMesh.transform.parent == null));
@@ -855,7 +866,38 @@ namespace FbxExporter.UnitTests
             Assert.That (fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSMR, exportedSMR;
-            var exportedFbxPath = ExportSkinnedMesh (fbxPath, out originalSMR, out exportedSMR);
+            SetImportSettings setImportSettings = (importer) =>
+            {
+                importer.importBlendShapes = true;
+                importer.meshCompression = ModelImporterMeshCompression.Off;
+
+#if UNITY_2019_1_OR_NEWER
+                importer.optimizeMeshPolygons = false;
+                importer.optimizeMeshVertices = false;
+#else
+                importer.optimizeMesh = false;
+#endif // UNITY_2019_1_OR_NEWER
+
+#if UNITY_2018_4_OR_NEWER
+                importer.importNormals = ModelImporterNormals.Import;
+                importer.importTangents = ModelImporterTangents.CalculateMikk;
+#else
+                // In 2018.3, the vertices still do not match unless no normals
+                // are imported.
+                importer.importNormals = ModelImporterNormals.None;
+#endif
+                // If either blendshape normals are imported or weldVertices is turned off (or both),
+                // the vertex count between the original and exported meshes does not match.
+                // TODO (UT-3410): investigate why the original and exported blendshape normals split the vertices differently.
+                importer.importBlendShapeNormals = ModelImporterNormals.None;
+                importer.weldVertices = true;
+            };
+
+            var exportResult = ExportSkinnedMesh (fbxPath, setImportSettings);
+            var exportedFbxPath = exportResult.filename;
+            originalSMR = exportResult.originalSkinnedMesh;
+            exportedSMR = exportResult.exportedSkinnedMesh;
+
 
             var originalMesh = originalSMR.sharedMesh;
             var exportedMesh = exportedSMR.sharedMesh;
@@ -1007,6 +1049,72 @@ namespace FbxExporter.UnitTests
                 Assert.That (expectedChildren.Contains (child.name));
                 expectedChildren.Remove (child.name);
             }
+        }
+
+        [Test]
+        public void TestPreserveImportSettings()
+        {
+            // create a primitive object and export to an fbx
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var filename = GetRandomFbxFilePath();
+            ModelExporter.ExportObject(filename, cube);
+
+            // change an import setting
+            var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
+            importer.importBlendShapes = !importer.importBlendShapes;
+            importer.SaveAndReimport();
+
+            // save original fbx's guid and import setting change
+            var originalGuid = AssetDatabase.AssetPathToGUID(filename);
+            var originalImportBlendShapes = importer.importBlendShapes;
+
+            // re-export with preserve import settings true and verify settings are the same
+            var exportOptions = new ExportModelSettingsSerialize();
+            ExportSettings.instance.ExportOutsideProject = false;
+            exportOptions.SetPreserveImportSettings(true);
+
+            ModelExporter.ExportObjects(filename, new Object[] { cube }, exportOptions);
+            importer = AssetImporter.GetAtPath(filename) as ModelImporter;
+            importer.SaveAndReimport();
+            Assert.AreEqual(originalImportBlendShapes, importer.importBlendShapes);
+
+            // verify guids still match
+            var newGuid = AssetDatabase.AssetPathToGUID(filename);
+            Assert.AreEqual(originalGuid, newGuid);
+
+            // re-export with preserve import settings false and verify settings are different
+            exportOptions = new ExportModelSettingsSerialize();
+            exportOptions.SetPreserveImportSettings(false);
+
+            exportOptions.SetPreserveImportSettings(false);
+            ModelExporter.ExportObjects(filename, new Object[] { cube }, exportOptions);
+            importer = AssetImporter.GetAtPath(filename) as ModelImporter;
+            importer.SaveAndReimport();
+            Assert.AreNotEqual(originalImportBlendShapes, importer.importBlendShapes);
+
+            // verify guids still match
+            newGuid = AssetDatabase.AssetPathToGUID(filename);
+            Assert.AreEqual(originalGuid, newGuid);
+        }
+
+        // UT-3419 Test that identical models export as instances
+        [Test]
+        public void TestInstanceExport()
+        {
+            // create root with 2 identical children
+            var filename = GetRandomFbxFilePath();
+            GameObject root = new GameObject("root");
+            GameObject child1 = CreateGameObject("child1", root.transform);
+            GameObject child2 = CreateGameObject("child2", root.transform);
+
+            // check export was successful
+            var result = ModelExporter.ExportObject(filename, root);
+            Assert.That(result, Is.Not.Null);
+            Assert.AreEqual(filename, result);
+
+            // check that both children reference the same mesh
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.AreEqual(fbxObj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.name, fbxObj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh.name);
         }
     }
 }
