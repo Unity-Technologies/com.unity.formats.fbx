@@ -123,8 +123,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     internal abstract class ExportOptionsSettingsBase<T> : ScriptableObject where T : ExportOptionsSettingsSerializeBase, new()
     {
+        [SerializeField]
         private T m_info = new T();
-        public T info {
+        public T info
+        {
             get { return m_info; }
             set { m_info = value; }
         }
