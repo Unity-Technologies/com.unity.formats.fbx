@@ -972,16 +972,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         // Get prerotation
                         var fbxPreRotationEuler = fbxBone.GetPreRotation(FbxNode.EPivotSet.eSourcePivot);
                         // Convert the prerotation to a Quaternion
-                        var fbxPreRotationQuaternion = EulerToQuaternion(fbxPreRotationEuler);
+                        var fbxPreRotationQuaternion = EulerToQuaternionXYZ(fbxPreRotationEuler);
                         // Inverse of the prerotation
                         fbxPreRotationQuaternion.Inverse();
 
                         // Multiply LclRotation by pre-rotation inverse to get the LclRotation without pre-rotation applied
-                        var finalLclRotationQuat = fbxPreRotationQuaternion * EulerToQuaternion(new FbxVector4(fbxBone.LclRotation.Get()));
+                        var finalLclRotationQuat = fbxPreRotationQuaternion * EulerToQuaternionZXY(bone.localEulerAngles);
 
-                        // Convert to Euler without axis conversion (Pre-rotation and LclRotation were already in Maya axis)
-                        // and update LclRotation
-                        fbxBone.LclRotation.Set(ToFbxDouble3(QuaternionToEuler(finalLclRotationQuat)));
+                        // Convert to Euler with Unity axis system and update LclRotation
+                        var finalUnityQuat = new Quaternion((float)finalLclRotationQuat.X, (float)finalLclRotationQuat.Y, (float)finalLclRotationQuat.Z, (float)finalLclRotationQuat.W);
+                        fbxBone.LclRotation.Set(ToFbxDouble3(finalUnityQuat.eulerAngles));
                     }
                     else
                     {
