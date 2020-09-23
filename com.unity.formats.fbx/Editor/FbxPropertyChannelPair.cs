@@ -61,7 +61,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 { "Motion T", "Lcl Translation" },
                 { "m_TranslationOffset", "Translation" },
                 { "m_ScaleOffset", "Scaling" },
-                { "m_RotationOffset", "Rotation" }
+                { "m_RotationOffset", "Rotation" },
+                { "localEulerAnglesRaw", "Lcl Rotation" }
             };
 
         /// <summary>

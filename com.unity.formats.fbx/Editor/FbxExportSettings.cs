@@ -462,7 +462,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         }
 
         [SerializeField]
-        private bool BakeAnimation = true;
+        private bool BakeAnimation = false;
         internal bool BakeAnimationProperty
         {
             get { return BakeAnimation; }
@@ -580,7 +580,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             integrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = null;
             dccOptionNames = null;
-            BakeAnimationProperty = true;
+            BakeAnimationProperty = false;
             ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             exportModelSettingsSerialize = ExportModelSettings.info;
             ShowConvertToPrefabDialog = true;
