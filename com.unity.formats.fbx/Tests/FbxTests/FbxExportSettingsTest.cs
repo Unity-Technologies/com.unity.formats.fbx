@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEditor.Formats.Fbx.Exporter;
 using NUnit.Framework;
+using UnityEditor.Presets;
 
 namespace FbxExporter.UnitTests
 {
@@ -490,5 +491,21 @@ namespace FbxExporter.UnitTests
             }
         }
 
+        [Test]
+        public void TestFbxExportSettingsPreset()
+        {
+            var instance = ExportSettings.instance;
+
+            instance.ShowConvertToPrefabDialog = false;
+            Assert.That(instance.ShowConvertToPrefabDialog, Is.False);
+
+            var preset = new Preset(ExportSettings.instance);
+            
+            instance.ShowConvertToPrefabDialog = true;
+            Assert.That(instance.ShowConvertToPrefabDialog, Is.True);
+
+            preset.ApplyTo(instance);
+            Assert.That(instance.ShowConvertToPrefabDialog, Is.False);
+        }
     }
 }
