@@ -182,8 +182,13 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             GUILayout.EndScrollView ();
 
             if (GUI.changed) {
-                EditorUtility.SetDirty (exportSettings);
-                exportSettings.Save ();
+                // Only save the settings if we are in the Singleton instance.
+                // Otherwise, the user is editing a preset and we don't need to save.
+                if (this.targets.Length == 1 && this.target == ExportSettings.instance)
+                {
+                    EditorUtility.SetDirty(exportSettings);
+                    exportSettings.Save();
+                }
             }
         }
 
@@ -1462,7 +1467,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         {
             if (s_Instance != null)
             {
-                Debug.LogError(typeof(T) + " already exists. Did you query the singleton in a constructor?");
+                // The user has most likely created a preset.
             }
         }
 
