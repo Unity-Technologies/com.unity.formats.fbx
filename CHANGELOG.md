@@ -1,5 +1,10 @@
 # Changes in Fbx Exporter
 
+## [UNRELEASED] - 2020-09-28
+### Fixed
+- Make FBX SDK bindings Editor only so they are not copied into builds by default. In order to use at runtime, 
+  add the FBXSDK_RUNTIME define to Edit > Project Settings... > Player > Other Settings > Scripting Define Symbols.
+
 ## [3.2.1-preview.2] - 2020-08-05
 ### Added
 - Add an export option to preserve model import settings when overwriting an fbx file.
