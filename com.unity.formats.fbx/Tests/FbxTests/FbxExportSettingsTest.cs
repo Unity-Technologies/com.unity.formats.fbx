@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEditor.Formats.Fbx.Exporter;
 using NUnit.Framework;
+using UnityEditor.Presets;
 
 namespace FbxExporter.UnitTests
 {
@@ -490,5 +491,36 @@ namespace FbxExporter.UnitTests
             }
         }
 
+        [Test]
+        public void TestExportSettingsPresets()
+        {
+            // make sure that the export settings exist
+            ExportSettings.instance.LoadDefaults();
+
+            var exportModelSettings = ExportSettings.instance.ExportModelSettings;
+            var convertPrefabSettings = ExportSettings.instance.ConvertToPrefabSettings;
+
+            // test ExportModelSettings preset
+            exportModelSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
+            Assert.That(exportModelSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+
+            var exportModelPreset = new Preset(exportModelSettings);
+            exportModelSettings.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
+            Assert.That(exportModelSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.ASCII));
+
+            exportModelPreset.ApplyTo(exportModelSettings);
+            Assert.That(exportModelSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+
+            // test ConvertToPrefabSettings preset
+            convertPrefabSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
+            Assert.That(convertPrefabSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+
+            var convertPrefabPreset = new Preset(convertPrefabSettings);
+            convertPrefabSettings.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
+            Assert.That(convertPrefabSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.ASCII));
+
+            convertPrefabPreset.ApplyTo(convertPrefabSettings);
+            Assert.That(convertPrefabSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+        }
     }
 }
