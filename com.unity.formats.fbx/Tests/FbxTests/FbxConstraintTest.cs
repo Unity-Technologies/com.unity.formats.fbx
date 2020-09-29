@@ -24,7 +24,7 @@ namespace FbxExporter.UnitTests
 
                 /* Test Aim */
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 30f, 10f }, new float[] { 10f, 180f, 10f }, "m_AimVector.x").Returns(1)
-                    .Ignore("UT-3734: Test fails due to constraint import issues.");
+                    .Ignore("UT-3734 (fogbug 1205373): Test fails due to constraint import issues.");
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 30f, 10f }, new float[] { 90f, 45f, 60f }, "m_AimVector.y").Returns(1);
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 30f, 10f }, new float[] { 10f, 180f, 10f }, "m_AimVector.z").Returns(1);
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1, 0.3f, 10f }, new float[] { -4, 39, 45 }, "m_RotationOffset.x").Returns(1);
@@ -32,12 +32,12 @@ namespace FbxExporter.UnitTests
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1.2f, 0.8f, 10.3f }, new float[] { 194, 9, 195 }, "m_RotationOffset.z").Returns(1);
 
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 2f, 4f }, new float[] { 100f, 80f, 19f }, "m_UpVector.x").Returns(1)
-                    .Ignore("UT-3734: Test fails due to constraint import issues."); ;
+                    .Ignore("UT-3734 (fogbug 1205373): Test fails due to constraint import issues."); ;
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 2f, 4f }, new float[] { 4f, 154f, 454f }, "m_UpVector.y").Returns(1);
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 2f, 4f }, new float[] { 8f, 14f, 6f }, "m_UpVector.z").Returns(1);
 
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 2f, 30f, 77f }, new float[] { 29.3f, 322f, -190f }, "m_WorldUpVector.x").Returns(1)
-                    .Ignore("UT-3734: Test fails due to constraint import issues.");
+                    .Ignore("UT-3734 (fogbug 1205373): Test fails due to constraint import issues.");
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 2f, 30f, 77f }, new float[] { 145f, 180f, 40f }, "m_WorldUpVector.y").Returns(1);
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 2f, 30f, 77f }, new float[] { 10f, 180f, 10f }, "m_WorldUpVector.z").Returns(1);
 
@@ -175,7 +175,7 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
-        [Ignore("UT-3734: Test fails due to constraint import issues.")]
+        [Ignore("UT-3734 (fogbug 1205373): Test fails due to constraint import issues.")]
         public void TestParentConstraintExport()
         {
             List<Object> toExport;
@@ -201,7 +201,7 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
-        [Ignore("UT-3734: Test fails due to constraint import issues.")]
+        [Ignore("UT-3734 (fogbug 1205373): Test fails due to constraint import issues.")]
         public void TestAimConstraintExport()
         {
             List<Object> toExport;
