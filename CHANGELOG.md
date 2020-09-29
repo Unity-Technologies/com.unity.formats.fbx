@@ -1,9 +1,12 @@
 # Changes in Fbx Exporter
 
 ## [UNRELEASED] - 2020-09-28
-### Fixed
-- Make FBX SDK bindings Editor only so they are not copied into builds by default. In order to use at runtime, 
+### Changed
+- Made FBX SDK bindings Editor only so they are not copied into builds by default. In order to use at runtime, 
   add the FBXSDK_RUNTIME define to Edit > Project Settings... > Player > Other Settings > Scripting Define Symbols.
+
+### Fixed
+- FBX SDK bindings no longer included in builds, fixing an issue with shipping on the Mac App Store.
 
 ## [3.2.1-preview.2] - 2020-08-05
 ### Added
