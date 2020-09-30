@@ -2,11 +2,17 @@
 
 ## [UNRELEASED] - 2020-09-29
 ### Changed
-- Use DeepConvertScene from Autodesk® FBX SDK to convert from Unity (left handed system with odd parity) to Maya (right handed system with odd parity) axis system.
+- Use DeepConvertScene from Autodesk® FBX SDK to convert from Unity (left handed system with odd parity) to Autodesk® Maya® (right handed system with odd parity) axis system.
     - Previously the conversion was performed by the FBX exporter.
+    - For the majority of cases there will be no noticeable difference in the final export result. If any custom export code that is affected by the axis system has been added or modified, it will
+      need to use Unity's axis system (left handed with odd parity), instead of converting directly to Autodesk® Maya®'s.
+    - There may be discrepancies in the Aim constraint and Parent constraint export result compared to before, however these should still import correctly into Autodesk® Maya® and other DCCs.
 - Export animation curve tangents instead of baking animation.
-    - With the exception of rotation curves for objects with a prerotation (i.e. bones of skinned meshes), as prerotation and rotation are combined in Unity but separated on export.
+    - For more details see https://docs.unity3d.com/Packages/com.unity.formats.fbx@4.0/manual/exporting.html#animation
 
+### Known issues
+- Negative scale will not export properly.
+    
 ## [3.2.1-preview.2] - 2020-08-05
 ### Added
 - Add an export option to preserve model import settings when overwriting an fbx file.
