@@ -50,18 +50,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
-            exportSettings.SetAnimatedSkinnedMesh(EditorGUILayout.Toggle ("Animated Skinned Mesh", exportSettings.AnimateSkinnedMesh));
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Animated Skinned Mesh"), GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.SetAnimatedSkinnedMesh(EditorGUILayout.Toggle (exportSettings.AnimateSkinnedMesh));
+            GUILayout.EndHorizontal();
 
-            exportSettings.SetUseMayaCompatibleNames(EditorGUILayout.Toggle (
-                new GUIContent ("Compatible Naming",
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Compatible Naming",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
                     "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
                     "On export, convert the names of GameObjects so they are Maya compatible." +
                     (exportSettings.UseMayaCompatibleNames ? "" :
                         "\n\nWARNING: Disabling this feature may result in lost material connections," +
-                        " and unexpected character replacements in Maya.")
-                ),
-                exportSettings.UseMayaCompatibleNames));
+                        " and unexpected character replacements in Maya.")),
+                    GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.SetUseMayaCompatibleNames(EditorGUILayout.Toggle (exportSettings.UseMayaCompatibleNames));
+            GUILayout.EndHorizontal();
         }
     }
 
