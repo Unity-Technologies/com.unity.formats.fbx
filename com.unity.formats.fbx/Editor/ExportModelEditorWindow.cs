@@ -128,8 +128,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Receiver = ScriptableObject.CreateInstance<FbxExportPresetSelectorReceiver> () as FbxExportPresetSelectorReceiver;
                 Receiver.SelectionChanged -= OnPresetSelectionChanged;
                 Receiver.SelectionChanged += OnPresetSelectionChanged;
-                Receiver.DialogClosed -= SaveExportSettings;
-                Receiver.DialogClosed += SaveExportSettings;
             }
         }
         #endif
@@ -142,13 +140,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return;
             }
             ExportFileName = filename.Remove(extIndex);
-        }
-
-        public void SaveExportSettings()
-        {
-            // save once preset selection is finished
-            EditorUtility.SetDirty (ExportSettings.instance);
-            ExportSettings.instance.Save ();
         }
 
         public void OnPresetSelectionChanged()
@@ -470,10 +461,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             GUILayout.EndHorizontal ();
             EditorGUILayout.Space(); // adding a space at bottom of dialog so buttons aren't right at the edge
-
-            if (GUI.changed) {
-                SaveExportSettings ();
-            }
         }
 
         /// <summary>
@@ -489,9 +476,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     string.Format("File {0} already exists.\nOverwrite cannot be undone.", filePath), 
                     "Overwrite", "Cancel");
                 if (!overwrite) {
-                    if (GUI.changed) {
-                        SaveExportSettings ();
-                    }
                     return false;
                 }
             }
@@ -533,8 +517,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             set{
                 m_isTimelineAnim = value;
                 if (m_isTimelineAnim) {
-                    m_previousInclude = ExportSettings.instance.ExportModelSettings.info.ModelAnimIncludeOption;
-                    ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+                    m_previousInclude = ExportModelSettingsInstance.info.ModelAnimIncludeOption;
+                    ExportModelSettingsInstance.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
                 }
                 if (InnerEditor) {
                     var exportModelSettingsEditor = InnerEditor as ExportModelSettingsEditor;
@@ -560,9 +544,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
+        private ExportModelSettings m_exportModelSettingsInstance;
+        protected ExportModelSettings ExportModelSettingsInstance
+        {
+            get { return m_exportModelSettingsInstance; }
+            set { m_exportModelSettingsInstance = value; }
+        }
+
         protected override ExportOptionsSettingsSerializeBase SettingsObject
         {
-            get { return ExportSettings.instance.ExportModelSettings.info; }
+            get { return ExportModelSettingsInstance.info; }
         }
 
         private ExportSettings.Include m_previousInclude = ExportSettings.Include.ModelAndAnim;
@@ -626,8 +617,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected override void OnEnable ()
         {
             base.OnEnable ();
+            // make a copy of the settings
+            ExportModelSettingsInstance = ScriptableObject.CreateInstance(typeof(ExportModelSettings)) as ExportModelSettings;
+            ExportModelSettingsInstance.info = ExportModelSettingsSerialize.DeepCopy<ExportModelSettingsSerialize>(ExportSettings.instance.ExportModelSettings.info);
+
             if (!InnerEditor) {
-                InnerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.ExportModelSettings);
+                InnerEditor = UnityEditor.Editor.CreateEditor (ExportModelSettingsInstance);
                 this.SingleHierarchyExport = m_singleHierarchyExport;
                 this.IsTimelineAnim = m_isTimelineAnim;
             }
@@ -644,8 +639,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected virtual void RestoreSettings()
         {
             if (IsTimelineAnim) {
-                ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(m_previousInclude);
-                SaveExportSettings ();
+                ExportModelSettingsInstance.info.SetModelAnimIncludeOption(m_previousInclude);
             }
         }
 
@@ -674,7 +668,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         #if UNITY_2018_1_OR_NEWER  
         protected override void ShowPresetReceiver ()
         {
-            ShowPresetReceiver (ExportSettings.instance.ExportModelSettings);
+            ShowPresetReceiver (ExportModelSettingsInstance);
         }
         #endif
     }

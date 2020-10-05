@@ -1,5 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -165,6 +167,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public abstract bool ExportUnrendered { get; }
         public virtual bool PreserveImportSettings { get;  }
         public abstract bool AllowSceneModification { get; }
+
+        // https://stackoverflow.com/questions/129389/how-do-you-do-a-deep-copy-of-an-object-in-net
+        public static T DeepCopy<T>(T other) where T : ExportOptionsSettingsSerializeBase
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(ms, other);
+                ms.Position = 0;
+                return formatter.Deserialize(ms) as T;
+            }
+        }
     }
 
     [System.Serializable]
