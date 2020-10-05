@@ -186,7 +186,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 // Otherwise, the user is editing a preset and we don't need to save.
                 if (this.targets.Length == 1 && this.target == ExportSettings.instance)
                 {
-                    EditorUtility.SetDirty(exportSettings);
                     exportSettings.Save();
                 }
             }
@@ -280,7 +279,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
     }
 
     [FilePath("ProjectSettings/FbxExportSettings.asset",FilePathAttribute.Location.ProjectFolder)]
-    internal class ExportSettings : ScriptableSingleton<ExportSettings>
+    internal class ExportSettings : ScriptableObject
     {
         public enum ExportFormat { ASCII = 0, Binary = 1}
 
@@ -298,6 +297,60 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         internal const string kMaxOptionName = "3ds Max ";
         internal const string kMayaOptionName = "Maya ";
         internal const string kMayaLtOptionName = "Maya LT";
+
+        private static ExportSettings s_Instance;
+        public static ExportSettings instance
+        {
+            get
+            {
+                if (s_Instance == null)
+                {
+                    s_Instance = ScriptableObject.CreateInstance<ExportSettings>();
+                    s_Instance.Load();
+                }
+                return s_Instance;
+            }
+        }
+
+        internal ExportSettings()
+        {
+            if (s_Instance != null)
+            {
+                // The user has most likely created a preset.
+            }
+        }
+
+        internal void Save(bool saveAsText)
+        {
+            if (s_Instance == null)
+            {
+                Debug.Log("Cannot save ScriptableSingleton: no instance!");
+                return;
+            }
+            string filePath = GetFilePath();
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                string directoryName = Path.GetDirectoryName(filePath);
+                if (!Directory.Exists(directoryName))
+                {
+                    Directory.CreateDirectory(directoryName);
+                }
+                System.IO.File.WriteAllText(filePath, EditorJsonUtility.ToJson(s_Instance, true));
+            }
+        }
+
+        private static string GetFilePath()
+        {
+            foreach (var attr in typeof(ExportSettings).GetCustomAttributes(true))
+            {
+                FilePathAttribute filePathAttribute = attr as FilePathAttribute;
+                if (filePathAttribute != null)
+                {
+                    return filePathAttribute.filepath;
+                }
+            }
+            return null;
+        }
 
         // NOTE: using "Verbose" and "VerboseProperty" to handle backwards compatibility with older FbxExportSettings.asset files.
         //       The variable name is used when serializing, so changing the variable name would prevent older FbxExportSettings.asset files
@@ -576,7 +629,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         [SerializeField]
         private ConvertToPrefabSettingsSerialize convertToPrefabSettingsSerialize;
 
-        internal override void LoadDefaults()
+        internal void LoadDefaults()
         {
             LaunchAfterInstallation = true;
             HideSendToUnityMenuProperty = true;
@@ -1425,9 +1478,28 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        internal override void Load ()
+        internal void Load ()
         {
-            base.Load ();
+            string filePath = GetFilePath();
+            if (!System.IO.File.Exists(filePath))
+            {
+                LoadDefaults();
+            }
+            else
+            {
+                try
+                {
+                    var fileData = System.IO.File.ReadAllText(filePath);
+                    EditorJsonUtility.FromJsonOverwrite(fileData, s_Instance);
+                }
+                catch (Exception xcp)
+                {
+                    // Quash the exception and take the default settings.
+                    Debug.LogException(xcp);
+                    LoadDefaults();
+                }
+            }
+
             if (!instance.ExportModelSettings) {
                 instance.ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             }
@@ -1446,82 +1518,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             instance.Save (true);
         }
     }
-
-    internal abstract class ScriptableSingleton<T> : ScriptableObject where T : ScriptableSingleton<T>
-    {
-        private static T s_Instance;
-        public static T instance
-        {
-            get
-            {
-                if (s_Instance == null)
-                {
-                    s_Instance = ScriptableObject.CreateInstance<T>();
-                    s_Instance.Load();
-                }
-                return s_Instance;
-            }
-        }
-
-        internal ScriptableSingleton()
-        {
-            if (s_Instance != null)
-            {
-                // The user has most likely created a preset.
-            }
-        }
-
-        internal abstract void LoadDefaults();
-
-        internal virtual void Load()
-        {
-            string filePath = GetFilePath();
-            if (!System.IO.File.Exists(filePath)) {
-                LoadDefaults();
-            } else {
-                try {
-                    var fileData = System.IO.File.ReadAllText(filePath);
-                    EditorJsonUtility.FromJsonOverwrite(fileData, s_Instance);
-                } catch(Exception xcp) {
-                    // Quash the exception and take the default settings.
-                    Debug.LogException(xcp);
-                    LoadDefaults();
-                }
-            }
-        }
-
-        internal virtual void Save(bool saveAsText)
-        {
-            if (s_Instance == null)
-            {
-                Debug.Log("Cannot save ScriptableSingleton: no instance!");
-                return;
-            }
-            string filePath = GetFilePath();
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                string directoryName = Path.GetDirectoryName(filePath);
-                if (!Directory.Exists(directoryName))
-                {
-                    Directory.CreateDirectory(directoryName);
-                }
-                System.IO.File.WriteAllText(filePath, EditorJsonUtility.ToJson(s_Instance, true));
-            }
-        }
-
-        private static string GetFilePath()
-        {
-            foreach(var attr in typeof(T).GetCustomAttributes(true)) {
-                FilePathAttribute filePathAttribute = attr as FilePathAttribute;
-                if (filePathAttribute != null)
-                {
-                    return filePathAttribute.filepath;
-                }
-            }
-            return null;
-        }
-    }
-
 
     [AttributeUsage(AttributeTargets.Class)]
     internal sealed class FilePathAttribute : Attribute

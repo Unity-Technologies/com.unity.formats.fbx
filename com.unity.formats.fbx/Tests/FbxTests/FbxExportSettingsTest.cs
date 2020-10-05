@@ -33,7 +33,7 @@ namespace FbxExporter.UnitTests
 
             // static fields can't be found through inheritance with GetField.
             // if we change the inheritance diagram, we have to change t.BaseType here.
-            s_InstanceField = t.BaseType.GetField ("s_Instance", privates);
+            s_InstanceField = t.GetField ("s_Instance", privates);
             Assert.IsNotNull (s_InstanceField, "s_Instance");
         }
 
@@ -506,6 +506,26 @@ namespace FbxExporter.UnitTests
 
             preset.ApplyTo(instance);
             Assert.That(instance.ShowConvertToPrefabDialog, Is.False);
+        }
+
+        [Test]
+        public void TestMultipleInstances()
+        {
+            var instance = ExportSettings.instance;
+            // Test creating a new ExportSettings instance
+            ExportSettings newInstance = ScriptableObject.CreateInstance<ExportSettings>();
+            // check that a new instance was created
+            Assert.That(newInstance.GetInstanceID(), Is.Not.EqualTo(instance.GetInstanceID()));
+            // but that the "instance" member is the same
+            Assert.That(ExportSettings.instance, Is.EqualTo(instance));
+            Assert.That(ExportSettings.instance, Is.Not.EqualTo(newInstance));
+
+            instance.ShowConvertToPrefabDialog = false;
+            Assert.That(instance.ShowConvertToPrefabDialog, Is.False);
+
+            newInstance.ShowConvertToPrefabDialog = true;
+            Assert.That(newInstance.ShowConvertToPrefabDialog, Is.True);
+            Assert.That(ExportSettings.instance.ShowConvertToPrefabDialog, Is.False);
         }
     }
 }
