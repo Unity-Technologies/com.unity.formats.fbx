@@ -128,6 +128,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Receiver = ScriptableObject.CreateInstance<FbxExportPresetSelectorReceiver> () as FbxExportPresetSelectorReceiver;
                 Receiver.SelectionChanged -= OnPresetSelectionChanged;
                 Receiver.SelectionChanged += OnPresetSelectionChanged;
+                Receiver.DialogClosed -= SaveExportSettings;
+                Receiver.DialogClosed += SaveExportSettings;
             }
         }
         #endif
@@ -141,6 +143,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             ExportFileName = filename.Remove(extIndex);
         }
+
+        public abstract void SaveExportSettings();
 
         public void OnPresetSelectionChanged()
         {
@@ -461,6 +465,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             GUILayout.EndHorizontal ();
             EditorGUILayout.Space(); // adding a space at bottom of dialog so buttons aren't right at the edge
+
+            if (GUI.changed)
+            {
+                SaveExportSettings();
+            }
         }
 
         /// <summary>
@@ -476,6 +485,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     string.Format("File {0} already exists.\nOverwrite cannot be undone.", filePath), 
                     "Overwrite", "Cancel");
                 if (!overwrite) {
+                    if (GUI.changed)
+                    {
+                        SaveExportSettings();
+                    }
                     return false;
                 }
             }
@@ -544,11 +557,26 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
+        [SerializeField]
         private ExportModelSettings m_exportModelSettingsInstance;
         protected ExportModelSettings ExportModelSettingsInstance
         {
-            get { return m_exportModelSettingsInstance; }
-            set { m_exportModelSettingsInstance = value; }
+            get
+            {
+                if(m_exportModelSettingsInstance == null)
+                {
+                    // make a copy of the settings
+                    m_exportModelSettingsInstance = ScriptableObject.CreateInstance(typeof(ExportModelSettings)) as ExportModelSettings;
+                    // load settings stored in Unity session, default to Export Settings
+                    m_exportModelSettingsInstance.info.RestoreFromSession(ExportSettings.instance.ExportModelSettings.info);
+                }
+                return m_exportModelSettingsInstance;
+            }
+        }
+
+        public override void SaveExportSettings()
+        {
+            ExportModelSettingsInstance.info.StoreInSession();
         }
 
         protected override ExportOptionsSettingsSerializeBase SettingsObject
@@ -617,10 +645,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected override void OnEnable ()
         {
             base.OnEnable ();
-            // make a copy of the settings
-            ExportModelSettingsInstance = ScriptableObject.CreateInstance(typeof(ExportModelSettings)) as ExportModelSettings;
-            ExportModelSettingsInstance.info = ExportModelSettingsSerialize.DeepCopy<ExportModelSettingsSerialize>(ExportSettings.instance.ExportModelSettings.info);
-
             if (!InnerEditor) {
                 InnerEditor = UnityEditor.Editor.CreateEditor (ExportModelSettingsInstance);
                 this.SingleHierarchyExport = m_singleHierarchyExport;

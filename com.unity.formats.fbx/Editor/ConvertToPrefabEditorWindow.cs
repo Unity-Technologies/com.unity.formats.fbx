@@ -98,7 +98,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             base.OnEnable();
             if (!InnerEditor)
             {
-                InnerEditor = UnityEditor.Editor.CreateEditor(ExportSettings.instance.ConvertToPrefabSettings);
+                InnerEditor = UnityEditor.Editor.CreateEditor(ConvertToPrefabSettingsInstance);
             }
             m_prefabExtLabelWidth = FbxExtLabelStyle.CalcSize(new GUIContent(".prefab")).x;
         }
@@ -216,7 +216,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 ConvertToNestedPrefab.Convert(
-                    go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
+                    go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ConvertToPrefabSettingsInstance.info
                 );
                 return true;
             }
@@ -235,7 +235,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // Convert, automatically choosing a file path that won't clobber any existing files.
                 var go = ModelExporter.GetGameObject(obj);
                 ConvertToNestedPrefab.Convert(
-                    go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
+                    go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ConvertToPrefabSettingsInstance.info
                 );
             }
             if (!onlyPrefabAssets && groupIndex >= 0)
@@ -246,14 +246,36 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
+        [SerializeField]
+        private ConvertToPrefabSettings m_convertToPrefabSettingsInstance;
+        protected ConvertToPrefabSettings ConvertToPrefabSettingsInstance
+        {
+            get
+            {
+                if (m_convertToPrefabSettingsInstance == null)
+                {
+                    // make a copy of the settings
+                    m_convertToPrefabSettingsInstance = ScriptableObject.CreateInstance(typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
+                    // load settings stored in Unity session, default to Export Settings
+                    m_convertToPrefabSettingsInstance.info.RestoreFromSession(ExportSettings.instance.ConvertToPrefabSettings.info);
+                }
+                return m_convertToPrefabSettingsInstance;
+            }
+        }
+
+        public override void SaveExportSettings()
+        {
+            ConvertToPrefabSettingsInstance.info.StoreInSession();
+        }
+
         protected override ExportOptionsSettingsSerializeBase SettingsObject
         {
-            get { return ExportSettings.instance.ConvertToPrefabSettings.info; }
+            get { return ConvertToPrefabSettingsInstance.info; }
         }
 #if UNITY_2018_1_OR_NEWER
         protected override void ShowPresetReceiver()
         {
-            ShowPresetReceiver(ExportSettings.instance.ConvertToPrefabSettings);
+            ShowPresetReceiver(ConvertToPrefabSettingsInstance);
         }
 #endif
         protected override void CreateCustomUI()

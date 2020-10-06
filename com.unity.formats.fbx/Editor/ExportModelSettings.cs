@@ -154,6 +154,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         [System.NonSerialized]
         private Transform animDest;
 
+        protected const string k_sessionStoragePrefix = "FbxExporterOptions_{0}";
+
         public ExportSettings.ExportFormat ExportFormat { get { return exportFormat; } }
         public void SetExportFormat(ExportSettings.ExportFormat format){ this.exportFormat = format; }
         public bool AnimateSkinnedMesh { get { return animatedSkinnedMesh; } }
@@ -171,16 +173,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public virtual bool PreserveImportSettings { get;  }
         public abstract bool AllowSceneModification { get; }
 
-        // https://stackoverflow.com/questions/129389/how-do-you-do-a-deep-copy-of-an-object-in-net
-        public static T DeepCopy<T>(T other) where T : ExportOptionsSettingsSerializeBase
+        public virtual void StoreInSession()
         {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(ms, other);
-                ms.Position = 0;
-                return formatter.Deserialize(ms) as T;
-            }
+            SessionState.SetInt(string.Format(k_sessionStoragePrefix, nameof(exportFormat)), (int)exportFormat);
+            SessionState.SetBool(string.Format(k_sessionStoragePrefix, nameof(animatedSkinnedMesh)), animatedSkinnedMesh);
+            SessionState.SetBool(string.Format(k_sessionStoragePrefix, nameof(mayaCompatibleNaming)), mayaCompatibleNaming);
+        }
+
+        public virtual void RestoreFromSession(ExportOptionsSettingsSerializeBase defaults)
+        {
+            exportFormat = (ExportSettings.ExportFormat)SessionState.GetInt(string.Format(k_sessionStoragePrefix, nameof(exportFormat)), (int)defaults.ExportFormat);
+            animatedSkinnedMesh = SessionState.GetBool(string.Format(k_sessionStoragePrefix, nameof(animatedSkinnedMesh)), defaults.AnimateSkinnedMesh);
+            mayaCompatibleNaming = SessionState.GetBool(string.Format(k_sessionStoragePrefix, nameof(mayaCompatibleNaming)), defaults.UseMayaCompatibleNames);
         }
     }
 
@@ -208,5 +212,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }
         public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings && !ExportSettings.instance.ExportOutsideProject; }
         public override bool AllowSceneModification { get { return false; } }
+
+        public override void StoreInSession()
+        {
+            base.StoreInSession();
+            SessionState.SetInt(string.Format(k_sessionStoragePrefix, nameof(include)), (int)include);
+            SessionState.SetInt(string.Format(k_sessionStoragePrefix, nameof(lodLevel)), (int)lodLevel);
+            SessionState.SetInt(string.Format(k_sessionStoragePrefix, nameof(objectPosition)), (int)objectPosition);
+            SessionState.SetBool(string.Format(k_sessionStoragePrefix, nameof(exportUnrendered)), exportUnrendered);
+            SessionState.SetBool(string.Format(k_sessionStoragePrefix, nameof(preserveImportSettings)), preserveImportSettings);
+        }
+
+        public override void RestoreFromSession(ExportOptionsSettingsSerializeBase defaults)
+        {
+            base.RestoreFromSession(defaults);
+            include = (ExportSettings.Include)SessionState.GetInt(string.Format(k_sessionStoragePrefix, nameof(include)), (int)defaults.ModelAnimIncludeOption);
+            lodLevel = (ExportSettings.LODExportType)SessionState.GetInt(string.Format(k_sessionStoragePrefix, nameof(lodLevel)), (int)defaults.LODExportType);
+            objectPosition = (ExportSettings.ObjectPosition)SessionState.GetInt(string.Format(k_sessionStoragePrefix, nameof(objectPosition)), (int)defaults.ObjectPosition);
+            exportUnrendered = SessionState.GetBool(string.Format(k_sessionStoragePrefix, nameof(exportUnrendered)), defaults.ExportUnrendered);
+            preserveImportSettings = SessionState.GetBool(string.Format(k_sessionStoragePrefix, nameof(preserveImportSettings)), defaults.PreserveImportSettings);
+        }
     }
 }
