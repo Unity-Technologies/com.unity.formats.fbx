@@ -56,11 +56,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 "If FBX exporter version 1.3.0f1 or earlier was previously installed, then links to the FbxPrefab component will need updating.\n" +
                 "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
             public static GUIContent ShowConvertToPrefabDialog = new GUIContent(
-                "Show Export Window",
+                "Display Options Window",
                 "Show the Convert dialog when converting to an FBX Prefab Variant");
         }
 
-        private void ShowExportPathUI(string label, string tooltip, string openFolderPanelTitle, bool isConvertToPrefabOptions)
+        private void ShowExportPathUI(string label, string tooltip, string openFolderPanelTitle, bool isSingletonInstance, bool isConvertToPrefabOptions = false)
         {
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent(label, tooltip), GUILayout.Width(ExportOptionsLabelWidth - ExportOptionsFieldOffset));
@@ -89,6 +89,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 ExportSettings.instance.ExportOutsideProject = false;
             }
 
+            EditorGUI.BeginDisabledGroup(!isSingletonInstance);
             var str = isConvertToPrefabOptions ? "save prefab" : "export";
             var buttonTooltip = string.Format("Browse to a new location to {0} to", str);
             if (GUILayout.Button(new GUIContent("...", buttonTooltip), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
@@ -135,12 +136,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     GUIUtility.keyboardControl = 0;
                 }
             }
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
         }
 
         [SecurityPermission(SecurityAction.LinkDemand)]
         public override void OnInspectorGUI() {
             ExportSettings exportSettings = (ExportSettings)target;
+            bool isSingletonInstance = this.targets.Length == 1 && this.target == ExportSettings.instance;
 
             // Increasing the label width so that none of the text gets cut off
             EditorGUIUtility.labelWidth = LabelWidth;
@@ -166,11 +169,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.Space();
 
             // EXPORT SETTINGS
-            m_showExportSettingsOptions = EditorGUILayout.Foldout(m_showExportSettingsOptions, "Export Options", EditorStyles.foldoutHeader);
+            m_showExportSettingsOptions = EditorGUILayout.Foldout(m_showExportSettingsOptions, "FBX File Options", EditorStyles.foldoutHeader);
             if (m_showExportSettingsOptions)
             {
                 EditorGUI.indentLevel++;
-                ShowExportPathUI("Export Path", "Location where the FBX will be saved.", "Select Export Model Path", isConvertToPrefabOptions: false);
+                ShowExportPathUI("Export Path", "Location where the FBX will be saved.", "Select Export Model Path", isSingletonInstance, isConvertToPrefabOptions: false);
             
                 var exportSettingsEditor = UnityEditor.Editor.CreateEditor(exportSettings.ExportModelSettings) as ExportModelSettingsEditor;
                 exportSettingsEditor.LabelWidth = ExportOptionsLabelWidth;
@@ -181,11 +184,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // --------------------------
 
             // CONVERT TO PREFAB SETTINGS
-            m_showConvertSettingsOptions = EditorGUILayout.Foldout(m_showConvertSettingsOptions, "Convert Options", EditorStyles.foldoutHeader);
+            m_showConvertSettingsOptions = EditorGUILayout.Foldout(m_showConvertSettingsOptions, "Convert to Prefab Options", EditorStyles.foldoutHeader);
             if (m_showConvertSettingsOptions)
             {
                 EditorGUI.indentLevel++;
-                ShowExportPathUI("Prefab Path", "Relative path for saving FBX Prefab Variants.", "Select FBX Prefab Variant Save Path", isConvertToPrefabOptions: true);
+                ShowExportPathUI("Prefab Path", "Relative path for saving FBX Prefab Variants.", "Select FBX Prefab Variant Save Path", isSingletonInstance, isConvertToPrefabOptions: true);
 
                 var prefabSettingsEditor = UnityEditor.Editor.CreateEditor(exportSettings.ConvertToPrefabSettings) as ConvertToPrefabSettingsEditor;
                 prefabSettingsEditor.LabelWidth = ExportOptionsLabelWidth;
@@ -208,6 +211,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             exportSettings.SelectedDCCApp = EditorGUILayout.Popup(exportSettings.SelectedDCCApp, options);
 
+            EditorGUI.BeginDisabledGroup(!isSingletonInstance);
             if (GUILayout.Button(new GUIContent("...", "Browse to a 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
                 var ext = "";
                 switch (Application.platform) {
@@ -240,6 +244,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     Repaint ();
                 }
             }
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal ();
 
             EditorGUILayout.Space();
@@ -261,7 +266,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.Space();
 
             // disable button if no 3D application is available
-            EditorGUI.BeginDisabledGroup (!ExportSettings.CanInstall());
+            EditorGUI.BeginDisabledGroup (!isSingletonInstance || !ExportSettings.CanInstall());
             if (GUILayout.Button (Style.InstallIntegrationContent)) {
                 EditorApplication.delayCall += UnityEditor.Formats.Fbx.Exporter.IntegrationsUI.InstallDCCIntegration;
             }
@@ -274,7 +279,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUI.indentLevel++;
 
             EditorGUILayout.Space ();
-            
+
+            EditorGUI.BeginDisabledGroup(!isSingletonInstance);
             if (GUILayout.Button (Style.RepairMissingScripts)) {
                 var componentUpdater = new UnityEditor.Formats.Fbx.Exporter.RepairMissingScripts ();
                 var filesToRepairCount = componentUpdater.AssetsToRepairCount;
@@ -299,6 +305,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                         "Couldn't find any prefabs or scenes that require updating", "Ok");
                 }
             }
+            EditorGUI.EndDisabledGroup();
 
             GUILayout.FlexibleSpace ();
             GUILayout.EndVertical();
