@@ -33,14 +33,17 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         const float FieldOffset = 18;
         const float BrowseButtonOffset = 5;
 
+        private bool m_showExportSettingsOptions = true;
+        private bool m_showConvertSettingsOptions = true;
+
         static class Style
         {
             public static GUIContent Application3D = new GUIContent(
-                "3D Application:",
+                "3D Application",
                 "Select the 3D Application for which you would like to install the Unity integration.");
-            public static GUIContent KeepOpen = new GUIContent("Keep Open:",
+            public static GUIContent KeepOpen = new GUIContent("Keep Open",
                 "Keep the selected 3D application open after Unity integration install has completed.");
-            public static GUIContent HideNativeMenu = new GUIContent("Hide Native Menu:",
+            public static GUIContent HideNativeMenu = new GUIContent("Hide Native Menu",
                 "Replace Maya's native 'Send to Unity' menu with the Unity Integration's menu");
             public static GUIContent InstallIntegrationContent = new GUIContent(
                 "Install Unity Integration",
@@ -49,6 +52,87 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 "Run Component Updater",
                 "If FBX exporter version 1.3.0f1 or earlier was previously installed, then links to the FbxPrefab component will need updating.\n" +
                 "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
+            public static GUIContent ShowConvertToPrefabDialog = new GUIContent(
+                "Show Export Window",
+                "Show the Convert dialog when converting to an FBX Prefab Variant");
+        }
+
+        private void ShowExportPathUI(string label, string tooltip, string openFolderPanelTitle, bool isConvertToPrefabOptions)
+        {
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent(label, tooltip), GUILayout.Width(175 - FieldOffset));
+
+            var pathLabels = ExportSettings.GetMixedFbxSavePaths();
+            if (isConvertToPrefabOptions)
+            {
+                pathLabels = ExportSettings.GetRelativePrefabSavePaths();
+            }
+
+            if (isConvertToPrefabOptions)
+            {
+                ExportSettings.instance.SelectedPrefabPath = EditorGUILayout.Popup(ExportSettings.instance.SelectedPrefabPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+            }
+            else {
+                ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup(ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+            }
+
+            // Set export setting for exporting outside the project on choosing a path
+            if (!isConvertToPrefabOptions && !pathLabels[ExportSettings.instance.SelectedFbxPath].Substring(0, 6).Equals("Assets"))
+            {
+                ExportSettings.instance.ExportOutsideProject = true;
+            }
+            else
+            {
+                ExportSettings.instance.ExportOutsideProject = false;
+            }
+
+            var str = isConvertToPrefabOptions ? "save prefab" : "export";
+            var buttonTooltip = string.Format("Browse to a new location to {0} to", str);
+            if (GUILayout.Button(new GUIContent("...", buttonTooltip), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
+            {
+                string initialPath = Application.dataPath;
+
+                string fullPath = EditorUtility.OpenFolderPanel(
+                    openFolderPanelTitle, initialPath, null
+                );
+                
+                // Unless the user canceled, save path.
+                if (!string.IsNullOrEmpty(fullPath))
+                {
+                    var relativePath = ExportSettings.ConvertToAssetRelativePath(fullPath);
+
+                    // We're exporting outside Assets folder, so store the absolute path
+                    if (string.IsNullOrEmpty(relativePath))
+                    {
+                        if (isConvertToPrefabOptions)
+                        {
+                            Debug.LogWarning("Please select a location in the Assets folder");
+                        }
+                        else
+                        {
+                            ExportSettings.instance.ExportOutsideProject = true;
+                            ExportSettings.AddFbxSavePath(fullPath);
+                        }
+                    }
+                    // Store the relative path to the Assets folder
+                    else
+                    {
+                        if (isConvertToPrefabOptions)
+                        {
+                            ExportSettings.AddPrefabSavePath(relativePath);
+                        }
+                        else
+                        {
+                            ExportSettings.AddFbxSavePath(relativePath);
+                        }
+                    }
+                    // Make sure focus is removed from the selectable label
+                    // otherwise it won't update
+                    GUIUtility.hotControl = 0;
+                    GUIUtility.keyboardControl = 0;
+                }
+            }
+            GUILayout.EndHorizontal();
         }
 
         [SecurityPermission(SecurityAction.LinkDemand)]
@@ -70,12 +154,40 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(Style.ShowConvertToPrefabDialog, GUILayout.Width(LabelWidth));
             exportSettings.ShowConvertToPrefabDialog = EditorGUILayout.Toggle(
-                new GUIContent("Show Convert UI:", "Show the Convert dialog when converting to an FBX Prefab Variant"),
                 exportSettings.ShowConvertToPrefabDialog
             );
+            EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
-            EditorGUILayout.Space();
+
+            // EXPORT SETTINGS
+            m_showExportSettingsOptions = EditorGUILayout.Foldout(m_showExportSettingsOptions, "Export Options", EditorStyles.foldoutHeader);
+            if (m_showExportSettingsOptions)
+            {
+                EditorGUI.indentLevel++;
+                ShowExportPathUI("Export Path", "Location where the FBX will be saved.", "Select Export Model Path", isConvertToPrefabOptions: false);
+            
+                var exportSettingsEditor = UnityEditor.Editor.CreateEditor(exportSettings.ExportModelSettings);
+                exportSettingsEditor.OnInspectorGUI();
+                EditorGUI.indentLevel--;
+            }
+            // --------------------------
+
+            // CONVERT TO PREFAB SETTINGS
+            m_showConvertSettingsOptions = EditorGUILayout.Foldout(m_showConvertSettingsOptions, "Convert Options", EditorStyles.foldoutHeader);
+            if (m_showConvertSettingsOptions)
+            {
+                EditorGUI.indentLevel++;
+                ShowExportPathUI("Prefab Path", "Relative path for saving FBX Prefab Variants.", "Select FBX Prefab Variant Save Path", isConvertToPrefabOptions: true);
+
+                var prefabSettingsEditor = UnityEditor.Editor.CreateEditor(exportSettings.ConvertToPrefabSettings);
+                prefabSettingsEditor.OnInspectorGUI();
+                EditorGUI.indentLevel--;
+            }
+            // --------------------------
+
             EditorGUI.indentLevel--;
 
             EditorGUILayout.LabelField("Integration", EditorStyles.boldLabel);
@@ -610,7 +722,15 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         private ExportModelSettings m_exportModelSettings;
         internal ExportModelSettings ExportModelSettings
         {
-            get { return m_exportModelSettings; }
+            get
+            {
+                if (!m_exportModelSettings)
+                {
+                    m_exportModelSettings = ScriptableObject.CreateInstance(typeof(ExportModelSettings)) as ExportModelSettings;
+                }
+                m_exportModelSettings.info = this.exportModelSettingsSerialize;
+                return m_exportModelSettings;
+            }
             set { m_exportModelSettings = value; }
         }
 
@@ -622,7 +742,15 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         private ConvertToPrefabSettings m_convertToPrefabSettings;
         internal ConvertToPrefabSettings ConvertToPrefabSettings
         {
-            get { return m_convertToPrefabSettings; }
+            get
+            {
+                if (!m_convertToPrefabSettings)
+                {
+                    m_convertToPrefabSettings = ScriptableObject.CreateInstance(typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
+                }
+                m_convertToPrefabSettings.info = this.convertToPrefabSettingsSerialize;
+                return m_convertToPrefabSettings;
+            }
             set { m_convertToPrefabSettings = value; }
         }
 
@@ -1499,23 +1627,13 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     LoadDefaults();
                 }
             }
-
-            if (!instance.ExportModelSettings) {
-                instance.ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
-            }
-            instance.ExportModelSettings.info = instance.exportModelSettingsSerialize;
-            
-            if (!instance.ConvertToPrefabSettings) {
-                instance.ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
-            }
-            instance.ConvertToPrefabSettings.info = instance.convertToPrefabSettingsSerialize;
         }
 
         internal void Save()
         {
             exportModelSettingsSerialize = ExportModelSettings.info;
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
-            instance.Save (true);
+            this.Save (true);
         }
     }
 
