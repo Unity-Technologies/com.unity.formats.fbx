@@ -27,7 +27,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
     [CustomEditor(typeof(ExportSettings))]
     internal class ExportSettingsEditor : UnityEditor.Editor {
         Vector2 scrollPos = Vector2.zero;
-        const float LabelWidth = 150;
+        const float LabelWidth = 180;
         const float SelectableLabelMinWidth = 90;
         const float BrowseButtonWidth = 25;
         const float FieldOffset = 18;
@@ -38,6 +38,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         private bool m_showExportSettingsOptions = true;
         private bool m_showConvertSettingsOptions = true;
+
+        private ExportModelSettingsEditor m_exportModelEditor;
+        private ConvertToPrefabSettingsEditor m_convertEditor;
+
+        private void OnEnable()
+        {
+            ExportSettings exportSettings = (ExportSettings)target;
+            m_exportModelEditor = UnityEditor.Editor.CreateEditor(exportSettings.ExportModelSettings) as ExportModelSettingsEditor;
+            m_convertEditor = UnityEditor.Editor.CreateEditor(exportSettings.ConvertToPrefabSettings) as ConvertToPrefabSettingsEditor;
+        }
 
         static class Style
         {
@@ -174,11 +184,10 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             {
                 EditorGUI.indentLevel++;
                 ShowExportPathUI("Export Path", "Location where the FBX will be saved.", "Select Export Model Path", isSingletonInstance, isConvertToPrefabOptions: false);
-            
-                var exportSettingsEditor = UnityEditor.Editor.CreateEditor(exportSettings.ExportModelSettings) as ExportModelSettingsEditor;
-                exportSettingsEditor.LabelWidth = ExportOptionsLabelWidth;
-                exportSettingsEditor.FieldOffset = ExportOptionsFieldOffset;
-                exportSettingsEditor.OnInspectorGUI();
+
+                m_exportModelEditor.LabelWidth = ExportOptionsLabelWidth;
+                m_exportModelEditor.FieldOffset = ExportOptionsFieldOffset;
+                m_exportModelEditor.OnInspectorGUI();
                 EditorGUI.indentLevel--;
             }
             // --------------------------
@@ -190,10 +199,9 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 EditorGUI.indentLevel++;
                 ShowExportPathUI("Prefab Path", "Relative path for saving FBX Prefab Variants.", "Select FBX Prefab Variant Save Path", isSingletonInstance, isConvertToPrefabOptions: true);
 
-                var prefabSettingsEditor = UnityEditor.Editor.CreateEditor(exportSettings.ConvertToPrefabSettings) as ConvertToPrefabSettingsEditor;
-                prefabSettingsEditor.LabelWidth = ExportOptionsLabelWidth;
-                prefabSettingsEditor.FieldOffset = ExportOptionsFieldOffset;
-                prefabSettingsEditor.OnInspectorGUI();
+                m_convertEditor.LabelWidth = ExportOptionsLabelWidth;
+                m_convertEditor.FieldOffset = ExportOptionsFieldOffset;
+                m_convertEditor.OnInspectorGUI();
                 EditorGUI.indentLevel--;
             }
             // --------------------------
