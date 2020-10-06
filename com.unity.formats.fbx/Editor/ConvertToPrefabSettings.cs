@@ -5,8 +5,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
     [CustomEditor (typeof(ConvertToPrefabSettings))]
     internal class ConvertToPrefabSettingsEditor : UnityEditor.Editor
     {
-        private const float LabelWidth = 175;
-        private const float FieldOffset = 18;
+        private const float DefaultLabelWidth = 175;
+        private const float DefaultFieldOffset = 18;
+
+        public float LabelWidth { get; set; } = DefaultLabelWidth;
+        public float FieldOffset { get; set; } = DefaultFieldOffset;
 
         private string[] exportFormatOptions = new string[]{ "ASCII", "Binary" };
         private string[] includeOptions = new string[]{"Model(s) + Animation"};

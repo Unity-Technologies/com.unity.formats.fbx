@@ -27,11 +27,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
     [CustomEditor(typeof(ExportSettings))]
     internal class ExportSettingsEditor : UnityEditor.Editor {
         Vector2 scrollPos = Vector2.zero;
-        const float LabelWidth = 144;
+        const float LabelWidth = 150;
         const float SelectableLabelMinWidth = 90;
         const float BrowseButtonWidth = 25;
         const float FieldOffset = 18;
         const float BrowseButtonOffset = 5;
+
+        const float ExportOptionsLabelWidth = 205;
+        const float ExportOptionsFieldOffset = 18;
 
         private bool m_showExportSettingsOptions = true;
         private bool m_showConvertSettingsOptions = true;
@@ -60,7 +63,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         private void ShowExportPathUI(string label, string tooltip, string openFolderPanelTitle, bool isConvertToPrefabOptions)
         {
             GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent(label, tooltip), GUILayout.Width(175 - FieldOffset));
+            EditorGUILayout.LabelField(new GUIContent(label, tooltip), GUILayout.Width(ExportOptionsLabelWidth - ExportOptionsFieldOffset));
 
             var pathLabels = ExportSettings.GetMixedFbxSavePaths();
             if (isConvertToPrefabOptions)
@@ -169,7 +172,9 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 EditorGUI.indentLevel++;
                 ShowExportPathUI("Export Path", "Location where the FBX will be saved.", "Select Export Model Path", isConvertToPrefabOptions: false);
             
-                var exportSettingsEditor = UnityEditor.Editor.CreateEditor(exportSettings.ExportModelSettings);
+                var exportSettingsEditor = UnityEditor.Editor.CreateEditor(exportSettings.ExportModelSettings) as ExportModelSettingsEditor;
+                exportSettingsEditor.LabelWidth = ExportOptionsLabelWidth;
+                exportSettingsEditor.FieldOffset = ExportOptionsFieldOffset;
                 exportSettingsEditor.OnInspectorGUI();
                 EditorGUI.indentLevel--;
             }
@@ -182,7 +187,9 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 EditorGUI.indentLevel++;
                 ShowExportPathUI("Prefab Path", "Relative path for saving FBX Prefab Variants.", "Select FBX Prefab Variant Save Path", isConvertToPrefabOptions: true);
 
-                var prefabSettingsEditor = UnityEditor.Editor.CreateEditor(exportSettings.ConvertToPrefabSettings);
+                var prefabSettingsEditor = UnityEditor.Editor.CreateEditor(exportSettings.ConvertToPrefabSettings) as ConvertToPrefabSettingsEditor;
+                prefabSettingsEditor.LabelWidth = ExportOptionsLabelWidth;
+                prefabSettingsEditor.FieldOffset = ExportOptionsFieldOffset;
                 prefabSettingsEditor.OnInspectorGUI();
                 EditorGUI.indentLevel--;
             }
@@ -194,7 +201,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUI.indentLevel++;
 
             GUILayout.BeginHorizontal ();
-            EditorGUILayout.LabelField(Style.Application3D, GUILayout.Width(LabelWidth - FieldOffset));
+            EditorGUILayout.LabelField(Style.Application3D, GUILayout.Width(LabelWidth));
             
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
@@ -237,15 +244,19 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             EditorGUILayout.Space();
 
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(Style.KeepOpen, GUILayout.Width(LabelWidth));
             exportSettings.LaunchAfterInstallation = EditorGUILayout.Toggle(
-                Style.KeepOpen,
                 exportSettings.LaunchAfterInstallation
             );
+            GUILayout.EndHorizontal();
 
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(Style.HideNativeMenu, GUILayout.Width(LabelWidth));
             exportSettings.HideSendToUnityMenuProperty = EditorGUILayout.Toggle(
-                Style.HideNativeMenu,
                 exportSettings.HideSendToUnityMenuProperty
             );
+            GUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
 
