@@ -308,7 +308,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Add UI to turn the dialog off next time the user exports
         /// </summary>
-        protected virtual void DoNotShowDialogUI() { }
+        protected virtual void DoNotShowDialogUI()
+        {
+            EditorGUI.indentLevel--;
+            ExportSettings.instance.DisplayOptionsWindow = !EditorGUILayout.Toggle(
+                new GUIContent("Don't ask me again", "Don't ask me again, use the last used paths and options instead"),
+                !ExportSettings.instance.DisplayOptionsWindow
+            );
+        }
 
         // -------------------------------------------------------------------------------------
 

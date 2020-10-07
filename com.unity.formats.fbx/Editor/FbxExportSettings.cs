@@ -172,8 +172,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUI.indentLevel++;
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(Style.ShowConvertToPrefabDialog, GUILayout.Width(LabelWidth));
-            exportSettings.ShowConvertToPrefabDialog = EditorGUILayout.Toggle(
-                exportSettings.ShowConvertToPrefabDialog
+            exportSettings.DisplayOptionsWindow = EditorGUILayout.Toggle(
+                exportSettings.DisplayOptionsWindow
             );
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
@@ -667,7 +667,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         
         [SerializeField]
         private bool showConvertToPrefabDialog = true;
-        public bool ShowConvertToPrefabDialog
+        public bool DisplayOptionsWindow
         {
             get { return showConvertToPrefabDialog; }
             set { showConvertToPrefabDialog = value; }
@@ -795,7 +795,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             BakeAnimationProperty = false;
             ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             exportModelSettingsSerialize = ExportModelSettings.info;
-            ShowConvertToPrefabDialog = true;
+            DisplayOptionsWindow = true;
             ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
         }

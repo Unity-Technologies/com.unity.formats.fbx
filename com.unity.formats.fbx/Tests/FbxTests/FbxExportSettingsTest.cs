@@ -496,16 +496,16 @@ namespace FbxExporter.UnitTests
         {
             var instance = ExportSettings.instance;
 
-            instance.ShowConvertToPrefabDialog = false;
-            Assert.That(instance.ShowConvertToPrefabDialog, Is.False);
+            instance.DisplayOptionsWindow = false;
+            Assert.That(instance.DisplayOptionsWindow, Is.False);
 
             var preset = new Preset(ExportSettings.instance);
             
-            instance.ShowConvertToPrefabDialog = true;
-            Assert.That(instance.ShowConvertToPrefabDialog, Is.True);
+            instance.DisplayOptionsWindow = true;
+            Assert.That(instance.DisplayOptionsWindow, Is.True);
 
             preset.ApplyTo(instance);
-            Assert.That(instance.ShowConvertToPrefabDialog, Is.False);
+            Assert.That(instance.DisplayOptionsWindow, Is.False);
         }
 
         [Test]
@@ -520,12 +520,12 @@ namespace FbxExporter.UnitTests
             Assert.That(ExportSettings.instance, Is.EqualTo(instance));
             Assert.That(ExportSettings.instance, Is.Not.EqualTo(newInstance));
 
-            instance.ShowConvertToPrefabDialog = false;
-            Assert.That(instance.ShowConvertToPrefabDialog, Is.False);
+            instance.DisplayOptionsWindow = false;
+            Assert.That(instance.DisplayOptionsWindow, Is.False);
 
-            newInstance.ShowConvertToPrefabDialog = true;
-            Assert.That(newInstance.ShowConvertToPrefabDialog, Is.True);
-            Assert.That(ExportSettings.instance.ShowConvertToPrefabDialog, Is.False);
+            newInstance.DisplayOptionsWindow = true;
+            Assert.That(newInstance.DisplayOptionsWindow, Is.True);
+            Assert.That(ExportSettings.instance.DisplayOptionsWindow, Is.False);
         }
     }
 }

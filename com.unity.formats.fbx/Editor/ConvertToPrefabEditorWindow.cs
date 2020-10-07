@@ -343,14 +343,5 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             GUILayout.EndHorizontal();
         }
-
-        protected override void DoNotShowDialogUI()
-        {
-            EditorGUI.indentLevel--;
-            ExportSettings.instance.ShowConvertToPrefabDialog = !EditorGUILayout.Toggle(
-                new GUIContent("Don't ask me again", "Don't ask me again, use the last used paths and options instead"),
-                !ExportSettings.instance.ShowConvertToPrefabDialog
-            );
-        }
     }
 }
