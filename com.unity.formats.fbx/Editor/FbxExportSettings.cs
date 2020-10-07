@@ -65,7 +65,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 "Run Component Updater",
                 "If FBX exporter version 1.3.0f1 or earlier was previously installed, then links to the FbxPrefab component will need updating.\n" +
                 "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
-            public static GUIContent ShowConvertToPrefabDialog = new GUIContent(
+            public static GUIContent DisplayOptionsWindow = new GUIContent(
                 "Display Options Window",
                 "Show the Convert dialog when converting to an FBX Prefab Variant");
         }
@@ -171,7 +171,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(Style.ShowConvertToPrefabDialog, GUILayout.Width(LabelWidth));
+            EditorGUILayout.LabelField(Style.DisplayOptionsWindow, GUILayout.Width(LabelWidth));
             exportSettings.DisplayOptionsWindow = EditorGUILayout.Toggle(
                 exportSettings.DisplayOptionsWindow
             );
@@ -314,6 +314,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 }
             }
             EditorGUI.EndDisabledGroup();
+            EditorGUI.indentLevel--;
 
             GUILayout.FlexibleSpace ();
             GUILayout.EndVertical();
