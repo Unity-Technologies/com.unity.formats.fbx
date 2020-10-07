@@ -574,8 +574,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     // make a copy of the settings
                     m_exportModelSettingsInstance = ScriptableObject.CreateInstance(typeof(ExportModelSettings)) as ExportModelSettings;
-                    // load settings stored in Unity session, default to Export Settings
-                    m_exportModelSettingsInstance.info.RestoreFromSession(ExportSettings.instance.ExportModelSettings.info);
+                    // load settings stored in Unity session, default to DefaultPreset, if none then Export Settings
+                    var defaultPresets = Preset.GetDefaultPresetsForObject(m_exportModelSettingsInstance);
+                    if (defaultPresets.Length <= 0)
+                    {
+                        m_exportModelSettingsInstance.info.RestoreFromSession(ExportSettings.instance.ExportModelSettings.info);
+                    }
+                    else
+                    {
+                        // apply the first default preset
+                        // TODO: figure out what it means to have multiple default presets, when would they be applied?
+                        defaultPresets[0].ApplyTo(m_exportModelSettingsInstance);
+                        m_exportModelSettingsInstance.info.RestoreFromSession(m_exportModelSettingsInstance.info);
+                    }
                 }
                 return m_exportModelSettingsInstance;
             }

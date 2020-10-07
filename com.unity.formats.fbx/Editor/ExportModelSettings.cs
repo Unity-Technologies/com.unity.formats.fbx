@@ -20,7 +20,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public const string singleHierarchyOption = "Local Pivot";
         public const string multiHerarchyOption = "Local Centered";
-        private string hierarchyDepOption = "";
+        private string hierarchyDepOption = singleHierarchyOption;
         private string[] objPositionOptions { get { return new string[]{hierarchyDepOption, "World Absolute"}; }}
 
         private bool disableIncludeDropdown = false;
@@ -129,6 +129,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     internal abstract class ExportOptionsSettingsBase<T> : ScriptableObject where T : ExportOptionsSettingsSerializeBase, new()
     {
+        [SerializeField]
         private T m_info = new T();
         public T info {
             get { return m_info; }
