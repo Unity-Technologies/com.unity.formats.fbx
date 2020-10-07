@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [UNRELEASED] - 2020-09-29
+### Fixed
+- Fix Export Model and Convert to Prefab Variant setting presets not serializing settings properly.
+
 ## [3.2.1-preview.2] - 2020-08-05
 ### Added
 - Add an export option to preserve model import settings when overwriting an fbx file.

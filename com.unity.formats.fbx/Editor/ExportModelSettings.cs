@@ -131,7 +131,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
     {
         [SerializeField]
         private T m_info = new T();
-        public T info {
+        public T info
+        {
             get { return m_info; }
             set { m_info = value; }
         }
