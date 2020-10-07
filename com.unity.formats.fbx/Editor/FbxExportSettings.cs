@@ -755,7 +755,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 {
                     m_exportModelSettings = ScriptableObject.CreateInstance(typeof(ExportModelSettings)) as ExportModelSettings;
                 }
-                m_exportModelSettings.info = this.exportModelSettingsSerialize;
+                if (this.exportModelSettingsSerialize != null)
+                {
+                    m_exportModelSettings.info = this.exportModelSettingsSerialize;
+                }
+                else
+                {
+                    this.exportModelSettingsSerialize = m_exportModelSettings.info;
+                }
                 return m_exportModelSettings;
             }
             set { m_exportModelSettings = value; }
@@ -775,7 +782,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 {
                     m_convertToPrefabSettings = ScriptableObject.CreateInstance(typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
                 }
-                m_convertToPrefabSettings.info = this.convertToPrefabSettingsSerialize;
+                if (this.convertToPrefabSettingsSerialize != null)
+                {
+                    m_convertToPrefabSettings.info = this.convertToPrefabSettingsSerialize;
+                }
+                else
+                {
+                    this.convertToPrefabSettingsSerialize = m_convertToPrefabSettings.info;
+                }
                 return m_convertToPrefabSettings;
             }
             set { m_convertToPrefabSettings = value; }
