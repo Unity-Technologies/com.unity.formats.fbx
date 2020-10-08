@@ -32,12 +32,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        public static void Init(IEnumerable<GameObject> toConvert)
+        public static ConvertToPrefabEditorWindow Init(IEnumerable<GameObject> toConvert)
         {
             ConvertToPrefabEditorWindow window = CreateWindow<ConvertToPrefabEditorWindow>();
             window.InitializeWindow();
             window.SetGameObjectsToConvert(toConvert);
             window.Show();
+            return window;
         }
 
         protected void SetGameObjectsToConvert(IEnumerable<GameObject> toConvert)
@@ -246,9 +247,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        [SerializeField]
+
+        protected override string SessionStoragePrefix { get { return "FbxExporterConvertOptions_{0}"; } }
+
+        public override void ClearSessionSettings(ExportOptionsSettingsSerializeBase settings)
+        {
+            base.ClearSessionSettings(settings);
+            m_convertToPrefabSettingsInstance = null;
+        }
+
         private ConvertToPrefabSettings m_convertToPrefabSettingsInstance;
-        protected ConvertToPrefabSettings ConvertToPrefabSettingsInstance
+        public ConvertToPrefabSettings ConvertToPrefabSettingsInstance
         {
             get
             {
@@ -260,14 +269,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     var defaultPresets = Preset.GetDefaultPresetsForObject(m_convertToPrefabSettingsInstance);
                     if (defaultPresets.Length <= 0)
                     {
-                        m_convertToPrefabSettingsInstance.info.RestoreFromSession(ExportSettings.instance.ConvertToPrefabSettings.info);
+                        RestoreSettingsFromSession(m_convertToPrefabSettingsInstance.info, ExportSettings.instance.ConvertToPrefabSettings.info);
                     }
                     else
                     {
                         // apply the first default preset
                         // TODO: figure out what it means to have multiple default presets, when would they be applied?
                         defaultPresets[0].ApplyTo(m_convertToPrefabSettingsInstance);
-                        m_convertToPrefabSettingsInstance.info.RestoreFromSession(m_convertToPrefabSettingsInstance.info);
+                        RestoreSettingsFromSession(m_convertToPrefabSettingsInstance.info, m_convertToPrefabSettingsInstance.info);
                     }
                 }
                 return m_convertToPrefabSettingsInstance;
@@ -276,7 +285,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public override void SaveExportSettings()
         {
-            ConvertToPrefabSettingsInstance.info.StoreInSession();
+            StoreSettingsInSession(m_convertToPrefabSettingsInstance.info);
         }
 
         protected override ExportOptionsSettingsSerializeBase SettingsObject

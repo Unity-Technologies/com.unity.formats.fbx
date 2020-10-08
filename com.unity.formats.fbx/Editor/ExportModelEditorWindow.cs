@@ -101,6 +101,29 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected abstract ExportOptionsSettingsSerializeBase SettingsObject { get; }
 
+        // Helper functions for persisting the Export Settings for the session
+        protected virtual string SessionStoragePrefix { get { return "FbxExporterOptions_{0}"; } }
+        protected virtual void StoreSettingsInSession(ExportOptionsSettingsSerializeBase settings)
+        {
+            SessionState.SetInt(string.Format(SessionStoragePrefix, nameof(settings.ExportFormat)), (int)settings.ExportFormat);
+            SessionState.SetBool(string.Format(SessionStoragePrefix, nameof(settings.AnimateSkinnedMesh)), settings.AnimateSkinnedMesh);
+            SessionState.SetBool(string.Format(SessionStoragePrefix, nameof(settings.UseMayaCompatibleNames)), settings.UseMayaCompatibleNames);
+        }
+
+        protected virtual void RestoreSettingsFromSession(ExportOptionsSettingsSerializeBase settings, ExportOptionsSettingsSerializeBase defaults)
+        {
+            settings.SetExportFormat((ExportSettings.ExportFormat)SessionState.GetInt(string.Format(SessionStoragePrefix, nameof(settings.ExportFormat)), (int)defaults.ExportFormat));
+            settings.SetAnimatedSkinnedMesh(SessionState.GetBool(string.Format(SessionStoragePrefix, nameof(settings.AnimateSkinnedMesh)), defaults.AnimateSkinnedMesh));
+            settings.SetUseMayaCompatibleNames(SessionState.GetBool(string.Format(SessionStoragePrefix, nameof(settings.UseMayaCompatibleNames)), defaults.UseMayaCompatibleNames));
+        }
+
+        public virtual void ClearSessionSettings(ExportOptionsSettingsSerializeBase settings)
+        {
+            SessionState.EraseInt(string.Format(SessionStoragePrefix, nameof(settings.ExportFormat)));
+            SessionState.EraseBool(string.Format(SessionStoragePrefix, nameof(settings.AnimateSkinnedMesh)));
+            SessionState.EraseBool(string.Format(SessionStoragePrefix, nameof(settings.UseMayaCompatibleNames)));
+        }
+
         private UnityEngine.Object[] m_toExport;
         protected Object[] GetToExport(){ return m_toExport; }
         protected void SetToExport(Object[] value){ m_toExport = value; }
@@ -563,10 +586,41 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
         }
+        
+        protected override void StoreSettingsInSession(ExportOptionsSettingsSerializeBase settings)
+        {
+            base.StoreSettingsInSession(settings);
+            SessionState.SetInt(string.Format(SessionStoragePrefix, nameof(settings.ModelAnimIncludeOption)), (int)settings.ModelAnimIncludeOption);
+            SessionState.SetInt(string.Format(SessionStoragePrefix, nameof(settings.LODExportType)), (int)settings.LODExportType);
+            SessionState.SetInt(string.Format(SessionStoragePrefix, nameof(settings.ObjectPosition)), (int)settings.ObjectPosition);
+            SessionState.SetBool(string.Format(SessionStoragePrefix, nameof(settings.ExportUnrendered)), settings.ExportUnrendered);
+            SessionState.SetBool(string.Format(SessionStoragePrefix, nameof(settings.PreserveImportSettings)), settings.PreserveImportSettings);
+        }
 
-        [SerializeField]
+        protected override void RestoreSettingsFromSession(ExportOptionsSettingsSerializeBase settings, ExportOptionsSettingsSerializeBase defaults)
+        {
+            base.RestoreSettingsFromSession(settings, defaults);
+            var exportSettings = settings as ExportModelSettingsSerialize;
+            exportSettings.SetModelAnimIncludeOption((ExportSettings.Include)SessionState.GetInt(string.Format(SessionStoragePrefix, nameof(settings.ModelAnimIncludeOption)), (int)defaults.ModelAnimIncludeOption));
+            exportSettings.SetLODExportType((ExportSettings.LODExportType)SessionState.GetInt(string.Format(SessionStoragePrefix, nameof(settings.LODExportType)), (int)defaults.LODExportType));
+            exportSettings.SetObjectPosition((ExportSettings.ObjectPosition)SessionState.GetInt(string.Format(SessionStoragePrefix, nameof(settings.ObjectPosition)), (int)defaults.ObjectPosition));
+            exportSettings.SetExportUnredererd(SessionState.GetBool(string.Format(SessionStoragePrefix, nameof(settings.ExportUnrendered)), defaults.ExportUnrendered));
+            exportSettings.SetPreserveImportSettings(SessionState.GetBool(string.Format(SessionStoragePrefix, nameof(settings.PreserveImportSettings)), defaults.PreserveImportSettings));
+        }
+
+        public override void ClearSessionSettings(ExportOptionsSettingsSerializeBase settings)
+        {
+            base.ClearSessionSettings(settings);
+            SessionState.EraseInt(string.Format(SessionStoragePrefix, nameof(settings.ModelAnimIncludeOption)));
+            SessionState.EraseInt(string.Format(SessionStoragePrefix, nameof(settings.LODExportType)));
+            SessionState.EraseInt(string.Format(SessionStoragePrefix, nameof(settings.ObjectPosition)));
+            SessionState.EraseBool(string.Format(SessionStoragePrefix, nameof(settings.ExportUnrendered)));
+            SessionState.EraseBool(string.Format(SessionStoragePrefix, nameof(settings.PreserveImportSettings)));
+            m_exportModelSettingsInstance = null;
+        }
+
         private ExportModelSettings m_exportModelSettingsInstance;
-        protected ExportModelSettings ExportModelSettingsInstance
+        public ExportModelSettings ExportModelSettingsInstance
         {
             get
             {
@@ -578,14 +632,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     var defaultPresets = Preset.GetDefaultPresetsForObject(m_exportModelSettingsInstance);
                     if (defaultPresets.Length <= 0)
                     {
-                        m_exportModelSettingsInstance.info.RestoreFromSession(ExportSettings.instance.ExportModelSettings.info);
+                        RestoreSettingsFromSession(m_exportModelSettingsInstance.info, ExportSettings.instance.ExportModelSettings.info);
                     }
                     else
                     {
                         // apply the first default preset
                         // TODO: figure out what it means to have multiple default presets, when would they be applied?
                         defaultPresets[0].ApplyTo(m_exportModelSettingsInstance);
-                        m_exportModelSettingsInstance.info.RestoreFromSession(m_exportModelSettingsInstance.info);
+                        RestoreSettingsFromSession(m_exportModelSettingsInstance.info, m_exportModelSettingsInstance.info);
                     }
                 }
                 return m_exportModelSettingsInstance;
@@ -594,7 +648,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public override void SaveExportSettings()
         {
-            ExportModelSettingsInstance.info.StoreInSession();
+            StoreSettingsInSession(m_exportModelSettingsInstance.info);
         }
 
         protected override ExportOptionsSettingsSerializeBase SettingsObject
@@ -604,7 +658,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private ExportSettings.Include m_previousInclude = ExportSettings.Include.ModelAndAnim;
 
-        public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false)
+        public static ExportModelEditorWindow Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false)
         {
             ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
             window.IsTimelineAnim = isTimelineAnim;
@@ -616,6 +670,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             window.InitializeWindow (filename);
             window.SingleHierarchyExport = (numObjects == 1);
             window.Show ();
+            return window;
         }
 
         protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport){
