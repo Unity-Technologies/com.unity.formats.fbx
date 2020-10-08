@@ -108,6 +108,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
             SessionState.SetInt(string.Format(SessionStoragePrefix, nameof(settings.ExportFormat)), (int)settings.ExportFormat);
             SessionState.SetBool(string.Format(SessionStoragePrefix, nameof(settings.AnimateSkinnedMesh)), settings.AnimateSkinnedMesh);
             SessionState.SetBool(string.Format(SessionStoragePrefix, nameof(settings.UseMayaCompatibleNames)), settings.UseMayaCompatibleNames);
+
+            // store Fbx Save Paths
+            if(m_fbxSavePaths == null)
+            {
+                return;
+            }
+            for(int i = 0; i < m_fbxSavePaths.Count; i++)
+            {
+                SessionState.SetString(string.Format(SessionStoragePrefix, nameof(m_fbxSavePaths)) + "_" + i, m_fbxSavePaths[i]);
+            }
+            SessionState.SetInt(string.Format(SessionStoragePrefix, nameof(SelectedFbxPath)), SelectedFbxPath);
         }
 
         protected virtual void RestoreSettingsFromSession(ExportOptionsSettingsSerializeBase settings, ExportOptionsSettingsSerializeBase defaults)
@@ -122,6 +133,55 @@ namespace UnityEditor.Formats.Fbx.Exporter
             SessionState.EraseInt(string.Format(SessionStoragePrefix, nameof(settings.ExportFormat)));
             SessionState.EraseBool(string.Format(SessionStoragePrefix, nameof(settings.AnimateSkinnedMesh)));
             SessionState.EraseBool(string.Format(SessionStoragePrefix, nameof(settings.UseMayaCompatibleNames)));
+
+            for (int i = 0; i < ExportSettings.instance.maxStoredSavePaths; i++)
+            {
+                SessionState.EraseString(string.Format(SessionStoragePrefix, nameof(m_fbxSavePaths)) + "_" + i);
+            }
+            m_fbxSavePaths = null;
+            SessionState.EraseInt(string.Format(SessionStoragePrefix, nameof(SelectedFbxPath)));
+            SelectedFbxPath = 0;
+        }
+
+        [SerializeField]
+        private List<string> m_fbxSavePaths;
+        protected List<string> FbxSavePaths
+        {
+            get
+            {
+                if (m_fbxSavePaths == null)
+                {
+                    // Try to restore from session, fall back to Fbx Export Settings
+                    m_fbxSavePaths = new List<string>();
+                    for (int i = 0; i < ExportSettings.instance.maxStoredSavePaths; i++)
+                    {
+                        var path = SessionState.GetString(string.Format(SessionStoragePrefix, nameof(m_fbxSavePaths)) + "_" + i, null);
+                        if (string.IsNullOrEmpty(path))
+                        {
+                            break;
+                        }
+                        m_fbxSavePaths.Add(path);
+                    }
+                    if (m_fbxSavePaths.Count <= 0)
+                    {
+                        m_fbxSavePaths = ExportSettings.instance.GetCopyOfFbxSavePaths();
+                        SelectedFbxPath = ExportSettings.instance.SelectedFbxPath;
+                    }
+                    else
+                    {
+                        SelectedFbxPath = SessionState.GetInt(string.Format(SessionStoragePrefix, nameof(SelectedFbxPath)), 0);
+                    }
+                }
+                return m_fbxSavePaths;
+            }
+        }
+
+        [SerializeField]
+        private int m_selectedFbxPath = 0;
+        protected int SelectedFbxPath
+        {
+            get { return m_selectedFbxPath; }
+            set { m_selectedFbxPath = value; }
         }
 
         private UnityEngine.Object[] m_toExport;
@@ -391,23 +451,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 "Export Path",
                 "Location where the FBX will be saved."),GUILayout.Width(LabelWidth - FieldOffset));
 
-            var pathLabels = ExportSettings.GetMixedFbxSavePaths();
+            var pathLabels = ExportSettings.GetMixedSavePaths(FbxSavePaths);
 
             if (this is ConvertToPrefabEditorWindow)
             {
-                pathLabels = ExportSettings.GetRelativeFbxSavePaths();
+                pathLabels = ExportSettings.GetRelativeFbxSavePaths(FbxSavePaths, ref m_selectedFbxPath);
             }
 
-            ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+            SelectedFbxPath = EditorGUILayout.Popup (SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
-            // Set export setting for exporting outside the project on choosing a path
-            if (!pathLabels[ExportSettings.instance.SelectedFbxPath].Substring(0, 6).Equals("Assets"))
+            if (!(this is ConvertToPrefabEditorWindow))
             {
-                ExportSettings.instance.ExportOutsideProject = true;
-            }
-            else
-            {
-                ExportSettings.instance.ExportOutsideProject = false;
+                var exportSettingsEditor = InnerEditor as ExportModelSettingsEditor;
+                // Set export setting for exporting outside the project on choosing a path
+                var exportOutsideProject = !pathLabels[SelectedFbxPath].Substring(0, 6).Equals("Assets");
+                exportSettingsEditor.SetExportingOutsideProject(exportOutsideProject);
             }
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new location to export to"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
@@ -431,13 +489,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // We're exporting outside Assets folder, so store the absolute path
                     else if (string.IsNullOrEmpty(relativePath))
                     {
-                        ExportSettings.instance.ExportOutsideProject = true;
-                        ExportSettings.AddFbxSavePath(fullPath);
+                        //ExportSettings.instance.ExportOutsideProject = true;
+                        ExportSettings.AddSavePath(fullPath, ref m_fbxSavePaths, exportOutsideProject: true);
+                        SelectedFbxPath = 0;
                     }
                     // Store the relative path to the Assets folder
                     else
                     {
-                        ExportSettings.AddFbxSavePath(relativePath);
+                        ExportSettings.AddSavePath(relativePath, ref m_fbxSavePaths, exportOutsideProject: false);
+                        SelectedFbxPath = 0;
                     }
                     // Make sure focus is removed from the selectable label
                     // otherwise it won't update
@@ -747,7 +807,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Debug.LogError ("FbxExporter: Please specify an fbx filename");
                 return false;
             }
-            var folderPath = ExportSettings.FbxAbsoluteSavePath;
+            var folderPath = ExportSettings.GetAbsoluteSavePath(FbxSavePaths[SelectedFbxPath]);
             var filePath = System.IO.Path.Combine (folderPath, ExportFileName + ".fbx");
 
             if (!OverwriteExistingFile (filePath)) {

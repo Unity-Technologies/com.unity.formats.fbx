@@ -147,10 +147,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            var fbxDirPath = ExportSettings.FbxAbsoluteSavePath;
+            var fbxDirPath = ExportSettings.GetAbsoluteSavePath(FbxSavePaths[SelectedFbxPath]); ;
             var fbxPath = System.IO.Path.Combine(fbxDirPath, ExportFileName + ".fbx");
 
-            var prefabDirPath = ExportSettings.PrefabAbsoluteSavePath;
+            var prefabDirPath = ExportSettings.GetAbsoluteSavePath(PrefabSavePaths[SelectedPrefabPath]);
             var prefabPath = System.IO.Path.Combine(prefabDirPath, m_prefabFileName + ".prefab");
 
             if (GetToExport() == null)
@@ -254,6 +254,71 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             base.ClearSessionSettings(settings);
             m_convertToPrefabSettingsInstance = null;
+
+            for (int i = 0; i < ExportSettings.instance.maxStoredSavePaths; i++)
+            {
+                SessionState.EraseString(string.Format(SessionStoragePrefix, nameof(m_prefabSavePaths)) + "_" + i);
+            }
+            m_prefabSavePaths = null;
+            SessionState.EraseInt(string.Format(SessionStoragePrefix, nameof(SelectedPrefabPath)));
+            SelectedPrefabPath = 0;
+        }
+
+        protected override void StoreSettingsInSession(ExportOptionsSettingsSerializeBase settings)
+        {
+            base.StoreSettingsInSession(settings);
+
+            // store Prefab Save Paths
+            if (m_prefabSavePaths == null)
+            {
+                return;
+            }
+            for (int i = 0; i < m_prefabSavePaths.Count; i++)
+            {
+                SessionState.SetString(string.Format(SessionStoragePrefix, nameof(m_prefabSavePaths)) + "_" + i, m_prefabSavePaths[i]);
+            }
+            SessionState.SetInt(string.Format(SessionStoragePrefix, nameof(SelectedPrefabPath)), SelectedPrefabPath);
+        }
+
+        [SerializeField]
+        private List<string> m_prefabSavePaths;
+        protected List<string> PrefabSavePaths
+        {
+            get
+            {
+                if (m_prefabSavePaths == null)
+                {
+                    // Try to restore from session, fall back to Fbx Export Settings
+                    m_prefabSavePaths = new List<string>();
+                    for (int i = 0; i < ExportSettings.instance.maxStoredSavePaths; i++)
+                    {
+                        var path = SessionState.GetString(string.Format(SessionStoragePrefix, nameof(m_prefabSavePaths)) + "_" + i, null);
+                        if (string.IsNullOrEmpty(path))
+                        {
+                            break;
+                        }
+                        m_prefabSavePaths.Add(path);
+                    }
+                    if (m_prefabSavePaths.Count <= 0)
+                    {
+                        m_prefabSavePaths = ExportSettings.instance.GetCopyOfPrefabSavePaths();
+                        SelectedPrefabPath = ExportSettings.instance.SelectedPrefabPath;
+                    }
+                    else
+                    {
+                        SelectedPrefabPath = SessionState.GetInt(string.Format(SessionStoragePrefix, nameof(SelectedPrefabPath)), 0);
+                    }
+                }
+                return m_prefabSavePaths;
+            }
+        }
+
+        [SerializeField]
+        private int m_selectedPrefabPath = 0;
+        protected int SelectedPrefabPath
+        {
+            get { return m_selectedPrefabPath; }
+            set { m_selectedPrefabPath = value; }
         }
 
         private ConvertToPrefabSettings m_convertToPrefabSettingsInstance;
@@ -330,9 +395,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 "Prefab Path",
                 "Relative path for saving FBX Prefab Variants."), GUILayout.Width(LabelWidth - FieldOffset));
 
-            var pathLabels = ExportSettings.GetRelativePrefabSavePaths();
+            var pathLabels = ExportSettings.GetRelativeSavePaths(PrefabSavePaths);
 
-            ExportSettings.instance.SelectedPrefabPath = EditorGUILayout.Popup(ExportSettings.instance.SelectedPrefabPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+            SelectedPrefabPath = EditorGUILayout.Popup(SelectedPrefabPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new location to save prefab to"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
@@ -352,7 +417,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                     else
                     {
-                        ExportSettings.AddPrefabSavePath(relativePath);
+                        ExportSettings.AddSavePath(relativePath, ref m_prefabSavePaths);
+                        SelectedPrefabPath = 0;
 
                         // Make sure focus is removed from the selectable label
                         // otherwise it won't update

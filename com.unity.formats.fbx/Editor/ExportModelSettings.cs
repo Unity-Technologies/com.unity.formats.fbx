@@ -25,6 +25,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private bool disableIncludeDropdown = false;
 
+        private bool m_exportingOutsideProject = false;
+        public void SetExportingOutsideProject(bool val)
+        {
+            m_exportingOutsideProject = val;
+        }
+
         public void SetIsSingleHierarchy(bool singleHierarchy){
             if (singleHierarchy) {
                 hierarchyDepOption = singleHierarchyOption;
@@ -106,7 +112,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUILayout.LabelField(new GUIContent("Preserve Import Settings",
                 "If checked, the import settings from the overwritten FBX will be carried over to the new version."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if exporting outside assets folder
-            EditorGUI.BeginDisabledGroup(ExportSettings.instance.ExportOutsideProject);
+            EditorGUI.BeginDisabledGroup(m_exportingOutsideProject);
             exportSettings.SetPreserveImportSettings(EditorGUILayout.Toggle(exportSettings.PreserveImportSettings));
             EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
@@ -170,7 +176,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public abstract ExportSettings.LODExportType LODExportType { get; }
         public abstract ExportSettings.ObjectPosition ObjectPosition { get; }
         public abstract bool ExportUnrendered { get; }
-        public virtual bool PreserveImportSettings { get;  }
+        public virtual bool PreserveImportSettings { get { return false; } }
         public abstract bool AllowSceneModification { get; }
     }
 
@@ -196,7 +202,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool ExportUnrendered { get { return exportUnrendered; } }
         public void SetExportUnredererd(bool exportUnrendered){ this.exportUnrendered = exportUnrendered; }
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }
-        public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings && !ExportSettings.instance.ExportOutsideProject; }
+        public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings; }
         public override bool AllowSceneModification { get { return false; } }
     }
 }

@@ -90,13 +90,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
 
             // Set export setting for exporting outside the project on choosing a path
-            if (!isConvertToPrefabOptions && !pathLabels[ExportSettings.instance.SelectedFbxPath].Substring(0, 6).Equals("Assets"))
+            if (!isConvertToPrefabOptions)
             {
-                ExportSettings.instance.ExportOutsideProject = true;
-            }
-            else
-            {
-                ExportSettings.instance.ExportOutsideProject = false;
+                // Set export setting for exporting outside the project on choosing a path
+                var exportOutsideProject = !pathLabels[ExportSettings.instance.SelectedFbxPath].Substring(0, 6).Equals("Assets");
+                m_exportModelEditor.SetExportingOutsideProject(exportOutsideProject);
             }
 
             EditorGUI.BeginDisabledGroup(!isSingletonInstance);
@@ -124,8 +122,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                         }
                         else
                         {
-                            ExportSettings.instance.ExportOutsideProject = true;
-                            ExportSettings.AddFbxSavePath(fullPath);
+                            ExportSettings.AddFbxSavePath(fullPath, exportOutsideProject: true);
                         }
                     }
                     // Store the relative path to the Assets folder
@@ -428,8 +425,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 
-        public bool ExportOutsideProject = false;
-
         internal const string kDefaultSavePath = ".";
         private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};
         //Any additional names require a space after the name
@@ -715,9 +710,17 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         [SerializeField]
         private List<string> prefabSavePaths = new List<string> ();
+        internal List<string> GetCopyOfPrefabSavePaths()
+        {
+            return new List<string>(prefabSavePaths);
+        }
 
         [SerializeField]
         private List<string> fbxSavePaths = new List<string> ();
+        internal List<string> GetCopyOfFbxSavePaths()
+        {
+            return new List<string>(fbxSavePaths);
+        }
 
         [SerializeField]
         private int selectedFbxPath = 0;
@@ -735,7 +738,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             set { selectedPrefabPath = value; }
         }
 
-        private int maxStoredSavePaths = 5;
+        internal int maxStoredSavePaths = 5;
 
         // List of names in order that they appear in option list
         [SerializeField]
@@ -1372,17 +1375,28 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// Only returns the paths within the Assets folder of the project.
         /// </summary>
         internal static string[] GetRelativeFbxSavePaths(){
+            return GetRelativeFbxSavePaths(instance.fbxSavePaths, ref instance.selectedFbxPath);
+        }
+
+        /// <summary>
+        /// The path where Export model will save the new fbx.
+        /// This is relative to the Application.dataPath ; it uses '/' as the
+        /// separator on all platforms.
+        /// Only returns the paths within the Assets folder of the project.
+        /// </summary>
+        internal static string[] GetRelativeFbxSavePaths(List<string> fbxSavePaths, ref int pathIndex)
+        {
             // sort the list of paths, putting project paths first
-            instance.fbxSavePaths.Sort((x, y) => Path.IsPathRooted(x).CompareTo(Path.IsPathRooted(y)));
-            var relPathCount = instance.fbxSavePaths.FindAll(x => !Path.IsPathRooted(x)).Count;
+            fbxSavePaths.Sort((x, y) => Path.IsPathRooted(x).CompareTo(Path.IsPathRooted(y)));
+            var relPathCount = fbxSavePaths.FindAll(x => !Path.IsPathRooted(x)).Count;
 
             // reset selected path if it's out of range
-            if (instance.SelectedFbxPath > relPathCount - 1)
+            if (pathIndex > relPathCount - 1)
             {
-                instance.SelectedFbxPath = 0;
+                pathIndex = 0;
             }
 
-            return GetRelativeSavePaths(instance.fbxSavePaths.GetRange(0, relPathCount));
+            return GetRelativeSavePaths(fbxSavePaths.GetRange(0, relPathCount));
         }
 
         /// <summary>
@@ -1408,13 +1422,13 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         /// <param name="savePath">Save path.</param>
         /// <param name="exportSavePaths">Export save paths.</param>
-        private static void AddSavePath(string savePath, ref List<string> exportSavePaths){
+        internal static void AddSavePath(string savePath, ref List<string> exportSavePaths, bool exportOutsideProject = false){
             if(exportSavePaths == null)
             {
                 return;
             }
 
-            if (ExportSettings.instance.ExportOutsideProject)
+            if (exportOutsideProject)
             {
                 savePath = NormalizePath(savePath, isRelative: false);
             }
@@ -1439,8 +1453,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             exportSavePaths.Insert (0, savePath);
         }
 
-        internal static void AddFbxSavePath(string savePath){
-            AddSavePath (savePath, ref instance.fbxSavePaths);
+        internal static void AddFbxSavePath(string savePath, bool exportOutsideProject = false){
+            AddSavePath (savePath, ref instance.fbxSavePaths, exportOutsideProject);
             instance.SelectedFbxPath = 0;
         }
 
