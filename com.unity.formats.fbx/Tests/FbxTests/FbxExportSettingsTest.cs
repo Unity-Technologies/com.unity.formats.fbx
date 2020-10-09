@@ -599,7 +599,7 @@ namespace FbxExporter.UnitTests
 
             var exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
             // clear any previous settings
-            exportWindow.ClearSessionSettings(exportWindow.ExportModelSettingsInstance.info);
+            exportWindow.ClearSessionSettings();
             Assert.That(exportWindow.ExportModelSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(exportSettingsPreset.info.AnimateSkinnedMesh));
             Assert.That(exportWindow.ExportModelSettingsInstance.info.ExportFormat, Is.EqualTo(exportSettingsPreset.info.ExportFormat));
             exportWindow.Close();
@@ -611,7 +611,7 @@ namespace FbxExporter.UnitTests
 
             exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
             // clear any previous settings
-            exportWindow.ClearSessionSettings(exportWindow.ExportModelSettingsInstance.info);
+            exportWindow.ClearSessionSettings();
             Assert.That(exportWindow.ExportModelSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(instance.ExportModelSettings.info.AnimateSkinnedMesh));
             Assert.That(exportWindow.ExportModelSettingsInstance.info.ExportFormat, Is.EqualTo(instance.ExportModelSettings.info.ExportFormat));
 
@@ -627,7 +627,7 @@ namespace FbxExporter.UnitTests
             Assert.That(exportWindow.ExportModelSettingsInstance.info.ExportFormat, Is.Not.EqualTo(instance.ExportModelSettings.info.ExportFormat));
 
             // make sure these settings don't persist and close window
-            exportWindow.ClearSessionSettings(exportWindow.ExportModelSettingsInstance.info);
+            exportWindow.ClearSessionSettings();
             exportWindow.Close();
         }
 
@@ -660,7 +660,7 @@ namespace FbxExporter.UnitTests
 
             var convertWindow = ConvertToPrefabEditorWindow.Init(new GameObject[] { go });
             // clear any previous settings
-            convertWindow.ClearSessionSettings(convertWindow.ConvertToPrefabSettingsInstance.info);
+            convertWindow.ClearSessionSettings();
             Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(convertSettingsPreset.info.AnimateSkinnedMesh));
             Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.ExportFormat, Is.EqualTo(convertSettingsPreset.info.ExportFormat));
             convertWindow.Close();
@@ -672,7 +672,7 @@ namespace FbxExporter.UnitTests
 
             convertWindow = ConvertToPrefabEditorWindow.Init(new GameObject[] { go });
             // clear any previous settings
-            convertWindow.ClearSessionSettings(convertWindow.ConvertToPrefabSettingsInstance.info);
+            convertWindow.ClearSessionSettings();
             Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(instance.ConvertToPrefabSettings.info.AnimateSkinnedMesh));
             Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.ExportFormat, Is.EqualTo(instance.ConvertToPrefabSettings.info.ExportFormat));
 
@@ -688,7 +688,7 @@ namespace FbxExporter.UnitTests
             Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.ExportFormat, Is.Not.EqualTo(instance.ConvertToPrefabSettings.info.ExportFormat));
 
             // make sure these settings don't persist and close window
-            convertWindow.ClearSessionSettings(convertWindow.ConvertToPrefabSettingsInstance.info);
+            convertWindow.ClearSessionSettings();
             convertWindow.Close();
         }
     }

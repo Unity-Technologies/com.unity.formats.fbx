@@ -142,6 +142,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
             get { return m_info; }
             set { m_info = value; }
         }
+
+        public override bool Equals(object e)
+        {
+            var expOptions = e as ExportOptionsSettingsBase<T>;
+            if(expOptions == null)
+            {
+                return false;
+            }
+            return this.info.Equals(expOptions.info);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.info.GetHashCode();
+        }
     }
 
     internal class ExportModelSettings : ExportOptionsSettingsBase<ExportModelSettingsSerialize>
@@ -178,6 +193,23 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public abstract bool ExportUnrendered { get; }
         public virtual bool PreserveImportSettings { get { return false; } }
         public abstract bool AllowSceneModification { get; }
+
+        public override bool Equals(object e)
+        {
+            var expOptions = e as ExportOptionsSettingsSerializeBase;
+            if (expOptions == null)
+            {
+                return false;
+            }
+            return animatedSkinnedMesh == expOptions.animatedSkinnedMesh &&
+                mayaCompatibleNaming == expOptions.mayaCompatibleNaming &&
+                exportFormat == expOptions.exportFormat;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
     [System.Serializable]
@@ -191,6 +223,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private ExportSettings.ObjectPosition objectPosition = ExportSettings.ObjectPosition.LocalCentered;
         [SerializeField]
         private bool exportUnrendered = true;
+        [SerializeField]
         private bool preserveImportSettings = false;
 
         public override ExportSettings.Include ModelAnimIncludeOption { get { return include; } }
@@ -204,5 +237,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }
         public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings; }
         public override bool AllowSceneModification { get { return false; } }
+
+        public override bool Equals(object e)
+        {
+            var expOptions = e as ExportModelSettingsSerialize;
+            if (expOptions == null)
+            {
+                return false;
+            }
+            return base.Equals(e) && 
+                include == expOptions.include &&
+                lodLevel == expOptions.lodLevel &&
+                objectPosition == expOptions.objectPosition &&
+                exportUnrendered == expOptions.exportUnrendered &&
+                preserveImportSettings == expOptions.preserveImportSettings;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

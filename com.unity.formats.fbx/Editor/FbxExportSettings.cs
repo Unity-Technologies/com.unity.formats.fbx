@@ -710,16 +710,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         [SerializeField]
         private List<string> prefabSavePaths = new List<string> ();
-        internal List<string> GetCopyOfPrefabSavePaths()
+        internal string GetJoinedPrefabSavePaths()
         {
-            return new List<string>(prefabSavePaths);
+            return string.Join(",", prefabSavePaths);
         }
 
         [SerializeField]
         private List<string> fbxSavePaths = new List<string> ();
-        internal List<string> GetCopyOfFbxSavePaths()
+        internal string GetJoinedFbxSavePaths()
         {
-            return new List<string>(fbxSavePaths);
+            return string.Join(",", fbxSavePaths);
         }
 
         [SerializeField]
@@ -738,7 +738,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             set { selectedPrefabPath = value; }
         }
 
-        internal int maxStoredSavePaths = 5;
+        private int maxStoredSavePaths = 5;
 
         // List of names in order that they appear in option list
         [SerializeField]
