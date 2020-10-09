@@ -1,8 +1,16 @@
 # Changes in Fbx Exporter
 
 ## [UNRELEASED] - 2020-09-29
+### Changed
+- The Export and Convert to Prefab options can now be changed in the FBX Export Settings in Edit > Project Settings > Fbx Export.
+    - The Export and Convert to Prefab Options windows will use these settings by default.
+    - When modifying the settings in the Export/Convert to Prefab windows, the Project Settings are no longer updated, but the changes persist for the remainder of the Unity session.
+- Disable buttons such as the "Install Integration" button when editing an FBX export setting preset.
+- Rename "Show Convert UI" in project settings to "Display Options Window" and use it for both the Convert and Export windows instead of just the Convert to Prefab window.
+
 ### Fixed
 - Fix Export Model and Convert to Prefab Variant setting presets not serializing settings properly.
+- Fix NullReferenceException when creating a preset for the FBX export settings in Edit > Project Settings > Fbx Export.
 
 ## [3.2.1-preview.2] - 2020-08-05
 ### Added
