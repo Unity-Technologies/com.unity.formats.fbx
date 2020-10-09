@@ -418,7 +418,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                     else
                     {
-                        ExportSettings.AddSavePath(relativePath, ref m_prefabSavePaths);
+                        ExportSettings.AddSavePath(relativePath, PrefabSavePaths);
                         SelectedPrefabPath = 0;
 
                         // Make sure focus is removed from the selectable label

@@ -1422,7 +1422,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         /// <param name="savePath">Save path.</param>
         /// <param name="exportSavePaths">Export save paths.</param>
-        internal static void AddSavePath(string savePath, ref List<string> exportSavePaths, bool exportOutsideProject = false){
+        internal static void AddSavePath(string savePath, List<string> exportSavePaths, bool exportOutsideProject = false){
             if(exportSavePaths == null)
             {
                 return;
@@ -1454,12 +1454,12 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         }
 
         internal static void AddFbxSavePath(string savePath, bool exportOutsideProject = false){
-            AddSavePath (savePath, ref instance.fbxSavePaths, exportOutsideProject);
+            AddSavePath (savePath, instance.fbxSavePaths, exportOutsideProject);
             instance.SelectedFbxPath = 0;
         }
 
         internal static void AddPrefabSavePath(string savePath){
-            AddSavePath (savePath, ref instance.prefabSavePaths);
+            AddSavePath (savePath, instance.prefabSavePaths);
             instance.SelectedPrefabPath = 0;
         }
 
