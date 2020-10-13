@@ -103,19 +103,61 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         // Helper functions for persisting the Export Settings for the session
         protected virtual string SessionStoragePrefix { get { return "FbxExporterOptions_{0}"; } }
+
+        protected void StorePathsInSession(string varName, List<string> paths)
+        {
+            if(paths == null)
+            {
+                return;
+            }
+
+            var n = paths.Count;
+            SessionState.SetInt(string.Format(SessionStoragePrefix, varName), n);
+            for (int i = 0; i < n; i++)
+            {
+                SessionState.SetString(string.Format(SessionStoragePrefix + "_{1}", varName, i), paths[i]);
+            }
+        }
+
+        protected void RestorePathsFromSession(string varName, List<string> defaultsPaths, out List<string> paths)
+        {
+            var n = SessionState.GetInt(string.Format(SessionStoragePrefix, varName), 0);
+            paths = new List<string>();
+            if (n > 0)
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    var path = SessionState.GetString(string.Format(SessionStoragePrefix + "_{1}", varName, i), null);
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        paths.Add(path);
+                    }
+                }
+            }
+
+            if (paths.Count <= 0)
+            {
+                paths = defaultsPaths;
+            }
+        }
+
+        protected void ClearPathsFromSession(string varName)
+        {
+            var n = SessionState.GetInt(string.Format(SessionStoragePrefix, varName), 0);
+            SessionState.EraseInt(string.Format(SessionStoragePrefix, varName));
+            for(int i = 0; i < n; i++)
+            {
+                SessionState.EraseString(string.Format(SessionStoragePrefix + "_{1}", varName, i));
+            }
+        }
+
         protected virtual void StoreSettingsInSession()
         {
             var settings = SettingsObject;
             var json = EditorJsonUtility.ToJson(settings);
             SessionState.SetString(string.Format(SessionStoragePrefix, nameof(settings)), json);
 
-            // store Fbx Save Paths
-            if (m_fbxSavePaths == null)
-            {
-                return;
-            }
-            var joinedPaths = string.Join(",", m_fbxSavePaths);
-            SessionState.SetString(string.Format(SessionStoragePrefix, nameof(m_fbxSavePaths)), joinedPaths);
+            StorePathsInSession(nameof(m_fbxSavePaths), m_fbxSavePaths);
             SessionState.SetInt(string.Format(SessionStoragePrefix, nameof(SelectedFbxPath)), SelectedFbxPath);
         }
 
@@ -133,7 +175,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var settings = SettingsObject;
             SessionState.EraseString(string.Format(SessionStoragePrefix, nameof(settings)));
-            SessionState.EraseString(string.Format(SessionStoragePrefix, nameof(m_fbxSavePaths)));
+            ClearPathsFromSession(nameof(m_fbxSavePaths));
             m_fbxSavePaths = null;
             SessionState.EraseInt(string.Format(SessionStoragePrefix, nameof(SelectedFbxPath)));
             SelectedFbxPath = 0;
@@ -148,17 +190,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 if (m_fbxSavePaths == null)
                 {
                     // Try to restore from session, fall back to Fbx Export Settings
-                    var pathStr = SessionState.GetString(string.Format(SessionStoragePrefix, nameof(m_fbxSavePaths)), ExportSettings.instance.GetJoinedFbxSavePaths());
-                    m_fbxSavePaths = new List<string>(pathStr.Split(','));
-                    if (m_fbxSavePaths.Count <= 0)
-                    {
-                        m_fbxSavePaths.Add(ExportSettings.kDefaultSavePath);
-                        SelectedFbxPath = 0;
-                    }
-                    else
-                    {
-                        SelectedFbxPath = SessionState.GetInt(string.Format(SessionStoragePrefix, nameof(SelectedFbxPath)), ExportSettings.instance.SelectedFbxPath);
-                    }
+                    RestorePathsFromSession(nameof(m_fbxSavePaths), ExportSettings.instance.GetCopyOfFbxSavePaths(), out m_fbxSavePaths);
+                    SelectedFbxPath = SessionState.GetInt(string.Format(SessionStoragePrefix, nameof(SelectedFbxPath)), ExportSettings.instance.SelectedFbxPath);
                 }
                 return m_fbxSavePaths;
             }
@@ -672,8 +705,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // check if the settings are different from what is in the Project Settings and only store
             // if they are. Otherwise we want to keep them updated with changes to the Project Settings.
             bool settingsChanged = !(ExportModelSettingsInstance.Equals(ExportSettings.instance.ExportModelSettings));
-            var joinedFbxPaths = string.Join(",", FbxSavePaths);
-            settingsChanged |= !joinedFbxPaths.Equals(ExportSettings.instance.GetJoinedFbxSavePaths());
+            var projectSettingsPaths = ExportSettings.instance.GetCopyOfFbxSavePaths();
+            settingsChanged |= !projectSettingsPaths.SequenceEqual(FbxSavePaths);
             settingsChanged |= SelectedFbxPath != ExportSettings.instance.SelectedFbxPath;
 
             if (settingsChanged)

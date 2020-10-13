@@ -10,7 +10,8 @@
 
 ### Fixed
 - Fix Export Model and Convert to Prefab Variant setting presets not serializing settings properly.
-- Fix NullReferenceException when creating a preset for the FBX export settings in Edit > Project Settings > Fbx Export.
+- Fix NullReferenceException when modifying a preset for the FBX export settings in Edit > Project Settings > Fbx Export.
+- Fix error in an export when the project settings are not writeable (e.g. if you're using Perforce).
 
 ## [3.2.1-preview.2] - 2020-08-05
 ### Added

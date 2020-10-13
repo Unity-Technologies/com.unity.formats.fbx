@@ -229,7 +229,7 @@ However, modifying the settings in the Export Options window will preserve the c
 
 ## Exporting animation from the Timeline
 
-In order to export an animation clip from the timeline, in the Timeline editor select the desired clip, then from the top menu select __GameObject__ > __Export Selected Timeline Clip__.
+In order to export an animation clip from the timeline, in the Timeline editor select the desired clip, then from the top menu select **GameObject** > **Export Selected Timeline Clip**.
 
 
 ## Exporting with relevant system units

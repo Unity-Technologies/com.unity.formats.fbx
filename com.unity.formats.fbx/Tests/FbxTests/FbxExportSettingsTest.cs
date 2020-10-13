@@ -712,7 +712,7 @@ namespace FbxExporter.UnitTests
             var savePathCount = exportWindow.FbxSavePaths.Count;
 
             // to begin the list of paths should match
-            Assert.That(instance.GetJoinedFbxSavePaths(), Is.EqualTo(string.Join(",", exportWindow.FbxSavePaths)));
+            Assert.That(instance.GetCopyOfFbxSavePaths(), Is.EquivalentTo(exportWindow.FbxSavePaths));
 
             var randomFilePath = GetRandomFileNamePath();
             ExportSettings.AddSavePath(randomFilePath, exportWindow.FbxSavePaths);
@@ -721,19 +721,20 @@ namespace FbxExporter.UnitTests
             exportWindow.SaveExportSettings();
 
             // make sure the project settings didn't change
-            Assert.That(instance.GetJoinedFbxSavePaths(), Is.Not.EqualTo(string.Join(",", exportWindow.FbxSavePaths)));
+            Assert.That(instance.GetCopyOfFbxSavePaths(), Is.Not.EquivalentTo(exportWindow.FbxSavePaths));
 
             // now change the project settings and make sure the export options paths don't change
             var randomFilePath2 = GetRandomFileNamePath();
             ExportSettings.AddFbxSavePath(randomFilePath2);
 
-            Assert.That(string.Join(",", exportWindow.FbxSavePaths), Is.Not.EqualTo(instance.GetJoinedFbxSavePaths()));
+            var projectSettingsFbxSavePaths = instance.GetCopyOfFbxSavePaths();
+            Assert.That(exportWindow.FbxSavePaths, Is.Not.EquivalentTo(projectSettingsFbxSavePaths));
             Assert.That(exportWindow.FbxSavePaths.Count, Is.EqualTo(savePathCount + 1));
 
             // When the settings are cleared the file paths should match again
             exportWindow.ClearSessionSettings();
 
-            Assert.That(instance.GetJoinedFbxSavePaths(), Is.EqualTo(string.Join(",", exportWindow.FbxSavePaths)));
+            Assert.That(projectSettingsFbxSavePaths, Is.EquivalentTo(exportWindow.FbxSavePaths));
 
             exportWindow.Close();
         }

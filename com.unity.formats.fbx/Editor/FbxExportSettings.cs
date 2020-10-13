@@ -710,16 +710,16 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         [SerializeField]
         private List<string> prefabSavePaths = new List<string> ();
-        internal string GetJoinedPrefabSavePaths()
+        internal List<string> GetCopyOfPrefabSavePaths()
         {
-            return string.Join(",", prefabSavePaths);
+            return new List<string>(prefabSavePaths);
         }
 
         [SerializeField]
         private List<string> fbxSavePaths = new List<string> ();
-        internal string GetJoinedFbxSavePaths()
+        internal List<String> GetCopyOfFbxSavePaths()
         {
-            return string.Join(",", fbxSavePaths);
+            return new List<string>(fbxSavePaths);
         }
 
         [SerializeField]

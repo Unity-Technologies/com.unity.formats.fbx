@@ -1,7 +1,4 @@
-﻿using UnityEditor;
-using UnityEngine;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
+﻿using UnityEngine;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {

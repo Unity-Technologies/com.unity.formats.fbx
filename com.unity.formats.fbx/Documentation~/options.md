@@ -1,6 +1,6 @@
 # FBX Export settings
 
-Use the Fbx Export Settings window to show or hide the Export and Convert to Model Prefab Variant UI, change the default FBX File options and Convert To Prefab options, and to install the [Unity Integration](integration.html) for Autodesk® Maya®, Autodesk® Maya LT™, or Autodesk® 3ds Max®.
+Use the Fbx Export Settings window to show or hide the Export and Convert to Model Prefab Variant UI, to change the default FBX File options and Convert To Prefab options, and to install the [Unity Integration](integration.html) for Autodesk® Maya®, Autodesk® Maya LT™, or Autodesk® 3ds Max®.
 
 ![](images/FBXExporter_FBXExportSettingsWindow.png)
 
