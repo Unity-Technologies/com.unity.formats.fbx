@@ -554,6 +554,21 @@ namespace FbxExporter.UnitTests
 
             preset.ApplyTo(instance);
             Assert.That(instance.DisplayOptionsWindow, Is.False);
+
+            // Test that changing the preset doesn't change the instance
+            var refObjMethod = preset.GetType().GetMethod("GetReferenceObject", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var refObj = refObjMethod.Invoke(preset, null) as ExportSettings;
+
+            Assert.That(refObj, Is.Not.Null);
+
+            refObj.DisplayOptionsWindow = true;
+            Assert.That(refObj.DisplayOptionsWindow, Is.True);
+            preset.UpdateProperties(refObj);
+
+            Assert.That(instance.DisplayOptionsWindow, Is.False);
+
+            preset.ApplyTo(instance);
+            Assert.That(instance.DisplayOptionsWindow, Is.True);
         }
 
         [Test]
