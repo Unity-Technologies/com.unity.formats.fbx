@@ -70,6 +70,23 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 "Show the Convert dialog when converting to an FBX Prefab Variant");
         }
 
+        private void ClearExportWindowSettings<T>(string prefix) where T : ExportOptionsEditorWindow
+        {
+            if (EditorWindow.HasOpenInstances<T>())
+            {
+                // clear settings on the window and update the UI
+                var win = EditorWindow.GetWindow<T>(ExportOptionsEditorWindow.DefaultWindowTitle, focus: false);
+                win.ClearSessionSettings();
+                win.Repaint();
+            }
+            else
+            {
+                // Clear what is stored in the session.
+                // Window will update next time it is opened
+                ExportOptionsEditorWindow.ClearAllSessionSettings(prefix);
+            }
+        }
+
         private void ShowExportPathUI(string label, string tooltip, string openFolderPanelTitle, bool isSingletonInstance, bool isConvertToPrefabOptions = false)
         {
             GUILayout.BeginHorizontal();
@@ -81,12 +98,23 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 pathLabels = ExportSettings.GetRelativePrefabSavePaths();
             }
 
+            EditorGUI.BeginChangeCheck();
             if (isConvertToPrefabOptions)
             {
                 ExportSettings.instance.SelectedPrefabPath = EditorGUILayout.Popup(ExportSettings.instance.SelectedPrefabPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
             }
             else {
                 ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup(ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+            }
+            if(EditorGUI.EndChangeCheck() && isSingletonInstance){
+                if (isConvertToPrefabOptions)
+                {
+                    ClearExportWindowSettings<ConvertToPrefabEditorWindow>(ConvertToPrefabEditorWindow.k_SessionStoragePrefix);
+                }
+                else
+                {
+                    ClearExportWindowSettings<ExportModelEditorWindow>(ExportModelEditorWindow.k_SessionStoragePrefix);
+                }
             }
 
             // Set export setting for exporting outside the project on choosing a path
@@ -123,6 +151,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                         else
                         {
                             ExportSettings.AddFbxSavePath(fullPath, exportOutsideProject: true);
+                            ClearExportWindowSettings<ExportModelEditorWindow>(ExportModelEditorWindow.k_SessionStoragePrefix);
                         }
                     }
                     // Store the relative path to the Assets folder
@@ -131,10 +160,12 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                         if (isConvertToPrefabOptions)
                         {
                             ExportSettings.AddPrefabSavePath(relativePath);
+                            ClearExportWindowSettings<ConvertToPrefabEditorWindow>(ConvertToPrefabEditorWindow.k_SessionStoragePrefix);
                         }
                         else
                         {
                             ExportSettings.AddFbxSavePath(relativePath);
+                            ClearExportWindowSettings<ExportModelEditorWindow>(ExportModelEditorWindow.k_SessionStoragePrefix);
                         }
                     }
                     // Make sure focus is removed from the selectable label
@@ -182,9 +213,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 EditorGUI.indentLevel++;
                 ShowExportPathUI("Export Path", "Location where the FBX will be saved.", "Select Export Model Path", isSingletonInstance, isConvertToPrefabOptions: false);
 
+                EditorGUI.BeginChangeCheck();
                 m_exportModelEditor.LabelWidth = ExportOptionsLabelWidth;
                 m_exportModelEditor.FieldOffset = ExportOptionsFieldOffset;
                 m_exportModelEditor.OnInspectorGUI();
+                if (EditorGUI.EndChangeCheck() && isSingletonInstance)
+                {
+                    ClearExportWindowSettings<ExportModelEditorWindow>(ExportModelEditorWindow.k_SessionStoragePrefix);
+                }
                 EditorGUI.indentLevel--;
             }
             // --------------------------
@@ -196,9 +232,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 EditorGUI.indentLevel++;
                 ShowExportPathUI("Prefab Path", "Relative path for saving FBX Prefab Variants.", "Select FBX Prefab Variant Save Path", isSingletonInstance, isConvertToPrefabOptions: true);
 
+                EditorGUI.BeginChangeCheck();
                 m_convertEditor.LabelWidth = ExportOptionsLabelWidth;
                 m_convertEditor.FieldOffset = ExportOptionsFieldOffset;
                 m_convertEditor.OnInspectorGUI();
+                if (EditorGUI.EndChangeCheck() && isSingletonInstance)
+                {
+                    ClearExportWindowSettings<ConvertToPrefabEditorWindow>(ConvertToPrefabEditorWindow.k_SessionStoragePrefix);
+                }
                 EditorGUI.indentLevel--;
             }
             // --------------------------
@@ -320,7 +361,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             if (GUI.changed) {
                 // Only save the settings if we are in the Singleton instance.
                 // Otherwise, the user is editing a preset and we don't need to save.
-                if (this.targets.Length == 1 && this.target == ExportSettings.instance)
+                if (isSingletonInstance)
                 {
                     exportSettings.Save();
                 }

@@ -246,19 +246,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             return true;
         }
-
-
-        protected override string SessionStoragePrefix { get { return "FbxExporterConvertOptions_{0}"; } }
+        
+        public const string k_SessionStoragePrefix = "FbxExporterConvertOptions_{0}";
+        protected override string SessionStoragePrefix { get { return k_SessionStoragePrefix; } }
 
         public override void ClearSessionSettings()
         {
             base.ClearSessionSettings();
-            m_convertToPrefabSettingsInstance = null;
 
-            ClearPathsFromSession(nameof(m_prefabSavePaths));
+            // save the source and dest as these are not serialized
+            var source = m_convertToPrefabSettingsInstance.info.AnimationSource;
+            var dest = m_convertToPrefabSettingsInstance.info.AnimationDest;
+
+            m_convertToPrefabSettingsInstance = null;
+            ConvertToPrefabSettingsInstance.info.SetAnimationSource(source);
+            ConvertToPrefabSettingsInstance.info.SetAnimationDest(dest);
+            
             m_prefabSavePaths = null;
-            SessionState.EraseInt(string.Format(SessionStoragePrefix, nameof(SelectedPrefabPath)));
             SelectedPrefabPath = 0;
+            InnerEditor = Editor.CreateEditor(ConvertToPrefabSettingsInstance);
         }
 
         protected override void StoreSettingsInSession()
@@ -266,11 +272,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             base.StoreSettingsInSession();
 
             // store Prefab Save Paths
-            StorePathsInSession(nameof(m_prefabSavePaths), m_prefabSavePaths);
-            SessionState.SetInt(string.Format(SessionStoragePrefix, nameof(SelectedPrefabPath)), SelectedPrefabPath);
+            StorePathsInSession(k_SessionPrefabPathsName, m_prefabSavePaths);
+            SessionState.SetInt(string.Format(SessionStoragePrefix, k_SessionSelectedPrefabPathName), SelectedPrefabPath);
         }
 
-        [SerializeField]
+
         private List<string> m_prefabSavePaths;
         internal List<string> PrefabSavePaths
         {
@@ -279,8 +285,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 if (m_prefabSavePaths == null)
                 {
                     // Try to restore from session, fall back to Fbx Export Settings
-                    RestorePathsFromSession(nameof(m_prefabSavePaths), ExportSettings.instance.GetCopyOfPrefabSavePaths(), out m_prefabSavePaths);
-                    SelectedPrefabPath = SessionState.GetInt(string.Format(SessionStoragePrefix, nameof(SelectedPrefabPath)), ExportSettings.instance.SelectedPrefabPath);
+                    RestorePathsFromSession(k_SessionPrefabPathsName, ExportSettings.instance.GetCopyOfPrefabSavePaths(), out m_prefabSavePaths);
+                    SelectedPrefabPath = SessionState.GetInt(string.Format(SessionStoragePrefix, k_SessionSelectedPrefabPathName), ExportSettings.instance.SelectedPrefabPath);
                 }
                 return m_prefabSavePaths;
             }

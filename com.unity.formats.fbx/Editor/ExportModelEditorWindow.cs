@@ -10,7 +10,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 {
     internal abstract class ExportOptionsEditorWindow : EditorWindow
     {
-        protected const string DefaultWindowTitle = "Export Options";
+        internal const string DefaultWindowTitle = "Export Options";
         protected const float SelectableLabelMinWidth = 90;
         protected const float BrowseButtonWidth = 25;
         protected const float LabelWidth = 175;
@@ -102,7 +102,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected abstract ExportOptionsSettingsSerializeBase SettingsObject { get; }
 
         // Helper functions for persisting the Export Settings for the session
-        protected virtual string SessionStoragePrefix { get { return "FbxExporterOptions_{0}"; } }
+        protected abstract string SessionStoragePrefix { get; }
+
+        protected const string k_SessionSettingsName = "Settings";
+        protected const string k_SessionFbxPathsName = "FbxSavePath";
+        protected const string k_SessionSelectedFbxPathName = "SelectedFbxPath";
+        protected const string k_SessionPrefabPathsName = "PrefabSavePath";
+        protected const string k_SessionSelectedPrefabPathName = "SelectedPrefabPath";
 
         protected void StorePathsInSession(string varName, List<string> paths)
         {
@@ -141,13 +147,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        protected void ClearPathsFromSession(string varName)
+        protected static void ClearPathsFromSession(string varName, string prefix)
         {
-            var n = SessionState.GetInt(string.Format(SessionStoragePrefix, varName), 0);
-            SessionState.EraseInt(string.Format(SessionStoragePrefix, varName));
+            var n = SessionState.GetInt(string.Format(prefix, varName), 0);
+            SessionState.EraseInt(string.Format(prefix, varName));
             for(int i = 0; i < n; i++)
             {
-                SessionState.EraseString(string.Format(SessionStoragePrefix + "_{1}", varName, i));
+                SessionState.EraseString(string.Format(prefix + "_{1}", varName, i));
             }
         }
 
@@ -155,33 +161,39 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var settings = SettingsObject;
             var json = EditorJsonUtility.ToJson(settings);
-            SessionState.SetString(string.Format(SessionStoragePrefix, nameof(settings)), json);
+            SessionState.SetString(string.Format(SessionStoragePrefix, k_SessionSettingsName), json);
 
-            StorePathsInSession(nameof(m_fbxSavePaths), m_fbxSavePaths);
-            SessionState.SetInt(string.Format(SessionStoragePrefix, nameof(SelectedFbxPath)), SelectedFbxPath);
+            StorePathsInSession(k_SessionFbxPathsName, m_fbxSavePaths);
+            SessionState.SetInt(string.Format(SessionStoragePrefix, k_SessionSelectedFbxPathName), SelectedFbxPath);
         }
 
         protected virtual void RestoreSettingsFromSession(ExportOptionsSettingsSerializeBase defaults)
         {
             var settings = SettingsObject;
-            var json = SessionState.GetString(string.Format(SessionStoragePrefix, nameof(settings)), EditorJsonUtility.ToJson(defaults));
+            var json = SessionState.GetString(string.Format(SessionStoragePrefix, k_SessionSettingsName), EditorJsonUtility.ToJson(defaults));
             if (!string.IsNullOrEmpty(json))
             {
                 EditorJsonUtility.FromJsonOverwrite(json, settings);
             }
         }
 
-        public virtual void ClearSessionSettings()
+        public static void ClearAllSessionSettings(string prefix)
         {
-            var settings = SettingsObject;
-            SessionState.EraseString(string.Format(SessionStoragePrefix, nameof(settings)));
-            ClearPathsFromSession(nameof(m_fbxSavePaths));
-            m_fbxSavePaths = null;
-            SessionState.EraseInt(string.Format(SessionStoragePrefix, nameof(SelectedFbxPath)));
-            SelectedFbxPath = 0;
+            SessionState.EraseString(string.Format(prefix, k_SessionSettingsName));
+            ClearPathsFromSession(k_SessionFbxPathsName, prefix);
+            SessionState.EraseInt(string.Format(prefix, k_SessionSelectedFbxPathName));
+
+            ClearPathsFromSession(k_SessionPrefabPathsName, prefix);
+            SessionState.EraseInt(string.Format(prefix, k_SessionSelectedPrefabPathName));
         }
 
-        [SerializeField]
+        public virtual void ClearSessionSettings()
+        {
+            ClearAllSessionSettings(SessionStoragePrefix);
+            m_fbxSavePaths = null;
+            SelectedFbxPath = 0;
+        }
+        
         private List<string> m_fbxSavePaths;
         internal List<string> FbxSavePaths
         {
@@ -190,8 +202,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 if (m_fbxSavePaths == null)
                 {
                     // Try to restore from session, fall back to Fbx Export Settings
-                    RestorePathsFromSession(nameof(m_fbxSavePaths), ExportSettings.instance.GetCopyOfFbxSavePaths(), out m_fbxSavePaths);
-                    SelectedFbxPath = SessionState.GetInt(string.Format(SessionStoragePrefix, nameof(SelectedFbxPath)), ExportSettings.instance.SelectedFbxPath);
+                    RestorePathsFromSession(k_SessionFbxPathsName, ExportSettings.instance.GetCopyOfFbxSavePaths(), out m_fbxSavePaths);
+                    SelectedFbxPath = SessionState.GetInt(string.Format(SessionStoragePrefix, k_SessionSelectedFbxPathName), ExportSettings.instance.SelectedFbxPath);
                 }
                 return m_fbxSavePaths;
             }
@@ -608,6 +620,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     internal class ExportModelEditorWindow : ExportOptionsEditorWindow
     {
+        public const string k_SessionStoragePrefix = "FbxExporterOptions_{0}";
+        protected override string SessionStoragePrefix { get { return k_SessionStoragePrefix; } }
+
         protected override float MinWindowHeight { get { return 310; } } // determined by trial and error
         protected override bool DisableNameSelection {
             get {
@@ -670,7 +685,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override void ClearSessionSettings()
         {
             base.ClearSessionSettings();
+
+            // save the source and dest as these are not serialized
+            var source = m_exportModelSettingsInstance.info.AnimationSource;
+            var dest = m_exportModelSettingsInstance.info.AnimationDest;
+
             m_exportModelSettingsInstance = null;
+            ExportModelSettingsInstance.info.SetAnimationSource(source);
+            ExportModelSettingsInstance.info.SetAnimationDest(dest);
+            InnerEditor = Editor.CreateEditor(ExportModelSettingsInstance);
         }
 
         private ExportModelSettings m_exportModelSettingsInstance;
