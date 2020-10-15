@@ -15,6 +15,9 @@ namespace FbxExporter.UnitTests
         string originalVendorLocation = null;
         string originalMayaLocation = null;
 
+        DefaultPreset[] m_exportSettingsDefaultPresets;
+        DefaultPreset[] m_convertSettingsDefaultPresets;
+
         // We read two private fields for the test.
         static System.Reflection.FieldInfo s_InstanceField; // static
         static System.Reflection.FieldInfo s_SavePathField; // member
@@ -33,7 +36,7 @@ namespace FbxExporter.UnitTests
 
             // static fields can't be found through inheritance with GetField.
             // if we change the inheritance diagram, we have to change t.BaseType here.
-            s_InstanceField = t.BaseType.GetField ("s_Instance", privates);
+            s_InstanceField = t.GetField ("s_Instance", privates);
             Assert.IsNotNull (s_InstanceField, "s_Instance");
         }
 
@@ -46,6 +49,16 @@ namespace FbxExporter.UnitTests
             // Clear out the current instance and create a new one (but keep the original around).
             s_InstanceField.SetValue (null, null);
             s_InstanceField.SetValue (null, ScriptableObject.CreateInstance<ExportSettings> ());
+
+            // keep track of any existing default presets to reset them once tests finish
+            var exportPresetType = new PresetType(ExportSettings.instance.ExportModelSettings);
+            var convertPresetType = new PresetType(ExportSettings.instance.ConvertToPrefabSettings);
+            m_exportSettingsDefaultPresets = Preset.GetDefaultPresetsForType(exportPresetType);
+            m_convertSettingsDefaultPresets = Preset.GetDefaultPresetsForType(convertPresetType);
+
+            // clear default presets
+            Preset.SetDefaultPresetsForType(exportPresetType, new DefaultPreset[] { });
+            Preset.SetDefaultPresetsForType(convertPresetType, new DefaultPreset[] { });
         }
 
         [NUnit.Framework.TearDown]
@@ -57,6 +70,9 @@ namespace FbxExporter.UnitTests
             ScriptableObject.DestroyImmediate (settings);
 
             s_InstanceField.SetValue (null, m_originalSettings);
+
+            Preset.SetDefaultPresetsForType(new PresetType(ExportSettings.instance.ExportModelSettings), m_exportSettingsDefaultPresets);
+            Preset.SetDefaultPresetsForType(new PresetType(ExportSettings.instance.ConvertToPrefabSettings), m_convertSettingsDefaultPresets);
         }
 
 
@@ -521,6 +537,221 @@ namespace FbxExporter.UnitTests
 
             convertPrefabPreset.ApplyTo(convertPrefabSettings);
             Assert.That(convertPrefabSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+        }
+
+        [Test]
+        public void TestFbxExportSettingsPreset()
+        {
+            var instance = ExportSettings.instance;
+
+            instance.DisplayOptionsWindow = false;
+            Assert.That(instance.DisplayOptionsWindow, Is.False);
+
+            var preset = new Preset(ExportSettings.instance);
+            
+            instance.DisplayOptionsWindow = true;
+            Assert.That(instance.DisplayOptionsWindow, Is.True);
+
+            preset.ApplyTo(instance);
+            Assert.That(instance.DisplayOptionsWindow, Is.False);
+
+            // Test that changing the preset doesn't change the instance
+            var refObjMethod = preset.GetType().GetMethod("GetReferenceObject", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var refObj = refObjMethod.Invoke(preset, null) as ExportSettings;
+
+            Assert.That(refObj, Is.Not.Null);
+
+            refObj.DisplayOptionsWindow = true;
+            Assert.That(refObj.DisplayOptionsWindow, Is.True);
+            preset.UpdateProperties(refObj);
+
+            Assert.That(instance.DisplayOptionsWindow, Is.False);
+
+            preset.ApplyTo(instance);
+            Assert.That(instance.DisplayOptionsWindow, Is.True);
+        }
+
+        [Test]
+        public void TestMultipleInstances()
+        {
+            var instance = ExportSettings.instance;
+            // Test creating a new ExportSettings instance
+            ExportSettings newInstance = ScriptableObject.CreateInstance<ExportSettings>();
+            // check that a new instance was created
+            Assert.That(newInstance.GetInstanceID(), Is.Not.EqualTo(instance.GetInstanceID()));
+            // but that the "instance" member is the same
+            Assert.That(ExportSettings.instance, Is.EqualTo(instance));
+            Assert.That(ExportSettings.instance, Is.Not.EqualTo(newInstance));
+
+            instance.DisplayOptionsWindow = false;
+            Assert.That(instance.DisplayOptionsWindow, Is.False);
+
+            newInstance.DisplayOptionsWindow = true;
+            Assert.That(newInstance.DisplayOptionsWindow, Is.True);
+            Assert.That(ExportSettings.instance.DisplayOptionsWindow, Is.False);
+        }
+
+        [Test]
+        public void TestExportOptionsWindow()
+        {
+            var instance = ExportSettings.instance;
+
+            // check loading export settings from preset
+            var exportSettingsPreset = ScriptableObject.CreateInstance(typeof(ExportModelSettings)) as ExportModelSettings;
+            exportSettingsPreset.info.SetAnimatedSkinnedMesh(true);
+            exportSettingsPreset.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
+            var preset = new Preset(exportSettingsPreset);
+
+            // set default preset
+            var type = preset.GetPresetType();
+            Assert.That(type.IsValidDefault(), Is.True);
+            var defaultPreset = new DefaultPreset(string.Empty, preset);
+            Assert.That(Preset.SetDefaultPresetsForType(type, new DefaultPreset[] { defaultPreset }), Is.True);
+
+            // make sure the instance settings do not match the preset
+            instance.ExportModelSettings.info.SetAnimatedSkinnedMesh(false);
+            instance.ExportModelSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
+
+            Assert.That(exportSettingsPreset.info.AnimateSkinnedMesh, Is.Not.EqualTo(instance.ExportModelSettings.info.AnimateSkinnedMesh));
+            Assert.That(exportSettingsPreset.info.ExportFormat, Is.Not.EqualTo(instance.ExportModelSettings.info.ExportFormat));
+
+            // create an empty object to have something in the export set
+            var go = new GameObject("temp");
+
+            var exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
+            // clear any previous settings
+            exportWindow.ResetSessionSettings();
+            Assert.That(exportWindow.ExportModelSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(exportSettingsPreset.info.AnimateSkinnedMesh));
+            Assert.That(exportWindow.ExportModelSettingsInstance.info.ExportFormat, Is.EqualTo(exportSettingsPreset.info.ExportFormat));
+            exportWindow.Close();
+
+            // check loading export settings from project settings
+            // remove preset
+            Preset.RemoveFromDefault(preset);
+            Assert.That(Preset.GetDefaultPresetsForType(type), Is.Empty);
+
+            exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
+            // clear any previous settings
+            exportWindow.ResetSessionSettings();
+            Assert.That(exportWindow.ExportModelSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(instance.ExportModelSettings.info.AnimateSkinnedMesh));
+            Assert.That(exportWindow.ExportModelSettingsInstance.info.ExportFormat, Is.EqualTo(instance.ExportModelSettings.info.ExportFormat));
+
+            // check modifying export settings persist and don't modify project settings
+            exportWindow.ExportModelSettingsInstance.info.SetAnimatedSkinnedMesh(true);
+            exportWindow.ExportModelSettingsInstance.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
+            exportWindow.SaveExportSettings();
+
+            exportWindow.Close();
+            exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
+
+            Assert.That(exportWindow.ExportModelSettingsInstance.info.AnimateSkinnedMesh, Is.Not.EqualTo(instance.ExportModelSettings.info.AnimateSkinnedMesh));
+            Assert.That(exportWindow.ExportModelSettingsInstance.info.ExportFormat, Is.Not.EqualTo(instance.ExportModelSettings.info.ExportFormat));
+
+            // make sure these settings don't persist and close window
+            exportWindow.ResetSessionSettings();
+            exportWindow.Close();
+        }
+
+        [Test]
+        public void TestConvertOptionsWindow()
+        {
+            var instance = ExportSettings.instance;
+
+            // check loading export settings from preset
+            var convertSettingsPreset = ScriptableObject.CreateInstance(typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
+            convertSettingsPreset.info.SetAnimatedSkinnedMesh(true);
+            convertSettingsPreset.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
+            var preset = new Preset(convertSettingsPreset);
+
+            // set default preset
+            var type = preset.GetPresetType();
+            Assert.That(type.IsValidDefault(), Is.True);
+            var defaultPreset = new DefaultPreset(string.Empty, preset);
+            Assert.That(Preset.SetDefaultPresetsForType(type, new DefaultPreset[] { defaultPreset }), Is.True);
+
+            // make sure the instance settings do not match the preset
+            instance.ConvertToPrefabSettings.info.SetAnimatedSkinnedMesh(false);
+            instance.ConvertToPrefabSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
+
+            Assert.That(convertSettingsPreset.info.AnimateSkinnedMesh, Is.Not.EqualTo(instance.ConvertToPrefabSettings.info.AnimateSkinnedMesh));
+            Assert.That(convertSettingsPreset.info.ExportFormat, Is.Not.EqualTo(instance.ConvertToPrefabSettings.info.ExportFormat));
+
+            // create an empty object to have something in the export set
+            var go = new GameObject("temp");
+
+            var convertWindow = ConvertToPrefabEditorWindow.Init(new GameObject[] { go });
+            // clear any previous settings
+            convertWindow.ResetSessionSettings();
+            Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(convertSettingsPreset.info.AnimateSkinnedMesh));
+            Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.ExportFormat, Is.EqualTo(convertSettingsPreset.info.ExportFormat));
+            convertWindow.Close();
+
+            // check loading export settings from project settings
+            // remove preset
+            Preset.RemoveFromDefault(preset);
+            Assert.That(Preset.GetDefaultPresetsForType(type), Is.Empty);
+
+            convertWindow = ConvertToPrefabEditorWindow.Init(new GameObject[] { go });
+            // clear any previous settings
+            convertWindow.ResetSessionSettings();
+            Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(instance.ConvertToPrefabSettings.info.AnimateSkinnedMesh));
+            Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.ExportFormat, Is.EqualTo(instance.ConvertToPrefabSettings.info.ExportFormat));
+
+            // check modifying export settings persist and don't modify project settings
+            convertWindow.ConvertToPrefabSettingsInstance.info.SetAnimatedSkinnedMesh(true);
+            convertWindow.ConvertToPrefabSettingsInstance.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
+            convertWindow.SaveExportSettings();
+
+            convertWindow.Close();
+            convertWindow = ConvertToPrefabEditorWindow.Init(new GameObject[] { go });
+
+            Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.AnimateSkinnedMesh, Is.Not.EqualTo(instance.ConvertToPrefabSettings.info.AnimateSkinnedMesh));
+            Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.ExportFormat, Is.Not.EqualTo(instance.ConvertToPrefabSettings.info.ExportFormat));
+
+            // make sure these settings don't persist and close window
+            convertWindow.ResetSessionSettings();
+            convertWindow.Close();
+        }
+
+        [Test]
+        public void TestExportOptionsFbxSavePath()
+        {
+            // check that adding a path or modifying selection in export options window does not modify project
+            // settings and vice versa
+            var instance = ExportSettings.instance;
+
+            var go = new GameObject("temp");
+            var exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
+            // clear any previous settings
+            exportWindow.ResetSessionSettings();
+            var savePathCount = exportWindow.FbxSavePaths.Count;
+
+            // to begin the list of paths should match
+            Assert.That(instance.GetCopyOfFbxSavePaths(), Is.EquivalentTo(exportWindow.FbxSavePaths));
+
+            var randomFilePath = GetRandomFileNamePath();
+            ExportSettings.AddSavePath(randomFilePath, exportWindow.FbxSavePaths);
+            Assert.That(exportWindow.FbxSavePaths.Count, Is.EqualTo(savePathCount + 1));
+
+            exportWindow.SaveExportSettings();
+
+            // make sure the project settings didn't change
+            Assert.That(instance.GetCopyOfFbxSavePaths(), Is.Not.EquivalentTo(exportWindow.FbxSavePaths));
+
+            // now change the project settings and make sure the export options paths don't change
+            var randomFilePath2 = GetRandomFileNamePath();
+            ExportSettings.AddFbxSavePath(randomFilePath2);
+
+            var projectSettingsFbxSavePaths = instance.GetCopyOfFbxSavePaths();
+            Assert.That(exportWindow.FbxSavePaths, Is.Not.EquivalentTo(projectSettingsFbxSavePaths));
+            Assert.That(exportWindow.FbxSavePaths.Count, Is.EqualTo(savePathCount + 1));
+
+            // When the settings are cleared the file paths should match again
+            exportWindow.ResetSessionSettings();
+
+            Assert.That(projectSettingsFbxSavePaths, Is.EquivalentTo(exportWindow.FbxSavePaths));
+
+            exportWindow.Close();
         }
     }
 }

@@ -149,7 +149,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var toExport = ModelExporter.RemoveRedundantObjects(unityGameObjectsToConvert);
 
-            if (ExportSettings.instance.ShowConvertToPrefabDialog)
+            if (ExportSettings.instance.DisplayOptionsWindow)
             {
                 if (toExport.Count == 1)
                 {
