@@ -205,7 +205,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return (animatedSkinnedMesh ? 1 : 0) | (mayaCompatibleNaming ? 1 : 0) << 1 | (int)exportFormat << 2;
         }
     }
 
@@ -252,7 +252,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            var bitmask =  base.GetHashCode();
+            bitmask = (bitmask << 2) | (int)include;
+            bitmask = (bitmask << 2) | (int)lodLevel;
+            bitmask = (bitmask << 2) | (int)objectPosition;
+            bitmask = (bitmask << 1) | (exportUnrendered ? 1 : 0);
+            bitmask = (bitmask << 1) | (preserveImportSettings ? 1 : 0);
+            return bitmask;
         }
     }
 }
