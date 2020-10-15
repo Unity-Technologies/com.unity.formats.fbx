@@ -128,22 +128,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected void RestorePathsFromSession(string varName, List<string> defaultsPaths, out List<string> paths)
         {
             var n = SessionState.GetInt(string.Format(SessionStoragePrefix, varName), 0);
-            paths = new List<string>();
-            if (n > 0)
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    var path = SessionState.GetString(string.Format(SessionStoragePrefix + "_{1}", varName, i), null);
-                    if (!string.IsNullOrEmpty(path))
-                    {
-                        paths.Add(path);
-                    }
-                }
-            }
-
-            if (paths.Count <= 0)
+            if (n <= 0)
             {
                 paths = defaultsPaths;
+                return;
+            }
+
+            paths = new List<string>();
+            for (int i = 0; i < n; i++)
+            {
+                var path = SessionState.GetString(string.Format(SessionStoragePrefix + "_{1}", varName, i), null);
+                if (!string.IsNullOrEmpty(path))
+                {
+                    paths.Add(path);
+                }
             }
         }
 
