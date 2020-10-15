@@ -620,7 +620,7 @@ namespace FbxExporter.UnitTests
 
             var exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
             // clear any previous settings
-            exportWindow.ClearSessionSettings();
+            exportWindow.ResetSessionSettings();
             Assert.That(exportWindow.ExportModelSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(exportSettingsPreset.info.AnimateSkinnedMesh));
             Assert.That(exportWindow.ExportModelSettingsInstance.info.ExportFormat, Is.EqualTo(exportSettingsPreset.info.ExportFormat));
             exportWindow.Close();
@@ -632,7 +632,7 @@ namespace FbxExporter.UnitTests
 
             exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
             // clear any previous settings
-            exportWindow.ClearSessionSettings();
+            exportWindow.ResetSessionSettings();
             Assert.That(exportWindow.ExportModelSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(instance.ExportModelSettings.info.AnimateSkinnedMesh));
             Assert.That(exportWindow.ExportModelSettingsInstance.info.ExportFormat, Is.EqualTo(instance.ExportModelSettings.info.ExportFormat));
 
@@ -648,7 +648,7 @@ namespace FbxExporter.UnitTests
             Assert.That(exportWindow.ExportModelSettingsInstance.info.ExportFormat, Is.Not.EqualTo(instance.ExportModelSettings.info.ExportFormat));
 
             // make sure these settings don't persist and close window
-            exportWindow.ClearSessionSettings();
+            exportWindow.ResetSessionSettings();
             exportWindow.Close();
         }
 
@@ -681,7 +681,7 @@ namespace FbxExporter.UnitTests
 
             var convertWindow = ConvertToPrefabEditorWindow.Init(new GameObject[] { go });
             // clear any previous settings
-            convertWindow.ClearSessionSettings();
+            convertWindow.ResetSessionSettings();
             Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(convertSettingsPreset.info.AnimateSkinnedMesh));
             Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.ExportFormat, Is.EqualTo(convertSettingsPreset.info.ExportFormat));
             convertWindow.Close();
@@ -693,7 +693,7 @@ namespace FbxExporter.UnitTests
 
             convertWindow = ConvertToPrefabEditorWindow.Init(new GameObject[] { go });
             // clear any previous settings
-            convertWindow.ClearSessionSettings();
+            convertWindow.ResetSessionSettings();
             Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(instance.ConvertToPrefabSettings.info.AnimateSkinnedMesh));
             Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.ExportFormat, Is.EqualTo(instance.ConvertToPrefabSettings.info.ExportFormat));
 
@@ -709,7 +709,7 @@ namespace FbxExporter.UnitTests
             Assert.That(convertWindow.ConvertToPrefabSettingsInstance.info.ExportFormat, Is.Not.EqualTo(instance.ConvertToPrefabSettings.info.ExportFormat));
 
             // make sure these settings don't persist and close window
-            convertWindow.ClearSessionSettings();
+            convertWindow.ResetSessionSettings();
             convertWindow.Close();
         }
 
@@ -723,7 +723,7 @@ namespace FbxExporter.UnitTests
             var go = new GameObject("temp");
             var exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
             // clear any previous settings
-            exportWindow.ClearSessionSettings();
+            exportWindow.ResetSessionSettings();
             var savePathCount = exportWindow.FbxSavePaths.Count;
 
             // to begin the list of paths should match
@@ -747,7 +747,7 @@ namespace FbxExporter.UnitTests
             Assert.That(exportWindow.FbxSavePaths.Count, Is.EqualTo(savePathCount + 1));
 
             // When the settings are cleared the file paths should match again
-            exportWindow.ClearSessionSettings();
+            exportWindow.ResetSessionSettings();
 
             Assert.That(projectSettingsFbxSavePaths, Is.EquivalentTo(exportWindow.FbxSavePaths));
 

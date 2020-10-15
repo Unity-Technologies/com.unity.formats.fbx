@@ -175,9 +175,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        public static void ClearAllSessionSettings(string prefix)
+        public static void ResetAllSessionSettings(string prefix, string settingsDefaults = null)
         {
             SessionState.EraseString(string.Format(prefix, k_SessionSettingsName));
+            // Set the defaults of the settings.
+            // If there exists a Default Preset for the Convert/Export settings, then if the project settings are modified,
+            // the Default Preset will be reloaded instead of the project settings. Therefore, set them explicitely if projects settings desired.
+            if (!string.IsNullOrEmpty(settingsDefaults))
+            {
+                SessionState.SetString(string.Format(prefix, k_SessionSettingsName), settingsDefaults);
+            }
+
             ClearPathsFromSession(k_SessionFbxPathsName, prefix);
             SessionState.EraseInt(string.Format(prefix, k_SessionSelectedFbxPathName));
 
@@ -185,9 +193,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             SessionState.EraseInt(string.Format(prefix, k_SessionSelectedPrefabPathName));
         }
 
-        public virtual void ClearSessionSettings()
+        public virtual void ResetSessionSettings(string settingsDefaults = null)
         {
-            ClearAllSessionSettings(SessionStoragePrefix);
+            ResetAllSessionSettings(SessionStoragePrefix, settingsDefaults);
             m_fbxSavePaths = null;
             SelectedFbxPath = 0;
         }
@@ -680,9 +688,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        public override void ClearSessionSettings()
+        public override void ResetSessionSettings(string defaultSettings = null)
         {
-            base.ClearSessionSettings();
+            base.ResetSessionSettings(defaultSettings);
 
             // save the source and dest as these are not serialized
             var source = m_exportModelSettingsInstance.info.AnimationSource;

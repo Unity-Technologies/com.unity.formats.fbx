@@ -250,9 +250,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public const string k_SessionStoragePrefix = "FbxExporterConvertOptions_{0}";
         protected override string SessionStoragePrefix { get { return k_SessionStoragePrefix; } }
 
-        public override void ClearSessionSettings()
+        public override void ResetSessionSettings(string defaultSettings = null)
         {
-            base.ClearSessionSettings();
+            base.ResetSessionSettings(defaultSettings);
 
             // save the source and dest as these are not serialized
             var source = m_convertToPrefabSettingsInstance.info.AnimationSource;

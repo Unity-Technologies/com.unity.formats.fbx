@@ -72,18 +72,28 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         private void ClearExportWindowSettings<T>(string prefix) where T : ExportOptionsEditorWindow
         {
+            string defaultSettings = null;
+            if (typeof(T) == typeof(ExportModelEditorWindow))
+            {
+                defaultSettings = EditorJsonUtility.ToJson(ExportSettings.instance.ExportModelSettings.info);
+            }
+            else
+            {
+                defaultSettings = EditorJsonUtility.ToJson(ExportSettings.instance.ConvertToPrefabSettings.info);
+            }
+
             if (EditorWindow.HasOpenInstances<T>())
             {
                 // clear settings on the window and update the UI
                 var win = EditorWindow.GetWindow<T>(ExportOptionsEditorWindow.DefaultWindowTitle, focus: false);
-                win.ClearSessionSettings();
+                win.ResetSessionSettings(defaultSettings);
                 win.Repaint();
             }
             else
             {
                 // Clear what is stored in the session.
                 // Window will update next time it is opened
-                ExportOptionsEditorWindow.ClearAllSessionSettings(prefix);
+                ExportOptionsEditorWindow.ResetAllSessionSettings(prefix, defaultSettings);
             }
         }
 
