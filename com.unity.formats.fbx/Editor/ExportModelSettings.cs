@@ -205,7 +205,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public override int GetHashCode()
         {
-            return (animatedSkinnedMesh ? 1 : 0) | (mayaCompatibleNaming ? 1 : 0) << 1 | (int)exportFormat << 2;
+            return (animatedSkinnedMesh ? 1 : 0) | ((mayaCompatibleNaming ? 1 : 0) << 1) | ((int)exportFormat << 2);
         }
     }
 
