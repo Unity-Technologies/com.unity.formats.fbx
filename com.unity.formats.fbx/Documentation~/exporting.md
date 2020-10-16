@@ -195,7 +195,14 @@ In addition, it also exports the following animated attributes:
   - Up Vector (Aim Constraint)
   - Aim Vector (Aim Constraint)
 
+Animation curve tangents are exported, with the exception of rotation curves for objects with a prerotation (i.e. bones of skinned meshes).
 
+The reason for this is that prerotation and rotation are combined in Unity, but exported and stored separately in FBX. 
+The rotation curves for prerotation and rotation are also stored together as a single curve in Unity.
+The rotations are separated at export into two separate fields (prerotation and local rotation), however splitting the rotation curves in the same
+way is not as straightforward. In order for the rotation curve to export properly (with a static prerotation and animated local rotation), the prerotation would need to be removed at each key.
+This would affect not only the values at each key, but also the key tangents, which would need to be recalculated. 
+For this reason, the rotation curves of skinned mesh bones are baked at each frame (with the prerotation factored out), to ensure that the result matches the original animation.
 
 ## Export Options window
 
