@@ -1,14 +1,15 @@
 # Changes in Fbx Exporter
 
-## [UNRELEASED] - 2020-09-29
+## [4.0.0-pre.1] - 2020-10-16
 ### Changed
 - The Export and Convert to Prefab options can now be changed in the FBX Export Settings in Edit > Project Settings > Fbx Export.
     - The Export and Convert to Prefab Options windows will use these settings by default.
     - When modifying the settings in the Export/Convert to Prefab windows, the Project Settings are no longer updated, but the changes persist for the remainder of the Unity session.
 - Disable buttons such as the "Install Integration" button when editing an FBX export setting preset.
 - Rename "Show Convert UI" in project settings to "Display Options Window" and use it for both the Convert and Export windows instead of just the Convert to Prefab window.
-- Made FBX SDK bindings Editor only so they are not copied into builds by default. In order to use at runtime, 
-  add the FBXSDK_RUNTIME define to Edit > Project Settings... > Player > Other Settings > Scripting Define Symbols.
+- Updated the FBX SDK bindings to 4.0.0-pre.1
+    - Made FBX SDK bindings Editor only so they are not copied into builds by default. In order to use at runtime, 
+      add the FBXSDK_RUNTIME define to Edit > Project Settings... > Player > Other Settings > Scripting Define Symbols.
 - Use DeepConvertScene from Autodesk® FBX SDK to convert from Unity (left handed system with odd parity) to Autodesk® Maya® (right handed system with odd parity) axis system.
     - Previously the conversion was performed by the FBX exporter.
     - For the majority of cases there will be no noticeable difference in the final export result. If any custom export code that is affected by the axis system has been added or modified, it will
@@ -21,6 +22,7 @@
 - Fix Export Model and Convert to Prefab Variant setting presets not serializing settings properly.
 - Fix NullReferenceException when modifying a preset for the FBX export settings in Edit > Project Settings > Fbx Export.
 - Fix error in an export when the project settings are not writeable (e.g. if you're using Perforce).
+- Fix Compatible Naming checkbox not aligned properly in Export/Convert UI.
 - FBX SDK bindings no longer included in builds, fixing an issue with shipping on the Mac App Store.
 
 ### Known issues

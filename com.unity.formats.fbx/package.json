@@ -1,7 +1,7 @@
 {
   "name": "com.unity.formats.fbx",
   "displayName": "FBX Exporter",
-  "version": "3.2.1-preview.2",
+  "version": "4.0.0-pre.1",
   "dependencies": {
     "com.unity.recorder": "2.2.0-preview.4",
     "com.unity.timeline": "1.0.0",
