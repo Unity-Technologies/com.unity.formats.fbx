@@ -1,11 +1,7 @@
 test_trigger_editors:
-  - version: 2018.4
   - version: 2019.4
+  - version: 2020.1
 publish_trigger_editors:
-  - version: 2018.4
-  - version: 2019.1
-  - version: 2019.2
-  - version: 2019.3
   - version: 2019.4
   - version: 2020.1
 platforms:
