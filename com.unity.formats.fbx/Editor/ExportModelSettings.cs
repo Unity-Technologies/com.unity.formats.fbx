@@ -1,13 +1,15 @@
-﻿using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
     [CustomEditor (typeof(ExportModelSettings))]
     internal class ExportModelSettingsEditor : UnityEditor.Editor
     {
-        private const float LabelWidth = 175;
-        private const float FieldOffset = 18;
+        private const float DefaultLabelWidth = 175;
+        private const float DefaultFieldOffset = 18;
+
+        public float LabelWidth { get; set; } = DefaultLabelWidth;
+        public float FieldOffset { get; set; } = DefaultFieldOffset;
 
         private string[] exportFormatOptions = new string[]{ "ASCII", "Binary" };
         private string[] includeOptions = new string[]{"Model(s) Only", "Animation Only", "Model(s) + Animation"};
@@ -15,10 +17,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public const string singleHierarchyOption = "Local Pivot";
         public const string multiHerarchyOption = "Local Centered";
-        private string hierarchyDepOption = "";
+        private string hierarchyDepOption = singleHierarchyOption;
         private string[] objPositionOptions { get { return new string[]{hierarchyDepOption, "World Absolute"}; }}
 
         private bool disableIncludeDropdown = false;
+
+        private bool m_exportingOutsideProject = false;
+        public void SetExportingOutsideProject(bool val)
+        {
+            m_exportingOutsideProject = val;
+        }
 
         public void SetIsSingleHierarchy(bool singleHierarchy){
             if (singleHierarchy) {
@@ -76,16 +84,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal ();
 
-            exportSettings.SetUseMayaCompatibleNames(EditorGUILayout.Toggle (
-                new GUIContent ("Compatible Naming",
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Compatible Naming",
                     "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
                     "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
                     "On export, convert the names of GameObjects so they are Maya compatible." +
                     (exportSettings.UseMayaCompatibleNames ? "" :
                         "\n\nWARNING: Disabling this feature may result in lost material connections," +
-                        " and unexpected character replacements in Maya.")
-                ),
-                exportSettings.UseMayaCompatibleNames));
+                        " and unexpected character replacements in Maya.")),
+                    GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.SetUseMayaCompatibleNames(EditorGUILayout.Toggle (exportSettings.UseMayaCompatibleNames));
+            GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Unrendered",
@@ -100,7 +109,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUILayout.LabelField(new GUIContent("Preserve Import Settings",
                 "If checked, the import settings from the overwritten FBX will be carried over to the new version."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if exporting outside assets folder
-            EditorGUI.BeginDisabledGroup(ExportSettings.instance.ExportOutsideProject);
+            EditorGUI.BeginDisabledGroup(m_exportingOutsideProject);
             exportSettings.SetPreserveImportSettings(EditorGUILayout.Toggle(exportSettings.PreserveImportSettings));
             EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
@@ -123,10 +132,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     internal abstract class ExportOptionsSettingsBase<T> : ScriptableObject where T : ExportOptionsSettingsSerializeBase, new()
     {
+        [SerializeField]
         private T m_info = new T();
-        public T info {
+        public T info
+        {
             get { return m_info; }
             set { m_info = value; }
+        }
+
+        public override bool Equals(object e)
+        {
+            var expOptions = e as ExportOptionsSettingsBase<T>;
+            if(expOptions == null)
+            {
+                return false;
+            }
+            return this.info.Equals(expOptions.info);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.info.GetHashCode();
         }
     }
 
@@ -162,8 +188,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public abstract ExportSettings.LODExportType LODExportType { get; }
         public abstract ExportSettings.ObjectPosition ObjectPosition { get; }
         public abstract bool ExportUnrendered { get; }
-        public virtual bool PreserveImportSettings { get;  }
+        public virtual bool PreserveImportSettings { get { return false; } }
         public abstract bool AllowSceneModification { get; }
+
+        public override bool Equals(object e)
+        {
+            var expOptions = e as ExportOptionsSettingsSerializeBase;
+            if (expOptions == null)
+            {
+                return false;
+            }
+            return animatedSkinnedMesh == expOptions.animatedSkinnedMesh &&
+                mayaCompatibleNaming == expOptions.mayaCompatibleNaming &&
+                exportFormat == expOptions.exportFormat;
+        }
+
+        public override int GetHashCode()
+        {
+            return (animatedSkinnedMesh ? 1 : 0) | ((mayaCompatibleNaming ? 1 : 0) << 1) | ((int)exportFormat << 2);
+        }
     }
 
     [System.Serializable]
@@ -177,6 +220,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private ExportSettings.ObjectPosition objectPosition = ExportSettings.ObjectPosition.LocalCentered;
         [SerializeField]
         private bool exportUnrendered = true;
+        [SerializeField]
         private bool preserveImportSettings = false;
 
         public override ExportSettings.Include ModelAnimIncludeOption { get { return include; } }
@@ -188,7 +232,33 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool ExportUnrendered { get { return exportUnrendered; } }
         public void SetExportUnredererd(bool exportUnrendered){ this.exportUnrendered = exportUnrendered; }
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }
-        public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings && !ExportSettings.instance.ExportOutsideProject; }
+        public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings; }
         public override bool AllowSceneModification { get { return false; } }
+
+        public override bool Equals(object e)
+        {
+            var expOptions = e as ExportModelSettingsSerialize;
+            if (expOptions == null)
+            {
+                return false;
+            }
+            return base.Equals(e) && 
+                include == expOptions.include &&
+                lodLevel == expOptions.lodLevel &&
+                objectPosition == expOptions.objectPosition &&
+                exportUnrendered == expOptions.exportUnrendered &&
+                preserveImportSettings == expOptions.preserveImportSettings;
+        }
+
+        public override int GetHashCode()
+        {
+            var bitmask =  base.GetHashCode();
+            bitmask = (bitmask << 2) ^ (int)include;
+            bitmask = (bitmask << 2) ^ (int)lodLevel;
+            bitmask = (bitmask << 2) ^ (int)objectPosition;
+            bitmask = (bitmask << 1) | (exportUnrendered ? 1 : 0);
+            bitmask = (bitmask << 1) | (preserveImportSettings ? 1 : 0);
+            return bitmask;
+        }
     }
 }

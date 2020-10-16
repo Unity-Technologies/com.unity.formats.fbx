@@ -10,7 +10,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 {
     internal abstract class ExportOptionsEditorWindow : EditorWindow
     {
-        protected const string DefaultWindowTitle = "Export Options";
+        internal const string DefaultWindowTitle = "Export Options";
         protected const float SelectableLabelMinWidth = 90;
         protected const float BrowseButtonWidth = 25;
         protected const float LabelWidth = 175;
@@ -101,6 +101,128 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected abstract ExportOptionsSettingsSerializeBase SettingsObject { get; }
 
+        // Helper functions for persisting the Export Settings for the session
+        protected abstract string SessionStoragePrefix { get; }
+
+        protected const string k_SessionSettingsName = "Settings";
+        protected const string k_SessionFbxPathsName = "FbxSavePath";
+        protected const string k_SessionSelectedFbxPathName = "SelectedFbxPath";
+        protected const string k_SessionPrefabPathsName = "PrefabSavePath";
+        protected const string k_SessionSelectedPrefabPathName = "SelectedPrefabPath";
+
+        protected void StorePathsInSession(string varName, List<string> paths)
+        {
+            if(paths == null)
+            {
+                return;
+            }
+
+            var n = paths.Count;
+            SessionState.SetInt(string.Format(SessionStoragePrefix, varName), n);
+            for (int i = 0; i < n; i++)
+            {
+                SessionState.SetString(string.Format(SessionStoragePrefix + "_{1}", varName, i), paths[i]);
+            }
+        }
+
+        protected void RestorePathsFromSession(string varName, List<string> defaultsPaths, out List<string> paths)
+        {
+            var n = SessionState.GetInt(string.Format(SessionStoragePrefix, varName), 0);
+            if (n <= 0)
+            {
+                paths = defaultsPaths;
+                return;
+            }
+
+            paths = new List<string>();
+            for (int i = 0; i < n; i++)
+            {
+                var path = SessionState.GetString(string.Format(SessionStoragePrefix + "_{1}", varName, i), null);
+                if (!string.IsNullOrEmpty(path))
+                {
+                    paths.Add(path);
+                }
+            }
+        }
+
+        protected static void ClearPathsFromSession(string varName, string prefix)
+        {
+            var n = SessionState.GetInt(string.Format(prefix, varName), 0);
+            SessionState.EraseInt(string.Format(prefix, varName));
+            for(int i = 0; i < n; i++)
+            {
+                SessionState.EraseString(string.Format(prefix + "_{1}", varName, i));
+            }
+        }
+
+        protected virtual void StoreSettingsInSession()
+        {
+            var settings = SettingsObject;
+            var json = EditorJsonUtility.ToJson(settings);
+            SessionState.SetString(string.Format(SessionStoragePrefix, k_SessionSettingsName), json);
+
+            StorePathsInSession(k_SessionFbxPathsName, m_fbxSavePaths);
+            SessionState.SetInt(string.Format(SessionStoragePrefix, k_SessionSelectedFbxPathName), SelectedFbxPath);
+        }
+
+        protected virtual void RestoreSettingsFromSession(ExportOptionsSettingsSerializeBase defaults)
+        {
+            var settings = SettingsObject;
+            var json = SessionState.GetString(string.Format(SessionStoragePrefix, k_SessionSettingsName), EditorJsonUtility.ToJson(defaults));
+            if (!string.IsNullOrEmpty(json))
+            {
+                EditorJsonUtility.FromJsonOverwrite(json, settings);
+            }
+        }
+
+        public static void ResetAllSessionSettings(string prefix, string settingsDefaults = null)
+        {
+            SessionState.EraseString(string.Format(prefix, k_SessionSettingsName));
+            // Set the defaults of the settings.
+            // If there exists a Default Preset for the Convert/Export settings, then if the project settings are modified,
+            // the Default Preset will be reloaded instead of the project settings. Therefore, set them explicitely if projects settings desired.
+            if (!string.IsNullOrEmpty(settingsDefaults))
+            {
+                SessionState.SetString(string.Format(prefix, k_SessionSettingsName), settingsDefaults);
+            }
+
+            ClearPathsFromSession(k_SessionFbxPathsName, prefix);
+            SessionState.EraseInt(string.Format(prefix, k_SessionSelectedFbxPathName));
+
+            ClearPathsFromSession(k_SessionPrefabPathsName, prefix);
+            SessionState.EraseInt(string.Format(prefix, k_SessionSelectedPrefabPathName));
+        }
+
+        public virtual void ResetSessionSettings(string settingsDefaults = null)
+        {
+            ResetAllSessionSettings(SessionStoragePrefix, settingsDefaults);
+            m_fbxSavePaths = null;
+            SelectedFbxPath = 0;
+        }
+        
+        private List<string> m_fbxSavePaths;
+        internal List<string> FbxSavePaths
+        {
+            get
+            {
+                if (m_fbxSavePaths == null)
+                {
+                    // Try to restore from session, fall back to Fbx Export Settings
+                    RestorePathsFromSession(k_SessionFbxPathsName, ExportSettings.instance.GetCopyOfFbxSavePaths(), out m_fbxSavePaths);
+                    SelectedFbxPath = SessionState.GetInt(string.Format(SessionStoragePrefix, k_SessionSelectedFbxPathName), ExportSettings.instance.SelectedFbxPath);
+                }
+                return m_fbxSavePaths;
+            }
+        }
+
+        [SerializeField]
+        private int m_selectedFbxPath = 0;
+        internal int SelectedFbxPath
+        {
+            get { return m_selectedFbxPath; }
+            set { m_selectedFbxPath = value; }
+        }
+
         private UnityEngine.Object[] m_toExport;
         protected Object[] GetToExport(){ return m_toExport; }
         protected void SetToExport(Object[] value){ m_toExport = value; }
@@ -144,12 +266,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             ExportFileName = filename.Remove(extIndex);
         }
 
-        public void SaveExportSettings()
-        {
-            // save once preset selection is finished
-            EditorUtility.SetDirty (ExportSettings.instance);
-            ExportSettings.instance.Save ();
-        }
+        public abstract void SaveExportSettings();
 
         public void OnPresetSelectionChanged()
         {
@@ -313,7 +430,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Add UI to turn the dialog off next time the user exports
         /// </summary>
-        protected virtual void DoNotShowDialogUI() { }
+        protected virtual void DoNotShowDialogUI()
+        {
+            EditorGUI.indentLevel--;
+            ExportSettings.instance.DisplayOptionsWindow = !EditorGUILayout.Toggle(
+                new GUIContent("Don't ask me again", "Don't ask me again, use the last used paths and options instead"),
+                !ExportSettings.instance.DisplayOptionsWindow
+            );
+        }
 
         // -------------------------------------------------------------------------------------
 
@@ -366,23 +490,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 "Export Path",
                 "Location where the FBX will be saved."),GUILayout.Width(LabelWidth - FieldOffset));
 
-            var pathLabels = ExportSettings.GetMixedFbxSavePaths();
+            var pathLabels = ExportSettings.GetMixedSavePaths(FbxSavePaths);
 
             if (this is ConvertToPrefabEditorWindow)
             {
-                pathLabels = ExportSettings.GetRelativeFbxSavePaths();
+                pathLabels = ExportSettings.GetRelativeFbxSavePaths(FbxSavePaths, ref m_selectedFbxPath);
             }
 
-            ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup (ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+            SelectedFbxPath = EditorGUILayout.Popup (SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
-            // Set export setting for exporting outside the project on choosing a path
-            if (!pathLabels[ExportSettings.instance.SelectedFbxPath].Substring(0, 6).Equals("Assets"))
+            if (!(this is ConvertToPrefabEditorWindow))
             {
-                ExportSettings.instance.ExportOutsideProject = true;
-            }
-            else
-            {
-                ExportSettings.instance.ExportOutsideProject = false;
+                var exportSettingsEditor = InnerEditor as ExportModelSettingsEditor;
+                // Set export setting for exporting outside the project on choosing a path
+                var exportOutsideProject = !pathLabels[SelectedFbxPath].Substring(0, 6).Equals("Assets");
+                exportSettingsEditor.SetExportingOutsideProject(exportOutsideProject);
             }
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new location to export to"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
@@ -406,13 +528,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // We're exporting outside Assets folder, so store the absolute path
                     else if (string.IsNullOrEmpty(relativePath))
                     {
-                        ExportSettings.instance.ExportOutsideProject = true;
-                        ExportSettings.AddFbxSavePath(fullPath);
+                        ExportSettings.AddSavePath(fullPath, FbxSavePaths, exportOutsideProject: true);
+                        SelectedFbxPath = 0;
                     }
                     // Store the relative path to the Assets folder
                     else
                     {
-                        ExportSettings.AddFbxSavePath(relativePath);
+                        ExportSettings.AddSavePath(relativePath, FbxSavePaths, exportOutsideProject: false);
+                        SelectedFbxPath = 0;
                     }
                     // Make sure focus is removed from the selectable label
                     // otherwise it won't update
@@ -471,8 +594,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.EndHorizontal ();
             EditorGUILayout.Space(); // adding a space at bottom of dialog so buttons aren't right at the edge
 
-            if (GUI.changed) {
-                SaveExportSettings ();
+            if (GUI.changed)
+            {
+                SaveExportSettings();
             }
         }
 
@@ -489,8 +613,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     string.Format("File {0} already exists.\nOverwrite cannot be undone.", filePath), 
                     "Overwrite", "Cancel");
                 if (!overwrite) {
-                    if (GUI.changed) {
-                        SaveExportSettings ();
+                    if (GUI.changed)
+                    {
+                        SaveExportSettings();
                     }
                     return false;
                 }
@@ -501,6 +626,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     internal class ExportModelEditorWindow : ExportOptionsEditorWindow
     {
+        public const string k_SessionStoragePrefix = "FbxExporterOptions_{0}";
+        protected override string SessionStoragePrefix { get { return k_SessionStoragePrefix; } }
+
         protected override float MinWindowHeight { get { return 310; } } // determined by trial and error
         protected override bool DisableNameSelection {
             get {
@@ -533,8 +661,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             set{
                 m_isTimelineAnim = value;
                 if (m_isTimelineAnim) {
-                    m_previousInclude = ExportSettings.instance.ExportModelSettings.info.ModelAnimIncludeOption;
-                    ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+                    m_previousInclude = ExportModelSettingsInstance.info.ModelAnimIncludeOption;
+                    ExportModelSettingsInstance.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
                 }
                 if (InnerEditor) {
                     var exportModelSettingsEditor = InnerEditor as ExportModelSettingsEditor;
@@ -560,14 +688,70 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
+        public override void ResetSessionSettings(string defaultSettings = null)
+        {
+            base.ResetSessionSettings(defaultSettings);
+
+            // save the source and dest as these are not serialized
+            var source = m_exportModelSettingsInstance.info.AnimationSource;
+            var dest = m_exportModelSettingsInstance.info.AnimationDest;
+
+            m_exportModelSettingsInstance = null;
+            ExportModelSettingsInstance.info.SetAnimationSource(source);
+            ExportModelSettingsInstance.info.SetAnimationDest(dest);
+            InnerEditor = Editor.CreateEditor(ExportModelSettingsInstance);
+        }
+
+        private ExportModelSettings m_exportModelSettingsInstance;
+        public ExportModelSettings ExportModelSettingsInstance
+        {
+            get
+            {
+                if(m_exportModelSettingsInstance == null)
+                {
+                    // make a copy of the settings
+                    m_exportModelSettingsInstance = ScriptableObject.CreateInstance(typeof(ExportModelSettings)) as ExportModelSettings;
+                    // load settings stored in Unity session, default to DefaultPreset, if none then Export Settings
+                    var defaultPresets = Preset.GetDefaultPresetsForObject(m_exportModelSettingsInstance);
+                    if (defaultPresets.Length <= 0)
+                    {
+                        RestoreSettingsFromSession(ExportSettings.instance.ExportModelSettings.info);
+                    }
+                    else
+                    {
+                        // apply the first default preset
+                        // TODO: figure out what it means to have multiple default presets, when would they be applied?
+                        defaultPresets[0].ApplyTo(m_exportModelSettingsInstance);
+                        RestoreSettingsFromSession(m_exportModelSettingsInstance.info);
+                    }
+                }
+                return m_exportModelSettingsInstance;
+            }
+        }
+
+        public override void SaveExportSettings()
+        {
+            // check if the settings are different from what is in the Project Settings and only store
+            // if they are. Otherwise we want to keep them updated with changes to the Project Settings.
+            bool settingsChanged = !(ExportModelSettingsInstance.Equals(ExportSettings.instance.ExportModelSettings));
+            var projectSettingsPaths = ExportSettings.instance.GetCopyOfFbxSavePaths();
+            settingsChanged |= !projectSettingsPaths.SequenceEqual(FbxSavePaths);
+            settingsChanged |= SelectedFbxPath != ExportSettings.instance.SelectedFbxPath;
+
+            if (settingsChanged)
+            {
+                StoreSettingsInSession();
+            }
+        }
+
         protected override ExportOptionsSettingsSerializeBase SettingsObject
         {
-            get { return ExportSettings.instance.ExportModelSettings.info; }
+            get { return ExportModelSettingsInstance.info; }
         }
 
         private ExportSettings.Include m_previousInclude = ExportSettings.Include.ModelAndAnim;
 
-        public static void Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false)
+        public static ExportModelEditorWindow Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", bool isTimelineAnim = false)
         {
             ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
             window.IsTimelineAnim = isTimelineAnim;
@@ -579,6 +763,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             window.InitializeWindow (filename);
             window.SingleHierarchyExport = (numObjects == 1);
             window.Show ();
+            return window;
         }
 
         protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport){
@@ -627,7 +812,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             base.OnEnable ();
             if (!InnerEditor) {
-                InnerEditor = UnityEditor.Editor.CreateEditor (ExportSettings.instance.ExportModelSettings);
+                InnerEditor = UnityEditor.Editor.CreateEditor (ExportModelSettingsInstance);
                 this.SingleHierarchyExport = m_singleHierarchyExport;
                 this.IsTimelineAnim = m_isTimelineAnim;
             }
@@ -644,8 +829,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected virtual void RestoreSettings()
         {
             if (IsTimelineAnim) {
-                ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(m_previousInclude);
-                SaveExportSettings ();
+                ExportModelSettingsInstance.info.SetModelAnimIncludeOption(m_previousInclude);
             }
         }
 
@@ -656,7 +840,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Debug.LogError ("FbxExporter: Please specify an fbx filename");
                 return false;
             }
-            var folderPath = ExportSettings.FbxAbsoluteSavePath;
+            var folderPath = ExportSettings.GetAbsoluteSavePath(FbxSavePaths[SelectedFbxPath]);
             var filePath = System.IO.Path.Combine (folderPath, ExportFileName + ".fbx");
 
             if (!OverwriteExistingFile (filePath)) {
@@ -674,7 +858,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         #if UNITY_2018_1_OR_NEWER  
         protected override void ShowPresetReceiver ()
         {
-            ShowPresetReceiver (ExportSettings.instance.ExportModelSettings);
+            ShowPresetReceiver (ExportModelSettingsInstance);
         }
         #endif
     }

@@ -32,12 +32,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        public static void Init(IEnumerable<GameObject> toConvert)
+        public static ConvertToPrefabEditorWindow Init(IEnumerable<GameObject> toConvert)
         {
             ConvertToPrefabEditorWindow window = CreateWindow<ConvertToPrefabEditorWindow>();
             window.InitializeWindow();
             window.SetGameObjectsToConvert(toConvert);
             window.Show();
+            return window;
         }
 
         protected void SetGameObjectsToConvert(IEnumerable<GameObject> toConvert)
@@ -98,7 +99,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             base.OnEnable();
             if (!InnerEditor)
             {
-                InnerEditor = UnityEditor.Editor.CreateEditor(ExportSettings.instance.ConvertToPrefabSettings);
+                InnerEditor = UnityEditor.Editor.CreateEditor(ConvertToPrefabSettingsInstance);
             }
             m_prefabExtLabelWidth = FbxExtLabelStyle.CalcSize(new GUIContent(".prefab")).x;
         }
@@ -146,10 +147,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            var fbxDirPath = ExportSettings.FbxAbsoluteSavePath;
+            var fbxDirPath = ExportSettings.GetAbsoluteSavePath(FbxSavePaths[SelectedFbxPath]); ;
             var fbxPath = System.IO.Path.Combine(fbxDirPath, ExportFileName + ".fbx");
 
-            var prefabDirPath = ExportSettings.PrefabAbsoluteSavePath;
+            var prefabDirPath = ExportSettings.GetAbsoluteSavePath(PrefabSavePaths[SelectedPrefabPath]);
             var prefabPath = System.IO.Path.Combine(prefabDirPath, m_prefabFileName + ".prefab");
 
             if (GetToExport() == null)
@@ -216,7 +217,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 ConvertToNestedPrefab.Convert(
-                    go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
+                    go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ConvertToPrefabSettingsInstance.info
                 );
                 return true;
             }
@@ -235,7 +236,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // Convert, automatically choosing a file path that won't clobber any existing files.
                 var go = ModelExporter.GetGameObject(obj);
                 ConvertToNestedPrefab.Convert(
-                    go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
+                    go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ConvertToPrefabSettingsInstance.info
                 );
             }
             if (!onlyPrefabAssets && groupIndex >= 0)
@@ -245,15 +246,115 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             return true;
         }
+        
+        public const string k_SessionStoragePrefix = "FbxExporterConvertOptions_{0}";
+        protected override string SessionStoragePrefix { get { return k_SessionStoragePrefix; } }
+
+        public override void ResetSessionSettings(string defaultSettings = null)
+        {
+            base.ResetSessionSettings(defaultSettings);
+
+            // save the source and dest as these are not serialized
+            var source = m_convertToPrefabSettingsInstance.info.AnimationSource;
+            var dest = m_convertToPrefabSettingsInstance.info.AnimationDest;
+
+            m_convertToPrefabSettingsInstance = null;
+            ConvertToPrefabSettingsInstance.info.SetAnimationSource(source);
+            ConvertToPrefabSettingsInstance.info.SetAnimationDest(dest);
+            
+            m_prefabSavePaths = null;
+            SelectedPrefabPath = 0;
+            InnerEditor = Editor.CreateEditor(ConvertToPrefabSettingsInstance);
+        }
+
+        protected override void StoreSettingsInSession()
+        {
+            base.StoreSettingsInSession();
+
+            // store Prefab Save Paths
+            StorePathsInSession(k_SessionPrefabPathsName, m_prefabSavePaths);
+            SessionState.SetInt(string.Format(SessionStoragePrefix, k_SessionSelectedPrefabPathName), SelectedPrefabPath);
+        }
+
+
+        private List<string> m_prefabSavePaths;
+        internal List<string> PrefabSavePaths
+        {
+            get
+            {
+                if (m_prefabSavePaths == null)
+                {
+                    // Try to restore from session, fall back to Fbx Export Settings
+                    RestorePathsFromSession(k_SessionPrefabPathsName, ExportSettings.instance.GetCopyOfPrefabSavePaths(), out m_prefabSavePaths);
+                    SelectedPrefabPath = SessionState.GetInt(string.Format(SessionStoragePrefix, k_SessionSelectedPrefabPathName), ExportSettings.instance.SelectedPrefabPath);
+                }
+                return m_prefabSavePaths;
+            }
+        }
+
+        [SerializeField]
+        private int m_selectedPrefabPath = 0;
+        internal int SelectedPrefabPath
+        {
+            get { return m_selectedPrefabPath; }
+            set { m_selectedPrefabPath = value; }
+        }
+
+        private ConvertToPrefabSettings m_convertToPrefabSettingsInstance;
+        public ConvertToPrefabSettings ConvertToPrefabSettingsInstance
+        {
+            get
+            {
+                if (m_convertToPrefabSettingsInstance == null)
+                {
+                    // make a copy of the settings
+                    m_convertToPrefabSettingsInstance = ScriptableObject.CreateInstance(typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
+                    // load settings stored in Unity session, default to DefaultPreset, if none then Export Settings
+                    var defaultPresets = Preset.GetDefaultPresetsForObject(m_convertToPrefabSettingsInstance);
+                    if (defaultPresets.Length <= 0)
+                    {
+                        RestoreSettingsFromSession(ExportSettings.instance.ConvertToPrefabSettings.info);
+                    }
+                    else
+                    {
+                        // apply the first default preset
+                        // TODO: figure out what it means to have multiple default presets, when would they be applied?
+                        defaultPresets[0].ApplyTo(m_convertToPrefabSettingsInstance);
+                        RestoreSettingsFromSession(m_convertToPrefabSettingsInstance.info);
+                    }
+                }
+                return m_convertToPrefabSettingsInstance;
+            }
+        }
+
+        public override void SaveExportSettings()
+        {
+            // check if the settings are different from what is in the Project Settings and only store
+            // if they are. Otherwise we want to keep them updated with changes to the Project Settings.
+            bool settingsChanged = !(ConvertToPrefabSettingsInstance.Equals(ExportSettings.instance.ConvertToPrefabSettings));
+
+            var projectSettingsFbxPaths = ExportSettings.instance.GetCopyOfFbxSavePaths();
+            settingsChanged |= !projectSettingsFbxPaths.SequenceEqual(FbxSavePaths);
+            var projectSettingsPrefabPaths = ExportSettings.instance.GetCopyOfPrefabSavePaths();
+            settingsChanged |= !projectSettingsPrefabPaths.SequenceEqual(PrefabSavePaths);
+
+            settingsChanged |= SelectedPrefabPath != ExportSettings.instance.SelectedPrefabPath;
+            settingsChanged |= SelectedFbxPath != ExportSettings.instance.SelectedFbxPath;
+
+            if (settingsChanged)
+            {
+                StoreSettingsInSession();
+            }
+        }
 
         protected override ExportOptionsSettingsSerializeBase SettingsObject
         {
-            get { return ExportSettings.instance.ConvertToPrefabSettings.info; }
+            get { return ConvertToPrefabSettingsInstance.info; }
         }
 #if UNITY_2018_1_OR_NEWER
         protected override void ShowPresetReceiver()
         {
-            ShowPresetReceiver(ExportSettings.instance.ConvertToPrefabSettings);
+            ShowPresetReceiver(ConvertToPrefabSettingsInstance);
         }
 #endif
         protected override void CreateCustomUI()
@@ -288,9 +389,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 "Prefab Path",
                 "Relative path for saving FBX Prefab Variants."), GUILayout.Width(LabelWidth - FieldOffset));
 
-            var pathLabels = ExportSettings.GetRelativePrefabSavePaths();
+            var pathLabels = ExportSettings.GetRelativeSavePaths(PrefabSavePaths);
 
-            ExportSettings.instance.SelectedPrefabPath = EditorGUILayout.Popup(ExportSettings.instance.SelectedPrefabPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+            SelectedPrefabPath = EditorGUILayout.Popup(SelectedPrefabPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
             if (GUILayout.Button(new GUIContent("...", "Browse to a new location to save prefab to"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
             {
@@ -310,7 +411,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                     else
                     {
-                        ExportSettings.AddPrefabSavePath(relativePath);
+                        ExportSettings.AddSavePath(relativePath, PrefabSavePaths);
+                        SelectedPrefabPath = 0;
 
                         // Make sure focus is removed from the selectable label
                         // otherwise it won't update
@@ -320,15 +422,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
             GUILayout.EndHorizontal();
-        }
-
-        protected override void DoNotShowDialogUI()
-        {
-            EditorGUI.indentLevel--;
-            ExportSettings.instance.ShowConvertToPrefabDialog = !EditorGUILayout.Toggle(
-                new GUIContent("Don't ask me again", "Don't ask me again, use the last used paths and options instead"),
-                !ExportSettings.instance.ShowConvertToPrefabDialog
-            );
         }
     }
 }

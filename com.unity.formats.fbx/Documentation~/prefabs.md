@@ -85,10 +85,13 @@ When converting to an FBX Prefab Variant, the following window opens, displaying
 | __Object(s) Position__    | __Convert to FBX Prefab Variant__ always resets the root object's transform during export. However, the Prefab maintains the global transform for the root object. |
 | __Animated Skinned Mesh__ | Check this option to export animation on objects with skinned meshes.<br/><br/>If unchecked, the FBX Exporter does not export animation on skinned meshes. |
 | __Compatible Naming__     | Check this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and Autodesk® Maya® and Autodesk® Maya LT™. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("\_"). Invalid characters are all non-alphanumeric characters, except for colon (":").<br/> - Adds an underscore ("\_") to names that begin with a number. - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>**NOTE:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
-| __Don't ask me again__    | Check this option to use the same **Convert Option** properties and hide this window when converting to FBX Prefab Variants in the future. You can reset this option by turning on the **Show Convert UI** option under **Edit** > **Project Settings** > **Fbx Export** in Unity's top menu. |
+| __Don't ask me again__    | Check this option to use the same **Convert Option** properties and hide this window when converting to FBX Prefab Variants in the future. You can reset this option by turning on the **Display Options Window** option under **Edit** > **Project Settings** > **Fbx Export** in Unity's top menu. |
 
 > **NOTE:** For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters may differ between file systems.
 
+
+> **NOTE:** If a Default Preset has been set in the Preset Manager, the settings will default to this preset. Otherwise, the settings will default to the settings in Edit > Project Settings... > Fbx Export under Convert to Prefab Options.
+However, modifying the settings in the Convert Options window will preserve the changes for the remainder of the Unity session.
 
 
 <a name="conversion"></a>
