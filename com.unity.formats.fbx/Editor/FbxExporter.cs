@@ -3864,8 +3864,33 @@ namespace UnityEditor.Formats.Fbx.Exporter
         internal static void ExportSingleTimelineClip(Object editorClipSelected)
         {
             UnityEngine.Object[] exportArray = new UnityEngine.Object[] { editorClipSelected };
+            string filename = AnimationOnlyExportData.GetFileName(editorClipSelected);
+            if (ExportSettings.DisplayOptionsWindow)
+            {
+                ExportModelEditorWindow.Init(exportArray, filename, isTimelineAnim: true);
+                return;
+            }
 
-            ExportModelEditorWindow.Init (exportArray, AnimationOnlyExportData.GetFileName(editorClipSelected), isTimelineAnim: true);
+            var folderPath = ExportSettings.FbxAbsoluteSavePath;
+            var filePath = System.IO.Path.Combine(folderPath, filename + ".fbx");
+
+            if (System.IO.File.Exists(filePath))
+            {
+                Debug.LogErrorFormat("{0}: Failed to export to {1}, file already exists", PACKAGE_UI_NAME, filePath);
+                return;
+            }
+
+            var previousInclude = ExportSettings.instance.ExportModelSettings.info.ModelAnimIncludeOption;
+            ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+
+            if (ExportObjects(filePath, exportArray, ExportSettings.instance.ExportModelSettings.info) != null)
+            {
+                // refresh the asset database so that the file appears in the
+                // asset folder view.
+                AssetDatabase.Refresh();
+            }
+
+            ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(previousInclude);
         }
 
         /// <summary>
@@ -4339,7 +4364,37 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GameObject [] selectedGOs = Selection.GetFiltered<GameObject> (SelectionMode.TopLevel);
 
             var toExport = ModelExporter.RemoveRedundantObjects(selectedGOs);
-            ExportModelEditorWindow.Init (System.Linq.Enumerable.Cast<UnityEngine.Object> (toExport), isTimelineAnim: false);
+            if (ExportSettings.instance.DisplayOptionsWindow)
+            {
+                ExportModelEditorWindow.Init(System.Linq.Enumerable.Cast<UnityEngine.Object>(toExport), isTimelineAnim: false);
+                return;
+            }
+
+            var filename = "";
+            if (toExport.Count == 1)
+            {
+                filename = toExport.ToArray()[0].name;
+            }
+            else
+            {
+                filename = "Untitled";
+            }
+
+            var folderPath = ExportSettings.FbxAbsoluteSavePath;
+            var filePath = System.IO.Path.Combine(folderPath, filename + ".fbx");
+
+            if (System.IO.File.Exists(filePath))
+            {
+                Debug.LogErrorFormat("{0}: Failed to export to {1}, file already exists", PACKAGE_UI_NAME, filePath);
+                return;
+            }
+
+            if (ExportObjects(filePath, toExport.ToArray(), ExportSettings.instance.ExportModelSettings.info) != null)
+            {
+                // refresh the asset database so that the file appears in the
+                // asset folder view.
+                AssetDatabase.Refresh();
+            }
         }
 
         [SecurityPermission(SecurityAction.LinkDemand)]
