@@ -7,11 +7,15 @@
     - When modifying the settings in the Export/Convert to Prefab windows, the Project Settings are no longer updated, but the changes persist for the remainder of the Unity session.
 - Disable buttons such as the "Install Integration" button when editing an FBX export setting preset.
 - Rename "Show Convert UI" in project settings to "Display Options Window" and use it for both the Convert and Export windows instead of just the Convert to Prefab window.
+- Made FBX SDK bindings Editor only so they are not copied into builds by default. In order to use at runtime, 
+  add the FBXSDK_RUNTIME define to Edit > Project Settings... > Player > Other Settings > Scripting Define Symbols.
 
 ### Fixed
 - Fix Export Model and Convert to Prefab Variant setting presets not serializing settings properly.
 - Fix NullReferenceException when modifying a preset for the FBX export settings in Edit > Project Settings > Fbx Export.
 - Fix error in an export when the project settings are not writeable (e.g. if you're using Perforce).
+- FBX SDK bindings no longer included in builds, fixing an issue with shipping on the Mac App Store.
+
 
 ## [3.2.1-preview.2] - 2020-08-05
 ### Added

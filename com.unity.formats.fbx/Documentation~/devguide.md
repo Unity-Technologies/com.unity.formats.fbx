@@ -24,6 +24,8 @@ public static void ExportGameObjects(Object[] objects)
 
 The FBX SDK bindings can be executed during gameplay allowing import and export at runtime. Currently a custom importer/exporter needs to be written in order to do so, as the FBX Exporter is Editor only.
 
+> **NOTE:** The FBX SDK bindings are Editor only by default and will not be included in a build. In order for the package to be included in the build, add the FBXSDK_RUNTIME define to Edit > Project Settings... > Player > Other Settings > Scripting Define Symbols.
+
 ### Basic Exporter:
 
 ```
@@ -84,4 +86,4 @@ protected void ImportScene (string fileName)
 
 ### Limitations
 
-* Only 64 bit Windows and MacOS standalone player builds are supported
+* Only 64 bit Windows, MacOS and Ubuntu standalone player builds are supported
