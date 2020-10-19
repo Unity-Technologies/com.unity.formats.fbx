@@ -1,6 +1,6 @@
 # FBX Recorder
 
-With the FBX Exporter and the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@2.1/index.html), it is possible to export animations (including [Cinemachine](https://docs.unity3d.com/Packages/com.unity.cinemachine@2.3/manual/index.html) camera animations) directly to FBX in a few easy steps:
+With the FBX Exporter and the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@2.2/index.html), it is possible to export animations (including [Cinemachine](https://docs.unity3d.com/Packages/com.unity.cinemachine@2.3/manual/index.html) camera animations) directly to FBX in a few easy steps:
 
 1. Install the Unity Recorder package from the [Package Manager](https://docs.unity3d.com/Manual/upm-ui-install.html) if it is not already in the project
 2. Open the Recorder window by selecting (Window > General > Recorder > Recorder Window)
