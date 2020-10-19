@@ -14,7 +14,7 @@ The FBX Exporter package includes the following features:
 
 The FBX Exporter package is compatible with the following versions of the Unity Editor:
 
-* 2018.3 and later
+* 2019.4 and later
 
 The Unity Integration for Autodesk® Maya® and Autodesk® Maya LT™ feature supports the following versions:
 

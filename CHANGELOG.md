@@ -17,6 +17,8 @@
     - There may be discrepancies in the Aim constraint and Parent constraint export result compared to before, however these should still import correctly into Autodesk® Maya® and other DCCs.
 - Export animation curve tangents instead of baking animation.
     - For more details see https://docs.unity3d.com/Packages/com.unity.formats.fbx@4.0/manual/exporting.html#animation
+- Change dependency on Unity Recorder to an optional one so it is no longer immediately installed when installing the FBX exporter package.
+- Update minimum supported Unity version to 2019.4.
 
 ### Fixed
 - Fix Export Model and Convert to Prefab Variant setting presets not serializing settings properly.
