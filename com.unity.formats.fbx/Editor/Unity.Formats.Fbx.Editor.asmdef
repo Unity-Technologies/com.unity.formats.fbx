@@ -17,6 +17,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.recorder",
+            "expression": "2.2.0-preview.4",
+            "define": "ENABLE_FBX_RECORDER"
+        }
+    ],
     "noEngineReferences": false
 }

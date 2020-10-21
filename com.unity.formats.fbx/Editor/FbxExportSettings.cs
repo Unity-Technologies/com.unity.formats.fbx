@@ -505,7 +505,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        internal void Save(bool saveAsText)
+        internal void SaveToFile()
         {
             if (s_Instance == null)
             {
@@ -1739,7 +1739,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         {
             exportModelSettingsSerialize = ExportModelSettings.info;
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
-            this.Save (true);
+            this.SaveToFile ();
         }
     }
 

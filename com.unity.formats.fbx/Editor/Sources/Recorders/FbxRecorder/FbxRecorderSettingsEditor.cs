@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if ENABLE_FBX_RECORDER
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Recorder;
@@ -36,3 +37,4 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 }
+#endif // ENABLE_FBX_RECORDER
