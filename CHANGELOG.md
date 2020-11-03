@@ -223,7 +223,7 @@ FIXES
 
 * Fixed skinned mesh bone updates.
 
-## [1.5.0]
+## [1.5.0] - 2018-05-22
 
 NEW FEATURES
 
@@ -236,7 +236,7 @@ FIXES:
 
 * The DCC integration plug-ins now work with the Package Manager.
 
-## [1.4.0]
+## [1.4.0] - 2018-04-23
 
 NEW FEATURES
 
@@ -256,7 +256,7 @@ KNOWN ISSUES
 * When converting an existing FBX file, the FBX Filename and FBX Export options are ignored (but not greyed out).
 * When converting an existing Prefab, the Prefab Filename is ignored (but not greyed out).
 
-## [1.3.0f1] - 2018-04-17
+## [1.3.0] - 2018-04-17
 NEW FEATURES
 * `Unity3dsMaxIntegration`: 
 	* Allows multiple file import.
