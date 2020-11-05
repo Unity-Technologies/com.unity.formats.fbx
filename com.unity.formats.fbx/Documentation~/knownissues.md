@@ -7,3 +7,5 @@
 * The FBX Exporter package ignores name or path changes when converting a Model instance.
 
 * The FBX Exporter package does not support exporting animation only for animated Lights and Cameras from Autodesk® Maya® and Maya LT™.
+
+* Exporting an empty mesh (MeshFilter with null sharedMesh), fails to export with ArgumentNullException.
