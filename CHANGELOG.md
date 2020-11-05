@@ -1,5 +1,13 @@
 # Changes in Fbx Exporter
 
+## [4.0.0-pre.2] - 2020-11-05
+### Changed
+- Added missing release date information to changelog.
+- Updated License.md.
+
+### Known issues
+- Exporting an empty mesh (MeshFilter with null sharedMesh), fails to export with ArgumentNullException.
+
 ## [4.0.0-pre.1] - 2020-10-16
 ### Changed
 - The Export and Convert to Prefab options can now be changed in the FBX Export Settings in Edit > Project Settings > Fbx Export.
