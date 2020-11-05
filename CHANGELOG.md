@@ -257,6 +257,9 @@ KNOWN ISSUES
 * When converting an existing Prefab, the Prefab Filename is ignored (but not greyed out).
 
 ## [1.3.0] - 2018-04-17
+NOTES
+* This is the last Asset Store version. It is also known as 1.3.0f1.
+
 NEW FEATURES
 * `Unity3dsMaxIntegration`: 
 	* Allows multiple file import.
