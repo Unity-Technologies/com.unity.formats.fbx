@@ -14,7 +14,7 @@ platforms:
     image: package-ci/mac:stable
     flavor: b1.medium
 coverage:
-    minPercent: 19
+    minPercent: 57.6
 ---
 pack:
   name: Pack
