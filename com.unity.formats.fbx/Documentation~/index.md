@@ -21,6 +21,7 @@ The Unity Integration for Autodesk® Maya® and Autodesk® Maya LT™ feature su
 * Autodesk® Maya® and Autodesk® Maya LT™ 2017
 * Autodesk® Maya® and Autodesk® Maya LT™ 2018
 * Autodesk® Maya® and Autodesk® Maya LT™ 2019
+* Autodesk® Maya® and Autodesk® Maya LT™ 2020
 
 The Unity Integration for Autodesk® 3ds Max® feature supports the following versions of Autodesk® 3ds Max®:
 
