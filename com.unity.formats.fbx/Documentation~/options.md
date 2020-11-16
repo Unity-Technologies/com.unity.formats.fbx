@@ -52,6 +52,6 @@ Use the Fbx Export Settings window to show or hide the Export and Convert to Mod
 ### FBX Prefab Component Updater
 | Property:                     | Function:                                                    |
 | :---------------------------- | :----------------------------------------------------------- |
-| __Run Component Updater__     | Click this button to run the [Component Updater](index.html#Repairs_1_3_0f_1) to repair any missing FbxPrefab components if you were using version 1.3.0f1 or earlier of the FBX Exporter package. |
+| __Run Component Updater__     | Click this button to run the [Component Updater](assetstoreUpgrade.md) to repair any missing FbxPrefab components if you were using version 1.3.0f1 or earlier of the FBX Exporter package. |
 
 
