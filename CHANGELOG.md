@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [4.0.0-pre.2] - 2020-11-05
+## [4.0.0-pre.2] - 2020-11-17
 ### Changed
 - Added missing release date information to changelog.
 - Updated License.md.
