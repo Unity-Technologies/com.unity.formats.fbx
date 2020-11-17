@@ -4,6 +4,7 @@
 ### Changed
 - Added missing release date information to changelog.
 - Updated License.md.
+- Moved Asset Store update information to separate page in documentation.
 
 ### Known issues
 - Exporting an empty mesh (MeshFilter with null sharedMesh), fails to export with ArgumentNullException.
