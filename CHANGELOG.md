@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [Unreleased] - 2020-11-16
+### Changed
+- Moved Asset Store update information to separate page in documentation.
+
 ## [4.0.0-pre.1] - 2020-10-16
 ### Changed
 - The Export and Convert to Prefab options can now be changed in the FBX Export Settings in Edit > Project Settings > Fbx Export.

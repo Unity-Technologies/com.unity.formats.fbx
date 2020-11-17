@@ -6,4 +6,5 @@
 	* [FBX Recorder](recorder)
 	* [Limitations](knownissues)
 	* [Troubleshooting](troubleshooting)
+	* [Upgrading from Asset Store](assetstoreUpgrade)
 	* [Developer's guide](devguide)
