@@ -19,7 +19,9 @@ namespace FbxExporter.UnitTests
 
 #if UNITY_EDITOR_LINUX
         private const string k_buildName = "test.x86_64";
-#else
+#elif UNITY_EDITOR_OSX
+        private const string k_buildName = "test.app";
+#else // UNITY_EDITOR_WIN
         private const string k_buildName = "test.exe";
 #endif
 
