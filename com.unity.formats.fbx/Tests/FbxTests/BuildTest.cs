@@ -65,7 +65,9 @@ namespace FbxExporter.UnitTests
         public void TestBuildPlayer()
         {
             // create simple test scene
-            var scene = UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.DefaultGameObjects, UnityEditor.SceneManagement.NewSceneMode.Single);
+            var scene = UnityEditor.SceneManagement.EditorSceneManager.NewScene(
+                UnityEditor.SceneManagement.NewSceneSetup.DefaultGameObjects,
+                UnityEditor.SceneManagement.NewSceneMode.Single);
             var scenePath = Path.Combine(BuildTestScenePath, "test.unity");
             UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene, scenePath);
             AssetDatabase.Refresh();
