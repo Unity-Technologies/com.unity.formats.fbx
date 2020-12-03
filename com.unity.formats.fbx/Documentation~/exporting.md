@@ -5,7 +5,7 @@ Use __Export To FBX__ (menu: __GameObject__ > __Export To FBX__) to manually exp
 The FBX Exporter exports the following objects:
 
 * GameObject hierarchies and their transforms
-* [Meshes](#meshes) 
+* [Meshes](#meshes)
 * SkinnedMeshRenderers with the following exceptions:
     * Humanoid rigs are not supported
     * Meshes in bone hierarchies are not supported
@@ -53,15 +53,15 @@ The FBX Exporter exports Physical Cameras, including these properties:
 
 On export, the FBX Exporter sets the **Aperture Height** to 0.612 inches, and calculates the **Aperture Width** using this sensor back relative to the Camera's Aspect Ratio. For example:
 
-    * Full 1024 4:3 (1024x768) 
-       *  Aspect Ratio 4:3 
+    * Full 1024 4:3 (1024x768)
+       *  Aspect Ratio 4:3
        *  Aperture Width = 0.612 * (1024/768)
 
-The Aperture Width and Height values appear in Unity's Inspector as the **Sensor Size** property in millimeters. 
+The Aperture Width and Height values appear in Unity's Inspector as the **Sensor Size** property in millimeters.
 
 The FBX Exporter derives the **Focal Length** from the vertical Field of View (FOV) and the sensor back settings (Aperture Width and Aperture Height). The FBX Exporter uses the default FBX setting for Aperture Mode: Vertical.
 
-**Film Resolution Gate** is set to Horizontal so that the importing software fits the resolution gate horizontally within the film gate. 
+**Film Resolution Gate** is set to Horizontal so that the importing software fits the resolution gate horizontally within the film gate.
 
 The **Near & Far** Clipping Plane values have a range of 30 cm to 600000 cm.
 
@@ -78,16 +78,11 @@ The FBX Exporter exports Lights of type *Directional*, *Spot*, *Point*, and *Are
 It also exports the following Light attributes:
 
 - Spot Angle (for Spot lights)
-
 - Color
-
 - Intensity
-
 - Range
-
 - Shadows (either On or Off)
 
-  
 
 <a name="constraints"></a>
 
@@ -172,9 +167,9 @@ The FBX Exporter exports the following attributes for the Parent Constraint type
 
 ## Animation
 
-The FBX Exporter exports Legacy and Generic Animation from Animation and Animator components, or from a Timeline clip. 
+The FBX Exporter exports Legacy and Generic Animation from Animation and Animator components, or from a Timeline clip.
 
-In addition, it also exports the following animated attributes:
+In addition, the FBX Exporter exports the following animated attributes:
 
 - Transforms
 - Lights:
@@ -195,14 +190,21 @@ In addition, it also exports the following animated attributes:
   - Up Vector (Aim Constraint)
   - Aim Vector (Aim Constraint)
 
-Animation curve tangents are exported, with the exception of rotation curves for objects with a prerotation (i.e. bones of skinned meshes).
+### Animation curve tangents
 
-The reason for this is that prerotation and rotation are combined in Unity, but exported and stored separately in FBX. 
-The rotation curves for prerotation and rotation are also stored together as a single curve in Unity.
-The rotations are separated at export into two separate fields (prerotation and local rotation), however splitting the rotation curves in the same
-way is not as straightforward. In order for the rotation curve to export properly (with a static prerotation and animated local rotation), the prerotation would need to be removed at each key.
-This would affect not only the values at each key, but also the key tangents, which would need to be recalculated. 
-For this reason, the rotation curves of skinned mesh bones are baked at each frame (with the prerotation factored out), to ensure that the result matches the original animation.
+The FBX Exporter includes the animation curve tangents when it exports an animation.
+
+The only exception is for objects with a prerotation, such as bones of skinned meshes. In that case, the FBX Exporter bakes the curves at each frame, with the prerotation factored out. This ensures that the result matches the original animation despite slight differences between the Unity architecture and the FBX format. More precisely:
+* Unity combines prerotation and rotation, while the FBX format stores them separately. Unity also stores prerotation and rotation data in a single curve.
+* At export, the FBX Exporter separates the rotations into two separate fields: prerotation and local rotation. However, to split the rotation curves in the same way, the FBX Exporter would need to remove the prerotation at each key, which would affect not only the values at each key, but also the key tangents. The FBX Exporter would then need recalculate them.
+
+### Exporting an animation clip from the Timeline
+
+To export an animation clip from the timeline, in the Timeline editor select the desired clip, then from the top menu select **GameObject** > **Export Selected Timeline Clip**.
+
+### Exporting animations with the FBX Recorder
+
+If you installed the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html) package, you can also use the [FBX Recorder](recorder.md) to export animations to FBX files, either from a dedicated Recorder window or through a Recorder Track in Timeline.
 
 ## Export Options window
 
@@ -210,7 +212,7 @@ When exporting an FBX file, the following **Export Options** window opens, displ
 
 ![Export Options window](images/FBXExporter_ExportOptionsWindow.png)
 
-### Export Options properties
+### Properties
 
 | Property:                 | Function:                                                    |
 | :------------------------ | :----------------------------------------------------------- |
@@ -222,29 +224,26 @@ When exporting an FBX file, the following **Export Options** window opens, displ
 | __Include__               | Choose whether to export both Models and Animation, only Models, or only Animations. |
 | __LOD level__             | For level of detail (LOD) groups, choose the desired level of detail to export (all, highest, or lowest). <br/><br/>**NOTES:**<br/> - The FBX Exporter ignores LODs outside of selected hierarchy.<br/> - The FBX Exporter does not filter out objects that are used as LODs and doesn't export them if they aren’t direct descendants of their respective LOD Group |
 | __Object(s) Position__    | Choose whether to reset the exported objects to world center, or keep world transforms during export.<br/><br/>If you select multiple objects for export, and you choose __Local Centered__ from this drop-down menu, the FBX Exporter centers objects around a shared root while keeping their relative placement unchanged. |
-| __Animated Skinned Mesh__ | Check this option to export animation on objects with skinned meshes.<br/><br/>If unchecked, the FBX Exporter does not export animation on skinned meshes. |
-| __Compatible Naming__     | Check this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and Autodesk® Maya® and Autodesk® Maya LT™. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("\_"). Invalid characters are all non-alphanumeric characters, except for the colon (":").<br/> - Adds an underscore ("\_") to names that begin with a number.<br/> - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>**NOTE:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
-| __Export Unrendered__     | Check this option to export meshes that either don't have a renderer component, or that have a disabled renderer component. For example, a simplified mesh used as a Mesh collider. |
-|__Preserve Import Settings__ | Check this option to preserve all import settings applied to an existing fbx that will be overwritten in the export. If the GameObject is being exported as a new fbx, the import settings will not be carried over.|
-| __Don't ask me again__    | Check this option to use the same **Export Option** properties and hide this window when exporting to FBX in the future. You can reset this option by turning on the **Display Options Window** option under **Edit** > **Project Settings** > **Fbx Export** in Unity's top menu. |
+| __Animated Skinned Mesh__ | Enable this option to export animation on objects with skinned meshes.<br/><br/>If unchecked, the FBX Exporter does not export animation on skinned meshes. |
+| __Compatible Naming__     | Enable this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and Autodesk® Maya® and Autodesk® Maya LT™. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("\_"). Invalid characters are all non-alphanumeric characters, except for the colon (":").<br/> - Adds an underscore ("\_") to names that begin with a number.<br/> - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>**NOTE:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
+| __Export Unrendered__     | Enable this option to export meshes that either don't have a renderer component, or that have a disabled renderer component. For example, a simplified mesh used as a Mesh collider. |
+|__Preserve Import Settings__ | Enable this option to preserve all import settings applied to an existing FBX file that is overwritten during the export.<br/>If you export the GameObject as a new FBX file, the FBX Exporter does not carry over the import settings.|
+| __Don't ask me again__    | Enable this option to use the same **Export Options** properties and hide this window when you export FBX files in the future.<br/>If you need to reset this property: from the Unity Editor menu, select **Edit** > **Project Settings** > **Fbx Export** and enable **Display Options Window**. |
 
-> **NOTE:** For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters may differ between file systems.
+> **Note:** For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters might differ between file systems.
 
+### Default property values
 
-> **NOTE:** If a Default Preset has been set in the Preset Manager, the settings will default to this preset. Otherwise, the settings will default to the settings in Edit > Project Settings... > Fbx Export under FBX File Options.
-However, modifying the settings in the Export Options window will preserve the changes for the remainder of the Unity session.
+If you set a Default Preset in the Preset Manager, the FBX Exporter automatically uses the values of this Preset as default property values. Otherwise, the FBX Exporter falls back to the values defined in **Edit > Project Settings... > Fbx Export** under **FBX File Options**.
 
-## Exporting animation from the Timeline
-
-In order to export an animation clip from the timeline, in the Timeline editor select the desired clip, then from the top menu select **GameObject** > **Export Selected Timeline Clip**.
-
+However, if you modify the settings in the Export Options window during an export, the FBX Exporter preserves them as long as you keep the Unity session open.
 
 ## Exporting with relevant system units
 
-The FBX Exporter exports in centimeter units (cm) with the Mesh set to real world meter (m) scale. For example, if vertex[0] is at [1, 1, 1] m, it is converted to [100, 100, 100] cm. 
+The FBX Exporter exports in centimeter units (cm) with the Mesh set to real world meter (m) scale. For example, if vertex[0] is at [1, 1, 1] m, it is converted to [100, 100, 100] cm.
 
 In Autodesk® 3ds Max®, it is recommended to set the system units to centimeters to avoid any scaling on Model import and export.
 
-There are no specific import options to adjust between Unity and Autodesk® Maya® and Autodesk® Maya LT™. When working in Autodesk® Maya® and Autodesk® Maya LT™, you can set the working units to meters if you prefer. 
+There are no specific import options to adjust between Unity and Autodesk® Maya® and Autodesk® Maya LT™. When working in Autodesk® Maya® and Autodesk® Maya LT™, you can set the working units to meters if you prefer.
 
 When working with large models in Autodesk® Maya® and Autodesk® Maya LT™, to ensure that the models clip to meters, adjust the scale of the near and far clipping planes for all cameras by 100x. In addition, you should scale lights and cameras by 100x so that objects display in the viewport.

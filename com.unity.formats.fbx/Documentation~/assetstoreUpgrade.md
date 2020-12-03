@@ -1,6 +1,6 @@
-## Updating from 1.3.0f1 or earlier
+## Upgrading from Asset Store version of the FBX Exporter
 
-If your previous version of the FBX Exporter package was version 1.3.0f1 or earlier, follow these steps for updating:
+If your previous version of the FBX Exporter package was version 1.3.0f1 or earlier, follow these steps:
 
 Before you install the FBX Exporter Package, follow these steps (recommended):
 
@@ -12,9 +12,9 @@ Before you install the FBX Exporter Package, follow these steps (recommended):
 
 4. Install the FBX Exporter from the [Package Manager](https://docs.unity3d.com/Manual/upm-ui-install.html).
 
-If you were using an older version of the FBX Exporter, some Assets in your Project may have missing scripts where the obsolete FbxPrefab component was used. In order to fix these issues, follow these steps: 
+If you were using an older version of the FBX Exporter, some Assets in your Project may have missing scripts where the obsolete FbxPrefab component was used. To fix these issues, follow these steps:
 
-1. If your Project Assets are serialized as Binary, select __Edit__ > __Project Settings__ > __Editor__ to view the Editor Settings. 
+1. If your Project Assets are serialized as Binary, select __Edit__ > __Project Settings__ > __Editor__ to view the Editor Settings.
 
 2. Change the __Asset Serialization__ mode to __Force Text__. The __Force Text__ option converts all Project Assets to text.
 
