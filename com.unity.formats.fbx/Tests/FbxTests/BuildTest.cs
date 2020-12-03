@@ -8,22 +8,7 @@ namespace FbxExporter.UnitTests
 {
     public class BuildTest
     {
-#if UNITY_EDITOR_WIN
-        private const BuildTarget k_buildTarget = BuildTarget.StandaloneWindows64;
-#elif UNITY_EDITOR_OSX
-        private const BuildTarget k_buildTarget = BuildTarget.StandaloneOSX;
-#else // UNITY_EDITOR_LINUX
-        private const BuildTarget k_buildTarget = BuildTarget.StandaloneLinux64;
-#endif
         private const BuildTargetGroup k_buildTargetGroup = BuildTargetGroup.Standalone;
-
-#if UNITY_EDITOR_LINUX
-        private const string k_buildName = "test.x86_64";
-#elif UNITY_EDITOR_OSX
-        private const string k_buildName = "test.app";
-#else // UNITY_EDITOR_WIN
-        private const string k_buildName = "test.exe";
-#endif
 
         private const string k_temporaryFolderName = "_safe_to_delete_build";
 
@@ -74,9 +59,29 @@ namespace FbxExporter.UnitTests
             UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene, scenePath);
             AssetDatabase.Refresh();
 
+            BuildTarget buildTarget;
+            string buildName;
+            switch (Application.platform)
+            {
+                case RuntimePlatform.WindowsEditor:
+                    buildTarget = BuildTarget.StandaloneWindows64;
+                    buildName = "test.exe";
+                    break;
+                case RuntimePlatform.OSXEditor:
+                    buildTarget = BuildTarget.StandaloneOSX;
+                    buildName = "test.app";
+                    break;
+                case RuntimePlatform.LinuxEditor:
+                    buildTarget = BuildTarget.StandaloneLinux64;
+                    buildName = "test.x86_64";
+                    break;
+                default:
+                    throw new System.PlatformNotSupportedException($"Platform {Application.platform} is not supported.");
+            }
+
             BuildPlayerOptions options = new BuildPlayerOptions();
-            options.locationPathName = Path.Combine(BuildFolder, k_buildName);
-            options.target = k_buildTarget;
+            options.locationPathName = Path.Combine(BuildFolder, buildName);
+            options.target = buildTarget;
             options.targetGroup = k_buildTargetGroup;
             options.scenes = new string[] { scenePath };
 
