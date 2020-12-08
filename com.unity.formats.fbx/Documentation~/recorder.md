@@ -1,10 +1,10 @@
 # Using the FBX Recorder
 
-With the FBX Exporter and the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@2.2/index.html), you can export animations (including [Cinemachine](https://docs.unity3d.com/Packages/com.unity.cinemachine@2.3/manual/index.html) camera animations) directly to FBX files.
+With the FBX Exporter and the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/), you can export animations (including [Cinemachine](https://docs.unity3d.com/Packages/com.unity.cinemachine@latest/) camera animations) directly to FBX files.
 
 ## Requirements
 
-* To use the FBX Recorder, you must install the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html) package.
+* To use the FBX Recorder, you must install the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/) package.
 
 
 ## Using the FBX Recorder from the Recorder window
@@ -41,7 +41,7 @@ Define the source and the content of your recording.
 |Property||Function|
 |:---|:---|:---|
 | **GameObject** ||The [GameObject](https://docs.unity3d.com/Manual/class-GameObject.html) to record.|
-| **Recorded Component(s)** ||The components of the GameObject to record.<br />Choose more than one item to record more than one component.|
+| **Recorded Component(s)** ||The components of the GameObject to record.<br />Choose more than one item to record more than one component.<br /><br />**Note:** The FBX Recorder can only export the same component properties as the [animation export feature of the FBX Exporter](exporting.md#animation). |
 | **Record Hierarchy** ||Enable this property to record the GameObject's child GameObjects.|
 | **Clamped Tangents** || Enable this option to set all [key tangents](https://docs.unity3d.com/Manual/EditingCurves.html) of the recorded animation to **Clamped Auto**. Disabling the option sets the tangents to **Auto** (legacy).<br />Clamped tangents are useful to prevent curve overshoots when the animation data is discontinuous. |
 | **Anim. Compression** || Specifies the keyframe reduction level to use to compress the recorded animation curve data. |

@@ -6,8 +6,8 @@ The FBX Exporter package includes the following features:
 
 * [FBX Exporter](exporting.md): Export geometry, animation, Lights, and Cameras as FBX files so you can transfer game data to any 3D modeling software. Record gameplay and export it to make cinematics. Start grey-boxing with [ProBuilder](https://docs.unity3d.com/Packages/com.unity.probuilder@latest/), then export your GameObjects to FBX until you can replace them with the final Assets.
 
-* [FBX Recorder](recorder.md): Export animations through the Unity Recorder (including [Cinemachine](https://docs.unity3d.com/Packages/com.unity.cinemachine@2.3/manual/index.html) camera animations).
-<br />**Note:** To use this feature, you must install the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html) package.
+* [FBX Recorder](recorder.md): Export animations through the Unity Recorder (including [Cinemachine](https://docs.unity3d.com/Packages/com.unity.cinemachine@latest/) camera animations).
+<br />**Note:** To use this feature, you must install the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/) package.
 
 * [FBX Prefab Variants](prefabs.md): The FBX Importer allows you to import an FBX file as a **Model Prefab** and create **Prefab Variants** from them. Since Prefab Variants can override properties and children without affecting the original Prefab, you can use them in Unity without breaking the link to the file, and bring in updates.
 
@@ -35,6 +35,6 @@ Verify that the FBX Exporter is correctly installed by opening it (from the top 
 
 ## Additional support information
 
-* The FBX Exporter packages has some [known limitations](knownissues.md) you should be aware of before you start to use it.
+* The FBX Exporter package has some [known limitations](knownissues.md) you should be aware of before you start to use it.
 * If you encounter issues when using the FBX Exporter, look at the dedicated [troubleshooting page](troubleshooting.md).
 * If you are upgrading from the Asset Store version of the FBX Exporter, you need to [follow specific steps](assetstoreUpgrade.md).

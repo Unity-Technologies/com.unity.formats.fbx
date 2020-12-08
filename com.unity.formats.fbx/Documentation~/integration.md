@@ -203,7 +203,7 @@ Importing an FBX Model automatically configures the plug-in for export. The plug
 
 1. Select **Import** to open a file browser directly in your current Unity Project:
 
-   * In Autodesk® 3ds Max® 2018, select **File > Import > Import from Unity**.
+   * In Autodesk® 3ds Max® 2018 or later, select **File > Import > Import from Unity**.
 
      ![](images/FBXExporter_MaxUnityMenuImport.png)
 
@@ -214,6 +214,8 @@ Importing an FBX Model automatically configures the plug-in for export. The plug
 2. Use the file browser to select the Models to import.
 
    **Note:** You can select multiple files at once: hold Shift or Ctrl to select multiple files.
+
+   ![FBX import file browser in Autodesk® 3ds Max®](images/FBXExporter_MaxUnityFileBrowser.png)
 
 #### Result
 
@@ -239,8 +241,6 @@ This allows you to easily import animation files and apply them to the appropria
 
 You cannot export animation only from Autodesk® 3ds Max®.
 
-![FBX import file browser in Autodesk® 3ds Max®](images/FBXExporter_MaxUnityFileBrowser.png)
-
 #### System units
 
 If the system units are not set to centimeters, Autodesk® 3ds Max® prompts you to change them:
@@ -265,7 +265,7 @@ There are two options available for export in Autodesk® 3ds Max®:
 
 Both options automatically export the files with the settings and Models you configured during import. To use them:
 
-* In Autodesk® 3ds Max® 2018, from the menu, select **File > Export** and then choose **Export to Unity** or **Export to Unity (Model Only)**.
+* In Autodesk® 3ds Max® 2018 or later, from the menu, select **File > Export** and then choose **Export to Unity** or **Export to Unity (Model Only)**.
 
   ![](images/FBXExporter_MaxUnityMenuExport.png)
 

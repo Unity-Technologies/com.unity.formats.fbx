@@ -196,7 +196,7 @@ The FBX Exporter includes the animation curve tangents when it exports an animat
 
 The only exception is for objects with a prerotation, such as bones of skinned meshes. In that case, the FBX Exporter bakes the curves at each frame, with the prerotation factored out. This ensures that the result matches the original animation despite slight differences between the Unity architecture and the FBX format. More precisely:
 * Unity combines prerotation and rotation, while the FBX format stores them separately. Unity also stores prerotation and rotation data in a single curve.
-* At export, the FBX Exporter separates the rotations into two separate fields: prerotation and local rotation. However, to split the rotation curves in the same way, the FBX Exporter would need to remove the prerotation at each key, which would affect not only the values at each key, but also the key tangents. The FBX Exporter would then need recalculate them.
+* At export, the FBX Exporter separates the rotations into two separate fields: prerotation and local rotation. However, to split the rotation curves in the same way, the FBX Exporter would need to remove the prerotation at each key, which would affect not only the values at each key, but also the key tangents. The FBX Exporter would then need to recalculate them.
 
 ### Exporting an animation clip from the Timeline
 
