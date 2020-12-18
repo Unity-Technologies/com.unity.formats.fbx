@@ -1116,9 +1116,16 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual(fbxObj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.name, fbxObj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh.name);
         }
 
-        private bool AreEqual(Vector3 a, Vector3 b, double epsilon = 0.0001)
+        /// <summary>
+        /// Check if two Vector3's are equal by comparing the squared magnitude.
+        /// </summary>
+        /// <param name="a">Vector3</param>
+        /// <param name="b">Vector3</param>
+        /// <param name="epsilon2">Epsilon squared. Default to 1e-6 to check if Vector3's are equal within a millimeter.</param>
+        /// <returns></returns>
+        private bool AreEqual(Vector3 a, Vector3 b, double epsilon2 = 1e-6)
         {
-            return Vector3.SqrMagnitude(a - b) < epsilon;
+            return Vector3.SqrMagnitude(a - b) < epsilon2;
         }
 
         // UT-3413 Negative scale not converted properly with DeepConvert, fixed in FBXSDK 2020.2.
