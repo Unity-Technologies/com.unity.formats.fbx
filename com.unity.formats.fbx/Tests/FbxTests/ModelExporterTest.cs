@@ -1115,5 +1115,71 @@ namespace FbxExporter.UnitTests
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             Assert.AreEqual(fbxObj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.name, fbxObj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh.name);
         }
+
+        /// <summary>
+        /// Check if two Vector3's are equal by comparing the squared magnitude.
+        /// </summary>
+        /// <param name="a">Vector3</param>
+        /// <param name="b">Vector3</param>
+        /// <param name="epsilon2">Epsilon squared. Default to 1e-6 to check if Vector3's are equal within a millimeter.</param>
+        /// <returns></returns>
+        private bool AreEqual(Vector3 a, Vector3 b, double epsilon2 = 1e-6)
+        {
+            return Vector3.SqrMagnitude(a - b) < epsilon2;
+        }
+
+        // UT-3413 Negative scale not converted properly with DeepConvert, fixed in FBXSDK 2020.2.
+        [Test]
+        public void TestNegativeScaleExport()
+        {
+            var filename = GetRandomFbxFilePath();
+            // Recreating the repro steps for the original issue.
+            // The exported hierarchy should match the original. The mirrored object
+            // with negative scale on z will import with the following rotation and scale:
+            // - rotation: (0, 0, -180)
+            // - scale: (-1, -1, -1)
+            // However, the spheres will have the same global position as before on success.
+            //
+            // Create the following GameObject hierarchy:
+            //          Cube
+            //        /      \
+            //    sphere1    mirror (-1 scale on z)
+            //                  \
+            //                 sphere2
+            GameObject root = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject sphere1 = CreateGameObject("sphere1", root.transform, PrimitiveType.Sphere);
+            GameObject mirror = CreateGameObject("mirror", root.transform);
+            GameObject sphere2 = CreateGameObject("sphere2", mirror.transform, PrimitiveType.Sphere);
+
+            var spherePosition = new Vector3(0, 2, 2);
+            sphere1.transform.localPosition = spherePosition;
+            sphere2.transform.localPosition = spherePosition;
+
+            // mirror will mirror sphere2 on x
+            mirror.transform.localScale = new Vector3(1, 1, -1);
+
+            // global positions should not match
+            Assert.That(sphere1.transform.position, Is.Not.EqualTo(sphere2.transform.position));
+            Assert.That(sphere1.transform.position, Is.EqualTo(spherePosition));
+            Assert.That(sphere2.transform.position, Is.EqualTo(new Vector3(0, 2, -2)));
+
+            // check export was successful
+            var result = ModelExporter.ExportObject(filename, root);
+            Assert.That(result, Is.Not.Null);
+            Assert.AreEqual(filename, result);
+
+            // check that both children reference the same mesh
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            var fbxSphere1 = fbxObj.transform.Find("sphere1");
+            Assert.That(fbxSphere1, Is.Not.Null);
+            var fbxSphere2 = fbxObj.transform.Find("mirror/sphere2");
+            Assert.That(fbxSphere2, Is.Not.Null);
+
+            // The exported spheres should match the originals
+            Assert.That(AreEqual(fbxSphere1.position, sphere1.transform.position), 
+                string.Format("Positions do not match.\nActual: {0}\nExpected: {1}", fbxSphere1.position, sphere1.transform.position));
+            Assert.That(AreEqual(fbxSphere2.position, sphere2.transform.position),
+                string.Format("Positions do not match.\nActual: {0}\nExpected: {1}", fbxSphere2.position, sphere2.transform.position));
+        }
     }
 }

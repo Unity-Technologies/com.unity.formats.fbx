@@ -295,11 +295,6 @@ namespace FbxExporter.UnitTests
             Assert.That(expSources[1].weight, Is.EqualTo(origSources[2].weight));
         }
 
-        public bool AreEqual(Vector3 a, Vector3 b, double epsilon = 0.0001)
-        {
-            return Vector3.SqrMagnitude(a - b) < epsilon;
-        }
-
         public bool AreRotationEqual(Vector3 a, Vector3 b, double epsilon = 0.0001)
         {
             Quaternion c = Quaternion.Euler(a.x, a.y, a.z);
