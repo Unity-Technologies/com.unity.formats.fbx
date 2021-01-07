@@ -5,6 +5,8 @@
 - Added missing release date information to changelog.
 - Updated License.md.
 - Moved Asset Store update information to separate page in documentation.
+- Moved Developer Guide to Scripting API index page.
+- Reviewed the documentation overall.
 
 ### Known issues
 - Exporting an empty mesh (MeshFilter with null sharedMesh), fails to export with ArgumentNullException.

@@ -29,8 +29,8 @@ Before exporting the animated skinned Mesh, make sure that:
 
 * The skinned mesh animation is not being previewed in the Animation of Timeline windows, as this may cause issues on export.
 
-* The original Rig's FBX does not contain animation. 
-  
+* The original Rig's FBX does not contain animation.
+
     **NOTE**: It is currently not possible to fix this issue in Unity. You need to separate your animation from the Rig in a separate modeling software such as Autodesk® Maya® first.
 
 
@@ -39,9 +39,9 @@ Before exporting the animated skinned Mesh, make sure that:
 
 ## Converting GameObjects with UI components
 
-Converting hierarchies with UI components (for example, **RectTransform**) breaks the UI. 
+Converting hierarchies with UI components (for example, **RectTransform**) breaks the UI.
 
-To work around this: 
+To work around this:
 
 1. Prepare the hierarchy so that it has no GameObjects with UI elements before converting.
 2. Add the UI elements to the FBX Linked Prefab afterwards.
@@ -78,10 +78,12 @@ If you lose Materials when converting trail or line particles, you need to re-ap
 
 ## Uninstalling FBX Exporter breaks Unity Recorder
 
-If you are uninstalling the FBX Exporter package but would like to continue using the Unity Recorder make sure to first remove all existing FBX Recorders.
-You can do this by right clicking on the FBX recorders in the Recorder Window or Timeline and selecting "Delete".
+If you want to uninstall the FBX Exporter package but still need to use the Unity Recorder, make sure to first remove all existing FBX Recorders you might have added in the Recorder List or in a Timeline Recorder Track:
 
-If you have already uninstalled the FBX Exporter package and are now having issues with the Unity Recorder, follow these steps:
-1. Reinstall the FBX Exporter package
-2. Find and remove all FBX recorder instances (right click and Delete from the Recorder Window and Timeline(s))
-3. Uninstall the FBX Exporter from the Package Manager
+* In the Recorder Window: right click on any FBX Recorder listed in the Recorder List (at the left of the window) and select **Delete**.
+* In any Timeline of your project: look for Recorder Tracks, right click on any Recorder Clip that use an FBX Recorder, and select **Delete**, or simply delete the Recorder Track the same way.
+
+If you have already uninstalled the FBX Exporter package and are experiencing issues with the Unity Recorder:
+1. Re-install the FBX Exporter package.
+2. Find and remove all FBX recorder instances (see above).
+3. Uninstall the FBX Exporter from the Package Manager.
