@@ -1,9 +1,8 @@
 # Changes in Fbx Exporter
 
-## [4.0.0-pre.2] - 2021-01-07
+## [4.0.0-pre.2] - 2021-01-12
 ### Changed
 - Added missing release date information to changelog.
-- Updated License.md.
 - Moved Asset Store update information to separate page in documentation.
 - Moved Developer Guide to Scripting API index page.
 - Reviewed the documentation overall.
