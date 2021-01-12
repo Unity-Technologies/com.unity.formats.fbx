@@ -1,10 +1,10 @@
 {
   "name": "com.unity.formats.fbx",
   "displayName": "FBX Exporter",
-  "version": "4.0.0-pre.1",
+  "version": "4.0.0-pre.2",
   "dependencies": {
     "com.unity.timeline": "1.0.0",
-    "com.autodesk.fbx": "4.0.0-pre.1"
+    "com.autodesk.fbx": "4.0.0-pre.2"
   },
   "unity": "2019.4",
   "unityRelease": "0f1",

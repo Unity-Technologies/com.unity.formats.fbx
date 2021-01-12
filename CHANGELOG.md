@@ -1,10 +1,14 @@
 # Changes in Fbx Exporter
 
-## [Unreleased] - 2020-12-03
+## [4.0.0-pre.2] - 2021-01-12
 ### Changed
+- Added missing release date information to changelog.
 - Moved Asset Store update information to separate page in documentation.
 - Moved Developer Guide to Scripting API index page.
 - Reviewed the documentation overall.
+
+### Known issues
+- Exporting an empty mesh (MeshFilter with null sharedMesh), fails to export with ArgumentNullException.
 
 ## [4.0.0-pre.1] - 2020-10-16
 ### Changed
