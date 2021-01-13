@@ -7,7 +7,7 @@ using UnityEditor.Recorder.Input;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
-    [RecorderSettings(typeof(FbxRecorder), "FBX", "fbx_recorder")]
+    [RecorderSettings(typeof(FbxRecorder), "FBX")]
     internal class FbxRecorderSettings : RecorderSettings
     {
         [SerializeField] bool m_exportGeometry = true;
