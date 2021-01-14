@@ -1,11 +1,12 @@
 # Changes in Fbx Exporter
 
-## [4.0.0-pre.2] - 2021-01-12
+## [4.0.0-pre.3] - 2021-01-13
 ### Changed
 - Added missing release date information to changelog.
 - Moved Asset Store update information to separate page in documentation.
 - Moved Developer Guide to Scripting API index page.
 - Reviewed the documentation overall.
+- Fix missing icon error when using FBX recorder with Unity Recorder 2.5.2.
 
 ### Known issues
 - Exporting an empty mesh (MeshFilter with null sharedMesh), fails to export with ArgumentNullException.
