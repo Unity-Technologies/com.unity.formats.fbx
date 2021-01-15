@@ -1,6 +1,6 @@
 {
     "createSeparatePackage": true,
     "dependencies": {
-        "nuget.moq": "1.0.0"
+        "com.unity.modules.physics": "1.0.0"
     }
 }
