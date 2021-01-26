@@ -276,6 +276,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected bool SelectionContainsPrefabInstanceWithAddedObjects()
         {
             var exportSet = GetToExport();
+            // FBX-60 (fogbug 1307749):
+            // On Linux OnGUI() sometimes gets called a few times before
+            // the export set is set and window.show() is called.
+            // This leads to this function being called from OnGUI() with a
+            // null or empty export set, and an ArgumentNullException when
+            // creating the stack.
+            // Check that the set exists and has values before creating the stack.
+            if (exportSet == null || exportSet.Length <= 0)
+            {
+                return false;
+            }
+
             Stack<Object> stack = new Stack<Object>(exportSet);
             while (stack.Count > 0)
             {
