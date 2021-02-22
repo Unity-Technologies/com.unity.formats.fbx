@@ -1,5 +1,20 @@
 # Changes in Fbx Exporter
 
+## [4.0.0-pre.4] - 2021-01-26
+### Fixed
+- Fix ArgumentNullException on Linux when opening Export Options window.
+
+## [4.0.0-pre.3] - 2021-01-13
+### Changed
+- Added missing release date information to changelog.
+- Moved Asset Store update information to separate page in documentation.
+- Moved Developer Guide to Scripting API index page.
+- Reviewed the documentation overall.
+- Fix missing icon error when using FBX recorder with Unity Recorder 2.5.2.
+
+### Known issues
+- Exporting an empty mesh (MeshFilter with null sharedMesh), fails to export with ArgumentNullException.
+
 ## [4.0.0-pre.1] - 2020-10-16
 ### Changed
 - The Export and Convert to Prefab options can now be changed in the FBX Export Settings in Edit > Project Settings > Fbx Export.
@@ -223,7 +238,7 @@ FIXES
 
 * Fixed skinned mesh bone updates.
 
-## [1.5.0]
+## [1.5.0] - 2018-05-22
 
 NEW FEATURES
 
@@ -236,7 +251,7 @@ FIXES:
 
 * The DCC integration plug-ins now work with the Package Manager.
 
-## [1.4.0]
+## [1.4.0] - 2018-04-23
 
 NEW FEATURES
 
@@ -256,7 +271,10 @@ KNOWN ISSUES
 * When converting an existing FBX file, the FBX Filename and FBX Export options are ignored (but not greyed out).
 * When converting an existing Prefab, the Prefab Filename is ignored (but not greyed out).
 
-## [1.3.0f1] - 2018-04-17
+## [1.3.0] - 2018-04-17
+NOTES
+* This is the last Asset Store version. It is also known as 1.3.0f1.
+
 NEW FEATURES
 * `Unity3dsMaxIntegration`: 
 	* Allows multiple file import.
