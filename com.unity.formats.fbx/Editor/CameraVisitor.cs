@@ -68,10 +68,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             public static Vector2 GetSizeOfMainGameView()
             {
+#if UNITY_2019_4_OR_NEWER
+                return Handles.GetMainGameViewSize();
+#else
                 System.Type T = System.Type.GetType("UnityEditor.GameView,UnityEditor");
                 System.Reflection.MethodInfo GetSizeOfMainGameView = T.GetMethod("GetSizeOfMainGameView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
                 System.Object Res = GetSizeOfMainGameView.Invoke(null, null);
                 return (Vector2)Res;
+#endif // UNITY_2019_4_OR_NEWER
             }
 
             /// <summary>
