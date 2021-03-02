@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [4.0.0] - 2021-03-02
+### Changed
+- Update from prerelease to released package (remove "pre" from version).
+
 ## [4.0.0-pre.4] - 2021-01-26
 ### Fixed
 - Fix ArgumentNullException on Linux when opening Export Options window.
