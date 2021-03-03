@@ -70,7 +70,7 @@ To avoid this, make sure to convert only the Tree when finished editing. Otherwi
 
 ## Trail and line particles lose Material after being converted
 
-If you lose Materials when converting trail or line particles, you need to re-apply the Materials to the FBX Linked Prefab after conversion.
+If you lose Materials when converting trail or line particles, you need to re-apply the Materials to the FBX Prefab Variant after conversion.
 
 
 
