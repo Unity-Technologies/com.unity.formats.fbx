@@ -19,7 +19,7 @@ With the FBX Exporter and the [Unity Recorder](https://docs.unity3d.com/Packages
 
 4. Select **Start Recording**.
 
-> **Note:** Alternatively, you can use the FBX Recorder through a [Recorder Clip](https://docs.unity3d.com/Packages/com.unity.recorder@latest/RecordingTimelineTrack.md) in a [Timeline](https://docs.unity3d.com/Packages/com.unity.timeline@latest) track.
+> **Note:** Alternatively, you can use the FBX Recorder through a [Recorder Clip](https://docs.unity3d.com/Packages/com.unity.recorder@latest) in a [Timeline](https://docs.unity3d.com/Packages/com.unity.timeline@latest) track.
 
 ## FBX Recorder properties
 
