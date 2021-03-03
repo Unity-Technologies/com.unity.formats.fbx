@@ -102,6 +102,7 @@ namespace FbxExporter.UnitTests
 
             Assert.That( srcCam.fieldOfView, Is.EqualTo(origCam.fieldOfView).Within(EPSILON));
             Assert.That( srcCam.focalLength, Is.EqualTo(origCam.focalLength));
+            Assert.That( srcCam.aspect, Is.EqualTo(origCam.aspect));
             Assert.That( srcCam.sensorSize.x, Is.EqualTo(origCam.sensorSize.x).Within(EPSILON));
             Assert.That( srcCam.sensorSize.y, Is.EqualTo(origCam.sensorSize.y).Within(EPSILON));
             Assert.That( srcCam.usePhysicalProperties, Is.EqualTo(origCam.usePhysicalProperties));
