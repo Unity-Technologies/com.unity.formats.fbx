@@ -165,6 +165,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>> MapConstrainedObjectToConstraints = new Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>>();
 
         /// <summary>
+        /// keep a map between the constrained FbxNode (in Unity this is the GameObject with constraint component)
+        /// and its FbxConstraints for quick lookup when exporting constraint animations.
+        /// </summary>
+        Dictionary<FbxNode, Dictionary<FbxBlendShapeChannel, string>> MapUnityObjectToBlendShapes = new Dictionary<FbxNode, Dictionary<FbxBlendShapeChannel, string>>();
+
+        /// <summary>
         /// Map Unity material ID to FBX material object
         /// </summary>
         Dictionary<int, FbxSurfaceMaterial> MaterialMap = new Dictionary<int, FbxSurfaceMaterial> ();
@@ -483,7 +489,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export the mesh's blend shapes.
         /// </summary>
-        private bool ExportBlendShapes(MeshInfo mesh, FbxMesh fbxMesh, FbxScene fbxScene, int[] unmergedTriangles)
+        private bool ExportBlendShapes(FbxNode fbxNode, MeshInfo mesh, FbxMesh fbxMesh, FbxScene fbxScene, int[] unmergedTriangles)
         {
             var umesh = mesh.mesh;
             if (umesh.blendShapeCount == 0)
@@ -506,6 +512,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var numFrames = umesh.GetBlendShapeFrameCount(bi);
                 var fbxChannel = FbxBlendShapeChannel.Create(fbxScene, bsName);
                 fbxBlendShape.AddBlendShapeChannel(fbxChannel);
+
+                Dictionary<FbxBlendShapeChannel, string> blenshapeChannels;
+                if (!MapUnityObjectToBlendShapes.TryGetValue(fbxNode, out blenshapeChannels))
+                {
+                    blenshapeChannels = new Dictionary<FbxBlendShapeChannel, string>();
+                    MapUnityObjectToBlendShapes.Add(fbxNode, blenshapeChannels);
+                }
+                blenshapeChannels.Add(fbxChannel, bsName);
 
                 for (int fi = 0; fi < numFrames; ++fi)
                 {
@@ -899,7 +913,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             ExportComponentAttributes (meshInfo, fbxMesh, unmergedPolygons.ToArray());
 
             // Set up blend shapes.
-            ExportBlendShapes(meshInfo, fbxMesh, fbxScene, unmergedPolygons.ToArray());
+            ExportBlendShapes(fbxNode, meshInfo, fbxMesh, fbxScene, unmergedPolygons.ToArray());
 
             // set the fbxNode containing the mesh
             fbxNode.SetNodeAttribute (fbxMesh);
@@ -1964,7 +1978,34 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return null;
         }
 
-        private FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType)
+        /// <summary>
+        /// Get the FbxConstraint associated with the constrained node.
+        /// </summary>
+        /// <param name="constrainedNode"></param>
+        /// <param name="uniConstraintType"></param>
+        /// <returns></returns>
+        private FbxBlendShapeChannel GetFbxBlendShape(FbxNode blendshapeNode, string uniPropertyName)
+        {
+            Dictionary<FbxBlendShapeChannel, string> blendshapeChannels;
+            if (!MapUnityObjectToBlendShapes.TryGetValue(blendshapeNode, out blendshapeChannels))
+            {
+                return null;
+            }
+
+            foreach (var channel in blendshapeChannels)
+            {
+                if (uniPropertyName != ("blendShape." + channel.Value))
+                {
+                    continue;
+                }
+
+                return channel.Key;
+            }
+
+            return null;
+        }
+
+        private FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType, string uniPropertyName)
         {
             if(fbxNode == null)
             {
@@ -1984,6 +2025,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
+            if (uniPropertyType == typeof(UnityEngine.SkinnedMeshRenderer))
+            {
+                var fbxBlendShape = GetFbxBlendShape(fbxNode, uniPropertyName);
+                if (fbxBlendShape != null)
+                {
+                    var prop = fbxBlendShape.FindProperty(fbxPropertyName, false);
+                    if (prop.IsValid())
+                    {
+                        return prop;
+                    }
+                }
+            }
             // map unity property name to fbx property
             var fbxProperty = fbxNode.FindProperty(fbxPropertyName, false);
             if (fbxProperty.IsValid())
@@ -2030,8 +2083,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             foreach (var fbxPropertyChannelPair in fbxPropertyChannelPairs) {
                 // map unity property name to fbx property
-                var fbxProperty = GetFbxProperty(fbxNode, fbxPropertyChannelPair.Property, uniPropertyType);
-                if (!fbxProperty.IsValid ()) {
+                var fbxProperty = GetFbxProperty(fbxNode, fbxPropertyChannelPair.Property, uniPropertyType, uniPropertyName);
+                if (!fbxProperty.IsValid ()) 
+                {
                     Debug.LogError (string.Format ("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
                     return;
                 }
@@ -4115,9 +4169,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (obj is UnityEngine.Transform) {
                 var xform = obj as UnityEngine.Transform;
                 return xform.gameObject;
-            } else if (obj is UnityEngine.GameObject) {
+            }
+            else if (obj is UnityEngine.SkinnedMeshRenderer)
+            {
+                var skinnedMeshRenderer = obj as UnityEngine.SkinnedMeshRenderer;
+                return skinnedMeshRenderer.gameObject;
+            }
+            else if (obj is UnityEngine.GameObject)
+            {
                 return obj as UnityEngine.GameObject;
-            } else if (obj is Behaviour) {
+            } 
+            else if (obj is Behaviour) 
+            {
                 var behaviour = obj as Behaviour;
                 return behaviour.gameObject;
             }
