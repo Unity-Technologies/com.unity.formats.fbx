@@ -119,12 +119,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             };
 
         /// <summary>
-        /// Map of Unity constraint source transform property name as a regular expression to the FBX property as a string format.
-        /// This is necessary because the Unity and FBX properties contain the name of the source object.
+        /// Map of Unity blendshape property name as a regular expression to the FBX property.
+        /// This is necessary because the Unity property contains the name of the target object.
         /// </summary>
         private static Dictionary<string, string> MapBlendshapesPropToFbxProp = new Dictionary<string, string>()
             {
-                { @"blendShape\.(\S+)\.(\S+)", "DeformPercent" }
+                { @"blendShape\.(\S+)", "DeformPercent" }
             };
 
         // ================== Channel Maps ======================
@@ -156,8 +156,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private static PropertyChannelMap ColorPropertyMap = new PropertyChannelMap(MapColorPropToFbxProp, MapColorChannelToFbxChannel);
         private static PropertyChannelMap ConstraintSourcePropertyMap = new PropertyChannelMap(MapConstraintSourcePropToFbxProp, null);
         private static PropertyChannelMap ConstraintSourceTransformPropertyMap = new PropertyChannelMap(MapConstraintSourceTransformPropToFbxProp, MapTransformChannelToFbxChannel);
-
         private static PropertyChannelMap BlendshapeMap = new PropertyChannelMap(MapBlendshapesPropToFbxProp, null);
+
         private static PropertyChannelMap OtherPropertyMap = new PropertyChannelMap(MapPropToFbxProp, null);
 
         /// <summary>
@@ -228,13 +228,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get the Fbx property name for the given Unity constraint source property name from the given dictionary.
+        /// Get the Fbx property name for the given Unity blendshape property name from the given dictionary.
         /// 
-        /// This is different from GetFbxProperty() because the Unity constraint source properties contain indices, and
-        /// the Fbx constraint source property contains the name of the source object.
+        /// This is different from GetFbxProperty() because the Unity blendshape properties contain the name
+        /// of the target object.
         /// </summary>
         /// <param name="uniProperty"></param>
-        /// <param name="constraint"></param>
         /// <param name="propertyMap"></param>
         /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
         private static string GetFbxBlendshapeProperty(string uniProperty, Dictionary<string, string> propertyMap)

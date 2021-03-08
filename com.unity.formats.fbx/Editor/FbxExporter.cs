@@ -165,8 +165,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>> MapConstrainedObjectToConstraints = new Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>>();
 
         /// <summary>
-        /// keep a map between the constrained FbxNode (in Unity this is the GameObject with constraint component)
-        /// and its FbxConstraints for quick lookup when exporting constraint animations.
+        /// keep a map between the FbxNode and its blendshape channels for quick lookup when exporting blendshapes.
         /// </summary>
         Dictionary<FbxNode, Dictionary<FbxBlendShapeChannel, string>> MapUnityObjectToBlendShapes = new Dictionary<FbxNode, Dictionary<FbxBlendShapeChannel, string>>();
 
@@ -1967,22 +1966,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 
             foreach (var constraint in constraints)
             {
-                if (uniConstraintType != constraint.Value)
+                if (uniConstraintType == constraint.Value)
                 {
-                    continue;
+                    return constraint.Key;
                 }
-
-                return constraint.Key;
             }
-
             return null;
         }
 
         /// <summary>
-        /// Get the FbxConstraint associated with the constrained node.
+        /// Get the FbxBlendshape with the given name associated with the FbxNode.
         /// </summary>
-        /// <param name="constrainedNode"></param>
-        /// <param name="uniConstraintType"></param>
+        /// <param name="blendshapeNode"></param>
+        /// <param name="uniPropertyName"></param>
         /// <returns></returns>
         private FbxBlendShapeChannel GetFbxBlendShape(FbxNode blendshapeNode, string uniPropertyName)
         {
@@ -1994,14 +1990,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             foreach (var channel in blendshapeChannels)
             {
-                if (uniPropertyName != ("blendShape." + channel.Value))
+                if (uniPropertyName == ("blendShape." + channel.Value))
                 {
-                    continue;
+                    return channel.Key;
                 }
-
-                return channel.Key;
             }
-
             return null;
         }
 
@@ -2025,18 +2018,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
-            if (uniPropertyType == typeof(UnityEngine.SkinnedMeshRenderer))
+            // check if the property maps to a blendshape
+            var fbxBlendShape = GetFbxBlendShape(fbxNode, uniPropertyName);
+            if (fbxBlendShape != null)
             {
-                var fbxBlendShape = GetFbxBlendShape(fbxNode, uniPropertyName);
-                if (fbxBlendShape != null)
+                var prop = fbxBlendShape.FindProperty(fbxPropertyName, false);
+                if (prop.IsValid())
                 {
-                    var prop = fbxBlendShape.FindProperty(fbxPropertyName, false);
-                    if (prop.IsValid())
-                    {
-                        return prop;
-                    }
+                    return prop;
                 }
             }
+
             // map unity property name to fbx property
             var fbxProperty = fbxNode.FindProperty(fbxPropertyName, false);
             if (fbxProperty.IsValid())
