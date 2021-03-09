@@ -189,6 +189,7 @@ In addition, the FBX Exporter exports the following animated attributes:
   - World Up Vector (Aim Constraint)
   - Up Vector (Aim Constraint)
   - Aim Vector (Aim Constraint)
+- Blendshapes
 
 ### Animation curve tangents
 

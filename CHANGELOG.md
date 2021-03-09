@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [Unreleased]
+### Added
+- Added ability to export blendshape animations when the "Animated Skinned Mesh" Export Option is selected.
+
 ## [4.0.0-pre.4] - 2021-01-26
 ### Fixed
 - Fix ArgumentNullException on Linux when opening Export Options window.

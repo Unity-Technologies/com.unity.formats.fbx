@@ -167,7 +167,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// keep a map between the FbxNode and its blendshape channels for quick lookup when exporting blendshapes.
         /// </summary>
-        Dictionary<FbxNode, Dictionary<FbxBlendShapeChannel, string>> MapUnityObjectToBlendShapes = new Dictionary<FbxNode, Dictionary<FbxBlendShapeChannel, string>>();
+        Dictionary<FbxNode, List<FbxBlendShapeChannel>> MapUnityObjectToBlendShapes = new Dictionary<FbxNode, List<FbxBlendShapeChannel>>();
 
         /// <summary>
         /// Map Unity material ID to FBX material object
@@ -488,11 +488,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export the mesh's blend shapes.
         /// </summary>
-        private bool ExportBlendShapes(FbxNode fbxNode, MeshInfo mesh, FbxMesh fbxMesh, FbxScene fbxScene, int[] unmergedTriangles)
+        private FbxBlendShape ExportBlendShapes(MeshInfo mesh, FbxMesh fbxMesh, FbxScene fbxScene, int[] unmergedTriangles)
         {
             var umesh = mesh.mesh;
             if (umesh.blendShapeCount == 0)
-                return false;
+                return null;
 
             var fbxBlendShape = FbxBlendShape.Create(fbxScene, umesh.name + "_BlendShape");
             fbxMesh.AddDeformer(fbxBlendShape);
@@ -511,14 +511,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var numFrames = umesh.GetBlendShapeFrameCount(bi);
                 var fbxChannel = FbxBlendShapeChannel.Create(fbxScene, bsName);
                 fbxBlendShape.AddBlendShapeChannel(fbxChannel);
-
-                Dictionary<FbxBlendShapeChannel, string> blenshapeChannels;
-                if (!MapUnityObjectToBlendShapes.TryGetValue(fbxNode, out blenshapeChannels))
-                {
-                    blenshapeChannels = new Dictionary<FbxBlendShapeChannel, string>();
-                    MapUnityObjectToBlendShapes.Add(fbxNode, blenshapeChannels);
-                }
-                blenshapeChannels.Add(fbxChannel, bsName);
 
                 for (int fi = 0; fi < numFrames; ++fi)
                 {
@@ -577,7 +569,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                 }
             }
-            return true;
+            return fbxBlendShape;
         }
 
         /// <summary>
@@ -912,7 +904,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
             ExportComponentAttributes (meshInfo, fbxMesh, unmergedPolygons.ToArray());
 
             // Set up blend shapes.
-            ExportBlendShapes(fbxNode, meshInfo, fbxMesh, fbxScene, unmergedPolygons.ToArray());
+            FbxBlendShape fbxBlendShape = ExportBlendShapes(meshInfo, fbxMesh, fbxScene, unmergedPolygons.ToArray());
+            
+            if(fbxBlendShape != null && fbxBlendShape.GetBlendShapeChannelCount() > 0)
+            {
+                // Populate mapping for faster lookup when exporting blendshape animations
+                List<FbxBlendShapeChannel> blendshapeChannels;
+                if (!MapUnityObjectToBlendShapes.TryGetValue(fbxNode, out blendshapeChannels))
+                {
+                    blendshapeChannels = new List<FbxBlendShapeChannel>();
+                    MapUnityObjectToBlendShapes.Add(fbxNode, blendshapeChannels);
+                }
+                
+                for(int i = 0; i < fbxBlendShape.GetBlendShapeChannelCount(); i++)
+                {
+                    var bsChannel = fbxBlendShape.GetBlendShapeChannel(i);
+                    blendshapeChannels.Add(bsChannel);
+                }
+            }
 
             // set the fbxNode containing the mesh
             fbxNode.SetNodeAttribute (fbxMesh);
@@ -1959,18 +1968,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             Dictionary<FbxConstraint, System.Type> constraints;
-            if (!MapConstrainedObjectToConstraints.TryGetValue(constrainedNode, out constraints))
+            if (MapConstrainedObjectToConstraints.TryGetValue(constrainedNode, out constraints))
             {
-                return null;
-            }
-                
-            foreach (var constraint in constraints)
-            {
-                if (uniConstraintType == constraint.Value)
+                var targetConstraint = constraints.FirstOrDefault(constraint => (constraint.Value == uniConstraintType));
+                if (!targetConstraint.Equals(default(KeyValuePair<FbxConstraint, System.Type>)))
                 {
-                    return constraint.Key;
+                    return targetConstraint.Key;
                 }
             }
+
             return null;
         }
 
@@ -1982,17 +1988,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns></returns>
         private FbxBlendShapeChannel GetFbxBlendShape(FbxNode blendshapeNode, string uniPropertyName)
         {
-            Dictionary<FbxBlendShapeChannel, string> blendshapeChannels;
-            if (!MapUnityObjectToBlendShapes.TryGetValue(blendshapeNode, out blendshapeChannels))
+            List<FbxBlendShapeChannel> blendshapeChannels;
+            if (MapUnityObjectToBlendShapes.TryGetValue(blendshapeNode, out blendshapeChannels))
             {
-                return null;
-            }
-
-            foreach (var channel in blendshapeChannels)
-            {
-                if (uniPropertyName == ("blendShape." + channel.Value))
+                var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, @"blendShape\.(\S+)");
+                if (match.Success && match.Groups.Count > 0)
                 {
-                    return channel.Key;
+                    string blendshapeName = match.Groups[1].Value;
+
+                    var targetChannel = blendshapeChannels.FirstOrDefault(channel => (channel.GetName() == blendshapeName));
+                    if (targetChannel != null)
+                    {
+                        return targetChannel;
+                    }    
                 }
             }
             return null;
