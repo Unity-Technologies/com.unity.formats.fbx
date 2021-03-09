@@ -1,22 +1,11 @@
 # Quality Report - FBX Exporter Package
-## Version tested: 3.2.1-preview
+## Version tested: 4.0.0
 
-#### QA Owner: Natalia Whiteley
+#### QA Owner: Rajat Goswamy
 ### Tested On: Windows, MacOS
 
 ### Test strategy
 
-[Ran Test Plan](https://docs.google.com/document/d/1W_RYL6j--nASVlxwJ4QWZpiZLPseKoxP5WAooANdlNU/edit?usp=sharing)
-
-#####  New Features QA:
-- Tested option to preserve import settings.
-- Tested exporting an fbx outside the project.
-
-#####  Fixes QA:
-- Tested empty selection does not export in Autodesk® 3ds Max®.
-- Tested null check for bones.
-- Tested relative paths for textures in FBX files.
-- Tested fix for Editor focus lockup when creating an FBX Prefab Variant on Mac.
-
-### Package Status
-- No new issues from current test plan or bugfixes.
+Ran TestRails test plan:
+https://qatestrail.hq.unity3d.com/index.php?/runs/view/27326&group_by=cases:section_id&group_order=asc
+https://qatestrail.hq.unity3d.com/index.php?/runs/view/27263&group_by=cases:section_id&group_order=asc
