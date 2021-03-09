@@ -15,7 +15,7 @@ The FBX Exporter exports the following objects:
 * [Lights](#lights)
 * [Contraints](#constraints)
 * [Animation](#animation)
-* Blendshapes
+* Blendshapes if the "Animated Skinned Mesh" Export Option is selected
 
 
 
