@@ -2,7 +2,7 @@
 
 ## [4.0.1] - 2021-03-10
 ### Changed
-- Update from prerelease to released package (remove "pre" from version).
+- Update from prerelease to released package.
 
 ## [4.0.0-pre.4] - 2021-01-26
 ### Fixed
