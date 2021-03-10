@@ -16,7 +16,11 @@ platforms:
     image: package-ci/mac:stable
     flavor: b1.medium
 coverage:
+{% if platform.name == "ubuntu" %}
+    minPercent: 0
+{% else %}
     minPercent: 57.5
+{% endif %}
 ---
 pack:
   name: Pack
