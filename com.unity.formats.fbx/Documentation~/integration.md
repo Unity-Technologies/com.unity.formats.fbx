@@ -64,7 +64,7 @@ To manually install an Autodesk® Maya® or Autodesk® Maya LT™ Integration:
    `UnityFbxForMaya {Version} {UnityIntegrationsPath}/Integrations/Autodesk/maya`
 
    **Note:** You need to replace:
-   * `{Version}` by the version number of your FBX Exporter package (for example, `4.0.0`)
+   * `{Version}` by the version number of your FBX Exporter package (for example, `4.0.1`)
    * `{UnityIntegrationsPath}` by the location where you unzipped `UnityFbxForMaya.zip` in first step.
    <br />
 
