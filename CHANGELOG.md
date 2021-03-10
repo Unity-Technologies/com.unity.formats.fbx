@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [4.0.0] - 2021-03-02
+## [4.0.1] - 2021-03-10
 ### Changed
 - Update from prerelease to released package (remove "pre" from version).
 
