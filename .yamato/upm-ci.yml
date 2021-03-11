@@ -16,11 +16,7 @@ platforms:
     image: package-ci/mac:stable
     flavor: b1.medium
 coverage:
-{% if platform.name == "ubuntu" %}
-    minPercent: 0
-{% else %}
     minPercent: 57.5
-{% endif %}
 ---
 pack:
   name: Pack
@@ -49,7 +45,9 @@ test_{{ platform.name }}_{{ editor.version }}:
   commands:
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
+{% if platform.name != "ubuntu" %}
     - python tests/yamato/check_coverage_percent.py upm-ci~/test-results/ {{ coverage.minPercent }}
+{% endif %}
   artifacts:
     logs:
       paths:
