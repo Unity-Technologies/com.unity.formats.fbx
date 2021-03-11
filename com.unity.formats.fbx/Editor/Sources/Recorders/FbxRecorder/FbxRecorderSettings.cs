@@ -91,9 +91,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>Transform associated with binding ID</returns>
         static Transform GetBinding(string id)
         {
-            // return BindingManager.Get(m_BindingId) as GameObject;
+#if UNITY_2020_1_OR_NEWER
+            return BindingManager.Get(m_BindingId) as Transform;
+#else
             var method = Type.GetType("UnityEditor.Recorder.BindingManager,Unity.Recorder.Editor").GetMethod("Get", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
             return method.Invoke(null, new object[] { id }) as Transform;
+#endif // UNITY_2020_1_OR_NEWER
         }
 
         /// <summary>
@@ -105,9 +108,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="obj">Unity Object</param>
         static void SetBinding(string id, UnityEngine.Object obj)
         {
-            // BindingManager.Set(m_BindingId, value);
+#if UNITY_2020_1_OR_NEWER
+            BindingManager.Set(m_BindingId, value);
+#else
             var method = Type.GetType("UnityEditor.Recorder.BindingManager,Unity.Recorder.Editor").GetMethod("Set", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
             method.Invoke(null, new object[] { id, obj });
+#endif // UNITY_2020_1_OR_NEWER
         }
 
         /// <summary>
