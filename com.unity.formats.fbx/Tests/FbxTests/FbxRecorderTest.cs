@@ -15,7 +15,7 @@ namespace FbxExporter.UnitTests
         };
 
         [Test, TestCaseSource(typeof(FbxRecorderTest), "RecorderTestCases")]
-    	public void TransferAnimationTest(string prefabPath) 
+        public void TransferAnimationTest(string prefabPath) 
         {
             prefabPath = FindPathInUnitTests(prefabPath);
             Assert.That(prefabPath, Is.Not.Null);
