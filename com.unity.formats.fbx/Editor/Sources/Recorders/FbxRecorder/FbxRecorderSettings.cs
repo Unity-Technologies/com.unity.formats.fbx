@@ -92,7 +92,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         static Transform GetBinding(string id)
         {
 #if UNITY_2020_1_OR_NEWER
-            return BindingManager.Get(m_BindingId) as Transform;
+            return BindingManager.Get(id) as Transform;
 #else
             var method = Type.GetType("UnityEditor.Recorder.BindingManager,Unity.Recorder.Editor").GetMethod("Get", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
             return method.Invoke(null, new object[] { id }) as Transform;
@@ -109,7 +109,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         static void SetBinding(string id, UnityEngine.Object obj)
         {
 #if UNITY_2020_1_OR_NEWER
-            BindingManager.Set(m_BindingId, value);
+            BindingManager.Set(id, obj);
 #else
             var method = Type.GetType("UnityEditor.Recorder.BindingManager,Unity.Recorder.Editor").GetMethod("Set", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
             method.Invoke(null, new object[] { id, obj });
