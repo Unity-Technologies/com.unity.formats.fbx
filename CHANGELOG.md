@@ -4,6 +4,10 @@
 ### Added
 - Added ability to export blendshape animations when the "Animated Skinned Mesh" Export Option is selected.
 
+## [Unreleased]
+### Changed
+- Updating the minimum required version of the Unity Recorder package to 2.5.5.
+
 ## [4.0.0-pre.4] - 2021-01-26
 ### Fixed
 - Fix ArgumentNullException on Linux when opening Export Options window.
