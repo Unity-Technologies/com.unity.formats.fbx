@@ -28,7 +28,7 @@
     "versionDefines": [
         {
             "name": "com.unity.recorder",
-            "expression": "2.2.0-preview.4",
+            "expression": "2.5.5",
             "define": "ENABLE_FBX_RECORDER"
         }
     ],

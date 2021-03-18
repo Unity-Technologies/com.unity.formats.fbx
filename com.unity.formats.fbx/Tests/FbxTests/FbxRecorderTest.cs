@@ -34,8 +34,13 @@ namespace FbxExporter.UnitTests
             Transform skeletonNode = go.transform.GetChild(2);
             settings.TransferAnimationDest = skeletonNode;
 
+            // Assignment of the AnimationSource and AnimationDest transforms also tests the GetBinding and SetBinding methods
+            // of the FbxRecorderSettings class which previously used a private API.
             Assert.That(settings.TransferAnimationSource, Is.Not.Null);
+            Assert.That(settings.TransferAnimationSource, Is.EqualTo(go.transform));
+
             Assert.That(settings.TransferAnimationDest, Is.Not.Null);
+            Assert.That(settings.TransferAnimationDest, Is.EqualTo(skeletonNode));
         }
     }
 }
