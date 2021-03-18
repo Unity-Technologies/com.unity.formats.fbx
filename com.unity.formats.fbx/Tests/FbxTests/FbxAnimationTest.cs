@@ -47,6 +47,13 @@ namespace FbxExporter.UnitTests
                 yield return new TestCaseData (new float [3] { 1f, 2f, 3f }, new float [3] { 0f, 100f, 0f }, typeof (Transform), "m_LocalPosition.z").Returns (1);
             }
         }
+        public static IEnumerable BlendshapeAnimationTestCases {
+            get {
+                yield return new TestCaseData (new float [3] { 1f, 2f, 3f }, new float [3] { 1f, 100f, 1f }, typeof (SkinnedMeshRenderer), "blendShape.Cube").Returns (1);
+                yield return new TestCaseData (new float [3] { 1f, 2f, 3f }, new float [3] { 1f, 100f, 1f }, typeof (SkinnedMeshRenderer), "blendShape.CubeAndCylinder").Returns (1);
+                yield return new TestCaseData (new float [3] { 1f, 2f, 3f }, new float [3] { 1f, 100f, 1f }, typeof (SkinnedMeshRenderer), "blendShape.Cylinder").Returns (1);
+            }
+        }
         public static IEnumerable QuaternionTestCases {
             get {
                 yield return new TestCaseData (new float [3] { 1f, 2f, 3f }, new Vector3 [3]{new Vector3 (0f, 80f, 0f), new Vector3 (80f, 0f, 0f),new Vector3 (0f, 0f, 80f)}, typeof (Transform), m_rotationQuaternionNames ).Returns (3);
@@ -301,6 +308,17 @@ namespace FbxExporter.UnitTests
             public string testName;
             public string path;
             public IComparer<Keyframe> keyComparer;
+            private IExportOptions m_exportOptions;
+            internal IExportOptions exportOptions {
+                get {
+                    if (m_exportOptions == null) {
+                        // get default settings;
+                        m_exportOptions = new ExportModelSettingsSerialize();
+                    }
+                    return m_exportOptions;
+                }
+                set { m_exportOptions = value; }
+            }
 
             public int DoIt ()
             {
@@ -385,7 +403,7 @@ namespace FbxExporter.UnitTests
                 keyData.targetObject.transform.parent = goRoot.transform;
 
                 //export the object
-                var exportedFilePath = ModelExporter.ExportObject (path, goRoot);
+                var exportedFilePath = ModelExporter.ExportObject (path, goRoot, exportOptions);
                 Assert.That (exportedFilePath, Is.EqualTo (path));
 
                 // TODO: Uni-34492 change importer settings of (newly exported model) 
@@ -697,6 +715,32 @@ namespace FbxExporter.UnitTests
             KeyData keyData = new PropertyKeyData { propertyName = componentName, componentType = componentType, keyTimes = keyTimesInSeconds, keyFloatValues = keyValues };
 
             var tester = new AnimTester {keyData=keyData, testName=componentName, path=GetRandomFbxFilePath ()};
+            return tester.DoIt();
+        }
+
+        [Test, TestCaseSource (typeof (AnimationTestDataClass), "BlendshapeAnimationTestCases")]
+        public int BlendshapeAnimTest (float [] keyTimesInSeconds, float [] keyValues, System.Type componentType, string componentName)
+        {
+            var prefabPath = FindPathInUnitTests ("Models/blendshape.fbx");
+            Assert.That (prefabPath, Is.Not.Null);
+
+            // add prefab to scene
+            GameObject originalGO = AddAssetToScene(prefabPath);
+
+            KeyData keyData = new PropertyKeyData {
+                targetObject = originalGO, 
+                propertyName = componentName,
+                componentType = componentType,
+                keyTimes = keyTimesInSeconds,
+                keyFloatValues = keyValues
+            };
+
+            var tester = new AnimTester {keyData=keyData, testName=componentName, path=GetRandomFbxFilePath ()};
+
+            var exportOptions = new ExportModelSettingsSerialize ();
+            exportOptions.SetAnimatedSkinnedMesh(true);
+            
+            tester.exportOptions = exportOptions;
             return tester.DoIt();
         }
 
