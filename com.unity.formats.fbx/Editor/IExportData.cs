@@ -124,24 +124,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get the property propertyName from object obj using reflection.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="propertyName"></param>
-        /// <returns>property propertyName as an object</returns>
-        private static object GetPropertyReflection(object obj, string propertyName)
-        {
-            return obj.GetType().GetProperty(propertyName).GetValue(obj, null);
-        }
-
-        /// <summary>
         /// Get the timeline clip from the given editor clip using reflection.
         /// </summary>
         /// <param name="editorClip"></param>
         /// <returns>the timeline clip or null if none</returns>
         private static TimelineClip GetTimelineClipFromEditorClip(object editorClip)
         {
-            object clip = GetPropertyReflection(editorClip, "clip");
+            object clip = editorClip.GetType().GetProperty("clip").GetValue(editorClip, null);
             return clip as TimelineClip;
         }
 
