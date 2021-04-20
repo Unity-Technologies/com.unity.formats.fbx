@@ -2,7 +2,9 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.Timeline;
 using UnityEditor;
+using UnityEditor.Timeline;
 using System.Linq;
 using Autodesk.Fbx;
 using System.Runtime.CompilerServices;  
@@ -3895,14 +3897,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         [MenuItem(TimelineClipMenuItemName, true, 31)]
         static bool ValidateOnClipContextClick()
         {
-            Object[] selectedObjects = Selection.objects;
-
-            foreach (Object editorClipSelected in selectedObjects)
+            TimelineClip[] selectedClips = TimelineEditor.selectedClips;
+            
+            if(selectedClips != null && selectedClips.Length > 0)
             {
-                if (IsEditorClip(editorClipSelected))
-                {         
-                    return true;
-                }
+                return true;
             }
             return false;
         }

@@ -146,14 +146,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get the GameObject that the editor clip is bound to in the timeline using reflection.
+        /// Get the GameObject that the clip is bound to in the timeline.
         /// </summary>
-        /// <param name="editorClip"></param>
-        /// <returns>The GameObject bound to the editor clip or null if none.</returns>
-        private static GameObject GetGameObjectBoundToEditorClip(object editorClip)
+        /// <param name="timelineClip"></param>
+        /// <returns>The GameObject bound to the timeline clip or null if none.</returns>
+        private static GameObject GetGameObjectBoundToTimelineClip(TimelineClip timelineClip)
         {
-            var timelineClip = GetTimelineClipFromEditorClip(editorClip);
-            object parentTrack = timelineClip.parentTrack;
+            object parentTrack = timelineClip.GetParentTrack();
             AnimationTrack animTrack = parentTrack as AnimationTrack;
             
             Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.inspectedDirector.GetGenericBinding(animTrack);
@@ -188,7 +187,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             
             TimelineClip timeLineClip = GetTimelineClipFromEditorClip(editorClip);
 
-            var animationTrackGO = GetGameObjectBoundToEditorClip(editorClip);
+            var animationTrackGO = GetGameObjectBoundToTimelineClip(timeLineClip);
             if (animationTrackGO == null)
             {
                 return new KeyValuePair<GameObject, AnimationClip>();
@@ -219,7 +218,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return timeLineClip.displayName;
             }
 
-            var goBound = GetGameObjectBoundToEditorClip(obj);
+            var goBound = GetGameObjectBoundToTimelineClip(timeLineClip);
             if (goBound == null)
             {
                 return obj.name;
