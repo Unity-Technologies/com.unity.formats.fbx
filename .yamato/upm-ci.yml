@@ -22,7 +22,7 @@ pack:
   name: Pack
   agent:
     type: Unity::VM
-    image: package-ci/ubuntu:latest
+    image: package-ci/ubuntu:stable
     flavor: b1.small
   commands:
     - ./build.sh
