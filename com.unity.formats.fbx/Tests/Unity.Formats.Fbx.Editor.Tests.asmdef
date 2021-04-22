@@ -1,24 +1,37 @@
 {
     "name": "Unity.Formats.Fbx.Editor.Tests",
+    "rootNamespace": "",
     "references": [
         "Unity.Timeline",
         "Autodesk.Fbx",
         "Unity.Formats.Fbx.Editor",
         "Unity.Formats.Fbx.Runtime",
-        "Unity.Formats.Fbx.Editor.Tests.Prefabs"
-    ],
-    "optionalUnityReferences": [
-        "TestAssemblies"
+        "Unity.Formats.Fbx.Editor.Tests.Prefabs",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Unity.Recorder",
+        "Unity.Recorder.Editor"
     ],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
     "defineConstraints": [
+        "UNITY_INCLUDE_TESTS",
         "!UNITY_EDITOR_LINUX"
-    ]
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.recorder",
+            "expression": "2.5.5",
+            "define": "ENABLE_FBX_RECORDER"
+        }
+    ],
+    "noEngineReferences": false
 }

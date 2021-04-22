@@ -118,6 +118,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 { @"m_RotationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset R" }
             };
 
+        /// <summary>
+        /// Map of Unity blendshape property name as a regular expression to the FBX property.
+        /// This is necessary because the Unity property contains the name of the target object.
+        /// </summary>
+        private static Dictionary<string, string> MapBlendshapesPropToFbxProp = new Dictionary<string, string>()
+            {
+                { @"blendShape\.(\S+)", "DeformPercent" }
+            };
+
         // ================== Channel Maps ======================
 
         /// <summary>
@@ -147,6 +156,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private static PropertyChannelMap ColorPropertyMap = new PropertyChannelMap(MapColorPropToFbxProp, MapColorChannelToFbxChannel);
         private static PropertyChannelMap ConstraintSourcePropertyMap = new PropertyChannelMap(MapConstraintSourcePropToFbxProp, null);
         private static PropertyChannelMap ConstraintSourceTransformPropertyMap = new PropertyChannelMap(MapConstraintSourceTransformPropToFbxProp, MapTransformChannelToFbxChannel);
+        private static PropertyChannelMap BlendshapeMap = new PropertyChannelMap(MapBlendshapesPropToFbxProp, null);
+
         private static PropertyChannelMap OtherPropertyMap = new PropertyChannelMap(MapPropToFbxProp, null);
 
         /// <summary>
@@ -217,6 +228,28 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
+        /// Get the Fbx property name for the given Unity blendshape property name from the given dictionary.
+        /// 
+        /// This is different from GetFbxProperty() because the Unity blendshape properties contain the name
+        /// of the target object.
+        /// </summary>
+        /// <param name="uniProperty"></param>
+        /// <param name="propertyMap"></param>
+        /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
+        private static string GetFbxBlendshapeProperty(string uniProperty, Dictionary<string, string> propertyMap)
+        {
+            foreach (var prop in propertyMap)
+            {
+                var match = System.Text.RegularExpressions.Regex.Match(uniProperty, prop.Key);
+                if (match.Success)
+                {
+                    return prop.Value;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Get the Fbx channel name for the given Unity channel from the given dictionary.
         /// </summary>
         /// <param name="uniChannel"></param>
@@ -256,11 +289,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 // try to match property
                 var fbxProperty = GetFbxProperty(uniPropChannelPair.property, propertyChannelMap.MapUnityPropToFbxProp);
-                if (string.IsNullOrEmpty(fbxProperty) && constraint != null)
+                if (string.IsNullOrEmpty(fbxProperty))
                 {
-                    // check if it's a constraint source property
-                    fbxProperty = GetFbxConstraintSourceProperty(uniPropChannelPair.property, constraint, propertyChannelMap.MapUnityPropToFbxProp);
+                    if (constraint != null)
+                    {
+                        // check if it's a constraint source property
+                        fbxProperty = GetFbxConstraintSourceProperty(uniPropChannelPair.property, constraint, propertyChannelMap.MapUnityPropToFbxProp);
+                    }
+                    else
+                    {
+                        // check if it's a blendshape property
+                        fbxProperty = GetFbxBlendshapeProperty(uniPropChannelPair.property, propertyChannelMap.MapUnityPropToFbxProp);
+                    }
                 }
+
                 if (string.IsNullOrEmpty(fbxProperty))
                 {
                     continue;
@@ -320,6 +362,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             propertyMaps.Add(TransformPropertyMap);
             propertyMaps.Add(ColorPropertyMap);
             propertyMaps.Add(OtherPropertyMap);
+            propertyMaps.Add(BlendshapeMap);
 
             foreach (var propMap in propertyMaps)
             {
