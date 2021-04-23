@@ -636,7 +636,18 @@ namespace FbxExporter.UnitTests
             Assert.That (fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSkinnedMesh, exportedSkinnedMesh;
-            var exportResult = ExportSkinnedMesh (fbxPath);
+
+            SetImportSettings setImportSettings = (importer) =>
+            {
+                // Older versions of Unity and meta files will be imported
+                // to optimize bones automatically.
+                // New files have optimizeBones set to false by default.
+#if UNITY_2021_2_OR_NEWER
+                importer.optimizeBones = true;
+#endif // UNITY_2021_2_OR_NEWER
+            };
+
+            var exportResult = ExportSkinnedMesh (fbxPath, setImportSettings);
             originalSkinnedMesh = exportResult.originalSkinnedMesh;
             exportedSkinnedMesh = exportResult.exportedSkinnedMesh;
 

@@ -1,9 +1,11 @@
 test_trigger_editors:
   - version: 2019.4
   - version: 2020.1
+  - version: 2021.1
 publish_trigger_editors:
   - version: 2019.4
   - version: 2020.1
+  - version: 2021.1
 platforms:
   - name: win
     type: Unity::VM
@@ -20,7 +22,7 @@ pack:
   name: Pack
   agent:
     type: Unity::VM
-    image: package-ci/ubuntu:latest
+    image: package-ci/ubuntu:stable
     flavor: b1.small
   commands:
     - ./build.sh
@@ -43,7 +45,9 @@ test_{{ platform.name }}_{{ editor.version }}:
   commands:
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
+{% if platform.name != "ubuntu" %}
     - python tests/yamato/check_coverage_percent.py upm-ci~/test-results/ {{ coverage.minPercent }}
+{% endif %}
   artifacts:
     logs:
       paths:

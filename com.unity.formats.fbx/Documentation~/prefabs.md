@@ -2,7 +2,7 @@
 
 In Unity, [Nested Prefabs](https://docs.unity3d.com/Documentation/Manual/NestedPrefabs.html) allow you to create Prefabs inside other Prefabs, and [Prefab Variants](https://docs.unity3d.com/Documentation/Manual/PrefabVariants.html) allow you to save a variation on an existing Prefab.
 
-When Unity imports a Model from a 3D modeling application such as Autodesk® Maya®, Unity creates a **Model Prefab**, which is a read-only representation of the FBX file's contents. You can't edit Model Prefabs in Unity, apart from [changing the import settings](https://docs.unity3d.com/2018.3/Documentation/Manual/class-FBXImporter.html). When the FBX file is modified inside the originating 3D modeling software, Unity updates the Model Prefab.
+When Unity imports a Model from a 3D modeling application such as Autodesk® Maya®, Unity creates a **Model Prefab**, which is a read-only representation of the FBX file's contents. You can't edit Model Prefabs in Unity, apart from [changing the import settings](https://docs.unity3d.com/Documentation/Manual/class-FBXImporter.html). When the FBX file is modified inside the originating 3D modeling software, Unity updates the Model Prefab.
 
 ![A Model Prefab in the Scene and Hierarchy views](images/FBXExporter_ModelPrefab.png)
 
