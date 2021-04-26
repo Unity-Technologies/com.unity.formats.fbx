@@ -8,6 +8,11 @@
 ### Changed
 - Updating the minimum required version of the Unity Recorder package to 2.5.5.
 
+## [4.0.1] - 2021-03-10
+### Changed
+- Update from prerelease to released package.
+- Updated the FBX SDK bindings to 4.0.1.
+
 ## [4.0.0-pre.4] - 2021-01-26
 ### Fixed
 - Fix ArgumentNullException on Linux when opening Export Options window.
