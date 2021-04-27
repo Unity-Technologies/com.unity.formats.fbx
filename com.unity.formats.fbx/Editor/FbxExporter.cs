@@ -3136,7 +3136,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// components and the animation clips. Also, the first animation to export, if any.
         /// </summary>
         /// <returns>The animation only hierarchy count.</returns>
-        /// <param name="exportSet">GameObject hierarchies selected for export.</param>
         /// <param name="hierarchyToExportData">Map from GameObject hierarchy to animation export data.</param>
         [SecurityPermission(SecurityAction.LinkDemand)]
         internal int GetAnimOnlyHierarchyCount(Dictionary<GameObject, IExportData> hierarchyToExportData)
@@ -3147,7 +3146,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var data = item.Value;
                 if(data == null || data.Objects.Count <= 0)
                 {
-                    Debug.LogWarningFormat("No animation data to export for object: {0}", item.Key);
+                    Debug.LogWarningFormat("No animation data to export for objects in hierarchy: {0}", item.Key);
                     continue;
                 }
                 foreach (var go in data.Objects) {
