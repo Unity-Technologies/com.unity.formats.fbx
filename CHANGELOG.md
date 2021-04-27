@@ -1,12 +1,12 @@
 # Changes in Fbx Exporter
 
-## [Unreleased]
+## [4.1.0-pre.1] - 2021-04-27
 ### Added
 - Added ability to export blendshape animations when the "Animated Skinned Mesh" Export Option is selected.
 
-## [Unreleased]
 ### Changed
 - Updating the minimum required version of the Unity Recorder package to 2.5.5.
+- Updated the FBX SDK bindings to 4.1.0-pre.1
 
 ## [4.0.1] - 2021-03-10
 ### Changed
