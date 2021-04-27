@@ -17,7 +17,7 @@ Use the Fbx Export Settings window to:
 
 | Property | Function |
 | :------- | :------- |
-| **Display Options Window** | Enable this option to display the **Export Options** or **Export Options** window before letting the FBX Exporter proceed when you respectively select the **Export To FBX** or **Convert To FBX Prefab Variant** menu action.<br /><br />If you disable this option, the FBX Exporter directly converts or exports without asking. It uses the last path you specified and a filename based on the selected GameObject's name. |
+| **Display Options Window** | Enable this option to display the **Export Options** or **Convert Options** window before letting the FBX Exporter proceed when you respectively select the **Export To FBX** or **Convert To FBX Prefab Variant** menu action.<br /><br />If you disable this option, the FBX Exporter directly converts or exports without asking. It uses the last path you specified and a filename based on the selected GameObject's name. |
 
 #### FBX File Options
 | Property  |  | Function |
