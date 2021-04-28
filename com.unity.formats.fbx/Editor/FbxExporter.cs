@@ -3142,11 +3142,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             // including any parents of animated objects that are exported
             var completeExpSet = new HashSet<GameObject>();
-            foreach (var item in hierarchyToExportData) {
-                var data = item.Value;
+            foreach (var data in hierarchyToExportData.Values) {
                 if(data == null || data.Objects.Count <= 0)
                 {
-                    Debug.LogWarningFormat("No animation data to export for objects in hierarchy: {0}", item.Key);
                     continue;
                 }
                 foreach (var go in data.Objects) {
