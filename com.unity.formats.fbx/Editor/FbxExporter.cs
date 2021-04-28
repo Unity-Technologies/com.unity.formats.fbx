@@ -2877,8 +2877,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         ExportLight (go, fbxScene, node);
                     } else if (compType == typeof(Camera)) {
                         ExportCamera (go, fbxScene, node);
-                    } else if (compType == typeof(SkinnedMeshRenderer))
-                    {
+                    } else if (compType == typeof(SkinnedMeshRenderer)) {
                         // export only what is necessary for exporting blendshape animation
                         var unitySkin = go.GetComponent<SkinnedMeshRenderer>();
                         var meshInfo = new MeshInfo(unitySkin.sharedMesh, unitySkin.sharedMaterials);
