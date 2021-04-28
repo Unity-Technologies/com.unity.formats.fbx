@@ -744,6 +744,36 @@ namespace FbxExporter.UnitTests
             return tester.DoIt();
         }
 
+        [Test, TestCaseSource(typeof(AnimationTestDataClass), "BlendshapeAnimationTestCases")]
+        public int BlendshapeAnimOnlyTest(float[] keyTimesInSeconds, float[] keyValues, System.Type componentType, string componentName)
+        {
+            var prefabPath = FindPathInUnitTests("Models/blendshape.fbx");
+            Assert.That(prefabPath, Is.Not.Null);
+
+            // add prefab to scene
+            GameObject originalGO = AddAssetToScene(prefabPath);
+
+            KeyData keyData = new PropertyKeyData
+            {
+                targetObject = originalGO,
+                propertyName = componentName,
+                componentType = componentType,
+                keyTimes = keyTimesInSeconds,
+                keyFloatValues = keyValues
+            };
+
+            var tester = new AnimTester { keyData = keyData, testName = componentName, path = GetRandomFbxFilePath() };
+
+            var exportOptions = new ExportModelSettingsSerialize();
+            exportOptions.SetAnimatedSkinnedMesh(true);
+
+            // only export animation, not model and animation
+            exportOptions.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+
+            tester.exportOptions = exportOptions;
+            return tester.DoIt();
+        }
+
         [Test, TestCaseSource (typeof (AnimationTestDataClass), "QuaternionTestCases")]
         public int QuaternionPropertyAnimTest (float [] keyTimesInSeconds, Vector3 [] keyValues, System.Type componentType, string[] componentNames)
         {

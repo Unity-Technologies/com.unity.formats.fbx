@@ -100,6 +100,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     this.exportComponent[unityGo] = typeof(Light);
                 else if (unityGo.GetComponent<Camera>())
                     this.exportComponent[unityGo] = typeof(Camera);
+                else if ((uniCurveBinding.type == typeof(SkinnedMeshRenderer)) && unityGo.GetComponent<SkinnedMeshRenderer>())
+                {
+                    // only export mesh if there are animation keys for it (e.g. for blendshapes)
+                    if (FbxPropertyChannelPair.TryGetValue(uniCurveBinding.propertyName, out FbxPropertyChannelPair[] channelPairs))
+                    {
+                        this.exportComponent[unityGo] = typeof(SkinnedMeshRenderer);
+                    }
+                }
 
                 this.goExportSet.Add(unityGo);
             }
