@@ -212,6 +212,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         internal static void FixSceneReferenceToObject(SearchItem item, Object origObj, Object newObj, GameObject toConvertRoot)
         {
+            // item has reference to origObj that need to be replaced by references to newObj
             var go = ModelExporter.GetGameObject(item.ToObject());
             if (go && go.transform.IsChildOf(toConvertRoot.transform))
             {
