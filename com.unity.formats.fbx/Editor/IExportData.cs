@@ -132,36 +132,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get the property propertyName from object obj using reflection.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="propertyName"></param>
-        /// <returns>property propertyName as an object</returns>
-        private static object GetPropertyReflection(object obj, string propertyName)
-        {
-            return obj.GetType().GetProperty(propertyName).GetValue(obj, null);
-        }
-
-        /// <summary>
         /// Get the timeline clip from the given editor clip using reflection.
         /// </summary>
         /// <param name="editorClip"></param>
         /// <returns>the timeline clip or null if none</returns>
         private static TimelineClip GetTimelineClipFromEditorClip(object editorClip)
         {
-            object clip = GetPropertyReflection(editorClip, "clip");
+            object clip = editorClip.GetType().GetProperty("clip").GetValue(editorClip, null);
             return clip as TimelineClip;
         }
 
         /// <summary>
-        /// Get the GameObject that the editor clip is bound to in the timeline using reflection.
+        /// Get the GameObject that the clip is bound to in the timeline.
         /// </summary>
-        /// <param name="editorClip"></param>
-        /// <returns>The GameObject bound to the editor clip or null if none.</returns>
-        private static GameObject GetGameObjectBoundToEditorClip(object editorClip)
+        /// <param name="timelineClip"></param>
+        /// <returns>The GameObject bound to the timeline clip or null if none.</returns>
+        private static GameObject GetGameObjectBoundToTimelineClip(TimelineClip timelineClip)
         {
-            var timelineClip = GetTimelineClipFromEditorClip(editorClip);
-            object parentTrack = timelineClip.parentTrack;
+            object parentTrack = timelineClip.GetParentTrack();
             AnimationTrack animTrack = parentTrack as AnimationTrack;
             
             Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.inspectedDirector.GetGenericBinding(animTrack);
@@ -196,7 +184,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             
             TimelineClip timeLineClip = GetTimelineClipFromEditorClip(editorClip);
 
-            var animationTrackGO = GetGameObjectBoundToEditorClip(editorClip);
+            var animationTrackGO = GetGameObjectBoundToTimelineClip(timeLineClip);
             if (animationTrackGO == null)
             {
                 return new KeyValuePair<GameObject, AnimationClip>();
@@ -227,7 +215,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return timeLineClip.displayName;
             }
 
-            var goBound = GetGameObjectBoundToEditorClip(obj);
+            var goBound = GetGameObjectBoundToTimelineClip(timeLineClip);
             if (goBound == null)
             {
                 return obj.name;
