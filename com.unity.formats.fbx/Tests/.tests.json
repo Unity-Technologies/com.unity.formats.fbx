@@ -1,1 +1,6 @@
-{"createSeparatePackage": true}
+{
+    "createSeparatePackage": true,
+    "dependencies": {
+        "com.unity.modules.physics": "1.0.0"
+    }
+}
