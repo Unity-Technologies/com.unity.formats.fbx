@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [4.1.0-pre.2] - 2021-05-05
+### Known Issues
+- FBX exporter integration with Probuilder broken with Probuilder 5.0.3. Exporting a Probuilder object may break the original object.
+
 ## [4.1.0-pre.1] - 2021-04-29
 ### Added
 - Added ability to export blendshape animations when the "Animated Skinned Mesh" Export Option is selected.
