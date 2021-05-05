@@ -756,7 +756,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 GameObjectUtility.SetStaticEditorFlags(destGO, GameObjectUtility.GetStaticEditorFlags(sourceGO));
 
                 // set icon
-                System.Reflection.BindingFlags bindingFlags = System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic;
+                System.Reflection.BindingFlags bindingFlags = System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public;
                 var sourceIcon = typeof(EditorGUIUtility).InvokeMember("GetIconForObject", bindingFlags, null, null, new object[] { sourceGO });
                 object[] args = new object[] { destGO, sourceIcon };
                 typeof(EditorGUIUtility).InvokeMember("SetIconForObject", bindingFlags, null, null, args);
