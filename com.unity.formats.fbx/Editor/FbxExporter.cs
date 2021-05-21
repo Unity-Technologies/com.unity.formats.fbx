@@ -1057,9 +1057,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // get the bindpose of the parent
             var parentPose = GetBindPose(unityBone.parent, bindPoses, ref boneInfo);
-            // get the local transformation matrix according the to current positions of the bone and parent (which may not be in the bindpose),
-            // then transform it into the global transformation matrix with the parent in the bind pose.
-            bindPose = (unityBone.parent.worldToLocalMatrix * unityBone.localToWorldMatrix) * parentPose.inverse;
+            // get the local transformation matrix of the bone, then transform it into
+            // the global transformation matrix with the parent in the bind pose.
+            bindPose = parentPose.inverse * Matrix4x4.TRS(unityBone.localPosition, unityBone.localRotation, unityBone.localScale);
             // bindpose is the inverse of the transformation matrix
             bindPose = bindPose.inverse;
             boneToBindPose.Add(unityBone, bindPose);
