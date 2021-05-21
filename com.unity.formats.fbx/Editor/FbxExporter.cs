@@ -1023,15 +1023,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>The bind pose.</returns>
         /// <param name="unityBone">Unity bone.</param>
         /// <param name="bindPoses">Bind poses.</param>
-        /// <param name="boneDict">Dictionary of bone to index.</param>
-        /// <param name="skinnedMesh">Skinned mesh.</param>
+        /// <param name="boneInfo">Contains information about bones and skinned mesh.</param>
         private Matrix4x4 GetBindPose(
             Transform unityBone, Matrix4x4[] bindPoses,
-            Dictionary<Transform, int> boneDict,
-            SkinnedMeshRenderer skinnedMesh,
-            ref Dictionary<Transform, Matrix4x4> boneToBindPose
+            ref SkinnedMeshBoneInfo boneInfo
         )
         {
+            var boneDict = boneInfo.boneDict;
+            var skinnedMesh = boneInfo.skinnedMesh;
+            var boneToBindPose = boneInfo.boneToBindPose;
+
             Matrix4x4 bindPose;
             if(boneToBindPose.TryGetValue(unityBone, out bindPose))
             {
@@ -1055,10 +1056,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             // get the bindpose of the parent
-            var parentPose = GetBindPose(unityBone.parent, bindPoses, boneDict, skinnedMesh, ref boneToBindPose);
-            // get the local transformation matrix according the to current positions,
+            var parentPose = GetBindPose(unityBone.parent, bindPoses, ref boneInfo);
+            // get the local transformation matrix according the to current positions of the bone and parent (which may not be in the bindpose),
             // then transform it into the global transformation matrix with the parent in the bind pose.
             bindPose = (unityBone.parent.worldToLocalMatrix * unityBone.localToWorldMatrix) * parentPose.inverse;
+            // bindpose is the inverse of the transformation matrix
             bindPose = bindPose.inverse;
             boneToBindPose.Add(unityBone, bindPose);
             return bindPose;
@@ -3092,11 +3094,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var bindPoses = skinnedMesh.sharedMesh.bindposes;
 
             // get bind pose
-            Matrix4x4 bindPose = GetBindPose(unityBone, bindPoses, boneDict, skinnedMesh, ref boneInfo.boneToBindPose);
+            Matrix4x4 bindPose = GetBindPose(unityBone, bindPoses, ref boneInfo);
 
             Matrix4x4 pose;
             // get parent's bind pose
-            Matrix4x4 parentBindPose = GetBindPose(unityBone.parent, bindPoses, boneDict, skinnedMesh, ref boneInfo.boneToBindPose);
+            Matrix4x4 parentBindPose = GetBindPose(unityBone.parent, bindPoses, ref boneInfo);
             pose = parentBindPose * bindPose.inverse;
 
             FbxVector4 translation, rotation, scale;
