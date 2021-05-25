@@ -1023,19 +1023,68 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>The bind pose.</returns>
         /// <param name="unityBone">Unity bone.</param>
         /// <param name="bindPoses">Bind poses.</param>
-        /// <param name="boneDict">Dictionary of bone to index.</param>
-        /// <param name="skinnedMesh">Skinned mesh.</param>
+        /// <param name="boneInfo">Contains information about bones and skinned mesh.</param>
         private Matrix4x4 GetBindPose(
             Transform unityBone, Matrix4x4[] bindPoses,
-            Dictionary<Transform, int> boneDict, SkinnedMeshRenderer skinnedMesh
-        ){
+            ref SkinnedMeshBoneInfo boneInfo
+        )
+        {
+            var boneDict = boneInfo.boneDict;
+            var skinnedMesh = boneInfo.skinnedMesh;
+            var boneToBindPose = boneInfo.boneToBindPose;
+
+            // If we have already retrieved the bindpose for this bone before
+            // it will be present in the boneToBindPose dictionary,
+            // simply return this bindpose.
             Matrix4x4 bindPose;
-            int index;
-            if (boneDict.TryGetValue (unityBone, out index)) {
-                bindPose = bindPoses [index];
-            } else {
-                bindPose = unityBone.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
+            if(boneToBindPose.TryGetValue(unityBone, out bindPose))
+            {
+                return bindPose;
             }
+
+            // Check if unityBone is a bone registered in the bone list of the skinned mesh.
+            // If it is, then simply retrieve the bindpose from the boneDict (maps bone to index in bone/bindpose list).
+            // Make sure to update the boneToBindPose list in case the bindpose for this bone needs to be retrieved again.
+            int index;
+            if (boneDict.TryGetValue(unityBone, out index))
+            {
+                bindPose = bindPoses[index];
+                boneToBindPose.Add(unityBone, bindPose);
+                return bindPose;
+            }
+
+            // unityBone is not registered as a bone in the skinned mesh, therefore there is no bindpose
+            // associated with it, we need to calculate one.
+
+            // If this is the rootbone of the mesh or an object without a parent, use the global matrix relative to the skinned mesh
+            // as the bindpose.
+            if(unityBone == skinnedMesh.rootBone || unityBone.parent == null)
+            {
+                // there is no bone above this object with a bindpose, calculate bindpose relative to skinned mesh
+                bindPose = (unityBone.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix);
+                boneToBindPose.Add(unityBone, bindPose);
+                return bindPose;
+            }
+
+            // If this object has a parent that could be a bone, then it is not enough to use the worldToLocalMatrix,
+            // as this will give an incorrect global transform if the parents are not already in the bindpose in the scene.
+            // Instead calculate what the bindpose would be based on the bindpose of the parent object.
+
+            // get the bindpose of the parent
+            var parentBindPose = GetBindPose(unityBone.parent, bindPoses, ref boneInfo);
+            // Get the local transformation matrix of the bone, then transform it into
+            // the global transformation matrix with the parent in the bind pose.
+            // Formula to get the global transformation matrix:
+            //   (parentBindPose.inverse * boneLocalTRSMatrix)
+            // The bindpose is then the inverse of this matrix:
+            //   (parentBindPose.inverse * boneLocalTRSMatrix).inverse
+            // This can be simplified with (AB)^{-1} = B^{-1}A^{-1} rule as follows:
+            //   (parentBindPose.inverse * boneLocalTRSMatrix).inverse
+            // = boneLocalTRSMatrix.inverse * parentBindPose.inverse.inverse
+            // = boneLocalTRSMatrix.inverse * parentBindPose
+            var boneLocalTRSMatrix = Matrix4x4.TRS(unityBone.localPosition, unityBone.localRotation, unityBone.localScale);
+            bindPose = boneLocalTRSMatrix.inverse * parentBindPose;
+            boneToBindPose.Add(unityBone, bindPose);
             return bindPose;
         }
 
@@ -3067,19 +3116,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var bindPoses = skinnedMesh.sharedMesh.bindposes;
 
             // get bind pose
-            Matrix4x4 bindPose;
-            if (!boneInfo.boneToBindPose.TryGetValue (unityBone, out bindPose)) {
-                bindPose = GetBindPose (unityBone, bindPoses, boneDict, skinnedMesh);
-                boneInfo.boneToBindPose.Add (unityBone, bindPose);
-            }
+            Matrix4x4 bindPose = GetBindPose(unityBone, bindPoses, ref boneInfo);
 
             Matrix4x4 pose;
             // get parent's bind pose
-            Matrix4x4 parentBindPose;
-            if (!boneInfo.boneToBindPose.TryGetValue (unityBone.parent, out parentBindPose)) {
-                parentBindPose = GetBindPose (unityBone.parent, bindPoses, boneDict, skinnedMesh);
-                boneInfo.boneToBindPose.Add (unityBone.parent, parentBindPose);
-            }
+            Matrix4x4 parentBindPose = GetBindPose(unityBone.parent, bindPoses, ref boneInfo);
             pose = parentBindPose * bindPose.inverse;
 
             FbxVector4 translation, rotation, scale;
