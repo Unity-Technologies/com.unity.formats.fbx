@@ -492,6 +492,10 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 {
                     s_Instance = ScriptableObject.CreateInstance<ExportSettings>();
                     s_Instance.Load();
+                    // don't save the export settings to the scene,
+                    // otherwise they could be deleted on new scene, breaking
+                    // the UI if the settings are being inspected.
+                    s_Instance.hideFlags = HideFlags.DontSaveInEditor;
                 }
                 return s_Instance;
             }
