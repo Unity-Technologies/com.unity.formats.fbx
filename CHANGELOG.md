@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [Unreleased] - 2021-05-26
+### Fixed
+- Fix Fbx Export Project Settings break if they are open when changing scenes.
+
 ## [4.1.0-pre.2] - 2021-05-05
 ### Known Issues
 - FBX exporter integration with Probuilder broken with Probuilder 5.0.3. Exporting a Probuilder object may break the original object.
