@@ -1416,7 +1416,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (materials != null)
             {
                 foreach (var mat in materials) {
-                    if (MaterialMap.TryGetValue(mat.GetInstanceID(), out newMaterial))
+                    if (mat != null && MaterialMap.TryGetValue(mat.GetInstanceID(), out newMaterial))
                     {
                         fbxNode.AddMaterial(newMaterial);
                     }
