@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [Unreleased] - 2021-05-31
+### Fixed
+- Fix NullReferenceException if materials are null.
+
 ## [Unreleased] - 2021-05-26
 ### Fixed
 - Fix Fbx Export Project Settings break if they are open when changing scenes.
