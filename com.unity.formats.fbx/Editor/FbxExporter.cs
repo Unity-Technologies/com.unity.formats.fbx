@@ -3327,7 +3327,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         }
                         else
                         {
-                            Debug.LogWarningFormat("Couldn't export motion {0}", motion.name);
+                            if (motion != null) {
+                                Debug.LogWarningFormat("Couldn't export motion {0}", motion.name);
+                            }
+                            // missing animation
+                            else {
+                                Debug.LogWarningFormat("Couldn't export motion. Missing or null motion.");
+                            }
                         }
                     }
                 }
