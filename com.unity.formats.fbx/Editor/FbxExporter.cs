@@ -4627,7 +4627,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private static string ConvertToMayaCompatibleName(string name)
         {
             if (string.IsNullOrEmpty(name)) {
-                name = InvalidCharReplacement.ToString();
+                return InvalidCharReplacement.ToString();
             }
             string newName = RemoveDiacritics (name);
 
