@@ -4628,7 +4628,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             string newName = RemoveDiacritics (name);
 
-            if (char.IsDigit (newName [0])) {
+            if (newName.Length > 0 && char.IsDigit (newName [0])) {
                 newName = newName.Insert (0, InvalidCharReplacement.ToString());
             }
 
