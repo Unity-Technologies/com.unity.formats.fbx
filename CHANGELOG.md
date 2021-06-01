@@ -1,14 +1,12 @@
 # Changes in Fbx Exporter
 
-## [Unreleased] - 2021-05-31
-### Fixed
-- Fix NullReferenceException if materials are null.
-- Fix NullReferenceException if animation is missing.
-
 ## [Unreleased] - 2021-05-26
 ### Fixed
 - Fix Fbx Export Project Settings break if they are open when changing scenes.
 - Fix specular texture not being exported.
+- Fix NullReferenceException if materials are null.
+- Fix NullReferenceException if animation is missing.
+- Fix error when exporting object with empty name.
 
 ## [4.1.0-pre.2] - 2021-05-05
 ### Known Issues
