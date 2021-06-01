@@ -57,7 +57,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 if (m_nameTextFieldStyle == null)
                 {
                     m_nameTextFieldStyle = new GUIStyle(GUIStyle.none);
-                    m_nameTextFieldStyle.alignment = TextAnchor.LowerCenter;
+                    m_nameTextFieldStyle.alignment = TextAnchor.MiddleCenter;
                     m_nameTextFieldStyle.clipping = TextClipping.Clip;
                     m_nameTextFieldStyle.normal.textColor = EditorStyles.textField.normal.textColor;
                 }
