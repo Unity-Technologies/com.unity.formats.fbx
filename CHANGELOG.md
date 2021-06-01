@@ -7,6 +7,7 @@
 - Fix NullReferenceException if materials are null.
 - Fix NullReferenceException if animation is missing.
 - Fix error when exporting object with empty name.
+- Fix misaligned text in export file name field.
 
 ## [4.1.0-pre.2] - 2021-05-05
 ### Known Issues
