@@ -3,6 +3,7 @@
 ## [Unreleased] - 2021-05-31
 ### Fixed
 - Fix NullReferenceException if materials are null.
+- Fix NullReferenceException if animation is missing.
 
 ## [Unreleased] - 2021-05-26
 ### Fixed
