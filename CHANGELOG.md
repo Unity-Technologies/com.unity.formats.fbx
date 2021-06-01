@@ -7,6 +7,7 @@
 ## [Unreleased] - 2021-05-26
 ### Fixed
 - Fix Fbx Export Project Settings break if they are open when changing scenes.
+- Fix specular texture not being exported.
 
 ## [4.1.0-pre.2] - 2021-05-05
 ### Known Issues

@@ -723,7 +723,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             ExportTexture (unityMaterial, "_EmissionMap", fbxMaterial, FbxSurfaceMaterial.sEmissive);
             ExportTexture (unityMaterial, "_BumpMap", fbxMaterial, FbxSurfaceMaterial.sNormalMap);
             if (specular) {
-                ExportTexture (unityMaterial, "_SpecGlosMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
+                ExportTexture (unityMaterial, "_SpecGlossMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
             }
 
             MaterialMap.Add (unityID, fbxMaterial);
