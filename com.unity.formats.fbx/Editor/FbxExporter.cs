@@ -3865,12 +3865,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var tempMetafilePath = Path.GetTempFileName();
             
-            // Try as an absolute path
-            var fbxPath = m_lastFilePath;
+            // Try as a relative path
+            var fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
             if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
             {
-                // Try as a relative path
-                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+                // Try as an absolute path
+                fbxPath = m_lastFilePath;
                 if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
                 {
                     Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
@@ -3898,12 +3898,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private void ReplaceMetafile(string metafilePath)
         {
-            // Try as an absolute path
-            var fbxPath = m_lastFilePath;
+            // Try as a relative path
+            var fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
             if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
             {
-                // Try as a relative path
-                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
+                // Try as an absolute path
+                fbxPath = m_lastFilePath;
                 if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
                 {
                     Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
