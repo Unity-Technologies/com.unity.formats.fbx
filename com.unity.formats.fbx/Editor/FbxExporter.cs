@@ -3772,6 +3772,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // delete old file, move temp file
                 ReplaceFile();
+
+                // refresh the database so Unity knows the file's been deleted
                 AssetDatabase.Refresh();
                 
                 // replace with original metafile if specified to
@@ -3846,9 +3848,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 File.Delete (m_lastFilePath);
             } catch (IOException) {
             }
-
-            // refresh the database so Unity knows the file's been deleted
-            AssetDatabase.Refresh();
 
             if (File.Exists (m_lastFilePath)) {
                 Debug.LogWarning ("Failed to delete file: " + m_lastFilePath);
