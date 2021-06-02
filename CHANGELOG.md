@@ -8,6 +8,8 @@
 - Fix NullReferenceException if animation is missing.
 - Fix error when exporting object with empty name.
 - Fix misaligned text in export file name field.
+- Fix warning about missing metafiles.
+- Fix warning about using absolute paths when overwriting an fbx file.
 
 ## [4.1.0-pre.2] - 2021-05-05
 ### Known Issues
