@@ -8,6 +8,7 @@
 - Fix NullReferenceException if animation is missing.
 - Fix error when exporting object with empty name.
 - Fix misaligned text in export file name field.
+- Fix exporting zero scale not importing correctly in 3ds Max.
 
 ## [4.1.0-pre.2] - 2021-05-05
 ### Known Issues

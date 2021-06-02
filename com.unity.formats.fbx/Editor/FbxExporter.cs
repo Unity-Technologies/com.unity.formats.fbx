@@ -1349,6 +1349,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var fbxTranslate = ConvertToFbxVector4(unityTranslate, UnitScaleFactor);
             var fbxScale = new FbxDouble3 (unityScale.x, unityScale.y, unityScale.z);
 
+            // Zero scale causes issues in 3ds Max (child of object with zero scale will end up with a much larger scale, e.g. >9000).
+            // When exporting 0 scale from Maya, the FBX contains 1e-12 instead of 0,
+            // which doesn't cause issues in Max. Do the same here.
+            if(fbxScale.X == 0)
+            {
+                fbxScale.X = 1e-12;
+            }
+            if(fbxScale.Y == 0)
+            {
+                fbxScale.Y = 1e-12;
+            }
+            if(fbxScale.Z == 0)
+            {
+                fbxScale.Z = 1e-12;
+            }
+
             // set the local position of fbxNode
             fbxNode.LclTranslation.Set (new FbxDouble3(fbxTranslate.X, fbxTranslate.Y, fbxTranslate.Z));
             fbxNode.LclRotation.Set (fbxRotate);
