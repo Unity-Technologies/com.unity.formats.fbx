@@ -1745,6 +1745,13 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
             this.SaveToFile ();
         }
+
+        internal void Reset()
+        {
+            Debug.Log("reset called");
+            // resets some but not all settings
+            LoadDefaults();
+        }
     }
 
     [AttributeUsage(AttributeTargets.Class)]
