@@ -11,7 +11,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     internal abstract class ExportOptionsEditorWindow : EditorWindow
     {
         internal const string DefaultWindowTitle = "Export Options";
-        protected const float SelectableLabelMinWidth = 90;
+        protected const float SelectableLabelMinWidth = 150;
         protected const float BrowseButtonWidth = 25;
         protected const float LabelWidth = 175;
         protected const float FieldOffset = 18;
