@@ -209,7 +209,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return converted.ToArray();
         }
 
-
+        /// <summary>
+        /// For sceneObj, replace reference of origObj with newObj.
+        /// 
+        /// If the scene object is toConvertRoot or a child of it, then do not fix its references as it
+        /// will be deleted after conversion.
+        /// </summary>
+        /// <param name="sceneObj">scene object with reference to replace</param>
+        /// <param name="origObj">original object</param>
+        /// <param name="newObj">new object</param>
+        /// <param name="toConvertRoot">root of the hierarchy being converted</param>
         internal static void FixSceneReferenceToObject(Object sceneObj, Object origObj, Object newObj, GameObject toConvertRoot)
         {
             // item has reference to origObj that need to be replaced by references to newObj

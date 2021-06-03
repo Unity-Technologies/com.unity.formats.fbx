@@ -520,7 +520,8 @@ namespace FbxExporter.UnitTests
                 constraintSource.sourceTransform = a.transform;
                 constraintSource.weight = 0.5f;
                 constraint.AddSource(constraintSource);
-                
+
+#if !UNITY_2021_2_OR_NEWER
                 var sceneRefs = ConvertToNestedPrefab.GetSceneReferencesToObject(a);
                 Assert.That(sceneRefs.Count, Is.EqualTo(2));
                 Assert.That(sceneRefs.Contains(a)); // GameObjects also reference themself
@@ -534,6 +535,7 @@ namespace FbxExporter.UnitTests
                 Assert.That(sceneRefs.Count, Is.EqualTo(2));
                 Assert.That(sceneRefs.Contains(b));
                 Assert.That(sceneRefs.Contains(c));
+#endif // !UNITY_2021_2_OR_NEWER
             }
         }
 
