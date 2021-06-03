@@ -3863,7 +3863,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             try {
                 File.Delete (m_lastFilePath);
                 // delete meta file also
-                File.Delete("Assets" + m_lastFilePath.Substring(Application.dataPath.Length) + ".meta");
+                File.Delete(m_lastFilePath + ".meta");
             } catch (IOException) {
             }
 
