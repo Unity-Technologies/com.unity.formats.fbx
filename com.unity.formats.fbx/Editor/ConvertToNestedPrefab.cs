@@ -334,7 +334,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 System.Reflection.BindingFlags.Instance).GetValue(instance, null);
         }
 
-#if UNITY_2021_2_OR_NEWER
+#if !UNITY_2021_2_OR_NEWER
             /// <summary>
             /// Returns a list of GameObjects in the scene that contain references to the given object.
             /// </summary>
