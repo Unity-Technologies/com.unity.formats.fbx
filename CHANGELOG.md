@@ -9,6 +9,7 @@
 - Fix error when exporting object with empty name.
 - Fix misaligned text in export file name field.
 - Fix exporting zero scale not importing correctly in 3ds Max.
+- Fix window size cutting off text in export window.
 
 ## [4.1.0-pre.2] - 2021-05-05
 ### Known Issues
