@@ -199,8 +199,7 @@ namespace FbxExporter.UnitTests
         {
             EditorApplication.update -= DeleteOnNextUpdate;
             try {
-                Directory.Delete(filePath, recursive: true);
-                AssetDatabase.Refresh();
+                AssetDatabase.DeleteAsset(filePath);
             } catch(IOException) {
                 // ignore -- something else must have deleted this.
             }

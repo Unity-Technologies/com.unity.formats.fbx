@@ -210,10 +210,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
 
-        internal static void FixSceneReferenceToObject(SearchItem item, Object origObj, Object newObj, GameObject toConvertRoot)
+        internal static void FixSceneReferenceToObject(Object sceneObj, Object origObj, Object newObj, GameObject toConvertRoot)
         {
             // item has reference to origObj that need to be replaced by references to newObj
-            var go = ModelExporter.GetGameObject(item.ToObject());
+            var go = ModelExporter.GetGameObject(sceneObj);
             if (go && go.transform.IsChildOf(toConvertRoot.transform))
             {
                 // if this is a child of what we are converting, don't update its references.
@@ -259,36 +259,66 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="toConvertRoot"></param>
         internal static void FixSceneReferences(Object origObj, Object newObj, GameObject toConvertRoot)
         {
-            void OnSearchCompleted(SearchContext context, IList<SearchItem> items)
+#if UNITY_2021_2_OR_NEWER
+            if (SceneManagement.EditorSceneManager.IsPreviewSceneObject(origObj))
             {
-                Debug.Log("Items found: " + items.Count);
-                foreach (var item in items)
-                {
-                    Debug.Log("found id: " + item.id + ", object name: " + item.ToObject().name);
-                    FixSceneReferenceToObject(item, origObj, newObj, toConvertRoot);
-                }
+                return;
             }
+            UnityEditor.Search.SearchService.Refresh();
 
             var instanceID = origObj.GetInstanceID();
             var query = "h: ref=" + instanceID;
-
-            Debug.Log("QUERY: " + query + ", " + origObj.name);
             
-            UnityEditor.Search.SearchService.Request(query, OnSearchCompleted);
-
-            // This works, however having some issues if first converting a prefab in a preview scene
-            /*using (var searchContext = UnityEditor.Search.SearchService.CreateContext(query))
+            using (var searchContext = UnityEditor.Search.SearchService.CreateContext(query))
             {
                 // Initiate the query and get the first results.
                 var items = UnityEditor.Search.SearchService.GetItems(searchContext, SearchFlags.Synchronous);
                 
-                Debug.Log("Items found: " + items.Count);
                 foreach (var item in items)
                 {
-                    Debug.Log("found id: " + item.id + ", object name: " + item.ToObject().name);
-                    FixSceneReferenceToObject(item, origObj, newObj, toConvertRoot);
+                    FixSceneReferenceToObject(item.ToObject(), origObj, newObj, toConvertRoot);
                 }
-            }*/
+            }
+#else // UNITY_2021_2_OR_NEWER
+            var sceneObjs = GetSceneReferencesToObject(origObj);
+
+            // try to fix references on each component of each scene object, if applicable
+            foreach (var sceneObj in sceneObjs)
+            {
+                var go = ModelExporter.GetGameObject(sceneObj);
+                if (go && go.transform.IsChildOf(toConvertRoot.transform))
+                {
+                    // if this is a child of what we are converting, don't update its references.
+                    continue;
+                }
+
+                var components = sceneObj.GetComponents<Component>();
+                foreach (var component in components)
+                {
+                    var serializedComponent = new SerializedObject(component);
+                    var property = serializedComponent.GetIterator();
+                    property.Next(true); // skip generic field
+                    // For SkinnedMeshRenderer, the bones array doesn't have visible children, but may have references that need to be fixed.
+                    // For everything else, filtering by visible children in the while loop and then copying properties that don't have visible children,
+                    // ensures that only the leaf properties are copied over. Copying other properties is not usually necessary and may break references that
+                    // were not meant to be copied.
+                    while (property.Next((component is SkinnedMeshRenderer) ? property.hasChildren : property.hasVisibleChildren))
+                    {
+                        if (!property.hasVisibleChildren)
+                        {
+                            // with Undo operations, copying m_Father reference causes issues. Also, it is not required as the reference is fixed when
+                            // the transform is parented under the correct hierarchy (which happens before this).
+                            if (property.propertyType == SerializedPropertyType.ObjectReference && property.propertyPath != "m_GameObject" &&
+                                property.propertyPath != "m_Father" && property.objectReferenceValue &&
+                                (property.objectReferenceValue == origObj))
+                            {
+                                property.objectReferenceValue = newObj;
+                                serializedComponent.ApplyModifiedProperties();
+                            }
+                        }
+                    }
+                }
+#endif // UNITY_2021_2_OR_NEWER
         }
 
         /// <summary>
@@ -304,12 +334,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 System.Reflection.BindingFlags.Instance).GetValue(instance, null);
         }
 
-        /// <summary>
-        /// Returns a list of GameObjects in the scene that contain references to the given object.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        internal static List<GameObject> GetSceneReferencesToObject(Object obj)
+#if UNITY_2021_2_OR_NEWER
+            /// <summary>
+            /// Returns a list of GameObjects in the scene that contain references to the given object.
+            /// </summary>
+            /// <param name="obj"></param>
+            /// <returns></returns>
+            internal static List<GameObject> GetSceneReferencesToObject(Object obj)
         {
             var sceneHierarchyWindowType = typeof(UnityEditor.SearchableEditorWindow).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
 
@@ -354,6 +385,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { previousSearchFilter, SearchableEditorWindow.SearchMode.Name, true, false });
             return sceneObjects;
         }
+#endif // UNITY_2021_2_OR_NEWER
 
         /// <summary>
         /// Convert one object (and the hierarchy below it) to a prefab variant of a model prefab.
