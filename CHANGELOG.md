@@ -8,6 +8,8 @@
 - Fix NullReferenceException if animation is missing.
 - Fix error when exporting object with empty name.
 - Fix misaligned text in export file name field.
+- Fix warning about missing metafiles.
+- Fix warning about using absolute paths when overwriting an fbx file.
 - Fix exporting zero scale not importing correctly in 3ds Max.
 - Fix window size cutting off text in export window.
 

@@ -3788,6 +3788,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // delete old file, move temp file
                 ReplaceFile();
+
+                // refresh the database so Unity knows the file's been deleted
                 AssetDatabase.Refresh();
                 
                 // replace with original metafile if specified to
@@ -3860,11 +3862,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // delete old file
             try {
                 File.Delete (m_lastFilePath);
+                // delete meta file also
+                File.Delete(m_lastFilePath + ".meta");
             } catch (IOException) {
             }
-
-            // refresh the database so Unity knows the file's been deleted
-            AssetDatabase.Refresh();
 
             if (File.Exists (m_lastFilePath)) {
                 Debug.LogWarning ("Failed to delete file: " + m_lastFilePath);
@@ -3882,17 +3883,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var tempMetafilePath = Path.GetTempFileName();
             
-            // Try as an absolute path
-            var fbxPath = m_lastFilePath;
+            // get relative path
+            var fbxPath = "Assets/" + ExportSettings.ConvertToAssetRelativePath(m_lastFilePath);
             if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
             {
-                // Try as a relative path
-                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
-                if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
-                {
-                    Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
-                    return "";
-                }
+                Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
+                return "";
             }
             
             // get metafile for original fbx file
@@ -3915,17 +3911,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private void ReplaceMetafile(string metafilePath)
         {
-            // Try as an absolute path
-            var fbxPath = m_lastFilePath;
+            // get relative path
+            var fbxPath = "Assets/" + ExportSettings.ConvertToAssetRelativePath(m_lastFilePath);
             if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
             {
-                // Try as a relative path
-                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
-                if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
-                {
-                    Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
-                    return;
-                }
+                Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
+                return;
             }
             
             // get metafile for new fbx file
