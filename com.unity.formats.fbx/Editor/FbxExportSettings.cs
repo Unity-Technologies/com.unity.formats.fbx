@@ -1748,9 +1748,23 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         internal void Reset()
         {
-            Debug.Log("reset called");
-            // resets some but not all settings
+            // resets paths and general settings
             LoadDefaults();
+
+            // reset model export settings
+            exportModelSettingsSerialize.SetExportFormat(ExportFormat.ASCII);
+            exportModelSettingsSerialize.SetModelAnimIncludeOption(ExportSettings.Include.ModelAndAnim);
+            exportModelSettingsSerialize.SetLODExportType(ExportSettings.LODExportType.All);
+            exportModelSettingsSerialize.SetObjectPosition(ExportSettings.ObjectPosition.LocalCentered);
+            exportModelSettingsSerialize.SetAnimatedSkinnedMesh(false);
+            exportModelSettingsSerialize.SetUseMayaCompatibleNames(true);
+            exportModelSettingsSerialize.SetExportUnredererd(true);
+            exportModelSettingsSerialize.SetPreserveImportSettings(false);
+
+            // reset prefab export settings
+            convertToPrefabSettingsSerialize.SetExportFormat(ExportFormat.ASCII);
+            convertToPrefabSettingsSerialize.SetAnimatedSkinnedMesh(false);
+            convertToPrefabSettingsSerialize.SetUseMayaCompatibleNames(true);
         }
     }
 
