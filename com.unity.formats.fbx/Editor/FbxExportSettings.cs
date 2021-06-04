@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using UnityEditor.Presets;
 
 namespace UnityEditor.Formats.Fbx.Exporter {
     [System.Serializable]
@@ -476,6 +477,10 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 
+        // presets for editor settings
+        private Preset m_defaultModelExportSettings;
+        private Preset m_defaultConvertPrefabSettings;
+
         internal const string kDefaultSavePath = ".";
         private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};
         //Any additional names require a space after the name
@@ -871,6 +876,17 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             DisplayOptionsWindow = true;
             ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
+
+            // create presets if none exist
+            if (!m_defaultModelExportSettings) {
+                m_defaultModelExportSettings = new Preset(ExportModelSettings);
+                Debug.Log("model default made");
+            }
+
+            if (!m_defaultConvertPrefabSettings) {
+                m_defaultConvertPrefabSettings = new Preset(ConvertToPrefabSettings);
+                Debug.Log("convert default made");
+            }     
         }
 
         /// <summary>
@@ -1746,25 +1762,15 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             this.SaveToFile ();
         }
 
+        // Called on creation and whenever the reset button is clicked
         internal void Reset()
         {
-            // resets paths and general settings
+            // loads some default settings and creates presets if none exist
             LoadDefaults();
 
-            // reset model export settings
-            exportModelSettingsSerialize.SetExportFormat(ExportFormat.ASCII);
-            exportModelSettingsSerialize.SetModelAnimIncludeOption(ExportSettings.Include.ModelAndAnim);
-            exportModelSettingsSerialize.SetLODExportType(ExportSettings.LODExportType.All);
-            exportModelSettingsSerialize.SetObjectPosition(ExportSettings.ObjectPosition.LocalCentered);
-            exportModelSettingsSerialize.SetAnimatedSkinnedMesh(false);
-            exportModelSettingsSerialize.SetUseMayaCompatibleNames(true);
-            exportModelSettingsSerialize.SetExportUnredererd(true);
-            exportModelSettingsSerialize.SetPreserveImportSettings(false);
-
-            // reset prefab export settings
-            convertToPrefabSettingsSerialize.SetExportFormat(ExportFormat.ASCII);
-            convertToPrefabSettingsSerialize.SetAnimatedSkinnedMesh(false);
-            convertToPrefabSettingsSerialize.SetUseMayaCompatibleNames(true);
+            // apply default settings
+            m_defaultModelExportSettings.ApplyTo(ExportModelSettings);
+            m_defaultConvertPrefabSettings.ApplyTo(ConvertToPrefabSettings);
         }
     }
 
