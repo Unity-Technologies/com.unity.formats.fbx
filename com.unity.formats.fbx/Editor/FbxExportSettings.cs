@@ -880,12 +880,10 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // create presets if none exist
             if (!m_defaultModelExportSettings) {
                 m_defaultModelExportSettings = new Preset(ExportModelSettings);
-                Debug.Log("model default made");
             }
 
             if (!m_defaultConvertPrefabSettings) {
                 m_defaultConvertPrefabSettings = new Preset(ConvertToPrefabSettings);
-                Debug.Log("convert default made");
             }     
         }
 
