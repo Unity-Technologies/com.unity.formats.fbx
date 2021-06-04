@@ -876,15 +876,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             DisplayOptionsWindow = true;
             ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
-
-            // create presets if none exist
-            if (!m_defaultModelExportSettings) {
-                m_defaultModelExportSettings = new Preset(ExportModelSettings);
-            }
-
-            if (!m_defaultConvertPrefabSettings) {
-                m_defaultConvertPrefabSettings = new Preset(ConvertToPrefabSettings);
-            }     
         }
 
         /// <summary>
@@ -1763,10 +1754,17 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         // Called on creation and whenever the reset button is clicked
         internal void Reset()
         {
-            // loads some default settings and creates presets if none exist
-            LoadDefaults();
+            // create presets if none exist
+            if (!m_defaultModelExportSettings) {
+                m_defaultModelExportSettings = new Preset(ExportModelSettings);
+            }
+
+            if (!m_defaultConvertPrefabSettings) {
+                m_defaultConvertPrefabSettings = new Preset(ConvertToPrefabSettings);
+            }
 
             // apply default settings
+            //LoadDefaults();
             m_defaultModelExportSettings.ApplyTo(ExportModelSettings);
             m_defaultConvertPrefabSettings.ApplyTo(ConvertToPrefabSettings);
         }
