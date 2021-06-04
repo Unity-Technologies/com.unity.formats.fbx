@@ -868,8 +868,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             prefabSavePaths = new List<string>(){ kDefaultSavePath };
             fbxSavePaths = new List<string> (){ kDefaultSavePath };
             integrationSavePath = DefaultIntegrationSavePath;
-            dccOptionPaths = null;
-            dccOptionNames = null;
+            dccOptionPaths = new List<string>();
+            dccOptionNames = new List<string>();
             BakeAnimationProperty = false;
             ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
             exportModelSettingsSerialize = ExportModelSettings.info;
@@ -1764,7 +1764,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
 
             // apply default settings
-            //LoadDefaults();
+            LoadDefaults();
             m_defaultModelExportSettings.ApplyTo(ExportModelSettings);
             m_defaultConvertPrefabSettings.ApplyTo(ConvertToPrefabSettings);
         }
