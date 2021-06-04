@@ -1,12 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.Linq;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+#if UNITY_2021_2_OR_NEWER
 using UnityEditor.Search;
+#endif
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
