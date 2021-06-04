@@ -523,7 +523,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 string initialPath = Application.dataPath;
 
-                string fullPath = EditorUtility.OpenFolderPanel(
+                string fullPath = EditorUtility.SaveFolderPanel(
                     "Select Export Model Path", initialPath, null
                 );
 
