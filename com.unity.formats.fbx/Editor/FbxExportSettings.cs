@@ -477,10 +477,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 
-        // presets for editor settings
-        private Preset m_defaultModelExportSettings;
-        private Preset m_defaultConvertPrefabSettings;
-
         internal const string kDefaultSavePath = ".";
         private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};
         //Any additional names require a space after the name
