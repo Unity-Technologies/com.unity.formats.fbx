@@ -753,5 +753,41 @@ namespace FbxExporter.UnitTests
 
             exportWindow.Close();
         }
+        [Test]
+        public void TestExportOptionsReset()
+        {
+            var instance = ExportSettings.instance;
+            var go = new GameObject("temp");
+            var exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
+            var convertWindow = ConvertToPrefabEditorWindow.Init(new GameObject[] { go });
+
+            // test export window reset
+            // change one setting from default
+            instance.ExportModelSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
+            Assert.That(instance.ExportModelSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+
+            // reset export settings
+            instance.Reset();
+
+            // check that setting was reverted to default
+            Assert.That(instance.ExportModelSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.ASCII));
+
+            exportWindow.ResetSessionSettings();
+            exportWindow.Close();
+
+            // test convert prefab window reset
+            // change one setting from default
+            instance.ConvertToPrefabSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
+            Assert.That(instance.ConvertToPrefabSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+
+            // reset export settings
+            instance.Reset();
+
+            // check that setting was reverted to default
+            Assert.That(instance.ConvertToPrefabSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.ASCII));
+
+            convertWindow.ResetSessionSettings();
+            convertWindow.Close();
+        }
     }
 }
