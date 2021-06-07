@@ -2790,6 +2790,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             string fbxName = unityGo.name;
             if (ExportOptions.UseMayaCompatibleNames)
             {
+                Undo.RegisterCompleteObjectUndo(unityGo, "Change fbx to maya compatible name");
                 fbxName = ConvertToMayaCompatibleName(unityGo.name);
                 if (ExportOptions.AllowSceneModification)
                 {
