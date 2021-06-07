@@ -2790,10 +2790,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             string fbxName = unityGo.name;
             if (ExportOptions.UseMayaCompatibleNames)
             {
-                Undo.RecordObject(unityGo, "rename " + fbxName);
                 fbxName = ConvertToMayaCompatibleName(unityGo.name);
                 if (ExportOptions.AllowSceneModification)
                 {
+                    Undo.RecordObject(unityGo, "rename " + fbxName);
                     unityGo.name = fbxName;
                 }
             }
