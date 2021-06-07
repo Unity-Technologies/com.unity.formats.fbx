@@ -405,7 +405,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // don't need to undo if we are converting a prefab asset
             if (!isPrefabAsset)
             {
-                Undo.IncrementCurrentGroup();
                 Undo.SetCurrentGroupName(string.Format(UndoConversionGroup, toConvert.name));
             }
 
