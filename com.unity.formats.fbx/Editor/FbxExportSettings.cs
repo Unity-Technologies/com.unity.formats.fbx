@@ -871,11 +871,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             dccOptionPaths = new List<string>();
             dccOptionNames = new List<string>();
             BakeAnimationProperty = false;
-            ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
-            exportModelSettingsSerialize = ExportModelSettings.info;
+            exportModelSettingsSerialize = new ExportModelSettingsSerialize();
+            ExportModelSettings.info = exportModelSettingsSerialize;
             DisplayOptionsWindow = true;
-            ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
-            convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
+            convertToPrefabSettingsSerialize = new ConvertToPrefabSettingsSerialize();
+            ConvertToPrefabSettings.info = convertToPrefabSettingsSerialize;
         }
 
         /// <summary>
@@ -1754,19 +1754,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         // Called on creation and whenever the reset button is clicked
         internal void Reset()
         {
-            // create presets if none exist
-            if (!m_defaultModelExportSettings) {
-                m_defaultModelExportSettings = new Preset(ExportModelSettings);
-            }
-
-            if (!m_defaultConvertPrefabSettings) {
-                m_defaultConvertPrefabSettings = new Preset(ConvertToPrefabSettings);
-            }
-
             // apply default settings
             LoadDefaults();
-            m_defaultModelExportSettings.ApplyTo(ExportModelSettings);
-            m_defaultConvertPrefabSettings.ApplyTo(ConvertToPrefabSettings);
         }
     }
 
