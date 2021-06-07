@@ -247,13 +247,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     {
                         // with Undo operations, copying m_Father reference causes issues. Also, it is not required as the reference is fixed when
                         // the transform is parented under the correct hierarchy (which happens before this).
-                        if (property.propertyType == SerializedPropertyType.ObjectReference && property.propertyPath != "m_GameObject" &&
-                            property.propertyPath != "m_Father" && property.objectReferenceValue &&
-                            (property.objectReferenceValue == origObj))
-                        {
-                            property.objectReferenceValue = newObj;
-                            serializedComponent.ApplyModifiedProperties();
-                        }
+                        if (property.propertyType != SerializedPropertyType.ObjectReference) continue;
+                        if (property.propertyPath == "m_GameObject") continue;
+                        if (property.propertyPath == "m_Father") continue;
+                        if (!property.objectReferenceValue) continue;
+                        if (property.objectReferenceValue != origObj) continue;
+
+                        property.objectReferenceValue = newObj;
+                        serializedComponent.ApplyModifiedProperties();
                     }
                 }
             }
@@ -314,12 +315,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
 #if !UNITY_2021_2_OR_NEWER
-            /// <summary>
-            /// Returns a list of GameObjects in the scene that contain references to the given object.
-            /// </summary>
-            /// <param name="obj"></param>
-            /// <returns></returns>
-            internal static List<GameObject> GetSceneReferencesToObject(Object obj)
+        /// <summary>
+        /// Returns a list of GameObjects in the scene that contain references to the given object.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        internal static List<GameObject> GetSceneReferencesToObject(Object obj)
         {
             var sceneHierarchyWindowType = typeof(UnityEditor.SearchableEditorWindow).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
 
