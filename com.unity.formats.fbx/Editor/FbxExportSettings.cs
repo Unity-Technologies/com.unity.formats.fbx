@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using UnityEditor.Presets;
 
 namespace UnityEditor.Formats.Fbx.Exporter {
     [System.Serializable]
@@ -863,14 +864,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             prefabSavePaths = new List<string>(){ kDefaultSavePath };
             fbxSavePaths = new List<string> (){ kDefaultSavePath };
             integrationSavePath = DefaultIntegrationSavePath;
-            dccOptionPaths = null;
-            dccOptionNames = null;
+            dccOptionPaths = new List<string>();
+            dccOptionNames = new List<string>();
             BakeAnimationProperty = false;
-            ExportModelSettings = ScriptableObject.CreateInstance (typeof(ExportModelSettings)) as ExportModelSettings;
-            exportModelSettingsSerialize = ExportModelSettings.info;
+            exportModelSettingsSerialize = new ExportModelSettingsSerialize();
+            ExportModelSettings.info = exportModelSettingsSerialize;
             DisplayOptionsWindow = true;
-            ConvertToPrefabSettings = ScriptableObject.CreateInstance (typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
-            convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
+            convertToPrefabSettingsSerialize = new ConvertToPrefabSettingsSerialize();
+            ConvertToPrefabSettings.info = convertToPrefabSettingsSerialize;
         }
 
         /// <summary>
@@ -1744,6 +1745,13 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             exportModelSettingsSerialize = ExportModelSettings.info;
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
             this.SaveToFile ();
+        }
+
+        // Called on creation and whenever the reset button is clicked
+        internal void Reset()
+        {
+            // apply default settings
+            LoadDefaults();
         }
     }
 

@@ -12,6 +12,7 @@
 - Fix warning about using absolute paths when overwriting an fbx file.
 - Fix exporting zero scale not importing correctly in 3ds Max.
 - Fix window size cutting off text in export window.
+- Fix settings reset button not working.
 - Fix not being able to export to a new folder on Mac.
 
 ## [4.1.0-pre.2] - 2021-05-05
