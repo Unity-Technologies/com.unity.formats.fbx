@@ -387,10 +387,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return null;
             }
 
-            // If we selected the something that's already backed by an
-            // FBX, don't export.
-            var mainAsset = GetOrCreateFbxAsset(toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
-
             // if toConvert is part of a prefab asset and not an instance, make it an instance in a preview scene
             // so that we can unpack it and avoid issues with nested prefab references.
             bool isPrefabAsset = false;
@@ -405,6 +401,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // don't need to undo if we are converting a prefab asset
             if (!isPrefabAsset)
             {
+                Undo.IncrementCurrentGroup();
                 Undo.SetCurrentGroupName(string.Format(UndoConversionGroup, toConvert.name));
             }
 
@@ -414,6 +411,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Undo.RegisterFullObjectHierarchyUndo(toConvert, "unpack prefab instance");
                 PrefabUtility.UnpackPrefabInstance(toConvert, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
             }
+
+            // If we selected the something that's already backed by an
+            // FBX, don't export.
+            var mainAsset = GetOrCreateFbxAsset(toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
 
             // create prefab variant from the fbx
             var fbxInstance = PrefabUtility.InstantiatePrefab(mainAsset) as GameObject;
