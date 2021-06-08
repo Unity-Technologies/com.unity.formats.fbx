@@ -12,6 +12,7 @@
 - Fix warning about using absolute paths when overwriting an fbx file.
 - Fix exporting zero scale not importing correctly in 3ds Max.
 - Fix window size cutting off text in export window.
+- Fix object name not being undone after undo convert to prefab.
 - Fix settings reset button not working.
 - Fix not being able to export to a new folder on Mac.
 

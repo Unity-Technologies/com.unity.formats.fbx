@@ -747,5 +747,29 @@ namespace FbxExporter.UnitTests
 
             Assert.AreEqual (Path.GetFileNameWithoutExtension (path), cubePrefab.name);
         }
+
+        [Test]
+        public void TestUndoNameReset()
+        {
+            // Get a random directory.
+            var path = GetRandomFileNamePath(extName: "");
+
+            // Get prefab convert settings and set maya compatible naming to true
+            var convertToPrefabSettings = ExportSettings.instance.ConvertToPrefabSettings.info;
+            convertToPrefabSettings.SetUseMayaCompatibleNames(true);
+
+            // Make a cube with a non-maya compatible name
+            var cube = CreateGameObject("cube 1");
+
+            // Convert it to a prefab
+            var cubePrefab = ConvertToNestedPrefab.Convert(cube,
+                fbxDirectoryFullPath: path, prefabDirectoryFullPath: path, exportOptions: convertToPrefabSettings);
+
+            // Undo prefab convert
+            Undo.PerformUndo();
+            
+            // Make sure name is same as original
+            Assert.AreEqual("cube 1", cube.name);
+        }
     }
 }
