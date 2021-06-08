@@ -713,7 +713,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             fbxMaterial.Emissive.Set (GetMaterialColor (unityMaterial, "_EmissionColor", 0));
             // hdrp materials dont export emission properly, so default to 0
             if (hdrp) {
-                fbxMaterial.Emissive.Set(0);
+                fbxMaterial.Emissive.Set(new FbxDouble3(0, 0, 0));
             }
             fbxMaterial.Ambient.Set (new FbxDouble3 ());
 
