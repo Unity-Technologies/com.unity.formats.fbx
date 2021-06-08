@@ -243,10 +243,7 @@ namespace FbxExporter.UnitTests
         {
             var tree = CreateHierarchy();
             var tester = new CallbackTester(tree.transform, GetRandomFbxFilePath());
-            var nbTransforms = tree.GetComponentsInChildren<Transform>().Length;
-            // UT-3419: because cubes are duplicates, there are less model callbacks than transforms
-            // 1 for the root and 1 for the cube model all the gameobjects share
-            var nbMeshCallbacks = 2;
+            var n = tree.GetComponentsInChildren<Transform>().Length;
 
             // No callbacks registered => no calls.
             tester.Verify(0, 0);
@@ -255,14 +252,14 @@ namespace FbxExporter.UnitTests
             ModelExporter.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab);
 
             // No fbprefab => no component calls, but every object called.
-            tester.Verify(0, nbMeshCallbacks);
+            tester.Verify(0, n);
 
             // Add a fbxprefab, check every object called and the prefab called.
             tree.transform.Find("Parent1").gameObject.AddComponent<FbxPrefab>();
-            tester.Verify(1, nbTransforms);
+            tester.Verify(1, n);
 
             // Make the object report it's replacing everything => no component calls.
-            tester.Verify(0, nbTransforms, objectResult: true);
+            tester.Verify(0, n, objectResult: true);
 
             // Make sure we can't register for a component twice, but we can
             // for an object.  Register twice for an object means two calls per
@@ -270,19 +267,19 @@ namespace FbxExporter.UnitTests
             Assert.That( () => ModelExporter.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab),
                     Throws.Exception);
             ModelExporter.RegisterMeshObjectCallback(tester.CallbackForObject);
-            tester.Verify(1, 2 * nbTransforms);
+            tester.Verify(1, 2 * n);
 
             // Register twice but return true => only one call per object.
-            tester.Verify(0, nbTransforms, objectResult: true);
+            tester.Verify(0, n, objectResult: true);
 
             // Unregister once => only one call per object, and no more for the prefab.
             ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
             ModelExporter.UnRegisterMeshObjectCallback(tester.CallbackForObject);
-            tester.Verify(0, nbMeshCallbacks);
+            tester.Verify(0, n);
 
             // Legal to unregister if already unregistered.
             ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
-            tester.Verify(0, nbMeshCallbacks);
+            tester.Verify(0, n);
 
             // Register same callback twice gets back to original state.
             ModelExporter.UnRegisterMeshObjectCallback(tester.CallbackForObject);
@@ -316,12 +313,11 @@ namespace FbxExporter.UnitTests
             ModelExporter.ExportObject(filename, tree);
             ModelExporter.UnRegisterMeshCallback<FbxPrefab>();
 
-            // UT-3419 Parent1 and Parent2 are instances the same mesh, so they should point to the same mesh
             asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             assetMesh = asset.transform.Find("Parent1").GetComponent<MeshFilter>().sharedMesh;
             Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
             assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
-            Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
+            Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
 
             // Try again, but this time pick on Parent2 by name (different just
             // to make sure we don't pass if the previous pass didn't
@@ -340,12 +336,11 @@ namespace FbxExporter.UnitTests
             ModelExporter.ExportObject(filename, tree);
             ModelExporter.UnRegisterMeshObjectCallback(callback);
 
-            // UT-3419 Parent1 and Parent2 are instances the same mesh, so they should point to the same mesh
             asset = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             assetMesh = asset.transform.Find("Parent1").GetComponent<MeshFilter>().sharedMesh;
             Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
             assetMesh = asset.transform.Find("Parent2").GetComponent<MeshFilter>().sharedMesh;
-            Assert.AreEqual(cubeMesh.triangles.Length, assetMesh.triangles.Length);
+            Assert.AreEqual(sphereMesh.triangles.Length, assetMesh.triangles.Length);
         }
 
         [Test]
@@ -1105,26 +1100,6 @@ namespace FbxExporter.UnitTests
             // verify guids still match
             newGuid = AssetDatabase.AssetPathToGUID(filename);
             Assert.AreEqual(originalGuid, newGuid);
-        }
-
-        // UT-3419 Test that identical models export as instances
-        [Test]
-        public void TestInstanceExport()
-        {
-            // create root with 2 identical children
-            var filename = GetRandomFbxFilePath();
-            GameObject root = new GameObject("root");
-            GameObject child1 = CreateGameObject("child1", root.transform);
-            GameObject child2 = CreateGameObject("child2", root.transform);
-
-            // check export was successful
-            var result = ModelExporter.ExportObject(filename, root);
-            Assert.That(result, Is.Not.Null);
-            Assert.AreEqual(filename, result);
-
-            // check that both children reference the same mesh
-            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
-            Assert.AreEqual(fbxObj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.name, fbxObj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh.name);
         }
 
         /// <summary>
