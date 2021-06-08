@@ -702,6 +702,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // itself specular, Lambert otherwise.
             var shader = unityMaterial.shader;
             bool specular = shader.name.ToLower ().Contains ("specular");
+            bool hdrp = shader.name.ToLower().Contains("hdrp");
 
             var fbxMaterial = specular
                 ? FbxSurfacePhong.Create (fbxScene, fbxName)
@@ -710,6 +711,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Copy the flat colours over from Unity standard materials to FBX.
             fbxMaterial.Diffuse.Set (GetMaterialColor (unityMaterial, "_Color"));
             fbxMaterial.Emissive.Set (GetMaterialColor (unityMaterial, "_EmissionColor", 0));
+            // hdrp materials dont export emission properly, so default to 0
+            if (hdrp) {
+                fbxMaterial.Emissive.Set(0);
+            }
             fbxMaterial.Ambient.Set (new FbxDouble3 ());
 
             fbxMaterial.BumpFactor.Set (unityMaterial.HasProperty ("_BumpScale") ? unityMaterial.GetFloat ("_BumpScale") : 0);
