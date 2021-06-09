@@ -16,6 +16,7 @@
 - Fix settings reset button not working.
 - Fix not being able to export to a new folder on Mac.
 - Fix hdrp materials being exported with max incandescence.
+- Fix warning about ExportSettings not being in a file called ExportSettings.cs.
 
 ## [4.1.0-pre.2] - 2021-05-05
 ### Known Issues
