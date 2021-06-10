@@ -781,9 +781,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                                 polySize = 4;
                                 break;
                             case MeshTopology.Lines:
-                                throw new System.NotImplementedException();
+                                polySize = 2;
+                                break;
                             case MeshTopology.Points:
-                                throw new System.NotImplementedException();
+                                polySize = 1;
+                                break;
                             case MeshTopology.LineStrip:
                                 throw new System.NotImplementedException();
                             default:
@@ -874,9 +876,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         vertOrder = new int[] { 0, 1, 2, 3 };
                         break;
                     case MeshTopology.Lines:
-                        throw new System.NotImplementedException();
+                        polySize = 2;
+                        vertOrder = new int[] { 0, 1 };
+                        break;
                     case MeshTopology.Points:
-                        throw new System.NotImplementedException();
+                        polySize = 1;
+                        vertOrder = new int[] { 0 };
+                        break;
                     case MeshTopology.LineStrip:
                         throw new System.NotImplementedException();
                     default:
