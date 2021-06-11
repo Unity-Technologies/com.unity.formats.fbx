@@ -1389,42 +1389,41 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            Object unityPrefabParent = PrefabUtility.GetCorrespondingObjectFromSource(unityGo);
-
+            // where the fbx mesh is stored on a successful export
             FbxMesh fbxMesh = null;
+            // get game object's prefab parent if it exists
+            Object unityPrefabParent = PrefabUtility.GetCorrespondingObjectFromSource(unityGo);
+            // get the mesh of the game object
+            Mesh unityGoMesh = unityGo.GetComponent<MeshFilter>().sharedMesh;
 
-            if (unityPrefabParent != null && !SharedMeshes.TryGetValue (unityPrefabParent.GetInstanceID(), out fbxMesh))
+            // mesh is a prefab instance, so export with a reference to its parent
+            if (unityPrefabParent && !SharedMeshes.TryGetValue(unityPrefabParent.GetInstanceID(), out fbxMesh))
             {
                 if (Verbose)
+                {
                     Debug.Log (string.Format ("exporting instance {0}({1})", unityGo.name, unityPrefabParent.name));
-                
-                if (ExportMesh (unityGo, fbxNode) && fbxNode.GetMesh() != null) {
-                    SharedMeshes [unityPrefabParent.GetInstanceID()] = fbxNode.GetMesh ();
-                    return true;
                 }
+
+                // add mesh to shared prefab meshes if exported successfully
+                if (ExportMesh(unityGo, fbxNode) && fbxNode.GetMesh() != null) {
+                    SharedMeshes[unityPrefabParent.GetInstanceID()] = fbxNode.GetMesh();
+                }
+                // error in mesh export
                 return false;
             }
-            // check if mesh is shared between 2 objects that are not prefabs
-            else if (unityPrefabParent == null)
+            // mesh has already been exported to another object, so copy mesh
+            else if (unityGoMesh && MeshToFbxNodeMap.ContainsKey(unityGoMesh))
             {
-                // check if same mesh has already been exported
-                Mesh unityGoMesh = unityGo.GetComponent<MeshFilter>().sharedMesh;
-                if (unityGoMesh && MeshToFbxNodeMap.ContainsKey(unityGoMesh))
-                {
-                    fbxMesh = MeshToFbxNodeMap[unityGoMesh].GetMesh();
-                }
-                // export mesh as normal and add it to list
-                else
-                {
-                    if (unityGoMesh != null)
-                    {
-                        MeshToFbxNodeMap.Add(unityGoMesh, fbxNode);
-                    }
-                    return false;
-                }
+                fbxMesh = MeshToFbxNodeMap[unityGoMesh].GetMesh();
             }
-
-            if (fbxMesh == null)
+            // new mesh, so save reference
+            else if (unityGoMesh)
+            {
+                MeshToFbxNodeMap.Add(unityGoMesh, fbxNode);
+                return false;
+            }
+            // mesh doesn't exist or wasn't exported successfully
+            else
             {
                 return false;
             }
