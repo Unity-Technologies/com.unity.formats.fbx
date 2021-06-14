@@ -1396,25 +1396,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 unityGoMesh = meshFilter.sharedMesh;
             }
 
-            // mesh is a prefab instance, so export with a reference to its parent
+            // export mesh as an instance if it is a duplicate mesh or a prefab
             if (unityGoMesh && SharedMeshes.ContainsKey(unityGoMesh))
             {
                 if (Verbose)
                 {
                     Debug.Log (string.Format ("exporting instance {0}", unityGo.name));
                 }
-
-                // add mesh to shared prefab meshes if exported successfully
                 fbxMesh = SharedMeshes[unityGoMesh].GetMesh();
             }
-            // new mesh, so save reference
+            // unique mesh, so save it to find future duplicates
             else if (unityGoMesh)
             {
                 SharedMeshes.Add(unityGoMesh, fbxNode);
                 return false;
             }
+
             // mesh doesn't exist or wasn't exported successfully
-            else
+            if (fbxMesh == null)
             {
                 return false;
             }
