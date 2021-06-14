@@ -182,7 +182,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         Dictionary<string, FbxTexture> TextureMap = new Dictionary<string, FbxTexture> ();
 
         /// <summary>
-        /// Map the ID of a prefab to an FbxMesh (for preserving instances) 
+        /// Map a Unity mesh to an fbx node (for preserving instances) 
         /// </summary>
         Dictionary<Mesh, FbxNode> SharedMeshes = new Dictionary<Mesh, FbxNode>();
 
@@ -1389,21 +1389,31 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // where the fbx mesh is stored on a successful export
             FbxMesh fbxMesh = null;
+            // store the shared mesh of the game object
             Mesh unityGoMesh = null;
+            
             // get the mesh of the game object
             if (unityGo.TryGetComponent<MeshFilter>(out MeshFilter meshFilter))
             {
                 unityGoMesh = meshFilter.sharedMesh;
             }
 
+            if (!unityGoMesh)
+            {
+                return false;
+            }
             // export mesh as an instance if it is a duplicate mesh or a prefab
-            if (unityGoMesh && SharedMeshes.ContainsKey(unityGoMesh))
+            else if (unityGoMesh && SharedMeshes.ContainsKey(unityGoMesh))
             {
                 if (Verbose)
                 {
                     Debug.Log (string.Format ("exporting instance {0}", unityGo.name));
                 }
-                fbxMesh = SharedMeshes[unityGoMesh].GetMesh();
+
+                if (SharedMeshes.TryGetValue(unityGoMesh, out FbxNode node))
+                {
+                    fbxMesh = node.GetMesh();
+                }
             }
             // unique mesh, so save it to find future duplicates
             else if (unityGoMesh)
