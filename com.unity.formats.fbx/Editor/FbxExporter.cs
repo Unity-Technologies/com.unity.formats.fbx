@@ -1400,7 +1400,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             if (!unityGoMesh)
             {
-                Debug.LogWarningFormat("Warning: Could not find a valid mesh for {0}.", unityGo.name);
                 return false;
             }
             // export mesh as an instance if it is a duplicate mesh or a prefab
