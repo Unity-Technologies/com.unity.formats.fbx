@@ -182,9 +182,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         Dictionary<string, FbxTexture> TextureMap = new Dictionary<string, FbxTexture> ();
 
         /// <summary>
-        /// Map the ID of a prefab to an FbxMesh (for preserving instances) 
+        /// Map a Unity mesh to an fbx node (for preserving instances) 
         /// </summary>
-        Dictionary<int, FbxMesh> SharedMeshes = new Dictionary<int, FbxMesh> ();
+        Dictionary<Mesh, FbxNode> SharedMeshes = new Dictionary<Mesh, FbxNode>();
 
         /// <summary>
         /// Map for the Name of an Object to number of objects with this name.
@@ -204,8 +204,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         Dictionary<string, int> TextureNameToIndexMap = new Dictionary<string, int>();
         
-        Dictionary<Mesh, FbxNode> MeshToFbxNodeMap = new Dictionary<Mesh, FbxNode>();
-
         /// <summary>
         /// Format for creating unique names
         /// </summary>
@@ -1389,41 +1387,39 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            Object unityPrefabParent = PrefabUtility.GetCorrespondingObjectFromSource(unityGo);
-
+            // where the fbx mesh is stored on a successful export
             FbxMesh fbxMesh = null;
-
-            if (unityPrefabParent != null && !SharedMeshes.TryGetValue (unityPrefabParent.GetInstanceID(), out fbxMesh))
+            // store the shared mesh of the game object
+            Mesh unityGoMesh = null;
+            
+            // get the mesh of the game object
+            if (unityGo.TryGetComponent<MeshFilter>(out MeshFilter meshFilter))
             {
-                if (Verbose)
-                    Debug.Log (string.Format ("exporting instance {0}({1})", unityGo.name, unityPrefabParent.name));
-                
-                if (ExportMesh (unityGo, fbxNode) && fbxNode.GetMesh() != null) {
-                    SharedMeshes [unityPrefabParent.GetInstanceID()] = fbxNode.GetMesh ();
-                    return true;
-                }
+                unityGoMesh = meshFilter.sharedMesh;
+            }
+
+            if (!unityGoMesh)
+            {
                 return false;
             }
-            // check if mesh is shared between 2 objects that are not prefabs
-            else if (unityPrefabParent == null)
+            // export mesh as an instance if it is a duplicate mesh or a prefab
+            else if (SharedMeshes.TryGetValue(unityGoMesh, out FbxNode node))
             {
-                // check if same mesh has already been exported
-                MeshFilter unityGoMesh = unityGo.GetComponent<MeshFilter>();
-                if (unityGoMesh != null && MeshToFbxNodeMap.ContainsKey(unityGoMesh.sharedMesh))
+                if (Verbose)
                 {
-                    fbxMesh = MeshToFbxNodeMap[unityGoMesh.sharedMesh].GetMesh();
+                    Debug.Log (string.Format ("exporting instance {0}", unityGo.name));
                 }
-                // export mesh as normal and add it to list
-                else
-                {
-                    if (unityGoMesh != null)
-                    {
-                        MeshToFbxNodeMap.Add(unityGoMesh.sharedMesh, fbxNode);
-                    }
-                    return false;
-                }
+                
+                fbxMesh = node.GetMesh();
+            }
+            // unique mesh, so save it to find future duplicates
+            else
+            {
+                SharedMeshes.Add(unityGoMesh, fbxNode);
+                return false;
             }
 
+            // mesh doesn't exist or wasn't exported successfully
             if (fbxMesh == null)
             {
                 return false;
