@@ -6,6 +6,7 @@ using System.IO;
 using UnityEngine.Formats.Fbx.Exporter;
 using UnityEditor.Formats.Fbx.Exporter;
 using System.Collections;
+using UnityEngine.TestTools;
 
 namespace FbxExporter.UnitTests
 {
@@ -130,8 +131,11 @@ namespace FbxExporter.UnitTests
             }
         }
 
-        [Test]
-        public void TestReferencesInScene()
+        // Note: this test is a UnityTest instead of a regular test
+        // as the search functionality when replacing scene references
+        // does not always find the objects added by script if a frame is not skipped.
+        [UnityTest]
+        public IEnumerator TestReferencesInScene()
         {
             // test that references that scene objects hold to the converted object
             // are maintained
@@ -144,6 +148,8 @@ namespace FbxExporter.UnitTests
             reference.m_goList = new GameObject[] { a, b };
             reference.m_collider = a.GetComponent<BoxCollider>();
             reference.m_transform = b.transform;
+
+            yield return null;
 
             var fbxPath = GetRandomFbxFilePath();
 
@@ -520,7 +526,8 @@ namespace FbxExporter.UnitTests
                 constraintSource.sourceTransform = a.transform;
                 constraintSource.weight = 0.5f;
                 constraint.AddSource(constraintSource);
-                
+
+#if !UNITY_2021_2_OR_NEWER
                 var sceneRefs = ConvertToNestedPrefab.GetSceneReferencesToObject(a);
                 Assert.That(sceneRefs.Count, Is.EqualTo(2));
                 Assert.That(sceneRefs.Contains(a)); // GameObjects also reference themself
@@ -534,6 +541,7 @@ namespace FbxExporter.UnitTests
                 Assert.That(sceneRefs.Count, Is.EqualTo(2));
                 Assert.That(sceneRefs.Contains(b));
                 Assert.That(sceneRefs.Contains(c));
+#endif // !UNITY_2021_2_OR_NEWER
             }
         }
 

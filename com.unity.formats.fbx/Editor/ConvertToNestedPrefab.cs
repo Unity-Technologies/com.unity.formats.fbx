@@ -6,6 +6,9 @@ using System.Linq;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+#if UNITY_2021_2_OR_NEWER
+using UnityEditor.Search;
+#endif
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -207,6 +210,55 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             return converted.ToArray();
         }
+
+        /// <summary>
+        /// For sceneObj, replace reference of origObj with newObj.
+        /// 
+        /// If the scene object is toConvertRoot or a child of it, then do not fix its references as it
+        /// will be deleted after conversion.
+        /// </summary>
+        /// <param name="sceneObj">scene object with reference to replace</param>
+        /// <param name="origObj">original object</param>
+        /// <param name="newObj">new object</param>
+        /// <param name="toConvertRoot">root of the hierarchy being converted</param>
+        internal static void FixSceneReferenceToObject(Object sceneObj, Object origObj, Object newObj, GameObject toConvertRoot)
+        {
+            // item has reference to origObj that need to be replaced by references to newObj
+            var go = ModelExporter.GetGameObject(sceneObj);
+            if (go && go.transform.IsChildOf(toConvertRoot.transform))
+            {
+                // if this is a child of what we are converting, don't update its references.
+                return;
+            }
+
+            var components = go.GetComponents<Component>();
+            foreach (var component in components)
+            {
+                var serializedComponent = new SerializedObject(component);
+                var property = serializedComponent.GetIterator();
+                property.Next(true); // skip generic field
+                // For SkinnedMeshRenderer, the bones array doesn't have visible children, but may have references that need to be fixed.
+                // For everything else, filtering by visible children in the while loop and then copying properties that don't have visible children,
+                // ensures that only the leaf properties are copied over. Copying other properties is not usually necessary and may break references that
+                // were not meant to be copied.
+                while (property.Next((component is SkinnedMeshRenderer) ? property.hasChildren : property.hasVisibleChildren))
+                {
+                    if (!property.hasVisibleChildren)
+                    {
+                        // with Undo operations, copying m_Father reference causes issues. Also, it is not required as the reference is fixed when
+                        // the transform is parented under the correct hierarchy (which happens before this).
+                        if (property.propertyType != SerializedPropertyType.ObjectReference) continue;
+                        if (property.propertyPath == "m_GameObject") continue;
+                        if (property.propertyPath == "m_Father") continue;
+                        if (!property.objectReferenceValue) continue;
+                        if (property.objectReferenceValue != origObj) continue;
+
+                        property.objectReferenceValue = newObj;
+                        serializedComponent.ApplyModifiedProperties();
+                    }
+                }
+            }
+        }
         
         /// <summary>
         /// For all scene objects holding a reference to origObj, replaces the references to newObj.
@@ -219,45 +271,34 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="toConvertRoot"></param>
         internal static void FixSceneReferences(Object origObj, Object newObj, GameObject toConvertRoot)
         {
+#if UNITY_2021_2_OR_NEWER
+            if (SceneManagement.EditorSceneManager.IsPreviewSceneObject(origObj))
+            {
+                return;
+            }
+
+            var instanceID = origObj.GetInstanceID();
+            var query = "h: ref=" + instanceID;
+            
+            using (var searchContext = UnityEditor.Search.SearchService.CreateContext(query))
+            {
+                // Initiate the query and get the first results.
+                var items = UnityEditor.Search.SearchService.GetItems(searchContext, SearchFlags.Synchronous);
+                
+                foreach (var item in items)
+                {
+                    FixSceneReferenceToObject(item.ToObject(), origObj, newObj, toConvertRoot);
+                }
+            }
+#else // UNITY_2021_2_OR_NEWER
             var sceneObjs = GetSceneReferencesToObject(origObj);
 
             // try to fix references on each component of each scene object, if applicable
-            foreach(var sceneObj in sceneObjs)
+            foreach (var sceneObj in sceneObjs)
             {
-                var go = ModelExporter.GetGameObject(sceneObj);
-                if (go && go.transform.IsChildOf(toConvertRoot.transform))
-                {
-                    // if this is a child of what we are converting, don't update its references.
-                    continue;
-                }
-
-                var components = sceneObj.GetComponents<Component>();
-                foreach(var component in components)
-                {
-                    var serializedComponent = new SerializedObject(component);
-                    var property = serializedComponent.GetIterator();
-                    property.Next(true); // skip generic field
-                    // For SkinnedMeshRenderer, the bones array doesn't have visible children, but may have references that need to be fixed.
-                    // For everything else, filtering by visible children in the while loop and then copying properties that don't have visible children,
-                    // ensures that only the leaf properties are copied over. Copying other properties is not usually necessary and may break references that
-                    // were not meant to be copied.
-                    while (property.Next((component is SkinnedMeshRenderer) ? property.hasChildren : property.hasVisibleChildren))
-                    {
-                        if (!property.hasVisibleChildren)
-                        {
-                            // with Undo operations, copying m_Father reference causes issues. Also, it is not required as the reference is fixed when
-                            // the transform is parented under the correct hierarchy (which happens before this).
-                            if (property.propertyType == SerializedPropertyType.ObjectReference && property.propertyPath != "m_GameObject" &&
-                                property.propertyPath != "m_Father" && property.objectReferenceValue &&
-                                (property.objectReferenceValue == origObj))
-                            {
-                                property.objectReferenceValue = newObj;
-                                serializedComponent.ApplyModifiedProperties();
-                            }
-                        }
-                    }
-                }
+                FixSceneReferenceToObject(sceneObj, origObj, newObj, toConvertRoot);
             }
+#endif // UNITY_2021_2_OR_NEWER
         }
 
         /// <summary>
@@ -273,6 +314,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 System.Reflection.BindingFlags.Instance).GetValue(instance, null);
         }
 
+#if !UNITY_2021_2_OR_NEWER
         /// <summary>
         /// Returns a list of GameObjects in the scene that contain references to the given object.
         /// </summary>
@@ -323,6 +365,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { previousSearchFilter, SearchableEditorWindow.SearchMode.Name, true, false });
             return sceneObjects;
         }
+#endif // UNITY_2021_2_OR_NEWER
 
         /// <summary>
         /// Convert one object (and the hierarchy below it) to a prefab variant of a model prefab.
