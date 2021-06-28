@@ -2,7 +2,7 @@
 
 ## [4.1.0-pre.3] - 2021-06-28
 ### Changed
-- Updated the FBX SDK bindings to 4.1.0-pre.2.
+- Updated the FBX SDK bindings to 4.1.0-pre.3.
 
 ### Fixed
 - Fix Fbx Export Project Settings break if they are open when changing scenes.
