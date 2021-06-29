@@ -1,6 +1,9 @@
 # Changes in Fbx Exporter
 
-## [Unreleased] - 2021-05-26
+## [4.1.0-pre.3] - 2021-06-28
+### Changed
+- Updated the FBX SDK bindings to 4.1.0-pre.3.
+
 ### Fixed
 - Fix Fbx Export Project Settings break if they are open when changing scenes.
 - Fix specular texture not being exported.
