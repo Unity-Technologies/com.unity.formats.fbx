@@ -1,5 +1,10 @@
 # Changes in Fbx Exporter
 
+## [4.1.0] - 2021-07-06
+### Changed
+- Update from prerelease to released package.
+- Updated the FBX SDK bindings to 4.1.0.
+
 ## [4.1.0-pre.3] - 2021-06-28
 ### Changed
 - Updated the FBX SDK bindings to 4.1.0-pre.3.

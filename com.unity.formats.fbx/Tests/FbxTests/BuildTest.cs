@@ -48,6 +48,7 @@ namespace FbxExporter.UnitTests
             }
         }
 
+        [Ignore("Ignoring in CI because we don't control which backends are installed")]
         [Test]
         public void TestBuildPlayer()
         {
