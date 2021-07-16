@@ -65,7 +65,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Use the ExportObject and ExportObjects methods. The default export
     /// options are used when exporting the objects to the FBX file.
     /// </para>
-    /// <para>For information on using the ModelExporter class, see <a href="../manual/devguide.html">the Developer's Guide</a>.</para>
+    /// <para>For information on using the ModelExporter class, see <a href="../manual/api_index.html">the Developer's Guide</a>.</para>
     /// </summary>
     public sealed class ModelExporter : System.IDisposable
     {
@@ -182,9 +182,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         Dictionary<string, FbxTexture> TextureMap = new Dictionary<string, FbxTexture> ();
 
         /// <summary>
-        /// Map the ID of a prefab to an FbxMesh (for preserving instances) 
+        /// Map a Unity mesh to an fbx node (for preserving instances) 
         /// </summary>
-        Dictionary<int, FbxMesh> SharedMeshes = new Dictionary<int, FbxMesh> ();
+        Dictionary<Mesh, FbxNode> SharedMeshes = new Dictionary<Mesh, FbxNode>();
 
         /// <summary>
         /// Map for the Name of an Object to number of objects with this name.
@@ -204,8 +204,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         Dictionary<string, int> TextureNameToIndexMap = new Dictionary<string, int>();
         
-        Dictionary<Mesh, FbxNode> MeshToFbxNodeMap = new Dictionary<Mesh, FbxNode>();
-
         /// <summary>
         /// Format for creating unique names
         /// </summary>
@@ -702,6 +700,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // itself specular, Lambert otherwise.
             var shader = unityMaterial.shader;
             bool specular = shader.name.ToLower ().Contains ("specular");
+            bool hdrp = shader.name.ToLower().Contains("hdrp");
 
             var fbxMaterial = specular
                 ? FbxSurfacePhong.Create (fbxScene, fbxName)
@@ -710,6 +709,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Copy the flat colours over from Unity standard materials to FBX.
             fbxMaterial.Diffuse.Set (GetMaterialColor (unityMaterial, "_Color"));
             fbxMaterial.Emissive.Set (GetMaterialColor (unityMaterial, "_EmissionColor", 0));
+            // hdrp materials dont export emission properly, so default to 0
+            if (hdrp) {
+                fbxMaterial.Emissive.Set(new FbxDouble3(0, 0, 0));
+            }
             fbxMaterial.Ambient.Set (new FbxDouble3 ());
 
             fbxMaterial.BumpFactor.Set (unityMaterial.HasProperty ("_BumpScale") ? unityMaterial.GetFloat ("_BumpScale") : 0);
@@ -723,7 +726,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             ExportTexture (unityMaterial, "_EmissionMap", fbxMaterial, FbxSurfaceMaterial.sEmissive);
             ExportTexture (unityMaterial, "_BumpMap", fbxMaterial, FbxSurfaceMaterial.sNormalMap);
             if (specular) {
-                ExportTexture (unityMaterial, "_SpecGlosMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
+                ExportTexture (unityMaterial, "_SpecGlossMap", fbxMaterial, FbxSurfaceMaterial.sSpecular);
             }
 
             MaterialMap.Add (unityID, fbxMaterial);
@@ -1023,19 +1026,68 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>The bind pose.</returns>
         /// <param name="unityBone">Unity bone.</param>
         /// <param name="bindPoses">Bind poses.</param>
-        /// <param name="boneDict">Dictionary of bone to index.</param>
-        /// <param name="skinnedMesh">Skinned mesh.</param>
+        /// <param name="boneInfo">Contains information about bones and skinned mesh.</param>
         private Matrix4x4 GetBindPose(
             Transform unityBone, Matrix4x4[] bindPoses,
-            Dictionary<Transform, int> boneDict, SkinnedMeshRenderer skinnedMesh
-        ){
+            ref SkinnedMeshBoneInfo boneInfo
+        )
+        {
+            var boneDict = boneInfo.boneDict;
+            var skinnedMesh = boneInfo.skinnedMesh;
+            var boneToBindPose = boneInfo.boneToBindPose;
+
+            // If we have already retrieved the bindpose for this bone before
+            // it will be present in the boneToBindPose dictionary,
+            // simply return this bindpose.
             Matrix4x4 bindPose;
-            int index;
-            if (boneDict.TryGetValue (unityBone, out index)) {
-                bindPose = bindPoses [index];
-            } else {
-                bindPose = unityBone.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix;
+            if(boneToBindPose.TryGetValue(unityBone, out bindPose))
+            {
+                return bindPose;
             }
+
+            // Check if unityBone is a bone registered in the bone list of the skinned mesh.
+            // If it is, then simply retrieve the bindpose from the boneDict (maps bone to index in bone/bindpose list).
+            // Make sure to update the boneToBindPose list in case the bindpose for this bone needs to be retrieved again.
+            int index;
+            if (boneDict.TryGetValue(unityBone, out index))
+            {
+                bindPose = bindPoses[index];
+                boneToBindPose.Add(unityBone, bindPose);
+                return bindPose;
+            }
+
+            // unityBone is not registered as a bone in the skinned mesh, therefore there is no bindpose
+            // associated with it, we need to calculate one.
+
+            // If this is the rootbone of the mesh or an object without a parent, use the global matrix relative to the skinned mesh
+            // as the bindpose.
+            if(unityBone == skinnedMesh.rootBone || unityBone.parent == null)
+            {
+                // there is no bone above this object with a bindpose, calculate bindpose relative to skinned mesh
+                bindPose = (unityBone.worldToLocalMatrix * skinnedMesh.transform.localToWorldMatrix);
+                boneToBindPose.Add(unityBone, bindPose);
+                return bindPose;
+            }
+
+            // If this object has a parent that could be a bone, then it is not enough to use the worldToLocalMatrix,
+            // as this will give an incorrect global transform if the parents are not already in the bindpose in the scene.
+            // Instead calculate what the bindpose would be based on the bindpose of the parent object.
+
+            // get the bindpose of the parent
+            var parentBindPose = GetBindPose(unityBone.parent, bindPoses, ref boneInfo);
+            // Get the local transformation matrix of the bone, then transform it into
+            // the global transformation matrix with the parent in the bind pose.
+            // Formula to get the global transformation matrix:
+            //   (parentBindPose.inverse * boneLocalTRSMatrix)
+            // The bindpose is then the inverse of this matrix:
+            //   (parentBindPose.inverse * boneLocalTRSMatrix).inverse
+            // This can be simplified with (AB)^{-1} = B^{-1}A^{-1} rule as follows:
+            //   (parentBindPose.inverse * boneLocalTRSMatrix).inverse
+            // = boneLocalTRSMatrix.inverse * parentBindPose.inverse.inverse
+            // = boneLocalTRSMatrix.inverse * parentBindPose
+            var boneLocalTRSMatrix = Matrix4x4.TRS(unityBone.localPosition, unityBone.localRotation, unityBone.localScale);
+            bindPose = boneLocalTRSMatrix.inverse * parentBindPose;
+            boneToBindPose.Add(unityBone, bindPose);
             return bindPose;
         }
 
@@ -1300,6 +1352,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var fbxTranslate = ConvertToFbxVector4(unityTranslate, UnitScaleFactor);
             var fbxScale = new FbxDouble3 (unityScale.x, unityScale.y, unityScale.z);
 
+            // Zero scale causes issues in 3ds Max (child of object with zero scale will end up with a much larger scale, e.g. >9000).
+            // When exporting 0 scale from Maya, the FBX contains 1e-12 instead of 0,
+            // which doesn't cause issues in Max. Do the same here.
+            if(fbxScale.X == 0)
+            {
+                fbxScale.X = 1e-12;
+            }
+            if(fbxScale.Y == 0)
+            {
+                fbxScale.Y = 1e-12;
+            }
+            if(fbxScale.Z == 0)
+            {
+                fbxScale.Z = 1e-12;
+            }
+
             // set the local position of fbxNode
             fbxNode.LclTranslation.Set (new FbxDouble3(fbxTranslate.X, fbxTranslate.Y, fbxTranslate.Z));
             fbxNode.LclRotation.Set (fbxRotate);
@@ -1319,41 +1387,39 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            Object unityPrefabParent = PrefabUtility.GetCorrespondingObjectFromSource(unityGo);
-
+            // where the fbx mesh is stored on a successful export
             FbxMesh fbxMesh = null;
-
-            if (unityPrefabParent != null && !SharedMeshes.TryGetValue (unityPrefabParent.GetInstanceID(), out fbxMesh))
+            // store the shared mesh of the game object
+            Mesh unityGoMesh = null;
+            
+            // get the mesh of the game object
+            if (unityGo.TryGetComponent<MeshFilter>(out MeshFilter meshFilter))
             {
-                if (Verbose)
-                    Debug.Log (string.Format ("exporting instance {0}({1})", unityGo.name, unityPrefabParent.name));
-                
-                if (ExportMesh (unityGo, fbxNode) && fbxNode.GetMesh() != null) {
-                    SharedMeshes [unityPrefabParent.GetInstanceID()] = fbxNode.GetMesh ();
-                    return true;
-                }
+                unityGoMesh = meshFilter.sharedMesh;
+            }
+
+            if (!unityGoMesh)
+            {
                 return false;
             }
-            // check if mesh is shared between 2 objects that are not prefabs
-            else if (unityPrefabParent == null)
+            // export mesh as an instance if it is a duplicate mesh or a prefab
+            else if (SharedMeshes.TryGetValue(unityGoMesh, out FbxNode node))
             {
-                // check if same mesh has already been exported
-                MeshFilter unityGoMesh = unityGo.GetComponent<MeshFilter>();
-                if (unityGoMesh != null && MeshToFbxNodeMap.ContainsKey(unityGoMesh.sharedMesh))
+                if (Verbose)
                 {
-                    fbxMesh = MeshToFbxNodeMap[unityGoMesh.sharedMesh].GetMesh();
+                    Debug.Log (string.Format ("exporting instance {0}", unityGo.name));
                 }
-                // export mesh as normal and add it to list
-                else
-                {
-                    if (unityGoMesh != null)
-                    {
-                        MeshToFbxNodeMap.Add(unityGoMesh.sharedMesh, fbxNode);
-                    }
-                    return false;
-                }
+                
+                fbxMesh = node.GetMesh();
+            }
+            // unique mesh, so save it to find future duplicates
+            else
+            {
+                SharedMeshes.Add(unityGoMesh, fbxNode);
+                return false;
             }
 
+            // mesh doesn't exist or wasn't exported successfully
             if (fbxMesh == null)
             {
                 return false;
@@ -1367,7 +1433,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (materials != null)
             {
                 foreach (var mat in materials) {
-                    if (MaterialMap.TryGetValue(mat.GetInstanceID(), out newMaterial))
+                    if (mat != null && MaterialMap.TryGetValue(mat.GetInstanceID(), out newMaterial))
                     {
                         fbxNode.AddMaterial(newMaterial);
                     }
@@ -2728,6 +2794,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 fbxName = ConvertToMayaCompatibleName(unityGo.name);
                 if (ExportOptions.AllowSceneModification)
                 {
+                    Undo.RecordObject(unityGo, "rename " + fbxName);
                     unityGo.name = fbxName;
                 }
             }
@@ -3067,19 +3134,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var bindPoses = skinnedMesh.sharedMesh.bindposes;
 
             // get bind pose
-            Matrix4x4 bindPose;
-            if (!boneInfo.boneToBindPose.TryGetValue (unityBone, out bindPose)) {
-                bindPose = GetBindPose (unityBone, bindPoses, boneDict, skinnedMesh);
-                boneInfo.boneToBindPose.Add (unityBone, bindPose);
-            }
+            Matrix4x4 bindPose = GetBindPose(unityBone, bindPoses, ref boneInfo);
 
             Matrix4x4 pose;
             // get parent's bind pose
-            Matrix4x4 parentBindPose;
-            if (!boneInfo.boneToBindPose.TryGetValue (unityBone.parent, out parentBindPose)) {
-                parentBindPose = GetBindPose (unityBone.parent, bindPoses, boneDict, skinnedMesh);
-                boneInfo.boneToBindPose.Add (unityBone.parent, parentBindPose);
-            }
+            Matrix4x4 parentBindPose = GetBindPose(unityBone.parent, bindPoses, ref boneInfo);
             pose = parentBindPose * bindPose.inverse;
 
             FbxVector4 translation, rotation, scale;
@@ -3286,7 +3345,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         }
                         else
                         {
-                            Debug.LogWarningFormat("Couldn't export motion {0}", motion.name);
+                            if (motion != null) {
+                                Debug.LogWarningFormat("Couldn't export motion {0}", motion.name);
+                            }
+                            // missing animation
+                            else {
+                                Debug.LogWarningFormat("Couldn't export motion. Motion is missing.");
+                            }
                         }
                     }
                 }
@@ -3725,6 +3790,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // delete old file, move temp file
                 ReplaceFile();
+
+                // refresh the database so Unity knows the file's been deleted
                 AssetDatabase.Refresh();
                 
                 // replace with original metafile if specified to
@@ -3797,11 +3864,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // delete old file
             try {
                 File.Delete (m_lastFilePath);
+                // delete meta file also
+                File.Delete(m_lastFilePath + ".meta");
             } catch (IOException) {
             }
-
-            // refresh the database so Unity knows the file's been deleted
-            AssetDatabase.Refresh();
 
             if (File.Exists (m_lastFilePath)) {
                 Debug.LogWarning ("Failed to delete file: " + m_lastFilePath);
@@ -3819,17 +3885,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var tempMetafilePath = Path.GetTempFileName();
             
-            // Try as an absolute path
-            var fbxPath = m_lastFilePath;
+            // get relative path
+            var fbxPath = "Assets/" + ExportSettings.ConvertToAssetRelativePath(m_lastFilePath);
             if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
             {
-                // Try as a relative path
-                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
-                if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
-                {
-                    Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
-                    return "";
-                }
+                Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
+                return "";
             }
             
             // get metafile for original fbx file
@@ -3852,17 +3913,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private void ReplaceMetafile(string metafilePath)
         {
-            // Try as an absolute path
-            var fbxPath = m_lastFilePath;
+            // get relative path
+            var fbxPath = "Assets/" + ExportSettings.ConvertToAssetRelativePath(m_lastFilePath);
             if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
             {
-                // Try as a relative path
-                fbxPath = "Assets" + m_lastFilePath.Substring(Application.dataPath.Length);
-                if (AssetDatabase.LoadAssetAtPath(fbxPath, typeof(Object)) == null)
-                {
-                    Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
-                    return;
-                }
+                Debug.LogWarning(string.Format("Failed to find a valid asset at {0}. Import settings will be reset to default values.", m_lastFilePath));
+                return;
             }
             
             // get metafile for new fbx file
@@ -4579,6 +4635,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private static string ConvertToMayaCompatibleName(string name)
         {
+            if (string.IsNullOrEmpty(name)) {
+                return InvalidCharReplacement.ToString();
+            }
             string newName = RemoveDiacritics (name);
 
             if (char.IsDigit (newName [0])) {

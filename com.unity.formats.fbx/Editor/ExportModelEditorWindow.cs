@@ -11,7 +11,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     internal abstract class ExportOptionsEditorWindow : EditorWindow
     {
         internal const string DefaultWindowTitle = "Export Options";
-        protected const float SelectableLabelMinWidth = 90;
+        protected const float SelectableLabelMinWidth = 120;
         protected const float BrowseButtonWidth = 25;
         protected const float LabelWidth = 175;
         protected const float FieldOffset = 18;
@@ -57,7 +57,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 if (m_nameTextFieldStyle == null)
                 {
                     m_nameTextFieldStyle = new GUIStyle(GUIStyle.none);
-                    m_nameTextFieldStyle.alignment = TextAnchor.LowerCenter;
+                    m_nameTextFieldStyle.alignment = TextAnchor.MiddleCenter;
                     m_nameTextFieldStyle.clipping = TextClipping.Clip;
                     m_nameTextFieldStyle.normal.textColor = EditorStyles.textField.normal.textColor;
                 }
@@ -232,7 +232,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             InitializeReceiver ();
             #endif
             m_showOptions = true;
-            this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth, MinWindowHeight);
+            this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth + ExportButtonWidth, MinWindowHeight);
         }
 
         protected static T CreateWindow<T>() where T : EditorWindow {
@@ -523,7 +523,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 string initialPath = Application.dataPath;
 
-                string fullPath = EditorUtility.OpenFolderPanel(
+                string fullPath = EditorUtility.SaveFolderPanel(
                     "Select Export Model Path", initialPath, null
                 );
 

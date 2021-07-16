@@ -1192,5 +1192,16 @@ namespace FbxExporter.UnitTests
             Assert.That(AreEqual(fbxSphere2.position, sphere2.transform.position),
                 string.Format("Positions do not match.\nActual: {0}\nExpected: {1}", fbxSphere2.position, sphere2.transform.position));
         }
+        // Test that export does not fail if the mesh is missing or null
+        [Test]
+        public void TestMissingMeshExport()
+        {
+            var filename = GetRandomFbxFilePath();
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.GetComponent<MeshFilter>().sharedMesh = null;
+            Assert.IsNull(cube.GetComponent<MeshFilter>().sharedMesh);
+            ModelExporter.ExportObject(filename, cube);
+            Assert.IsNotNull(filename);
+        }
     }
 }
