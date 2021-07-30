@@ -25,9 +25,9 @@ test_editors:
   - version: 2021.2
   - version: trunk
 test_platforms:
-  - name: ubuntu
+  - name: win
     type: Unity::VM
-    image: package-ci/ubuntu:stable
+    image: package-ci/win10:stable
     flavor: b1.large
 ---
 
@@ -41,7 +41,7 @@ test_{{ platform.name }}_{{ editor.version }}:
     flavor: {{ platform.flavor}}
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-    - {% if platform.name == "centos" %}DISPLAY=:0 {% endif %}upm-ci package test -u {{ editor.version }} --type package-tests
+    - {% if platform.name == "centos" %}DISPLAY=:0 {% endif %}upm-ci package test -u {{ editor.version }} --type package-tests --package-path com.unity.formats.fbx
   artifacts:
     logs:
       paths:
@@ -63,7 +63,7 @@ validate_{{ platform.name }}_{{ editor.version }}:
     flavor: {{ platform.flavor}}
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-    - {% if platform.name == "centos" %}DISPLAY=:0 {% endif %}upm-ci package test -u {{ editor.version }} --type vetting-tests --platform editmode
+    - {% if platform.name == "centos" %}DISPLAY=:0 {% endif %}upm-ci package test -u {{ editor.version }} --type vetting-tests --platform editmode --package-path com.unity.formats.fbx
   artifacts:
     logs:
       paths:
