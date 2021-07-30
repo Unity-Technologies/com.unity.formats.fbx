@@ -1,18 +1,24 @@
-# Promotion tests are theoretically platform-independent so
-# we can run them just on 2019.1/win.
-#
-# The promotion job depends on the publish-to-candidates job, which runs
-# every test on every platform and version, so we're not actually skipping
-# tests.
-#
 test_editors:
   - version: 2019.4
+  - version: 2020.3
+  - version: 2021.1
+  - version: 2021.2
+  - version: trunk
 test_platforms:
   - name: win
     type: Unity::VM
     image: package-ci/win10:stable
-    flavor: b1.medium
+    flavor: b1.large
+  - name: mac
+    type: Unity::VM::osx
+    image: package-ci/mac:stable
+    flavor: m1.mac
+  - name: ubuntu
+    type: Unity::VM
+    image: package-ci/ubuntu:stable
+    flavor: b1.large
 ---
+
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
 promotion_test_{{ platform.name }}_{{ editor.version }}:
@@ -25,16 +31,22 @@ promotion_test_{{ platform.name }}_{{ editor.version }}:
     UPMCI_PROMOTION: 1
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-    - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version {{ editor.version }} --package-path com.unity.formats.fbx
+    - upm-ci package test --unity-version {{ editor.version }}
   artifacts:
     logs:
       paths:
         - "upm-ci~/test-results/**/*"
-    packages:
-      paths:
-        - "upm-ci~/packages/**/*"
   dependencies:
-    - .yamato/upm-ci.yml#pack
+    - .yamato/package-pack.yml#pack
+{% endfor %}
+{% endfor %}
+
+promotion_test_trigger:
+  name: Promotion Tests Trigger
+  dependencies:
+{% for editor in test_editors %}
+{% for platform in test_platforms %}
+    - .yamato/package-promotion.yml#promotion_test_{{platform.name}}_{{editor.version}}
 {% endfor %}
 {% endfor %}
 
@@ -43,24 +55,24 @@ promote:
   agent:
     type: Unity::VM
     image: package-ci/win10:stable
-    flavor: b1.small
+    flavor: b1.large
   variables:
     UPMCI_PROMOTION: 1
   commands:
-    - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-    - upm-ci package promote --package-path com.unity.formats.fbx
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - upm-ci package promote
   triggers:
     tags:
       only:
-        - /^(r|R)elease-\d+\.\d+\.\d+(-preview(\.\d+)?)?$/
+        - /^[Rr]elease-(0\.\d+\.\d+|[1-9]\d*\.\d+\.\d+(-preview(\.\d+)?|-exp(\.\d+|-\w+\.\d+)|-pre\.\d+))$/
   artifacts:
     artifacts:
       paths:
         - "upm-ci~/packages/*.tgz"
   dependencies:
-    - .yamato/upm-ci.yml#publish
+    - .yamato/package-pack.yml#pack
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
-    - .yamato/promotion.yml#promotion_test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/package-promotion.yml#promotion_test_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
 {% endfor %}
