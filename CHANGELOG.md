@@ -1,5 +1,12 @@
 # Changes in Fbx Exporter
 
+## [4.1.1] - 2021-08-25
+### Changed
+- Use EditorGUIUtility's GetIcon and SetIcon instead of reflection for prefab icons.
+
+### Fixed
+- Fixed one namespace being stripped instead of just the root namespace if all namespaces are unique.
+
 ## [4.1.0] - 2021-07-06
 ### Changed
 - Update from prerelease to released package.
