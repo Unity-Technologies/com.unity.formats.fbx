@@ -799,10 +799,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 GameObjectUtility.SetStaticEditorFlags(destGO, GameObjectUtility.GetStaticEditorFlags(sourceGO));
 
                 // set icon
+#if UNITY_2021_2_OR_NEWER
+                var sourceIcon = EditorGUIUtility.GetIconForObject(sourceGO);
+                EditorGUIUtility.SetIconForObject(destGO, sourceIcon);   
+# else // UNITY_2021_2_OR_NEWER
                 System.Reflection.BindingFlags bindingFlags = System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public;
                 var sourceIcon = typeof(EditorGUIUtility).InvokeMember("GetIconForObject", bindingFlags, null, null, new object[] { sourceGO });
                 object[] args = new object[] { destGO, sourceIcon };
                 typeof(EditorGUIUtility).InvokeMember("SetIconForObject", bindingFlags, null, null, args);
+#endif // UNITY_2021_2_OR_NEWER
 
                 foreach (Transform child in t)
                 {
