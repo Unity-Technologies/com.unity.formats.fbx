@@ -556,6 +556,12 @@ proc string[] getIntersection(string $set1[], string $set2[]){
 // test1:test2:cylinder
 //
 // Then it will return test1:test2.
+// For multiple unique namespaces, the root namespace will be returned. For example:
+//
+// test1:sphere
+// test2:cube
+//
+// Then the root namespace will be returned.
 proc string getCommonNamespace(string $origSelection[]){
     // gather up all the unique namespaces
     string $selectedNamespaces[];
@@ -573,13 +579,17 @@ proc string getCommonNamespace(string $origSelection[]){
 
     // go through selection to find common namespace to set as default
     string $commonNamespace = ":";
-    int $maxNamespaceCount = 0;
+    // get contents and size of root namespace
+    string $namespaceContents[] = `namespaceInfo -ls $commonNamespace -r`;
+    string $intersection[] = getIntersection($origSelection, $namespaceContents);
+    int $intersectionSize = size($intersection);
+    int $maxNamespaceCount = $intersectionSize;
     for($i = 0; $i < size($selectedNamespaces); $i++){
         $currNamespace = $selectedNamespaces[$i];
         // get contents of namespace
-        string $namespaceContents[] = `namespaceInfo -ls $currNamespace -r`;
-        string $intersection[] = getIntersection($origSelection, $namespaceContents);
-        int $intersectionSize = size($intersection);
+        $namespaceContents = `namespaceInfo -ls $currNamespace -r`;
+        $intersection = getIntersection($origSelection, $namespaceContents);
+        $intersectionSize = size($intersection);
         if($intersectionSize > $maxNamespaceCount ||
             // prefer more specific namespaces
             ($maxNamespaceCount > 0 &&
