@@ -119,8 +119,10 @@ publish:
     type: Unity::VM
     image: package-ci/win10:stable
     flavor: b1.small
+  variables:
+    UPMCI_ENABLE_PACKAGE_SIGNING: 1
   commands:
-    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package publish --package-path com.unity.formats.fbx
   triggers:
     tags:
