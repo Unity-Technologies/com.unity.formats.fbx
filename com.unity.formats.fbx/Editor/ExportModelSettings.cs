@@ -113,6 +113,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             exportSettings.SetPreserveImportSettings(EditorGUILayout.Toggle(exportSettings.PreserveImportSettings));
             EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
+
+            exportSettings.SetKeepInstances(EditorGUILayout.Toggle(new GUIContent("Keep Instances", "If enabled, instances will be preserved as instances in the FBX file. This can cause issues with e.g. Blender if different instances have different materials assigned."), exportSettings.KeepInstances));
+            exportSettings.SetEmbedTextures(EditorGUILayout.Toggle(new GUIContent("Embed Textures", "If enabled, textures are embedded into the resulting FBX file instead of referenced."), exportSettings.EmbedTextures));
+
         }
     }
 
@@ -126,6 +130,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         bool AllowSceneModification { get; }
         bool ExportUnrendered { get; }
         bool PreserveImportSettings { get; }
+        bool KeepInstances { get; }
+        bool EmbedTextures { get; }
         Transform AnimationSource { get; }
         Transform AnimationDest { get; }
     }
@@ -190,6 +196,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public abstract bool ExportUnrendered { get; }
         public virtual bool PreserveImportSettings { get { return false; } }
         public abstract bool AllowSceneModification { get; }
+        public virtual bool KeepInstances { get { return true; } }
+        public virtual bool EmbedTextures { get { return false; } }
 
         public override bool Equals(object e)
         {
@@ -222,7 +230,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private bool exportUnrendered = true;
         [SerializeField]
         private bool preserveImportSettings = false;
-
+        [SerializeField]
+        private bool keepInstances = true;
+        [SerializeField]
+        private bool embedTextures = false;
+        
         public override ExportSettings.Include ModelAnimIncludeOption { get { return include; } }
         public void SetModelAnimIncludeOption(ExportSettings.Include include) { this.include = include; }
         public override ExportSettings.LODExportType LODExportType { get { return lodLevel; } }
@@ -234,6 +246,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }
         public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings; }
         public override bool AllowSceneModification { get { return false; } }
+        public override bool KeepInstances { get { return keepInstances; } }
+        public void SetKeepInstances(bool keepInstances){ this.keepInstances = keepInstances; }
+        public override bool EmbedTextures { get { return embedTextures; } }
+        public void SetEmbedTextures(bool embedTextures){ this.embedTextures = embedTextures; }
 
         public override bool Equals(object e)
         {

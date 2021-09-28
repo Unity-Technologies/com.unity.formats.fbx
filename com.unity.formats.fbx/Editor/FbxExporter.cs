@@ -3385,7 +3385,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var fbxNode = entry.Value;
 
                 // try export mesh
-                bool exportedMesh = ExportInstance (unityGo, fbxScene, fbxNode);
+                bool exportedMesh = false;
+                if(ExportOptions.KeepInstances) {
+                    exportedMesh = ExportInstance (unityGo, fbxScene, fbxNode);
+                }
 
                 if (!exportedMesh) {
                     exportedMesh = ExportMesh (unityGo, fbxNode);
@@ -3592,7 +3595,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // Create the FBX manager
                 using (var fbxManager = FbxManager.Create ()) {
                     // Configure fbx IO settings.
-                    fbxManager.SetIOSettings (FbxIOSettings.Create (fbxManager, Globals.IOSROOT));
+                    var settings = FbxIOSettings.Create (fbxManager, Globals.IOSROOT);
+                    if(ExportOptions.EmbedTextures)
+                        settings.SetBoolProp (Globals.EXP_FBX_EMBEDDED, true);
+                    fbxManager.SetIOSettings (settings);
 
                     // Create the exporter
                     var fbxExporter = FbxExporter.Create (fbxManager, "Exporter");
