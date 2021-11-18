@@ -749,22 +749,20 @@ namespace FbxExporter.UnitTests
 
             var comparisonCount = 0;
             var minVertCount = Mathf.Min(origVerts.Length, expVerts.Length);
-            for (int i = 0; i < minVertCount; i++)
+            for (int origVertIndex = 0; origVertIndex < minVertCount; origVertIndex++)
             {
-                for (int j = 0; j < minVertCount; j++)
+                for (int expVertIndex = 0; expVertIndex < minVertCount; expVertIndex++)
                 {
-                    // i = origVerts index
-                    // j = expVerts index
-                    if (origVerts[i] == expVerts[j])
+                    if (origVerts[origVertIndex] == expVerts[expVertIndex])
                     {
-                        var origNumberOfBonesForThisVertex = origBonesPerVertex[i];
-                        var exportedNumberOfBonesForThisVertex = exportedBonesPerVertex[j];
-                        Assert.That(exportedNumberOfBonesForThisVertex, Is.EqualTo(origNumberOfBonesForThisVertex));
+                        var origBoneWeightCountForVert = origBonesPerVertex[origVertIndex];
+                        var expBoneWeightCountForVert = exportedBonesPerVertex[expVertIndex];
+                        Assert.That(expBoneWeightCountForVert, Is.EqualTo(origBoneWeightCountForVert));
 
-                        var origStartIndex = origVertToBoneWeightIndex[i];
-                        var expStartIndex = exportedVertToBoneWeightIndex[j];
+                        var origStartIndex = origVertToBoneWeightIndex[origVertIndex];
+                        var expStartIndex = exportedVertToBoneWeightIndex[expVertIndex];
 
-                        for (var k = 0; k < exportedNumberOfBonesForThisVertex; k++)
+                        for (var k = 0; k < expBoneWeightCountForVert; k++)
                         {
                             var origBw = origBoneWeights1[origStartIndex + k];
                             var expBw = exportedBoneWeights1[expStartIndex + k];
