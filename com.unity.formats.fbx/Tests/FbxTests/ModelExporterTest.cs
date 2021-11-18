@@ -717,53 +717,8 @@ namespace FbxExporter.UnitTests
             var expVerts = exportedSkinnedMesh.sharedMesh.vertices;
             Assert.That (expVerts, Is.Not.Null);
 
-            var origBoneWeights = originalSkinnedMesh.sharedMesh.boneWeights;
-            Assert.That (origBoneWeights, Is.Not.Null);
-            Assert.That (origBoneWeights.Length, Is.GreaterThan (0));
-
-            var expBoneWeights = exportedSkinnedMesh.sharedMesh.boneWeights;
-            Assert.That (expBoneWeights, Is.Not.Null);
-            Assert.That (expBoneWeights.Length, Is.GreaterThan (0));
-
             var origBones = originalSkinnedMesh.bones;
             var expBones = exportedSkinnedMesh.bones;
-
-            int comparisonCount = 0;
-            int minVertCount = Mathf.Min (origVerts.Length, expVerts.Length);
-            for(int i = 0; i < minVertCount; i++){
-                for (int j = 0; j < minVertCount; j++) {
-                    if (origVerts [i] == expVerts [j]) {
-                        // compare bone weights
-                        var origBw = origBoneWeights[i];
-                        var expBw = expBoneWeights [j];
-
-                        var indexMsg = "Bone index {0} doesn't match";
-                        var nameMsg = "bone names don't match";
-
-                        Assert.That (expBw.boneIndex0, Is.EqualTo (origBw.boneIndex0), string.Format(indexMsg, 0));
-                        Assert.That (expBones[expBw.boneIndex0].name, Is.EqualTo (origBones[origBw.boneIndex0].name), nameMsg);
-
-                        Assert.That (expBw.boneIndex1, Is.EqualTo (origBw.boneIndex1), string.Format(indexMsg, 1));
-                        Assert.That (expBones[expBw.boneIndex1].name, Is.EqualTo (origBones[origBw.boneIndex1].name), nameMsg);
-
-                        Assert.That (expBw.boneIndex2, Is.EqualTo (origBw.boneIndex2), string.Format(indexMsg, 2));
-                        Assert.That (expBones[expBw.boneIndex2].name, Is.EqualTo (origBones[origBw.boneIndex2].name), nameMsg);
-
-                        Assert.That (expBw.boneIndex3, Is.EqualTo (origBw.boneIndex3), string.Format(indexMsg, 3));
-                        Assert.That (expBones[expBw.boneIndex3].name, Is.EqualTo (origBones[origBw.boneIndex3].name), nameMsg);
-
-                        var message = "Bone weight {0} doesn't match";
-                        Assert.That (expBw.weight0, Is.EqualTo (origBw.weight0).Within(0.001f), string.Format(message, 0));
-                        Assert.That (expBw.weight1, Is.EqualTo (origBw.weight1).Within(0.001f), string.Format(message, 1));
-                        Assert.That (expBw.weight2, Is.EqualTo (origBw.weight2).Within(0.001f), string.Format(message, 2));
-                        Assert.That (expBw.weight3, Is.EqualTo (origBw.weight3).Within(0.001f), string.Format(message, 3));
-
-                        comparisonCount++;
-                        break;
-                    }
-                }
-            }
-            Debug.LogWarningFormat ("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
 
             // test with more than 4 bone weights
 
@@ -792,8 +747,8 @@ namespace FbxExporter.UnitTests
                 boneWeightIndexMapping += exportedBonesPerVertex[i];
             }
 
-            comparisonCount = 0;
-            minVertCount = Mathf.Min(origVerts.Length, expVerts.Length);
+            var comparisonCount = 0;
+            var minVertCount = Mathf.Min(origVerts.Length, expVerts.Length);
             for (int i = 0; i < minVertCount; i++)
             {
                 for (int j = 0; j < minVertCount; j++)
