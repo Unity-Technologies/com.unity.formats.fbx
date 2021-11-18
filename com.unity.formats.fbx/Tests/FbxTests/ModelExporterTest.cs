@@ -626,6 +626,8 @@ namespace FbxExporter.UnitTests
                     yield return "Models/MultiRootCharacters/NullsInHierarchy.fbx";
                     // Characters from the asset store
                     yield return "Models/SimpleMan/SimpleMan.fbx";
+                    // Cube with 8 bones and each vertex influenced by each bone
+                    yield return "Models/multiBoneInfluence.fbx";
                 }
             }
         }
@@ -639,6 +641,9 @@ namespace FbxExporter.UnitTests
 
             SetImportSettings setImportSettings = (importer) =>
             {
+                importer.skinWeights = ModelImporterSkinWeights.Custom;
+                importer.maxBonesPerVertex = 255;
+
                 // Older versions of Unity and meta files will be imported
                 // to optimize bones automatically.
                 // New files have optimizeBones set to false by default.
@@ -759,6 +764,72 @@ namespace FbxExporter.UnitTests
                 }
             }
             Debug.LogWarningFormat ("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
+
+            // test with more than 4 bone weights
+
+            // Get the number of bone weights per vertex
+            var origBonesPerVertex = origMesh.GetBonesPerVertex();
+            var exportedBonesPerVertex = exportedMesh.GetBonesPerVertex();
+
+            // Get all the bone weights, in vertex index order
+            var origBoneWeights1 = origMesh.GetAllBoneWeights();
+            var exportedBoneWeights1 = exportedMesh.GetAllBoneWeights();
+
+            // get the vertex index to index in bone weights mapping (for easier access)
+            var origVertToBoneWeightIndex = new Dictionary<int, int>();
+            var boneWeightIndexMapping = 0;
+            for (int i = 0; i < origVerts.Length; i++)
+            {
+                origVertToBoneWeightIndex.Add(i, boneWeightIndexMapping);
+                boneWeightIndexMapping += origBonesPerVertex[i];
+            }
+
+            var exportedVertToBoneWeightIndex = new Dictionary<int, int>();
+            boneWeightIndexMapping = 0;
+            for (int i = 0; i < expVerts.Length; i++)
+            {
+                exportedVertToBoneWeightIndex.Add(i, boneWeightIndexMapping);
+                boneWeightIndexMapping += exportedBonesPerVertex[i];
+            }
+
+            comparisonCount = 0;
+            minVertCount = Mathf.Min(origVerts.Length, expVerts.Length);
+            for (int i = 0; i < minVertCount; i++)
+            {
+                for (int j = 0; j < minVertCount; j++)
+                {
+                    // i = origVerts index
+                    // j = expVerts index
+                    if (origVerts[i] == expVerts[j])
+                    {
+                        var origNumberOfBonesForThisVertex = origBonesPerVertex[i];
+                        var exportedNumberOfBonesForThisVertex = exportedBonesPerVertex[j];
+                        Assert.That(exportedNumberOfBonesForThisVertex, Is.EqualTo(origNumberOfBonesForThisVertex));
+
+                        var origStartIndex = origVertToBoneWeightIndex[i];
+                        var expStartIndex = exportedVertToBoneWeightIndex[j];
+
+                        for (var k = 0; k < exportedNumberOfBonesForThisVertex; k++)
+                        {
+                            var origBw = origBoneWeights1[origStartIndex + k];
+                            var expBw = exportedBoneWeights1[expStartIndex + k];
+
+                            var indexMsg = "Bone index doesn't match";
+                            var nameMsg = "bone names don't match";
+
+                            Assert.That(expBones[expBw.boneIndex].name, Is.EqualTo(origBones[origBw.boneIndex].name), nameMsg);
+                            Assert.That(expBw.boneIndex, Is.EqualTo(origBw.boneIndex), indexMsg);
+
+                            var message = "Bone weight doesn't match";
+                            Assert.That(expBw.weight, Is.EqualTo(origBw.weight).Within(0.001f), message);
+                        }
+
+                        comparisonCount++;
+                        break;
+                    }
+                }
+            }
+            Debug.LogWarningFormat("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
         }
 
         private delegate float GetDistance<T>(T x, T y);
