@@ -23,7 +23,8 @@ The FBX Exporter exports the following objects:
 
 ## Mesh support
 
-The FBX Exporter exports multiple copies of the same Mesh as instances. The FBX Exporter also exports the following mesh attributes:
+The FBX Exporter exports multiple copies of the same Mesh as instances (to export all Meshes as unique, uncheck the *Keep Instances* option in the export settings).
+The FBX Exporter also exports the following mesh attributes:
 
 - Normals
 - Binormals
@@ -229,6 +230,8 @@ When exporting an FBX file, the following **Export Options** window opens, displ
 | __Compatible Naming__     | Enable this option to control renaming the GameObject and Materials during export. <br/><br/>The FBX Exporter ensures compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and Autodesk® Maya® and Autodesk® Maya LT™. During export the FBX Exporter replaces characters in Unity names as follows:<br/> - Replaces invalid characters with underscores ("\_"). Invalid characters are all non-alphanumeric characters, except for the colon (":").<br/> - Adds an underscore ("\_") to names that begin with a number.<br/> - Replaces diacritics. For example, replaces "é" with “e”.<br/><br/>**NOTE:** If you have a Material with a space in its name, the space is replaced with an underscore ("_"). This results in a new Material being created when it is imported. For example, the Material named "Default Material" is exported as "Default_Material" and is created as a new Material when it is imported. If you want the exported Material to match an existing Material in the scene, you must manually rename the Material before exporting. |
 | __Export Unrendered__     | Enable this option to export meshes that either don't have a renderer component, or that have a disabled renderer component. For example, a simplified mesh used as a Mesh collider. |
 |__Preserve Import Settings__ | Enable this option to preserve all import settings applied to an existing FBX file that is overwritten during the export.<br/>If you export the GameObject as a new FBX file, the FBX Exporter does not carry over the import settings.|
+| __Keep Instances__        | Enable this option to export multiple copies of the same Mesh as instances.<br/>If unchecked, the FBX Exporter exports all Meshes as unique. |
+| __Embed Textures__        | Enable this option to embed textures in the exported FBX. |
 | __Don't ask me again__    | Enable this option to use the same **Export Options** properties and hide this window when you export FBX files in the future.<br/>If you need to reset this property: from the Unity Editor menu, select **Edit** > **Project Settings** > **Fbx Export** and enable **Display Options Window**. |
 
 > **Note:** For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters might differ between file systems.

@@ -114,9 +114,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
-            exportSettings.SetKeepInstances(EditorGUILayout.Toggle(new GUIContent("Keep Instances", "If enabled, instances will be preserved as instances in the FBX file. This can cause issues with e.g. Blender if different instances have different materials assigned."), exportSettings.KeepInstances));
-            exportSettings.SetEmbedTextures(EditorGUILayout.Toggle(new GUIContent("Embed Textures", "If enabled, textures are embedded into the resulting FBX file instead of referenced."), exportSettings.EmbedTextures));
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Keep Instances",
+                "If enabled, instances will be preserved as instances in the FBX file. This can cause issues with e.g. Blender if different instances have different materials assigned."),
+                GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.SetKeepInstances(EditorGUILayout.Toggle(exportSettings.KeepInstances));
+            GUILayout.EndHorizontal();
 
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Embed Textures",
+                "If enabled, textures are embedded into the resulting FBX file instead of referenced."), GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.SetEmbedTextures(EditorGUILayout.Toggle(exportSettings.EmbedTextures));
+            GUILayout.EndHorizontal();
         }
     }
 
