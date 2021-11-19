@@ -731,19 +731,19 @@ namespace FbxExporter.UnitTests
             var exportedBoneWeights1 = exportedMesh.GetAllBoneWeights();
 
             // get the vertex index to index in bone weights mapping (for easier access)
-            var origVertToBoneWeightIndex = new Dictionary<int, int>();
+            var origVertToBoneWeightIndex = new int[origVerts.Length];
             var boneWeightIndexMapping = 0;
             for (int i = 0; i < origVerts.Length; i++)
             {
-                origVertToBoneWeightIndex.Add(i, boneWeightIndexMapping);
+                origVertToBoneWeightIndex[i] = boneWeightIndexMapping;
                 boneWeightIndexMapping += origBonesPerVertex[i];
             }
 
-            var exportedVertToBoneWeightIndex = new Dictionary<int, int>();
+            var exportedVertToBoneWeightIndex = new int[expVerts.Length];
             boneWeightIndexMapping = 0;
             for (int i = 0; i < expVerts.Length; i++)
             {
-                exportedVertToBoneWeightIndex.Add(i, boneWeightIndexMapping);
+                exportedVertToBoneWeightIndex[i] = boneWeightIndexMapping;
                 boneWeightIndexMapping += exportedBonesPerVertex[i];
             }
 
