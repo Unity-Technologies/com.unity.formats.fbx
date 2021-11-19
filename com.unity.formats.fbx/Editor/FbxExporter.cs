@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Timeline;
-using UnityEditor;
 using UnityEditor.Timeline;
 using System.Linq;
 using Autodesk.Fbx;
 using System.Runtime.CompilerServices;  
 using System.Runtime.Serialization;
 using UnityEditor.Formats.Fbx.Exporter.Visitors;
-using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
 using System.Security.Permissions;
 
 [assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editor.Tests")]  
@@ -1199,42 +1197,68 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// set vertex weights in cluster
         /// </summary>
-        private void SetVertexWeights (MeshInfo meshInfo, Dictionary<int, FbxCluster> boneCluster)
+        private void SetVertexWeights (MeshInfo meshInfo, Dictionary<int, FbxCluster> boneIndexToCluster)
         {
-            HashSet<int> visitedVertices = new HashSet<int> ();
+            var mesh = meshInfo.mesh;
+            // Get the number of bone weights per vertex
+            var bonesPerVertex = mesh.GetBonesPerVertex();
+            if (bonesPerVertex.Length == 0)
+            {
+                // no bone weights to set
+                return;
+            }
 
-            // set the vertex weights for each bone
-            for (int i = 0; i < meshInfo.BoneWeights.Length; i++) {
-                var actualIndex = ControlPointToIndex [meshInfo.Vertices [i]];
+            HashSet<int> visitedVertices = new HashSet<int>();
 
-                if (visitedVertices.Contains (actualIndex)) {
+            // Get all the bone weights, in vertex index order
+            // Note: this contains all the bone weights for all vertices.
+            //       Use number of bonesPerVertex to determine where weights end
+            //       for one vertex and begin for another.
+            var boneWeights1 = mesh.GetAllBoneWeights();
+
+            // Keep track of where we are in the array of BoneWeights, as we iterate over the vertices
+            var boneWeightIndex = 0;
+
+            for (var vertIndex = 0; vertIndex < meshInfo.VertexCount; vertIndex++)
+            {
+                // Get the index into the list of vertices without duplicates
+                var actualIndex = ControlPointToIndex[meshInfo.Vertices[vertIndex]];
+
+                var numberOfBonesForThisVertex = bonesPerVertex[vertIndex];
+
+                if (visitedVertices.Contains(actualIndex))
+                {
+                    // skip duplicate vertex
+                    boneWeightIndex += numberOfBonesForThisVertex;
                     continue;
                 }
-                visitedVertices.Add (actualIndex);
+                visitedVertices.Add(actualIndex);
 
-                var boneWeights = meshInfo.BoneWeights;
-                int[] indices = {
-                    boneWeights [i].boneIndex0,
-                    boneWeights [i].boneIndex1,
-                    boneWeights [i].boneIndex2,
-                    boneWeights [i].boneIndex3
-                };
-                float[] weights = {
-                    boneWeights [i].weight0,
-                    boneWeights [i].weight1,
-                    boneWeights [i].weight2,
-                    boneWeights [i].weight3
-                };
+                // For each vertex, iterate over its BoneWeights
+                for (var i = 0; i < numberOfBonesForThisVertex; i++)
+                {
+                    var currentBoneWeight = boneWeights1[boneWeightIndex];
 
-                for (int j = 0; j < indices.Length; j++) {
-                    if (weights [j] <= 0) {
+                    // bone index is index into skinnedmesh.bones[]
+                    var boneIndex = currentBoneWeight.boneIndex;
+                    // how much influence does this bone have on vertex at vertIndex
+                    var weight = currentBoneWeight.weight;
+
+                    if (weight <= 0)
+                    {
                         continue;
                     }
-                    if (!boneCluster.ContainsKey (indices [j])) {
+
+                    // get the right cluster
+                    FbxCluster boneCluster;
+                    if (!boneIndexToCluster.TryGetValue(boneIndex, out boneCluster))
+                    {
                         continue;
                     }
                     // add vertex and weighting on vertex to this bone's cluster
-                    boneCluster [indices [j]].AddControlPointIndex (actualIndex, weights [j]);
+                    boneCluster.AddControlPointIndex(actualIndex, weight);
+
+                    boneWeightIndex++;
                 }
             }
         }
@@ -4170,15 +4194,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// None are missing materials (we replace missing materials with the default material).
             /// </summary>
             public Material[] Materials { get ; private set; }
-
-            private BoneWeight[] m_boneWeights;
-            public BoneWeight[] BoneWeights { get {
-                    if (m_boneWeights == null) {
-                        m_boneWeights = mesh.boneWeights;
-                    }
-                    return m_boneWeights; 
-                }
-            }
 
             /// <summary>
             /// Set up the MeshInfo with the given mesh and materials.
