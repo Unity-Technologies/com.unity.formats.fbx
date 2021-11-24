@@ -1,6 +1,6 @@
 # FbxExporters
 
-Copyright (c) 2018 Unity Technologies. All rights reserved.
+Copyright (c) 2021 Unity Technologies. All rights reserved.
 
 See LICENSE.md file in the project root for full license information.
 
