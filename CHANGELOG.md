@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Added the ability to export meshes using more than 4 skin weights per vertex.
+- Added export options to Keep Instances and Embed Textures. Thank you to @hybridherbst for the additions.
 
 ## [4.1.1] - 2021-09-03
 ### Changed

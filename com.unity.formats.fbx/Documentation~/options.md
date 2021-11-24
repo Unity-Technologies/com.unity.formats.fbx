@@ -33,7 +33,8 @@ Use the Fbx Export Settings window to:
 | **Compatible Naming**  |  | Enable this option to make the FBX Exporter rename GameObjects and Materials on export, according to specific [character replacement rules](#compatible-naming-rules).<br /><br />This ensures a compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and Autodesk® Maya® and Autodesk® Maya LT™. |
 | **Export Unrendered**  |  | Enable this option to export meshes that don't have a renderer component or that have a disabled renderer component.<br/><br/>For example, a simplified mesh used as a Mesh collider. |
 |**Preserve Import Settings**  |  | Enable this option to preserve all import settings applied to an existing FBX that is overwritten in the export. If the FBX Exporter exports the GameObject as a new FBX, the import settings are not carried over. |
-
+| **Keep Instances** | | Enable this option to export multiple copies of the same Mesh as instances.<br/>If unchecked, the FBX Exporter exports all Meshes as unique. |
+| **Embed Textures** | | Enable this option to embed textures in the exported FBX. |
 
 #### Convert to Prefab Options
 | Property | Function |
