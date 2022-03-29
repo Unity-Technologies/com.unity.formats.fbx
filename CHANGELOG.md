@@ -1,6 +1,7 @@
 # Changes in Fbx Exporter
 
-## Unreleased
+## [4.2.0-pre.1] - 2022-04-20
+### Changed
 - Added the ability to export meshes using more than 4 skin weights per vertex.
 - Added export options to Keep Instances and Embed Textures. Thank you to @hybridherbst for the additions.
 
