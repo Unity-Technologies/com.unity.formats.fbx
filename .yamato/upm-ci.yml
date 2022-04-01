@@ -1,12 +1,10 @@
 test_trigger_editors:
   - version: 2019.4
   - version: 2020.3
-  - version: 2021.1
   - version: 2021.2
 publish_trigger_editors:
   - version: 2019.4
   - version: 2020.3
-  - version: 2021.1
   - version: 2021.2
 platforms:
   - name: win
@@ -96,6 +94,24 @@ test_trigger:
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
 {% endfor %}
 {% endfor %}
+
+nightly_test_trigger:
+  name: Nightly tests Trigger
+  triggers:
+    recurring:
+      - branch: master
+        frequency: daily
+        rerun: always
+      - branch: "release/*"
+        frequency: daily
+        rerun: always
+  dependencies:
+    - .yamato/upm-ci.yml#pack
+      {% for editor in test_trigger_editors %}
+      {% for platform in platforms %}
+    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+      {% endfor %}
+      {% endfor %}
 
 publish_test_trigger:
   name: Publish Tests Trigger
