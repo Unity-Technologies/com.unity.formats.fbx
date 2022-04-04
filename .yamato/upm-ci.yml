@@ -1,11 +1,11 @@
 test_trigger_editors:
   - version: 2019.4
   - version: 2020.3
-  - version: 2021.2
+  - version: 2021.1
 publish_trigger_editors:
   - version: 2019.4
   - version: 2020.3
-  - version: 2021.2
+  - version: 2021.1
 platforms:
   - name: win
     type: Unity::VM
