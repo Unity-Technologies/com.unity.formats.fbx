@@ -225,8 +225,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         protected Object[] ToExport { get; set; }
-        protected Object[] GetToExport(){ return ToExport; }
-        protected void SetToExport(Object[] value){ ToExport = value; }
 
         protected virtual void OnEnable(){
             #if UNITY_2018_1_OR_NEWER
@@ -276,7 +274,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected bool SelectionContainsPrefabInstanceWithAddedObjects()
         {
-            var exportSet = GetToExport();
+            var exportSet = ToExport;
             // FBX-60 (fogbug 1307749):
             // On Linux OnGUI() sometimes gets called a few times before
             // the export set is set and window.show() is called.
@@ -822,10 +820,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected string DefaultFilename {
             get
             {
-                var filename = "";
-                if (GetToExport().Length == 1)
+                string filename;
+                if (ToExport.Length == 1)
                 {
-                    filename = GetToExport()[0].name;
+                    filename = ToExport[0].name;
                 }
                 else
                 {
@@ -881,7 +879,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             else
             {
-                exportResult = ModelExporter.ExportObjects(filePath, GetToExport(), SettingsObject);
+                exportResult = ModelExporter.ExportObjects(filePath, ToExport, SettingsObject);
             }
 
             if (!string.IsNullOrEmpty(exportResult))
