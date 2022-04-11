@@ -4019,7 +4019,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <param name="command">Command.</param>
         [MenuItem (MenuItemName, false, 30)]
-        static void OnContextItem (MenuCommand command)
+        internal static void OnContextItem (MenuCommand command)
         {
             if (Selection.objects.Length <= 0) {
                 DisplayNoSelectionDialog ();
@@ -4556,6 +4556,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return ExportObjects(filePath, new Object[] {singleObject}, exportOptions: null);
         }
 
+        /// <summary>
+        /// Exports the animation from a single TimelineClip to an FBX file.
+        /// </summary>
+        /// <param name="filePath">Absolute file path to use for the FBX file.</param>
+        /// <param name="timelineClip">The TimelineClip to export.</param>
+        /// <param name="exportOptions">The export options to use.</param>
+        /// <returns>The FBX file path if successful; otherwise null.</returns>
         [SecurityPermission(SecurityAction.LinkDemand)]
         internal static string ExportTimelineClip(string filePath, TimelineClip timelineClip, IExportOptions exportOptions = null)
         {

@@ -1,5 +1,4 @@
-﻿using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Timeline;
 using System.Collections.Generic;
 
@@ -162,9 +161,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get the GameObject and it's corresponding animation clip from the given editor clip.
+        /// Get the GameObject and it's corresponding animation clip from the given timeline clip.
         /// </summary>
-        /// <param name="editorClip"></param>
+        /// <param name="timelineClip"></param>
         /// <returns>KeyValuePair containing GameObject and corresponding AnimationClip</returns>
         public static KeyValuePair<GameObject, AnimationClip> GetGameObjectAndAnimationClip(TimelineClip timelineClip)
         {
@@ -177,6 +176,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return new KeyValuePair<GameObject, AnimationClip>(animationTrackGO, timelineClip.animationClip);
         }
 
+        /// <summary>
+        /// Get the filename of the format {model}@{anim}.fbx from the given timeline clip
+        /// </summary>
+        /// <param name="timelineClip"></param>
+        /// <returns>filename for use for exporting animation clip</returns>
         public static string GetFileName(TimelineClip timelineClip)
         {
             // if the timeline clip name already contains an @, then take this as the
@@ -192,16 +196,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return timelineClip.displayName;
             }
             return string.Format("{0}@{1}", goBound.name, timelineClip.displayName);
-        }
-
-        /// <summary>
-        /// Get the filename of the format {model}@{anim}.fbx from the given object
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns>filename for use for exporting animation clip</returns>
-        public static string GetFileName(Object obj)
-        {
-            return obj.name;
         }
     }
 }
