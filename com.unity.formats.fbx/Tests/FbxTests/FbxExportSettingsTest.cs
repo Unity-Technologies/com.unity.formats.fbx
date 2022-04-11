@@ -618,7 +618,7 @@ namespace FbxExporter.UnitTests
             // create an empty object to have something in the export set
             var go = new GameObject("temp");
 
-            var exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
+            var exportWindow = ExportModelEditorWindow.Init(new Object[] { go });
             // clear any previous settings
             exportWindow.ResetSessionSettings();
             Assert.That(exportWindow.ExportModelSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(exportSettingsPreset.info.AnimateSkinnedMesh));
@@ -630,7 +630,7 @@ namespace FbxExporter.UnitTests
             Preset.RemoveFromDefault(preset);
             Assert.That(Preset.GetDefaultPresetsForType(type), Is.Empty);
 
-            exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
+            exportWindow = ExportModelEditorWindow.Init(new Object[] { go });
             // clear any previous settings
             exportWindow.ResetSessionSettings();
             Assert.That(exportWindow.ExportModelSettingsInstance.info.AnimateSkinnedMesh, Is.EqualTo(instance.ExportModelSettings.info.AnimateSkinnedMesh));
@@ -642,7 +642,7 @@ namespace FbxExporter.UnitTests
             exportWindow.SaveExportSettings();
 
             exportWindow.Close();
-            exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
+            exportWindow = ExportModelEditorWindow.Init(new Object[] { go });
 
             Assert.That(exportWindow.ExportModelSettingsInstance.info.AnimateSkinnedMesh, Is.Not.EqualTo(instance.ExportModelSettings.info.AnimateSkinnedMesh));
             Assert.That(exportWindow.ExportModelSettingsInstance.info.ExportFormat, Is.Not.EqualTo(instance.ExportModelSettings.info.ExportFormat));
@@ -721,7 +721,7 @@ namespace FbxExporter.UnitTests
             var instance = ExportSettings.instance;
 
             var go = new GameObject("temp");
-            var exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
+            var exportWindow = ExportModelEditorWindow.Init(new Object[] { go });
             // clear any previous settings
             exportWindow.ResetSessionSettings();
             var savePathCount = exportWindow.FbxSavePaths.Count;
@@ -758,7 +758,7 @@ namespace FbxExporter.UnitTests
         {
             var instance = ExportSettings.instance;
             var go = new GameObject("temp");
-            var exportWindow = ExportModelEditorWindow.Init(new Object[] { go }, isTimelineAnim: false);
+            var exportWindow = ExportModelEditorWindow.Init(new Object[] { go });
             var convertWindow = ConvertToPrefabEditorWindow.Init(new GameObject[] { go });
 
             // test export window reset
