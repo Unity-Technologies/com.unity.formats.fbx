@@ -132,17 +132,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get the timeline clip from the given editor clip using reflection.
-        /// </summary>
-        /// <param name="editorClip"></param>
-        /// <returns>the timeline clip or null if none</returns>
-        private static TimelineClip GetTimelineClipFromEditorClip(object editorClip)
-        {
-            object clip = editorClip.GetType().GetProperty("clip").GetValue(editorClip, null);
-            return clip as TimelineClip;
-        }
-
-        /// <summary>
         /// Get the GameObject that the clip is bound to in the timeline.
         /// </summary>
         /// <param name="timelineClip"></param>
@@ -177,20 +166,32 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <param name="editorClip"></param>
         /// <returns>KeyValuePair containing GameObject and corresponding AnimationClip</returns>
-        public static KeyValuePair<GameObject, AnimationClip> GetGameObjectAndAnimationClip(Object editorClip)
+        public static KeyValuePair<GameObject, AnimationClip> GetGameObjectAndAnimationClip(TimelineClip timelineClip)
         {
-            if (!ModelExporter.IsEditorClip(editorClip))
-                return new KeyValuePair<GameObject, AnimationClip>();
-            
-            TimelineClip timeLineClip = GetTimelineClipFromEditorClip(editorClip);
-
-            var animationTrackGO = GetGameObjectBoundToTimelineClip(timeLineClip);
-            if (animationTrackGO == null)
+            var animationTrackGO = GetGameObjectBoundToTimelineClip(timelineClip);
+            if (!animationTrackGO)
             {
                 return new KeyValuePair<GameObject, AnimationClip>();
             }
 
-            return new KeyValuePair<GameObject, AnimationClip>(animationTrackGO, timeLineClip.animationClip);
+            return new KeyValuePair<GameObject, AnimationClip>(animationTrackGO, timelineClip.animationClip);
+        }
+
+        public static string GetFileName(TimelineClip timelineClip)
+        {
+            // if the timeline clip name already contains an @, then take this as the
+            // filename to avoid duplicate @
+            if (timelineClip.displayName.Contains("@"))
+            {
+                return timelineClip.displayName;
+            }
+
+            var goBound = GetGameObjectBoundToTimelineClip(timelineClip);
+            if (goBound == null)
+            {
+                return timelineClip.displayName;
+            }
+            return string.Format("{0}@{1}", goBound.name, timelineClip.displayName);
         }
 
         /// <summary>
@@ -200,27 +201,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>filename for use for exporting animation clip</returns>
         public static string GetFileName(Object obj)
         {
-            if (!ModelExporter.IsEditorClip(obj))
-            {
-                // not an editor clip so just return the name of the object
-                return obj.name;
-            }
-
-            TimelineClip timeLineClip = GetTimelineClipFromEditorClip(obj);
-
-            // if the timeline clip name already contains an @, then take this as the
-            // filename to avoid duplicate @
-            if (timeLineClip.displayName.Contains("@"))
-            {
-                return timeLineClip.displayName;
-            }
-
-            var goBound = GetGameObjectBoundToTimelineClip(timeLineClip);
-            if (goBound == null)
-            {
-                return obj.name;
-            }
-            return string.Format("{0}@{1}", goBound.name, timeLineClip.displayName);
+            return obj.name;
         }
     }
 }

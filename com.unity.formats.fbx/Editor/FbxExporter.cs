@@ -3251,30 +3251,49 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         [SecurityPermission(SecurityAction.LinkDemand)]
+        internal static Dictionary<GameObject, IExportData> GetExportData(TimelineClip timelineClip, IExportOptions exportOptions = null)
+        {
+            if(timelineClip == null)
+            {
+                return null;
+            }
+
+            if (exportOptions == null)
+                exportOptions = DefaultOptions;
+            Debug.Assert(exportOptions != null);
+
+            // only support anim only export for timeline clips
+            if (exportOptions.ModelAnimIncludeOption != ExportSettings.Include.Anim)
+            {
+                return null;
+            }
+
+            Dictionary<GameObject, IExportData> exportData = new Dictionary<GameObject, IExportData>();
+            KeyValuePair<GameObject, AnimationClip> pair = AnimationOnlyExportData.GetGameObjectAndAnimationClip(timelineClip);
+            exportData[pair.Key] = GetExportData(pair.Key, pair.Value, exportOptions);
+
+            return exportData;
+        }
+
+        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static Dictionary<GameObject, IExportData> GetExportData(Object[] objects, IExportOptions exportOptions = null)
         {
             if (exportOptions==null)
                 exportOptions = DefaultOptions;
             Debug.Assert(exportOptions!=null);
 
-            Dictionary<GameObject, IExportData>  exportData = new Dictionary<GameObject, IExportData>();
-
             if (exportOptions.ModelAnimIncludeOption == ExportSettings.Include.Model)
             {
                 return null;
             }
 
+            Dictionary<GameObject, IExportData> exportData = new Dictionary<GameObject, IExportData>();
             foreach (var obj in objects) 
             {
                 GameObject go = ModelExporter.GetGameObject (obj);
                 if (go)
                 {
                     exportData[go] = GetExportData(go, exportOptions);
-                }
-                else if (IsEditorClip(obj)) 
-                {
-                    KeyValuePair<GameObject, AnimationClip> pair = AnimationOnlyExportData.GetGameObjectAndAnimationClip(obj);
-                    exportData[pair.Key] = GetExportData (pair.Key, pair.Value, exportOptions);
                 }
             }
 
@@ -3966,6 +3985,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
+        public class TestObject : Object
+        {
+            public TimelineClip clip;
+        }
+
         /// <summary>
         /// GameObject/Export Selected Timeline Clip...
         /// </summary>
@@ -3973,15 +3997,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 		[MenuItem(TimelineClipMenuItemName, false, 31)]
         static void OnClipContextClick(MenuCommand command)
         {
-            Object[] selectedObjects = Selection.objects;
+            TimelineClip[] selectedClips = TimelineEditor.selectedClips;
 
-            foreach (Object editorClipSelected in selectedObjects)
+            foreach (var timelineClip in selectedClips)
             {
-                // export first selected editor clip.
-                if (IsEditorClip(editorClipSelected)) {
-                    ExportSingleTimelineClip(editorClipSelected);
-                    return;
-                }
+                ExportSingleTimelineClip(timelineClip);
+                return;
             }
         }
 
@@ -4000,21 +4021,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return false;
         }
 
-        internal static bool IsEditorClip(object obj)
+        internal static void ExportSingleTimelineClip(TimelineClip timelineClip)
         {
-            if (obj == null)
-                return false;
-
-            return obj.GetType().Name.Contains("EditorClip");
-        }
-
-        internal static void ExportSingleTimelineClip(Object editorClipSelected)
-        {
-            UnityEngine.Object[] exportArray = new UnityEngine.Object[] { editorClipSelected };
-            string filename = AnimationOnlyExportData.GetFileName(editorClipSelected);
+            string filename = AnimationOnlyExportData.GetFileName(timelineClip);
             if (ExportSettings.DisplayOptionsWindow)
             {
-                ExportModelEditorWindow.Init(exportArray, filename, isTimelineAnim: true);
+                ExportModelEditorWindow.Init(null, filename, timelineClip);
                 return;
             }
 
@@ -4030,7 +4042,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var previousInclude = ExportSettings.instance.ExportModelSettings.info.ModelAnimIncludeOption;
             ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
 
-            if (ExportObjects(filePath, exportArray, ExportSettings.instance.ExportModelSettings.info) != null)
+            if(ExportTimelineClip(filePath, timelineClip, ExportSettings.instance.ExportModelSettings.info) != null)
             {
                 // refresh the asset database so that the file appears in the
                 // asset folder view.
@@ -4513,11 +4525,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var toExport = ModelExporter.RemoveRedundantObjects(selectedGOs);
             if (ExportSettings.instance.DisplayOptionsWindow)
             {
-                ExportModelEditorWindow.Init(System.Linq.Enumerable.Cast<UnityEngine.Object>(toExport), isTimelineAnim: false);
+                ExportModelEditorWindow.Init(System.Linq.Enumerable.Cast<UnityEngine.Object>(toExport));
                 return;
             }
 
-            var filename = "";
+            string filename;
             if (toExport.Count == 1)
             {
                 filename = toExport.ToArray()[0].name;
@@ -4582,6 +4594,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return ExportObjects(filePath, new Object[] {singleObject}, exportOptions: null);
         }
 
+        [SecurityPermission(SecurityAction.LinkDemand)]
+        internal static string ExportTimelineClip(string filePath, TimelineClip timelineClip, IExportOptions exportOptions = null)
+        {
+            var exportData = ModelExporter.GetExportData(timelineClip, exportOptions);
+            return ExportObjects(filePath, null, exportOptions: exportOptions, exportData: exportData);
+        }
+
         /// <summary>
         /// Exports a list of GameObjects to an FBX file. 
         /// <para>
@@ -4607,8 +4626,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     objects = Selection.objects;
                 }
 
-                if (exportData==null)
-                    exportData = ModelExporter.GetExportData (objects, exportOptions);
+                if (exportData == null)
+                {
+                    exportData = ModelExporter.GetExportData(objects, exportOptions);
+                }
 
                 if (fbxExporter.ExportAll (objects, exportData) > 0) {
                     string message = string.Format ("Successfully exported: {0}", filePath);
