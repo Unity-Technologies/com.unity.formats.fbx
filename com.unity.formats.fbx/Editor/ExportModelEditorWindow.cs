@@ -663,7 +663,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
                 if (ToExport != null && ToExport.Length > 0) 
                 { 
-                    return ModelExporter.GetGameObject(GetToExport()[0]);
+                    return ModelExporter.GetGameObject(ToExport[0]);
                 }
                 return null;
             }
@@ -674,7 +674,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // don't transfer animation if we are exporting more than one hierarchy, the timeline clips from
                 // a playable director, or if only the model is being exported
                 // if we are on the timeline then export length can be more than 1
-                return (!IsTimelineAnim && (GetToExport() == null || GetToExport().Length == 0)) || (!IsTimelineAnim && GetToExport().Length > 1) || SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model;
+                return SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model || (!IsTimelineAnim && (ToExport == null || ToExport.Length != 1));
             }
         }
 
