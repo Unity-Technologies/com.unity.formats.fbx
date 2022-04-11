@@ -89,8 +89,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         //       being called only once regardless of what is selected.
         const string MenuItemName = "GameObject/Export To FBX...";
 
-        const string TimelineClipMenuItemName = "GameObject/Export Selected Timeline Clip...";
-
         const string ProgressBarTitle = "FBX Export";
 
         const char MayaNamespaceSeparator = ':';
@@ -3983,42 +3981,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             } catch(IOException) {
                 Debug.LogWarning (string.Format("Failed to copy file {0} to {1}. Import settings will be reset to default values.", metafilePath, m_lastFilePath));
             }
-        }
-
-        public class TestObject : Object
-        {
-            public TimelineClip clip;
-        }
-
-        /// <summary>
-        /// GameObject/Export Selected Timeline Clip...
-        /// </summary>
-        /// <param name="command"></param>
-		[MenuItem(TimelineClipMenuItemName, false, 31)]
-        static void OnClipContextClick(MenuCommand command)
-        {
-            TimelineClip[] selectedClips = TimelineEditor.selectedClips;
-
-            foreach (var timelineClip in selectedClips)
-            {
-                ExportSingleTimelineClip(timelineClip);
-                return;
-            }
-        }
-
-        /// <summary>
-        /// Validate the menu item defined by the function OnClipContextClick.
-        /// </summary>
-        [MenuItem(TimelineClipMenuItemName, true, 31)]
-        static bool ValidateOnClipContextClick()
-        {
-            TimelineClip[] selectedClips = TimelineEditor.selectedClips;
-            
-            if(selectedClips != null && selectedClips.Length > 0)
-            {
-                return true;
-            }
-            return false;
         }
 
         internal static void ExportSingleTimelineClip(TimelineClip timelineClip)
