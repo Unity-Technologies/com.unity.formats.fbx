@@ -150,8 +150,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             Object animationTrackObject = inspectedDirector.GetGenericBinding(animTrack);
 
-            //Timeline.TimelineEditor.GetOrCreateWindow().Repaint();
-
             GameObject animationTrackGO = null;
             if (animationTrackObject is GameObject)
             {

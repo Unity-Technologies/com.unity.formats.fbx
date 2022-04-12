@@ -3264,6 +3264,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // only support anim only export for timeline clips
             if (exportOptions.ModelAnimIncludeOption != ExportSettings.Include.Anim)
             {
+                Debug.LogWarning("Timeline clips must be exported with Anim only include option");
                 return null;
             }
 
