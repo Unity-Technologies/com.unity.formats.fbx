@@ -3268,7 +3268,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             Dictionary<GameObject, IExportData> exportData = new Dictionary<GameObject, IExportData>();
             KeyValuePair<GameObject, AnimationClip> pair = AnimationOnlyExportData.GetGameObjectAndAnimationClip(timelineClip);
-            exportData[pair.Key] = GetExportData(pair.Key, pair.Value, exportOptions);
+            var boundGo = pair.Key;
+            if(boundGo == null)
+            {
+                return null;
+            }
+            exportData[boundGo] = GetExportData(boundGo, pair.Value, exportOptions);
 
             return exportData;
         }
@@ -3301,6 +3306,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         [SecurityPermission(SecurityAction.LinkDemand)]
         internal static IExportData GetExportData(GameObject rootObject, AnimationClip animationClip, IExportOptions exportOptions = null)
         {
+            if(rootObject == null || animationClip == null)
+            {
+                return null;
+            }
+
             if (exportOptions==null)
                 exportOptions = DefaultOptions;
             Debug.Assert(exportOptions!=null);

@@ -139,8 +139,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             object parentTrack = timelineClip.GetParentTrack();
             AnimationTrack animTrack = parentTrack as AnimationTrack;
-            
-            Object animationTrackObject = UnityEditor.Timeline.TimelineEditor.inspectedDirector.GetGenericBinding(animTrack);
+
+            var inspectedDirector = UnityEditor.Timeline.TimelineEditor.inspectedDirector;
+            if (!inspectedDirector)
+            {
+                Debug.LogWarning("No Timeline selected in inspector, cannot retrieve GameObject bound to track");
+                return null;
+            }
+
+            Object animationTrackObject = inspectedDirector.GetGenericBinding(animTrack);
 
             GameObject animationTrackGO = null;
             if (animationTrackObject is GameObject)
