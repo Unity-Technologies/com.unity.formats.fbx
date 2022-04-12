@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Timeline;
 using System.Collections.Generic;
+using UnityEngine.Playables;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -135,12 +136,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <param name="timelineClip"></param>
         /// <returns>The GameObject bound to the timeline clip or null if none.</returns>
-        private static GameObject GetGameObjectBoundToTimelineClip(TimelineClip timelineClip)
+        private static GameObject GetGameObjectBoundToTimelineClip(TimelineClip timelineClip, PlayableDirector director = null)
         {
             object parentTrack = timelineClip.GetParentTrack();
             AnimationTrack animTrack = parentTrack as AnimationTrack;
 
-            var inspectedDirector = UnityEditor.Timeline.TimelineEditor.inspectedDirector;
+            var inspectedDirector = director? director : UnityEditor.Timeline.TimelineEditor.inspectedDirector;
             if (!inspectedDirector)
             {
                 Debug.LogWarning("No Timeline selected in inspector, cannot retrieve GameObject bound to track");
@@ -148,6 +149,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             Object animationTrackObject = inspectedDirector.GetGenericBinding(animTrack);
+
+            //Timeline.TimelineEditor.GetOrCreateWindow().Repaint();
 
             GameObject animationTrackGO = null;
             if (animationTrackObject is GameObject)
@@ -172,9 +175,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <param name="timelineClip"></param>
         /// <returns>KeyValuePair containing GameObject and corresponding AnimationClip</returns>
-        public static KeyValuePair<GameObject, AnimationClip> GetGameObjectAndAnimationClip(TimelineClip timelineClip)
+        public static KeyValuePair<GameObject, AnimationClip> GetGameObjectAndAnimationClip(TimelineClip timelineClip, PlayableDirector director = null)
         {
-            var animationTrackGO = GetGameObjectBoundToTimelineClip(timelineClip);
+            var animationTrackGO = GetGameObjectBoundToTimelineClip(timelineClip, director);
             if (!animationTrackGO)
             {
                 return new KeyValuePair<GameObject, AnimationClip>();

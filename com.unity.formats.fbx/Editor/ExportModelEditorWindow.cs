@@ -6,6 +6,8 @@ using UnityEditor.Presets;
 using System.Linq;
 using System.Security.Permissions;
 using UnityEngine.Timeline;
+using UnityEngine.Playables;
+using UnityEditor.Timeline;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -685,6 +687,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         protected TimelineClip TimelineClipToExport { get; set; }
+        protected PlayableDirector PlayableDirector { get; set; }
 
         private bool m_isTimelineAnim = false;
         protected bool IsTimelineAnim {
@@ -782,12 +785,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private ExportSettings.Include m_previousInclude = ExportSettings.Include.ModelAndAnim;
 
-        public static ExportModelEditorWindow Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", TimelineClip timelineClip = null)
+        public static ExportModelEditorWindow Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", TimelineClip timelineClip = null, PlayableDirector director = null)
         {
             ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
             window.IsTimelineAnim = (timelineClip != null);
             window.TimelineClipToExport = timelineClip;
-            
+            window.PlayableDirector = director? director : TimelineEditor.inspectedDirector;
+
 
             int numObjects = window.SetGameObjectsToExport (toExport);
             if (string.IsNullOrEmpty (filename)) {
@@ -883,7 +887,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             string exportResult;
             if (IsTimelineAnim)
             {
-                exportResult = ModelExporter.ExportTimelineClip(filePath, TimelineClipToExport, SettingsObject);
+                exportResult = ModelExporter.ExportTimelineClip(filePath, TimelineClipToExport, PlayableDirector, SettingsObject);
             }
             else
             {

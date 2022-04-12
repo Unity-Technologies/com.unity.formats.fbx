@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using UnityEditor.Formats.Fbx.Exporter.Visitors;
 using System.Security.Permissions;
+using UnityEngine.Playables;
 
 [assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editor.Tests")]  
 [assembly: InternalsVisibleTo("Unity.ProBuilder.AddOns.Editor")]  
@@ -3249,7 +3250,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         [SecurityPermission(SecurityAction.LinkDemand)]
-        internal static Dictionary<GameObject, IExportData> GetExportData(TimelineClip timelineClip, IExportOptions exportOptions = null)
+        internal static Dictionary<GameObject, IExportData> GetExportData(TimelineClip timelineClip, PlayableDirector director = null, IExportOptions exportOptions = null)
         {
             if(timelineClip == null)
             {
@@ -3267,7 +3268,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             Dictionary<GameObject, IExportData> exportData = new Dictionary<GameObject, IExportData>();
-            KeyValuePair<GameObject, AnimationClip> pair = AnimationOnlyExportData.GetGameObjectAndAnimationClip(timelineClip);
+            KeyValuePair<GameObject, AnimationClip> pair = AnimationOnlyExportData.GetGameObjectAndAnimationClip(timelineClip, director);
             var boundGo = pair.Key;
             if(boundGo == null)
             {
@@ -3993,12 +3994,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        internal static void ExportSingleTimelineClip(TimelineClip timelineClip)
+        internal static void ExportSingleTimelineClip(TimelineClip timelineClip, PlayableDirector director = null)
         {
             string filename = AnimationOnlyExportData.GetFileName(timelineClip);
             if (ExportSettings.DisplayOptionsWindow)
             {
-                ExportModelEditorWindow.Init(null, filename, timelineClip);
+                ExportModelEditorWindow.Init(null, filename, timelineClip, director);
                 return;
             }
 
@@ -4014,7 +4015,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var previousInclude = ExportSettings.instance.ExportModelSettings.info.ModelAnimIncludeOption;
             ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
 
-            if(ExportTimelineClip(filePath, timelineClip, ExportSettings.instance.ExportModelSettings.info) != null)
+            if(ExportTimelineClip(filePath, timelineClip, director, ExportSettings.instance.ExportModelSettings.info) != null)
             {
                 // refresh the asset database so that the file appears in the
                 // asset folder view.
@@ -4574,9 +4575,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="exportOptions">The export options to use.</param>
         /// <returns>The FBX file path if successful; otherwise null.</returns>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        internal static string ExportTimelineClip(string filePath, TimelineClip timelineClip, IExportOptions exportOptions = null)
+        internal static string ExportTimelineClip(string filePath, TimelineClip timelineClip, PlayableDirector director = null, IExportOptions exportOptions = null)
         {
-            var exportData = ModelExporter.GetExportData(timelineClip, exportOptions);
+            var exportData = ModelExporter.GetExportData(timelineClip, director, exportOptions);
             return ExportObjects(filePath, null, exportOptions: exportOptions, exportData: exportData);
         }
 

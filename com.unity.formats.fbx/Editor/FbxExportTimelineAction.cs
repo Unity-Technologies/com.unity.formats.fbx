@@ -3,6 +3,8 @@ using JetBrains.Annotations;
 using UnityEditor.Timeline.Actions;
 using UnityEngine.Timeline;
 using System.Linq;
+using UnityEngine.Playables;
+using UnityEditor.Timeline;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -11,7 +13,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
     {
         public override bool Execute(IEnumerable<TimelineClip> clips)
         {
-            ModelExporter.ExportSingleTimelineClip(clips.First());
+            PlayableDirector director = TimelineEditor.inspectedDirector;
+            ModelExporter.ExportSingleTimelineClip(clips.First(), director);
             return true;
         }
 
