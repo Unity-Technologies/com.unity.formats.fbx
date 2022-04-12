@@ -4,6 +4,10 @@
 ### Changed
 - Added export options to Keep Instances and Embed Textures. Thank you to @hybridherbst for the additions.
 
+### Fixed
+- Removed setting export file version to 2014. Originally added for Blender compatibility, 
+  however this version used 32bit offsets and does not support exporting large binary files.
+
 ## [4.1.2] - 2021-09-19
 ### Changed
 - Added the ability to export meshes using more than 4 skin weights per vertex.
