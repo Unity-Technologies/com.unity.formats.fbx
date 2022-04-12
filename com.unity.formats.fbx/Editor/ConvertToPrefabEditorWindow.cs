@@ -21,14 +21,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             get
             {
-                return (ToExport != null && ToExport.Length > 1);
+                var toExport = ToExport;
+                return (toExport != null && toExport.Length > 1);
             }
         }
         protected override bool DisableTransferAnim
         {
             get
             {
-                return ToExport == null || ToExport.Length > 1;
+                var toExport = ToExport;
+                return toExport == null || toExport.Length > 1;
             }
         }
 
@@ -48,10 +50,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             TransferAnimationSource = null;
             TransferAnimationDest = null;
 
+            var toExport = ToExport;
             string fbxFileName = null;
-            if (ToExport.Length == 1)
+            if (toExport.Length == 1)
             {
-                var go = ModelExporter.GetGameObject(ToExport[0]);
+                var go = ModelExporter.GetGameObject(toExport[0]);
                 // check if the GameObject is a model instance, use as default filename and path if it is
                 GameObject mainAsset = ConvertToNestedPrefab.GetFbxAssetOrNull(go);
                 if (!mainAsset)
@@ -85,7 +88,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     TransferAnimationDest = go.transform;
                 }
             }
-            else if (ToExport.Length > 1)
+            else if (toExport.Length > 1)
             {
                 m_prefabFileName = "(automatic)";
             }
