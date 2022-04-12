@@ -381,14 +381,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
 
+        protected GameObject m_firstGameObjectToExport;
         protected virtual GameObject FirstGameObjectToExport
         {
             get {
-                if(ToExport == null || ToExport.Length == 0)
+                if (!m_firstGameObjectToExport)
                 {
-                    return null;
+                    if (ToExport == null || ToExport.Length == 0)
+                    {
+                        return null;
+                    }
+                    m_firstGameObjectToExport = ModelExporter.GetGameObject(ToExport[0]);
                 }
-                return ModelExporter.GetGameObject(ToExport[0]);
+                return m_firstGameObjectToExport;
             }
         }
 
@@ -655,15 +660,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             get
             {
-                if (IsTimelineAnim)
+                if (!m_firstGameObjectToExport)
                 {
-                    return AnimationOnlyExportData.GetGameObjectAndAnimationClip(TimelineClipToExport).Key;
+                    if (IsTimelineAnim)
+                    {
+                        m_firstGameObjectToExport = AnimationOnlyExportData.GetGameObjectAndAnimationClip(TimelineClipToExport).Key;
+                    }
+                    else if (ToExport != null && ToExport.Length > 0)
+                    {
+                        m_firstGameObjectToExport = ModelExporter.GetGameObject(ToExport[0]);
+                    }
                 }
-                if (ToExport != null && ToExport.Length > 0) 
-                { 
-                    return ModelExporter.GetGameObject(ToExport[0]);
-                }
-                return null;
+                return m_firstGameObjectToExport;
             }
         }
 
