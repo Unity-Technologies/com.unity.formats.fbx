@@ -3,10 +3,7 @@
 ## [4.2.0-pre.1] - 2022-04-20
 ### Changed
 - Added export options to Keep Instances and Embed Textures. Thank you to @hybridherbst for the additions.
-
-### Fixed
-- Removed setting export file version to 2014. Originally added for Blender compatibility, 
-  however this version used 32bit offsets and does not support exporting large binary files.
+- Updated to the default file version, which allows exporting large binary FBX files. Make sure to update to Blender 2.79 or later to read these files.
 
 ## [4.1.2] - 2021-09-19
 ### Changed
