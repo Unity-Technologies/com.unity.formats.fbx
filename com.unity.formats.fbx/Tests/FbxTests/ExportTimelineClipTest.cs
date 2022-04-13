@@ -36,7 +36,7 @@ namespace FbxExporter.UnitTests
                     foreach (TimelineClip timeLineClip in at.GetClips()) {
                         Assert.That (timeLineClip.animationClip, Is.Not.Null);
 
-                        filePath = string.Format ("{0}/{1}@{2}", folderPath, atObject.name, "Recorded.fbx");
+                        filePath = $"{folderPath}/{atObject.name}@Recorded.fbx";
                         exportData[atObject] = ModelExporter.GetExportData(atObject, timeLineClip.animationClip);
                         break;
                     }
@@ -77,7 +77,7 @@ namespace FbxExporter.UnitTests
                     {
                         Assert.That(timeLineClip.animationClip, Is.Not.Null);
 
-                        filePath = string.Format("{0}/{1}@{2}", folderPath, atObject.name, "Recorded.fbx");
+                        filePath = $"{folderPath}/{atObject.name}@Recorded.fbx";
                         timelineClipToExport = timeLineClip;
                         break;
                     }
