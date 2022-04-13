@@ -8,7 +8,7 @@ using UnityEditor.Timeline;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
-    [MenuEntry("Export Clip To FBX..", MenuPriority.CustomClipActionSection.resetOffset), UsedImplicitly]
+    [MenuEntry("Export Clip To FBX...", MenuPriority.CustomClipActionSection.start + MenuPriority.separatorAt), UsedImplicitly]
     class FbxExportTimelineAction : ClipAction
     {
         public override bool Execute(IEnumerable<TimelineClip> clips)
