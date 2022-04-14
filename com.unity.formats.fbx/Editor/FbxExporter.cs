@@ -3669,9 +3669,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     if (!status)
                         return 0;
 
-                    // Set compatibility to 2014
-                    fbxExporter.SetFileExportVersion ("FBX201400");
-
                     // Set the progress callback.
                     fbxExporter.SetProgressCallback (ExportProgressCallback);
 
