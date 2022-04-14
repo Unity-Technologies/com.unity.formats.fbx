@@ -21,14 +21,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             get
             {
-                return (GetToExport() != null && GetToExport().Length > 1);
+                var toExport = ToExport;
+                return (toExport != null && toExport.Length > 1);
             }
         }
         protected override bool DisableTransferAnim
         {
             get
             {
-                return GetToExport() == null || GetToExport().Length > 1;
+                var toExport = ToExport;
+                return toExport == null || toExport.Length > 1;
             }
         }
 
@@ -43,15 +45,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected void SetGameObjectsToConvert(IEnumerable<GameObject> toConvert)
         {
-            SetToExport(toConvert.OrderBy(go => go.name).ToArray());
+            ToExport = toConvert.OrderBy(go => go.name).ToArray();
 
             TransferAnimationSource = null;
             TransferAnimationDest = null;
 
+            var toExport = ToExport;
             string fbxFileName = null;
-            if (GetToExport().Length == 1)
+            if (toExport.Length == 1)
             {
-                var go = ModelExporter.GetGameObject(GetToExport()[0]);
+                var go = ModelExporter.GetGameObject(toExport[0]);
                 // check if the GameObject is a model instance, use as default filename and path if it is
                 GameObject mainAsset = ConvertToNestedPrefab.GetFbxAssetOrNull(go);
                 if (!mainAsset)
@@ -85,7 +88,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     TransferAnimationDest = go.transform;
                 }
             }
-            else if (GetToExport().Length > 1)
+            else if (toExport.Length > 1)
             {
                 m_prefabFileName = "(automatic)";
             }
@@ -110,7 +113,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected int GetUIElementsInExportSetCount()
         {
             int count = 0;
-            foreach (var obj in GetToExport())
+            foreach (var obj in ToExport)
             {
                 var go = ModelExporter.GetGameObject(obj);
                 var rectTransforms = go.GetComponentsInChildren<RectTransform>();
@@ -121,7 +124,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected bool ExportSetContainsAnimation()
         {
-            foreach (var obj in GetToExport())
+            foreach (var obj in ToExport)
             {
                 var go = ModelExporter.GetGameObject(obj);
                 if (go.GetComponentInChildren<Animation>() || go.GetComponentInChildren<Animator>())
@@ -153,7 +156,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var prefabDirPath = ExportSettings.GetAbsoluteSavePath(PrefabSavePaths[SelectedPrefabPath]);
             var prefabPath = System.IO.Path.Combine(prefabDirPath, m_prefabFileName + ".prefab");
 
-            if (GetToExport() == null)
+            if (ToExport == null)
             {
                 Debug.LogError("FbxExporter: missing object for conversion");
                 return false;
@@ -197,9 +200,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
-            if (GetToExport().Length == 1)
+            if (ToExport.Length == 1)
             {
-                var go = ModelExporter.GetGameObject(GetToExport()[0]);
+                var go = ModelExporter.GetGameObject(ToExport[0]);
 
                 // Check if we'll be clobbering files. If so, warn the user
                 // first and let them cancel out.
@@ -222,7 +225,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return true;
             }
 
-            bool onlyPrefabAssets = ConvertToNestedPrefab.SetContainsOnlyPrefabAssets(GetToExport());
+            bool onlyPrefabAssets = ConvertToNestedPrefab.SetContainsOnlyPrefabAssets(ToExport);
             int groupIndex = -1;
             // no need to undo if we aren't converting anything that's in the scene
             if (!onlyPrefabAssets)
@@ -231,7 +234,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 groupIndex = Undo.GetCurrentGroup();
                 Undo.SetCurrentGroupName(ConvertToNestedPrefab.UndoConversionCreateObject);
             }
-            foreach (var obj in GetToExport())
+            foreach (var obj in ToExport)
             {
                 // Convert, automatically choosing a file path that won't clobber any existing files.
                 var go = ModelExporter.GetGameObject(obj);
