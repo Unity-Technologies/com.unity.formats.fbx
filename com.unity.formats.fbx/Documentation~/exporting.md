@@ -202,7 +202,7 @@ The only exception is for objects with a prerotation, such as bones of skinned m
 
 ### Exporting an animation clip from the Timeline
 
-To export an animation clip from the timeline, in the Timeline editor select the desired clip, then from the top menu select **GameObject** > **Export Selected Timeline Clip**.
+To export an animation clip from the timeline, in the Timeline editor select the desired clip, then right click on it and select **Export Clip to FBX...** from the context menu.
 
 ### Exporting animations with the FBX Recorder
 
