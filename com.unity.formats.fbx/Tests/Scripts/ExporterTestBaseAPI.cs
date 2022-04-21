@@ -222,6 +222,7 @@ namespace FbxExporter.UnitTests
         [SetUp]
         public virtual void Init()
         {
+            Undo.ClearAll();
         }
 
         /// <summary>
