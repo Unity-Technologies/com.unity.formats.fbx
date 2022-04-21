@@ -208,6 +208,8 @@ namespace FbxExporter.UnitTests
         [TearDown]
         public virtual void Term ()
         {
+            Undo.ClearAll();
+
             if (string.IsNullOrEmpty(_testDirectory)) {
                 return;
             }
@@ -220,6 +222,7 @@ namespace FbxExporter.UnitTests
         [SetUp]
         public virtual void Init()
         {
+            Undo.ClearAll();
         }
 
         /// <summary>
