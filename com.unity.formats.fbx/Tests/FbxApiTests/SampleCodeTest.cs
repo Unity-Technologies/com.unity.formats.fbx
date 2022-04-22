@@ -14,15 +14,13 @@ namespace FbxExporter.UnitTests
     public class SampleCodeTest : ExporterTestBaseAPI
     {
         // Export GameObjects sample function
-        public string ExportGameObjects(Object[] objects)
+        public static void ExportGameObjects(Object[] objects)
         {
-            string filePath = GetRandomFileNamePath(extName: ".fbx");
+            string filePath = Path.Combine(Application.dataPath, "MyGame.fbx");
             ModelExporter.ExportObjects(filePath, objects);
 
             // ModelExporter.ExportObject can be used instead of 
             // ModelExporter.ExportObjects to export a single game object
-
-            return filePath;
         }
 
         [Test]
@@ -31,10 +29,15 @@ namespace FbxExporter.UnitTests
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
-            var exportPath = ExportGameObjects(new Object[] { cube, sphere });
+            ExportGameObjects(new Object[] { cube, sphere });
+
+            var filename = "MyGame.fbx";
+            var exportPath = Path.Combine(Application.dataPath, filename);
             Assert.That(exportPath, Does.Exist);
 
-            Object[] loaded = AssetDatabase.LoadAllAssetsAtPath(exportPath);
+            var assetPath = "Assets/" + filename;
+
+            Object[] loaded = AssetDatabase.LoadAllAssetsAtPath(assetPath);
             Assert.That(loaded, Is.Not.Null.Or.Empty);
             var loadedMeshes = (from loadedObj in loaded where loadedObj as Mesh != null select loadedObj as Mesh).ToArray();
 
@@ -44,7 +47,7 @@ namespace FbxExporter.UnitTests
                 Assert.Greater(mesh.triangles.Length, 0);
             }
 
-            File.Delete(exportPath);
+            AssetDatabase.DeleteAsset(assetPath);
         }
 
         // Export scene sample
