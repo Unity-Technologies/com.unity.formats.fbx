@@ -11,42 +11,18 @@ namespace FbxExporter.UnitTests
     /// <summary>
     /// Unit tests for sample code included in documentation.
     /// </summary>
-    public class SampleCodeTest
+    public class SampleCodeTest : ExporterTestBaseAPI
     {
-        private const string k_tempFolderName = "_safe_to_delete";
-        private string m_tempFolder = Path.Combine("Assets", k_tempFolderName);
-
-        [SetUp]
-        public void Init()
-        {
-            Assert.That(m_tempFolder, Does.Not.Exist);
-            Directory.CreateDirectory(m_tempFolder);
-        }
-
-        [TearDown]
-        public void Term()
-        {
-            if (Directory.Exists(m_tempFolder))
-            {
-                try
-                {
-                    bool deleted = AssetDatabase.DeleteAsset(m_tempFolder);
-                }
-                catch (IOException)
-                {
-                    // ignore -- something else must have deleted this.
-                }
-            }
-        }
-
         // Export GameObjects sample function
-        public static void ExportGameObjects(Object[] objects)
+        public string ExportGameObjects(Object[] objects)
         {
-            string filePath = Path.Combine(Application.dataPath, "MyGame.fbx");
+            string filePath = GetRandomFileNamePath(extName: ".fbx");
             ModelExporter.ExportObjects(filePath, objects);
 
             // ModelExporter.ExportObject can be used instead of 
             // ModelExporter.ExportObjects to export a single game object
+
+            return filePath;
         }
 
         [Test]
@@ -55,13 +31,10 @@ namespace FbxExporter.UnitTests
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
-            ExportGameObjects(new Object[] { cube, sphere });
-
-            var filename = "MyGame.fbx";
-            var exportPath = Path.Combine(Application.dataPath, filename);
+            var exportPath = ExportGameObjects(new Object[] { cube, sphere });
             Assert.That(exportPath, Does.Exist);
 
-            Object[] loaded = AssetDatabase.LoadAllAssetsAtPath("Assets/" + filename);
+            Object[] loaded = AssetDatabase.LoadAllAssetsAtPath(exportPath);
             Assert.That(loaded, Is.Not.Null.Or.Empty);
             var loadedMeshes = (from loadedObj in loaded where loadedObj as Mesh != null select loadedObj as Mesh).ToArray();
 
@@ -101,8 +74,7 @@ namespace FbxExporter.UnitTests
         [Test]
         public void TestExportSceneSample()
         {
-            var filename = "MyGame.fbx";
-            var exportPath = Path.Combine(m_tempFolder, filename);
+            var exportPath = GetRandomFileNamePath(extName: ".fbx");
             Assert.That(exportPath, Does.Not.Exist);
 
             ExportScene(exportPath);
@@ -136,8 +108,7 @@ namespace FbxExporter.UnitTests
         [Test]
         public void TestImportSceneSample()
         {
-            var filename = "MyGame.fbx";
-            var exportPath = Path.Combine(m_tempFolder, filename);
+            var exportPath = GetRandomFileNamePath(extName: ".fbx");
             Assert.That(exportPath, Does.Not.Exist);
 
             ExportScene(exportPath);
