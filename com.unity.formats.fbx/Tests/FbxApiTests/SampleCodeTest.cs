@@ -14,7 +14,7 @@ namespace FbxExporter.UnitTests
     public class SampleCodeTest
     {
         private const string k_tempFolderName = "_safe_to_delete";
-        private string m_tempFolder = Path.Combine(Application.dataPath, k_tempFolderName);
+        private string m_tempFolder = Path.Combine("Assets", k_tempFolderName);
 
         [SetUp]
         public void Init()
@@ -28,7 +28,14 @@ namespace FbxExporter.UnitTests
         {
             if (Directory.Exists(m_tempFolder))
             {
-                Directory.Delete(m_tempFolder, recursive: true);
+                try
+                {
+                    bool deleted = AssetDatabase.DeleteAsset(m_tempFolder);
+                }
+                catch (IOException)
+                {
+                    // ignore -- something else must have deleted this.
+                }
             }
         }
 
