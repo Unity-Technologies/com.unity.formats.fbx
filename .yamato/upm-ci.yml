@@ -22,7 +22,7 @@ platforms:
     flavor: b1.medium
   - name: ubuntu
     type: Unity::VM
-    image: package-ci/ubuntu:stable
+    image: package-ci/ubuntu:prev-stable
     flavor: b1.medium
 coverage:
     minPercent: 57.5
