@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.IO;
 using Autodesk.Fbx;
 using UnityEngine.Formats.Fbx.Exporter;
 using UnityEditor.Formats.Fbx.Exporter;
@@ -1245,21 +1246,47 @@ namespace FbxExporter.UnitTests
             var cubeRepeat = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cubeRepeat.name = "Repeat";
             cubeRepeat.GetComponent<MeshRenderer>().sharedMaterial = repeatMat;
-            
-            ModelExporter.ExportObjects(filename, new Object[] { cubeClamp, cubeRepeat });
+
+            var settings = new ExportModelSettingsSerialize();
+            settings.SetEmbedTextures(true);
+            settings.SetKeepInstances(false);
+            ModelExporter.ExportObjects(filename, new Object[] { cubeClamp, cubeRepeat }, settings);
+
+            var modelImporter = AssetImporter.GetAtPath(filename) as ModelImporter;
+            modelImporter.ExtractTextures(tempUnpackPath);
+            AssetDatabase.Refresh();
             
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             var importedClampMat = fbxObj.transform.Find("Clamp").GetComponent<MeshRenderer>().sharedMaterial;
             var importedRepeatMat = fbxObj.transform.Find("Repeat").GetComponent<MeshRenderer>().sharedMaterial;
 
-            // TODO this does not actually test the wrap mode, as FBX importer auto-binds to the same texture object as was used for export
-            Assert.AreEqual(clampMat.mainTexture.wrapMode, importedClampMat.mainTexture.wrapMode);
-            Assert.AreEqual(repeatMat.mainTexture.wrapMode, importedRepeatMat.mainTexture.wrapMode);
+            // Ensure we're actually checking on the newly imported textures, not on the ones used for export
+            Assert.NotNull(importedClampMat.mainTexture);
+            Assert.NotNull(importedRepeatMat.mainTexture);
+            // This fails - seems there's a bug with modelImporter.ExtractTextures when used inside a test?
+            // Manually exporting the FBX and extracting textures via Inspector properly produces separate textures.
+            // Assert.AreNotSame(importedClampMat.mainTexture, importedRepeatMat.mainTexture);
+            Assert.AreNotSame(clampMat.mainTexture, importedClampMat.mainTexture);
+            Assert.AreNotSame(repeatMat.mainTexture, importedRepeatMat.mainTexture);
+            // This will fail until Case 1416726 is closed (texture wrap mode is not correctly set when extracting textures from FBX files)
+            // Assert.AreEqual(clampMat.mainTexture.wrapMode, importedClampMat.mainTexture.wrapMode);
+            // Assert.AreEqual(repeatMat.mainTexture.wrapMode, importedRepeatMat.mainTexture.wrapMode);
             
             Assert.AreEqual(clampMat.mainTextureOffset, importedClampMat.mainTextureOffset);
             Assert.AreEqual(clampMat.mainTextureScale, importedClampMat.mainTextureScale);
             Assert.AreEqual(repeatMat.mainTextureOffset, importedRepeatMat.mainTextureOffset);
             Assert.AreEqual(repeatMat.mainTextureScale, importedRepeatMat.mainTextureScale);
+
+        }
+
+        string tempUnpackPath = "Assets/Temp-Texture-Unpack";
+        [TearDown]
+        public void ClearImportedTextures()
+        {
+            // cleanup of imported textures
+            Directory.Delete(tempUnpackPath, true);
+            File.Delete(tempUnpackPath + ".meta");
+            AssetDatabase.Refresh();
         }
     }
 }
