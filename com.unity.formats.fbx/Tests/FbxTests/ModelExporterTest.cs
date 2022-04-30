@@ -1227,5 +1227,38 @@ namespace FbxExporter.UnitTests
             ModelExporter.ExportObject(filename, cube);
             Assert.IsNotNull(filename);
         }
+
+        [Test]
+        public void TestMaterialScaleAndOffset() 
+        {
+            string matClampGuid = "e6598d8bd228e5940988877e9eddd594";
+            string matRepeatGuid = "f07bd71d1d87a7b41acfc483bf06be3f";
+            
+            var filename = GetRandomFbxFilePath();
+
+            var clampMat = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(matClampGuid));
+            var cubeClamp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cubeClamp.name = "Clamp";
+            cubeClamp.GetComponent<MeshRenderer>().sharedMaterial = clampMat;
+
+            var repeatMat = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(matClampGuid));
+            var cubeRepeat = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cubeRepeat.name = "Repeat";
+            cubeRepeat.GetComponent<MeshRenderer>().sharedMaterial = repeatMat;
+            
+            ModelExporter.ExportObjects(filename, new Object[] { cubeClamp, cubeRepeat });
+            
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            var importedClampMat = fbxObj.transform.Find("Clamp").GetComponent<MeshRenderer>().sharedMaterial;
+            var importedRepeatMat = fbxObj.transform.Find("Repeat").GetComponent<MeshRenderer>().sharedMaterial;
+
+            Assert.AreEqual(clampMat.mainTexture.wrapMode, importedClampMat.mainTexture.wrapMode);
+            Assert.AreEqual(repeatMat.mainTexture.wrapMode, importedRepeatMat.mainTexture.wrapMode);
+            
+            Assert.AreEqual(clampMat.mainTextureOffset, importedClampMat.mainTextureOffset);
+            Assert.AreEqual(clampMat.mainTextureScale, importedClampMat.mainTextureScale);
+            Assert.AreEqual(repeatMat.mainTextureOffset, importedRepeatMat.mainTextureOffset);
+            Assert.AreEqual(repeatMat.mainTextureScale, importedRepeatMat.mainTextureScale);
+        }
     }
 }
