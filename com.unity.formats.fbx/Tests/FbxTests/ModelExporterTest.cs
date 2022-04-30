@@ -1252,6 +1252,7 @@ namespace FbxExporter.UnitTests
             var importedClampMat = fbxObj.transform.Find("Clamp").GetComponent<MeshRenderer>().sharedMaterial;
             var importedRepeatMat = fbxObj.transform.Find("Repeat").GetComponent<MeshRenderer>().sharedMaterial;
 
+            // TODO this does not actually test the wrap mode, as FBX importer auto-binds to the same texture object as was used for export
             Assert.AreEqual(clampMat.mainTexture.wrapMode, importedClampMat.mainTexture.wrapMode);
             Assert.AreEqual(repeatMat.mainTexture.wrapMode, importedRepeatMat.mainTexture.wrapMode);
             
