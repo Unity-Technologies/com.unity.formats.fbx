@@ -4,6 +4,7 @@ using UnityEditor;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Autodesk.Fbx;
 using UnityEngine.Formats.Fbx.Exporter;
 using UnityEditor.Formats.Fbx.Exporter;
@@ -1242,7 +1243,7 @@ namespace FbxExporter.UnitTests
             cubeClamp.name = "Clamp";
             cubeClamp.GetComponent<MeshRenderer>().sharedMaterial = clampMat;
 
-            var repeatMat = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(matClampGuid));
+            var repeatMat = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(matRepeatGuid));
             var cubeRepeat = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cubeRepeat.name = "Repeat";
             cubeRepeat.GetComponent<MeshRenderer>().sharedMaterial = repeatMat;
@@ -1251,9 +1252,16 @@ namespace FbxExporter.UnitTests
             settings.SetEmbedTextures(true);
             ModelExporter.ExportObjects(filename, new Object[] { cubeClamp, cubeRepeat }, settings);
 
+            var tempUnpackPath = GetRandomFileNamePath(extName: "");
             var modelImporter = AssetImporter.GetAtPath(filename) as ModelImporter;
             modelImporter.ExtractTextures(tempUnpackPath);
             AssetDatabase.Refresh();
+            var guids = AssetDatabase.FindAssets("t:Texture", new string[] { tempUnpackPath });
+            foreach (var tex in guids.Select(AssetDatabase.GUIDToAssetPath).Select(AssetDatabase.LoadAssetAtPath<Texture>).Where(tex => tex))
+            {
+                modelImporter.AddRemap(new AssetImporter.SourceAssetIdentifier(tex), tex);
+            }
+            AssetDatabase.ImportAsset(modelImporter.assetPath, ImportAssetOptions.ForceUpdate);
             
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             var importedClampMat = fbxObj.transform.Find("Clamp").GetComponent<MeshRenderer>().sharedMaterial;
@@ -1262,14 +1270,9 @@ namespace FbxExporter.UnitTests
             // Ensure we're actually checking on the newly imported textures, not on the ones used for export
             Assert.NotNull(importedClampMat.mainTexture);
             Assert.NotNull(importedRepeatMat.mainTexture);
-            
-            // (Case 1424290) This fails - seems there's a bug with modelImporter.ExtractTextures when used inside a test
-            // Manually exporting the FBX and extracting textures via Inspector properly produces separate textures.
-            // Assert.AreNotSame(importedClampMat.mainTexture, importedRepeatMat.mainTexture);
-            
-            // Seems these also randomly fail? Sometimes work, sometimes not...
-            // Assert.AreNotSame(clampMat.mainTexture, importedClampMat.mainTexture);
-            // Assert.AreNotSame(repeatMat.mainTexture, importedRepeatMat.mainTexture);
+            Assert.AreNotSame(clampMat.mainTexture, importedClampMat.mainTexture);
+            Assert.AreNotSame(repeatMat.mainTexture, importedRepeatMat.mainTexture);
+            Assert.AreNotSame(importedClampMat.mainTexture, importedRepeatMat.mainTexture);
             
             // (Case 1416726) This fails since texture wrap mode is not correctly set when extracting textures from FBX files
             // Assert.AreEqual(clampMat.mainTexture.wrapMode, importedClampMat.mainTexture.wrapMode);
@@ -1280,20 +1283,6 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual(repeatMat.mainTextureOffset, importedRepeatMat.mainTextureOffset);
             Assert.AreEqual(repeatMat.mainTextureScale, importedRepeatMat.mainTextureScale);
 
-        }
-
-        string tempUnpackPath = "Assets/Temp-Texture-Unpack";
-        [TearDown]
-        public void ClearImportedTextures()
-        {
-            // cleanup of imported textures
-            if(Directory.Exists(tempUnpackPath))
-            {
-                Directory.Delete(tempUnpackPath, true);
-                if(File.Exists(tempUnpackPath + ".meta"))
-                    File.Delete(tempUnpackPath + ".meta");
-            }
-            AssetDatabase.Refresh();
         }
     }
 }
