@@ -111,7 +111,10 @@ nightly_test_trigger:
       - branch: master
         frequency: daily
         rerun: always
-      - branch: "release/*"
+      - branch: release/4.1
+        frequency: daily
+        rerun: always
+      - branch: release/4.2
         frequency: daily
         rerun: always
   dependencies:
