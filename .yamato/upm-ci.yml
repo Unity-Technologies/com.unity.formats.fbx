@@ -1,7 +1,10 @@
 # Nightly trigger editors by release.
+#
 # When adding a new release version, add a new section
-# for the new release(e.g. release_{maj}_{min}_nightly_...)
+# for the new release (e.g. release_{maj}_{min}_nightly_...)
 # containing the editors that it should run on.
+# Also add the release name and version to the list of nightly_tested_releases.
+#
 # Additionally, update the previous release nighlty versions if necessary,
 # For example, removing trunk from the list of editors for the previous release.
 release_4_2_nightly_trigger_editors:
