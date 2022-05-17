@@ -1,7 +1,27 @@
-test_trigger_editors:
+release_4_2_nightly_trigger_editors:
   - version: 2019.4
   - version: 2020.3
   - version: 2021.3
+  - version: 2022.2
+  - version: trunk
+
+release_4_1_nightly_trigger_editors:
+  - version: 2019.4
+  - version: 2020.3
+  - version: 2021.3
+  - version: 2022.1
+  
+master_nightly_trigger_editors:
+  - version: 2019.4
+  - version: 2020.3
+  - version: 2021.3
+  - version: 2022.2
+  - version: trunk
+
+test_trigger_editors:
+  - version: 2019.4
+  - version: 2020.3
+  - version: 2021.2
   - version: 2022.1
   - version: trunk
 
@@ -104,19 +124,46 @@ test_trigger:
 {% endfor %}
 {% endfor %}
 
-nightly_test_trigger:
+release_4_2_nightly_test_trigger:
+  name: Nightly tests Trigger
+  triggers:
+    recurring:
+      - branch: release/4.2
+        frequency: daily
+        rerun: always
+  dependencies:
+    - .yamato/upm-ci.yml#pack
+      {% for editor in release_4_2_nightly_trigger_editors %}
+      {% for platform in platforms %}
+    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+      {% endfor %}
+      {% endfor %}
+      
+release_4_1_nightly_test_trigger:
+  name: Nightly tests Trigger
+  triggers:
+    recurring:
+      - branch: release/4.1
+        frequency: daily
+        rerun: always
+  dependencies:
+    - .yamato/upm-ci.yml#pack
+      {% for editor in release_4_1_nightly_trigger_editors %}
+      {% for platform in platforms %}
+    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+      {% endfor %}
+      {% endfor %}
+      
+master_nightly_test_trigger:
   name: Nightly tests Trigger
   triggers:
     recurring:
       - branch: master
         frequency: daily
         rerun: always
-      - branch: "release/*"
-        frequency: daily
-        rerun: always
   dependencies:
     - .yamato/upm-ci.yml#pack
-      {% for editor in test_trigger_editors %}
+      {% for editor in master_nightly_trigger_editors %}
       {% for platform in platforms %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
       {% endfor %}
