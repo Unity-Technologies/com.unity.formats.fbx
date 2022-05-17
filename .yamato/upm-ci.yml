@@ -21,7 +21,7 @@ master_nightly_trigger_editors:
 test_trigger_editors:
   - version: 2019.4
   - version: 2020.3
-  - version: 2021.2
+  - version: 2021.3
   - version: 2022.1
   - version: trunk
 
