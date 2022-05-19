@@ -1,3 +1,13 @@
+# Nightly trigger editors by release.
+#
+# When adding a new release version, add a new section
+# to nightly_tested_releases for the release
+# containing the name with underscores to separate the numbers, 
+# the branch name and editors that it should run on.
+#
+# Additionally, update the previous release nightly versions if necessary,
+# For example, removing trunk from the list of editors for the previous release.
+
 test_trigger_editors:
   - version: 2019.4
   - version: 2020.3
@@ -11,6 +21,32 @@ publish_trigger_editors:
   - version: 2021.3
   - version: 2022.1
   - version: trunk
+  
+nightly_tested_releases:
+  - name: release_4_2
+    branch: release/4.2
+    nightly_editors: 
+      - version: 2019.4
+      - version: 2020.3
+      - version: 2021.3
+      - version: 2022.2
+      - version: trunk
+  - name: release_4_1
+    branch: release/4.1
+    nightly_editors: 
+      - version: 2019.4
+      - version: 2020.3
+      - version: 2021.3
+      - version: 2022.1
+  - name: master
+    branch: master
+    nightly_editors: 
+      - version: 2019.4
+      - version: 2020.3
+      - version: 2021.3
+      - version: 2022.2
+      - version: trunk
+  
 platforms:
   - name: win
     type: Unity::VM
@@ -104,23 +140,22 @@ test_trigger:
 {% endfor %}
 {% endfor %}
 
-nightly_test_trigger:
-  name: Nightly tests Trigger
+{% for release in nightly_tested_releases %}
+{{release.name}}_nightly_test_trigger:
+  name: {{release.branch}} nightly tests Trigger
   triggers:
     recurring:
-      - branch: master
-        frequency: daily
-        rerun: always
-      - branch: "release/*"
+      - branch: {{release.branch}}
         frequency: daily
         rerun: always
   dependencies:
     - .yamato/upm-ci.yml#pack
-      {% for editor in test_trigger_editors %}
+      {% for editor in {{release.nightly_editors}} %}
       {% for platform in platforms %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
       {% endfor %}
       {% endfor %}
+{% endfor %}
 
 publish_test_trigger:
   name: Publish Tests Trigger
