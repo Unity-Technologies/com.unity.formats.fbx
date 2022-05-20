@@ -5,8 +5,18 @@
 # containing the name with underscores to separate the numbers, 
 # the branch name and editors that it should run on.
 #
-# Additionally, update the previous release nightly versions if necessary,
+# Make sure all editor versions specified are included in all_test_editors section as well.
+#
+# Additionally, update the previous release nightly versions if necessary.
 # For example, removing trunk from the list of editors for the previous release.
+
+all_test_editors:
+  - version: 2019.4
+  - version: 2020.3
+  - version: 2021.3
+  - version: 2022.1
+  - version: 2022.2
+  - version: trunk
 
 test_trigger_editors:
   - version: 2019.4
@@ -79,7 +89,7 @@ pack:
        - "upm-ci~/**/*"
 
 
-{% for editor in publish_trigger_editors %}
+{% for editor in all_test_editors %}
 {% for platform in platforms %}
 test_{{ platform.name }}_{{ editor.version }}:
   name : Test version {{ editor.version }} on {{ platform.name }}
