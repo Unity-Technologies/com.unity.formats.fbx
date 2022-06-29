@@ -436,18 +436,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="fbxMesh">Fbx mesh.</param>
         /// <param name="mesh">Mesh.</param>
         /// <param name="unmergedTriangles">Unmerged triangles.</param>
-        private static bool ExportUVs(FbxMesh fbxMesh, MeshInfo mesh, int[] unmergedTriangles)
+        private static bool ExportUVs(FbxMesh fbxMesh, MeshInfo meshInfo, int[] unmergedTriangles)
         {
-            Vector2[][] uvs = new Vector2[][] {
-                mesh.UV,
-                mesh.mesh.uv2,
-                mesh.mesh.uv3,
-                mesh.mesh.uv4
-            };
+            var mesh = meshInfo.mesh;
+
+            List<Vector2> uvs = new List<Vector2>();
 
             int k = 0;
-            for (int i = 0; i < uvs.Length; i++) {
-                if (uvs [i] == null || uvs [i].Length == 0) {
+            for (int i = 0; i < 8; i++) {
+                mesh.GetUVs(i, uvs);
+
+                if (uvs == null || uvs.Count == 0) {
                     continue; // don't have these UV's, so skip
                 }
 
@@ -461,9 +460,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray ();
 
                     // (Uni-31596) only copy unique UVs into this array, and index appropriately
-                    for (int n = 0; n < uvs[i].Length; n++) {
-                        fbxElementArray.Add (new FbxVector2 (uvs[i] [n] [0],
-                            uvs[i] [n] [1]));
+                    for (int n = 0; n < uvs.Count; n++) {
+                        fbxElementArray.Add (new FbxVector2 (uvs[n] [0],
+                            uvs[n] [1]));
                     }
 
                     // For each face index, point to a texture uv
@@ -476,6 +475,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     fbxLayer.SetUVs (fbxLayerElement, FbxLayerElement.EType.eTextureDiffuse);
                 }
                 k++;
+                uvs.Clear();
             }
 
             // if we incremented k, then at least on set of UV's were exported
