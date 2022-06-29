@@ -53,6 +53,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 exportSettings.SetAnimationSource(settings.TransferAnimationSource);
                 exportSettings.SetAnimationDest(settings.TransferAnimationDest);
                 exportSettings.SetObjectPosition(ExportSettings.ObjectPosition.WorldAbsolute);
+                // export animated skinned meshes so that blendshape animation will export
+                exportSettings.SetAnimatedSkinnedMesh(true);
                 var toInclude = ExportSettings.Include.ModelAndAnim;
                 if (!settings.ExportGeometry)
                 {
