@@ -226,7 +226,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
             set { m_selectedFbxPath = value; }
         }
 
-        protected Object[] ToExport { get; set; }
+        private bool m_exportSetContainsPrefabInstanceWithAddedObjects;
+
+        private Object[] m_toExport;
+        protected Object[] ToExport { 
+            get
+            {
+                return m_toExport;
+            }
+            set
+            {
+                m_toExport = value;
+                m_exportSetContainsPrefabInstanceWithAddedObjects = SelectionContainsPrefabInstanceWithAddedObjects();
+            }
+        }
 
         protected virtual void OnEnable(){
             #if UNITY_2018_1_OR_NEWER
@@ -276,7 +289,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected bool SelectionContainsPrefabInstanceWithAddedObjects()
         {
-            var exportSet = ToExport;
+            var exportSet = m_toExport;
             // FBX-60 (fogbug 1307749):
             // On Linux OnGUI() sometimes gets called a few times before
             // the export set is set and window.show() is called.
@@ -593,7 +606,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             // if we are exporting or converting a prefab with overrides, then show a warning
-            if (SelectionContainsPrefabInstanceWithAddedObjects())
+            if (m_exportSetContainsPrefabInstanceWithAddedObjects)
             {
                 EditorGUILayout.Space();
                 EditorGUILayout.HelpBox("Prefab instance overrides will be exported", MessageType.Warning, true);
