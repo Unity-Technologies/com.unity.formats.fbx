@@ -9,8 +9,8 @@ The FBX Exporter exports the following objects:
 * SkinnedMeshRenderers with the following exceptions:
     * Humanoid rigs are not supported
     * Meshes in bone hierarchies are not supported
-* Materials as Phong if the material has specular; Lambert in all other cases
-* Textures
+* [Materials](#materials)
+* [Textures](#textures)
 * [Cameras](#cameras)
 * [Lights](#lights)
 * [Contraints](#constraints)
@@ -33,7 +33,31 @@ The FBX Exporter also exports the following mesh attributes:
 - All 8 Mesh UVs, if present
 - Quads or Triangles
 
+<a name="materials"></a>
 
+## Materials
+
+The FBX Exporter exports Unity PBS materials to FBX classic materials: Phong if the material has specular; Lambert in all other cases.
+Primarily Standard and Standard (Specular) shaders are supported.
+
+The following material properties are exported:
+- Color
+- Emission Color
+- Bump Scale
+- Specular Color (for specular materials)
+
+<a name="textures"></a>
+
+## Textures
+
+The FBX Exporter can export textures as embedded, or with a link to the absolute path of the textures.
+Textures can be embedded by selecting the "Embed Textures" option and "Binary" export format in the export settings on export.
+
+The following textures are exported:
+- Main Texture
+- Emission Map
+- Bump Map/Normal Map
+- Specular Gloss Map (for specular materials)
 
 <a name="cameras"></a>
 
