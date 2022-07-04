@@ -44,6 +44,147 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 MapUnityPropToFbxProp = propertyMap;
                 MapUnityChannelToFbxChannel = channelMap;
             }
+
+            /// <summary>
+            /// Get the Fbx property name for the given Unity property name from the given dictionary.
+            /// </summary>
+            /// <param name="uniProperty"></param>
+            /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
+            public string GetFbxProperty(string uniProperty)
+            {
+                string fbxProperty;
+                if (!MapUnityPropToFbxProp.TryGetValue(uniProperty, out fbxProperty))
+                {
+                    return null;
+                }
+                return fbxProperty;
+            }
+
+            /// <summary>
+            /// Get the Fbx channel name for the given Unity channel from the given dictionary.
+            /// </summary>
+            /// <param name="uniChannel"></param>
+            /// <returns>The Fbx channel name or null if there was no match in the dictionary</returns>
+            public string GetFbxChannel(string uniChannel)
+            {
+                string fbxChannel;
+                if (!MapUnityChannelToFbxChannel.TryGetValue(uniChannel, out fbxChannel))
+                {
+                    return null;
+                }
+                return fbxChannel;
+            }
+
+            /// <summary>
+            /// Get the Fbx property name for the given Unity constraint source property name from the given dictionary.
+            /// 
+            /// This is different from GetFbxProperty() because the Unity constraint source properties contain indices, and
+            /// the Fbx constraint source property contains the name of the source object.
+            /// </summary>
+            /// <param name="uniProperty"></param>
+            /// <param name="constraint"></param>
+            /// <param name="propertyMap"></param>
+            /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
+            private string GetFbxConstraintSourceProperty(string uniProperty, FbxConstraint constraint)
+            {
+                foreach (var prop in MapUnityPropToFbxProp)
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(uniProperty, prop.Key);
+                    if (match.Success && match.Groups.Count > 0)
+                    {
+                        var matchedStr = match.Groups[1].Value;
+                        int index;
+                        if (!int.TryParse(matchedStr, out index))
+                        {
+                            continue;
+                        }
+                        var source = constraint.GetConstraintSource(index);
+                        return string.Format(prop.Value, source.GetName());
+                    }
+                }
+                return null;
+            }
+
+            /// <summary>
+            /// Get the Fbx property name for the given Unity blendshape property name from the given dictionary.
+            /// 
+            /// This is different from GetFbxProperty() because the Unity blendshape properties contain the name
+            /// of the target object.
+            /// </summary>
+            /// <param name="uniProperty"></param>
+            /// <param name="propertyMap"></param>
+            /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
+            private string GetFbxBlendshapeProperty(string uniProperty)
+            {
+                foreach (var prop in MapUnityPropToFbxProp)
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(uniProperty, prop.Key);
+                    if (match.Success)
+                    {
+                        return prop.Value;
+                    }
+                }
+                return null;
+            }
+
+            /// <summary>
+            /// Try to get the property channel pairs for the given Unity property from the given property channel mapping.
+            /// </summary>
+            /// <param name="uniPropertyName"></param>
+            /// <param name="propertyChannelMap"></param>
+            /// <param name="constraint"></param>
+            /// <returns>The property channel pairs or null if there was no match</returns>
+            public FbxPropertyChannelPair[] GetChannelPairs(string uniPropertyName, FbxConstraint constraint = null)
+            {
+                // Unity property name is of the format "property.channel" or "property". Handle both cases.
+                var possibleUniPropChannelPairs = new List<UnityPropertyChannelPair>();
+
+                // could give same result as already in the list, avoid checking this case twice
+                var propChannelPair = GetUnityPropertyChannelPair(uniPropertyName);
+                possibleUniPropChannelPairs.Add(propChannelPair);
+                if (propChannelPair.property != uniPropertyName)
+                {
+                    possibleUniPropChannelPairs.Add(new UnityPropertyChannelPair(uniPropertyName, null));
+                }
+
+                foreach (var uniPropChannelPair in possibleUniPropChannelPairs)
+                {
+                    // try to match property
+                    var fbxProperty = GetFbxProperty(uniPropChannelPair.property);
+                    if (string.IsNullOrEmpty(fbxProperty))
+                    {
+                        if (constraint != null)
+                        {
+                            // check if it's a constraint source property
+                            fbxProperty = GetFbxConstraintSourceProperty(uniPropChannelPair.property, constraint);
+                        }
+                        else
+                        {
+                            // check if it's a blendshape property
+                            fbxProperty = GetFbxBlendshapeProperty(uniPropChannelPair.property);
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(fbxProperty))
+                    {
+                        continue;
+                    }
+
+                    // matched property, now try to match channel
+                    string fbxChannel = null;
+                    if (!string.IsNullOrEmpty(uniPropChannelPair.channel) && MapUnityChannelToFbxChannel != null)
+                    {
+                        fbxChannel = GetFbxChannel(uniPropChannelPair.channel);
+                        if (string.IsNullOrEmpty(fbxChannel))
+                        {
+                            // couldn't match the Unity channel to the fbx channel
+                            continue;
+                        }
+                    }
+                    return new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxProperty, fbxChannel) };
+                }
+                return null;
+            }
         }
 
         // =========== Property Maps ================
@@ -183,148 +324,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get the Fbx property name for the given Unity property name from the given dictionary.
-        /// </summary>
-        /// <param name="uniProperty"></param>
-        /// <param name="propertyMap"></param>
-        /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
-        private static string GetFbxProperty(string uniProperty, Dictionary<string, string> propertyMap)
-        {
-            string fbxProperty;
-            if(!propertyMap.TryGetValue(uniProperty, out fbxProperty)){
-                return null;
-            }
-            return fbxProperty;
-        }
-
-        /// <summary>
-        /// Get the Fbx property name for the given Unity constraint source property name from the given dictionary.
-        /// 
-        /// This is different from GetFbxProperty() because the Unity constraint source properties contain indices, and
-        /// the Fbx constraint source property contains the name of the source object.
-        /// </summary>
-        /// <param name="uniProperty"></param>
-        /// <param name="constraint"></param>
-        /// <param name="propertyMap"></param>
-        /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
-        private static string GetFbxConstraintSourceProperty(string uniProperty, FbxConstraint constraint, Dictionary<string, string> propertyMap)
-        {
-            foreach (var prop in propertyMap)
-            {
-                var match = System.Text.RegularExpressions.Regex.Match(uniProperty, prop.Key);
-                if (match.Success && match.Groups.Count > 0)
-                {
-                    var matchedStr = match.Groups[1].Value;
-                    int index;
-                    if (!int.TryParse(matchedStr, out index))
-                    {
-                        continue;
-                    }
-                    var source = constraint.GetConstraintSource(index);
-                    return string.Format(prop.Value, source.GetName());
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Get the Fbx property name for the given Unity blendshape property name from the given dictionary.
-        /// 
-        /// This is different from GetFbxProperty() because the Unity blendshape properties contain the name
-        /// of the target object.
-        /// </summary>
-        /// <param name="uniProperty"></param>
-        /// <param name="propertyMap"></param>
-        /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
-        private static string GetFbxBlendshapeProperty(string uniProperty, Dictionary<string, string> propertyMap)
-        {
-            foreach (var prop in propertyMap)
-            {
-                var match = System.Text.RegularExpressions.Regex.Match(uniProperty, prop.Key);
-                if (match.Success)
-                {
-                    return prop.Value;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Get the Fbx channel name for the given Unity channel from the given dictionary.
-        /// </summary>
-        /// <param name="uniChannel"></param>
-        /// <param name="channelMap"></param>
-        /// <returns>The Fbx channel name or null if there was no match in the dictionary</returns>
-        private static string GetFbxChannel(string uniChannel, Dictionary<string, string> channelMap)
-        {
-            string fbxChannel;
-            if(!channelMap.TryGetValue(uniChannel, out fbxChannel))
-            {
-                return null;
-            }
-            return fbxChannel;
-        }
-
-        /// <summary>
-        /// Try to get the property channel pairs for the given Unity property from the given property channel mapping.
-        /// </summary>
-        /// <param name="uniPropertyName"></param>
-        /// <param name="propertyChannelMap"></param>
-        /// <param name="constraint"></param>
-        /// <returns>The property channel pairs or null if there was no match</returns>
-        private static FbxPropertyChannelPair[] GetChannelPairs(string uniPropertyName, PropertyChannelMap propertyChannelMap, FbxConstraint constraint = null)
-        {
-            // Unity property name is of the format "property.channel" or "property". Handle both cases.
-            var possibleUniPropChannelPairs = new List<UnityPropertyChannelPair>();
-
-            // could give same result as already in the list, avoid checking this case twice
-            var propChannelPair = GetUnityPropertyChannelPair(uniPropertyName);
-            possibleUniPropChannelPairs.Add(propChannelPair);
-            if (propChannelPair.property != uniPropertyName)
-            {
-                possibleUniPropChannelPairs.Add(new UnityPropertyChannelPair(uniPropertyName, null));
-            }
-
-            foreach (var uniPropChannelPair in possibleUniPropChannelPairs)
-            {
-                // try to match property
-                var fbxProperty = GetFbxProperty(uniPropChannelPair.property, propertyChannelMap.MapUnityPropToFbxProp);
-                if (string.IsNullOrEmpty(fbxProperty))
-                {
-                    if (constraint != null)
-                    {
-                        // check if it's a constraint source property
-                        fbxProperty = GetFbxConstraintSourceProperty(uniPropChannelPair.property, constraint, propertyChannelMap.MapUnityPropToFbxProp);
-                    }
-                    else
-                    {
-                        // check if it's a blendshape property
-                        fbxProperty = GetFbxBlendshapeProperty(uniPropChannelPair.property, propertyChannelMap.MapUnityPropToFbxProp);
-                    }
-                }
-
-                if (string.IsNullOrEmpty(fbxProperty))
-                {
-                    continue;
-                }
-
-                // matched property, now try to match channel
-                string fbxChannel = null;
-                if(!string.IsNullOrEmpty(uniPropChannelPair.channel) && propertyChannelMap.MapUnityChannelToFbxChannel != null)
-                {
-                    fbxChannel = GetFbxChannel(uniPropChannelPair.channel, propertyChannelMap.MapUnityChannelToFbxChannel);
-                    if (string.IsNullOrEmpty(fbxChannel))
-                    {
-                        // couldn't match the Unity channel to the fbx channel
-                        continue;
-                    }
-                }
-                return new FbxPropertyChannelPair[] { new FbxPropertyChannelPair(fbxProperty, fbxChannel) };
-            }
-            return null;
-        }
-
-        /// <summary>
         /// Map a Unity property name to the corresponding FBX property and
         /// channel names.
         /// </summary>
@@ -366,7 +365,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             foreach (var propMap in propertyMaps)
             {
-                prop = GetChannelPairs(uniPropertyName, propMap, constraint);
+                prop = propMap.GetChannelPairs(uniPropertyName, constraint);
                 if (prop != null)
                 {
                     return true;
