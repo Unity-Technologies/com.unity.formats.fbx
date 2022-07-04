@@ -31,15 +31,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Contains the two dictionaries that map Unity property to FBX property and Unity channel to Fbx channel
+        /// Contains the two lists that map Unity property to FBX property and Unity channel to Fbx channel
         /// for a set of properties.
         /// </summary>
         struct PropertyChannelMap
         {
-            public Dictionary<string, string> MapUnityPropToFbxProp;
-            public Dictionary<string, string> MapUnityChannelToFbxChannel;
+            public List<(string, string)> MapUnityPropToFbxProp;
+            public List<(string, string)> MapUnityChannelToFbxChannel;
 
-            public PropertyChannelMap(Dictionary<string,string> propertyMap, Dictionary<string, string> channelMap)
+            public PropertyChannelMap(List<(string, string)> propertyMap, List<(string, string)> channelMap)
             {
                 MapUnityPropToFbxProp = propertyMap;
                 MapUnityChannelToFbxChannel = channelMap;
@@ -47,54 +47,54 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         // =========== Property Maps ================
-        // These are dictionaries that map a Unity property name to it's corresponding Fbx property name.
-        // Split up into multiple dictionaries as some are channel and object dependant.
+        // These are list that map a Unity property name to it's corresponding Fbx property name.
+        // Split up into multiple lists as some are channel and object dependant.
 
         /// <summary>
         /// Map of Unity transform properties to their FBX equivalent.
         /// </summary>
-        private static Dictionary<string, string> MapTransformPropToFbxProp = new Dictionary<string, string>()
+        private static List<(string, string)> MapTransformPropToFbxProp = new List<(string, string)>()
             {
-                { "m_LocalScale", "Lcl Scaling" },
-                { "Motion S", "Lcl Scaling" },
-                { "m_LocalPosition", "Lcl Translation" },
-                { "Motion T", "Lcl Translation" },
-                { "m_TranslationOffset", "Translation" },
-                { "m_ScaleOffset", "Scaling" },
-                { "m_RotationOffset", "Rotation" },
-                { "localEulerAnglesRaw", "Lcl Rotation" }
+                ( "m_LocalScale", "Lcl Scaling" ),
+                ( "Motion S", "Lcl Scaling" ),
+                ( "m_LocalPosition", "Lcl Translation" ),
+                ( "Motion T", "Lcl Translation" ),
+                ( "m_TranslationOffset", "Translation" ),
+                ( "m_ScaleOffset", "Scaling" ),
+                ( "m_RotationOffset", "Rotation" ),
+                ( "localEulerAnglesRaw", "Lcl Rotation" )
             };
 
         /// <summary>
         /// Map of Unity Aim constraint properties to their FBX equivalent.
         /// </summary>
-        private static Dictionary<string, string> MapAimConstraintPropToFbxProp = new Dictionary<string, string>()
+        private static List<(string, string)> MapAimConstraintPropToFbxProp = new List<(string, string)>()
             {
-                { "m_AimVector", "AimVector" },
-                { "m_UpVector", "UpVector" },
-                { "m_WorldUpVector", "WorldUpVector" },
-                { "m_RotationOffset", "RotationOffset" }
+                ( "m_AimVector", "AimVector" ),
+                ( "m_UpVector", "UpVector" ),
+                ( "m_WorldUpVector", "WorldUpVector" ),
+                ( "m_RotationOffset", "RotationOffset" )
             };
 
         /// <summary>
         /// Map of Unity color properties to their FBX equivalent.
         /// </summary>
-        private static Dictionary<string, string> MapColorPropToFbxProp = new Dictionary<string, string>()
+        private static List<(string, string)> MapColorPropToFbxProp = new List<(string, string)>()
             {
-                { "m_Color", "Color" }
+                ( "m_Color", "Color" )
             };
 
         /// <summary>
         /// Map of Unity properties to their FBX equivalent.
         /// </summary>
-        private static Dictionary<string, string> MapPropToFbxProp = new Dictionary<string, string>()
+        private static List<(string, string)> MapPropToFbxProp = new List<(string, string)>()
             {
-                { "m_Intensity", "Intensity" },
-                { "field of view", "FieldOfView" },
-                { "m_Weight", "Weight" },
-                { "m_FocalLength", "FocalLength" },
-                { "m_LensShift.x", "FilmOffsetX" },
-                { "m_LensShift.y", "FilmOffsetY" }
+                ( "m_Intensity", "Intensity" ),
+                ( "field of view", "FieldOfView" ),
+                ( "m_Weight", "Weight" ),
+                ( "m_FocalLength", "FocalLength" ),
+                ( "m_LensShift.x", "FilmOffsetX" ),
+                ( "m_LensShift.y", "FilmOffsetY" )
             };
 
         /// <summary>
@@ -102,9 +102,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// This is necessary because the Unity property contains an index in to an array, and the FBX property contains
         /// the name of the source object.
         /// </summary>
-        private static Dictionary<string, string> MapConstraintSourcePropToFbxProp = new Dictionary<string, string>()
+        private static List<(string, string)> MapConstraintSourcePropToFbxProp = new List<(string, string)>()
             {
-                { @"m_Sources\.Array\.data\[(\d+)\]\.weight", "{0}.Weight" }
+                ( @"m_Sources\.Array\.data\[(\d+)\]\.weight", "{0}.Weight" )
             };
 
         /// <summary>
@@ -112,19 +112,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// This is necessary because the Unity property contains an index in to an array, and the FBX property contains
         /// the name of the source object.
         /// </summary>
-        private static Dictionary<string, string> MapConstraintSourceTransformPropToFbxProp = new Dictionary<string, string>()
+        private static List<(string, string)> MapConstraintSourceTransformPropToFbxProp = new List<(string, string)>()
             {
-                { @"m_TranslationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset T" },
-                { @"m_RotationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset R" }
+                ( @"m_TranslationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset T" ),
+                ( @"m_RotationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset R" )
             };
 
         /// <summary>
         /// Map of Unity blendshape property name as a regular expression to the FBX property.
         /// This is necessary because the Unity property contains the name of the target object.
         /// </summary>
-        private static Dictionary<string, string> MapBlendshapesPropToFbxProp = new Dictionary<string, string>()
+        private static List<(string, string)> MapBlendshapesPropToFbxProp = new List<(string, string)>()
             {
-                { @"blendShape\.(\S+)", "DeformPercent" }
+                ( @"blendShape\.(\S+)", "DeformPercent" )
             };
 
         // ================== Channel Maps ======================
@@ -132,21 +132,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Map of Unity transform channels to their FBX equivalent.
         /// </summary>
-        private static Dictionary<string, string> MapTransformChannelToFbxChannel = new Dictionary<string, string>()
+        private static List<(string, string)> MapTransformChannelToFbxChannel = new List<(string, string)>()
             {
-                { "x", Globals.FBXSDK_CURVENODE_COMPONENT_X },
-                { "y", Globals.FBXSDK_CURVENODE_COMPONENT_Y },
-                { "z", Globals.FBXSDK_CURVENODE_COMPONENT_Z }
+                ( "x", Globals.FBXSDK_CURVENODE_COMPONENT_X ),
+                ( "y", Globals.FBXSDK_CURVENODE_COMPONENT_Y ),
+                ( "z", Globals.FBXSDK_CURVENODE_COMPONENT_Z )
             };
 
         /// <summary>
         /// Map of Unity color channels to their FBX equivalent.
         /// </summary>
-        private static Dictionary<string, string> MapColorChannelToFbxChannel = new Dictionary<string, string>()
+        private static List<(string, string)> MapColorChannelToFbxChannel = new List<(string, string)>()
             {
-                { "b", Globals.FBXSDK_CURVENODE_COLOR_BLUE },
-                { "g", Globals.FBXSDK_CURVENODE_COLOR_GREEN },
-                { "r", Globals.FBXSDK_CURVENODE_COLOR_RED }
+                ( "b", Globals.FBXSDK_CURVENODE_COLOR_BLUE ),
+                ( "g", Globals.FBXSDK_CURVENODE_COLOR_GREEN ),
+                ( "r", Globals.FBXSDK_CURVENODE_COLOR_RED )
             };
 
         // =======================================================
@@ -183,22 +183,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get the Fbx property name for the given Unity property name from the given dictionary.
+        /// Get the Fbx property name for the given Unity property name from the given list.
         /// </summary>
         /// <param name="uniProperty"></param>
         /// <param name="propertyMap"></param>
-        /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
-        private static string GetFbxProperty(string uniProperty, Dictionary<string, string> propertyMap)
+        /// <returns>The Fbx property name or null if there was no match in the list</returns>
+        private static string GetFbxProperty(string uniProperty, List<(string,string)> propertyMap)
         {
-            string fbxProperty;
-            if(!propertyMap.TryGetValue(uniProperty, out fbxProperty)){
-                return null;
+            foreach(var tup in propertyMap)
+            {
+                if(tup.Item1 == uniProperty)
+                {
+                    return tup.Item2;
+                }
             }
-            return fbxProperty;
+            return null;
         }
 
         /// <summary>
-        /// Get the Fbx property name for the given Unity constraint source property name from the given dictionary.
+        /// Get the Fbx property name for the given Unity constraint source property name from the given list.
         /// 
         /// This is different from GetFbxProperty() because the Unity constraint source properties contain indices, and
         /// the Fbx constraint source property contains the name of the source object.
@@ -206,12 +209,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="uniProperty"></param>
         /// <param name="constraint"></param>
         /// <param name="propertyMap"></param>
-        /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
-        private static string GetFbxConstraintSourceProperty(string uniProperty, FbxConstraint constraint, Dictionary<string, string> propertyMap)
+        /// <returns>The Fbx property name or null if there was no match in the list</returns>
+        private static string GetFbxConstraintSourceProperty(string uniProperty, FbxConstraint constraint, List<(string, string)> propertyMap)
         {
             foreach (var prop in propertyMap)
             {
-                var match = System.Text.RegularExpressions.Regex.Match(uniProperty, prop.Key);
+                var match = System.Text.RegularExpressions.Regex.Match(uniProperty, prop.Item1);
                 if (match.Success && match.Groups.Count > 0)
                 {
                     var matchedStr = match.Groups[1].Value;
@@ -221,48 +224,50 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         continue;
                     }
                     var source = constraint.GetConstraintSource(index);
-                    return string.Format(prop.Value, source.GetName());
+                    return string.Format(prop.Item2, source.GetName());
                 }
             }
             return null;
         }
 
         /// <summary>
-        /// Get the Fbx property name for the given Unity blendshape property name from the given dictionary.
+        /// Get the Fbx property name for the given Unity blendshape property name from the given list.
         /// 
         /// This is different from GetFbxProperty() because the Unity blendshape properties contain the name
         /// of the target object.
         /// </summary>
         /// <param name="uniProperty"></param>
         /// <param name="propertyMap"></param>
-        /// <returns>The Fbx property name or null if there was no match in the dictionary</returns>
-        private static string GetFbxBlendshapeProperty(string uniProperty, Dictionary<string, string> propertyMap)
+        /// <returns>The Fbx property name or null if there was no match in the list</returns>
+        private static string GetFbxBlendshapeProperty(string uniProperty, List<(string, string)> propertyMap)
         {
             foreach (var prop in propertyMap)
             {
-                var match = System.Text.RegularExpressions.Regex.Match(uniProperty, prop.Key);
+                var match = System.Text.RegularExpressions.Regex.Match(uniProperty, prop.Item1);
                 if (match.Success)
                 {
-                    return prop.Value;
+                    return prop.Item2;
                 }
             }
             return null;
         }
 
         /// <summary>
-        /// Get the Fbx channel name for the given Unity channel from the given dictionary.
+        /// Get the Fbx channel name for the given Unity channel from the given list.
         /// </summary>
         /// <param name="uniChannel"></param>
         /// <param name="channelMap"></param>
-        /// <returns>The Fbx channel name or null if there was no match in the dictionary</returns>
-        private static string GetFbxChannel(string uniChannel, Dictionary<string, string> channelMap)
+        /// <returns>The Fbx channel name or null if there was no match in the list</returns>
+        private static string GetFbxChannel(string uniChannel, List<(string, string)> channelMap)
         {
-            string fbxChannel;
-            if(!channelMap.TryGetValue(uniChannel, out fbxChannel))
+            foreach (var tup in channelMap)
             {
-                return null;
+                if (tup.Item1 == uniChannel)
+                {
+                    return tup.Item2;
+                }
             }
-            return fbxChannel;
+            return null;
         }
 
         /// <summary>
