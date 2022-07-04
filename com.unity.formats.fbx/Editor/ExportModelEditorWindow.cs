@@ -226,6 +226,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             set { m_selectedFbxPath = value; }
         }
 
+        /// <summary>
+        /// Caches the result of SelectionContainsPrefabInstanceWithAddedObjects() as it
+        /// only needs to be updated when ToExport is modified.
+        /// </summary>
         private bool m_exportSetContainsPrefabInstanceWithAddedObjects;
 
         private Object[] m_toExport;
@@ -289,7 +293,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected bool SelectionContainsPrefabInstanceWithAddedObjects()
         {
-            var exportSet = m_toExport;
+            var exportSet = ToExport;
             // FBX-60 (fogbug 1307749):
             // On Linux OnGUI() sometimes gets called a few times before
             // the export set is set and window.show() is called.
