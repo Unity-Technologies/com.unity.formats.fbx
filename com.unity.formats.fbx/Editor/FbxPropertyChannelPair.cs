@@ -251,9 +251,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// This is necessary because the Unity property contains an index in to an array, and the FBX property contains
         /// the name of the source object.
         /// </summary>
-        private static Dictionary<string, string> MapConstraintSourcePropToFbxProp = new Dictionary<string, string>()
+        private static List<(string, string)> MapConstraintSourcePropToFbxProp = new List<(string, string)>()
             {
-                { @"m_Sources\.Array\.data\[(\d+)\]\.weight", "{0}.Weight" }
+                ( @"m_Sources\.Array\.data\[(\d+)\]\.weight", "{0}.Weight" )
             };
 
         /// <summary>
@@ -261,19 +261,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// This is necessary because the Unity property contains an index in to an array, and the FBX property contains
         /// the name of the source object.
         /// </summary>
-        private static Dictionary<string, string> MapConstraintSourceTransformPropToFbxProp = new Dictionary<string, string>()
+        private static List<(string, string)> MapConstraintSourceTransformPropToFbxProp = new List<(string, string)>()
             {
-                { @"m_TranslationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset T" },
-                { @"m_RotationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset R" }
+                ( @"m_TranslationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset T" ),
+                ( @"m_RotationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset R" )
             };
 
         /// <summary>
         /// Map of Unity blendshape property name as a regular expression to the FBX property.
         /// This is necessary because the Unity property contains the name of the target object.
         /// </summary>
-        private static Dictionary<string, string> MapBlendshapesPropToFbxProp = new Dictionary<string, string>()
+        private static List<(string, string)> MapBlendshapesPropToFbxProp = new List<(string, string)>()
             {
-                { @"blendShape\.(\S+)", "DeformPercent" }
+                ( @"blendShape\.(\S+)", "DeformPercent" )
             };
 
         // ================== Channel Maps ======================
@@ -300,14 +300,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         // =======================================================
 
-        private static PropertyChannelMap TransformPropertyMap = new PropertyChannelMap(MapTransformPropToFbxProp, MapTransformChannelToFbxChannel);
-        private static PropertyChannelMap AimConstraintPropertyMap = new PropertyChannelMap(MapAimConstraintPropToFbxProp, MapTransformChannelToFbxChannel);
-        private static PropertyChannelMap ColorPropertyMap = new PropertyChannelMap(MapColorPropToFbxProp, MapColorChannelToFbxChannel);
-        private static PropertyChannelMap ConstraintSourcePropertyMap = new PropertyChannelMap(MapConstraintSourcePropToFbxProp, null);
-        private static PropertyChannelMap ConstraintSourceTransformPropertyMap = new PropertyChannelMap(MapConstraintSourceTransformPropToFbxProp, MapTransformChannelToFbxChannel);
-        private static PropertyChannelMap BlendshapeMap = new PropertyChannelMap(MapBlendshapesPropToFbxProp, null);
+        private static APropertyChannelFinder TransformPropertyMap = new PropertyChannelMap(MapTransformPropToFbxProp, MapTransformChannelToFbxChannel);
+        private static APropertyChannelFinder AimConstraintPropertyMap = new PropertyChannelMap(MapAimConstraintPropToFbxProp, MapTransformChannelToFbxChannel);
+        private static APropertyChannelFinder ColorPropertyMap = new PropertyChannelMap(MapColorPropToFbxProp, MapColorChannelToFbxChannel);
+        private static APropertyChannelFinder ConstraintSourcePropertyMap = new PropertyChannelConstraint(MapConstraintSourcePropToFbxProp, null);
+        private static APropertyChannelFinder ConstraintSourceTransformPropertyMap = new PropertyChannelConstraint(MapConstraintSourceTransformPropToFbxProp, MapTransformChannelToFbxChannel);
+        private static APropertyChannelFinder BlendshapeMap = new PropertyChannelRegexList(MapBlendshapesPropToFbxProp, null);
 
-        private static PropertyChannelMap OtherPropertyMap = new PropertyChannelMap(MapPropToFbxProp, null);
+        private static APropertyChannelFinder OtherPropertyMap = new PropertyChannelMap(MapPropToFbxProp, null);
 
         /// <summary>
         /// Separates and returns the property and channel from the full Unity property name.
@@ -350,7 +350,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return true;
             }
 
-            var propertyMaps = new List<PropertyChannelMap>();
+            var propertyMaps = new List<APropertyChannelFinder>();
 
             // Try get constraint specific channel pairs first as we know this is a constraint
             if (constraint != null)
