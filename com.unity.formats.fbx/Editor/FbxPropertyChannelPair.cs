@@ -44,6 +44,34 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 MapUnityPropToFbxProp = propertyMap;
                 MapUnityChannelToFbxChannel = channelMap;
             }
+
+            private string GetFbxValue(string uniValue, List<(string,string)> list)
+            {
+                var index = list.FindIndex(x => x.Item1 == uniValue);
+                return index < 0 ? null : list[index].Item2;
+            }
+
+            /// <summary>
+            /// Get the Fbx property name for the given Unity property name from the given list.
+            /// </summary>
+            /// <param name="uniProperty"></param>
+            /// <param name="propertyMap"></param>
+            /// <returns>The Fbx property name or null if there was no match in the list</returns>
+            public string GetFbxProperty(string uniProperty)
+            {
+                return GetFbxValue(uniProperty, MapUnityPropToFbxProp);
+            }
+
+            /// <summary>
+            /// Get the Fbx channel name for the given Unity channel from the given list.
+            /// </summary>
+            /// <param name="uniChannel"></param>
+            /// <param name="channelMap"></param>
+            /// <returns>The Fbx channel name or null if there was no match in the list</returns>
+            public string GetFbxChannel(string uniChannel)
+            {
+                return GetFbxValue(uniChannel, MapUnityChannelToFbxChannel);
+            }
         }
 
         // =========== Property Maps ================
@@ -183,24 +211,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get the Fbx property name for the given Unity property name from the given list.
-        /// </summary>
-        /// <param name="uniProperty"></param>
-        /// <param name="propertyMap"></param>
-        /// <returns>The Fbx property name or null if there was no match in the list</returns>
-        private static string GetFbxProperty(string uniProperty, List<(string,string)> propertyMap)
-        {
-            foreach(var tup in propertyMap)
-            {
-                if(tup.Item1 == uniProperty)
-                {
-                    return tup.Item2;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
         /// Get the Fbx property name for the given Unity constraint source property name from the given list.
         /// 
         /// This is different from GetFbxProperty() because the Unity constraint source properties contain indices, and
@@ -253,24 +263,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get the Fbx channel name for the given Unity channel from the given list.
-        /// </summary>
-        /// <param name="uniChannel"></param>
-        /// <param name="channelMap"></param>
-        /// <returns>The Fbx channel name or null if there was no match in the list</returns>
-        private static string GetFbxChannel(string uniChannel, List<(string, string)> channelMap)
-        {
-            foreach (var tup in channelMap)
-            {
-                if (tup.Item1 == uniChannel)
-                {
-                    return tup.Item2;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
         /// Try to get the property channel pairs for the given Unity property from the given property channel mapping.
         /// </summary>
         /// <param name="uniPropertyName"></param>
@@ -293,7 +285,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             foreach (var uniPropChannelPair in possibleUniPropChannelPairs)
             {
                 // try to match property
-                var fbxProperty = GetFbxProperty(uniPropChannelPair.property, propertyChannelMap.MapUnityPropToFbxProp);
+                var fbxProperty = propertyChannelMap.GetFbxProperty(uniPropChannelPair.property);
                 if (string.IsNullOrEmpty(fbxProperty))
                 {
                     if (constraint != null)
@@ -317,7 +309,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 string fbxChannel = null;
                 if(!string.IsNullOrEmpty(uniPropChannelPair.channel) && propertyChannelMap.MapUnityChannelToFbxChannel != null)
                 {
-                    fbxChannel = GetFbxChannel(uniPropChannelPair.channel, propertyChannelMap.MapUnityChannelToFbxChannel);
+                    fbxChannel = propertyChannelMap.GetFbxChannel(uniPropChannelPair.channel);
                     if (string.IsNullOrEmpty(fbxChannel))
                     {
                         // couldn't match the Unity channel to the fbx channel
