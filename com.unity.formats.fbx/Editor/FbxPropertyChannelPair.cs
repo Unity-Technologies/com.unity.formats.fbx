@@ -75,7 +75,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         // =========== Property Maps ================
-        // These are list that map a Unity property name to it's corresponding Fbx property name.
+        // These are lists that map a Unity property name to it's corresponding Fbx property name.
         // Split up into multiple lists as some are channel and object dependant.
 
         /// <summary>
