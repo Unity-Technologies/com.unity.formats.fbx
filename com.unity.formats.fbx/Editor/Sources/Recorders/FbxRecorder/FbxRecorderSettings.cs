@@ -274,29 +274,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Tests if the Recorder is correctly configured.
-        /// </summary>
-        /// <param name="errors">List of errors encountered.</param>
-        /// <returns>True if there are no errors, False otherwise.</returns>
-        [System.Obsolete("Please use methods GetErrors() and GetWarnings()")]
-        protected override bool ValidityCheck(List<string> errors)
-        {
-            var ok = base.ValidityCheck(errors);
-
-            if (m_AnimationInputSettings.gameObject == null)
-            {
-                ok = false;
-                if(errors == null)
-                {
-                    throw new System.ArgumentNullException("errors");
-                }
-                errors.Add("No input object set");
-            }
-
-            return ok;
-        }
-
-        /// <summary>
         /// Tests if the Recorder has any errors.
         /// </summary>
         /// <param name="errors">List of errors encountered.</param>
