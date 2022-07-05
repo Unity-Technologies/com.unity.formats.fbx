@@ -226,7 +226,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
             set { m_selectedFbxPath = value; }
         }
 
-        protected Object[] ToExport { get; set; }
+        /// <summary>
+        /// Caches the result of SelectionContainsPrefabInstanceWithAddedObjects() as it
+        /// only needs to be updated when ToExport is modified.
+        /// </summary>
+        private bool m_exportSetContainsPrefabInstanceWithAddedObjects;
+
+        private Object[] m_toExport;
+        protected Object[] ToExport { 
+            get
+            {
+                return m_toExport;
+            }
+            set
+            {
+                m_toExport = value;
+                m_exportSetContainsPrefabInstanceWithAddedObjects = SelectionContainsPrefabInstanceWithAddedObjects();
+            }
+        }
 
         protected virtual void OnEnable(){
             #if UNITY_2018_1_OR_NEWER
@@ -593,7 +610,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             // if we are exporting or converting a prefab with overrides, then show a warning
-            if (SelectionContainsPrefabInstanceWithAddedObjects())
+            if (m_exportSetContainsPrefabInstanceWithAddedObjects)
             {
                 EditorGUILayout.Space();
                 EditorGUILayout.HelpBox("Prefab instance overrides will be exported", MessageType.Warning, true);
