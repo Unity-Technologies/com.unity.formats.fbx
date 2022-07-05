@@ -1,0 +1,27 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace UnityEditor.Formats.Fbx.Exporter
+{
+    [UnityEditor.Recorder.RecorderSettings(typeof(UnityEditor.Formats.Fbx.Exporter.FbxRecorder), @"FBX")] public class FbxRecorderSettings : UnityEditor.Recorder.RecorderSettings
+    {
+        public UnityEditor.Recorder.Input.AnimationInputSettings AnimationInputSettings { get; set; }
+        public bool ExportGeometry { get; set; }
+        protected virtual string Extension { get; }
+        public virtual System.Collections.Generic.IEnumerable<UnityEditor.Recorder.RecorderInputSettings> InputsSettings { get; }
+        public virtual bool IsPlatformSupported { get; }
+        public UnityEngine.Transform TransferAnimationDest { get; set; }
+        public UnityEngine.Transform TransferAnimationSource { get; set; }
+        public FbxRecorderSettings() {}
+        protected virtual void GetErrors(System.Collections.Generic.List<string> errors);
+        public virtual void OnAfterDuplicate();
+    }
+
+    public sealed class ModelExporter : System.IDisposable
+    {
+        public ModelExporter() {}
+        public virtual void Dispose();
+        public static string ExportObject(string filePath, UnityEngine.Object singleObject);
+        public static string ExportObjects(string filePath, UnityEngine.Object[] objects = default(UnityEngine.Object[]));
+    }
+}
