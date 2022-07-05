@@ -47,8 +47,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             private string GetFbxValue(string uniValue, List<(string,string)> list)
             {
-                var index = list.FindIndex(x => x.Item1 == uniValue);
-                return index < 0 ? null : list[index].Item2;
+                return list.Find(x => x.Item1 == uniValue).Item2;
             }
 
             /// <summary>
