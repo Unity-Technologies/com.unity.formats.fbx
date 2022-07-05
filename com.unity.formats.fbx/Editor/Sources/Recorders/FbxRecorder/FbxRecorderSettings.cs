@@ -249,7 +249,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return go != null ? go.scene.name : "None";
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Indicates if the current platform is supported (True) or not (False).
+        /// </summary>
         /// <remarks>
         /// FBX Recorder currently supports the following platforms: LinuxEditor, OSXEditor, WindowsEditor.
         /// </remarks>
@@ -263,13 +265,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Stores the list of Input settings required by this Recorder.
+        /// </summary>
         public override IEnumerable<RecorderInputSettings> InputsSettings
         {
             get { yield return m_AnimationInputSettings; }
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Tests if the Recorder is correctly configured.
+        /// </summary>
+        /// <param name="errors">List of errors encountered.</param>
+        /// <returns>True if there are no errors, False otherwise.</returns>
+        [System.Obsolete("Please use methods GetErrors() and GetWarnings()")]
         protected override bool ValidityCheck(List<string> errors)
         {
             var ok = base.ValidityCheck(errors);
@@ -287,7 +296,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return ok;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Tests if the Recorder has any errors.
+        /// </summary>
+        /// <param name="errors">List of errors encountered.</param>
+        protected override void GetErrors(List<string> errors)
+        {
+            base.GetErrors(errors);
+
+            if (m_AnimationInputSettings.gameObject == null)
+            {
+                if (errors == null)
+                {
+                    throw new System.ArgumentNullException("errors");
+                }
+                errors.Add("No input object set");
+            }
+        }
+
+        /// <summary>
+        /// Override this method if any post treatment needs to be done after this Recorder is duplicated in the Recorder Window.
+        /// </summary>
         public override void OnAfterDuplicate()
         {
             m_AnimationInputSettings.DuplicateExposedReference();
@@ -298,7 +327,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             m_AnimationInputSettings.ClearExposedReference();
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Stores the file extension used by this Recorder (without the dot).
+        /// </summary>
         protected override string Extension
         {
             get { return "fbx"; }
