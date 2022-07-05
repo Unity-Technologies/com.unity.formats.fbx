@@ -126,7 +126,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns><c>true</c> if p is ancestor to t; otherwise, <c>false</c>.</returns>
         /// <param name="p">P.</param>
         /// <param name="t">T.</param>
-        protected internal bool IsAncestor(Transform p, Transform t)
+        internal bool IsAncestor(Transform p, Transform t)
         {
             var curr = t;
             while (curr != null)
@@ -146,12 +146,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns><c>true</c> if t1 is in same hierarchy as t2; otherwise, <c>false</c>.</returns>
         /// <param name="t1">T1.</param>
         /// <param name="t2">T2.</param>
-        protected internal bool IsInSameHierarchy(Transform t1, Transform t2)
+        internal bool IsInSameHierarchy(Transform t1, Transform t2)
         {
             return (IsAncestor(t1, t2) || IsAncestor(t2, t1));
         }
 
-        protected internal bool TransferAnimationSourceIsValid(Transform newValue)
+        internal bool TransferAnimationSourceIsValid(Transform newValue)
         {
             if (!newValue)
             {
@@ -181,7 +181,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        protected internal bool TransferAnimationDestIsValid(Transform newValue)
+        internal bool TransferAnimationDestIsValid(Transform newValue)
         {
             if (!newValue)
             {
