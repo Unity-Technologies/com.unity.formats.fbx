@@ -129,6 +129,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
+    /// <summary>
+    /// Interface of export options that can be set when exporting to FBX.
+    /// </summary>
     public interface IExportOptions {
         ExportFormat ExportFormat { get; }
         Include ModelAnimIncludeOption { get; }
@@ -174,6 +177,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
     internal class ExportModelSettings : ExportOptionsSettingsBase<ExportModelSettingsSerialize>
     {}
 
+    /// <summary>
+    /// Base class for the export model settings and convert to prefab settings. 
+    /// </summary>
     [System.Serializable]
     public abstract class ExportOptionsSettingsSerializeBase : IExportOptions
     {
@@ -199,15 +205,51 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public void SetAnimationSource(Transform source) { this.animSource = source; }
         public Transform AnimationDest { get { return animDest; } }
         public void SetAnimationDest(Transform dest) { this.animDest = dest; }
+
+        /// <summary>
+        /// Get option to export model only, animation only, or both model and animation.
+        /// </summary>
         public abstract Include ModelAnimIncludeOption { get; }
+
+        /// <summary>
+        /// Get the type of LOD to export (options are: All, Highest or Lowest).
+        /// </summary>
         public abstract LODExportType LODExportType { get; }
+
+        /// <summary>
+        /// Get the position to export the object to (options are: Local centered, World absolute, and Reset (used for converting to prefab)).
+        /// </summary>
         public abstract ObjectPosition ObjectPosition { get; }
+
+        /// <summary>
+        /// Should objects that do not have a renderer be exported?
+        /// </summary>
         public abstract bool ExportUnrendered { get; }
+
+        /// <summary>
+        /// If an FBX file is being overwritten, should the previous import settings be preserved after export.
+        /// </summary>
         public virtual bool PreserveImportSettings { get { return false; } }
         public abstract bool AllowSceneModification { get; }
+
+        /// <summary>
+        /// If multiple instances of the same mesh are being exported, should they be kept as instances on export?
+        /// </summary>
         public virtual bool KeepInstances { get { return true; } }
+
+        /// <summary>
+        /// Should textures be embedded in the FBX file.
+        /// </summary>
+        /// <remarks>
+        /// Note: For textures to be embedded the file must also be exported as binary.
+        /// </remarks>
         public virtual bool EmbedTextures { get { return false; } }
 
+        /// <summary>
+        /// Check if two instances of the export settings are equal.
+        /// </summary>
+        /// <param name="e">The other export setting object to check.</param>
+        /// <returns>True if equal, false otherwise.</returns>
         public override bool Equals(object e)
         {
             var expOptions = e as ExportOptionsSettingsSerializeBase;
@@ -220,12 +262,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 exportFormat == expOptions.exportFormat;
         }
 
+        /// <summary>
+        /// Get the hash code for this instance of the export model settings.
+        /// </summary>
+        /// <returns>Unique hash code for these settings.</returns>
         public override int GetHashCode()
         {
             return (animatedSkinnedMesh ? 1 : 0) | ((mayaCompatibleNaming ? 1 : 0) << 1) | ((int)exportFormat << 2);
         }
     }
 
+    /// <summary>
+    /// Class specifying the settings for exporting to FBX.
+    /// </summary>
     [System.Serializable]
     public class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
@@ -243,23 +292,75 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private bool keepInstances = true;
         [SerializeField]
         private bool embedTextures = false;
-        
+  
+        /// <inheritdoc/>
         public override Include ModelAnimIncludeOption { get { return include; } }
+
+        /// <summary>
+        /// Set the option to export model only, animation only, or both model and animation.
+        /// </summary>
+        /// <param name="include">model, animation, or model and animation</param>
         public void SetModelAnimIncludeOption(Include include) { this.include = include; }
+
+        /// <inheritdoc/>
         public override LODExportType LODExportType { get { return lodLevel; } }
+
+        /// <summary>
+        /// Set the type of LOD to export (options are: All, Highest or Lowest).
+        /// </summary>
+        /// <param name="lodLevel">All, Highest, or Lowest</param>
         public void SetLODExportType(LODExportType lodLevel){ this.lodLevel = lodLevel; }
+
+        /// <inheritdoc/>
         public override ObjectPosition ObjectPosition { get { return objectPosition; } }
-        public void SetObjectPosition(ObjectPosition objPos){ this.objectPosition = objPos; }
+
+        /// <summary>
+        /// Set the position to export the object to (options are: Local centered, World absolute, and Reset (used for converting to prefab)).
+        /// </summary>
+        /// <param name="objectPosition">Local centered, World absolute, or Reset</param>
+        public void SetObjectPosition(ObjectPosition objectPosition){ this.objectPosition = objectPosition; }
+
+        /// <inheritdoc/>
         public override bool ExportUnrendered { get { return exportUnrendered; } }
+
+        /// <summary>
+        /// Set whether objects that do not have a renderer are exported.
+        /// </summary>
+        /// <param name="exportUnrendered">True to export unrendered, false otherwise.</param>
         public void SetExportUnredererd(bool exportUnrendered){ this.exportUnrendered = exportUnrendered; }
+
+        /// <inheritdoc/>
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }
+
+        /// <summary>
+        /// Set whether the previous export settings will be preserved after export when overwriting
+        /// an existing FBX file.
+        /// </summary>
+        /// <param name="preserveImportSettings">True if previous import settings should be preserved, false otherwise.</param>
         public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings; }
+
+        /// <inheritdoc/>
         public override bool AllowSceneModification { get { return false; } }
+
+        /// <inheritdoc/>
         public override bool KeepInstances { get { return keepInstances; } }
+
+        /// <summary>
+        /// Set whether multiple instances of the same mesh are kept as instances on export.
+        /// </summary>
+        /// <param name="keepInstances">True if instances should be exported as instances, false otherwise.</param>
         public void SetKeepInstances(bool keepInstances){ this.keepInstances = keepInstances; }
+
+        /// <inheritdoc/>
         public override bool EmbedTextures { get { return embedTextures; } }
+
+        /// <summary>
+        /// Set whether textures should be embedded on export.
+        /// </summary>
+        /// <param name="embedTextures">True if textures should be embedded, false otherwise.</param>
         public void SetEmbedTextures(bool embedTextures){ this.embedTextures = embedTextures; }
 
+        /// <inheritdoc/>
         public override bool Equals(object e)
         {
             var expOptions = e as ExportModelSettingsSerialize;
@@ -275,6 +376,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 preserveImportSettings == expOptions.preserveImportSettings;
         }
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             var bitmask =  base.GetHashCode();

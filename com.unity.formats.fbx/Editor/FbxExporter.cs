@@ -4528,20 +4528,42 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// 
+        /// Exports a single Unity GameObject to an FBX file, 
+        /// with the specified export settings.
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="root"></param>
-        /// <param name="exportOptions"></param>
-        /// <returns></returns>
+        /// <returns>
+        /// The FBX file path if successful; otherwise null.
+        /// </returns>
+        /// <param name="filePath">Absolute file path to use for the FBX file.</param>
+        /// <param name="singleObject">The Unity GameObject to export.</param>
+        /// <param name="exportOptions">The export options to use.</param>
         [SecurityPermission(SecurityAction.LinkDemand)]
         public static string ExportObject (
             string filePath, 
-            UnityEngine.Object root,
+            UnityEngine.Object singleObject,
             IExportOptions exportOptions = null
         )
         {
-            return ExportObjects(filePath, new Object[] { root }, exportOptions);
+            return ExportObjects(filePath, new Object[] { singleObject }, exportOptions, exportData: null);
+        }
+
+        /// <summary>
+        /// Exports an array of Unity GameObjects to an FBX file,
+        /// with the specified export settings.
+        /// </summary>
+        /// <returns>
+        /// The FBX file path if successful; otherwise returns null.
+        /// </returns>
+        /// <param name="filePath">Absolute file path to use for the FBX file.</param>
+        /// <param name="objects">Array of Unity GameObjects to export.</param>
+        /// <param name="exportOptions">The export options to use.</param>
+        [SecurityPermission(SecurityAction.LinkDemand)]
+        public static string ExportObjects(
+            string filePath,
+            UnityEngine.Object[] objects = null,
+            IExportOptions exportOptions = null)
+        {
+            return ExportObjects(filePath, objects, exportOptions, exportData: null);
         }
 
         /// <summary>
