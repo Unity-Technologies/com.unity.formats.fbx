@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
-    [CustomEditor (typeof(ExportModelSettings))]
+    [CustomEditor(typeof(ExportModelSettings))]
     internal class ExportModelSettingsEditor : UnityEditor.Editor
     {
         private const float DefaultLabelWidth = 175;
@@ -11,14 +11,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public float LabelWidth { get; set; } = DefaultLabelWidth;
         public float FieldOffset { get; set; } = DefaultFieldOffset;
 
-        private string[] exportFormatOptions = new string[]{ "ASCII", "Binary" };
-        private string[] includeOptions = new string[]{"Model(s) Only", "Animation Only", "Model(s) + Animation"};
-        private string[] lodOptions = new string[]{"All Levels", "Highest", "Lowest"};
+        private string[] exportFormatOptions = new string[] { "ASCII", "Binary" };
+        private string[] includeOptions = new string[] {"Model(s) Only", "Animation Only", "Model(s) + Animation"};
+        private string[] lodOptions = new string[] {"All Levels", "Highest", "Lowest"};
 
         public const string singleHierarchyOption = "Local Pivot";
         public const string multiHerarchyOption = "Local Centered";
         private string hierarchyDepOption = singleHierarchyOption;
-        private string[] objPositionOptions { get { return new string[]{hierarchyDepOption, "World Absolute"}; }}
+        private string[] objPositionOptions { get { return new string[] {hierarchyDepOption, "World Absolute"}; }}
 
         private bool disableIncludeDropdown = false;
 
@@ -28,19 +28,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
             m_exportingOutsideProject = val;
         }
 
-        public void SetIsSingleHierarchy(bool singleHierarchy){
-            if (singleHierarchy) {
+        public void SetIsSingleHierarchy(bool singleHierarchy)
+        {
+            if (singleHierarchy)
+            {
                 hierarchyDepOption = singleHierarchyOption;
                 return;
             }
             hierarchyDepOption = multiHerarchyOption;
         }
 
-        public void DisableIncludeDropdown(bool disable){
+        public void DisableIncludeDropdown(bool disable)
+        {
             disableIncludeDropdown = disable;
         }
 
-        public override void OnInspectorGUI ()
+        public override void OnInspectorGUI()
         {
             var exportSettings = ((ExportModelSettings)target).info;
 
@@ -49,14 +52,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.SetExportFormat((ExportFormat)EditorGUILayout.Popup((int)exportSettings.ExportFormat, exportFormatOptions) );
+            exportSettings.SetExportFormat((ExportFormat)EditorGUILayout.Popup((int)exportSettings.ExportFormat, exportFormatOptions));
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Include", "Select whether to export models, animation or both."), GUILayout.Width(LabelWidth - FieldOffset));
             EditorGUI.BeginDisabledGroup(disableIncludeDropdown);
             exportSettings.SetModelAnimIncludeOption((Include)EditorGUILayout.Popup((int)exportSettings.ModelAnimIncludeOption, includeOptions));
-            EditorGUI.EndDisabledGroup ();
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -64,7 +67,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // greyed out if animation only
             EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == Include.Anim);
             exportSettings.SetLODExportType((LODExportType)EditorGUILayout.Popup((int)exportSettings.LODExportType, lodOptions));
-            EditorGUI.EndDisabledGroup ();
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -72,7 +75,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // greyed out if animation only
             EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == Include.Anim);
             exportSettings.SetObjectPosition((ObjectPosition)EditorGUILayout.Popup((int)exportSettings.ObjectPosition, objPositionOptions));
-            EditorGUI.EndDisabledGroup ();
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -81,19 +84,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // greyed out if model
             EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == Include.Model);
             exportSettings.SetAnimatedSkinnedMesh(EditorGUILayout.Toggle(exportSettings.AnimateSkinnedMesh));
-            EditorGUI.EndDisabledGroup ();
-            GUILayout.EndHorizontal ();
+            EditorGUI.EndDisabledGroup();
+            GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Compatible Naming",
-                    "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
-                    "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
-                    "On export, convert the names of GameObjects so they are Maya compatible." +
-                    (exportSettings.UseMayaCompatibleNames ? "" :
-                        "\n\nWARNING: Disabling this feature may result in lost material connections," +
-                        " and unexpected character replacements in Maya.")),
-                    GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.SetUseMayaCompatibleNames(EditorGUILayout.Toggle (exportSettings.UseMayaCompatibleNames));
+                "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
+                "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
+                "On export, convert the names of GameObjects so they are Maya compatible." +
+                (exportSettings.UseMayaCompatibleNames ? "" :
+                    "\n\nWARNING: Disabling this feature may result in lost material connections," +
+                    " and unexpected character replacements in Maya.")),
+                GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.SetUseMayaCompatibleNames(EditorGUILayout.Toggle(exportSettings.UseMayaCompatibleNames));
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -102,9 +105,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // greyed out if animation only
             EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == Include.Anim);
             exportSettings.SetExportUnredererd(EditorGUILayout.Toggle(exportSettings.ExportUnrendered));
-            EditorGUI.EndDisabledGroup ();
-            GUILayout.EndHorizontal ();
-            
+            EditorGUI.EndDisabledGroup();
+            GUILayout.EndHorizontal();
+
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Preserve Import Settings",
                 "If checked, the import settings from the overwritten FBX will be carried over to the new version."), GUILayout.Width(LabelWidth - FieldOffset));
@@ -132,8 +135,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// <summary>
     /// Interface of export options that can be set when exporting to FBX.
     /// </summary>
-    public interface IExportOptions {
-
+    public interface IExportOptions
+    {
         /// <summary>
         /// Setting for the export format (binary or ascii)
         /// </summary>
@@ -223,7 +226,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool Equals(object e)
         {
             var expOptions = e as ExportOptionsSettingsBase<T>;
-            if(expOptions == null)
+            if (expOptions == null)
             {
                 return false;
             }
@@ -240,7 +243,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     {}
 
     /// <summary>
-    /// Base class for the export model settings and convert to prefab settings. 
+    /// Base class for the export model settings and convert to prefab settings.
     /// </summary>
     [System.Serializable]
     public abstract class ExportOptionsSettingsSerializeBase : IExportOptions
@@ -264,7 +267,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Set the export format to binary or ascii.
         /// </summary>
         /// <param name="format">Binary or ASCII</param>
-        public void SetExportFormat(ExportFormat format){ this.exportFormat = format; }
+        public void SetExportFormat(ExportFormat format) { this.exportFormat = format; }
 
         /// <inheritdoc/>
         public bool AnimateSkinnedMesh { get { return animatedSkinnedMesh; } }
@@ -273,7 +276,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Set whether animation on objects containing a skinned mesh will be exported.
         /// </summary>
         /// <param name="animatedSkinnedMesh">True to export animation on skinned meshes, false otherwise.</param>
-        public void SetAnimatedSkinnedMesh(bool animatedSkinnedMesh){ this.animatedSkinnedMesh = animatedSkinnedMesh; }
+        public void SetAnimatedSkinnedMesh(bool animatedSkinnedMesh) { this.animatedSkinnedMesh = animatedSkinnedMesh; }
 
         /// <inheritdoc/>
         public bool UseMayaCompatibleNames { get { return mayaCompatibleNaming; } }
@@ -282,7 +285,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Set whether exported objects will be renamed to Maya compatible names.
         /// </summary>
         /// <param name="useMayaCompNames">True to have export Maya compatible names, false otherwise.</param>
-        public void SetUseMayaCompatibleNames(bool useMayaCompNames){ this.mayaCompatibleNaming = useMayaCompNames; }
+        public void SetUseMayaCompatibleNames(bool useMayaCompNames) { this.mayaCompatibleNaming = useMayaCompNames; }
 
         /// <inheritdoc/>
         public Transform AnimationSource { get { return animSource; } }
@@ -373,7 +376,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private bool keepInstances = true;
         [SerializeField]
         private bool embedTextures = false;
-  
+
         /// <inheritdoc/>
         public override Include ModelAnimIncludeOption { get { return include; } }
 
@@ -390,7 +393,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Set the type of LOD to export (options are: All, Highest or Lowest).
         /// </summary>
         /// <param name="lodLevel">All, Highest, or Lowest</param>
-        public void SetLODExportType(LODExportType lodLevel){ this.lodLevel = lodLevel; }
+        public void SetLODExportType(LODExportType lodLevel) { this.lodLevel = lodLevel; }
 
         /// <inheritdoc/>
         public override ObjectPosition ObjectPosition { get { return objectPosition; } }
@@ -399,7 +402,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Set the position to export the object to (options are: Local centered, World absolute, and Reset (used for converting to prefab)).
         /// </summary>
         /// <param name="objectPosition">Local centered, World absolute, or Reset</param>
-        public void SetObjectPosition(ObjectPosition objectPosition){ this.objectPosition = objectPosition; }
+        public void SetObjectPosition(ObjectPosition objectPosition) { this.objectPosition = objectPosition; }
 
         /// <inheritdoc/>
         public override bool ExportUnrendered { get { return exportUnrendered; } }
@@ -408,7 +411,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Set whether objects that do not have a renderer are exported.
         /// </summary>
         /// <param name="exportUnrendered">True to export unrendered, false otherwise.</param>
-        public void SetExportUnredererd(bool exportUnrendered){ this.exportUnrendered = exportUnrendered; }
+        public void SetExportUnredererd(bool exportUnrendered) { this.exportUnrendered = exportUnrendered; }
 
         /// <inheritdoc/>
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }
@@ -418,7 +421,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// an existing FBX file.
         /// </summary>
         /// <param name="preserveImportSettings">True if previous import settings should be preserved, false otherwise.</param>
-        public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings; }
+        public void SetPreserveImportSettings(bool preserveImportSettings) { this.preserveImportSettings = preserveImportSettings; }
 
         /// <inheritdoc/>
         public override bool AllowSceneModification { get { return false; } }
@@ -430,7 +433,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Set whether multiple instances of the same mesh are kept as instances on export.
         /// </summary>
         /// <param name="keepInstances">True if instances should be exported as instances, false otherwise.</param>
-        public void SetKeepInstances(bool keepInstances){ this.keepInstances = keepInstances; }
+        public void SetKeepInstances(bool keepInstances) { this.keepInstances = keepInstances; }
 
         /// <inheritdoc/>
         public override bool EmbedTextures { get { return embedTextures; } }
@@ -439,7 +442,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Set whether textures should be embedded on export.
         /// </summary>
         /// <param name="embedTextures">True if textures should be embedded, false otherwise.</param>
-        public void SetEmbedTextures(bool embedTextures){ this.embedTextures = embedTextures; }
+        public void SetEmbedTextures(bool embedTextures) { this.embedTextures = embedTextures; }
 
         /// <inheritdoc/>
         public override bool Equals(object e)
@@ -449,7 +452,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 return false;
             }
-            return base.Equals(e) && 
+            return base.Equals(e) &&
                 include == expOptions.include &&
                 lodLevel == expOptions.lodLevel &&
                 objectPosition == expOptions.objectPosition &&
