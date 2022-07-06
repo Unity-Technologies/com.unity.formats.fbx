@@ -76,7 +76,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     {}
 
     /// <summary>
-    /// Class specifying the settings for converting to a prefab variant.
+    /// Class specifying the FBX export settings when converting to a prefab variant.
     /// </summary>
     [System.Serializable]
     public class ConvertToPrefabSettingsSerialize : ExportOptionsSettingsSerializeBase

@@ -172,7 +172,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         bool AllowSceneModification { get; }
 
         /// <summary>
-        /// Should objects that do not have a renderer be exported?
+        /// If false, objects that do not have a renderer will not be exported.
         /// </summary>
         bool ExportUnrendered { get; }
 
@@ -187,7 +187,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         bool KeepInstances { get; }
 
         /// <summary>
-        /// Should textures be embedded in the FBX file.
+        /// If true, textures will be embedded in the FBX file.
         /// </summary>
         /// <remarks>
         /// Note: For textures to be embedded the file must also be exported as binary.

@@ -10,12 +10,40 @@ using System.Security.Permissions;
 using UnityEditor.Presets;
 
 namespace UnityEditor.Formats.Fbx.Exporter {
+
+    /// <summary>
+    /// Enum specifying the FBX export format options.
+    /// </summary>
     public enum ExportFormat { ASCII = 0, Binary = 1 }
 
+    /// <summary>
+    /// Enum specifying the type of data to include in the export
+    /// (Model only, animation only, or model and animation).
+    /// </summary>
     public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
 
+    /// <summary>
+    /// Enum specifying the position to use for the root object.
+    /// 
+    /// Local Centered: For a single root uses the local transform information.
+    /// If you select multiple objects for export, the FBX Exporter centers objects 
+    /// around a shared root while keeping their relative placement unchanged.
+    /// 
+    /// World Absolute: Use world position of objects.
+    /// 
+    /// Reset: Export the object to (0,0,0).
+    /// </summary>
     public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/}
 
+    /// <summary>
+    /// Enum specifying the LODs to export for LOD groups.
+    /// </summary>
+    /// <remarks>
+    /// Notes:
+    /// - The FBX Exporter ignores LODs outside of selected hierarchy.
+    /// - The FBX Exporter does not filter out objects that are used as LODs and doesn't 
+    ///   export them if they aren’t direct descendants of their respective LOD Group
+    /// </remarks>
     public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 
 

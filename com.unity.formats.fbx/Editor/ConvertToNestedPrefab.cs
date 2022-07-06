@@ -373,15 +373,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Returns the prefab asset that's linked to the fbx.
         ///
         /// If 'toConvert' is:
-        /// <list>
-        /// <item>An object in the scene, then the hierarchy will be exported
-        /// and a new prefab variant created pointing to the new fbx.</item>
-        /// <item>The root of an fbx asset, or the root of an instance of an
+        /// <list type="bullet">
+        /// <item><description>
+        /// An object in the scene, then the hierarchy will be exported
+        /// and a new prefab variant created pointing to the new fbx.
+        /// </description></item>
+        /// <item><description>
+        /// The root of an fbx asset, or the root of an instance of an
         /// fbx asset, then a new prefab variant will be created
-        /// pointing to the existing fbx.</item>
-        /// <item>A prefab asset,
+        /// pointing to the existing fbx.
+        /// </description></item>
+        /// <item><description>
+        /// A prefab asset,
         /// then a new fbx asset will be exported and a new prefab variant created
-        /// pointing to the fbx.</item>
+        /// pointing to the fbx.
+        /// </description></item>
         /// </list>
         /// </summary>
         /// <returns>The prefab variant linked to an fbx file.</returns>
@@ -405,6 +411,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// file under a unique filename. May be null, in which case we use
         /// the export settings. Ignored if 'prefabFullPath' is specified.
         /// Ignored if 'toConvert' is a prefab asset.</param>
+        /// <param name="exportOptions">
+        /// Export options to use for exporting the model asset
+        /// that will be converted to a prefab.
+        /// </param>
         [SecurityPermission(SecurityAction.LinkDemand)]
         public static GameObject Convert(
             GameObject toConvert,
