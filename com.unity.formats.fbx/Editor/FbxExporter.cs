@@ -2849,7 +2849,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GameObject  unityGo, FbxScene fbxScene, FbxNode fbxNodeParent,
             int exportProgress, int objectCount, Vector3 newCenter,
             TransformExportType exportType = TransformExportType.Local,
-            ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All
+            LODExportType lodExportType = LODExportType.All
         )
         {
             int numObjectsExported = exportProgress;
@@ -2874,12 +2874,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // if this object has an LOD group, then export according to the LOD preference setting
             var lodGroup = unityGo.GetComponent<LODGroup>();
-            if (lodGroup && lodExportType != ExportSettings.LODExportType.All) {
+            if (lodGroup && lodExportType != LODExportType.All) {
                 LOD[] lods = lodGroup.GetLODs ();
 
                 // LODs are ordered from highest to lowest.
                 // If exporting lowest LOD, reverse the array
-                if (lodExportType == ExportSettings.LODExportType.Lowest) {
+                if (lodExportType == LODExportType.Lowest) {
                     // reverse the array
                     LOD[] tempLods = new LOD[lods.Length];
                     System.Array.Copy (lods, tempLods, lods.Length);
@@ -3262,7 +3262,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Debug.Assert(exportOptions != null);
 
             // only support anim only export for timeline clips
-            if (exportOptions.ModelAnimIncludeOption != ExportSettings.Include.Anim)
+            if (exportOptions.ModelAnimIncludeOption != Include.Anim)
             {
                 Debug.LogWarning("Timeline clips must be exported with Anim only include option");
                 return null;
@@ -3287,7 +3287,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 exportOptions = DefaultOptions;
             Debug.Assert(exportOptions!=null);
 
-            if (exportOptions.ModelAnimIncludeOption == ExportSettings.Include.Model)
+            if (exportOptions.ModelAnimIncludeOption == Include.Model)
             {
                 return null;
             }
@@ -3643,7 +3643,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             try {
-                bool animOnly = exportData != null && ExportOptions.ModelAnimIncludeOption == ExportSettings.Include.Anim;
+                bool animOnly = exportData != null && ExportOptions.ModelAnimIncludeOption == Include.Anim;
                 bool status = false;
                 // Create the FBX manager
                 using (var fbxManager = FbxManager.Create ()) {
@@ -3659,7 +3659,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // Initialize the exporter.
                     // fileFormat must be binary if we are embedding textures
                     int fileFormat = -1;
-                    if (ExportOptions.ExportFormat == ExportSettings.ExportFormat.ASCII)
+                    if (ExportOptions.ExportFormat == ExportFormat.ASCII)
                     {
                         fileFormat = fbxManager.GetIOPluginRegistry().FindWriterIDByDescription("FBX ascii (*.fbx)");
                     }                        
@@ -3743,7 +3743,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     Vector3 center = Vector3.zero;
                     TransformExportType transformExportType = TransformExportType.Global;
                     switch(ExportOptions.ObjectPosition){
-                    case ExportSettings.ObjectPosition.LocalCentered:
+                    case ObjectPosition.LocalCentered:
                         // one object to export -> move to (0,0,0)
                         if(rootObjCount == 1){
                             var tempList = new List<GameObject>(revisedExportSet);
@@ -3753,7 +3753,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         // more than one object to export -> get bounding center
                         center = FindCenter(revisedExportSet);
                         break;
-                    case ExportSettings.ObjectPosition.Reset:
+                    case ObjectPosition.Reset:
                         transformExportType = TransformExportType.Reset;
                         break;
                     // absolute center -> don't do anything
@@ -4011,7 +4011,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             var previousInclude = ExportSettings.instance.ExportModelSettings.info.ModelAnimIncludeOption;
-            ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+            ExportSettings.instance.ExportModelSettings.info.SetModelAnimIncludeOption(Include.Anim);
 
             if(ExportTimelineClip(filePath, timelineClip, director, ExportSettings.instance.ExportModelSettings.info) != null)
             {
@@ -4527,8 +4527,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="root"></param>
+        /// <param name="exportOptions"></param>
+        /// <returns></returns>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        internal static string ExportObject (
+        public static string ExportObject (
             string filePath, 
             UnityEngine.Object root,
             IExportOptions exportOptions = null

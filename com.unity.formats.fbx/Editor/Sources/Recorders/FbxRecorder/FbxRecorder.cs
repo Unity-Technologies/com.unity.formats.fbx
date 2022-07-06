@@ -52,11 +52,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var exportSettings = new ExportModelSettingsSerialize();
                 exportSettings.SetAnimationSource(settings.TransferAnimationSource);
                 exportSettings.SetAnimationDest(settings.TransferAnimationDest);
-                exportSettings.SetObjectPosition(ExportSettings.ObjectPosition.WorldAbsolute);
-                var toInclude = ExportSettings.Include.ModelAndAnim;
+                exportSettings.SetObjectPosition(ObjectPosition.WorldAbsolute);
+                var toInclude = Include.ModelAndAnim;
                 if (!settings.ExportGeometry)
                 {
-                    toInclude = ExportSettings.Include.Anim;
+                    toInclude = Include.Anim;
                 } 
                 exportSettings.SetModelAnimIncludeOption(toInclude);
 

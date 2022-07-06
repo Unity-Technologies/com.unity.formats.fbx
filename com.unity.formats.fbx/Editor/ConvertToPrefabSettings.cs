@@ -26,7 +26,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.SetExportFormat((ExportSettings.ExportFormat)EditorGUILayout.Popup((int)exportSettings.ExportFormat, exportFormatOptions));
+            exportSettings.SetExportFormat((ExportFormat)EditorGUILayout.Popup((int)exportSettings.ExportFormat, exportFormatOptions));
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -76,11 +76,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
     {}
 
     [System.Serializable]
-    internal class ConvertToPrefabSettingsSerialize : ExportOptionsSettingsSerializeBase
+    public class ConvertToPrefabSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
-        public override ExportSettings.Include ModelAnimIncludeOption { get { return ExportSettings.Include.ModelAndAnim; } }
-        public override ExportSettings.LODExportType LODExportType { get { return ExportSettings.LODExportType.All; } }
-        public override ExportSettings.ObjectPosition ObjectPosition { get { return ExportSettings.ObjectPosition.Reset; } }
+        public override Include ModelAnimIncludeOption { get { return Include.ModelAndAnim; } }
+        public override LODExportType LODExportType { get { return LODExportType.All; } }
+        public override ObjectPosition ObjectPosition { get { return ObjectPosition.Reset; } }
         public override bool ExportUnrendered { get { return true; } }
         public override bool AllowSceneModification { get { return true; } }
     }

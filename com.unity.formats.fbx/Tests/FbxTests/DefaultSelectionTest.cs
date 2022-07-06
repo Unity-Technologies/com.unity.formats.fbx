@@ -58,7 +58,7 @@ namespace FbxExporter.UnitTests
             Assert.IsNotNull (m_root);
 
             // test without centered objects
-            m_centerObjectsSetting.SetObjectPosition(ExportSettings.ObjectPosition.WorldAbsolute);
+            m_centerObjectsSetting.SetObjectPosition(ObjectPosition.WorldAbsolute);
 
             // test Export Root
             // Expected result: everything gets exported
@@ -93,7 +93,7 @@ namespace FbxExporter.UnitTests
             var goExportSet = new GameObject[]{ child2.gameObject, parent2.gameObject };
 
             // test without centering objects
-            m_centerObjectsSetting.SetObjectPosition(ExportSettings.ObjectPosition.WorldAbsolute);
+            m_centerObjectsSetting.SetObjectPosition(ObjectPosition.WorldAbsolute);
 
             exportedRoot = ExportSelection (exportSet, m_centerObjectsSetting);
             List<GameObject> children = new List<GameObject> ();
@@ -103,7 +103,7 @@ namespace FbxExporter.UnitTests
             CompareHierarchies (new GameObject[]{ child2, parent2.gameObject }, children.ToArray ());
 
             // test with centered objects
-            m_centerObjectsSetting.SetObjectPosition(ExportSettings.ObjectPosition.LocalCentered);
+            m_centerObjectsSetting.SetObjectPosition(ObjectPosition.LocalCentered);
             var newCenter = ModelExporter.FindCenter (goExportSet);
 
             exportedRoot = ExportSelection (exportSet, m_centerObjectsSetting);

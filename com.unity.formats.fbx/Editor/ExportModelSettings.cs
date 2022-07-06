@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -49,29 +49,29 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.SetExportFormat((ExportSettings.ExportFormat)EditorGUILayout.Popup((int)exportSettings.ExportFormat, exportFormatOptions) );
+            exportSettings.SetExportFormat((ExportFormat)EditorGUILayout.Popup((int)exportSettings.ExportFormat, exportFormatOptions) );
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Include", "Select whether to export models, animation or both."), GUILayout.Width(LabelWidth - FieldOffset));
             EditorGUI.BeginDisabledGroup(disableIncludeDropdown);
-            exportSettings.SetModelAnimIncludeOption((ExportSettings.Include)EditorGUILayout.Popup((int)exportSettings.ModelAnimIncludeOption, includeOptions));
+            exportSettings.SetModelAnimIncludeOption((Include)EditorGUILayout.Popup((int)exportSettings.ModelAnimIncludeOption, includeOptions));
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("LOD level", "Select which LOD to export."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if animation only
-            EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == ExportSettings.Include.Anim);
-            exportSettings.SetLODExportType((ExportSettings.LODExportType)EditorGUILayout.Popup((int)exportSettings.LODExportType, lodOptions));
+            EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == Include.Anim);
+            exportSettings.SetLODExportType((LODExportType)EditorGUILayout.Popup((int)exportSettings.LODExportType, lodOptions));
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Object(s) Position", "Select an option for exporting object's transform."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if animation only
-            EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == ExportSettings.Include.Anim);
-            exportSettings.SetObjectPosition((ExportSettings.ObjectPosition)EditorGUILayout.Popup((int)exportSettings.ObjectPosition, objPositionOptions));
+            EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == Include.Anim);
+            exportSettings.SetObjectPosition((ObjectPosition)EditorGUILayout.Popup((int)exportSettings.ObjectPosition, objPositionOptions));
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal();
 
@@ -79,7 +79,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUILayout.LabelField(new GUIContent("Animated Skinned Mesh",
                 "If checked, animation on objects with skinned meshes will be exported"), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if model
-            EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == ExportSettings.Include.Model);
+            EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == Include.Model);
             exportSettings.SetAnimatedSkinnedMesh(EditorGUILayout.Toggle(exportSettings.AnimateSkinnedMesh));
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal ();
@@ -100,7 +100,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUILayout.LabelField(new GUIContent("Export Unrendered",
                 "If checked, meshes will be exported even if they don't have a Renderer component."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if animation only
-            EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == ExportSettings.Include.Anim);
+            EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == Include.Anim);
             exportSettings.SetExportUnredererd(EditorGUILayout.Toggle(exportSettings.ExportUnrendered));
             EditorGUI.EndDisabledGroup ();
             GUILayout.EndHorizontal ();
@@ -129,11 +129,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
-    internal interface IExportOptions {
-        ExportSettings.ExportFormat ExportFormat { get; }
-        ExportSettings.Include ModelAnimIncludeOption { get; }
-        ExportSettings.LODExportType LODExportType { get; }
-        ExportSettings.ObjectPosition ObjectPosition { get; }
+    public interface IExportOptions {
+        ExportFormat ExportFormat { get; }
+        Include ModelAnimIncludeOption { get; }
+        LODExportType LODExportType { get; }
+        ObjectPosition ObjectPosition { get; }
         bool AnimateSkinnedMesh { get; }
         bool UseMayaCompatibleNames { get; }
         bool AllowSceneModification { get; }
@@ -175,10 +175,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
     {}
 
     [System.Serializable]
-    internal abstract class ExportOptionsSettingsSerializeBase : IExportOptions
+    public abstract class ExportOptionsSettingsSerializeBase : IExportOptions
     {
         [SerializeField]
-        private ExportSettings.ExportFormat exportFormat = ExportSettings.ExportFormat.ASCII;
+        private ExportFormat exportFormat = ExportFormat.ASCII;
         [SerializeField]
         private bool animatedSkinnedMesh = false;
         [SerializeField]
@@ -189,8 +189,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         [System.NonSerialized]
         private Transform animDest;
 
-        public ExportSettings.ExportFormat ExportFormat { get { return exportFormat; } }
-        public void SetExportFormat(ExportSettings.ExportFormat format){ this.exportFormat = format; }
+        public ExportFormat ExportFormat { get { return exportFormat; } }
+        public void SetExportFormat(ExportFormat format){ this.exportFormat = format; }
         public bool AnimateSkinnedMesh { get { return animatedSkinnedMesh; } }
         public void SetAnimatedSkinnedMesh(bool animatedSkinnedMesh){ this.animatedSkinnedMesh = animatedSkinnedMesh; }
         public bool UseMayaCompatibleNames { get { return mayaCompatibleNaming; } }
@@ -199,9 +199,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public void SetAnimationSource(Transform source) { this.animSource = source; }
         public Transform AnimationDest { get { return animDest; } }
         public void SetAnimationDest(Transform dest) { this.animDest = dest; }
-        public abstract ExportSettings.Include ModelAnimIncludeOption { get; }
-        public abstract ExportSettings.LODExportType LODExportType { get; }
-        public abstract ExportSettings.ObjectPosition ObjectPosition { get; }
+        public abstract Include ModelAnimIncludeOption { get; }
+        public abstract LODExportType LODExportType { get; }
+        public abstract ObjectPosition ObjectPosition { get; }
         public abstract bool ExportUnrendered { get; }
         public virtual bool PreserveImportSettings { get { return false; } }
         public abstract bool AllowSceneModification { get; }
@@ -227,14 +227,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
     }
 
     [System.Serializable]
-    internal class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
+    public class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
         [SerializeField]
-        private ExportSettings.Include include = ExportSettings.Include.ModelAndAnim;
+        private Include include = Include.ModelAndAnim;
         [SerializeField]
-        private ExportSettings.LODExportType lodLevel = ExportSettings.LODExportType.All;
+        private LODExportType lodLevel = LODExportType.All;
         [SerializeField]
-        private ExportSettings.ObjectPosition objectPosition = ExportSettings.ObjectPosition.LocalCentered;
+        private ObjectPosition objectPosition = ObjectPosition.LocalCentered;
         [SerializeField]
         private bool exportUnrendered = true;
         [SerializeField]
@@ -244,12 +244,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         [SerializeField]
         private bool embedTextures = false;
         
-        public override ExportSettings.Include ModelAnimIncludeOption { get { return include; } }
-        public void SetModelAnimIncludeOption(ExportSettings.Include include) { this.include = include; }
-        public override ExportSettings.LODExportType LODExportType { get { return lodLevel; } }
-        public void SetLODExportType(ExportSettings.LODExportType lodLevel){ this.lodLevel = lodLevel; }
-        public override ExportSettings.ObjectPosition ObjectPosition { get { return objectPosition; } }
-        public void SetObjectPosition(ExportSettings.ObjectPosition objPos){ this.objectPosition = objPos; }
+        public override Include ModelAnimIncludeOption { get { return include; } }
+        public void SetModelAnimIncludeOption(Include include) { this.include = include; }
+        public override LODExportType LODExportType { get { return lodLevel; } }
+        public void SetLODExportType(LODExportType lodLevel){ this.lodLevel = lodLevel; }
+        public override ObjectPosition ObjectPosition { get { return objectPosition; } }
+        public void SetObjectPosition(ObjectPosition objPos){ this.objectPosition = objPos; }
         public override bool ExportUnrendered { get { return exportUnrendered; } }
         public void SetExportUnredererd(bool exportUnrendered){ this.exportUnrendered = exportUnrendered; }
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }

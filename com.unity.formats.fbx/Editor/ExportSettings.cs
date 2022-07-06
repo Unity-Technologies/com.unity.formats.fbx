@@ -10,6 +10,15 @@ using System.Security.Permissions;
 using UnityEditor.Presets;
 
 namespace UnityEditor.Formats.Fbx.Exporter {
+    public enum ExportFormat { ASCII = 0, Binary = 1 }
+
+    public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
+
+    public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/}
+
+    public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
+
+
     [System.Serializable]
     internal class FbxExportSettingsException : System.Exception
     {
@@ -469,14 +478,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
     [FilePath("ProjectSettings/FbxExportSettings.asset",FilePathAttribute.Location.ProjectFolder)]
     internal class ExportSettings : ScriptableObject
     {
-        public enum ExportFormat { ASCII = 0, Binary = 1}
-
-        public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
-
-        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/}
-
-        public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
-
         internal const string kDefaultSavePath = ".";
         private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};
         //Any additional names require a space after the name
