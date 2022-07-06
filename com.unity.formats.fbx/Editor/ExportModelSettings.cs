@@ -133,18 +133,80 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Interface of export options that can be set when exporting to FBX.
     /// </summary>
     public interface IExportOptions {
+
+        /// <summary>
+        /// Setting for the export format (binary or ascii)
+        /// </summary>
         ExportFormat ExportFormat { get; }
+
+        /// <summary>
+        /// Option to export model only, animation only, or both model and animation.
+        /// </summary>
         Include ModelAnimIncludeOption { get; }
+
+        /// <summary>
+        /// The type of LOD to export (options are: All, Highest or Lowest).
+        /// </summary>
         LODExportType LODExportType { get; }
+
+        /// <summary>
+        /// The position to export the object to (options are: Local centered, World absolute, and Reset (used for converting to prefab)).
+        /// </summary>
         ObjectPosition ObjectPosition { get; }
+
+        /// <summary>
+        /// If false, do not export animation on objects that have a skinned mesh.
+        /// </summary>
         bool AnimateSkinnedMesh { get; }
+
+        /// <summary>
+        /// If true, object and material names will be converted to names
+        /// that are compatible with Maya.
+        /// </summary>
         bool UseMayaCompatibleNames { get; }
+
+        /// <summary>
+        /// If true and UseMayaCompatibleNames also enabled, change the objects and materials
+        /// in the scene to still have Maya compatible names after export.
+        /// </summary>
         bool AllowSceneModification { get; }
+
+        /// <summary>
+        /// Should objects that do not have a renderer be exported?
+        /// </summary>
         bool ExportUnrendered { get; }
+
+        /// <summary>
+        /// If an FBX file is being overwritten, should the previous import settings be preserved after export.
+        /// </summary>
         bool PreserveImportSettings { get; }
+
+        /// <summary>
+        /// If multiple instances of the same mesh are being exported, should they be kept as instances on export?
+        /// </summary>
         bool KeepInstances { get; }
+
+        /// <summary>
+        /// Should textures be embedded in the FBX file.
+        /// </summary>
+        /// <remarks>
+        /// Note: For textures to be embedded the file must also be exported as binary.
+        /// </remarks>
         bool EmbedTextures { get; }
+
+        /// <summary>
+        /// The transform to transfer animation from. Animation will be transferred to AnimationDest.
+        /// </summary>
+        /// <remarks>
+        /// Transform must be an ancestor of AnimationDest, and may be an ancestor of the selected object.
+        /// </remarks>
         Transform AnimationSource { get; }
+
+        /// <summary>
+        /// The transform to transfer animation to.
+        /// This object receives the transform animation on objects between Source
+        /// and Destination as well as the animation on the Source itself.
+        /// </summary>
         Transform AnimationDest { get; }
     }
 
@@ -195,54 +257,73 @@ namespace UnityEditor.Formats.Fbx.Exporter
         [System.NonSerialized]
         private Transform animDest;
 
+        /// <inheritdoc/>
         public ExportFormat ExportFormat { get { return exportFormat; } }
+
+        /// <summary>
+        /// Set the export format to binary or ascii.
+        /// </summary>
+        /// <param name="format">Binary or ASCII</param>
         public void SetExportFormat(ExportFormat format){ this.exportFormat = format; }
+
+        /// <inheritdoc/>
         public bool AnimateSkinnedMesh { get { return animatedSkinnedMesh; } }
+
+        /// <summary>
+        /// Set whether animation on objects containing a skinned mesh will be exported.
+        /// </summary>
+        /// <param name="animatedSkinnedMesh">True to export animation on skinned meshes, false otherwise.</param>
         public void SetAnimatedSkinnedMesh(bool animatedSkinnedMesh){ this.animatedSkinnedMesh = animatedSkinnedMesh; }
+
+        /// <inheritdoc/>
         public bool UseMayaCompatibleNames { get { return mayaCompatibleNaming; } }
+
+        /// <summary>
+        /// Set whether exported objects will be renamed to Maya compatible names.
+        /// </summary>
+        /// <param name="useMayaCompNames">True to have export Maya compatible names, false otherwise.</param>
         public void SetUseMayaCompatibleNames(bool useMayaCompNames){ this.mayaCompatibleNaming = useMayaCompNames; }
+
+        /// <inheritdoc/>
         public Transform AnimationSource { get { return animSource; } }
+
+        /// <summary>
+        /// Set the transform to transfer animation from.
+        /// </summary>
+        /// <param name="source">Transform to transfer animation from.</param>
         public void SetAnimationSource(Transform source) { this.animSource = source; }
+
+        /// <inheritdoc/>
         public Transform AnimationDest { get { return animDest; } }
+
+        /// <summary>
+        /// Set the transform to transfer animation from Source to.
+        /// </summary>
+        /// <param name="dest">Transform to transfer animation to.</param>
         public void SetAnimationDest(Transform dest) { this.animDest = dest; }
 
-        /// <summary>
-        /// Get option to export model only, animation only, or both model and animation.
-        /// </summary>
+        /// <inheritdoc/>
         public abstract Include ModelAnimIncludeOption { get; }
 
-        /// <summary>
-        /// Get the type of LOD to export (options are: All, Highest or Lowest).
-        /// </summary>
+        /// <inheritdoc/>
         public abstract LODExportType LODExportType { get; }
 
-        /// <summary>
-        /// Get the position to export the object to (options are: Local centered, World absolute, and Reset (used for converting to prefab)).
-        /// </summary>
+        /// <inheritdoc/>
         public abstract ObjectPosition ObjectPosition { get; }
 
-        /// <summary>
-        /// Should objects that do not have a renderer be exported?
-        /// </summary>
+        /// <inheritdoc/>
         public abstract bool ExportUnrendered { get; }
 
-        /// <summary>
-        /// If an FBX file is being overwritten, should the previous import settings be preserved after export.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual bool PreserveImportSettings { get { return false; } }
+
+        /// <inheritdoc/>
         public abstract bool AllowSceneModification { get; }
 
-        /// <summary>
-        /// If multiple instances of the same mesh are being exported, should they be kept as instances on export?
-        /// </summary>
+        /// <inheritdoc/>
         public virtual bool KeepInstances { get { return true; } }
 
-        /// <summary>
-        /// Should textures be embedded in the FBX file.
-        /// </summary>
-        /// <remarks>
-        /// Note: For textures to be embedded the file must also be exported as binary.
-        /// </remarks>
+        /// <inheritdoc/>
         public virtual bool EmbedTextures { get { return false; } }
 
         /// <summary>
