@@ -35,7 +35,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
-    internal static class ConvertToNestedPrefab
+    public static class ConvertToNestedPrefab
     {
         const string GameObjectMenuItemName = "GameObject/Convert To FBX Prefab Variant...";
         const string AssetsMenuItemName = "Assets/Convert To FBX Prefab Variant...";
@@ -103,7 +103,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         [MenuItem(GameObjectMenuItemName, true, 30)]
         [MenuItem(AssetsMenuItemName, true, 30)]
-        public static bool OnValidateMenuItem()
+        internal static bool OnValidateMenuItem()
         {
             return true;
         }
@@ -111,7 +111,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Gets the export settings.
         /// </summary>
-        public static ExportSettings ExportSettings
+        internal static ExportSettings ExportSettings
         {
             get { return ExportSettings.instance; }
         }
@@ -147,7 +147,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
         /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        public static GameObject[] CreateInstantiatedModelPrefab(
+        internal static GameObject[] CreateInstantiatedModelPrefab(
             GameObject[] unityGameObjectsToConvert)
         {
             var toExport = ModelExporter.RemoveRedundantObjects(unityGameObjectsToConvert);
@@ -530,7 +530,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Check whether <see>Convert</see> will be exporting an fbx file,
         /// or reusing one.
         /// </summary>
-        public static bool WillExportFbx(GameObject toConvert)
+        internal static bool WillExportFbx(GameObject toConvert)
         {
             return GetFbxAssetOrNull(toConvert) == null;
         }
@@ -681,7 +681,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns>new file name.</returns>
         /// <param name="filename">Filename.</param>
-        public static string IncrementFileName(string path, string filename)
+        internal static string IncrementFileName(string path, string filename)
         {
             string fileWithoutExt = Path.GetFileNameWithoutExtension(filename);
             string ext = Path.GetExtension(filename);
@@ -726,7 +726,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// e.g. Sphere becomes Sphere 1
         /// </summary>
         /// <param name="exportSet">Export set.</param>
-        public static void EnforceUniqueNames(IEnumerable<GameObject> exportSet)
+        internal static void EnforceUniqueNames(IEnumerable<GameObject> exportSet)
         {
             Dictionary<string, int> NameToIndexMap = new Dictionary<string, int>();
             string format = "{0} {1}";

@@ -75,13 +75,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
     internal class ConvertToPrefabSettings : ExportOptionsSettingsBase<ConvertToPrefabSettingsSerialize>
     {}
 
+    /// <summary>
+    /// Class specifying the settings for converting to a prefab variant.
+    /// </summary>
     [System.Serializable]
     public class ConvertToPrefabSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
+        /// <inheritdoc/>
         public override Include ModelAnimIncludeOption { get { return Include.ModelAndAnim; } }
+
+        /// <inheritdoc/>
         public override LODExportType LODExportType { get { return LODExportType.All; } }
+
+        /// <inheritdoc/>
         public override ObjectPosition ObjectPosition { get { return ObjectPosition.Reset; } }
+
+        /// <inheritdoc/>
         public override bool ExportUnrendered { get { return true; } }
+
+        /// <inheritdoc/>
         public override bool AllowSceneModification { get { return true; } }
     }
 }
