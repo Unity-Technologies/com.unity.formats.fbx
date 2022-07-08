@@ -1,4 +1,4 @@
-﻿#if ENABLE_FBX_RECORDER
+#if ENABLE_FBX_RECORDER
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Recorder;
@@ -260,8 +260,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             get
             {
                 return Application.platform == RuntimePlatform.LinuxEditor ||
-                       Application.platform == RuntimePlatform.OSXEditor ||
-                       Application.platform == RuntimePlatform.WindowsEditor;
+                    Application.platform == RuntimePlatform.OSXEditor ||
+                    Application.platform == RuntimePlatform.WindowsEditor;
             }
         }
 
