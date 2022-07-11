@@ -211,6 +211,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return converted.ToArray();
         }
 
+        private static Dictionary<Object, Object> s_fixSceneRefsTempDict = new Dictionary<Object, Object>();
+
         /// <summary>
         /// For sceneObj, replace reference of origObj with newObj.
         /// 
@@ -232,16 +234,23 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             var components = go.GetComponents<Component>();
+            int propCount = 0;
+
+            SerializedObject serializedComponent;
+            SerializedProperty property;
             foreach (var component in components)
             {
-                var serializedComponent = new SerializedObject(component);
-                var property = serializedComponent.GetIterator();
+                serializedComponent = new SerializedObject(component);
+                property = serializedComponent.GetIterator();
                 property.Next(true); // skip generic field
+
+                var isSkinnedMesh = component is SkinnedMeshRenderer;
+
                 // For SkinnedMeshRenderer, the bones array doesn't have visible children, but may have references that need to be fixed.
                 // For everything else, filtering by visible children in the while loop and then copying properties that don't have visible children,
                 // ensures that only the leaf properties are copied over. Copying other properties is not usually necessary and may break references that
                 // were not meant to be copied.
-                while (property.Next((component is SkinnedMeshRenderer) ? property.hasChildren : property.hasVisibleChildren))
+                while (property.Next((isSkinnedMesh) ? property.hasChildren : property.hasVisibleChildren))
                 {
                     if (!property.hasVisibleChildren)
                     {
@@ -251,12 +260,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         if (property.propertyPath == "m_GameObject") continue;
                         if (property.propertyPath == "m_Father") continue;
                         if (!property.objectReferenceValue) continue;
-                        if (property.objectReferenceValue != origObj) continue;
 
-                        property.objectReferenceValue = newObj;
-                        serializedComponent.ApplyModifiedProperties();
+                        if(s_fixSceneRefsTempDict.TryGetValue(property.objectReferenceValue, out Object newVal))
+                        {
+                            property.objectReferenceValue = newVal;
+                        }
                     }
+                    propCount++;
                 }
+                serializedComponent.ApplyModifiedProperties();
+            }
+        }
+
+        internal static List<Object> GetSceneReferences(int instanceId)
+        {
+            var query = $"h: ref={instanceId}";
+
+            using (var searchContext = UnityEditor.Search.SearchService.CreateContext(query))
+            {
+                // Initiate the query and get the first results.
+                var items = UnityEditor.Search.SearchService.GetItems(searchContext, SearchFlags.Synchronous);
+                return items.ConvertAll(x => x.ToObject());
             }
         }
         
@@ -277,19 +301,38 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return;
             }
 
-            var instanceID = origObj.GetInstanceID();
-            var query = "h: ref=" + instanceID;
-            
+            /*var query = $"h: (ref={origObj.GetInstanceID()}";
+            foreach(var k in s_fixSceneRefsTempDict.Keys)
+            {
+                var instanceID = k.GetInstanceID();
+                query += $" or ref={instanceID}";
+            }
+
+            //var instanceID = origObj.GetInstanceID();
+            //var query = "h: ref=" + instanceID;
+            query += ")";*/
+
+            var query = $"h: ref={origObj.GetInstanceID()}";
+
+            s_fixSceneRefsTempDict.Add(origObj, newObj);
+
+            var watch = new System.Diagnostics.Stopwatch();
+
+            watch.Start();
+
             using (var searchContext = UnityEditor.Search.SearchService.CreateContext(query))
             {
                 // Initiate the query and get the first results.
                 var items = UnityEditor.Search.SearchService.GetItems(searchContext, SearchFlags.Synchronous);
-                
                 foreach (var item in items)
                 {
                     FixSceneReferenceToObject(item.ToObject(), origObj, newObj, toConvertRoot);
                 }
             }
+
+            watch.Stop();
+            Debug.Log($"Search Execution Time: {watch.ElapsedMilliseconds} ms");
+
 #else // UNITY_2021_2_OR_NEWER
             var sceneObjs = GetSceneReferencesToObject(origObj);
 
@@ -459,6 +502,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // FBX, don't export.
             var mainAsset = GetOrCreateFbxAsset(toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
 
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
+
+            // Gather all the references to toConvert in the scene before exporting/converting
+            s_searchDict.Clear();
+            s_nameToGO.Clear();
+            GatherSceneHierarchy(toConvert);
+
             // create prefab variant from the fbx
             var fbxInstance = PrefabUtility.InstantiatePrefab(mainAsset) as GameObject;
 
@@ -472,6 +523,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // copy components over
             UpdateFromSourceRecursive(fbxInstance, toConvert);
+
+            watch.Stop();
+            Debug.Log($"Execution Time: {watch.ElapsedMilliseconds} ms");
 
             // make sure we have a path for the prefab
             if (string.IsNullOrEmpty(prefabFullPath))
@@ -524,6 +578,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             return prefab;
+        }
+
+        private static Dictionary<int, List<Object>> s_searchDict = new Dictionary<int, List<Object>>();
+        private static Dictionary<string, GameObject> s_nameToGO = new Dictionary<string, GameObject>();
+
+        private static void GatherSceneHierarchy(GameObject hierarchyRoot)
+        {
+            var q = new Queue<Transform>();
+            q.Enqueue(hierarchyRoot.transform);
+            while (q.Count > 0)
+            {
+                var t = q.Dequeue();
+                s_nameToGO[t.name] = null;
+                var instanceID = t.gameObject.GetInstanceID();
+                s_searchDict[instanceID] = GetSceneReferences(instanceID);
+
+                foreach (Transform child in t)
+                {
+                    q.Enqueue(child);
+                }
+            }
         }
 
         /// <summary>
@@ -786,8 +861,23 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     PrefabUtility.UnpackPrefabInstance(sourceGO, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                 }
 
-                FixSceneReferences(sourceGO, destGO, source);
+                if(s_fixSceneRefsTempDict == null)
+                {
+                    s_fixSceneRefsTempDict = new Dictionary<Object, Object>();
+                }
+                s_fixSceneRefsTempDict.Clear();
+
+                s_fixSceneRefsTempDict.Add(sourceGO, destGO);
+
                 CopyComponents(destGO, sourceGO, source, goDict);
+
+                if(s_searchDict.TryGetValue(sourceGO.GetInstanceID(), out var items))
+                {
+                    foreach(var item in items) {
+                        FixSceneReferenceToObject(item, null, null, source);
+                    }
+                }
+                //FixSceneReferences(sourceGO, destGO, source);
 
                 // also make sure GameObject properties, such as tag and layer
                 // are copied over as well
@@ -826,9 +916,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="source">Source GameObject.</param>
         internal static Dictionary<string, GameObject> MapNameToSourceRecursive(GameObject dest, GameObject source)
         {
-            var nameToGO = new Dictionary<string, GameObject>();
+            var nameToGO = s_nameToGO;//new Dictionary<string, GameObject>();
 
-            var q = new Queue<Transform>();
+            /*var q = new Queue<Transform>();
             q.Enqueue(dest.transform);
             while (q.Count > 0)
             {
@@ -838,7 +928,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     q.Enqueue(child);
                 }
-            }
+            }*/
 
             nameToGO[dest.name] = source;
 
@@ -928,7 +1018,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // the transform is updated in the FBX, it won't be in the prefab.
                 if (fromComponent is MeshFilter || (fromComponent is Transform && from != root))
                 {
-                    FixSceneReferences(fromComponent, to.GetComponent(fromComponent.GetType()), root);
+                    //FixSceneReferences(fromComponent, to.GetComponent(fromComponent.GetType()), root);
+                    s_fixSceneRefsTempDict.Add(fromComponent, to.GetComponent(fromComponent.GetType()));
                     continue;
                 }
 
@@ -991,7 +1082,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     continue;
                 }
 
-                FixSceneReferences(fromComponent, toComponent, root);
+                //FixSceneReferences(fromComponent, toComponent, root);
+                s_fixSceneRefsTempDict.Add(fromComponent, toComponent);
                 
                 // SkinnedMeshRenderer also stores the mesh.
                 // Make sure this is not copied over when the SkinnedMeshRenderer is updated,
