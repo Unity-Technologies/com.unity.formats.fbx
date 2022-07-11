@@ -20,7 +20,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
     /// Enum specifying the type of data to include in the export
     /// (Model only, animation only, or model and animation).
     /// </summary>
-    public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
+    public enum Include { Model = 1, Anim = 2, ModelAndAnim = 3 }
 
     /// <summary>
     /// Enum specifying the position to use for the root object.
