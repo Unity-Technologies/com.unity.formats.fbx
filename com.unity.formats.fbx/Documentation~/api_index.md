@@ -42,7 +42,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Formats.Fbx.Exporter;
 
-public static void ConvertGameObject(GameObject go)
+public static GameObject ConvertGameObject(GameObject go)
 {
     string filePath = Path.Combine(Application.dataPath, "MyObject.fbx");
     string prefabPath = Path.Combine(Application.dataPath, "MyObject.prefab");
@@ -52,7 +52,8 @@ public static void ConvertGameObject(GameObject go)
     ConvertToPrefabSettingsSerialize convertSettings = new ConvertToPrefabSettingsSerialize();
     convertSettings.SetExportFormat(ExportFormat.Binary);
 
-    ConvertToNestedPrefab.Convert(go, fbxFullPath: filePath, prefabFullPath: prefabPath, exportOptions: convertSettings);
+    // Returns the prefab variant linked to an fbx file
+    return ConvertToNestedPrefab.Convert(go, fbxFullPath: filePath, prefabFullPath: prefabPath, exportOptions: convertSettings);
 }
 ```
 
