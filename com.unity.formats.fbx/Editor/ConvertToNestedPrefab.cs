@@ -543,17 +543,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return prefab;
         }
 
-        struct SourceObjectInfo
+        internal struct SourceObjectInfo
         {
             public GameObject destGO;
 #if UNITY_2021_2_OR_NEWER
             public List<Object> sceneObjectsWithReference;
 #endif // UNITY_2021_2_OR_NEWER
+
+            public SourceObjectInfo(GameObject dest)
+            {
+                destGO = dest;
+#if UNITY_2021_2_OR_NEWER
+               sceneObjectsWithReference = new List<Object>();
+#endif // UNITY_2021_2_OR_NEWER
         }
+    }
 
-        private static Dictionary<string, SourceObjectInfo> s_nameToInfo = new Dictionary<string, SourceObjectInfo>();
+        internal static Dictionary<string, SourceObjectInfo> s_nameToInfo = new Dictionary<string, SourceObjectInfo>();
 
-        private static void GatherSceneHierarchy(GameObject hierarchyRoot)
+        internal static void GatherSceneHierarchy(GameObject hierarchyRoot)
         {
             s_nameToInfo.Clear();
 

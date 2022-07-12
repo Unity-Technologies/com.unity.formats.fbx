@@ -414,8 +414,10 @@ namespace FbxExporter.UnitTests
                 Assert.IsFalse(b.GetComponent<BoxCollider>());
                 Assert.AreEqual(Vector3.zero, b.transform.localPosition);
                 Assert.AreNotEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
-                var nameMap = ConvertToNestedPrefab.MapNameToSourceRecursive(b, a);
-                ConvertToNestedPrefab.CopyComponents(b, a, a, nameMap);
+                ConvertToNestedPrefab.GatherSceneHierarchy(b);
+                ConvertToNestedPrefab.MapNameToSourceRecursive(b, a);
+                var fixSceneRefsMap = new Dictionary<Object, Object>();
+                ConvertToNestedPrefab.CopyComponents(b, a, a, fixSceneRefsMap);
                 Assert.IsTrue(b.GetComponent<BoxCollider>());
                 Assert.AreEqual(a.transform.localPosition, b.transform.localPosition);
                 Assert.AreNotEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
@@ -448,6 +450,7 @@ namespace FbxExporter.UnitTests
                 Assert.AreEqual ("BB", b.transform.GetChild (1).name);
                 Assert.AreEqual (Vector3.zero, b1.transform.localPosition);
 
+                ConvertToNestedPrefab.GatherSceneHierarchy(a);
                 ConvertToNestedPrefab.UpdateFromSourceRecursive (b, a);
 
                 // everything except the mesh + materials and child transforms should change
@@ -503,10 +506,12 @@ namespace FbxExporter.UnitTests
                 var bSerObj = new SerializedObject(bReferenceComponent);
 
                 var fromProp = aSerObj.FindProperty("m_transform");
-                Dictionary<string, GameObject> nameMap = new Dictionary<string, GameObject>(){
-                    {"test", a}
+
+                ConvertToNestedPrefab.s_nameToInfo = new Dictionary<string, ConvertToNestedPrefab.SourceObjectInfo>()
+                {
+                    { "test", new ConvertToNestedPrefab.SourceObjectInfo(a) }
                 };
-                ConvertToNestedPrefab.CopySerializedProperty(bSerObj, fromProp, nameMap);
+                ConvertToNestedPrefab.CopySerializedProperty(bSerObj, fromProp);
 
                 Assert.That(bReferenceComponent.m_transform.name, Is.EqualTo(a.transform.name));
             }
@@ -708,12 +713,15 @@ namespace FbxExporter.UnitTests
             quad2.transform.parent = cube2.transform;
             capsule.transform.SetSiblingIndex(1);
 
-            var dictionary = ConvertToNestedPrefab.MapNameToSourceRecursive(cube, cube2);
+            ConvertToNestedPrefab.GatherSceneHierarchy(cube);
+            ConvertToNestedPrefab.MapNameToSourceRecursive(cube, cube2);
+
+            var dictionary = ConvertToNestedPrefab.s_nameToInfo;
 
             //We expect these to pass because we've given it an identical game object, as it would have after a normal export.
-            Assert.AreSame(capsule2, dictionary[capsule.name]);
-            Assert.AreSame(sphere2, dictionary[sphere.name]);
-            Assert.AreSame(quad2, dictionary[quad.name]);
+            Assert.AreSame(capsule2, dictionary[capsule.name].destGO);
+            Assert.AreSame(sphere2, dictionary[sphere.name].destGO);
+            Assert.AreSame(quad2, dictionary[quad.name].destGO);
             Assert.True(dictionary.Count == 4);
 
             //Create a broken hierarchy, one that is missing a primitive
@@ -724,14 +732,16 @@ namespace FbxExporter.UnitTests
             capsule3.transform.parent = cube3.transform;
             sphere3.transform.parent = cube3.transform;
 
-            var dictionaryBroken = ConvertToNestedPrefab.MapNameToSourceRecursive(cube, cube3);
+            ConvertToNestedPrefab.GatherSceneHierarchy(cube);
+            ConvertToNestedPrefab.MapNameToSourceRecursive(cube, cube3);
+            var dictionaryBroken = ConvertToNestedPrefab.s_nameToInfo;
 
             //the dictionary size should be equal to the amount of children + the parent
-            Assert.True(dictionaryBroken.Count == 4);
+            Assert.That(dictionaryBroken.Count, Is.EqualTo(4));
 
-            Assert.IsNull(dictionaryBroken[quad.name]);
-            Assert.AreSame(capsule3, dictionaryBroken[capsule.name]);
-            Assert.AreSame(sphere3, dictionaryBroken[sphere.name]);
+            Assert.IsNull(dictionaryBroken[quad.name].destGO);
+            Assert.AreSame(capsule3, dictionaryBroken[capsule.name].destGO);
+            Assert.AreSame(sphere3, dictionaryBroken[sphere.name].destGO);
         }
 
         [Test]
