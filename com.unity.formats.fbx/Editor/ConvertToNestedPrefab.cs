@@ -232,7 +232,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             var components = go.GetComponents<Component>();
-            int propCount = 0;
 
             SerializedObject serializedComponent;
             SerializedProperty property;
@@ -264,7 +263,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                             property.objectReferenceValue = newVal;
                         }
                     }
-                    propCount++;
                 }
                 serializedComponent.ApplyModifiedProperties();
             }
@@ -467,9 +465,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // FBX, don't export.
             var mainAsset = GetOrCreateFbxAsset(toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
 
-            var watch = new System.Diagnostics.Stopwatch();
-            watch.Start();
-
             // Gather all the references to toConvert in the scene before exporting/converting
             GatherSceneHierarchy(toConvert);
 
@@ -486,9 +481,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // copy components over
             UpdateFromSourceRecursive(fbxInstance, toConvert);
-
-            watch.Stop();
-            Debug.Log($"Execution Time: {watch.ElapsedMilliseconds} ms");
 
             // make sure we have a path for the prefab
             if (string.IsNullOrEmpty(prefabFullPath))
