@@ -11,7 +11,6 @@
 # For example, removing trunk from the list of editors for the previous release.
 
 all_test_editors:
-  - version: 2019.4
   - version: 2020.3
   - version: 2021.3
   - version: 2022.1
@@ -19,14 +18,12 @@ all_test_editors:
   - version: trunk
 
 test_trigger_editors:
-  - version: 2019.4
   - version: 2020.3
   - version: 2021.3
   - version: 2022.1
   - version: trunk
 
 publish_trigger_editors:
-  - version: 2019.4
   - version: 2020.3
   - version: 2021.3
   - version: 2022.1
@@ -51,7 +48,6 @@ nightly_tested_releases:
   - name: master
     branch: master
     nightly_editors: 
-      - version: 2019.4
       - version: 2020.3
       - version: 2021.3
       - version: 2022.2
