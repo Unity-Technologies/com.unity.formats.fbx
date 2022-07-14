@@ -30,7 +30,7 @@ namespace FbxExporter.UnitTests
         }
 
         /// <summary>
-        /// Convert Gameobject sample function.
+        /// Convert GameObject sample function.
         /// </summary>
         /// <param name="go">GameObject to convert.</param>
         public static GameObject ConvertGameObject(GameObject go)
