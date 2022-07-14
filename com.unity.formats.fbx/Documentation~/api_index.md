@@ -40,7 +40,7 @@ You can convert a GameObject hierarchy to an [FBX Prefab Variant](../manual/pref
 
 The principle is to export the GameObject hierarchy to an FBX and then convert the exported FBX Model Prefab into a Prefab Variant while maintaining the components from the original hierarchy.
 
-Please see below for an example:
+For example:
 
 ```
 using System.IO;
