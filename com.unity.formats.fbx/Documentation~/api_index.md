@@ -58,7 +58,7 @@ public static GameObject ConvertGameObject(GameObject go)
     ConvertToPrefabSettingsSerialize convertSettings = new ConvertToPrefabSettingsSerialize();
     convertSettings.SetExportFormat(ExportFormat.Binary);
 
-    // Returns the prefab variant linked to an fbx file
+    // Returns the prefab variant linked to an FBX file.
     return ConvertToNestedPrefab.Convert(go, fbxFullPath: filePath, prefabFullPath: prefabPath, exportOptions: convertSettings);
 }
 ```
