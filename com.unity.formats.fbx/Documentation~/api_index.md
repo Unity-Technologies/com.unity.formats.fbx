@@ -53,8 +53,8 @@ public static GameObject ConvertGameObject(GameObject go)
     string filePath = Path.Combine(Application.dataPath, "MyObject.fbx");
     string prefabPath = Path.Combine(Application.dataPath, "MyObject.prefab");
 
-    // Settings to use when exporting the FBX that will be converted to a prefab.
-    // Note: If no export settings are passed, the default settings will be used.
+    // Settings to use when exporting the FBX to convert to a prefab.
+    // Note: If you don't pass any export settings, Unity uses the default settings.
     ConvertToPrefabSettingsSerialize convertSettings = new ConvertToPrefabSettingsSerialize();
     convertSettings.SetExportFormat(ExportFormat.Binary);
 
