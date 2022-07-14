@@ -2,7 +2,9 @@
 
 As a developer, you have access to the FBX Exporter from C# scripting. You can use the basic API by providing a single GameObject or a list of GameObjects. 
 
-In order to use custom export settings, you can create and pass an instance of ExportModelSettingsSerialize class with modified settings.
+## Managing export settings
+
+To use custom export settings, you can create and pass an instance of `ExportModelSettingsSerialize` class with modified settings.
 
 If no export settings are passed, then default export settings are used for exporting the GameObjects to the FBX file.
 
