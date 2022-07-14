@@ -1,6 +1,6 @@
 # Developer’s Guide
 
-As a developer you have access to the FBX Exporter from C# scripting. You can use the basic API by providing a single GameObject or a list of GameObjects. 
+As a developer, you have access to the FBX Exporter from C# scripting. You can use the basic API by providing a single GameObject or a list of GameObjects. 
 
 In order to use custom export settings, you can create and pass an instance of ExportModelSettingsSerialize class with modified settings.
 
