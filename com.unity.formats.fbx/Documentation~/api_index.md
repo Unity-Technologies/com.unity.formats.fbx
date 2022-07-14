@@ -26,7 +26,7 @@ public static void ExportGameObjects(Object[] objects)
     exportSettings.SetExportFormat(ExportFormat.Binary);
     exportSettings.SetKeepInstances(false);
 
-    // Note: If no export settings are passed, the default settings will be used.
+    // Note: If you don't pass any export settings, Unity uses the default settings.
     ModelExporter.ExportObjects(filePath, objects, exportSettings);
 
     // ModelExporter.ExportObject can be used instead of 
