@@ -6,7 +6,7 @@ As a developer, you have access to the FBX Exporter from C# scripting. You can u
 
 To use custom export settings, you can create and pass an instance of `ExportModelSettingsSerialize` class with modified settings.
 
-If no export settings are passed, then default export settings are used for exporting the GameObjects to the FBX file.
+If you don't pass any export settings, Unity uses default export settings to export the GameObjects to the FBX file.
 
 You can call the FBX Exporter from C# using methods found in the [UnityEditor.Formats.Fbx.Exporter](../api/UnityEditor.Formats.Fbx.Exporter.html) namespace, for example:
 
