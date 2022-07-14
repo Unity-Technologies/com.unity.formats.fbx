@@ -32,7 +32,7 @@ namespace FbxExporter.UnitTests
         /// <summary>
         /// Convert GameObject sample function.
         /// </summary>
-        /// <param name="go">GameObject to convert.</param>
+        /// <param name="go">The GameObject to convert.</param>
         public static GameObject ConvertGameObject(GameObject go)
         {
             string filePath = Path.Combine(Application.dataPath, "MyObject.fbx");
