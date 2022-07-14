@@ -29,8 +29,8 @@ public static void ExportGameObjects(Object[] objects)
     // Note: If you don't pass any export settings, Unity uses the default settings.
     ModelExporter.ExportObjects(filePath, objects, exportSettings);
 
-    // ModelExporter.ExportObject can be used instead of 
-    // ModelExporter.ExportObjects to export a single game object
+    // You can use ModelExporter.ExportObject instead of 
+    // ModelExporter.ExportObjects to export a single GameObject.
 }
 ```
 
