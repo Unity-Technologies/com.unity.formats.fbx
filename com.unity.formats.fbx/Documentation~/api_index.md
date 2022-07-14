@@ -38,7 +38,7 @@ public static void ExportGameObjects(Object[] objects)
 
 You can convert a GameObject hierarchy to an [FBX Prefab Variant](../manual/prefabs.html) using the API. 
 
-This will export the hierarchy to an FBX and then convert the exported FBX's Model Prefab into a Prefab Variant while maintaining the components from the original hierarchy.
+The principle is to export the GameObject hierarchy to an FBX and then convert the exported FBX Model Prefab into a Prefab Variant while maintaining the components from the original hierarchy.
 
 Please see below for an example:
 
