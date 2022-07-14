@@ -8,7 +8,9 @@ To use custom export settings, you can create and pass an instance of `ExportMod
 
 If you don't pass any export settings, Unity uses default export settings to export the GameObjects to the FBX file.
 
-You can call the FBX Exporter from C# using methods found in the [UnityEditor.Formats.Fbx.Exporter](../api/UnityEditor.Formats.Fbx.Exporter.html) namespace, for example:
+## Calling the FBX Exporter
+
+You can call the FBX Exporter from C# using methods found in the [UnityEditor.Formats.Fbx.Exporter](UnityEditor.Formats.Fbx.Exporter.html) namespace, for example:
 
 ```
 using System.IO;
