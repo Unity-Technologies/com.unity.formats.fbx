@@ -176,7 +176,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Map texture properties to FBX texture object
         /// </summary>
-        Dictionary<(Texture unityTexture, Vector2 offset, Vector2 scale, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV), FbxTexture> TextureMap = new Dictionary<(Texture unityTexture, Vector2 offset, Vector2 scale, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV), FbxTexture>();
+        Dictionary<(Texture unityTexture, Vector2 offset, Vector2 scale, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV), FbxFileTexture> TextureMap = 
+            new Dictionary<(Texture unityTexture, Vector2 offset, Vector2 scale, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV), FbxFileTexture>();
 
         /// <summary>
         /// Map a Unity mesh to an fbx node (for preserving instances) 
@@ -640,32 +641,35 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var wrapModeV = unityTexture.wrapModeV;
 
             var tuple = (unityTexture, offset, scale, wrapModeU, wrapModeV);
-            
+
+            FbxFileTexture fbxTexture;
             // Find or create an fbx texture and link it up to the fbx material.
-            if (!TextureMap.ContainsKey (tuple)) {
+            if (!TextureMap.TryGetValue(tuple, out fbxTexture))
+            {
                 var textureName = GetUniqueTextureName(fbxPropName + "_Texture");
-                var fbxTexture = FbxFileTexture.Create (fbxMaterial, textureName);
+                fbxTexture = FbxFileTexture.Create (fbxMaterial, textureName);
                 fbxTexture.SetFileName (textureSourceFullPath);
                 fbxTexture.SetTextureUse (FbxTexture.ETextureUse.eStandard);
                 fbxTexture.SetMappingType (FbxTexture.EMappingType.eUV);
                 fbxTexture.SetScale(scale.x, scale.y);
                 fbxTexture.SetTranslation(offset.x, offset.y);
-                fbxTexture.SetWrapMode(GetWrapModeFromUnityWrapMode(wrapModeU), GetWrapModeFromUnityWrapMode(wrapModeV));
+                fbxTexture.SetWrapMode(GetWrapModeFromUnityWrapMode(wrapModeU, unityMaterial.name, unityPropName),
+                                       GetWrapModeFromUnityWrapMode(wrapModeV, unityMaterial.name, unityPropName));
                 TextureMap.Add (tuple, fbxTexture);
             }
-            TextureMap [tuple].ConnectDstProperty (fbxMaterialProperty);
+            fbxTexture.ConnectDstProperty(fbxMaterialProperty);
 
             return true;
         }
 
-        private FbxTexture.EWrapMode GetWrapModeFromUnityWrapMode(TextureWrapMode wrapMode)
+        private FbxTexture.EWrapMode GetWrapModeFromUnityWrapMode(TextureWrapMode wrapMode, string materialName, string textureName)
         {
             switch (wrapMode)
             {
                 case TextureWrapMode.Clamp: return FbxTexture.EWrapMode.eClamp;
                 case TextureWrapMode.Repeat: return FbxTexture.EWrapMode.eRepeat;
                 default:
-                    Debug.LogWarning("Texture uses wrap mode " + wrapMode + " which is not supported by FBX. Will be exported as \"Repeat\".");
+                    Debug.LogWarning($"Texture {textureName} on material {materialName} uses wrap mode {wrapMode} which is not supported by FBX. Will be exported as \"Repeat\".");
                     return FbxTexture.EWrapMode.eRepeat;
             }
         }
