@@ -35,8 +35,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private string m_animDestBindingId;
 
         /// <summary>
-        /// If set, transfer transform animation from this transform to destination.
-        /// Animation on objects between source and destination will also be transferred to destination.
+        /// Option to transfer the transform animation from this transform to the destination.
+        /// This also transfers to the destination any animation on GameObjects between the source and the destination.
         /// </summary>
         public Transform TransferAnimationSource
         {
