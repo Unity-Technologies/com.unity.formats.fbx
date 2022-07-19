@@ -375,8 +375,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// If 'toConvert' is:
         /// <list type="bullet">
         /// <item><description>
-        /// An object in the scene, then the hierarchy will be exported
-        /// and a new prefab variant created pointing to the new fbx.
+        /// A GameObject in the Scene, then the method exports the hierarchy to an FBX
+        /// and creates a new Prefab Variant pointing to the exported FBX.
         /// </description></item>
         /// <item><description>
         /// The root of an fbx asset, or the root of an instance of an
