@@ -15,7 +15,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         [SerializeField] bool m_exportGeometry = true;
 
         /// <summary>
-        /// Setting to export geometry/meshes of recorded hierarchy to FBX.
+        /// Option to export the geometry/meshes of the recorded hierarchy to FBX.
         /// </summary>
         public bool ExportGeometry
         {
