@@ -1,5 +1,4 @@
-﻿#if ENABLE_FBX_RECORDER
-using System;
+#if ENABLE_FBX_RECORDER
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Recorder;
@@ -7,10 +6,17 @@ using UnityEditor.Recorder.Input;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
+    /// <summary>
+    /// Class describing the settings for the FBX Recorder.
+    /// </summary>
     [RecorderSettings(typeof(FbxRecorder), "FBX")]
-    internal class FbxRecorderSettings : RecorderSettings
+    public class FbxRecorderSettings : RecorderSettings
     {
         [SerializeField] bool m_exportGeometry = true;
+
+        /// <summary>
+        /// Option to export the geometry/meshes of the recorded hierarchy to FBX.
+        /// </summary>
         public bool ExportGeometry
         {
             get
@@ -28,6 +34,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         [SerializeField]
         private string m_animDestBindingId;
 
+        /// <summary>
+        /// Option to transfer the transform animation from this transform to the destination.
+        /// This also transfers to the destination any animation on GameObjects between the source and the destination.
+        /// </summary>
         public Transform TransferAnimationSource
         {
             get
@@ -51,6 +61,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
+        /// <summary>
+        /// Option to transfer the transform animation from the source to this transform.
+        /// This also transfers to the destination any animation on GameObjects between the source and the destination.
+        /// </summary>
         public Transform TransferAnimationDest
         {
             get
@@ -112,7 +126,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns><c>true</c> if p is ancestor to t; otherwise, <c>false</c>.</returns>
         /// <param name="p">P.</param>
         /// <param name="t">T.</param>
-        protected bool IsAncestor(Transform p, Transform t)
+        internal bool IsAncestor(Transform p, Transform t)
         {
             var curr = t;
             while (curr != null)
@@ -132,12 +146,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns><c>true</c> if t1 is in same hierarchy as t2; otherwise, <c>false</c>.</returns>
         /// <param name="t1">T1.</param>
         /// <param name="t2">T2.</param>
-        protected bool IsInSameHierarchy(Transform t1, Transform t2)
+        internal bool IsInSameHierarchy(Transform t1, Transform t2)
         {
             return (IsAncestor(t1, t2) || IsAncestor(t2, t1));
         }
 
-        protected bool TransferAnimationSourceIsValid(Transform newValue)
+        internal bool TransferAnimationSourceIsValid(Transform newValue)
         {
             if (!newValue)
             {
@@ -167,7 +181,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        protected bool TransferAnimationDestIsValid(Transform newValue)
+        internal bool TransferAnimationDestIsValid(Transform newValue)
         {
             if (!newValue)
             {
@@ -199,12 +213,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         [SerializeField] AnimationInputSettings m_AnimationInputSettings = new AnimationInputSettings();
 
-        public AnimationInputSettings animationInputSettings
+        /// <summary>
+        /// Stores the reference to the current FBX Recorder's input settings.
+        /// </summary>
+        public AnimationInputSettings AnimationInputSettings
         {
             get { return m_AnimationInputSettings; }
             set { m_AnimationInputSettings = value; }
         }
 
+        /// <summary>
+        /// Default constructor for FbxRecorderSettings.
+        /// </summary>
         public FbxRecorderSettings()
         {
             var goWildcard = DefaultWildcard.GeneratePattern("GameObject");
@@ -229,38 +249,51 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return go != null ? go.scene.name : "None";
         }
 
+        /// <summary>
+        /// Indicates if the current platform is supported (True) or not (False).
+        /// </summary>
+        /// <remarks>
+        /// FBX Recorder currently supports the following platforms: LinuxEditor, OSXEditor, WindowsEditor.
+        /// </remarks>
         public override bool IsPlatformSupported
         {
             get
             {
                 return Application.platform == RuntimePlatform.LinuxEditor ||
-                       Application.platform == RuntimePlatform.OSXEditor ||
-                       Application.platform == RuntimePlatform.WindowsEditor;
+                    Application.platform == RuntimePlatform.OSXEditor ||
+                    Application.platform == RuntimePlatform.WindowsEditor;
             }
         }
 
+        /// <summary>
+        /// Stores the list of Input settings required by this Recorder.
+        /// </summary>
         public override IEnumerable<RecorderInputSettings> InputsSettings
         {
             get { yield return m_AnimationInputSettings; }
         }
 
-        protected override bool ValidityCheck(List<string> errors)
+        /// <summary>
+        /// Tests if the Recorder has any errors.
+        /// </summary>
+        /// <param name="errors">List of errors encountered.</param>
+        protected override void GetErrors(List<string> errors)
         {
-            var ok = base.ValidityCheck(errors);
+            base.GetErrors(errors);
 
             if (m_AnimationInputSettings.gameObject == null)
             {
-                ok = false;
-                if(errors == null)
+                if (errors == null)
                 {
                     throw new System.ArgumentNullException("errors");
                 }
                 errors.Add("No input object set");
             }
-
-            return ok;
         }
 
+        /// <summary>
+        /// Override this method if you need to do any post treatment after duplicating this Recorder in the Recorder Window.
+        /// </summary>
         public override void OnAfterDuplicate()
         {
             m_AnimationInputSettings.DuplicateExposedReference();
@@ -271,6 +304,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             m_AnimationInputSettings.ClearExposedReference();
         }
 
+        /// <summary>
+        /// Stores the file extension this Recorder uses (without the dot).
+        /// </summary>
         protected override string Extension
         {
             get { return "fbx"; }

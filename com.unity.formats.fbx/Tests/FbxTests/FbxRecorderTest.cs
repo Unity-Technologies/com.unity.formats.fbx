@@ -27,7 +27,7 @@ namespace FbxExporter.UnitTests
             animationInputSettings.gameObject = go;
 
             FbxRecorderSettings settings = ScriptableObject.CreateInstance(typeof(FbxRecorderSettings)) as FbxRecorderSettings;
-            settings.animationInputSettings = animationInputSettings;
+            settings.AnimationInputSettings = animationInputSettings;
 
             settings.TransferAnimationSource = go.transform;
 
