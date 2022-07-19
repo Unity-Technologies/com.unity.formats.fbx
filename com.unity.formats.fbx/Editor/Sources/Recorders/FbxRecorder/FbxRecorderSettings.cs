@@ -62,8 +62,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// If set, transfer transform animation from source to this transform.
-        /// Animation on objects between source and destination will also be transferred to destination.
+        /// Option to transfer the transform animation from the source to this transform.
+        /// This also transfers to the destination any animation on GameObjects between the source and the destination.
         /// </summary>
         public Transform TransferAnimationDest
         {
