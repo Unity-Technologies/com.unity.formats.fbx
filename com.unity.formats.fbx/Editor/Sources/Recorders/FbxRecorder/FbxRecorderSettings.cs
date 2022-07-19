@@ -305,7 +305,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Stores the file extension used by this Recorder (without the dot).
+        /// Stores the file extension this Recorder uses (without the dot).
         /// </summary>
         protected override string Extension
         {
