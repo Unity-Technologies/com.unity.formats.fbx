@@ -292,7 +292,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Override this method if any post treatment needs to be done after this Recorder is duplicated in the Recorder Window.
+        /// Override this method if you need to do any post treatment after duplicating this Recorder in the Recorder Window.
         /// </summary>
         public override void OnAfterDuplicate()
         {
