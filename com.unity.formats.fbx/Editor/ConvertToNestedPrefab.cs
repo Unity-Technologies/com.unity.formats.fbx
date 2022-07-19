@@ -413,7 +413,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Ignored if 'toConvert' is a prefab asset.</param>
         /// <param name="exportOptions">
         /// Export options to use for exporting the model asset
-        /// that will be converted to a prefab.
+        /// to convert to a Prefab.
         /// </param>
         [SecurityPermission(SecurityAction.LinkDemand)]
         public static GameObject Convert(

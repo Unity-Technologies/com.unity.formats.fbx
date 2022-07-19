@@ -133,81 +133,80 @@ namespace UnityEditor.Formats.Fbx.Exporter
     }
 
     /// <summary>
-    /// Interface of export options that can be set when exporting to FBX.
+    /// Interface of export options that you can set when exporting to FBX.
     /// </summary>
     public interface IExportOptions
     {
         /// <summary>
-        /// Setting for the export format (binary or ascii)
+        /// The export format (binary or ascii).
         /// </summary>
         ExportFormat ExportFormat { get; }
 
         /// <summary>
-        /// Option to export model only, animation only, or both model and animation.
+        /// Option to export the model only, the animation only, or both the model and the animation.
         /// </summary>
         Include ModelAnimIncludeOption { get; }
 
         /// <summary>
-        /// The type of LOD to export (options are: All, Highest or Lowest).
+        /// The type of LOD to export (All, Highest or Lowest).
         /// </summary>
         LODExportType LODExportType { get; }
 
         /// <summary>
-        /// The position to export the object to (options are: Local centered, World absolute, and Reset (used for converting to prefab)).
+        /// The position to export the object to (Local centered, World absolute, or Reset). Use Reset for converting to a Prefab.
         /// </summary>
         ObjectPosition ObjectPosition { get; }
 
         /// <summary>
-        /// If false, do not export animation on objects that have a skinned mesh.
+        /// Option to export the animation on GameObjects that have a skinned mesh.
         /// </summary>
         bool AnimateSkinnedMesh { get; }
 
         /// <summary>
-        /// If true, object and material names will be converted to names
-        /// that are compatible with Maya.
+        /// Option to convert the GameObject and material names to Maya compatible names.
         /// </summary>
         bool UseMayaCompatibleNames { get; }
 
         /// <summary>
-        /// If true and UseMayaCompatibleNames also enabled, change the objects and materials
-        /// in the scene to still have Maya compatible names after export.
+        /// Option to change the GameObjects and material names in the scene to keep them
+        /// Maya compatible after the export. Only works if UseMayaCompatibleNames is also enabled.
         /// </summary>
         bool AllowSceneModification { get; }
 
         /// <summary>
-        /// If false, objects that do not have a renderer will not be exported.
+        /// Option to export GameObjects that don't have a renderer.
         /// </summary>
         bool ExportUnrendered { get; }
 
         /// <summary>
-        /// If an FBX file is being overwritten, should the previous import settings be preserved after export.
+        /// Option to preserve the previous import settings after the export when overwriting an existing FBX file.
         /// </summary>
         bool PreserveImportSettings { get; }
 
         /// <summary>
-        /// If multiple instances of the same mesh are being exported, should they be kept as instances on export?
+        /// Option to keep multiple instances of the same mesh as separate instances on export.
         /// </summary>
         bool KeepInstances { get; }
 
         /// <summary>
-        /// If true, textures will be embedded in the FBX file.
+        /// Option to embed textures in the exported FBX file.
         /// </summary>
         /// <remarks>
-        /// Note: For textures to be embedded the file must also be exported as binary.
+        /// To embed textures, you must set the file ExportFormat to binary.
         /// </remarks>
         bool EmbedTextures { get; }
 
         /// <summary>
-        /// The transform to transfer animation from. Animation will be transferred to AnimationDest.
+        /// The transform to transfer the animation from. The animation is transferred to AnimationDest.
         /// </summary>
         /// <remarks>
-        /// Transform must be an ancestor of AnimationDest, and may be an ancestor of the selected object.
+        /// Transform must be an ancestor of AnimationDest, and may be an ancestor of the selected GameObject.
         /// </remarks>
         Transform AnimationSource { get; }
 
         /// <summary>
-        /// The transform to transfer animation to.
-        /// This object receives the transform animation on objects between Source
+        /// The transform to transfer the animation to.
+        /// This GameObject receives the transform animation on GameObjects between Source
         /// and Destination as well as the animation on the Source itself.
         /// </summary>
         Transform AnimationDest { get; }
@@ -264,7 +263,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public ExportFormat ExportFormat { get { return exportFormat; } }
 
         /// <summary>
-        /// Set the export format to binary or ascii.
+        /// Specifies the export format to binary or ascii.
         /// </summary>
         /// <param name="format">Binary or ASCII</param>
         public void SetExportFormat(ExportFormat format) { this.exportFormat = format; }
@@ -273,7 +272,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public bool AnimateSkinnedMesh { get { return animatedSkinnedMesh; } }
 
         /// <summary>
-        /// Set whether animation on objects containing a skinned mesh will be exported.
+        /// Specifies whether to export animation on GameObjects containing a skinned mesh.
         /// </summary>
         /// <param name="animatedSkinnedMesh">True to export animation on skinned meshes, false otherwise.</param>
         public void SetAnimatedSkinnedMesh(bool animatedSkinnedMesh) { this.animatedSkinnedMesh = animatedSkinnedMesh; }
@@ -282,7 +281,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public bool UseMayaCompatibleNames { get { return mayaCompatibleNaming; } }
 
         /// <summary>
-        /// Set whether exported objects will be renamed to Maya compatible names.
+        /// Specifies whether to rename the exported GameObjects to Maya compatible names.
         /// </summary>
         /// <param name="useMayaCompNames">True to have export Maya compatible names, false otherwise.</param>
         public void SetUseMayaCompatibleNames(bool useMayaCompNames) { this.mayaCompatibleNaming = useMayaCompNames; }
@@ -291,18 +290,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public Transform AnimationSource { get { return animSource; } }
 
         /// <summary>
-        /// Set the transform to transfer animation from.
+        /// Specifies the transform to transfer the animation from.
         /// </summary>
-        /// <param name="source">Transform to transfer animation from.</param>
+        /// <param name="source">The transform to transfer the animation from.</param>
         public void SetAnimationSource(Transform source) { this.animSource = source; }
 
         /// <inheritdoc/>
         public Transform AnimationDest { get { return animDest; } }
 
         /// <summary>
-        /// Set the transform to transfer animation from Source to.
+        /// Specifies the transform to transfer the source animation to.
         /// </summary>
-        /// <param name="dest">Transform to transfer animation to.</param>
+        /// <param name="dest">The transform to transfer the animation to.</param>
         public void SetAnimationDest(Transform dest) { this.animDest = dest; }
 
         /// <inheritdoc/>
@@ -330,7 +329,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public virtual bool EmbedTextures { get { return false; } }
 
         /// <summary>
-        /// Check if two instances of the export settings are equal.
+        /// Checks if two instances of the export settings are equal.
         /// </summary>
         /// <param name="e">The other export setting object to check.</param>
         /// <returns>True if equal, false otherwise.</returns>
@@ -347,9 +346,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Get the hash code for this instance of the export model settings.
+        /// Gets the hash code for this instance of the export model settings.
         /// </summary>
-        /// <returns>Unique hash code for these settings.</returns>
+        /// <returns>Unique hash code for the export model settings.</returns>
         public override int GetHashCode()
         {
             return (animatedSkinnedMesh ? 1 : 0) | ((mayaCompatibleNaming ? 1 : 0) << 1) | ((int)exportFormat << 2);
@@ -381,16 +380,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override Include ModelAnimIncludeOption { get { return include; } }
 
         /// <summary>
-        /// Set the option to export model only, animation only, or both model and animation.
+        /// Specifies to export the model only, the animation only, or both the model and the animation.
         /// </summary>
-        /// <param name="include">model, animation, or model and animation</param>
+        /// <param name="include">Model, animation, or model and animation</param>
         public void SetModelAnimIncludeOption(Include include) { this.include = include; }
 
         /// <inheritdoc/>
         public override LODExportType LODExportType { get { return lodLevel; } }
 
         /// <summary>
-        /// Set the type of LOD to export (options are: All, Highest or Lowest).
+        /// Specifies the type of LOD to export (All, Highest or Lowest).
         /// </summary>
         /// <param name="lodLevel">All, Highest, or Lowest</param>
         public void SetLODExportType(LODExportType lodLevel) { this.lodLevel = lodLevel; }
@@ -399,7 +398,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override ObjectPosition ObjectPosition { get { return objectPosition; } }
 
         /// <summary>
-        /// Set the position to export the object to (options are: Local centered, World absolute, and Reset (used for converting to prefab)).
+        /// Specifies the position to export the object to (Local centered, World absolute, or Reset). Use Reset for converting to a Prefab).
         /// </summary>
         /// <param name="objectPosition">Local centered, World absolute, or Reset</param>
         public void SetObjectPosition(ObjectPosition objectPosition) { this.objectPosition = objectPosition; }
@@ -408,7 +407,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool ExportUnrendered { get { return exportUnrendered; } }
 
         /// <summary>
-        /// Set whether objects that do not have a renderer are exported.
+        /// Specifies whether to export GameObjects that don't have a renderer.
         /// </summary>
         /// <param name="exportUnrendered">True to export unrendered, false otherwise.</param>
         public void SetExportUnredererd(bool exportUnrendered) { this.exportUnrendered = exportUnrendered; }
@@ -417,10 +416,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }
 
         /// <summary>
-        /// Set whether the previous export settings will be preserved after export when overwriting
+        /// Specifies whether to preserve the previous import settings after the export when overwriting
         /// an existing FBX file.
         /// </summary>
-        /// <param name="preserveImportSettings">True if previous import settings should be preserved, false otherwise.</param>
+        /// <param name="preserveImportSettings">True to preserve the previous import settings, false otherwise.</param>
         public void SetPreserveImportSettings(bool preserveImportSettings) { this.preserveImportSettings = preserveImportSettings; }
 
         /// <inheritdoc/>
@@ -430,18 +429,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool KeepInstances { get { return keepInstances; } }
 
         /// <summary>
-        /// Set whether multiple instances of the same mesh are kept as instances on export.
+        /// Specifies whether to keep multiple instances of the same mesh as separate instances on export.
         /// </summary>
-        /// <param name="keepInstances">True if instances should be exported as instances, false otherwise.</param>
+        /// <param name="keepInstances">True to export as separate instances, false otherwise.</param>
         public void SetKeepInstances(bool keepInstances) { this.keepInstances = keepInstances; }
 
         /// <inheritdoc/>
         public override bool EmbedTextures { get { return embedTextures; } }
 
         /// <summary>
-        /// Set whether textures should be embedded on export.
+        /// Specifies whether to embed textures in the exported FBX file.
         /// </summary>
-        /// <param name="embedTextures">True if textures should be embedded, false otherwise.</param>
+        /// <param name="embedTextures">True to embed textures, false otherwise.</param>
         public void SetEmbedTextures(bool embedTextures) { this.embedTextures = embedTextures; }
 
         /// <inheritdoc/>

@@ -12,37 +12,37 @@ using UnityEditor.Presets;
 namespace UnityEditor.Formats.Fbx.Exporter {
 
     /// <summary>
-    /// Enum specifying the FBX export format options.
+    /// FBX export format options.
     /// </summary>
     public enum ExportFormat { ASCII = 0, Binary = 1 }
 
     /// <summary>
-    /// Enum specifying the type of data to include in the export
+    /// Options for the type of data to include in the export
     /// (Model only, animation only, or model and animation).
     /// </summary>
     public enum Include { Model = 1, Anim = 2, ModelAndAnim = 3 }
 
     /// <summary>
-    /// Enum specifying the position to use for the root object.
+    /// Options for the position to use for the root GameObject.
     /// 
-    /// Local Centered: For a single root uses the local transform information.
-    /// If you select multiple objects for export, the FBX Exporter centers objects 
+    /// Local Centered: For a single root, uses the local transform information.
+    /// If you select multiple GameObjects for export, the FBX Exporter centers GameObjects 
     /// around a shared root while keeping their relative placement unchanged.
     /// 
-    /// World Absolute: Use world position of objects.
+    /// World Absolute: Uses the world position of the GameObjects.
     /// 
-    /// Reset: Export the object to (0,0,0).
+    /// Reset: Exports the object to (0,0,0).
     /// </summary>
     public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/}
 
     /// <summary>
-    /// Enum specifying the LODs to export for LOD groups.
+    /// LODs to export for LOD groups.
     /// </summary>
     /// <remarks>
     /// Notes:
     /// - The FBX Exporter ignores LODs outside of selected hierarchy.
     /// - The FBX Exporter does not filter out objects that are used as LODs and doesn't 
-    ///   export them if they aren’t direct descendants of their respective LOD Group
+    ///   export them if they arenâ€™t direct descendants of their respective LOD Group
     /// </remarks>
     public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 

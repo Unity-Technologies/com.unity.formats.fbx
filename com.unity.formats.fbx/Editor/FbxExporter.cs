@@ -4552,7 +4552,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// with the specified export settings.
         /// </summary>
         /// <returns>
-        /// The FBX file path if successful; otherwise returns null.
+        /// The FBX file path if successful; otherwise null.
         /// </returns>
         /// <param name="filePath">Absolute file path to use for the FBX file.</param>
         /// <param name="objects">Array of Unity GameObjects to export.</param>
