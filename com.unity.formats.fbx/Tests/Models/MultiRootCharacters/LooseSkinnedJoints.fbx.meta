@@ -1,61 +1,161 @@
 fileFormatVersion: 2
 guid: 6aab742b4e983430b9f727d49012050f
 ModelImporter:
-  serializedVersion: 23
-  fileIDToRecycleName:
-    100000: Body
-    100002: Head
-    100004: LeftElbow
-    100006: LeftFoot
-    100008: LeftHand
-    100010: LeftKnee
-    100012: LeftLoveHandle
-    100014: LeftShoulder
-    100016: LeftThigh
-    100018: //RootNode
-    100020: Neck
-    100022: Pelvis
-    100024: RightElbow
-    100026: RightFoot
-    100028: RightHand
-    100030: RightKnee
-    100032: RightLoveHandle
-    100034: RightShoulder
-    100036: RightThigh
-    100038: Root
-    100040: Spine1
-    100042: Spine2
-    100044: Spine3
-    400000: Body
-    400002: Head
-    400004: LeftElbow
-    400006: LeftFoot
-    400008: LeftHand
-    400010: LeftKnee
-    400012: LeftLoveHandle
-    400014: LeftShoulder
-    400016: LeftThigh
-    400018: //RootNode
-    400020: Neck
-    400022: Pelvis
-    400024: RightElbow
-    400026: RightFoot
-    400028: RightHand
-    400030: RightKnee
-    400032: RightLoveHandle
-    400034: RightShoulder
-    400036: RightThigh
-    400038: Root
-    400040: Spine1
-    400042: Spine2
-    400044: Spine3
-    2100000: phong1
-    4300000: Body
-    9500000: //RootNode
-    13700000: Body
+  serializedVersion: 21202
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: Body
+  - first:
+      1: 100002
+    second: Head
+  - first:
+      1: 100004
+    second: LeftElbow
+  - first:
+      1: 100006
+    second: LeftFoot
+  - first:
+      1: 100008
+    second: LeftHand
+  - first:
+      1: 100010
+    second: LeftKnee
+  - first:
+      1: 100012
+    second: LeftLoveHandle
+  - first:
+      1: 100014
+    second: LeftShoulder
+  - first:
+      1: 100016
+    second: LeftThigh
+  - first:
+      1: 100018
+    second: //RootNode
+  - first:
+      1: 100020
+    second: Neck
+  - first:
+      1: 100022
+    second: Pelvis
+  - first:
+      1: 100024
+    second: RightElbow
+  - first:
+      1: 100026
+    second: RightFoot
+  - first:
+      1: 100028
+    second: RightHand
+  - first:
+      1: 100030
+    second: RightKnee
+  - first:
+      1: 100032
+    second: RightLoveHandle
+  - first:
+      1: 100034
+    second: RightShoulder
+  - first:
+      1: 100036
+    second: RightThigh
+  - first:
+      1: 100038
+    second: Root
+  - first:
+      1: 100040
+    second: Spine1
+  - first:
+      1: 100042
+    second: Spine2
+  - first:
+      1: 100044
+    second: Spine3
+  - first:
+      4: 400000
+    second: Body
+  - first:
+      4: 400002
+    second: Head
+  - first:
+      4: 400004
+    second: LeftElbow
+  - first:
+      4: 400006
+    second: LeftFoot
+  - first:
+      4: 400008
+    second: LeftHand
+  - first:
+      4: 400010
+    second: LeftKnee
+  - first:
+      4: 400012
+    second: LeftLoveHandle
+  - first:
+      4: 400014
+    second: LeftShoulder
+  - first:
+      4: 400016
+    second: LeftThigh
+  - first:
+      4: 400018
+    second: //RootNode
+  - first:
+      4: 400020
+    second: Neck
+  - first:
+      4: 400022
+    second: Pelvis
+  - first:
+      4: 400024
+    second: RightElbow
+  - first:
+      4: 400026
+    second: RightFoot
+  - first:
+      4: 400028
+    second: RightHand
+  - first:
+      4: 400030
+    second: RightKnee
+  - first:
+      4: 400032
+    second: RightLoveHandle
+  - first:
+      4: 400034
+    second: RightShoulder
+  - first:
+      4: 400036
+    second: RightThigh
+  - first:
+      4: 400038
+    second: Root
+  - first:
+      4: 400040
+    second: Spine1
+  - first:
+      4: 400042
+    second: Spine2
+  - first:
+      4: 400044
+    second: Spine3
+  - first:
+      21: 2100000
+    second: phong1
+  - first:
+      43: 4300000
+    second: Body
+  - first:
+      95: 9500000
+    second: //RootNode
+  - first:
+      137: 13700000
+    second: Body
   externalObjects: {}
   materials:
-    importMaterials: 0
+    materialImportMode: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -64,6 +164,7 @@ ModelImporter:
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
     motionNodeName: 
     rigImportErrors: 
     rigImportWarnings: 
@@ -88,25 +189,34 @@ ModelImporter:
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
     importLights: 1
+    nodeNameCollisionStrategy: 0
+    fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
+    bakeAxisConversion: 0
     preserveHierarchy: 0
+    skinWeightsMode: 1
+    maxBonesPerVertex: 255
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 0
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 0.01
-    hasPreviousCalculatedGlobalScale: 1
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -115,10 +225,10 @@ ModelImporter:
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 0
-  copyAvatar: 0
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human: []
     skeleton: []
     armTwist: 0.5
@@ -128,13 +238,17 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
+  avatarSetup: 1
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
   additionalBone: 0
   userData: 
   assetBundleName: 
