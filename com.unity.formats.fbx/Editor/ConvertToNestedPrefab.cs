@@ -212,14 +212,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// For sceneObj, replace reference of origObj with newObj.
+        /// For sceneObj, replace references of objects that are keys in fixSceneRefsMap, to the value.
         /// 
         /// If the scene object is toConvertRoot or a child of it, then do not fix its references as it
         /// will be deleted after conversion.
         /// </summary>
         /// <param name="sceneObj">scene object with reference to replace</param>
-        /// <param name="origObj">original object</param>
-        /// <param name="newObj">new object</param>
+        /// <param name="fixSceneRefsMap">mapping from original object to new object</param>
         /// <param name="toConvertRoot">root of the hierarchy being converted</param>
         internal static void FixSceneReferenceToObject(Object sceneObj, GameObject toConvertRoot, Dictionary<Object, Object> fixSceneRefsMap)
         {
@@ -465,7 +464,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // FBX, don't export.
             var mainAsset = GetOrCreateFbxAsset(toConvert, fbxDirectoryFullPath, fbxFullPath, exportOptions);
 
-            // Gather all the references to toConvert in the scene before exporting/converting
+            // Gather all the references to toConvert in the scene before exporting/converting.
+            // Note: unique names are enforced in GetOrCreateFbxAsset()
             GatherSceneHierarchy(toConvert);
 
             // create prefab variant from the fbx
@@ -957,8 +957,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             var toProperty = serializedObject.FindProperty(fromProperty.propertyPath);
 
-            SourceObjectInfo info;
-            if (s_nameToInfo.TryGetValue(fromProperty.objectReferenceValue.name, out info))
+            if (s_nameToInfo.TryGetValue(fromProperty.objectReferenceValue.name, out var info))
             {
                 var value = info.destGO;
                 if (fromProperty.objectReferenceValue is GameObject)
@@ -989,6 +988,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// The 'from' hierarchy is not modified.
         /// 
         /// Note: 'root' is the root object that is being converted
+        /// 
+        /// For each component, add to fixSceneRefsMap a mapping from the original component on "from"
+        /// to the new component on "to". In order to be able to fix scene references that were
+        /// pointing to the original component.
         /// </summary>
         internal static void CopyComponents(GameObject to, GameObject from, GameObject root, Dictionary<Object, Object> fixSceneRefsMap)
         {
