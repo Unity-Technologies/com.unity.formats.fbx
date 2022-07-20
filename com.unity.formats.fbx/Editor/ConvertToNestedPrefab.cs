@@ -379,14 +379,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// and creates a new Prefab Variant pointing to the exported FBX.
         /// </description></item>
         /// <item><description>
-        /// The root of an fbx asset, or the root of an instance of an
-        /// fbx asset, then a new prefab variant will be created
-        /// pointing to the existing fbx.
+        /// The root of an FBX asset, or the root of an instance of an
+        /// FBX asset, then the method creates a new Prefab Variant
+        /// pointing to the existing FBX.
         /// </description></item>
         /// <item><description>
-        /// A prefab asset,
-        /// then a new fbx asset will be exported and a new prefab variant created
-        /// pointing to the fbx.
+        /// A Prefab asset,
+        /// then the method exports a new FBX asset and creates a new Prefab Variant
+        /// pointing to the FBX.
         /// </description></item>
         /// </list>
         /// </summary>
