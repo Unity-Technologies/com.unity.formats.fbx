@@ -537,8 +537,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         internal struct SourceObjectInfo
         {
+            /// <summary>
+            /// The exported GameObject that will replace the source.
+            /// </summary>
             public GameObject destGO;
+
 #if UNITY_2021_2_OR_NEWER
+            /// <summary>
+            /// A list of scene objects that reference this
+            /// object or one of its components. Populated before traversing the
+            /// components to speed up the search time of finding/replacing references.
+            /// 
+            /// Note: In older versions of Unity (without the Search API), searching
+            /// for references by GameObject ID will not return objects that reference
+            /// the components of the same GameObject. Therefore in older versions still need
+            /// to do a search by component.
+            /// </summary>
             public List<Object> sceneObjectsWithReference;
 #endif // UNITY_2021_2_OR_NEWER
 
@@ -551,8 +565,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
+        /// <summary>
+        /// Dictionary from name of source object (in toConvert hierarchy) to info.
+        /// </summary>
         internal static Dictionary<string, SourceObjectInfo> s_nameToInfo = new Dictionary<string, SourceObjectInfo>();
 
+        /// <summary>
+        /// Populates the s_nameToInfo dictionary by traversing the given hierarchy.
+        /// In newer versions of Unity, as it traverses, will also perform a search
+        /// for references to each object or component in the scene.
+        /// </summary>
+        /// <param name="hierarchyRoot"></param>
         internal static void GatherSceneHierarchy(GameObject hierarchyRoot)
         {
             s_nameToInfo.Clear();
