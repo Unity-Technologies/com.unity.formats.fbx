@@ -561,11 +561,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var isPreviewScene = SceneManagement.EditorSceneManager.IsPreviewSceneObject(hierarchyRoot);
 #endif // UNITY_2021_2_OR_NEWER
 
-            var q = new Queue<Transform>();
-            q.Enqueue(hierarchyRoot.transform);
-            while (q.Count > 0)
+            var s = new Stack<Transform>();
+            s.Push(hierarchyRoot.transform);
+            while (s.Count > 0)
             {
-                var t = q.Dequeue();
+                var t = s.Pop();
 
                 var info = new SourceObjectInfo();
 #if UNITY_2021_2_OR_NEWER
@@ -580,7 +580,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 foreach (Transform child in t)
                 {
-                    q.Enqueue(child);
+                    s.Push(child);
                 }
             }
         }
