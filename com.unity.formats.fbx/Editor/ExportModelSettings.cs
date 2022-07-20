@@ -539,10 +539,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
             set { mayaCompatibleNaming = value; }
         }
 
-        public bool AllowSceneModification { get { return false; } }
+        bool IExportOptions.AllowSceneModification
+        {
+            get { return false; }
+        }
 
-        public bool ExportUnrendered 
-        { 
+        public bool ExportUnrendered
+        {
             get { return exportUnrendered; }
             set { exportUnrendered = value; }
         }

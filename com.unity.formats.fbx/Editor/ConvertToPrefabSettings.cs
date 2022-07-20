@@ -118,11 +118,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
             set { exportFormat = value; }
         }
 
-        public Include ModelAnimIncludeOption { get { return Include.ModelAndAnim; } }
+        Include IExportOptions.ModelAnimIncludeOption
+        {
+            get { return Include.ModelAndAnim; }
+        }
 
-        public LODExportType LODExportType { get { return LODExportType.All; } }
+        LODExportType IExportOptions.LODExportType
+        {
+            get { return LODExportType.All; }
+        }
 
-        public ObjectPosition ObjectPosition { get { return ObjectPosition.Reset; } }
+        ObjectPosition IExportOptions.ObjectPosition
+        {
+            get { return ObjectPosition.Reset; }
+        }
 
         public bool AnimateSkinnedMesh
         {
@@ -136,21 +145,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
             set { mayaCompatibleNaming = value; }
         }
 
-        public bool AllowSceneModification { get { return true; } }
-
-        public bool ExportUnrendered { get { return true; } }
-
-        public bool PreserveImportSettings
-        {
-            get { return false; }
-        }
-
-        public bool KeepInstances
+        bool IExportOptions.AllowSceneModification
         {
             get { return true; }
         }
 
-        public bool EmbedTextures
+        bool IExportOptions.ExportUnrendered
+        {
+            get { return true; }
+        }
+
+        bool IExportOptions.PreserveImportSettings
+        {
+            get { return false; }
+        }
+
+        bool IExportOptions.KeepInstances
+        {
+            get { return true; }
+        }
+
+        bool IExportOptions.EmbedTextures
         {
             get { return false; }
         }

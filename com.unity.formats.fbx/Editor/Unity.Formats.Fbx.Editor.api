@@ -10,18 +10,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     public class ConvertToPrefabVariantOptions : UnityEditor.Formats.Fbx.Exporter.IExportOptions
     {
-        public virtual bool AllowSceneModification { get; }
         public virtual bool AnimateSkinnedMesh { get; set; }
         public virtual UnityEngine.Transform AnimationDest { get; set; }
         public virtual UnityEngine.Transform AnimationSource { get; set; }
-        public virtual bool EmbedTextures { get; }
         public virtual UnityEditor.Formats.Fbx.Exporter.ExportFormat ExportFormat { get; set; }
-        public virtual bool ExportUnrendered { get; }
-        public virtual bool KeepInstances { get; }
-        public virtual UnityEditor.Formats.Fbx.Exporter.LODExportType LODExportType { get; }
-        public virtual UnityEditor.Formats.Fbx.Exporter.Include ModelAnimIncludeOption { get; }
-        public virtual UnityEditor.Formats.Fbx.Exporter.ObjectPosition ObjectPosition { get; }
-        public virtual bool PreserveImportSettings { get; }
         public virtual bool UseMayaCompatibleNames { get; set; }
         public ConvertToPrefabVariantOptions() {}
     }
@@ -35,7 +27,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     public class ExportModelOptions : UnityEditor.Formats.Fbx.Exporter.IExportOptions
     {
-        public virtual bool AllowSceneModification { get; }
         public virtual bool AnimateSkinnedMesh { get; set; }
         public virtual UnityEngine.Transform AnimationDest { get; set; }
         public virtual UnityEngine.Transform AnimationSource { get; set; }
