@@ -4562,14 +4562,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="filePath">Absolute file path to use for the FBX file.</param>
         /// <param name="singleObject">The Unity GameObject to export.</param>
         /// <param name="exportOptions">The export options to use.</param>
-        [SecurityPermission(SecurityAction.LinkDemand)]
-        public static string ExportObject (
-            string filePath, 
+        public static string ExportObject(
+            string filePath,
             UnityEngine.Object singleObject,
             ExportModelOptions exportOptions = null
         )
         {
-            return ExportObjects(filePath, new Object[] { singleObject }, exportOptions.ConvertToModelSettingsSerialize(), exportData: null);
+            return ExportObjects(filePath, new Object[] { singleObject }, exportOptions?.ConvertToModelSettingsSerialize(), exportData: null);
         }
 
         [SecurityPermission(SecurityAction.LinkDemand)]
@@ -4592,13 +4591,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="filePath">Absolute file path to use for the FBX file.</param>
         /// <param name="objects">Array of Unity GameObjects to export.</param>
         /// <param name="exportOptions">The export options to use.</param>
-        [SecurityPermission(SecurityAction.LinkDemand)]
         public static string ExportObjects(
             string filePath,
             UnityEngine.Object[] objects = null,
             ExportModelOptions exportOptions = null)
         {
-            return ExportObjects(filePath, objects, exportOptions.ConvertToModelSettingsSerialize(), exportData: null);
+            return ExportObjects(filePath, objects, exportOptions?.ConvertToModelSettingsSerialize(), exportData: null);
         }
 
         /// <summary>
@@ -4609,7 +4607,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </returns>
         /// <param name="filePath">Absolute file path to use for the FBX file.</param>
         /// <param name="objects">Array of Unity GameObjects to export.</param>
-        [SecurityPermission(SecurityAction.LinkDemand)]
         public static string ExportObjects(string filePath, UnityEngine.Object[] objects = null)
         {
             return ExportObjects(filePath, objects, exportOptions: null, exportData: null);
@@ -4623,8 +4620,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </returns>
         /// <param name="filePath">Absolute file path to use for the FBX file.</param>
         /// <param name="singleObject">The Unity GameObject to export.</param>
-        [SecurityPermission(SecurityAction.LinkDemand)]
-        public static string ExportObject (string filePath, UnityEngine.Object singleObject)
+        public static string ExportObject(string filePath, UnityEngine.Object singleObject)
         {
             return ExportObjects(filePath, new Object[] {singleObject}, exportOptions: null);
         }

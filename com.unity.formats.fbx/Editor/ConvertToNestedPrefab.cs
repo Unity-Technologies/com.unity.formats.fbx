@@ -422,9 +422,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             string fbxFullPath = null,
             string prefabDirectoryFullPath = null,
             string prefabFullPath = null,
-            ConvertToPrefabVariantOptions exportOptions = null)
+            ConvertToPrefabVariantOptions convertOptions = null)
         {
-            return Convert(toConvert, fbxDirectoryFullPath, fbxFullPath, prefabDirectoryFullPath, prefabFullPath, exportOptions.ConvertToModelSettingsSerialize());
+            return Convert(toConvert, fbxDirectoryFullPath, fbxFullPath, prefabDirectoryFullPath, prefabFullPath, convertOptions?.ConvertToModelSettingsSerialize());
         }
 
         [SecurityPermission(SecurityAction.LinkDemand)]
