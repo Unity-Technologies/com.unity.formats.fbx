@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [Unreleased]
+### Changed
+- Added support for exporting texture offset, scale and wrap mode. Thank you to @hybridherbst for the additions.
+
 ## [4.2.0-pre.1] - 2022-04-20
 ### Changed
 - Added export options to Keep Instances and Embed Textures. Thank you to @hybridherbst for the additions.
