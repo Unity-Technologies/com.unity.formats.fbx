@@ -79,7 +79,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Class specifying the FBX export settings when converting to a Prefab Variant.
     /// </summary>
     [System.Serializable]
-    public class ConvertToPrefabSettingsSerialize : ExportOptionsSettingsSerializeBase
+    internal class ConvertToPrefabSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
         /// <inheritdoc/>
         public override Include ModelAnimIncludeOption { get { return Include.ModelAndAnim; } }
@@ -95,5 +95,88 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         /// <inheritdoc/>
         public override bool AllowSceneModification { get { return true; } }
+    }
+
+    [System.Serializable]
+    public class ConvertToPrefabVariantOptions : IExportOptions
+    {
+        [SerializeField]
+        private ExportFormat exportFormat = ExportFormat.ASCII;
+        [SerializeField]
+        private bool animatedSkinnedMesh = false;
+        [SerializeField]
+        private bool mayaCompatibleNaming = true;
+
+        [System.NonSerialized]
+        private Transform animSource;
+        [System.NonSerialized]
+        private Transform animDest;
+
+        public ExportFormat ExportFormat
+        {
+            get { return exportFormat; }
+            set { exportFormat = value; }
+        }
+
+        public Include ModelAnimIncludeOption { get { return Include.ModelAndAnim; } }
+
+        public LODExportType LODExportType { get { return LODExportType.All; } }
+
+        public ObjectPosition ObjectPosition { get { return ObjectPosition.Reset; } }
+
+        public bool AnimateSkinnedMesh
+        {
+            get { return animatedSkinnedMesh; }
+            set { animatedSkinnedMesh = value; }
+        }
+
+        public bool UseMayaCompatibleNames
+        {
+            get { return mayaCompatibleNaming; }
+            set { mayaCompatibleNaming = value; }
+        }
+
+        public bool AllowSceneModification { get { return true; } }
+
+        public bool ExportUnrendered { get { return true; } }
+
+        public bool PreserveImportSettings
+        {
+            get { return false; }
+        }
+
+        public bool KeepInstances
+        {
+            get { return true; }
+        }
+
+        public bool EmbedTextures
+        {
+            get { return false; }
+        }
+
+        public Transform AnimationSource
+        {
+            get { return animSource; }
+            set { animSource = value; }
+        }
+
+        public Transform AnimationDest
+        {
+            get { return animDest; }
+            set { animDest = value; }
+        }
+
+        internal ConvertToPrefabSettingsSerialize ConvertToModelSettingsSerialize()
+        {
+            var exportSettings = new ConvertToPrefabSettingsSerialize();
+            exportSettings.SetAnimatedSkinnedMesh(animatedSkinnedMesh);
+            exportSettings.SetAnimationDest(animDest);
+            exportSettings.SetAnimationSource(animSource);
+            exportSettings.SetExportFormat(exportFormat);
+            exportSettings.SetUseMayaCompatibleNames(mayaCompatibleNaming);
+
+            return exportSettings;
+        }
     }
 }

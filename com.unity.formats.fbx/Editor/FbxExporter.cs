@@ -4566,6 +4566,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public static string ExportObject (
             string filePath, 
             UnityEngine.Object singleObject,
+            ExportModelOptions exportOptions = null
+        )
+        {
+            return ExportObjects(filePath, new Object[] { singleObject }, exportOptions.ConvertToModelSettingsSerialize(), exportData: null);
+        }
+
+        [SecurityPermission(SecurityAction.LinkDemand)]
+        internal static string ExportObject(
+            string filePath,
+            UnityEngine.Object singleObject,
             IExportOptions exportOptions = null
         )
         {
@@ -4586,9 +4596,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public static string ExportObjects(
             string filePath,
             UnityEngine.Object[] objects = null,
-            IExportOptions exportOptions = null)
+            ExportModelOptions exportOptions = null)
         {
-            return ExportObjects(filePath, objects, exportOptions, exportData: null);
+            return ExportObjects(filePath, objects, exportOptions.ConvertToModelSettingsSerialize(), exportData: null);
         }
 
         /// <summary>

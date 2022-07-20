@@ -135,7 +135,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// <summary>
     /// Interface of export options that you can set when exporting to FBX.
     /// </summary>
-    public interface IExportOptions
+    internal interface IExportOptions
     {
         /// <summary>
         /// The export format (binary or ascii).
@@ -245,7 +245,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Base class for the export model settings and convert to prefab settings.
     /// </summary>
     [System.Serializable]
-    public abstract class ExportOptionsSettingsSerializeBase : IExportOptions
+    internal abstract class ExportOptionsSettingsSerializeBase : IExportOptions
     {
         [SerializeField]
         private ExportFormat exportFormat = ExportFormat.ASCII;
@@ -359,7 +359,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Class specifying the settings for exporting to FBX.
     /// </summary>
     [System.Serializable]
-    public class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
+    internal class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
         [SerializeField]
         private Include include = Include.ModelAndAnim;
@@ -469,6 +469,131 @@ namespace UnityEditor.Formats.Fbx.Exporter
             bitmask = (bitmask << 1) | (exportUnrendered ? 1 : 0);
             bitmask = (bitmask << 1) | (preserveImportSettings ? 1 : 0);
             return bitmask;
+        }
+    }
+
+    [System.Serializable]
+    public class ExportModelOptions : IExportOptions
+    {
+        [SerializeField]
+        private ExportFormat exportFormat = ExportFormat.ASCII;
+        [SerializeField]
+        private bool animatedSkinnedMesh = false;
+        [SerializeField]
+        private bool mayaCompatibleNaming = true;
+
+        [System.NonSerialized]
+        private Transform animSource;
+        [System.NonSerialized]
+        private Transform animDest;
+
+        [SerializeField]
+        private Include include = Include.ModelAndAnim;
+        [SerializeField]
+        private LODExportType lodLevel = LODExportType.All;
+        [SerializeField]
+        private ObjectPosition objectPosition = ObjectPosition.LocalCentered;
+        [SerializeField]
+        private bool exportUnrendered = true;
+        [SerializeField]
+        private bool preserveImportSettings = false;
+        [SerializeField]
+        private bool keepInstances = true;
+        [SerializeField]
+        private bool embedTextures = false;
+
+        public ExportFormat ExportFormat
+        {
+            get { return exportFormat; }
+            set { exportFormat = value; }
+        }
+
+        public Include ModelAnimIncludeOption
+        {
+            get { return include; }
+            set { include = value; }
+        }
+
+        public LODExportType LODExportType
+        {
+            get { return lodLevel; }
+            set { lodLevel = value; }
+        }
+
+        public ObjectPosition ObjectPosition
+        {
+            get { return objectPosition; }
+            set { objectPosition = value; }
+        }
+
+        public bool AnimateSkinnedMesh
+        {
+            get { return animatedSkinnedMesh; }
+            set { animatedSkinnedMesh = value; }
+        }
+
+
+        public bool UseMayaCompatibleNames
+        {
+            get { return mayaCompatibleNaming; }
+            set { mayaCompatibleNaming = value; }
+        }
+
+        public bool AllowSceneModification { get { return false; } }
+
+        public bool ExportUnrendered 
+        { 
+            get { return exportUnrendered; }
+            set { exportUnrendered = value; }
+        }
+
+        public bool PreserveImportSettings
+        {
+            get { return preserveImportSettings; }
+            set { preserveImportSettings = value; }
+        }
+
+        public bool KeepInstances
+        {
+            get { return keepInstances; }
+            set { keepInstances = value; }
+        }
+
+        public bool EmbedTextures
+        {
+            get { return embedTextures; }
+            set { embedTextures = value; }
+        }
+
+        public Transform AnimationSource
+        {
+            get { return animSource; }
+            set { animSource = value; }
+        }
+
+        public Transform AnimationDest
+        {
+            get { return animDest; }
+            set { animDest = value; }
+        }
+
+        internal ExportModelSettingsSerialize ConvertToModelSettingsSerialize()
+        {
+            var exportSettings = new ExportModelSettingsSerialize();
+            exportSettings.SetAnimatedSkinnedMesh(animatedSkinnedMesh);
+            exportSettings.SetAnimationDest(animDest);
+            exportSettings.SetAnimationSource(animSource);
+            exportSettings.SetEmbedTextures(embedTextures);
+            exportSettings.SetExportFormat(exportFormat);
+            exportSettings.SetExportUnredererd(exportUnrendered);
+            exportSettings.SetKeepInstances(keepInstances);
+            exportSettings.SetLODExportType(lodLevel);
+            exportSettings.SetModelAnimIncludeOption(include);
+            exportSettings.SetObjectPosition(objectPosition);
+            exportSettings.SetPreserveImportSettings(preserveImportSettings);
+            exportSettings.SetUseMayaCompatibleNames(mayaCompatibleNaming);
+
+            return exportSettings;
         }
     }
 }

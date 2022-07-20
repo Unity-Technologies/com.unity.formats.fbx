@@ -3,6 +3,54 @@
 // make sure the XML doc file is present and located next to the scraped dll
 namespace UnityEditor.Formats.Fbx.Exporter
 {
+    public static class ConvertToNestedPrefab
+    {
+        public static UnityEngine.GameObject ConvertToPrefabVariant(UnityEngine.GameObject toConvert, string fbxDirectoryFullPath = default(string), string fbxFullPath = default(string), string prefabDirectoryFullPath = default(string), string prefabFullPath = default(string), UnityEditor.Formats.Fbx.Exporter.ConvertToPrefabVariantOptions exportOptions = default(UnityEditor.Formats.Fbx.Exporter.ConvertToPrefabVariantOptions));
+    }
+
+    public class ConvertToPrefabVariantOptions : UnityEditor.Formats.Fbx.Exporter.IExportOptions
+    {
+        public virtual bool AllowSceneModification { get; }
+        public virtual bool AnimateSkinnedMesh { get; set; }
+        public virtual UnityEngine.Transform AnimationDest { get; set; }
+        public virtual UnityEngine.Transform AnimationSource { get; set; }
+        public virtual bool EmbedTextures { get; }
+        public virtual UnityEditor.Formats.Fbx.Exporter.ExportFormat ExportFormat { get; set; }
+        public virtual bool ExportUnrendered { get; }
+        public virtual bool KeepInstances { get; }
+        public virtual UnityEditor.Formats.Fbx.Exporter.LODExportType LODExportType { get; }
+        public virtual UnityEditor.Formats.Fbx.Exporter.Include ModelAnimIncludeOption { get; }
+        public virtual UnityEditor.Formats.Fbx.Exporter.ObjectPosition ObjectPosition { get; }
+        public virtual bool PreserveImportSettings { get; }
+        public virtual bool UseMayaCompatibleNames { get; set; }
+        public ConvertToPrefabVariantOptions() {}
+    }
+
+    public enum ExportFormat
+    {
+        public const UnityEditor.Formats.Fbx.Exporter.ExportFormat ASCII = 0;
+        public const UnityEditor.Formats.Fbx.Exporter.ExportFormat Binary = 1;
+        public int value__;
+    }
+
+    public class ExportModelOptions : UnityEditor.Formats.Fbx.Exporter.IExportOptions
+    {
+        public virtual bool AllowSceneModification { get; }
+        public virtual bool AnimateSkinnedMesh { get; set; }
+        public virtual UnityEngine.Transform AnimationDest { get; set; }
+        public virtual UnityEngine.Transform AnimationSource { get; set; }
+        public virtual bool EmbedTextures { get; set; }
+        public virtual UnityEditor.Formats.Fbx.Exporter.ExportFormat ExportFormat { get; set; }
+        public virtual bool ExportUnrendered { get; set; }
+        public virtual bool KeepInstances { get; set; }
+        public virtual UnityEditor.Formats.Fbx.Exporter.LODExportType LODExportType { get; set; }
+        public virtual UnityEditor.Formats.Fbx.Exporter.Include ModelAnimIncludeOption { get; set; }
+        public virtual UnityEditor.Formats.Fbx.Exporter.ObjectPosition ObjectPosition { get; set; }
+        public virtual bool PreserveImportSettings { get; set; }
+        public virtual bool UseMayaCompatibleNames { get; set; }
+        public ExportModelOptions() {}
+    }
+
     [UnityEditor.Recorder.RecorderSettings(typeof(UnityEditor.Formats.Fbx.Exporter.FbxRecorder), @"FBX")] public class FbxRecorderSettings : UnityEditor.Recorder.RecorderSettings
     {
         public UnityEditor.Recorder.Input.AnimationInputSettings AnimationInputSettings { get; set; }
@@ -17,11 +65,37 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public virtual void OnAfterDuplicate();
     }
 
+    public enum Include
+    {
+        public const UnityEditor.Formats.Fbx.Exporter.Include Anim = 2;
+        public const UnityEditor.Formats.Fbx.Exporter.Include Model = 1;
+        public const UnityEditor.Formats.Fbx.Exporter.Include ModelAndAnim = 3;
+        public int value__;
+    }
+
+    public enum LODExportType
+    {
+        public const UnityEditor.Formats.Fbx.Exporter.LODExportType All = 0;
+        public const UnityEditor.Formats.Fbx.Exporter.LODExportType Highest = 1;
+        public const UnityEditor.Formats.Fbx.Exporter.LODExportType Lowest = 2;
+        public int value__;
+    }
+
     public sealed class ModelExporter : System.IDisposable
     {
         public ModelExporter() {}
         public virtual void Dispose();
         public static string ExportObject(string filePath, UnityEngine.Object singleObject);
+        public static string ExportObject(string filePath, UnityEngine.Object singleObject, UnityEditor.Formats.Fbx.Exporter.ExportModelOptions exportOptions = default(UnityEditor.Formats.Fbx.Exporter.ExportModelOptions));
         public static string ExportObjects(string filePath, UnityEngine.Object[] objects = default(UnityEngine.Object[]));
+        public static string ExportObjects(string filePath, UnityEngine.Object[] objects = default(UnityEngine.Object[]), UnityEditor.Formats.Fbx.Exporter.ExportModelOptions exportOptions = default(UnityEditor.Formats.Fbx.Exporter.ExportModelOptions));
+    }
+
+    public enum ObjectPosition
+    {
+        public const UnityEditor.Formats.Fbx.Exporter.ObjectPosition LocalCentered = 0;
+        public const UnityEditor.Formats.Fbx.Exporter.ObjectPosition Reset = 2;
+        public int value__;
+        public const UnityEditor.Formats.Fbx.Exporter.ObjectPosition WorldAbsolute = 1;
     }
 }

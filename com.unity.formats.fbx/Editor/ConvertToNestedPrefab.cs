@@ -416,7 +416,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// to convert to a Prefab.
         /// </param>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        public static GameObject Convert(
+        public static GameObject ConvertToPrefabVariant(
+            GameObject toConvert,
+            string fbxDirectoryFullPath = null,
+            string fbxFullPath = null,
+            string prefabDirectoryFullPath = null,
+            string prefabFullPath = null,
+            ConvertToPrefabVariantOptions exportOptions = null)
+        {
+            return Convert(toConvert, fbxDirectoryFullPath, fbxFullPath, prefabDirectoryFullPath, prefabFullPath, exportOptions.ConvertToModelSettingsSerialize());
+        }
+
+        [SecurityPermission(SecurityAction.LinkDemand)]
+        internal static GameObject Convert(
             GameObject toConvert,
             string fbxDirectoryFullPath = null,
             string fbxFullPath = null,
