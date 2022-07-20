@@ -5,7 +5,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 {
     public static class ConvertToNestedPrefab
     {
-        public static UnityEngine.GameObject ConvertToPrefabVariant(UnityEngine.GameObject toConvert, string fbxDirectoryFullPath = default(string), string fbxFullPath = default(string), string prefabDirectoryFullPath = default(string), string prefabFullPath = default(string), UnityEditor.Formats.Fbx.Exporter.ConvertToPrefabVariantOptions convertOptions = default(UnityEditor.Formats.Fbx.Exporter.ConvertToPrefabVariantOptions));
+        public static UnityEngine.GameObject ConvertToPrefabVariant(UnityEngine.GameObject toConvert, string fbxDirectoryFullPath = default(string), string fbxFullPath = default(string), string prefabDirectoryFullPath = default(string), string prefabFullPath = default(string), UnityEditor.Formats.Fbx.Exporter.ConvertToPrefabVariantOptions exportOptions = default(UnityEditor.Formats.Fbx.Exporter.ConvertToPrefabVariantOptions));
     }
 
     public class ConvertToPrefabVariantOptions : UnityEditor.Formats.Fbx.Exporter.IExportOptions

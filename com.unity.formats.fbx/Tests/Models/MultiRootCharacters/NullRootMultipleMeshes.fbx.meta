@@ -1,161 +1,61 @@
 fileFormatVersion: 2
 guid: 78ddfc416b96b41f0b2441e3547fab11
 ModelImporter:
-  serializedVersion: 21202
-  internalIDToNameTable:
-  - first:
-      1: 100000
-    second: Head
-  - first:
-      1: 100002
-    second: LeftElbow
-  - first:
-      1: 100004
-    second: LeftFoot
-  - first:
-      1: 100006
-    second: LeftHand
-  - first:
-      1: 100008
-    second: LeftKnee
-  - first:
-      1: 100010
-    second: LeftShoulder
-  - first:
-      1: 100012
-    second: LeftThigh
-  - first:
-      1: 100014
-    second: LowerBody
-  - first:
-      1: 100016
-    second: Neck
-  - first:
-      1: 100018
-    second: //RootNode
-  - first:
-      1: 100020
-    second: Pelvis
-  - first:
-      1: 100022
-    second: RightElbow
-  - first:
-      1: 100024
-    second: RightFoot
-  - first:
-      1: 100026
-    second: RightHand
-  - first:
-      1: 100028
-    second: RightKnee
-  - first:
-      1: 100030
-    second: RightShoulder
-  - first:
-      1: 100032
-    second: RightThigh
-  - first:
-      1: 100034
-    second: Root
-  - first:
-      1: 100036
-    second: Spine1
-  - first:
-      1: 100038
-    second: Spine2
-  - first:
-      1: 100040
-    second: Spine3
-  - first:
-      1: 100042
-    second: UpperBody
-  - first:
-      4: 400000
-    second: Head
-  - first:
-      4: 400002
-    second: LeftElbow
-  - first:
-      4: 400004
-    second: LeftFoot
-  - first:
-      4: 400006
-    second: LeftHand
-  - first:
-      4: 400008
-    second: LeftKnee
-  - first:
-      4: 400010
-    second: LeftShoulder
-  - first:
-      4: 400012
-    second: LeftThigh
-  - first:
-      4: 400014
-    second: LowerBody
-  - first:
-      4: 400016
-    second: Neck
-  - first:
-      4: 400018
-    second: //RootNode
-  - first:
-      4: 400020
-    second: Pelvis
-  - first:
-      4: 400022
-    second: RightElbow
-  - first:
-      4: 400024
-    second: RightFoot
-  - first:
-      4: 400026
-    second: RightHand
-  - first:
-      4: 400028
-    second: RightKnee
-  - first:
-      4: 400030
-    second: RightShoulder
-  - first:
-      4: 400032
-    second: RightThigh
-  - first:
-      4: 400034
-    second: Root
-  - first:
-      4: 400036
-    second: Spine1
-  - first:
-      4: 400038
-    second: Spine2
-  - first:
-      4: 400040
-    second: Spine3
-  - first:
-      4: 400042
-    second: UpperBody
-  - first:
-      21: 2100000
-    second: phong1
-  - first:
-      43: 4300000
-    second: LowerBody
-  - first:
-      43: 4300002
-    second: UpperBody
-  - first:
-      95: 9500000
-    second: //RootNode
-  - first:
-      137: 13700000
-    second: LowerBody
-  - first:
-      137: 13700002
-    second: UpperBody
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: Head
+    100002: LeftElbow
+    100004: LeftFoot
+    100006: LeftHand
+    100008: LeftKnee
+    100010: LeftShoulder
+    100012: LeftThigh
+    100014: LowerBody
+    100016: Neck
+    100018: //RootNode
+    100020: Pelvis
+    100022: RightElbow
+    100024: RightFoot
+    100026: RightHand
+    100028: RightKnee
+    100030: RightShoulder
+    100032: RightThigh
+    100034: Root
+    100036: Spine1
+    100038: Spine2
+    100040: Spine3
+    100042: UpperBody
+    400000: Head
+    400002: LeftElbow
+    400004: LeftFoot
+    400006: LeftHand
+    400008: LeftKnee
+    400010: LeftShoulder
+    400012: LeftThigh
+    400014: LowerBody
+    400016: Neck
+    400018: //RootNode
+    400020: Pelvis
+    400022: RightElbow
+    400024: RightFoot
+    400026: RightHand
+    400028: RightKnee
+    400030: RightShoulder
+    400032: RightThigh
+    400034: Root
+    400036: Spine1
+    400038: Spine2
+    400040: Spine3
+    400042: UpperBody
+    2100000: phong1
+    4300000: LowerBody
+    4300002: UpperBody
+    9500000: //RootNode
+    13700000: LowerBody
+    13700002: UpperBody
   externalObjects: {}
   materials:
-    materialImportMode: 0
+    importMaterials: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -164,7 +64,6 @@ ModelImporter:
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
-    removeConstantScaleCurves: 0
     motionNodeName: 
     rigImportErrors: 
     rigImportWarnings: 
@@ -189,34 +88,25 @@ ModelImporter:
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
-    sortHierarchyByName: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
     importLights: 1
-    nodeNameCollisionStrategy: 0
-    fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
+    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
-    bakeAxisConversion: 0
     preserveHierarchy: 0
-    skinWeightsMode: 1
-    maxBonesPerVertex: 255
-    minBoneWeight: 0.001
-    optimizeBones: 1
-    meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
-    secondaryUVMarginMethod: 0
-    secondaryUVMinLightmapResolution: 40
-    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    previousCalculatedGlobalScale: 0.01
+    hasPreviousCalculatedGlobalScale: 1
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -225,10 +115,10 @@ ModelImporter:
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
-  referencedClips: []
   importAnimation: 0
+  copyAvatar: 0
   humanDescription:
-    serializedVersion: 3
+    serializedVersion: 2
     human: []
     skeleton: []
     armTwist: 0.5
@@ -238,17 +128,13 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
-  avatarSetup: 1
-  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
   additionalBone: 0
   userData: 
   assetBundleName: 
