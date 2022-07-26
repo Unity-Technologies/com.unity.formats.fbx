@@ -99,7 +99,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        // Validate the menu items defined above.
+        /// Validate the menu items defined above.
         /// </summary>
         [MenuItem(GameObjectMenuItemName, true, 30)]
         [MenuItem(AssetsMenuItemName, true, 30)]

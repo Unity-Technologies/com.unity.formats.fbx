@@ -94,9 +94,9 @@ If you have already uninstalled the FBX Exporter package and are experiencing is
 
 ## Exporting camera animation only from Maya gives incorrect camera rotations
 
-When using the Unity FBX Exporter Maya plugin to export camera animation with the `File > Unity > Export Animation Only` menu option,
+When using the Unity FBX Exporter Maya plugin to export camera animation with the **File > Unity > Export Animation Only** menu option,
 the resulting exported camera animation may be incorrect.
 
-The reason for this is that using the `Export Animation Only` menu option will export only transform animation and not the camera or its animated properties.
+The reason for this is that using the **Export Animation Only** menu option will export only transform animation and not the camera or its animated properties.
 
-The workaround for this issue is to export the camera with the `File > Unity > Export` menu option, which will export the camera as well as its animation.
+The workaround for this issue is to export the camera with the **File > Unity > Export** menu option, which will export the camera as well as its animation.

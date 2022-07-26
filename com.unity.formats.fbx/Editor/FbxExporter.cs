@@ -64,7 +64,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Use the ExportObject and ExportObjects methods. The default export
     /// options are used when exporting the objects to the FBX file.
     /// </para>
-    /// <para>For information on using the ModelExporter class, see <a href="../manual/api_index.html">the Developer's Guide</a>.</para>
+    /// <para>For information on using the ModelExporter class, see <a href="index.html">the Developer's Guide</a>.</para>
     /// </summary>
     public sealed class ModelExporter : System.IDisposable
     {

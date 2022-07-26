@@ -75,7 +75,7 @@ namespace UnityEngine.Formats.Fbx.Exporter
 
         /// <summary>
         /// Should we auto-update this prefab when the FBX file is updated?
-        /// <summary>
+        /// </summary>
         [Tooltip("Should we auto-update this prefab when the FBX file is updated?")]
         [SerializeField]
         bool m_autoUpdate = true;
