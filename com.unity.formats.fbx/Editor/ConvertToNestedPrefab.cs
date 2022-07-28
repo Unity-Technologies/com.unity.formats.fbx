@@ -35,6 +35,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
+    /// <summary>
+    /// Class for converting an exported FBX to a Prefab Variant.
+    /// </summary>
     public static class ConvertToNestedPrefab
     {
         const string GameObjectMenuItemName = "GameObject/Convert To FBX Prefab Variant...";
