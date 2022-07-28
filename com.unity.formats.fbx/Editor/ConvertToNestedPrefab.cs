@@ -5,7 +5,6 @@ using UnityEditor;
 using System.Linq;
 using System.IO;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 #if UNITY_2021_2_OR_NEWER
 using UnityEditor.Search;
 #endif
@@ -149,7 +148,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>list of instanced Model Prefabs</returns>
         /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
         /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
-        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static GameObject[] CreateInstantiatedModelPrefab(
             GameObject[] unityGameObjectsToConvert)
         {
@@ -418,7 +416,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Export options to use for exporting the model asset
         /// to convert to a Prefab.
         /// </param>
-        [SecurityPermission(SecurityAction.LinkDemand)]
         public static GameObject ConvertToPrefabVariant(
             GameObject toConvert,
             string fbxDirectoryFullPath = null,
@@ -430,7 +427,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return Convert(toConvert, fbxDirectoryFullPath, fbxFullPath, prefabDirectoryFullPath, prefabFullPath, convertOptions?.ConvertToModelSettingsSerialize());
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static GameObject Convert(
             GameObject toConvert,
             string fbxDirectoryFullPath = null,
