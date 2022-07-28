@@ -9,24 +9,26 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using UnityEditor.Presets;
 
-namespace UnityEditor.Formats.Fbx.Exporter {
+namespace UnityEditor.Formats.Fbx.Exporter
+{
     [System.Serializable]
     internal class FbxExportSettingsException : System.Exception
     {
-        public FbxExportSettingsException() { }
+        public FbxExportSettingsException() {}
 
         public FbxExportSettingsException(string message)
-            : base(message) { }
+            : base(message) {}
 
         public FbxExportSettingsException(string message, System.Exception inner)
-            : base(message, inner) { }
+            : base(message, inner) {}
 
         protected FbxExportSettingsException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+            : base(info, context) {}
     }
 
     [CustomEditor(typeof(ExportSettings))]
-    internal class ExportSettingsEditor : UnityEditor.Editor {
+    internal class ExportSettingsEditor : UnityEditor.Editor
+    {
         Vector2 scrollPos = Vector2.zero;
         const float LabelWidth = 180;
         const float SelectableLabelMinWidth = 90;
@@ -114,10 +116,12 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             {
                 ExportSettings.instance.SelectedPrefabPath = EditorGUILayout.Popup(ExportSettings.instance.SelectedPrefabPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
             }
-            else {
+            else
+            {
                 ExportSettings.instance.SelectedFbxPath = EditorGUILayout.Popup(ExportSettings.instance.SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
             }
-            if(EditorGUI.EndChangeCheck() && isSingletonInstance){
+            if (EditorGUI.EndChangeCheck() && isSingletonInstance)
+            {
                 if (isConvertToPrefabOptions)
                 {
                     ClearExportWindowSettings<ConvertToPrefabEditorWindow>(ConvertToPrefabEditorWindow.k_SessionStoragePrefix);
@@ -146,7 +150,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 string fullPath = EditorUtility.SaveFolderPanel(
                     openFolderPanelTitle, initialPath, null
                 );
-                
+
                 // Unless the user canceled, save path.
                 if (!string.IsNullOrEmpty(fullPath))
                 {
@@ -190,19 +194,21 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         }
 
         [SecurityPermission(SecurityAction.LinkDemand)]
-        public override void OnInspectorGUI() {
+        public override void OnInspectorGUI()
+        {
             ExportSettings exportSettings = (ExportSettings)target;
             bool isSingletonInstance = this.targets.Length == 1 && this.target == ExportSettings.instance;
 
             // Increasing the label width so that none of the text gets cut off
             EditorGUIUtility.labelWidth = LabelWidth;
 
-            scrollPos = GUILayout.BeginScrollView (scrollPos);
+            scrollPos = GUILayout.BeginScrollView(scrollPos);
 
-            var version = UnityEditor.Formats.Fbx.Exporter.ModelExporter.GetVersionFromReadme ();
-            if (!string.IsNullOrEmpty(version)) {
-                GUILayout.Label ("Version: " + version, EditorStyles.centeredGreyMiniLabel);
-                EditorGUILayout.Space ();
+            var version = UnityEditor.Formats.Fbx.Exporter.ModelExporter.GetVersionFromReadme();
+            if (!string.IsNullOrEmpty(version))
+            {
+                GUILayout.Label("Version: " + version, EditorStyles.centeredGreyMiniLabel);
+                EditorGUILayout.Space();
             }
 
             GUILayout.BeginVertical();
@@ -260,49 +266,56 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.LabelField("Integration", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
-            GUILayout.BeginHorizontal ();
+            GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(Style.Application3D, GUILayout.Width(LabelWidth));
-            
+
             // dropdown to select Maya version to use
             var options = ExportSettings.GetDCCOptions();
 
             exportSettings.SelectedDCCApp = EditorGUILayout.Popup(exportSettings.SelectedDCCApp, options);
 
             EditorGUI.BeginDisabledGroup(!isSingletonInstance);
-            if (GUILayout.Button(new GUIContent("...", "Browse to a 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth))) {
+            if (GUILayout.Button(new GUIContent("...", "Browse to a 3D application in a non-default location"), EditorStyles.miniButton, GUILayout.Width(BrowseButtonWidth)))
+            {
                 var ext = "";
-                switch (Application.platform) {
-                case RuntimePlatform.WindowsEditor:
-                    ext = "exe";
-                    break;
-                case RuntimePlatform.OSXEditor:
-                    ext = "app";
-                    break;
-                default:
-                    throw new System.NotImplementedException ();
+                switch (Application.platform)
+                {
+                    case RuntimePlatform.WindowsEditor:
+                        ext = "exe";
+                        break;
+                    case RuntimePlatform.OSXEditor:
+                        ext = "app";
+                        break;
+                    default:
+                        throw new System.NotImplementedException();
                 }
 
-                string dccPath = EditorUtility.OpenFilePanel ("Select Digital Content Creation Application", ExportSettings.FirstValidVendorLocation, ext);
+                string dccPath = EditorUtility.OpenFilePanel("Select Digital Content Creation Application", ExportSettings.FirstValidVendorLocation, ext);
 
                 // check that the path is valid and references the maya executable
-                if (!string.IsNullOrEmpty (dccPath)) {
+                if (!string.IsNullOrEmpty(dccPath))
+                {
                     ExportSettings.DCCType foundDCC = ExportSettings.DCCType.Maya;
-                    var foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Maya);
-                    if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor) {
-                        foundDCCPath = TryFindDCC (dccPath, ext, ExportSettings.DCCType.Max);
+                    var foundDCCPath = TryFindDCC(dccPath, ext, ExportSettings.DCCType.Maya);
+                    if (foundDCCPath == null && Application.platform == RuntimePlatform.WindowsEditor)
+                    {
+                        foundDCCPath = TryFindDCC(dccPath, ext, ExportSettings.DCCType.Max);
                         foundDCC = ExportSettings.DCCType.Max;
                     }
-                    if (foundDCCPath == null) {
-                        Debug.LogError (string.Format ("Could not find supported 3D application at: \"{0}\"", Path.GetDirectoryName (dccPath)));
-                    } else {
-                        dccPath = foundDCCPath;
-                        ExportSettings.AddDCCOption (dccPath, foundDCC);
+                    if (foundDCCPath == null)
+                    {
+                        Debug.LogError(string.Format("Could not find supported 3D application at: \"{0}\"", Path.GetDirectoryName(dccPath)));
                     }
-                    Repaint ();
+                    else
+                    {
+                        dccPath = foundDCCPath;
+                        ExportSettings.AddDCCOption(dccPath, foundDCC);
+                    }
+                    Repaint();
                 }
             }
             EditorGUI.EndDisabledGroup();
-            GUILayout.EndHorizontal ();
+            GUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
 
@@ -323,37 +336,43 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUILayout.Space();
 
             // disable button if no 3D application is available
-            EditorGUI.BeginDisabledGroup (!isSingletonInstance || !ExportSettings.CanInstall());
-            if (GUILayout.Button (Style.InstallIntegrationContent)) {
+            EditorGUI.BeginDisabledGroup(!isSingletonInstance || !ExportSettings.CanInstall());
+            if (GUILayout.Button(Style.InstallIntegrationContent))
+            {
                 EditorApplication.delayCall += UnityEditor.Formats.Fbx.Exporter.IntegrationsUI.InstallDCCIntegration;
             }
-            EditorGUI.EndDisabledGroup ();
+            EditorGUI.EndDisabledGroup();
 
-            EditorGUILayout.Space ();
+            EditorGUILayout.Space();
 
             EditorGUI.indentLevel--;
-            EditorGUILayout.LabelField ("FBX Prefab Component Updater", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("FBX Prefab Component Updater", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
-            EditorGUILayout.Space ();
+            EditorGUILayout.Space();
 
             EditorGUI.BeginDisabledGroup(!isSingletonInstance);
-            if (GUILayout.Button (Style.RepairMissingScripts)) {
-                var componentUpdater = new UnityEditor.Formats.Fbx.Exporter.RepairMissingScripts ();
+            if (GUILayout.Button(Style.RepairMissingScripts))
+            {
+                var componentUpdater = new UnityEditor.Formats.Fbx.Exporter.RepairMissingScripts();
                 var filesToRepairCount = componentUpdater.AssetsToRepairCount;
                 var dialogTitle = "FBX Prefab Component Updater";
-                if (filesToRepairCount > 0) {
-                    bool result = UnityEditor.EditorUtility.DisplayDialog (dialogTitle,
+                if (filesToRepairCount > 0)
+                {
+                    bool result = UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
                         string.Format("Found {0} prefab(s) and/or scene(s) with components requiring update.\n\n" +
-                        "If you choose 'Go Ahead', the FbxPrefab components in these assets " +
-                        "will be automatically updated to work with the latest FBX exporter.\n" +
+                            "If you choose 'Go Ahead', the FbxPrefab components in these assets " +
+                            "will be automatically updated to work with the latest FBX exporter.\n" +
                             "You should make a backup before proceeding.", filesToRepairCount),
                         "I Made a Backup. Go Ahead!", "No Thanks");
-                    if (result) {
-                        componentUpdater.ReplaceGUIDInTextAssets ();
-                    } else {
-                        var assetsToRepair = componentUpdater.GetAssetsToRepair ();
-                        Debug.LogFormat ("Failed to update the FbxPrefab components in the following files:\n{0}", string.Join ("\n", assetsToRepair));
+                    if (result)
+                    {
+                        componentUpdater.ReplaceGUIDInTextAssets();
+                    }
+                    else
+                    {
+                        var assetsToRepair = componentUpdater.GetAssetsToRepair();
+                        Debug.LogFormat("Failed to update the FbxPrefab components in the following files:\n{0}", string.Join("\n", assetsToRepair));
                     }
                 }
                 else
@@ -365,11 +384,12 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             EditorGUI.EndDisabledGroup();
             EditorGUI.indentLevel--;
 
-            GUILayout.FlexibleSpace ();
+            GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
-            GUILayout.EndScrollView ();
+            GUILayout.EndScrollView();
 
-            if (GUI.changed) {
+            if (GUI.changed)
+            {
                 // Only save the settings if we are in the Singleton instance.
                 // Otherwise, the user is editing a preset and we don't need to save.
                 if (isSingletonInstance)
@@ -379,20 +399,23 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        private static string TryFindDCC(string dccPath, string ext, ExportSettings.DCCType dccType){
+        private static string TryFindDCC(string dccPath, string ext, ExportSettings.DCCType dccType)
+        {
             string dccName = "";
-            switch (dccType) {
-            case ExportSettings.DCCType.Maya:
-                dccName = "maya";
-                break;
-            case ExportSettings.DCCType.Max:
-                dccName = "3dsmax";
-                break;
-            default:
-                throw new System.NotImplementedException ();
+            switch (dccType)
+            {
+                case ExportSettings.DCCType.Maya:
+                    dccName = "maya";
+                    break;
+                case ExportSettings.DCCType.Max:
+                    dccName = "3dsmax";
+                    break;
+                default:
+                    throw new System.NotImplementedException();
             }
 
-            if (Path.GetFileNameWithoutExtension (dccPath).ToLower ().Equals (dccName)) {
+            if (Path.GetFileNameWithoutExtension(dccPath).ToLower().Equals(dccName))
+            {
                 return dccPath;
             }
 
@@ -400,22 +423,25 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // a dcc in this directory.
             var dccDir = new DirectoryInfo(Path.GetDirectoryName(dccPath));
             FileSystemInfo[] files = {};
-            switch(Application.platform){
-            case RuntimePlatform.OSXEditor:
-                files = dccDir.GetDirectories ("*." + ext);
-                break;
-            case RuntimePlatform.WindowsEditor:
-                files = dccDir.GetFiles ("*." + ext);
-                break;
-            default:
-                throw new System.NotImplementedException();
+            switch (Application.platform)
+            {
+                case RuntimePlatform.OSXEditor:
+                    files = dccDir.GetDirectories("*." + ext);
+                    break;
+                case RuntimePlatform.WindowsEditor:
+                    files = dccDir.GetFiles("*." + ext);
+                    break;
+                default:
+                    throw new System.NotImplementedException();
             }
 
             string newDccPath = null;
-            foreach (var file in files) {
-                var filename = Path.GetFileNameWithoutExtension (file.Name).ToLower ();
-                if (filename.Equals (dccName)) {
-                    newDccPath = file.FullName.Replace("\\","/");
+            foreach (var file in files)
+            {
+                var filename = Path.GetFileNameWithoutExtension(file.Name).ToLower();
+                if (filename.Equals(dccName))
+                {
+                    newDccPath = file.FullName.Replace("\\", "/");
                     break;
                 }
             }
@@ -466,14 +492,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         }
     }
 
-    [FilePath("ProjectSettings/FbxExportSettings.asset",FilePathAttribute.Location.ProjectFolder)]
+    [FilePath("ProjectSettings/FbxExportSettings.asset", FilePathAttribute.Location.ProjectFolder)]
     internal class ExportSettings : ScriptableObject
     {
-        public enum ExportFormat { ASCII = 0, Binary = 1}
+        public enum ExportFormat { ASCII = 0, Binary = 1 }
 
         public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
 
-        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/}
+        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/ }
 
         public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 
@@ -553,8 +579,10 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             set { Verbose = value; }
         }
 
-        private static string DefaultIntegrationSavePath {
-            get{
+        private static string DefaultIntegrationSavePath
+        {
+            get
+            {
                 return Path.GetDirectoryName(Application.dataPath);
             }
         }
@@ -581,13 +609,13 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             if (Application.platform == RuntimePlatform.WindowsEditor)
             {
-                //If we are on Windows, we need only go up one location to get to the "Autodesk" folder.                        
+                //If we are on Windows, we need only go up one location to get to the "Autodesk" folder.
                 result = Directory.GetParent(location).ToString();
             }
             else if (Application.platform == RuntimePlatform.OSXEditor)
             {
                 //We can assume our path is: /Applications/Autodesk/maya2017/Maya.app/Contents
-                //So we need to go up three folders.                
+                //So we need to go up three folders.
 
                 var appFolder = Directory.GetParent(location);
                 if (appFolder != null)
@@ -646,7 +674,6 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     }
                 }
                 return existingDirectories;
-
             }
             else if (Application.platform == RuntimePlatform.OSXEditor)
             {
@@ -716,7 +743,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             get { return BakeAnimation; }
             set { BakeAnimation = value; }
         }
-        
+
         [SerializeField]
         private bool showConvertToPrefabDialog = true;
         public bool DisplayOptionsWindow
@@ -765,14 +792,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// value, properly interpreted for the current platform.
         /// </summary>
         [SerializeField]
-        private List<string> prefabSavePaths = new List<string> ();
+        private List<string> prefabSavePaths = new List<string>();
         internal List<string> GetCopyOfPrefabSavePaths()
         {
             return new List<string>(prefabSavePaths);
         }
 
         [SerializeField]
-        private List<string> fbxSavePaths = new List<string> ();
+        private List<string> fbxSavePaths = new List<string>();
         internal List<String> GetCopyOfFbxSavePaths()
         {
             return new List<string>(fbxSavePaths);
@@ -830,7 +857,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         // store contents of export model settings for serialization
         [SerializeField]
         private ExportModelSettingsSerialize exportModelSettingsSerialize;
-        
+
         [System.NonSerialized]
         private ConvertToPrefabSettings m_convertToPrefabSettings;
         internal ConvertToPrefabSettings ConvertToPrefabSettings
@@ -862,7 +889,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             LaunchAfterInstallation = true;
             HideSendToUnityMenuProperty = true;
             prefabSavePaths = new List<string>(){ kDefaultSavePath };
-            fbxSavePaths = new List<string> (){ kDefaultSavePath };
+            fbxSavePaths = new List<string>(){ kDefaultSavePath };
             integrationSavePath = DefaultIntegrationSavePath;
             dccOptionPaths = new List<string>();
             dccOptionNames = new List<string>();
@@ -879,34 +906,40 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         /// <returns>The unique name.</returns>
         /// <param name="name">Name.</param>
-        internal static string GetUniqueDCCOptionName(string name){
+        internal static string GetUniqueDCCOptionName(string name)
+        {
             Debug.Assert(instance != null);
             if (name == null)
             {
                 return null;
             }
-            if (!instance.dccOptionNames.Contains(name)) {
+            if (!instance.dccOptionNames.Contains(name))
+            {
                 return name;
             }
             var format = "{1} ({0})";
             int index = 1;
             // try extracting the current index from the name and incrementing it
             var result = System.Text.RegularExpressions.Regex.Match(name, @"\((?<number>\d+?)\)$");
-            if (result != null) {
+            if (result != null)
+            {
                 var number = result.Groups["number"].Value;
                 int tempIndex;
-                if (int.TryParse (number, out tempIndex)) {
-                    var indexOfNumber = name.LastIndexOf (number);
-                    format = name.Remove (indexOfNumber, number.Length).Insert (indexOfNumber, "{0}");
-                    index = tempIndex+1;
+                if (int.TryParse(number, out tempIndex))
+                {
+                    var indexOfNumber = name.LastIndexOf(number);
+                    format = name.Remove(indexOfNumber, number.Length).Insert(indexOfNumber, "{0}");
+                    index = tempIndex + 1;
                 }
             }
 
             string uniqueName = null;
-            do {
-                uniqueName = string.Format (format, index, name);
+            do
+            {
+                uniqueName = string.Format(format, index, name);
                 index++;
-            } while (instance.dccOptionNames.Contains(uniqueName));
+            }
+            while (instance.dccOptionNames.Contains(uniqueName));
 
             return uniqueName;
         }
@@ -1030,9 +1063,9 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 return -1;
             }
             AppName = AppName.Trim();
-            if (string.IsNullOrEmpty(AppName)) 
+            if (string.IsNullOrEmpty(AppName))
                 return -1;
-                
+
             string[] piecesArray = AppName.Split(' ');
             if (piecesArray.Length < 2)
             {
@@ -1070,11 +1103,12 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// <summary>
         /// Find Maya and 3DsMax installations at default install path.
         /// Add results to given dictionary.
-        /// 
+        ///
         /// If MAYA_LOCATION is set, add this to the list as well.
         /// </summary>
         [SecurityPermission(SecurityAction.LinkDemand)]
-        private static void FindDCCInstalls() {
+        private static void FindDCCInstalls()
+        {
             var dccOptionNames = instance.dccOptionNames;
             var dccOptionPaths = instance.dccOptionPaths;
 
@@ -1094,10 +1128,11 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                     var product = productDir.Name;
 
                     // Only accept those that start with 'maya' in either case.
-                    if (product.StartsWith ("maya", StringComparison.InvariantCultureIgnoreCase)) {
-                        string version = product.Substring ("maya".Length);
-                        dccOptionPaths.Add (GetMayaExePathFromLocation (productDir.FullName.Replace ("\\", "/")));
-                        dccOptionNames.Add (GetUniqueDCCOptionName(kMayaOptionName + version));
+                    if (product.StartsWith("maya", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        string version = product.Substring("maya".Length);
+                        dccOptionPaths.Add(GetMayaExePathFromLocation(productDir.FullName.Replace("\\", "/")));
+                        dccOptionNames.Add(GetUniqueDCCOptionName(kMayaOptionName + version));
                         continue;
                     }
 
@@ -1161,35 +1196,42 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// <param name="location">Location of Maya install.</param>
         private static string GetMayaExePathFromLocation(string location)
         {
-            switch (Application.platform) {
-            case RuntimePlatform.WindowsEditor:
-                return location + "/bin/maya.exe";
-            case RuntimePlatform.OSXEditor:
-                // MAYA_LOCATION on mac is set by Autodesk to be the
-                // Contents directory. But let's make it easier on people
-                // and allow just having it be the app bundle or a
-                // directory that holds the app bundle.
-                if (location.EndsWith(".app/Contents")) {
-                    return location + "/MacOS/Maya";
-                } else if (location.EndsWith(".app")) {
-                    return location + "/Contents/MacOS/Maya";
-                } else {
-                    return location + "/Maya.app/Contents/MacOS/Maya";
-                }
-            default:
-                throw new NotImplementedException ();
+            switch (Application.platform)
+            {
+                case RuntimePlatform.WindowsEditor:
+                    return location + "/bin/maya.exe";
+                case RuntimePlatform.OSXEditor:
+                    // MAYA_LOCATION on mac is set by Autodesk to be the
+                    // Contents directory. But let's make it easier on people
+                    // and allow just having it be the app bundle or a
+                    // directory that holds the app bundle.
+                    if (location.EndsWith(".app/Contents"))
+                    {
+                        return location + "/MacOS/Maya";
+                    }
+                    else if (location.EndsWith(".app"))
+                    {
+                        return location + "/Contents/MacOS/Maya";
+                    }
+                    else
+                    {
+                        return location + "/Maya.app/Contents/MacOS/Maya";
+                    }
+                default:
+                    throw new NotImplementedException();
             }
         }
 
         [SecurityPermission(SecurityAction.LinkDemand)]
-        internal static GUIContent[] GetDCCOptions(){
+        internal static GUIContent[] GetDCCOptions()
+        {
             if (instance.dccOptionNames == null ||
                 instance.dccOptionNames.Count != instance.dccOptionPaths.Count ||
-                instance.dccOptionNames.Count == 0) {
-
-                instance.dccOptionPaths = new List<string> ();
-                instance.dccOptionNames = new List<string> ();
-                FindDCCInstalls ();
+                instance.dccOptionNames.Count == 0)
+            {
+                instance.dccOptionPaths = new List<string>();
+                instance.dccOptionNames = new List<string>();
+                FindDCCInstalls();
             }
             // store the selected app if any
             string prevSelection = SelectedDCCPath;
@@ -1197,37 +1239,45 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // remove options that no longer exist
             List<string> pathsToDelete = new List<string>();
             List<string> namesToDelete = new List<string>();
-            for(int i = 0; i < instance.dccOptionPaths.Count; i++) {
-                var dccPath = instance.dccOptionPaths [i];
-                if (!File.Exists (dccPath)) {
-                    namesToDelete.Add (instance.dccOptionNames [i]);
-                    pathsToDelete.Add (dccPath);
+            for (int i = 0; i < instance.dccOptionPaths.Count; i++)
+            {
+                var dccPath = instance.dccOptionPaths[i];
+                if (!File.Exists(dccPath))
+                {
+                    namesToDelete.Add(instance.dccOptionNames[i]);
+                    pathsToDelete.Add(dccPath);
                 }
             }
-            foreach (var str in pathsToDelete) {
-                instance.dccOptionPaths.Remove (str);
+            foreach (var str in pathsToDelete)
+            {
+                instance.dccOptionPaths.Remove(str);
             }
-            foreach (var str in namesToDelete) {
-                instance.dccOptionNames.Remove (str);
+            foreach (var str in namesToDelete)
+            {
+                instance.dccOptionNames.Remove(str);
             }
 
             // set the selected DCC app to the previous selection
-            instance.SelectedDCCApp = instance.dccOptionPaths.IndexOf (prevSelection);
-            if (instance.SelectedDCCApp < 0) {
+            instance.SelectedDCCApp = instance.dccOptionPaths.IndexOf(prevSelection);
+            if (instance.SelectedDCCApp < 0)
+            {
                 // find preferred app if previous selection no longer exists
                 instance.SelectedDCCApp = instance.PreferredDCCApp;
             }
 
-            if (instance.dccOptionPaths.Count <= 0) {
+            if (instance.dccOptionPaths.Count <= 0)
+            {
                 instance.SelectedDCCApp = 0;
-                return new GUIContent[]{
+                return new GUIContent[]
+                {
                     new GUIContent("<No 3D Application found>")
                 };
             }
 
             GUIContent[] optionArray = new GUIContent[instance.dccOptionPaths.Count];
-            for(int i = 0; i < instance.dccOptionPaths.Count; i++){
-                optionArray [i] = new GUIContent(
+            for (int i = 0; i < instance.dccOptionPaths.Count; i++)
+            {
+                optionArray[i] = new GUIContent(
                     instance.dccOptionNames[i],
                     instance.dccOptionPaths[i]
                 );
@@ -1239,50 +1289,54 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
         [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        internal static void AddDCCOption(string newOption, DCCType dcc){
-            if (Application.platform == RuntimePlatform.OSXEditor && dcc == DCCType.Maya) {
+        internal static void AddDCCOption(string newOption, DCCType dcc)
+        {
+            if (Application.platform == RuntimePlatform.OSXEditor && dcc == DCCType.Maya)
+            {
                 // on OSX we get a path ending in .app, which is not quite the exe
                 newOption = GetMayaExePathFromLocation(newOption);
             }
 
             var dccOptionPaths = instance.dccOptionPaths;
-            if (dccOptionPaths.Contains(newOption)) {
-                instance.SelectedDCCApp = dccOptionPaths.IndexOf (newOption);
+            if (dccOptionPaths.Contains(newOption))
+            {
+                instance.SelectedDCCApp = dccOptionPaths.IndexOf(newOption);
                 return;
             }
 
             string optionName = "";
-            switch (dcc) {
-            case DCCType.Maya:
-                var version = AskMayaVersion(newOption);
-                if (version == null)
-                {
-                    Debug.LogError("This version of Maya could not be launched properly");
-                    UnityEditor.EditorUtility.DisplayDialog("Error Loading 3D Application",
-                        "Failed to add Maya option, could not get version number from maya.exe",
-                        "Ok");
-                    return;
-                }
-                optionName = GetUniqueDCCOptionName("Maya " + version);
-                break;
-            case DCCType.Max:
-                optionName = GetMaxOptionName (newOption);
-                if (ExportSettings.IsEarlierThanMax2017(optionName))
-                {
-                    Debug.LogError("Earlier than 3ds Max 2017 is not supported");
-                    UnityEditor.EditorUtility.DisplayDialog(
-                        "Error adding 3D Application",
-                        "Unity Integration only supports 3ds Max 2017 or later",
-                        "Ok");
+            switch (dcc)
+            {
+                case DCCType.Maya:
+                    var version = AskMayaVersion(newOption);
+                    if (version == null)
+                    {
+                        Debug.LogError("This version of Maya could not be launched properly");
+                        UnityEditor.EditorUtility.DisplayDialog("Error Loading 3D Application",
+                            "Failed to add Maya option, could not get version number from maya.exe",
+                            "Ok");
                         return;
-                }
+                    }
+                    optionName = GetUniqueDCCOptionName("Maya " + version);
                     break;
-            default:
-                throw new System.NotImplementedException();
+                case DCCType.Max:
+                    optionName = GetMaxOptionName(newOption);
+                    if (ExportSettings.IsEarlierThanMax2017(optionName))
+                    {
+                        Debug.LogError("Earlier than 3ds Max 2017 is not supported");
+                        UnityEditor.EditorUtility.DisplayDialog(
+                            "Error adding 3D Application",
+                            "Unity Integration only supports 3ds Max 2017 or later",
+                            "Ok");
+                        return;
+                    }
+                    break;
+                default:
+                    throw new System.NotImplementedException();
             }
 
-            instance.dccOptionNames.Add (optionName);
-            dccOptionPaths.Add (newOption);
+            instance.dccOptionNames.Add(optionName);
+            dccOptionPaths.Add(newOption);
             instance.SelectedDCCApp = dccOptionPaths.Count - 1;
         }
 
@@ -1291,7 +1345,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        internal static string AskMayaVersion(string exePath) {
+        internal static string AskMayaVersion(string exePath)
+        {
             System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
             myProcess.StartInfo.FileName = exePath;
             myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
@@ -1333,11 +1388,13 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         /// <returns>The 3DsMax dropdown option label.</returns>
         /// <param name="exePath">Exe path.</param>
-        internal static string GetMaxOptionName(string exePath){
-            return GetUniqueDCCOptionName(Path.GetFileName(Path.GetDirectoryName (exePath)));
+        internal static string GetMaxOptionName(string exePath)
+        {
+            return GetUniqueDCCOptionName(Path.GetFileName(Path.GetDirectoryName(exePath)));
         }
 
-        internal static bool IsEarlierThanMax2017(string AppName){
+        internal static bool IsEarlierThanMax2017(string AppName)
+        {
             int version = FindDCCVersion(AppName);
             return version != -1 && version < 2017;
         }
@@ -1367,10 +1424,12 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             return instance.dccOptionPaths.Count > 0;
         }
 
-        internal static string GetProjectRelativePath(string fullPath){
+        internal static string GetProjectRelativePath(string fullPath)
+        {
             var assetRelativePath = UnityEditor.Formats.Fbx.Exporter.ExportSettings.ConvertToAssetRelativePath(fullPath);
             var projectRelativePath = "Assets/" + assetRelativePath;
-            if (string.IsNullOrEmpty(assetRelativePath)) {
+            if (string.IsNullOrEmpty(assetRelativePath))
+            {
                 throw new FbxExportSettingsException("Path " + fullPath + " must be in the Assets folder.");
             }
             return projectRelativePath;
@@ -1381,21 +1440,24 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// This is relative to the Application.dataPath ; it uses '/' as the
         /// separator on all platforms.
         /// </summary>
-        internal static string[] GetRelativeSavePaths(List<string> exportSavePaths){
-            if(exportSavePaths == null)
+        internal static string[] GetRelativeSavePaths(List<string> exportSavePaths)
+        {
+            if (exportSavePaths == null)
             {
                 return null;
             }
 
-            if (exportSavePaths.Count == 0) {
-                exportSavePaths.Add (kDefaultSavePath);
+            if (exportSavePaths.Count == 0)
+            {
+                exportSavePaths.Add(kDefaultSavePath);
             }
             string[] relSavePaths = new string[exportSavePaths.Count];
             // use special forward slash unicode char as "/" is a special character
             // that affects the dropdown layout.
             string forwardslash = " \u2044 ";
-            for (int i = 0; i < relSavePaths.Length; i++) {
-                relSavePaths [i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
+            for (int i = 0; i < relSavePaths.Length; i++)
+            {
+                relSavePaths[i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "." ? "" : NormalizePath(exportSavePaths[i], isRelative: true).Replace("/", forwardslash));
             }
             return relSavePaths;
         }
@@ -1413,7 +1475,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 // if path is in Assets folder, shorten it
                 if (!Path.IsPathRooted(exportSavePaths[i]))
                 {
-					displayPaths[i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "."? "" : NormalizePath(exportSavePaths [i], isRelative: true).Replace("/", forwardslash));
+                    displayPaths[i] = string.Format("Assets{0}{1}", forwardslash, exportSavePaths[i] == "." ? "" : NormalizePath(exportSavePaths[i], isRelative: true).Replace("/", forwardslash));
                 }
                 else
                 {
@@ -1430,7 +1492,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// separator on all platforms.
         /// Only returns the paths within the Assets folder of the project.
         /// </summary>
-        internal static string[] GetRelativeFbxSavePaths(){
+        internal static string[] GetRelativeFbxSavePaths()
+        {
             return GetRelativeFbxSavePaths(instance.fbxSavePaths, ref instance.selectedFbxPath);
         }
 
@@ -1460,13 +1523,14 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// This is relative to the Application.dataPath ; it uses '/' as the
         /// separator on all platforms.
         /// </summary>
-        internal static string[] GetRelativePrefabSavePaths(){
+        internal static string[] GetRelativePrefabSavePaths()
+        {
             return GetRelativeSavePaths(instance.prefabSavePaths);
         }
 
         /// <summary>
         /// The paths formatted for display in the menu.
-        /// Paths outside the Assets folder are kept as they are and ones inside are shortened. 
+        /// Paths outside the Assets folder are kept as they are and ones inside are shortened.
         /// </summary>
         internal static string[] GetMixedFbxSavePaths()
         {
@@ -1478,8 +1542,9 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         /// <param name="savePath">Save path.</param>
         /// <param name="exportSavePaths">Export save paths.</param>
-        internal static void AddSavePath(string savePath, List<string> exportSavePaths, bool exportOutsideProject = false){
-            if(exportSavePaths == null)
+        internal static void AddSavePath(string savePath, List<string> exportSavePaths, bool exportOutsideProject = false)
+        {
+            if (exportSavePaths == null)
             {
                 return;
             }
@@ -1493,36 +1558,42 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 savePath = NormalizePath(savePath, isRelative: true);
             }
 
-            if (exportSavePaths.Contains (savePath)) {
+            if (exportSavePaths.Contains(savePath))
+            {
                 // move to first place if it isn't already
-                if (exportSavePaths [0] == savePath) {
+                if (exportSavePaths[0] == savePath)
+                {
                     return;
                 }
-                exportSavePaths.Remove (savePath);
+                exportSavePaths.Remove(savePath);
             }
 
-            if (exportSavePaths.Count >= instance.maxStoredSavePaths) {
+            if (exportSavePaths.Count >= instance.maxStoredSavePaths)
+            {
                 // remove last used path
-                exportSavePaths.RemoveAt(exportSavePaths.Count-1);
+                exportSavePaths.RemoveAt(exportSavePaths.Count - 1);
             }
 
-            exportSavePaths.Insert (0, savePath);
+            exportSavePaths.Insert(0, savePath);
         }
 
-        internal static void AddFbxSavePath(string savePath, bool exportOutsideProject = false){
-            AddSavePath (savePath, instance.fbxSavePaths, exportOutsideProject);
+        internal static void AddFbxSavePath(string savePath, bool exportOutsideProject = false)
+        {
+            AddSavePath(savePath, instance.fbxSavePaths, exportOutsideProject);
             instance.SelectedFbxPath = 0;
         }
 
-        internal static void AddPrefabSavePath(string savePath){
-            AddSavePath (savePath, instance.prefabSavePaths);
+        internal static void AddPrefabSavePath(string savePath)
+        {
+            AddSavePath(savePath, instance.prefabSavePaths);
             instance.SelectedPrefabPath = 0;
         }
 
-        internal static string GetAbsoluteSavePath(string savePath){
+        internal static string GetAbsoluteSavePath(string savePath)
+        {
             var projectAbsolutePath = Path.Combine(Application.dataPath, savePath);
             projectAbsolutePath = NormalizePath(projectAbsolutePath, isRelative: false, separator: Path.DirectorySeparatorChar);
-            
+
             // if path is outside Assets folder, it's already absolute so return the original path
             if (string.IsNullOrEmpty(ExportSettings.ConvertToAssetRelativePath(projectAbsolutePath)))
             {
@@ -1532,7 +1603,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             return projectAbsolutePath;
         }
 
-        internal static string FbxAbsoluteSavePath{
+        internal static string FbxAbsoluteSavePath
+        {
             get
             {
                 if (instance.fbxSavePaths.Count <= 0)
@@ -1543,7 +1615,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
 
-        internal static string PrefabAbsoluteSavePath{
+        internal static string PrefabAbsoluteSavePath
+        {
             get
             {
                 if (instance.prefabSavePaths.Count <= 0)
@@ -1565,12 +1638,15 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// </summary>
         internal static string ConvertToAssetRelativePath(string fullPathInAssets, bool requireSubdirectory = true)
         {
-            if (!Path.IsPathRooted(fullPathInAssets)) {
+            if (!Path.IsPathRooted(fullPathInAssets))
+            {
                 fullPathInAssets = Path.GetFullPath(fullPathInAssets);
             }
             var relativePath = GetRelativePath(Application.dataPath, fullPathInAssets);
-            if (requireSubdirectory && relativePath.StartsWith("..")) {
-                if (relativePath.Length == 2 || relativePath[2] == '/') {
+            if (requireSubdirectory && relativePath.StartsWith(".."))
+            {
+                if (relativePath.Length == 2 || relativePath[2] == '/')
+                {
                     // The relative path has us pop out to another directory,
                     // so return an empty string as requested.
                     return "";
@@ -1583,7 +1659,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// Compute how to get from 'fromDir' to 'toDir' via a relative path.
         /// </summary>
         internal static string GetRelativePath(string fromDir, string toDir,
-                char separator = '/')
+            char separator = '/')
         {
             // https://stackoverflow.com/questions/275689/how-to-get-relative-path-from-absolute-path
             // Except... the MakeRelativeUri that ships with Unity is buggy.
@@ -1601,7 +1677,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             // Find the least common ancestor
             int lca = -1;
-            for(int i = 0, n = System.Math.Min(fromDirs.Length, toDirs.Length); i < n; ++i) {
+            for (int i = 0, n = System.Math.Min(fromDirs.Length, toDirs.Length); i < n; ++i)
+            {
                 if (fromDirs[i] != toDirs[i]) { break; }
                 lca = i;
             }
@@ -1612,15 +1689,18 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // Then we need to go up 2 and down 3.
             var nStepsUp = (fromDirs.Length - 1) - lca;
             var nStepsDown = (toDirs.Length - 1) - lca;
-            if (nStepsUp + nStepsDown == 0) {
+            if (nStepsUp + nStepsDown == 0)
+            {
                 return ".";
             }
 
             var relDirs = new string[nStepsUp + nStepsDown];
-            for(int i = 0; i < nStepsUp; ++i) {
+            for (int i = 0; i < nStepsUp; ++i)
+            {
                 relDirs[i] = "..";
             }
-            for(int i = 0; i < nStepsDown; ++i) {
+            for (int i = 0; i < nStepsDown; ++i)
+            {
                 relDirs[nStepsUp + i] = toDirs[lca + 1 + i];
             }
 
@@ -1638,9 +1718,9 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         /// treat it as a relative path.
         /// </summary>
         internal static string NormalizePath(string path, bool isRelative,
-                char separator = '/')
+            char separator = '/')
         {
-            if(path == null)
+            if (path == null)
             {
                 return null;
             }
@@ -1650,7 +1730,8 @@ namespace UnityEditor.Formats.Fbx.Exporter {
 
             // If we're supposed to be an absolute path, but we're actually a
             // relative path, ignore the 'isRelative' flag.
-            if (!isRelative && !Path.IsPathRooted(path)) {
+            if (!isRelative && !Path.IsPathRooted(path))
+            {
                 isRelative = true;
             }
 
@@ -1660,23 +1741,29 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             // Modify dirs in-place, reading from readIndex and remembering
             // what index we've written to.
             int lastWriteIndex = -1;
-            for (int readIndex = 0, n = dirs.Length; readIndex < n; ++readIndex) {
+            for (int readIndex = 0, n = dirs.Length; readIndex < n; ++readIndex)
+            {
                 var dir = dirs[readIndex];
 
                 // Skip duplicate path separators.
-                if (string.IsNullOrEmpty(dir)) {
+                if (string.IsNullOrEmpty(dir))
+                {
                     // Skip if it's not a leading path separator.
-                   if (lastWriteIndex >= 0) {
-                       continue; }
+                    if (lastWriteIndex >= 0)
+                    {
+                        continue;
+                    }
 
-                   // Also skip if it's leading and we have a relative path.
-                   if (isRelative) {
-                       continue;
-                   }
+                    // Also skip if it's leading and we have a relative path.
+                    if (isRelative)
+                    {
+                        continue;
+                    }
                 }
 
                 // Skip '.'
-                if (dir == ".") {
+                if (dir == ".")
+                {
                     continue;
                 }
 
@@ -1686,12 +1773,18 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 //
                 // Note: this ignores the actual file system and the funny
                 // results you see when there are symlinks.
-                if (dir == "..") {
-                    if (lastWriteIndex == -1) {
+                if (dir == "..")
+                {
+                    if (lastWriteIndex == -1)
+                    {
                         // Leading '..' => handle like a normal directory.
-                    } else if (dirs[lastWriteIndex] == "..") {
+                    }
+                    else if (dirs[lastWriteIndex] == "..")
+                    {
                         // Multiple ".." => handle like a normal directory.
-                    } else {
+                    }
+                    else
+                    {
                         // Usual case: delete the previous directory.
                         lastWriteIndex--;
                         continue;
@@ -1703,21 +1796,27 @@ namespace UnityEditor.Formats.Fbx.Exporter {
                 dirs[lastWriteIndex] = dirs[readIndex];
             }
 
-            if (lastWriteIndex == -1 || (lastWriteIndex == 0 && string.IsNullOrEmpty(dirs[lastWriteIndex]))) {
+            if (lastWriteIndex == -1 || (lastWriteIndex == 0 && string.IsNullOrEmpty(dirs[lastWriteIndex])))
+            {
                 // If we didn't keep anything, we have the empty path.
                 // For an absolute path that's / ; for a relative path it's .
-                if (isRelative) {
+                if (isRelative)
+                {
                     return ".";
-                } else {
+                }
+                else
+                {
                     return "" + separator;
                 }
-            } else {
+            }
+            else
+            {
                 // Otherwise print out the path with the proper separator.
                 return String.Join("" + separator, dirs, 0, lastWriteIndex + 1);
             }
         }
 
-        internal void Load ()
+        internal void Load()
         {
             string filePath = GetFilePath();
             if (!System.IO.File.Exists(filePath))
@@ -1744,7 +1843,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
         {
             exportModelSettingsSerialize = ExportModelSettings.info;
             convertToPrefabSettingsSerialize = ConvertToPrefabSettings.info;
-            this.SaveToFile ();
+            this.SaveToFile();
         }
 
         // Called on creation and whenever the reset button is clicked
@@ -1789,5 +1888,4 @@ namespace UnityEditor.Formats.Fbx.Exporter {
             }
         }
     }
-
 }

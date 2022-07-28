@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -56,6 +56,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             OnContextItem(command, SelectionMode.Editable | SelectionMode.TopLevel);
         }
+
         [MenuItem(AssetsMenuItemName, false, 30)]
         static void OnAssetsContextItem(MenuCommand command)
         {
@@ -159,7 +160,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     var go = toExport.First();
                     if (PrefabUtility.IsPartOfNonAssetPrefabInstance(go) && !PrefabUtility.IsOutermostPrefabInstanceRoot(go))
                     {
-                        DisplayInvalidSelectionDialog(go, 
+                        DisplayInvalidSelectionDialog(go,
                             "Children of a Prefab instance cannot be converted.\nYou can open the Prefab in Prefab Mode or unpack the Prefab instance to convert it's children");
                         return null;
                     }
@@ -213,7 +214,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         /// <summary>
         /// For sceneObj, replace references of objects that are keys in fixSceneRefsMap, to the value.
-        /// 
+        ///
         /// If the scene object is toConvertRoot or a child of it, then do not fix its references as it
         /// will be deleted after conversion.
         /// </summary>
@@ -257,7 +258,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         if (property.propertyPath == "m_Father") continue;
                         if (!property.objectReferenceValue) continue;
 
-                        if(fixSceneRefsMap.TryGetValue(property.objectReferenceValue, out Object newVal))
+                        if (fixSceneRefsMap.TryGetValue(property.objectReferenceValue, out Object newVal))
                         {
                             property.objectReferenceValue = newVal;
                         }
@@ -279,6 +280,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return items.ConvertAll(x => x.ToObject());
             }
         }
+
 #endif // UNITY_2021_2_OR_NEWER
 
         /// <summary>
@@ -307,10 +309,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // bug 1242332: don't grab the focus!
                     // The arguments aren't actually optional so they must all be named.
                     s_sceneHierarchyWindow = EditorWindow.GetWindow(
-                            t: sceneHierarchyWindowType,
-                            utility: false,
-                            title: null,
-                            focus: false);
+                        t: sceneHierarchyWindowType,
+                        utility: false,
+                        title: null,
+                        focus: false);
                 }
                 return s_sceneHierarchyWindow;
             }
@@ -370,6 +372,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { previousSearchFilter, SearchableEditorWindow.SearchMode.Name, true, false });
             return sceneObjects;
         }
+
 #endif // UNITY_2021_2_OR_NEWER
 
         /// <summary>
@@ -439,7 +442,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // so that we can unpack it and avoid issues with nested prefab references.
             bool isPrefabAsset = false;
             UnityEngine.SceneManagement.Scene? previewScene = null;
-            if(PrefabUtility.IsPartOfPrefabAsset(toConvert) && PrefabUtility.GetPrefabInstanceStatus(toConvert) == PrefabInstanceStatus.NotAPrefab)
+            if (PrefabUtility.IsPartOfPrefabAsset(toConvert) && PrefabUtility.GetPrefabInstanceStatus(toConvert) == PrefabInstanceStatus.NotAPrefab)
             {
                 previewScene = SceneManagement.EditorSceneManager.NewPreviewScene();
                 toConvert = PrefabUtility.InstantiatePrefab(toConvert, previewScene.Value) as GameObject;
@@ -516,7 +519,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 Undo.DestroyObjectImmediate(toConvert);
                 Undo.RegisterCreatedObjectUndo(fbxInstance, UndoConversionCreateObject);
                 SceneManagement.EditorSceneManager.MarkSceneDirty(fbxInstance.scene);
-                
+
                 Undo.IncrementCurrentGroup();
                 return fbxInstance;
             }
@@ -547,7 +550,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// A list of scene objects that reference this
             /// object or one of its components. Populated before traversing the
             /// components to speed up the search time of finding/replacing references.
-            /// 
+            ///
             /// Note: In older versions of Unity (without the Search API), searching
             /// for references by GameObject ID will not return objects that reference
             /// the components of the same GameObject. Therefore in older versions still need
@@ -560,10 +563,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 destGO = dest;
 #if UNITY_2021_2_OR_NEWER
-               sceneObjectsWithReference = new List<Object>();
+                sceneObjectsWithReference = new List<Object>();
 #endif // UNITY_2021_2_OR_NEWER
+            }
         }
-    }
 
         /// <summary>
         /// Dictionary from name of source object (in toConvert hierarchy) to info.
@@ -638,9 +641,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// fbx asset or an instance of an fbx.</param>
         /// <returns>The root of a model prefab asset.</returns>
         internal static GameObject GetOrCreateFbxAsset(GameObject toConvert,
-                string fbxDirectoryFullPath = null,
-                string fbxFullPath = null,
-                ConvertToPrefabSettingsSerialize exportOptions = null)
+            string fbxDirectoryFullPath = null,
+            string fbxFullPath = null,
+            ConvertToPrefabSettingsSerialize exportOptions = null)
         {
             if (toConvert == null)
             {
@@ -683,9 +686,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Export to FBX. It refreshes the database.
             {
                 var fbxActualPath = ModelExporter.ExportObject(
-                                        fbxFullPath, toConvert,
-                                        exportOptions != null ? exportOptions : new ConvertToPrefabSettingsSerialize()
-                                    );
+                    fbxFullPath, toConvert,
+                    exportOptions != null ? exportOptions : new ConvertToPrefabSettingsSerialize()
+                );
                 if (fbxActualPath != fbxFullPath)
                 {
                     throw new ConvertToNestedPrefabException("Failed to convert " + toConvert.name);
@@ -717,7 +720,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Children of model prefab instances will also have "model prefab instance"
             // as their prefab type, so it is important that it is the root that is selected.
             //
-            // e.g. If I have the following hierarchy: 
+            // e.g. If I have the following hierarchy:
             //      Cube
             //      -- Sphere
             //
@@ -744,7 +747,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                 case PrefabInstanceStatus.NotAPrefab:
                     // a prefab asset
-                    if(go.transform.root.gameObject == go)
+                    if (go.transform.root.gameObject == go)
                     {
                         return go;
                     }
@@ -797,7 +800,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 file = string.Format(format, fileWithoutExt, index, ext);
                 file = Path.Combine(path, file);
                 index++;
-            } while (File.Exists(file));
+            }
+            while (File.Exists(file));
 
             return file;
         }
@@ -881,7 +885,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // Fix references of other objects in the scene
 #if UNITY_2021_2_OR_NEWER
-                if(info.sceneObjectsWithReference != null)
+                if (info.sceneObjectsWithReference != null)
                 {
                     var items = info.sceneObjectsWithReference;
                     foreach (var item in items)
@@ -915,7 +919,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // set icon
 #if UNITY_2021_2_OR_NEWER
                 var sourceIcon = EditorGUIUtility.GetIconForObject(sourceGO);
-                EditorGUIUtility.SetIconForObject(destGO, sourceIcon);   
+                EditorGUIUtility.SetIconForObject(destGO, sourceIcon);
 #else // UNITY_2021_2_OR_NEWER
                 System.Reflection.BindingFlags bindingFlags = System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public;
                 var sourceIcon = typeof(EditorGUIUtility).InvokeMember("GetIconForObject", bindingFlags, null, null, new object[] { sourceGO });
@@ -932,7 +936,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         /// <summary>
         /// Gets a dictionary linking dest GameObject name to source game object.
-        /// 
+        ///
         /// Before export we ensure that the hierarchy has unique names, so that we can map by name afterwards.
         /// </summary>
         /// <returns>Dictionary containing the name to source game object.</returns>
@@ -968,7 +972,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
         }
-        
+
         /// <summary>
         /// Copy the object reference from fromProperty to the matching property on serializedObject.
         /// Use nameMap to find the correct object reference to use.
@@ -1009,9 +1013,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// are already in the FBX.
         ///
         /// The 'from' hierarchy is not modified.
-        /// 
+        ///
         /// Note: 'root' is the root object that is being converted
-        /// 
+        ///
         /// For each component, add to fixSceneRefsMap a mapping from the original component on "from"
         /// to the new component on "to". In order to be able to fix scene references that were
         /// pointing to the original component.
@@ -1021,7 +1025,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // copy components on "from" to "to". Don't want to copy over meshes and materials that were exported
             var originalComponents = new List<Component>(from.GetComponents<Component>());
             var destinationComponents = new List<Component>(to.GetComponents<Component>());
-            foreach(var fromComponent in originalComponents)
+            foreach (var fromComponent in originalComponents)
             {
                 // ignore missing components
                 if (fromComponent == null)
@@ -1081,7 +1085,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // been added when adding the particle system.
                 // An object can have only one ParticleSystem so there shouldn't be an issue of the renderer
                 // belonging to a different ParticleSystem.
-                if(!toComponent && fromComponent is ParticleSystemRenderer)
+                if (!toComponent && fromComponent is ParticleSystemRenderer)
                 {
                     toComponent = to.GetComponent<ParticleSystemRenderer>();
                 }
@@ -1099,7 +1103,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
 
                 fixSceneRefsMap.Add(fromComponent, toComponent);
-                
+
                 // SkinnedMeshRenderer also stores the mesh.
                 // Make sure this is not copied over when the SkinnedMeshRenderer is updated,
                 // as we want to keep the mesh from the FBX not the scene.
@@ -1115,7 +1119,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     EditorJsonUtility.FromJsonOverwrite(json, toComponent);
                 }
 
-                if(fromComponent is MeshCollider)
+                if (fromComponent is MeshCollider)
                 {
                     // UNI-27534: This fixes the issue where the mesh collider would not update to point to the mesh in the fbx after export
                     // Point the mesh included in the mesh collider to the mesh in the FBX file, which is the same as the one in mesh filter
@@ -1142,7 +1146,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // For everything else, filtering by visible children in the while loop and then copying properties that don't have visible children,
                 // ensures that only the leaf properties are copied over. Copying other properties is not usually necessary and may break references that
                 // were not meant to be copied.
-                while (fromProperty.Next((fromComponent is SkinnedMeshRenderer)? fromProperty.hasChildren : fromProperty.hasVisibleChildren))
+                while (fromProperty.Next((fromComponent is SkinnedMeshRenderer) ? fromProperty.hasChildren : fromProperty.hasVisibleChildren))
                 {
                     if (!fromProperty.hasVisibleChildren)
                     {

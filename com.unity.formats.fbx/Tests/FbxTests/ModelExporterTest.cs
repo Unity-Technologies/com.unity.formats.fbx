@@ -14,22 +14,23 @@ namespace FbxExporter.UnitTests
     public class ModelExporterTest : ExporterTestBase
     {
         [TearDown]
-        public override void Term ()
+        public override void Term()
         {
             #if (!DEBUG_UNITTEST)
-            base.Term ();
+            base.Term();
             #endif
             ModelExporter.UnRegisterAllMeshCallbacks();
             ModelExporter.UnRegisterAllMeshObjectCallbacks();
         }
-        
+
         [Test]
-        public void TestBasics ()
+        public void TestBasics()
         {
             Assert.That(!string.IsNullOrEmpty(ModelExporter.GetVersionFromReadme()));
 
             // Test GetOrCreateLayer
-            using (var fbxManager = FbxManager.Create()) {
+            using (var fbxManager = FbxManager.Create())
+            {
                 var fbxMesh = FbxMesh.Create(fbxManager, "name");
                 var layer0 = ModelExporter.GetOrCreateLayer(fbxMesh);
                 Assert.That(layer0, Is.Not.Null);
@@ -41,26 +42,27 @@ namespace FbxExporter.UnitTests
 
             // Test axis conversion: a x b in left-handed is the same as b x a
             // in right-handed (that's why we need to flip the winding order).
-            var a = new Vector3(1,0,0);
-            var b = new Vector3(0,0,1);
-            var crossLeft = Vector3.Cross(a,b);
+            var a = new Vector3(1, 0, 0);
+            var b = new Vector3(0, 0, 1);
+            var crossLeft = Vector3.Cross(a, b);
 
             Assert.That(ModelExporter.DefaultMaterial);
 
             // Test non-static functions.
-            using (var fbxManager = FbxManager.Create()) {
+            using (var fbxManager = FbxManager.Create())
+            {
                 var fbxScene = FbxScene.Create(fbxManager, "scene");
-                var fbxNode = FbxNode.Create (fbxScene, "node");
+                var fbxNode = FbxNode.Create(fbxScene, "node");
                 var exporter = new ModelExporter();
 
                 // Test ExportMaterial: it exports and it re-exports
                 bool result = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene, fbxNode);
-                Assert.IsTrue (result);
-                var fbxMaterial = fbxNode.GetMaterial (0);
+                Assert.IsTrue(result);
+                var fbxMaterial = fbxNode.GetMaterial(0);
                 Assert.That(fbxMaterial, Is.Not.Null);
 
                 result = exporter.ExportMaterial(ModelExporter.DefaultMaterial, fbxScene, fbxNode);
-                var fbxMaterial2 = fbxNode.GetMaterial (1);
+                var fbxMaterial2 = fbxNode.GetMaterial(1);
                 Assert.AreEqual(fbxMaterial, fbxMaterial2);
 
                 // Test ExportTexture: it finds the same texture for the default-material (it doesn't create a new one)
@@ -110,7 +112,7 @@ namespace FbxExporter.UnitTests
                 FbxAMatrix m = new FbxAMatrix();
                 m.SetR(fbxV);
                 var actualQuat = m.GetQ();
-                
+
                 // since this quaternion is XYZ instead of ZXY, it should not match the quaternion
                 // created with EulerToQuaternionZXY
                 Assert.That(xyzQuat, Is.Not.EqualTo(quat));
@@ -119,19 +121,19 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
-        public void TestFindCenter ()
+        public void TestFindCenter()
         {
             // Create 3 objects
-            var cube = CreateGameObject ("cube");
-            var cube1 = CreateGameObject ("cube1");
-            var cube2 = CreateGameObject ("cube2");
+            var cube = CreateGameObject("cube");
+            var cube1 = CreateGameObject("cube1");
+            var cube2 = CreateGameObject("cube2");
 
             // Set their transforms
-            cube.transform.localPosition = new Vector3 (23, -5, 10);
-            cube1.transform.localPosition = new Vector3 (23, -5, 4);
-            cube1.transform.localScale = new Vector3 (1, 1, 2);
-            cube2.transform.localPosition = new Vector3 (28, 0, 10);
-            cube2.transform.localScale = new Vector3 (3, 1, 1);
+            cube.transform.localPosition = new Vector3(23, -5, 10);
+            cube1.transform.localPosition = new Vector3(23, -5, 4);
+            cube1.transform.localScale = new Vector3(1, 1, 2);
+            cube2.transform.localPosition = new Vector3(28, 0, 10);
+            cube2.transform.localScale = new Vector3(3, 1, 1);
 
             // Find the center
             var center = ModelExporter.FindCenter(new GameObject[] { cube, cube1, cube2 });
@@ -141,38 +143,38 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
-        public void TestRemoveRedundantObjects ()
+        public void TestRemoveRedundantObjects()
         {
-            var root = CreateGameObject ("root");
-            var child1 = CreateGameObject ("child1", root.transform);
-            var child2 = CreateGameObject ("child2", root.transform);
-            var root2 = CreateGameObject ("root2");
+            var root = CreateGameObject("root");
+            var child1 = CreateGameObject("child1", root.transform);
+            var child2 = CreateGameObject("child2", root.transform);
+            var root2 = CreateGameObject("root2");
 
             // test set: root
             // expected result: root
             var result = ModelExporter.RemoveRedundantObjects(new Object[] { root });
-            Assert.AreEqual (1, result.Count);
-            Assert.IsTrue (result.Contains (root));
+            Assert.AreEqual(1, result.Count);
+            Assert.IsTrue(result.Contains(root));
 
             // test set: root, child1
             // expected result: root
             result = ModelExporter.RemoveRedundantObjects(new Object[] { root, child1 });
-            Assert.AreEqual (1, result.Count);
-            Assert.IsTrue (result.Contains (root));
+            Assert.AreEqual(1, result.Count);
+            Assert.IsTrue(result.Contains(root));
 
             // test set: root, child1, child2, root2
             // expected result: root, root2
             result = ModelExporter.RemoveRedundantObjects(new Object[] { root, root2, child2, child1 });
-            Assert.AreEqual (2, result.Count);
-            Assert.IsTrue (result.Contains (root));
-            Assert.IsTrue (result.Contains (root2));
+            Assert.AreEqual(2, result.Count);
+            Assert.IsTrue(result.Contains(root));
+            Assert.IsTrue(result.Contains(root2));
 
             // test set: child1, child2
             // expected result: child1, child2
             result = ModelExporter.RemoveRedundantObjects(new Object[] { child2, child1 });
-            Assert.AreEqual (2, result.Count);
-            Assert.IsTrue (result.Contains (child1));
-            Assert.IsTrue (result.Contains (child2));
+            Assert.AreEqual(2, result.Count);
+            Assert.IsTrue(result.Contains(child1));
+            Assert.IsTrue(result.Contains(child2));
         }
 
         [Test]
@@ -181,31 +183,32 @@ namespace FbxExporter.UnitTests
             // test already valid filenames
             var filename = "foobar.fbx";
             var result = ModelExporter.ConvertToValidFilename(filename);
-            Assert.AreEqual (filename, result);
+            Assert.AreEqual(filename, result);
 
             filename = "foo_bar 1.fbx";
             result = ModelExporter.ConvertToValidFilename(filename);
-            Assert.AreEqual (filename, result);
+            Assert.AreEqual(filename, result);
 
             // test invalid filenames
             filename = "?foo**bar///.fbx";
             result = ModelExporter.ConvertToValidFilename(filename);
 #if UNITY_EDITOR_WIN
-            Assert.AreEqual ("_foo__bar___.fbx", result);
+            Assert.AreEqual("_foo__bar___.fbx", result);
 #else
-            Assert.AreEqual ("?foo**bar___.fbx", result);
+            Assert.AreEqual("?foo**bar___.fbx", result);
 #endif
 
             filename = "foo$?ba%r 2.fbx";
             result = ModelExporter.ConvertToValidFilename(filename);
 #if UNITY_EDITOR_WIN
-            Assert.AreEqual ("foo$_ba%r 2.fbx", result);
+            Assert.AreEqual("foo$_ba%r 2.fbx", result);
 #else
-            Assert.AreEqual ("foo$?ba%r 2.fbx", result);
+            Assert.AreEqual("foo$?ba%r 2.fbx", result);
 #endif
         }
 
-        class CallbackTester {
+        class CallbackTester
+        {
             public string filename;
             public Transform tree;
 
@@ -213,22 +216,26 @@ namespace FbxExporter.UnitTests
             int objectCalls;
             bool objectResult;
 
-            public CallbackTester(Transform t, string f) {
+            public CallbackTester(Transform t, string f)
+            {
                 filename = f;
                 tree = t;
             }
 
-            public bool CallbackForFbxPrefab(ModelExporter exporter, FbxPrefab component, FbxNode fbxNode) {
+            public bool CallbackForFbxPrefab(ModelExporter exporter, FbxPrefab component, FbxNode fbxNode)
+            {
                 componentCalls++;
                 return true;
             }
 
-            public bool CallbackForObject(ModelExporter exporter, GameObject go, FbxNode fbxNode) {
+            public bool CallbackForObject(ModelExporter exporter, GameObject go, FbxNode fbxNode)
+            {
                 objectCalls++;
                 return objectResult;
             }
 
-            public void Verify(int cCalls, int goCalls, bool objectResult = false) {
+            public void Verify(int cCalls, int goCalls, bool objectResult = false)
+            {
                 componentCalls = 0;
                 objectCalls = 0;
                 this.objectResult = objectResult;
@@ -269,8 +276,8 @@ namespace FbxExporter.UnitTests
             // Make sure we can't register for a component twice, but we can
             // for an object.  Register twice for an object means two calls per
             // object.
-            Assert.That( () => ModelExporter.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab),
-                    Throws.Exception);
+            Assert.That(() => ModelExporter.RegisterMeshCallback<FbxPrefab>(tester.CallbackForFbxPrefab),
+                Throws.Exception);
             ModelExporter.RegisterMeshObjectCallback(tester.CallbackForObject);
             tester.Verify(1, 2 * nbTransforms);
 
@@ -310,9 +317,9 @@ namespace FbxExporter.UnitTests
 
             GetMeshForComponent<FbxPrefab> prefabCallback =
                 (ModelExporter exporter, FbxPrefab component, FbxNode node) => {
-                    exporter.ExportMesh(sphereMesh, node);
-                    return true;
-                };
+                exporter.ExportMesh(sphereMesh, node);
+                return true;
+            };
             ModelExporter.RegisterMeshCallback(prefabCallback);
             filename = GetRandomFbxFilePath();
             ModelExporter.ExportObject(filename, tree);
@@ -331,13 +338,16 @@ namespace FbxExporter.UnitTests
             filename = GetRandomFbxFilePath();
             GetMeshForObject callback =
                 (ModelExporter exporter, GameObject gameObject, FbxNode node) => {
-                    if (gameObject.name == "Parent2") {
-                        exporter.ExportMesh(sphereMesh, node);
-                        return true;
-                    } else {
-                        return false;
-                    }
-                };
+                if (gameObject.name == "Parent2")
+                {
+                    exporter.ExportMesh(sphereMesh, node);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            };
             ModelExporter.RegisterMeshObjectCallback(callback);
             ModelExporter.ExportObject(filename, tree);
             ModelExporter.UnRegisterMeshObjectCallback(callback);
@@ -351,8 +361,9 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
-        [Ignore("Ignore a camera orthographic test (Uni-48092)")]        
-        public void TestExportCamera2(){
+        [Ignore("Ignore a camera orthographic test (Uni-48092)")]
+        public void TestExportCamera2()
+        {
             // NOTE: even though the aspect ratio is exported,
             //       it does not get imported back into Unity.
             //       Therefore don't modify or check if camera.aspect is the same
@@ -360,7 +371,7 @@ namespace FbxExporter.UnitTests
 
             // create a Unity camera
             GameObject cameraObj = new GameObject("TestCamera");
-            Camera camera = cameraObj.AddComponent<Camera> ();
+            Camera camera = cameraObj.AddComponent<Camera>();
 
             // test export orthographic camera
             camera.orthographic = true;
@@ -368,14 +379,15 @@ namespace FbxExporter.UnitTests
             camera.nearClipPlane = 19;
             camera.farClipPlane = 500.6f;
 
-            var filename = GetRandomFbxFilePath (); // export to a different file
-            var fbxCamera = ExportCamera (filename, cameraObj);
-            CompareCameraValues (camera, fbxCamera);
-            Assert.AreEqual (camera.orthographicSize, fbxCamera.orthographicSize);
+            var filename = GetRandomFbxFilePath();  // export to a different file
+            var fbxCamera = ExportCamera(filename, cameraObj);
+            CompareCameraValues(camera, fbxCamera);
+            Assert.AreEqual(camera.orthographicSize, fbxCamera.orthographicSize);
         }
 
         [Test]
-        public void TestExportCamera1(){
+        public void TestExportCamera1()
+        {
             // NOTE: even though the aspect ratio is exported,
             //       it does not get imported back into Unity.
             //       Therefore don't modify or check if camera.aspect is the same
@@ -383,7 +395,7 @@ namespace FbxExporter.UnitTests
 
             // create a Unity camera
             GameObject cameraObj = new GameObject("TestCamera");
-            Camera camera = cameraObj.AddComponent<Camera> ();
+            Camera camera = cameraObj.AddComponent<Camera>();
 
             // change some of the default settings
             camera.orthographic = false;
@@ -393,8 +405,8 @@ namespace FbxExporter.UnitTests
 
             // export the camera
             string filename = GetRandomFbxFilePath();
-            var fbxCamera = ExportCamera (filename, cameraObj);
-            CompareCameraValues (camera, fbxCamera);
+            var fbxCamera = ExportCamera(filename, cameraObj);
+            CompareCameraValues(camera, fbxCamera);
         }
 
         /// <summary>
@@ -403,8 +415,9 @@ namespace FbxExporter.UnitTests
         /// <returns>The exported camera.</returns>
         /// <param name="filename">Filename.</param>
         /// <param name="cameraObj">Camera object.</param>
-        private Camera ExportCamera(string filename, GameObject cameraObj){
-            return ExportComponent<Camera> (filename, cameraObj);
+        private Camera ExportCamera(string filename, GameObject cameraObj)
+        {
+            return ExportComponent<Camera>(filename, cameraObj);
         }
 
         /// <summary>
@@ -414,8 +427,9 @@ namespace FbxExporter.UnitTests
         /// <param name="filename">Filename.</param>
         /// <param name="obj">Object.</param>
         /// <typeparam name="T">The component type.</typeparam>
-        private T ExportComponent<T>(string filename, GameObject obj) where T : Component {
-            ModelExporter.ExportObject (filename, obj);
+        private T ExportComponent<T>(string filename, GameObject obj) where T : Component
+        {
+            ModelExporter.ExportObject(filename, obj);
 
             var importer = AssetImporter.GetAtPath(filename) as ModelImporter;
 #if UNITY_2019_1_OR_NEWER
@@ -427,17 +441,18 @@ namespace FbxExporter.UnitTests
             importer.SaveAndReimport();
 
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
-            var fbxComponent = fbxObj.GetComponent<T> ();
+            var fbxComponent = fbxObj.GetComponent<T>();
 
-            Assert.IsNotNull (fbxComponent);
+            Assert.IsNotNull(fbxComponent);
             return fbxComponent;
         }
 
-        private void CompareCameraValues(Camera camera, Camera fbxCamera, float delta=0.001f){
-            Assert.AreEqual (camera.orthographic, fbxCamera.orthographic);
-            Assert.AreEqual (camera.fieldOfView, fbxCamera.fieldOfView, delta);
-            Assert.AreEqual (camera.nearClipPlane, fbxCamera.nearClipPlane, delta);
-            Assert.AreEqual (camera.farClipPlane, fbxCamera.farClipPlane, delta);
+        private void CompareCameraValues(Camera camera, Camera fbxCamera, float delta = 0.001f)
+        {
+            Assert.AreEqual(camera.orthographic, fbxCamera.orthographic);
+            Assert.AreEqual(camera.fieldOfView, fbxCamera.fieldOfView, delta);
+            Assert.AreEqual(camera.nearClipPlane, fbxCamera.nearClipPlane, delta);
+            Assert.AreEqual(camera.farClipPlane, fbxCamera.farClipPlane, delta);
         }
 
         [Test]
@@ -445,7 +460,7 @@ namespace FbxExporter.UnitTests
         {
             // create a Unity light
             GameObject lightObj = new GameObject("TestLight");
-            Light light = lightObj.AddComponent<Light> ();
+            Light light = lightObj.AddComponent<Light>();
 
             light.type = LightType.Spot;
             light.spotAngle = 55.4f;
@@ -454,9 +469,9 @@ namespace FbxExporter.UnitTests
             light.range = 45;
             light.shadows = LightShadows.Soft;
 
-            string filename = GetRandomFbxFilePath ();
-            var fbxLight = ExportComponent<Light> (filename, lightObj);
-            CompareLightValues (light, fbxLight);
+            string filename = GetRandomFbxFilePath();
+            var fbxLight = ExportComponent<Light>(filename, lightObj);
+            CompareLightValues(light, fbxLight);
 
             light.type = LightType.Point;
             light.color = Color.red;
@@ -464,29 +479,34 @@ namespace FbxExporter.UnitTests
             light.range = 120;
             light.shadows = LightShadows.Hard;
 
-            filename = GetRandomFbxFilePath ();
-            fbxLight = ExportComponent<Light> (filename, lightObj);
-            CompareLightValues (light, fbxLight);
+            filename = GetRandomFbxFilePath();
+            fbxLight = ExportComponent<Light>(filename, lightObj);
+            CompareLightValues(light, fbxLight);
         }
 
-        private void CompareLightValues(Light light, Light fbxLight, float delta=0.001f){
-            Assert.AreEqual (light.type, fbxLight.type);
-            if (light.type == LightType.Spot) {
-                Assert.AreEqual (light.spotAngle, fbxLight.spotAngle, delta);
+        private void CompareLightValues(Light light, Light fbxLight, float delta = 0.001f)
+        {
+            Assert.AreEqual(light.type, fbxLight.type);
+            if (light.type == LightType.Spot)
+            {
+                Assert.AreEqual(light.spotAngle, fbxLight.spotAngle, delta);
             }
-            Assert.AreEqual (light.color, fbxLight.color);
-            Assert.AreEqual (light.intensity, fbxLight.intensity, delta);
-            Assert.AreEqual (light.range, fbxLight.range, delta);
+            Assert.AreEqual(light.color, fbxLight.color);
+            Assert.AreEqual(light.intensity, fbxLight.intensity, delta);
+            Assert.AreEqual(light.range, fbxLight.range, delta);
 
             // compare shadows
             // make sure that if we exported without shadows, don't import with shadows
-            if (light.shadows == LightShadows.None) {
-                Assert.AreEqual (LightShadows.None, fbxLight.shadows);
-            } else {
-                Assert.AreNotEqual (LightShadows.None, fbxLight.shadows);
+            if (light.shadows == LightShadows.None)
+            {
+                Assert.AreEqual(LightShadows.None, fbxLight.shadows);
+            }
+            else
+            {
+                Assert.AreNotEqual(LightShadows.None, fbxLight.shadows);
             }
 
-            Assert.IsTrue (light.transform.rotation == fbxLight.transform.rotation);
+            Assert.IsTrue(light.transform.rotation == fbxLight.transform.rotation);
         }
 
         [Test]
@@ -495,8 +515,8 @@ namespace FbxExporter.UnitTests
             // test exporting of normals, tangents, uvs, and vertex colors
             // Note: won't test binormals as they are not imported into Unity
 
-            var quad = GameObject.CreatePrimitive (PrimitiveType.Quad);
-            var quadMeshFilter = quad.GetComponent<MeshFilter> ();
+            var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            var quadMeshFilter = quad.GetComponent<MeshFilter>();
             var quadMesh = quadMeshFilter.sharedMesh;
 
             // create a simple mesh (just a quad)
@@ -511,15 +531,15 @@ namespace FbxExporter.UnitTests
             mesh.normals = quadMesh.normals;
             mesh.colors = quadMesh.colors;
 
-            Assert.IsNotNull (mesh.tangents);
-            Assert.IsNotNull (mesh.vertices);
-            Assert.IsNotNull (mesh.triangles);
-            Assert.IsNotNull (mesh.normals);
-            Assert.IsNotNull (mesh.colors);
+            Assert.IsNotNull(mesh.tangents);
+            Assert.IsNotNull(mesh.vertices);
+            Assert.IsNotNull(mesh.triangles);
+            Assert.IsNotNull(mesh.normals);
+            Assert.IsNotNull(mesh.colors);
 
-            var gameObject = new GameObject ();
-            var meshFilter = gameObject.AddComponent<MeshFilter> ();
-            gameObject.AddComponent<MeshRenderer> ();
+            var gameObject = new GameObject();
+            var meshFilter = gameObject.AddComponent<MeshFilter>();
+            gameObject.AddComponent<MeshRenderer>();
 
             meshFilter.sharedMesh = mesh;
 
@@ -528,44 +548,44 @@ namespace FbxExporter.UnitTests
 
             // try exporting default values
             string filename = GetRandomFbxFilePath();
-            var fbxMeshFilter = ExportComponent<MeshFilter> (filename, gameObject);
+            var fbxMeshFilter = ExportComponent<MeshFilter>(filename, gameObject);
             var fbxMesh = fbxMeshFilter.sharedMesh;
-            CompareMeshComponentAttributes (mesh, fbxMesh);
+            CompareMeshComponentAttributes(mesh, fbxMesh);
 
             // try exporting mesh without vertex colors
-            mesh.colors = new Color[]{ };
+            mesh.colors = new Color[] {};
 
             filename = GetRandomFbxFilePath();
-            fbxMeshFilter = ExportComponent<MeshFilter> (filename, gameObject);
+            fbxMeshFilter = ExportComponent<MeshFilter>(filename, gameObject);
             fbxMesh = fbxMeshFilter.sharedMesh;
-            CompareMeshComponentAttributes (mesh, fbxMesh);
+            CompareMeshComponentAttributes(mesh, fbxMesh);
 
-            Object.DestroyImmediate (mesh);
+            Object.DestroyImmediate(mesh);
         }
 
         private void CompareMeshComponentAttributes(Mesh mesh, Mesh fbxMesh)
         {
-            Assert.IsNotNull (fbxMesh);
-            Assert.IsNotNull (fbxMesh.vertices);
-            Assert.IsNotNull (fbxMesh.triangles);
-            Assert.IsNotNull (fbxMesh.normals);
-            Assert.IsNotNull (fbxMesh.colors);
-            Assert.IsNotNull (fbxMesh.tangents);
+            Assert.IsNotNull(fbxMesh);
+            Assert.IsNotNull(fbxMesh.vertices);
+            Assert.IsNotNull(fbxMesh.triangles);
+            Assert.IsNotNull(fbxMesh.normals);
+            Assert.IsNotNull(fbxMesh.colors);
+            Assert.IsNotNull(fbxMesh.tangents);
 
-            Assert.AreEqual (mesh.vertices, fbxMesh.vertices);
-            Assert.AreEqual (mesh.triangles, fbxMesh.triangles);
-            Assert.AreEqual (mesh.normals, fbxMesh.normals);
-            Assert.AreEqual (mesh.colors, fbxMesh.colors);
-            Assert.AreEqual (mesh.tangents, fbxMesh.tangents);
+            Assert.AreEqual(mesh.vertices, fbxMesh.vertices);
+            Assert.AreEqual(mesh.triangles, fbxMesh.triangles);
+            Assert.AreEqual(mesh.normals, fbxMesh.normals);
+            Assert.AreEqual(mesh.colors, fbxMesh.colors);
+            Assert.AreEqual(mesh.tangents, fbxMesh.tangents);
         }
 
         private delegate void SetImportSettings(ModelImporter importer);
         private (string filename, SkinnedMeshRenderer originalSkinnedMesh, SkinnedMeshRenderer exportedSkinnedMesh) ExportSkinnedMesh(
-            string fileToExport, 
+            string fileToExport,
             SetImportSettings setImportSettings = null)
         {
             // change import settings of original FBX
-            if(setImportSettings != null)
+            if (setImportSettings != null)
             {
                 var origImporter = AssetImporter.GetAtPath(fileToExport) as ModelImporter;
                 setImportSettings(origImporter);
@@ -574,14 +594,14 @@ namespace FbxExporter.UnitTests
 
             // add fbx to scene
             GameObject originalFbxObj = AssetDatabase.LoadMainAssetAtPath(fileToExport) as GameObject;
-            Assert.IsNotNull (originalFbxObj);
-            GameObject originalGO = GameObject.Instantiate (originalFbxObj);
-            Assert.IsTrue (originalGO);
+            Assert.IsNotNull(originalFbxObj);
+            GameObject originalGO = GameObject.Instantiate(originalFbxObj);
+            Assert.IsTrue(originalGO);
 
             // export fbx
             // get GameObject
             string filename = GetRandomFbxFilePath();
-            ModelExporter.ExportObject (filename, originalGO);
+            ModelExporter.ExportObject(filename, originalGO);
 
             if (setImportSettings != null)
             {
@@ -591,21 +611,23 @@ namespace FbxExporter.UnitTests
             }
 
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
-            Assert.IsTrue (fbxObj);
+            Assert.IsTrue(fbxObj);
 
-            var originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer> ();
-            Assert.IsNotNull (originalSkinnedMesh);
+            var originalSkinnedMesh = originalGO.GetComponentInChildren<SkinnedMeshRenderer>();
+            Assert.IsNotNull(originalSkinnedMesh);
 
-            var exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer> ();
-            Assert.IsNotNull (exportedSkinnedMesh);
+            var exportedSkinnedMesh = fbxObj.GetComponentInChildren<SkinnedMeshRenderer>();
+            Assert.IsNotNull(exportedSkinnedMesh);
 
             return (filename, originalSkinnedMesh, exportedSkinnedMesh);
         }
 
         public class SkinnedMeshTestDataClass
         {
-            public static System.Collections.IEnumerable SkinnedMeshCases {
-                get {
+            public static System.Collections.IEnumerable SkinnedMeshCases
+            {
+                get
+                {
                     // Basic Rig with one mesh and one standard hierarchy
                     yield return "Models/MultiRootCharacters/BasicSeparateBind.fbx";
                     // Basic Rig with one mesh and one standard hierarchy, with the Mesh parenting the bone structure
@@ -614,7 +636,7 @@ namespace FbxExporter.UnitTests
                     yield return "Models/MultiRootCharacters/LocatorsInHierachy.fbx";
                     // Root-Level Locators included in the fbx.
                     yield return "Models/MultiRootCharacters/LooseLocators.fbx";
-                    // Root-Level Null Objects included in the fbx. 
+                    // Root-Level Null Objects included in the fbx.
                     yield return "Models/MultiRootCharacters/LooseNulls.fbx";
                     // Basic Rig with additional floating joints independant in hierarchy and skinned to the mesh.
                     yield return "Models/MultiRootCharacters/LooseSkinnedJoints.fbx";
@@ -635,9 +657,10 @@ namespace FbxExporter.UnitTests
         }
 
         [Test, TestCaseSource(typeof(SkinnedMeshTestDataClass), "SkinnedMeshCases")]
-        public void TestSkinnedMeshes (string fbxPath) {
-            fbxPath = FindPathInUnitTests (fbxPath);
-            Assert.That (fbxPath, Is.Not.Null);
+        public void TestSkinnedMeshes(string fbxPath)
+        {
+            fbxPath = FindPathInUnitTests(fbxPath);
+            Assert.That(fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSkinnedMesh, exportedSkinnedMesh;
 
@@ -654,11 +677,11 @@ namespace FbxExporter.UnitTests
 #endif // UNITY_2021_2_OR_NEWER
             };
 
-            var exportResult = ExportSkinnedMesh (fbxPath, setImportSettings);
+            var exportResult = ExportSkinnedMesh(fbxPath, setImportSettings);
             originalSkinnedMesh = exportResult.originalSkinnedMesh;
             exportedSkinnedMesh = exportResult.exportedSkinnedMesh;
 
-            Assert.IsTrue (originalSkinnedMesh.name == exportedSkinnedMesh.name ||
+            Assert.IsTrue(originalSkinnedMesh.name == exportedSkinnedMesh.name ||
                 (originalSkinnedMesh.transform.parent == null && exportedSkinnedMesh.transform.parent == null));
 
             // check if skeletons match
@@ -666,17 +689,18 @@ namespace FbxExporter.UnitTests
             var originalBones = originalSkinnedMesh.bones;
             var exportedBones = exportedSkinnedMesh.bones;
 
-            Assert.IsNotNull (originalBones);
-            Assert.IsNotNull (exportedBones);
+            Assert.IsNotNull(originalBones);
+            Assert.IsNotNull(exportedBones);
 
-            Assert.AreEqual (originalBones.Length, exportedBones.Length);
+            Assert.AreEqual(originalBones.Length, exportedBones.Length);
 
-            for(int i = 0; i < originalBones.Length; i++){
-                var originalBone = originalBones [i];
-                var exportedBone = exportedBones [i];
+            for (int i = 0; i < originalBones.Length; i++)
+            {
+                var originalBone = originalBones[i];
+                var exportedBone = exportedBones[i];
 
-                Assert.AreEqual (originalBone.name, exportedBone.name);
-                Assert.AreEqual (originalBone.parent, exportedBone.parent);
+                Assert.AreEqual(originalBone.name, exportedBone.name);
+                Assert.AreEqual(originalBone.parent, exportedBone.parent);
 
                 // NOTE: not comparing transforms as the exported transforms are taken from
                 //       the bind pose whereas the originals are not necessarily.
@@ -684,29 +708,33 @@ namespace FbxExporter.UnitTests
 
             // compare bind poses
             var origMesh = originalSkinnedMesh.sharedMesh;
-            Assert.IsNotNull (origMesh);
+            Assert.IsNotNull(origMesh);
             var exportedMesh = exportedSkinnedMesh.sharedMesh;
-            Assert.IsNotNull (exportedMesh);
+            Assert.IsNotNull(exportedMesh);
 
             var origBindposes = origMesh.bindposes;
-            Assert.IsNotNull (origBindposes);
+            Assert.IsNotNull(origBindposes);
             var exportedBindposes = exportedMesh.bindposes;
-            Assert.IsNotNull (exportedBindposes);
+            Assert.IsNotNull(exportedBindposes);
 
             Assert.That(origBindposes.Length == exportedBindposes.Length);
 
-            for (int i = 0; i < origBindposes.Length; i++) {
-                var origBp = origBindposes [i];
-                var expBp = exportedBindposes [i];
+            for (int i = 0; i < origBindposes.Length; i++)
+            {
+                var origBp = origBindposes[i];
+                var expBp = exportedBindposes[i];
 
-				// TODO: (UNI-34293) fix so bones with negative scale export with correct bind pose
-				if (originalBones [i].name == "EyeL") {
-					continue;
-				}
+                // TODO: (UNI-34293) fix so bones with negative scale export with correct bind pose
+                if (originalBones[i].name == "EyeL")
+                {
+                    continue;
+                }
 
-                for (int j = 0; j < 4; j++) {
-                    for (int k = 0; k < 4; k++) {
-                        Assert.That (origBp.GetColumn (j)[k], Is.EqualTo(expBp.GetColumn (j)[k]).Within(0.001f), string.Format("bind pose doesn't match {0},{1}", j, k));
+                for (int j = 0; j < 4; j++)
+                {
+                    for (int k = 0; k < 4; k++)
+                    {
+                        Assert.That(origBp.GetColumn(j)[k], Is.EqualTo(expBp.GetColumn(j)[k]).Within(0.001f), string.Format("bind pose doesn't match {0},{1}", j, k));
                     }
                 }
             }
@@ -714,10 +742,10 @@ namespace FbxExporter.UnitTests
             // Test Bone Weights
 
             var origVerts = originalSkinnedMesh.sharedMesh.vertices;
-            Assert.That (origVerts, Is.Not.Null);
+            Assert.That(origVerts, Is.Not.Null);
 
             var expVerts = exportedSkinnedMesh.sharedMesh.vertices;
-            Assert.That (expVerts, Is.Not.Null);
+            Assert.That(expVerts, Is.Not.Null);
 
             var origBones = originalSkinnedMesh.bones;
             var expBones = exportedSkinnedMesh.bones;
@@ -832,7 +860,7 @@ namespace FbxExporter.UnitTests
                         continue;
                     }
 
-                    for(int j = 0; j < blendshape.GetBlendShapeChannelCount(); j++)
+                    for (int j = 0; j < blendshape.GetBlendShapeChannelCount(); j++)
                     {
                         var blendShapeChannel = blendshape.GetBlendShapeChannel(j);
                         for (int k = 0; k < blendShapeChannel.GetTargetShapeCount(); k++)
@@ -860,7 +888,7 @@ namespace FbxExporter.UnitTests
                 // Configure the IO settings.
                 fbxManager.SetIOSettings(fbxIOSettings);
 
-                // Create the importer 
+                // Create the importer
                 var fbxImporter = FbxImporter.Create(fbxManager, "Importer");
 
                 // Initialize the importer.
@@ -887,7 +915,7 @@ namespace FbxExporter.UnitTests
                 status = fbxImporter.Import(fbxScene);
                 fbxStatus = fbxImporter.GetStatus();
                 Assert.That(status, Is.True, fbxStatus.GetErrorString());
-                
+
                 // Get blendshapes and check that the FbxShapes all have names
                 var rootNode = fbxScene.GetRootNode();
                 TestFbxShapeNamesNotEmpty(rootNode);
@@ -899,8 +927,8 @@ namespace FbxExporter.UnitTests
         {
             const float epsilon = 0.001f;
 
-            fbxPath = FindPathInUnitTests (fbxPath);
-            Assert.That (fbxPath, Is.Not.Null);
+            fbxPath = FindPathInUnitTests(fbxPath);
+            Assert.That(fbxPath, Is.Not.Null);
 
             SkinnedMeshRenderer originalSMR, exportedSMR;
             SetImportSettings setImportSettings = (importer) =>
@@ -930,7 +958,7 @@ namespace FbxExporter.UnitTests
                 importer.weldVertices = true;
             };
 
-            var exportResult = ExportSkinnedMesh (fbxPath, setImportSettings);
+            var exportResult = ExportSkinnedMesh(fbxPath, setImportSettings);
             var exportedFbxPath = exportResult.filename;
             originalSMR = exportResult.originalSkinnedMesh;
             exportedSMR = exportResult.exportedSkinnedMesh;
@@ -989,7 +1017,8 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
-        public void LODExportTest(){
+        public void LODExportTest()
+        {
             // Create the following test hierarchy:
             //  LODGroup
             //  -- Sphere_LOD0
@@ -1000,55 +1029,55 @@ namespace FbxExporter.UnitTests
             // where sphere + capsule renderers are both in LOD0, and cylinder is in LOD1
             // but not parented under the LOD group
 
-            var lodGroup = new GameObject ("LODGroup");
-            var sphereLOD0 = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+            var lodGroup = new GameObject("LODGroup");
+            var sphereLOD0 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sphereLOD0.name = "Sphere_LOD0";
-            var capsuleLOD0 = GameObject.CreatePrimitive (PrimitiveType.Capsule);
+            var capsuleLOD0 = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             capsuleLOD0.name = "Capsule_LOD0";
-            var cubeLOD2 = GameObject.CreatePrimitive (PrimitiveType.Cube);
+            var cubeLOD2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cubeLOD2.name = "Cube_LOD2";
-            var cylinderLOD1 = GameObject.CreatePrimitive (PrimitiveType.Cylinder);
+            var cylinderLOD1 = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             cylinderLOD1.name = "Cylinder_LOD1";
 
-            sphereLOD0.transform.SetParent (lodGroup.transform);
-            capsuleLOD0.transform.SetParent (lodGroup.transform);
-            cubeLOD2.transform.SetParent (lodGroup.transform);
-            cylinderLOD1.transform.SetParent (null);
+            sphereLOD0.transform.SetParent(lodGroup.transform);
+            capsuleLOD0.transform.SetParent(lodGroup.transform);
+            cubeLOD2.transform.SetParent(lodGroup.transform);
+            cylinderLOD1.transform.SetParent(null);
 
             // add LOD group
             var lodGroupComp = lodGroup.AddComponent<LODGroup>();
-            Assert.That (lodGroupComp, Is.Not.Null);
+            Assert.That(lodGroupComp, Is.Not.Null);
 
             LOD[] lods = new LOD[3];
-            lods [0] = new LOD (1, new Renderer[]{ sphereLOD0.GetComponent<Renderer>(), capsuleLOD0.GetComponent<Renderer>() });
-            lods [1] = new LOD (0.75f, new Renderer[] { cylinderLOD1.GetComponent<Renderer>() });
-            lods [2] = new LOD (0.5f, new Renderer[] { cubeLOD2.GetComponent<Renderer>() });
-            lodGroupComp.SetLODs (lods);
-            lodGroupComp.RecalculateBounds ();
+            lods[0] = new LOD(1, new Renderer[] { sphereLOD0.GetComponent<Renderer>(), capsuleLOD0.GetComponent<Renderer>() });
+            lods[1] = new LOD(0.75f, new Renderer[] { cylinderLOD1.GetComponent<Renderer>() });
+            lods[2] = new LOD(0.5f, new Renderer[] { cubeLOD2.GetComponent<Renderer>() });
+            lodGroupComp.SetLODs(lods);
+            lodGroupComp.RecalculateBounds();
 
             // test export all
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
-            GameObject fbxObj = ExportToFbx(lodGroup, lodExportType:ExportSettings.LODExportType.All);
-            Assert.IsTrue (fbxObj);
+            GameObject fbxObj = ExportToFbx(lodGroup, lodExportType: ExportSettings.LODExportType.All);
+            Assert.IsTrue(fbxObj);
 
-            HashSet<string> expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
-            CompareGameObjectChildren (fbxObj, expectedChildren);
+            HashSet<string> expectedChildren = new HashSet<string>() { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
+            CompareGameObjectChildren(fbxObj, expectedChildren);
 
             // test export highest
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0
-            fbxObj = ExportToFbx(lodGroup, lodExportType:ExportSettings.LODExportType.Highest);
-            Assert.IsTrue (fbxObj);
+            fbxObj = ExportToFbx(lodGroup, lodExportType: ExportSettings.LODExportType.Highest);
+            Assert.IsTrue(fbxObj);
 
-            expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name };
-            CompareGameObjectChildren (fbxObj, expectedChildren);
+            expectedChildren = new HashSet<string>() { sphereLOD0.name, capsuleLOD0.name };
+            CompareGameObjectChildren(fbxObj, expectedChildren);
 
             // test export lowest
             // expected LODs exported: Cube_LOD2
-            fbxObj = ExportToFbx(lodGroup, lodExportType:ExportSettings.LODExportType.Lowest);
-            Assert.IsTrue (fbxObj);
+            fbxObj = ExportToFbx(lodGroup, lodExportType: ExportSettings.LODExportType.Lowest);
+            Assert.IsTrue(fbxObj);
 
-            expectedChildren = new HashSet<string> () { cubeLOD2.name };
-            CompareGameObjectChildren (fbxObj, expectedChildren);
+            expectedChildren = new HashSet<string>() { cubeLOD2.name };
+            CompareGameObjectChildren(fbxObj, expectedChildren);
 
 #if !UNITY_2018_3_OR_NEWER
             // test convert to prefab
@@ -1056,22 +1085,21 @@ namespace FbxExporter.UnitTests
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
             // NOTE: Cylinder_LOD1 is not exported as it is not under the LODGroup hierarchy being exported
             var convertedHierarchy = ConvertToModel.Convert(lodGroup,
-                    fbxFullPath: GetRandomFbxFilePath(),
-                    prefabFullPath: GetRandomPrefabAssetPath());
-            Assert.That (convertedHierarchy, Is.Not.Null);
+                fbxFullPath: GetRandomFbxFilePath(),
+                prefabFullPath: GetRandomPrefabAssetPath());
+            Assert.That(convertedHierarchy, Is.Not.Null);
 
             // check both converted hierarchy and fbx
-            expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
-            CompareGameObjectChildren (convertedHierarchy, expectedChildren);
+            expectedChildren = new HashSet<string>() { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
+            CompareGameObjectChildren(convertedHierarchy, expectedChildren);
 
             fbxObj = convertedHierarchy.GetComponent<FbxPrefab>().FbxModel;
-            Assert.IsTrue (fbxObj);
+            Assert.IsTrue(fbxObj);
 
-            expectedChildren = new HashSet<string> () { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
-            CompareGameObjectChildren (fbxObj, expectedChildren);
+            expectedChildren = new HashSet<string>() { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
+            CompareGameObjectChildren(fbxObj, expectedChildren);
 #endif
         }
-
 
         /// <summary>
         /// Compares obj's children to the expected children in the hashset.
@@ -1079,12 +1107,14 @@ namespace FbxExporter.UnitTests
         /// </summary>
         /// <param name="obj">Object.</param>
         /// <param name="expectedChildren">Expected children.</param>
-        private void CompareGameObjectChildren(GameObject obj, HashSet<string> expectedChildren){
-            Assert.That (obj.transform.childCount, Is.EqualTo (expectedChildren.Count));
+        private void CompareGameObjectChildren(GameObject obj, HashSet<string> expectedChildren)
+        {
+            Assert.That(obj.transform.childCount, Is.EqualTo(expectedChildren.Count));
 
-            foreach (Transform child in obj.transform) {
-                Assert.That (expectedChildren.Contains (child.name));
-                expectedChildren.Remove (child.name);
+            foreach (Transform child in obj.transform)
+            {
+                Assert.That(expectedChildren.Contains(child.name));
+                expectedChildren.Remove(child.name);
             }
         }
 
@@ -1213,11 +1243,12 @@ namespace FbxExporter.UnitTests
             Assert.That(fbxSphere2, Is.Not.Null);
 
             // The exported spheres should match the originals
-            Assert.That(AreEqual(fbxSphere1.position, sphere1.transform.position), 
+            Assert.That(AreEqual(fbxSphere1.position, sphere1.transform.position),
                 string.Format("Positions do not match.\nActual: {0}\nExpected: {1}", fbxSphere1.position, sphere1.transform.position));
             Assert.That(AreEqual(fbxSphere2.position, sphere2.transform.position),
                 string.Format("Positions do not match.\nActual: {0}\nExpected: {1}", fbxSphere2.position, sphere2.transform.position));
         }
+
         // Test that export does not fail if the mesh is missing or null
         [Test]
         public void TestMissingMeshExport()
@@ -1231,11 +1262,11 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
-        public void TestMaterialScaleAndOffset() 
+        public void TestMaterialScaleAndOffset()
         {
             string matClampGuid = "e6598d8bd228e5940988877e9eddd594";
             string matRepeatGuid = "f07bd71d1d87a7b41acfc483bf06be3f";
-            
+
             var filename = GetRandomFbxFilePath();
 
             var clampMat = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(matClampGuid));
@@ -1262,7 +1293,7 @@ namespace FbxExporter.UnitTests
                 modelImporter.AddRemap(new AssetImporter.SourceAssetIdentifier(tex), tex);
             }
             AssetDatabase.ImportAsset(modelImporter.assetPath, ImportAssetOptions.ForceUpdate);
-            
+
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             var importedClampMat = fbxObj.transform.Find("Clamp").GetComponent<MeshRenderer>().sharedMaterial;
             var importedRepeatMat = fbxObj.transform.Find("Repeat").GetComponent<MeshRenderer>().sharedMaterial;
@@ -1273,16 +1304,15 @@ namespace FbxExporter.UnitTests
             Assert.AreNotSame(clampMat.mainTexture, importedClampMat.mainTexture);
             Assert.AreNotSame(repeatMat.mainTexture, importedRepeatMat.mainTexture);
             Assert.AreNotSame(importedClampMat.mainTexture, importedRepeatMat.mainTexture);
-            
+
             // (Case 1416726) This fails since texture wrap mode is not correctly set when extracting textures from FBX files
             // Assert.AreEqual(clampMat.mainTexture.wrapMode, importedClampMat.mainTexture.wrapMode);
             // Assert.AreEqual(repeatMat.mainTexture.wrapMode, importedRepeatMat.mainTexture.wrapMode);
-            
+
             Assert.AreEqual(clampMat.mainTextureOffset, importedClampMat.mainTextureOffset);
             Assert.AreEqual(clampMat.mainTextureScale, importedClampMat.mainTextureScale);
             Assert.AreEqual(repeatMat.mainTextureOffset, importedRepeatMat.mainTextureOffset);
             Assert.AreEqual(repeatMat.mainTextureScale, importedRepeatMat.mainTextureScale);
-
         }
     }
 }
