@@ -183,5 +183,63 @@ namespace FbxExporter.UnitTests
             Assert.IsNotNull(fbxFileName);
             Assert.AreEqual(fbxFileName, filename);
         }
+
+        [Test]
+        public void TestConvertWithNoPaths()
+        {
+            var expectedPrefabPath = "Assets/Cube.prefab";
+            var expectedFbxPath = "Assets/Cube.fbx";
+
+            // make sure asset does not already exist
+            Assert.That(File.Exists(Path.GetFullPath(expectedPrefabPath)), Is.False);
+            Assert.That(File.Exists(Path.GetFullPath(expectedFbxPath)), Is.False);
+
+            Assert.IsNotNull(m_toExport);
+            Assert.IsNotNull(m_toExport[0]);
+
+            var result = ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0]);
+
+            Assert.IsTrue(result);
+            Assert.IsTrue(!m_toExport[0]);
+
+            string prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(result);
+            Assert.That(prefabPath, Is.EqualTo(expectedPrefabPath));
+
+            // get fbx path
+            var fbxObj = PrefabUtility.GetCorrespondingObjectFromOriginalSource(result);
+            var fbxPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(fbxObj);
+
+            Assert.That(fbxPath, Is.EqualTo(expectedFbxPath));
+
+            // delete at the end of the test
+            AssetDatabase.DeleteAsset(prefabPath);
+            AssetDatabase.DeleteAsset(fbxPath);
+        }
+
+        [Test]
+        public void TestConvertOutsideProject()
+        {
+            Assert.IsNotNull(m_toExport);
+            Assert.IsNotNull(m_toExport[0]);
+            var filePath = GetTempOutsideFilePath();
+
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxDirectoryFullPath: filePath));
+
+            // conversion should fail
+            Assert.IsTrue(m_toExport[0]);
+
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxFullPath: filePath));
+
+            Assert.IsTrue(m_toExport[0]);
+
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], prefabDirectoryFullPath: filePath));
+
+            Assert.IsTrue(m_toExport[0]);
+
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], prefabFullPath: filePath));
+
+            Assert.IsTrue(m_toExport[0]);
+
+        }
     }
 }
