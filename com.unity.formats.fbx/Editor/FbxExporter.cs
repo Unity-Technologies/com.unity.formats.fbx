@@ -64,7 +64,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// </para>
     /// <para>For information on using the ModelExporter class, see <a href="../manual/api_index.html">the Developer's Guide</a>.</para>
     /// </summary>
-    public sealed class ModelExporter : System.IDisposable
+    public sealed class ModelExporter
     {
         const string Title =
             "Created by FBX Exporter from Unity Technologies";
@@ -4469,14 +4469,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         internal int NumTriangles { set; get; }
 
-        /// <summary>
-        /// Cleans up this class on garbage collection
-        /// </summary>
-        public void Dispose ()
-        {
-            System.GC.SuppressFinalize(this);
-        }
-
         internal bool Verbose { get { return ExportSettings.instance.VerboseProperty; } }
 
         /// <summary>
@@ -4631,26 +4623,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             LastFilePath = filePath;
 
-            using (var fbxExporter = Create ()) {
-                // ensure output directory exists
-                EnsureDirectory (filePath);
-                fbxExporter.ExportOptions = exportOptions;
+            var fbxExporter = Create();
+            // ensure output directory exists
+            EnsureDirectory (filePath);
+            fbxExporter.ExportOptions = exportOptions;
 
-                if (objects == null) {
-                    objects = Selection.objects;
-                }
+            if (objects == null) {
+                objects = Selection.objects;
+            }
 
-                if (exportData == null)
-                {
-                    exportData = ModelExporter.GetExportData(objects, exportOptions);
-                }
+            if (exportData == null)
+            {
+                exportData = GetExportData(objects, exportOptions);
+            }
 
-                if (fbxExporter.ExportAll (objects, exportData) > 0) {
-                    string message = string.Format ("Successfully exported: {0}", filePath);
-                    UnityEngine.Debug.Log (message);
+            if (fbxExporter.ExportAll (objects, exportData) > 0) {
+                string message = string.Format ("Successfully exported: {0}", filePath);
+                Debug.Log (message);
 
-                    return filePath;
-                }
+                return filePath;
             }
             return null;
         }
