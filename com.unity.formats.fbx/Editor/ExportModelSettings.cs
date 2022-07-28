@@ -638,7 +638,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             exportSettings.SetAnimationSource(animSource);
             exportSettings.SetEmbedTextures(embedTextures);
             exportSettings.SetExportFormat(exportFormat);
-            exportSettings.SetExportUnredererd(exportUnrendered);
+            exportSettings.SetExportUnrendered(exportUnrendered);
             exportSettings.SetKeepInstances(keepInstances);
             exportSettings.SetLODExportType(lodLevel);
             exportSettings.SetModelAnimIncludeOption(include);
