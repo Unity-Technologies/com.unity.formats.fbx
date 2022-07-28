@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using NUnit.Framework;
 using System.Collections.Generic;
 using Autodesk.Fbx;
@@ -17,23 +17,24 @@ namespace FbxExporter.UnitTests
         internal ExportModelSettingsSerialize m_centerObjectsSetting;
 
         [SetUp]
-        public override void Init ()
+        public override void Init()
         {
             base.Init();
-            m_centerObjectsSetting = new ExportModelSettingsSerialize ();
+            m_centerObjectsSetting = new ExportModelSettingsSerialize();
         }
 
         [TearDown]
-        public override void Term ()
+        public override void Term()
         {
-            base.Term ();
-            if (m_root) {
-                UnityEngine.Object.DestroyImmediate (m_root);
+            base.Term();
+            if (m_root)
+            {
+                UnityEngine.Object.DestroyImmediate(m_root);
             }
         }
 
         [Test]
-        public void TestDefaultSelection ()
+        public void TestDefaultSelection()
         {
             // Default selection behavior:
             //  - Export descendants
@@ -54,8 +55,8 @@ namespace FbxExporter.UnitTests
             //    then export the translations so they are centered
             //    around the center of the union of the bounding boxes.
 
-            m_root = CreateHierarchy ();
-            Assert.IsNotNull (m_root);
+            m_root = CreateHierarchy();
+            Assert.IsNotNull(m_root);
 
             // test without centered objects
             m_centerObjectsSetting.SetObjectPosition(ExportSettings.ObjectPosition.WorldAbsolute);
@@ -63,55 +64,57 @@ namespace FbxExporter.UnitTests
             // test Export Root
             // Expected result: everything gets exported
             // Expected transform: all transforms unchanged
-            var exportedRoot = ExportSelection (m_root, m_centerObjectsSetting);
-            CompareHierarchies (m_root, exportedRoot, true, false);
-            CompareGlobalTransform (exportedRoot.transform, m_root.transform);
+            var exportedRoot = ExportSelection(m_root, m_centerObjectsSetting);
+            CompareHierarchies(m_root, exportedRoot, true, false);
+            CompareGlobalTransform(exportedRoot.transform, m_root.transform);
 
             // test Export Parent1, Child1
             // Expected result: Parent1, Child1, Child2
             // Expected transform: all transforms unchanged
-            var parent1 = m_root.transform.Find ("Parent1");
-            var child1 = parent1.Find ("Child1");
-            exportedRoot = ExportSelection (new Object[]{ parent1.gameObject, child1.gameObject }, m_centerObjectsSetting);
-            CompareHierarchies (parent1.gameObject, exportedRoot, true, false);
-            CompareGlobalTransform (exportedRoot.transform, parent1);
+            var parent1 = m_root.transform.Find("Parent1");
+            var child1 = parent1.Find("Child1");
+            exportedRoot = ExportSelection(new Object[] { parent1.gameObject, child1.gameObject }, m_centerObjectsSetting);
+            CompareHierarchies(parent1.gameObject, exportedRoot, true, false);
+            CompareGlobalTransform(exportedRoot.transform, parent1);
 
             // test Export Child2
             // Expected result: Child2
             // Expected transform: Child2 unchanged
-            var child2 = parent1.Find ("Child2").gameObject;
-            exportedRoot = ExportSelection (child2, m_centerObjectsSetting);
-            CompareHierarchies (child2, exportedRoot, true, false);
-            CompareGlobalTransform (exportedRoot.transform, child2.transform);
+            var child2 = parent1.Find("Child2").gameObject;
+            exportedRoot = ExportSelection(child2, m_centerObjectsSetting);
+            CompareHierarchies(child2, exportedRoot, true, false);
+            CompareGlobalTransform(exportedRoot.transform, child2.transform);
 
             // test Export Child2, Parent2
             // Expected result: Parent2, Child3, Child2
             // Expected transform: Child2 and Parent2 maintain global transform
-            var parent2 = m_root.transform.Find ("Parent2");
-            var exportSet = new Object[]{ child2, parent2 };
+            var parent2 = m_root.transform.Find("Parent2");
+            var exportSet = new Object[] { child2, parent2 };
             // for passing to FindCenter()
-            var goExportSet = new GameObject[]{ child2.gameObject, parent2.gameObject };
+            var goExportSet = new GameObject[] { child2.gameObject, parent2.gameObject };
 
             // test without centering objects
             m_centerObjectsSetting.SetObjectPosition(ExportSettings.ObjectPosition.WorldAbsolute);
 
-            exportedRoot = ExportSelection (exportSet, m_centerObjectsSetting);
-            List<GameObject> children = new List<GameObject> ();
-            foreach (Transform child in exportedRoot.transform) {
-                children.Add (child.gameObject);
+            exportedRoot = ExportSelection(exportSet, m_centerObjectsSetting);
+            List<GameObject> children = new List<GameObject>();
+            foreach (Transform child in exportedRoot.transform)
+            {
+                children.Add(child.gameObject);
             }
-            CompareHierarchies (new GameObject[]{ child2, parent2.gameObject }, children.ToArray ());
+            CompareHierarchies(new GameObject[] { child2, parent2.gameObject }, children.ToArray());
 
             // test with centered objects
             m_centerObjectsSetting.SetObjectPosition(ExportSettings.ObjectPosition.LocalCentered);
-            var newCenter = ModelExporter.FindCenter (goExportSet);
+            var newCenter = ModelExporter.FindCenter(goExportSet);
 
-            exportedRoot = ExportSelection (exportSet, m_centerObjectsSetting);
-            children = new List<GameObject> ();
-            foreach (Transform child in exportedRoot.transform) {
-                children.Add (child.gameObject);
+            exportedRoot = ExportSelection(exportSet, m_centerObjectsSetting);
+            children = new List<GameObject>();
+            foreach (Transform child in exportedRoot.transform)
+            {
+                children.Add(child.gameObject);
             }
-            CompareHierarchies (new GameObject[]{ child2, parent2.gameObject }, children.ToArray (), newCenter);
+            CompareHierarchies(new GameObject[] { child2, parent2.gameObject }, children.ToArray(), newCenter);
         }
 
         /// <summary>
@@ -122,14 +125,16 @@ namespace FbxExporter.UnitTests
         /// <param name="actual">Actual.</param>
         /// <param name="expected">Expected.</param>
         /// <param name="center">New center for expected transform, if present.</param>
-        private void CompareGlobalTransform (Transform actual, Transform expected = null, Vector3 center = default(Vector3))
+        private void CompareGlobalTransform(Transform actual, Transform expected = null, Vector3 center = default(Vector3))
         {
-            var actualMatrix = ConstructTRSMatrix (actual);
-            var expectedMatrix = expected == null ? new FbxAMatrix () : ConstructTRSMatrix (expected, false, center);
+            var actualMatrix = ConstructTRSMatrix(actual);
+            var expectedMatrix = expected == null ? new FbxAMatrix() : ConstructTRSMatrix(expected, false, center);
 
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    Assert.That (actualMatrix [i] [j], Is.EqualTo (expectedMatrix [i] [j]).Within(0.0001));
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    Assert.That(actualMatrix[i][j], Is.EqualTo(expectedMatrix[i][j]).Within(0.0001));
                 }
             }
         }
@@ -141,15 +146,15 @@ namespace FbxExporter.UnitTests
         /// <param name="t">Transform.</param>
         /// <param name="local">If set to <c>true</c> use local transform.</param>
         /// <param name="center">New center for global transform.</param>
-        private FbxAMatrix ConstructTRSMatrix (Transform t, bool local = true, Vector3 center = default(Vector3))
+        private FbxAMatrix ConstructTRSMatrix(Transform t, bool local = true, Vector3 center = default(Vector3))
         {
-            var translation = local ? t.localPosition : ModelExporter.GetRecenteredTranslation (t, center);
+            var translation = local ? t.localPosition : ModelExporter.GetRecenteredTranslation(t, center);
             var rotation = local ? t.localEulerAngles : t.eulerAngles;
             var scale = local ? t.localScale : t.lossyScale;
-            return new FbxAMatrix (
-                new FbxVector4 (translation.x, translation.y, translation.z),
-                new FbxVector4 (rotation.x, rotation.y, rotation.z),
-                new FbxVector4 (scale.x, scale.y, scale.z)
+            return new FbxAMatrix(
+                new FbxVector4(translation.x, translation.y, translation.z),
+                new FbxVector4(rotation.x, rotation.y, rotation.z),
+                new FbxVector4(scale.x, scale.y, scale.z)
             );
         }
 
@@ -160,7 +165,7 @@ namespace FbxExporter.UnitTests
         /// <param name="pos">Position.</param>
         /// <param name="rot">Rotation.</param>
         /// <param name="scale">Scale.</param>
-        private void SetTransform (Transform t, Vector3 pos, Vector3 rot, Vector3 scale)
+        private void SetTransform(Transform t, Vector3 pos, Vector3 rot, Vector3 scale)
         {
             t.localPosition = pos;
             t.localEulerAngles = rot;
@@ -174,27 +179,30 @@ namespace FbxExporter.UnitTests
         /// <param name="actualHierarchy">Actual hierarchy.</param>
         /// <param name="ignoreName">If set to <c>true</c> ignore name.</param>
         /// <param name="compareTransform">If set to <c>true</c> compare transform.</param>
-        private void CompareHierarchies (
+        private void CompareHierarchies(
             GameObject expectedHierarchy, GameObject actualHierarchy,
             bool ignoreName = false, bool compareTransform = true)
         {
-            if (!ignoreName) {
-                Assert.AreEqual (expectedHierarchy.name, actualHierarchy.name);
+            if (!ignoreName)
+            {
+                Assert.AreEqual(expectedHierarchy.name, actualHierarchy.name);
             }
 
             var expectedTransform = expectedHierarchy.transform;
             var actualTransform = actualHierarchy.transform;
 
-            if (compareTransform) {
-                Assert.AreEqual (expectedTransform, actualTransform);
+            if (compareTransform)
+            {
+                Assert.AreEqual(expectedTransform, actualTransform);
             }
 
-            Assert.AreEqual (expectedTransform.childCount, actualTransform.childCount);
+            Assert.AreEqual(expectedTransform.childCount, actualTransform.childCount);
 
-            foreach (Transform expectedChild in expectedTransform) {
-                var actualChild = actualTransform.Find (expectedChild.name);
-                Assert.IsNotNull (actualChild);
-                CompareHierarchies (expectedChild.gameObject, actualChild.gameObject);
+            foreach (Transform expectedChild in expectedTransform)
+            {
+                var actualChild = actualTransform.Find(expectedChild.name);
+                Assert.IsNotNull(actualChild);
+                CompareHierarchies(expectedChild.gameObject, actualChild.gameObject);
             }
         }
 
@@ -204,22 +212,23 @@ namespace FbxExporter.UnitTests
         /// <param name="expectedHierarchy">Expected hierarchy.</param>
         /// <param name="actualHierarchy">Actual hierarchy.</param>
         /// <param name="center">New center for global transforms.</param>
-        private void CompareHierarchies (GameObject[] expectedHierarchy, GameObject[] actualHierarchy, Vector3 center = default(Vector3))
+        private void CompareHierarchies(GameObject[] expectedHierarchy, GameObject[] actualHierarchy, Vector3 center = default(Vector3))
         {
-            Assert.AreEqual (expectedHierarchy.Length, actualHierarchy.Length);
+            Assert.AreEqual(expectedHierarchy.Length, actualHierarchy.Length);
 
-            System.Array.Sort (expectedHierarchy, delegate (GameObject x, GameObject y) {
-                return x.name.CompareTo (y.name);
+            System.Array.Sort(expectedHierarchy, delegate(GameObject x, GameObject y) {
+                return x.name.CompareTo(y.name);
             });
-            System.Array.Sort (actualHierarchy, delegate (GameObject x, GameObject y) {
-                return x.name.CompareTo (y.name);
+            System.Array.Sort(actualHierarchy, delegate(GameObject x, GameObject y) {
+                return x.name.CompareTo(y.name);
             });
 
-            for (int i = 0; i < expectedHierarchy.Length; i++) {
-                CompareHierarchies (expectedHierarchy [i], actualHierarchy [i], false, false);
+            for (int i = 0; i < expectedHierarchy.Length; i++)
+            {
+                CompareHierarchies(expectedHierarchy[i], actualHierarchy[i], false, false);
                 // if we are Comparing lists of hierarchies, that means that the transforms
                 // should be the global transform of expected, as there is no zeroed out root
-                CompareGlobalTransform (actualHierarchy [i].transform, expectedHierarchy [i].transform, center);
+                CompareGlobalTransform(actualHierarchy[i].transform, expectedHierarchy[i].transform, center);
             }
         }
     }

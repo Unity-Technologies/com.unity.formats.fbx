@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
-    [CustomEditor (typeof(ExportModelSettings))]
+    [CustomEditor(typeof(ExportModelSettings))]
     internal class ExportModelSettingsEditor : UnityEditor.Editor
     {
         private const float DefaultLabelWidth = 175;
@@ -11,14 +11,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public float LabelWidth { get; set; } = DefaultLabelWidth;
         public float FieldOffset { get; set; } = DefaultFieldOffset;
 
-        private string[] exportFormatOptions = new string[]{ "ASCII", "Binary" };
-        private string[] includeOptions = new string[]{"Model(s) Only", "Animation Only", "Model(s) + Animation"};
-        private string[] lodOptions = new string[]{"All Levels", "Highest", "Lowest"};
+        private string[] exportFormatOptions = new string[] { "ASCII", "Binary" };
+        private string[] includeOptions = new string[] {"Model(s) Only", "Animation Only", "Model(s) + Animation"};
+        private string[] lodOptions = new string[] {"All Levels", "Highest", "Lowest"};
 
         public const string singleHierarchyOption = "Local Pivot";
         public const string multiHerarchyOption = "Local Centered";
         private string hierarchyDepOption = singleHierarchyOption;
-        private string[] objPositionOptions { get { return new string[]{hierarchyDepOption, "World Absolute"}; }}
+        private string[] objPositionOptions { get { return new string[] {hierarchyDepOption, "World Absolute"}; }}
 
         private bool disableIncludeDropdown = false;
 
@@ -28,19 +28,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
             m_exportingOutsideProject = val;
         }
 
-        public void SetIsSingleHierarchy(bool singleHierarchy){
-            if (singleHierarchy) {
+        public void SetIsSingleHierarchy(bool singleHierarchy)
+        {
+            if (singleHierarchy)
+            {
                 hierarchyDepOption = singleHierarchyOption;
                 return;
             }
             hierarchyDepOption = multiHerarchyOption;
         }
 
-        public void DisableIncludeDropdown(bool disable){
+        public void DisableIncludeDropdown(bool disable)
+        {
             disableIncludeDropdown = disable;
         }
 
-        public override void OnInspectorGUI ()
+        public override void OnInspectorGUI()
         {
             var exportSettings = ((ExportModelSettings)target).info;
 
@@ -49,14 +52,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Export Format", "Export the FBX file in the standard binary format." +
                 " Select ASCII to export the FBX file in ASCII format."), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.SetExportFormat((ExportSettings.ExportFormat)EditorGUILayout.Popup((int)exportSettings.ExportFormat, exportFormatOptions) );
+            exportSettings.SetExportFormat((ExportSettings.ExportFormat)EditorGUILayout.Popup((int)exportSettings.ExportFormat, exportFormatOptions));
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Include", "Select whether to export models, animation or both."), GUILayout.Width(LabelWidth - FieldOffset));
             EditorGUI.BeginDisabledGroup(disableIncludeDropdown);
             exportSettings.SetModelAnimIncludeOption((ExportSettings.Include)EditorGUILayout.Popup((int)exportSettings.ModelAnimIncludeOption, includeOptions));
-            EditorGUI.EndDisabledGroup ();
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -64,7 +67,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // greyed out if animation only
             EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == ExportSettings.Include.Anim);
             exportSettings.SetLODExportType((ExportSettings.LODExportType)EditorGUILayout.Popup((int)exportSettings.LODExportType, lodOptions));
-            EditorGUI.EndDisabledGroup ();
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -72,7 +75,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // greyed out if animation only
             EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == ExportSettings.Include.Anim);
             exportSettings.SetObjectPosition((ExportSettings.ObjectPosition)EditorGUILayout.Popup((int)exportSettings.ObjectPosition, objPositionOptions));
-            EditorGUI.EndDisabledGroup ();
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -81,19 +84,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // greyed out if model
             EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == ExportSettings.Include.Model);
             exportSettings.SetAnimatedSkinnedMesh(EditorGUILayout.Toggle(exportSettings.AnimateSkinnedMesh));
-            EditorGUI.EndDisabledGroup ();
-            GUILayout.EndHorizontal ();
+            EditorGUI.EndDisabledGroup();
+            GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Compatible Naming",
-                    "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
-                    "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
-                    "On export, convert the names of GameObjects so they are Maya compatible." +
-                    (exportSettings.UseMayaCompatibleNames ? "" :
-                        "\n\nWARNING: Disabling this feature may result in lost material connections," +
-                        " and unexpected character replacements in Maya.")),
-                    GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.SetUseMayaCompatibleNames(EditorGUILayout.Toggle (exportSettings.UseMayaCompatibleNames));
+                "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
+                "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
+                "On export, convert the names of GameObjects so they are Maya compatible." +
+                (exportSettings.UseMayaCompatibleNames ? "" :
+                    "\n\nWARNING: Disabling this feature may result in lost material connections," +
+                    " and unexpected character replacements in Maya.")),
+                GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.SetUseMayaCompatibleNames(EditorGUILayout.Toggle(exportSettings.UseMayaCompatibleNames));
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -102,9 +105,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // greyed out if animation only
             EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == ExportSettings.Include.Anim);
             exportSettings.SetExportUnredererd(EditorGUILayout.Toggle(exportSettings.ExportUnrendered));
-            EditorGUI.EndDisabledGroup ();
-            GUILayout.EndHorizontal ();
-            
+            EditorGUI.EndDisabledGroup();
+            GUILayout.EndHorizontal();
+
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Preserve Import Settings",
                 "If checked, the import settings from the overwritten FBX will be carried over to the new version."), GUILayout.Width(LabelWidth - FieldOffset));
@@ -129,7 +132,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
-    internal interface IExportOptions {
+    internal interface IExportOptions
+    {
         ExportSettings.ExportFormat ExportFormat { get; }
         ExportSettings.Include ModelAnimIncludeOption { get; }
         ExportSettings.LODExportType LODExportType { get; }
@@ -158,7 +162,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public override bool Equals(object e)
         {
             var expOptions = e as ExportOptionsSettingsBase<T>;
-            if(expOptions == null)
+            if (expOptions == null)
             {
                 return false;
             }
@@ -190,11 +194,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private Transform animDest;
 
         public ExportSettings.ExportFormat ExportFormat { get { return exportFormat; } }
-        public void SetExportFormat(ExportSettings.ExportFormat format){ this.exportFormat = format; }
+        public void SetExportFormat(ExportSettings.ExportFormat format) { this.exportFormat = format; }
         public bool AnimateSkinnedMesh { get { return animatedSkinnedMesh; } }
-        public void SetAnimatedSkinnedMesh(bool animatedSkinnedMesh){ this.animatedSkinnedMesh = animatedSkinnedMesh; }
+        public void SetAnimatedSkinnedMesh(bool animatedSkinnedMesh) { this.animatedSkinnedMesh = animatedSkinnedMesh; }
         public bool UseMayaCompatibleNames { get { return mayaCompatibleNaming; } }
-        public void SetUseMayaCompatibleNames(bool useMayaCompNames){ this.mayaCompatibleNaming = useMayaCompNames; }
+        public void SetUseMayaCompatibleNames(bool useMayaCompNames) { this.mayaCompatibleNaming = useMayaCompNames; }
         public Transform AnimationSource { get { return animSource; } }
         public void SetAnimationSource(Transform source) { this.animSource = source; }
         public Transform AnimationDest { get { return animDest; } }
@@ -243,22 +247,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private bool keepInstances = true;
         [SerializeField]
         private bool embedTextures = false;
-        
+
         public override ExportSettings.Include ModelAnimIncludeOption { get { return include; } }
         public void SetModelAnimIncludeOption(ExportSettings.Include include) { this.include = include; }
         public override ExportSettings.LODExportType LODExportType { get { return lodLevel; } }
-        public void SetLODExportType(ExportSettings.LODExportType lodLevel){ this.lodLevel = lodLevel; }
+        public void SetLODExportType(ExportSettings.LODExportType lodLevel) { this.lodLevel = lodLevel; }
         public override ExportSettings.ObjectPosition ObjectPosition { get { return objectPosition; } }
-        public void SetObjectPosition(ExportSettings.ObjectPosition objPos){ this.objectPosition = objPos; }
+        public void SetObjectPosition(ExportSettings.ObjectPosition objPos) { this.objectPosition = objPos; }
         public override bool ExportUnrendered { get { return exportUnrendered; } }
-        public void SetExportUnredererd(bool exportUnrendered){ this.exportUnrendered = exportUnrendered; }
+        public void SetExportUnredererd(bool exportUnrendered) { this.exportUnrendered = exportUnrendered; }
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }
-        public void SetPreserveImportSettings(bool preserveImportSettings){ this.preserveImportSettings = preserveImportSettings; }
+        public void SetPreserveImportSettings(bool preserveImportSettings) { this.preserveImportSettings = preserveImportSettings; }
         public override bool AllowSceneModification { get { return false; } }
         public override bool KeepInstances { get { return keepInstances; } }
-        public void SetKeepInstances(bool keepInstances){ this.keepInstances = keepInstances; }
+        public void SetKeepInstances(bool keepInstances) { this.keepInstances = keepInstances; }
         public override bool EmbedTextures { get { return embedTextures; } }
-        public void SetEmbedTextures(bool embedTextures){ this.embedTextures = embedTextures; }
+        public void SetEmbedTextures(bool embedTextures) { this.embedTextures = embedTextures; }
 
         public override bool Equals(object e)
         {
@@ -267,7 +271,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 return false;
             }
-            return base.Equals(e) && 
+            return base.Equals(e) &&
                 include == expOptions.include &&
                 lodLevel == expOptions.lodLevel &&
                 objectPosition == expOptions.objectPosition &&

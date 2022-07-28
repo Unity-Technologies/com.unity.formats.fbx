@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
-    [CustomEditor (typeof(ConvertToPrefabSettings))]
+    [CustomEditor(typeof(ConvertToPrefabSettings))]
     internal class ConvertToPrefabSettingsEditor : UnityEditor.Editor
     {
         private const float DefaultLabelWidth = 175;
@@ -11,13 +11,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public float LabelWidth { get; set; } = DefaultLabelWidth;
         public float FieldOffset { get; set; } = DefaultFieldOffset;
 
-        private string[] exportFormatOptions = new string[]{ "ASCII", "Binary" };
-        private string[] includeOptions = new string[]{"Model(s) + Animation"};
-        private string[] lodOptions = new string[]{"All Levels"};
+        private string[] exportFormatOptions = new string[] { "ASCII", "Binary" };
+        private string[] includeOptions = new string[] {"Model(s) + Animation"};
+        private string[] lodOptions = new string[] {"All Levels"};
 
-        private string[] objPositionOptions { get { return new string[]{"Local Pivot"}; }}
+        private string[] objPositionOptions { get { return new string[] {"Local Pivot"}; }}
 
-        public override void OnInspectorGUI ()
+        public override void OnInspectorGUI()
         {
             var exportSettings = ((ConvertToPrefabSettings)target).info;
 
@@ -34,7 +34,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // always greyed out, show only to let user know what will happen
             EditorGUI.BeginDisabledGroup(true);
             EditorGUILayout.Popup(0, includeOptions);
-            EditorGUI.EndDisabledGroup ();
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -42,7 +42,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // always greyed out, show only to let user know what will happen
             EditorGUI.BeginDisabledGroup(true);
             EditorGUILayout.Popup(0, lodOptions);
-            EditorGUI.EndDisabledGroup ();
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -50,24 +50,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // always greyed out, show only to let user know what will happen
             EditorGUI.BeginDisabledGroup(true);
             EditorGUILayout.Popup(0, objPositionOptions);
-            EditorGUI.EndDisabledGroup ();
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Animated Skinned Mesh"), GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.SetAnimatedSkinnedMesh(EditorGUILayout.Toggle (exportSettings.AnimateSkinnedMesh));
+            exportSettings.SetAnimatedSkinnedMesh(EditorGUILayout.Toggle(exportSettings.AnimateSkinnedMesh));
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Compatible Naming",
-                    "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
-                    "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
-                    "On export, convert the names of GameObjects so they are Maya compatible." +
-                    (exportSettings.UseMayaCompatibleNames ? "" :
-                        "\n\nWARNING: Disabling this feature may result in lost material connections," +
-                        " and unexpected character replacements in Maya.")),
-                    GUILayout.Width(LabelWidth - FieldOffset));
-            exportSettings.SetUseMayaCompatibleNames(EditorGUILayout.Toggle (exportSettings.UseMayaCompatibleNames));
+                "In Maya some symbols such as spaces and accents get replaced when importing an FBX " +
+                "(e.g. \"foo bar\" becomes \"fooFBXASC032bar\"). " +
+                "On export, convert the names of GameObjects so they are Maya compatible." +
+                (exportSettings.UseMayaCompatibleNames ? "" :
+                    "\n\nWARNING: Disabling this feature may result in lost material connections," +
+                    " and unexpected character replacements in Maya.")),
+                GUILayout.Width(LabelWidth - FieldOffset));
+            exportSettings.SetUseMayaCompatibleNames(EditorGUILayout.Toggle(exportSettings.UseMayaCompatibleNames));
             GUILayout.EndHorizontal();
         }
     }
