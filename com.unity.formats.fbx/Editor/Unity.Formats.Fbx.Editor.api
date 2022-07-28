@@ -72,10 +72,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public int value__;
     }
 
-    public sealed class ModelExporter : System.IDisposable
+    public sealed class ModelExporter
     {
         public ModelExporter() {}
-        public virtual void Dispose();
         public static string ExportObject(string filePath, UnityEngine.Object singleObject);
         public static string ExportObject(string filePath, UnityEngine.Object singleObject, UnityEditor.Formats.Fbx.Exporter.ExportModelOptions exportOptions = default(UnityEditor.Formats.Fbx.Exporter.ExportModelOptions));
         public static string ExportObjects(string filePath, UnityEngine.Object[] objects = default(UnityEngine.Object[]));
