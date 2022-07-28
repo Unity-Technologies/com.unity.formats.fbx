@@ -472,6 +472,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
+    /// <summary>
+    /// Class specifying the settings for exporting to FBX.
+    /// </summary>
     [System.Serializable]
     public class ExportModelOptions : IExportOptions
     {
@@ -502,78 +505,125 @@ namespace UnityEditor.Formats.Fbx.Exporter
         [SerializeField]
         private bool embedTextures = false;
 
+        /// <summary>
+        /// The export format (binary or ascii).
+        /// </summary>
         public ExportFormat ExportFormat
         {
             get { return exportFormat; }
             set { exportFormat = value; }
         }
 
+        /// <summary>
+        /// Option to export the model only, the animation only, or both the model and the animation.
+        /// </summary>
         public Include ModelAnimIncludeOption
         {
             get { return include; }
             set { include = value; }
         }
 
+        /// <summary>
+        /// The type of LOD to export (All, Highest or Lowest).
+        /// </summary>
         public LODExportType LODExportType
         {
             get { return lodLevel; }
             set { lodLevel = value; }
         }
 
+        /// <summary>
+        /// The position to export the object to (Local centered, World absolute, or Reset). Use Reset for converting to a Prefab.
+        /// </summary>
         public ObjectPosition ObjectPosition
         {
             get { return objectPosition; }
             set { objectPosition = value; }
         }
 
+        /// <summary>
+        /// Option to export the animation on GameObjects that have a skinned mesh.
+        /// </summary>
         public bool AnimateSkinnedMesh
         {
             get { return animatedSkinnedMesh; }
             set { animatedSkinnedMesh = value; }
         }
 
-
+        /// <summary>
+        /// Option to convert the GameObject and material names to Maya compatible names.
+        /// </summary>
         public bool UseMayaCompatibleNames
         {
             get { return mayaCompatibleNaming; }
             set { mayaCompatibleNaming = value; }
         }
 
+        /// <summary>
+        /// Option to change the GameObjects and material names in the scene to keep them
+        /// Maya compatible after the export. Only works if UseMayaCompatibleNames is also enabled.
+        /// </summary>
         bool IExportOptions.AllowSceneModification
         {
             get { return false; }
         }
 
+        /// <summary>
+        /// Option to export GameObjects that don't have a renderer.
+        /// </summary>
         public bool ExportUnrendered
         {
             get { return exportUnrendered; }
             set { exportUnrendered = value; }
         }
 
+        /// <summary>
+        /// Option to preserve the previous import settings after the export when overwriting an existing FBX file.
+        /// </summary>
         public bool PreserveImportSettings
         {
             get { return preserveImportSettings; }
             set { preserveImportSettings = value; }
         }
 
+        /// <summary>
+        /// Option to keep multiple instances of the same mesh as separate instances on export.
+        /// </summary>
         public bool KeepInstances
         {
             get { return keepInstances; }
             set { keepInstances = value; }
         }
 
+        /// <summary>
+        /// Option to embed textures in the exported FBX file.
+        /// </summary>
+        /// <remarks>
+        /// To embed textures, you must set the file ExportFormat to binary.
+        /// </remarks>
         public bool EmbedTextures
         {
             get { return embedTextures; }
             set { embedTextures = value; }
         }
 
+        /// <summary>
+        /// The transform to transfer the animation from. The animation is transferred to AnimationDest.
+        /// </summary>
+        /// <remarks>
+        /// Transform must be an ancestor of AnimationDest, and may be an ancestor of the selected GameObject.
+        /// </remarks>
         public Transform AnimationSource
         {
             get { return animSource; }
             set { animSource = value; }
         }
 
+        /// <summary>
+        /// The transform to transfer the animation to.
+        /// This GameObject receives the transform animation on GameObjects between Source
+        /// and Destination as well as the animation on the Source itself.
+        /// </summary>
         public Transform AnimationDest
         {
             get { return animDest; }
