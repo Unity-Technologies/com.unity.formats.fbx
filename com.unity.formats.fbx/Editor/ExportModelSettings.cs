@@ -104,7 +104,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 "If checked, meshes will be exported even if they don't have a Renderer component."), GUILayout.Width(LabelWidth - FieldOffset));
             // greyed out if animation only
             EditorGUI.BeginDisabledGroup(exportSettings.ModelAnimIncludeOption == Include.Anim);
-            exportSettings.SetExportUnredererd(EditorGUILayout.Toggle(exportSettings.ExportUnrendered));
+            exportSettings.SetExportUnrendered(EditorGUILayout.Toggle(exportSettings.ExportUnrendered));
             EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
@@ -410,7 +410,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Specifies whether to export GameObjects that don't have a renderer.
         /// </summary>
         /// <param name="exportUnrendered">True to export unrendered, false otherwise.</param>
-        public void SetExportUnredererd(bool exportUnrendered) { this.exportUnrendered = exportUnrendered; }
+        public void SetExportUnrendered(bool exportUnrendered) { this.exportUnrendered = exportUnrendered; }
 
         /// <inheritdoc/>
         public override bool PreserveImportSettings { get { return preserveImportSettings; } }
