@@ -1928,7 +1928,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Return set of sample times to cover all keys on animation curves
         /// </summary>
-        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static HashSet<float> GetSampleTimes(AnimationCurve[] animCurves, double sampleRate)
         {
             var keyTimes = new HashSet<float>();
@@ -2290,7 +2289,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export an AnimationClip as a single take
         /// </summary>
-        [SecurityPermission(SecurityAction.LinkDemand)]
         private void ExportAnimationClip (AnimationClip uniAnimClip, GameObject uniRoot, FbxScene fbxScene)
         {
             if (!uniAnimClip || !uniRoot || fbxScene == null) return;
@@ -2692,7 +2690,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export the Animator component on this game object
         /// </summary>
-        [SecurityPermission(SecurityAction.LinkDemand)]
         private void ExportAnimation (GameObject uniRoot, FbxScene fbxScene)
         {
             if (!uniRoot)
@@ -4377,7 +4374,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// This goes through the callback system to find the right mesh and
         /// allow plugins to substitute their own meshes.
         /// </summary>
-        [SecurityPermission(SecurityAction.LinkDemand)]
         bool ExportMesh (GameObject gameObject, FbxNode fbxNode)
         {
             // First allow the object-based callbacks to have a hack at it.

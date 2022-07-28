@@ -1,7 +1,6 @@
 ﻿using Autodesk.Fbx;
 using UnityEngine;
 using System.Collections.Generic;
-using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 { 
@@ -45,7 +44,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected abstract FbxQuaternion GetConvertedQuaternionRotation (float seconds, UnityEngine.Quaternion restRotation);
 
-        [SecurityPermission(SecurityAction.LinkDemand)]
         private Key [] ComputeKeys(UnityEngine.Quaternion restRotation, FbxNode node) {
             // Get the source pivot pre-rotation if any, so we can
             // remove it from the animation we get from Unity.
@@ -88,7 +86,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return keys;
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand)]
         public void Animate(Transform unityTransform, FbxNode fbxNode, FbxAnimLayer fbxAnimLayer, bool Verbose) {
 
             if(!unityTransform || fbxNode == null)
