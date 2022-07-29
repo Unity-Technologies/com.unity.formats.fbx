@@ -55,7 +55,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private GUIStyle m_nameTextFieldStyle;
         protected GUIStyle NameTextFieldStyle
         {
-            get {
+            get
+            {
                 if (m_nameTextFieldStyle == null)
                 {
                     m_nameTextFieldStyle = new GUIStyle(GUIStyle.none);
@@ -71,7 +72,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private GUIStyle m_fbxExtLabelStyle;
         protected GUIStyle FbxExtLabelStyle
         {
-            get {
+            get
+            {
                 if (m_fbxExtLabelStyle == null)
                 {
                     m_fbxExtLabelStyle = new GUIStyle(GUIStyle.none);
@@ -232,7 +234,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         private bool m_exportSetContainsPrefabInstanceWithAddedObjects;
 
         private Object[] m_toExport;
-        protected Object[] ToExport { 
+        protected Object[] ToExport
+        {
             get
             {
                 return m_toExport;
@@ -244,39 +247,47 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        protected virtual void OnEnable(){
+        protected virtual void OnEnable()
+        {
             #if UNITY_2018_1_OR_NEWER
-            InitializeReceiver ();
+            InitializeReceiver();
             #endif
             m_showOptions = true;
-            this.minSize = new Vector2 (SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth + ExportButtonWidth, MinWindowHeight);
+            this.minSize = new Vector2(SelectableLabelMinWidth + LabelWidth + BrowseButtonWidth + ExportButtonWidth, MinWindowHeight);
         }
 
-        protected static T CreateWindow<T>() where T : EditorWindow {
-            return (T)EditorWindow.GetWindow <T>(DefaultWindowTitle, focus:true);
+        protected static T CreateWindow<T>() where T : EditorWindow
+        {
+            return (T)EditorWindow.GetWindow<T>(DefaultWindowTitle, focus: true);
         }
 
-        protected virtual void InitializeWindow(string filename = ""){
+        protected virtual void InitializeWindow(string filename = "")
+        {
             this.titleContent = WindowTitle;
-            this.SetFilename (filename);
+            this.SetFilename(filename);
         }
 
         #if UNITY_2018_1_OR_NEWER
-        protected void InitializeReceiver(){
-            if (!Receiver) {
-                Receiver = ScriptableObject.CreateInstance<FbxExportPresetSelectorReceiver> () as FbxExportPresetSelectorReceiver;
+        protected void InitializeReceiver()
+        {
+            if (!Receiver)
+            {
+                Receiver = ScriptableObject.CreateInstance<FbxExportPresetSelectorReceiver>() as FbxExportPresetSelectorReceiver;
                 Receiver.SelectionChanged -= OnPresetSelectionChanged;
                 Receiver.SelectionChanged += OnPresetSelectionChanged;
                 Receiver.DialogClosed -= SaveExportSettings;
                 Receiver.DialogClosed += SaveExportSettings;
             }
         }
+
         #endif
 
-        internal void SetFilename(string filename){
+        internal void SetFilename(string filename)
+        {
             // remove .fbx from end of filename
             int extIndex = filename.LastIndexOf(".fbx");
-            if (extIndex < 0) {
+            if (extIndex < 0)
+            {
                 ExportFileName = filename;
                 return;
             }
@@ -287,7 +298,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public void OnPresetSelectionChanged()
         {
-            this.Repaint ();
+            this.Repaint();
         }
 
         protected bool SelectionContainsPrefabInstanceWithAddedObjects()
@@ -314,7 +325,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     continue;
                 }
 
-                if(PrefabUtility.IsAnyPrefabInstanceRoot(go) && PrefabUtility.GetAddedGameObjects(go).Count > 0)
+                if (PrefabUtility.IsAnyPrefabInstanceRoot(go) && PrefabUtility.GetAddedGameObjects(go).Count > 0)
                 {
                     return true;
                 }
@@ -327,45 +338,55 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return false;
         }
 
-        protected abstract bool Export ();
+        protected abstract bool Export();
 
         /// <summary>
         /// Function to be used by derived classes to add custom UI between the file path selector and export options.
         /// </summary>
-        protected virtual void CreateCustomUI(){}
+        protected virtual void CreateCustomUI() {}
 
-        #if UNITY_2018_1_OR_NEWER  
-        protected abstract void ShowPresetReceiver ();
+        #if UNITY_2018_1_OR_NEWER
+        protected abstract void ShowPresetReceiver();
 
-        protected void ShowPresetReceiver(UnityEngine.Object target){
-            InitializeReceiver ();
+        protected void ShowPresetReceiver(UnityEngine.Object target)
+        {
+            InitializeReceiver();
             Receiver.SetTarget(target);
-            Receiver.SetInitialValue (new Preset (target));
+            Receiver.SetInitialValue(new Preset(target));
             UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, Receiver);
         }
+
         #endif
 
-        protected Transform TransferAnimationSource {
-            get {
+        protected Transform TransferAnimationSource
+        {
+            get
+            {
                 return SettingsObject.AnimationSource;
             }
-            set {
-                if (!TransferAnimationSourceIsValid (value)) {
+            set
+            {
+                if (!TransferAnimationSourceIsValid(value))
+                {
                     return;
                 }
-                SettingsObject.SetAnimationSource (value);
+                SettingsObject.SetAnimationSource(value);
             }
         }
 
-        protected Transform TransferAnimationDest {
-            get {
+        protected Transform TransferAnimationDest
+        {
+            get
+            {
                 return SettingsObject.AnimationDest;
             }
-            set {
-                if (!TransferAnimationDestIsValid (value)) {
+            set
+            {
+                if (!TransferAnimationDestIsValid(value))
+                {
                     return;
                 }
-                SettingsObject.SetAnimationDest (value);
+                SettingsObject.SetAnimationDest(value);
             }
         }
 
@@ -377,10 +398,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns><c>true</c> if p is ancestor to t; otherwise, <c>false</c>.</returns>
         /// <param name="p">P.</param>
         /// <param name="t">T.</param>
-        protected bool IsAncestor(Transform p, Transform t){
+        protected bool IsAncestor(Transform p, Transform t)
+        {
             var curr = t;
-            while (curr != null) {
-                if (curr == p) {
+            while (curr != null)
+            {
+                if (curr == p)
+                {
                     return true;
                 }
                 curr = curr.parent;
@@ -394,15 +418,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns><c>true</c> if t1 is in same hierarchy as t2; otherwise, <c>false</c>.</returns>
         /// <param name="t1">T1.</param>
         /// <param name="t2">T2.</param>
-        protected bool IsInSameHierarchy(Transform t1, Transform t2){
-            return (IsAncestor (t1, t2) || IsAncestor (t2, t1));
+        protected bool IsInSameHierarchy(Transform t1, Transform t2)
+        {
+            return (IsAncestor(t1, t2) || IsAncestor(t2, t1));
         }
-
 
         protected GameObject m_firstGameObjectToExport;
         protected virtual GameObject FirstGameObjectToExport
         {
-            get {
+            get
+            {
                 if (!m_firstGameObjectToExport)
                 {
                     if (ToExport == null || ToExport.Length == 0)
@@ -415,8 +440,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        protected bool TransferAnimationSourceIsValid(Transform newValue){
-            if (!newValue) {
+        protected bool TransferAnimationSourceIsValid(Transform newValue)
+        {
+            if (!newValue)
+            {
                 return true;
             }
 
@@ -428,20 +455,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             // source must be ancestor to dest
-            if (TransferAnimationDest && !IsAncestor(newValue, TransferAnimationDest)) {
+            if (TransferAnimationDest && !IsAncestor(newValue, TransferAnimationDest))
+            {
                 Debug.LogWarningFormat("FbxExportSettings: Source {0} must be an ancestor of {1}", newValue.name, TransferAnimationDest.name);
                 return false;
             }
             // must be in same hierarchy as selected GO
-            if (!selectedGO || !IsInSameHierarchy(newValue, selectedGO.transform)) {
-                Debug.LogWarningFormat("FbxExportSettings: Source {0} must be in the same hierarchy as {1}", newValue.name, selectedGO? selectedGO.name : "the selected object");
+            if (!selectedGO || !IsInSameHierarchy(newValue, selectedGO.transform))
+            {
+                Debug.LogWarningFormat("FbxExportSettings: Source {0} must be in the same hierarchy as {1}", newValue.name, selectedGO ? selectedGO.name : "the selected object");
                 return false;
             }
             return true;
         }
 
-        protected bool TransferAnimationDestIsValid(Transform newValue){
-            if (!newValue) {
+        protected bool TransferAnimationDestIsValid(Transform newValue)
+        {
+            if (!newValue)
+            {
                 return true;
             }
 
@@ -453,13 +484,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             // source must be ancestor to dest
-            if (TransferAnimationSource && !IsAncestor(TransferAnimationSource, newValue)) {
+            if (TransferAnimationSource && !IsAncestor(TransferAnimationSource, newValue))
+            {
                 Debug.LogWarningFormat("FbxExportSettings: Destination {0} must be a descendant of {1}", newValue.name, TransferAnimationSource.name);
                 return false;
             }
             // must be in same hierarchy as selected GO
-            if (!selectedGO || !IsInSameHierarchy(newValue, selectedGO.transform)) {
-                Debug.LogWarningFormat("FbxExportSettings: Destination {0} must be in the same hierarchy as {1}", newValue.name, selectedGO? selectedGO.name : "the selected object");
+            if (!selectedGO || !IsInSameHierarchy(newValue, selectedGO.transform))
+            {
+                Debug.LogWarningFormat("FbxExportSettings: Destination {0} must be in the same hierarchy as {1}", newValue.name, selectedGO ? selectedGO.name : "the selected object");
                 return false;
             }
             return true;
@@ -479,17 +512,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         // -------------------------------------------------------------------------------------
 
-        protected void OnGUI ()
+        protected void OnGUI()
         {
             // Increasing the label width so that none of the text gets cut off
             EditorGUIUtility.labelWidth = LabelWidth;
 
-            GUILayout.BeginHorizontal ();
-            GUILayout.FlexibleSpace ();
-                
-            #if UNITY_2018_1_OR_NEWER  
-            if(EditorGUILayout.DropdownButton(presetIcon, FocusType.Keyboard, presetIconButton)){
-                ShowPresetReceiver ();
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            #if UNITY_2018_1_OR_NEWER
+            if (EditorGUILayout.DropdownButton(presetIcon, FocusType.Keyboard, presetIconButton))
+            {
+                ShowPresetReceiver();
             }
             #endif
 
@@ -498,35 +532,35 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUILayout.LabelField("Naming");
             EditorGUI.indentLevel++;
 
-            GUILayout.BeginHorizontal ();
+            GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent(
                 "Export Name",
-                "Filename to save model to."),GUILayout.Width(LabelWidth-TextFieldAlignOffset));
+                "Filename to save model to."), GUILayout.Width(LabelWidth - TextFieldAlignOffset));
 
-            EditorGUI.BeginDisabledGroup (DisableNameSelection);
+            EditorGUI.BeginDisabledGroup(DisableNameSelection);
             // Show the export name with an uneditable ".fbx" at the end
             //-------------------------------------
-            EditorGUILayout.BeginVertical ();
+            EditorGUILayout.BeginVertical();
             EditorGUILayout.BeginHorizontal(EditorStyles.textField, GUILayout.Height(EditorGUIUtility.singleLineHeight));
             EditorGUI.indentLevel--;
             // continually resize to contents
-            var textFieldSize = NameTextFieldStyle.CalcSize (new GUIContent(ExportFileName));
-            ExportFileName = EditorGUILayout.TextField (ExportFileName, NameTextFieldStyle, GUILayout.Width(textFieldSize.x + 5), GUILayout.MinWidth(5));
-            ExportFileName = ModelExporter.ConvertToValidFilename (ExportFileName);
+            var textFieldSize = NameTextFieldStyle.CalcSize(new GUIContent(ExportFileName));
+            ExportFileName = EditorGUILayout.TextField(ExportFileName, NameTextFieldStyle, GUILayout.Width(textFieldSize.x + 5), GUILayout.MinWidth(5));
+            ExportFileName = ModelExporter.ConvertToValidFilename(ExportFileName);
 
-            EditorGUILayout.LabelField ("<color=#808080ff>.fbx</color>", FbxExtLabelStyle, GUILayout.Width(FbxExtLabelWidth));
+            EditorGUILayout.LabelField("<color=#808080ff>.fbx</color>", FbxExtLabelStyle, GUILayout.Width(FbxExtLabelWidth));
             EditorGUI.indentLevel++;
 
             EditorGUILayout.EndHorizontal();
-            EditorGUILayout.EndVertical ();
+            EditorGUILayout.EndVertical();
             //-----------------------------------
-            EditorGUI.EndDisabledGroup ();
-            GUILayout.EndHorizontal ();
+            EditorGUI.EndDisabledGroup();
+            GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent(
                 "Export Path",
-                "Location where the FBX will be saved."),GUILayout.Width(LabelWidth - FieldOffset));
+                "Location where the FBX will be saved."), GUILayout.Width(LabelWidth - FieldOffset));
 
             var pathLabels = ExportSettings.GetMixedSavePaths(FbxSavePaths);
 
@@ -535,7 +569,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 pathLabels = ExportSettings.GetRelativeFbxSavePaths(FbxSavePaths, ref m_selectedFbxPath);
             }
 
-            SelectedFbxPath = EditorGUILayout.Popup (SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
+            SelectedFbxPath = EditorGUILayout.Popup(SelectedFbxPath, pathLabels, GUILayout.MinWidth(SelectableLabelMinWidth));
 
             if (!(this is ConvertToPrefabEditorWindow))
             {
@@ -585,27 +619,28 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             CreateCustomUI();
 
-            EditorGUILayout.Space ();
+            EditorGUILayout.Space();
 
-            EditorGUI.BeginDisabledGroup (DisableTransferAnim);
+            EditorGUI.BeginDisabledGroup(DisableTransferAnim);
             EditorGUI.indentLevel--;
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent(
                 "Transfer Animation",
                 "Transfer transform animation from source to destination. Animation on objects between source and destination will also be transferred to destination."
-            ), GUILayout.Width(LabelWidth - FieldOffset));
+                ), GUILayout.Width(LabelWidth - FieldOffset));
             GUILayout.EndHorizontal();
             EditorGUI.indentLevel++;
-            TransferAnimationSource = EditorGUILayout.ObjectField ("Source", TransferAnimationSource, typeof(Transform), allowSceneObjects: true) as Transform;
-            TransferAnimationDest = EditorGUILayout.ObjectField ("Destination", TransferAnimationDest, typeof(Transform), allowSceneObjects: true) as Transform;
-            EditorGUILayout.Space ();
-            EditorGUI.EndDisabledGroup ();
+            TransferAnimationSource = EditorGUILayout.ObjectField("Source", TransferAnimationSource, typeof(Transform), allowSceneObjects: true) as Transform;
+            TransferAnimationDest = EditorGUILayout.ObjectField("Destination", TransferAnimationDest, typeof(Transform), allowSceneObjects: true) as Transform;
+            EditorGUILayout.Space();
+            EditorGUI.EndDisabledGroup();
 
             EditorGUI.indentLevel--;
-            m_showOptions = EditorGUILayout.Foldout (m_showOptions, "Options");
+            m_showOptions = EditorGUILayout.Foldout(m_showOptions, "Options");
             EditorGUI.indentLevel++;
-            if (m_showOptions) {
-                InnerEditor.OnInspectorGUI ();
+            if (m_showOptions)
+            {
+                InnerEditor.OnInspectorGUI();
             }
 
             // if we are exporting or converting a prefab with overrides, then show a warning
@@ -615,21 +650,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 EditorGUILayout.HelpBox("Prefab instance overrides will be exported", MessageType.Warning, true);
             }
 
-            GUILayout.FlexibleSpace ();
+            GUILayout.FlexibleSpace();
 
-            GUILayout.BeginHorizontal ();
+            GUILayout.BeginHorizontal();
             DoNotShowDialogUI();
-            GUILayout.FlexibleSpace ();
-            if (GUILayout.Button ("Cancel", GUILayout.Width(ExportButtonWidth))) {
-                this.Close ();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Cancel", GUILayout.Width(ExportButtonWidth)))
+            {
+                this.Close();
             }
 
-            if (GUILayout.Button (ExportButtonName, GUILayout.Width(ExportButtonWidth))) {
-                if (Export ()) {
-                    this.Close ();
+            if (GUILayout.Button(ExportButtonName, GUILayout.Width(ExportButtonWidth)))
+            {
+                if (Export())
+                {
+                    this.Close();
                 }
             }
-            GUILayout.EndHorizontal ();
+            GUILayout.EndHorizontal();
             EditorGUILayout.Space(); // adding a space at bottom of dialog so buttons aren't right at the edge
 
             if (GUI.changed)
@@ -643,14 +681,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns><c>true</c>, if file should be overwritten, <c>false</c> otherwise.</returns>
         /// <param name="filePath">File path.</param>
-        protected bool OverwriteExistingFile(string filePath){
+        protected bool OverwriteExistingFile(string filePath)
+        {
             // check if file already exists, give a warning if it does
-            if (System.IO.File.Exists (filePath)) {
-                bool overwrite = UnityEditor.EditorUtility.DisplayDialog (
-                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), 
-                    string.Format("File {0} already exists.\nOverwrite cannot be undone.", filePath), 
+            if (System.IO.File.Exists(filePath))
+            {
+                bool overwrite = UnityEditor.EditorUtility.DisplayDialog(
+                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME),
+                    string.Format("File {0} already exists.\nOverwrite cannot be undone.", filePath),
                     "Overwrite", "Cancel");
-                if (!overwrite) {
+                if (!overwrite)
+                {
                     if (GUI.changed)
                     {
                         SaveExportSettings();
@@ -668,8 +709,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected override string SessionStoragePrefix { get { return k_SessionStoragePrefix; } }
 
         protected override float MinWindowHeight { get { return 310; } } // determined by trial and error
-        protected override bool DisableNameSelection {
-            get {
+        protected override bool DisableNameSelection
+        {
+            get
+            {
                 return false;
             }
         }
@@ -693,8 +736,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        protected override bool DisableTransferAnim {
-            get {
+        protected override bool DisableTransferAnim
+        {
+            get
+            {
                 // don't transfer animation if we are exporting more than one hierarchy, the timeline clips from
                 // a playable director, or if only the model is being exported
                 // if we are on the timeline then export length can be more than 1
@@ -706,17 +751,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
         protected PlayableDirector PlayableDirector { get; set; }
 
         private bool m_isTimelineAnim = false;
-        protected bool IsTimelineAnim {
+        protected bool IsTimelineAnim
+        {
             get { return m_isTimelineAnim; }
-            set{
+            set
+            {
                 m_isTimelineAnim = value;
-                if (m_isTimelineAnim) {
+                if (m_isTimelineAnim)
+                {
                     m_previousInclude = ExportModelSettingsInstance.info.ModelAnimIncludeOption;
                     ExportModelSettingsInstance.info.SetModelAnimIncludeOption(Include.Anim);
                 }
-                if (InnerEditor) {
+                if (InnerEditor)
+                {
                     var exportModelSettingsEditor = InnerEditor as ExportModelSettingsEditor;
-                    if (exportModelSettingsEditor) {
+                    if (exportModelSettingsEditor)
+                    {
                         exportModelSettingsEditor.DisableIncludeDropdown(m_isTimelineAnim);
                     }
                 }
@@ -724,15 +774,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         private bool m_singleHierarchyExport = true;
-        protected bool SingleHierarchyExport {
+        protected bool SingleHierarchyExport
+        {
             get { return m_singleHierarchyExport; }
-            set {
+            set
+            {
                 m_singleHierarchyExport = value;
 
-                if (InnerEditor) {
+                if (InnerEditor)
+                {
                     var exportModelSettingsEditor = InnerEditor as ExportModelSettingsEditor;
-                    if (exportModelSettingsEditor) {
-                        exportModelSettingsEditor.SetIsSingleHierarchy (m_singleHierarchyExport);
+                    if (exportModelSettingsEditor)
+                    {
+                        exportModelSettingsEditor.SetIsSingleHierarchy(m_singleHierarchyExport);
                     }
                 }
             }
@@ -757,7 +811,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             get
             {
-                if(m_exportModelSettingsInstance == null)
+                if (m_exportModelSettingsInstance == null)
                 {
                     // make a copy of the settings
                     m_exportModelSettingsInstance = ScriptableObject.CreateInstance(typeof(ExportModelSettings)) as ExportModelSettings;
@@ -801,27 +855,29 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private Include m_previousInclude = Include.ModelAndAnim;
 
-        public static ExportModelEditorWindow Init (IEnumerable<UnityEngine.Object> toExport, string filename = "", TimelineClip timelineClip = null, PlayableDirector director = null)
+        public static ExportModelEditorWindow Init(IEnumerable<UnityEngine.Object> toExport, string filename = "", TimelineClip timelineClip = null, PlayableDirector director = null)
         {
-            ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow> ();
+            ExportModelEditorWindow window = CreateWindow<ExportModelEditorWindow>();
             window.IsTimelineAnim = (timelineClip != null);
             window.TimelineClipToExport = timelineClip;
-            window.PlayableDirector = director? director : TimelineEditor.inspectedDirector;
+            window.PlayableDirector = director ? director : TimelineEditor.inspectedDirector;
 
 
-            int numObjects = window.SetGameObjectsToExport (toExport);
-            if (string.IsNullOrEmpty (filename)) {
+            int numObjects = window.SetGameObjectsToExport(toExport);
+            if (string.IsNullOrEmpty(filename))
+            {
                 filename = window.DefaultFilename;
             }
-            window.InitializeWindow (filename);
+            window.InitializeWindow(filename);
             window.SingleHierarchyExport = (numObjects == 1);
-            window.Show ();
+            window.Show();
             return window;
         }
 
-        protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport) {
+        protected int SetGameObjectsToExport(IEnumerable<UnityEngine.Object> toExport)
+        {
             ToExport = toExport?.ToArray();
-            if (!IsTimelineAnim && (ToExport == null || ToExport.Length==0)) return 0;
+            if (!IsTimelineAnim && (ToExport == null || ToExport.Length == 0)) return 0;
 
             TransferAnimationSource = null;
             TransferAnimationDest = null;
@@ -837,7 +893,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
-            return IsTimelineAnim? 1 : ToExport.Length;
+            return IsTimelineAnim ? 1 : ToExport.Length;
         }
 
         /// <summary>
@@ -845,7 +901,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns>The object's name if one object selected, "Untitled" if multiple
         /// objects selected for export.</returns>
-        protected string DefaultFilename {
+        protected string DefaultFilename
+        {
             get
             {
                 string filename;
@@ -861,11 +918,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        protected override void OnEnable ()
+        protected override void OnEnable()
         {
-            base.OnEnable ();
-            if (!InnerEditor) {
-                InnerEditor = UnityEditor.Editor.CreateEditor (ExportModelSettingsInstance);
+            base.OnEnable();
+            if (!InnerEditor)
+            {
+                InnerEditor = UnityEditor.Editor.CreateEditor(ExportModelSettingsInstance);
                 this.SingleHierarchyExport = m_singleHierarchyExport;
                 this.IsTimelineAnim = m_isTimelineAnim;
             }
@@ -873,7 +931,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected void OnDisable()
         {
-            RestoreSettings ();
+            RestoreSettings();
         }
 
         /// <summary>
@@ -881,20 +939,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         protected virtual void RestoreSettings()
         {
-            if (IsTimelineAnim) {
+            if (IsTimelineAnim)
+            {
                 ExportModelSettingsInstance.info.SetModelAnimIncludeOption(m_previousInclude);
             }
         }
 
-        protected override bool Export(){
-            if (string.IsNullOrEmpty (ExportFileName)) {
-                Debug.LogError ("FbxExporter: Please specify an fbx filename");
+        protected override bool Export()
+        {
+            if (string.IsNullOrEmpty(ExportFileName))
+            {
+                Debug.LogError("FbxExporter: Please specify an fbx filename");
                 return false;
             }
             var folderPath = ExportSettings.GetAbsoluteSavePath(FbxSavePaths[SelectedFbxPath]);
-            var filePath = System.IO.Path.Combine (folderPath, ExportFileName + ".fbx");
+            var filePath = System.IO.Path.Combine(folderPath, ExportFileName + ".fbx");
 
-            if (!OverwriteExistingFile (filePath)) {
+            if (!OverwriteExistingFile(filePath))
+            {
                 return false;
             }
 
@@ -917,11 +979,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        #if UNITY_2018_1_OR_NEWER  
-        protected override void ShowPresetReceiver ()
+        #if UNITY_2018_1_OR_NEWER
+        protected override void ShowPresetReceiver()
         {
-            ShowPresetReceiver (ExportModelSettingsInstance);
+            ShowPresetReceiver(ExportModelSettingsInstance);
         }
+
         #endif
     }
 }

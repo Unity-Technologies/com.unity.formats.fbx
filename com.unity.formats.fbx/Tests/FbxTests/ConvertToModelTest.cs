@@ -316,7 +316,7 @@ namespace FbxExporter.UnitTests
             childDup.transform.parent = newPrefab.transform;
             Assert.That(childObj);
             Assert.That(childDup); // duplicate so we have an object to compare against
-            
+
             var fbxPath = GetRandomFbxFilePath();
 
             // Convert it to a prefab
@@ -331,9 +331,11 @@ namespace FbxExporter.UnitTests
             PrefabUtility.UnloadPrefabContents(newPrefab);
         }
 
-        public static List<string> ChildNames(Transform a) {
+        public static List<string> ChildNames(Transform a)
+        {
             var names = new List<string>();
-            foreach(Transform child in a) {
+            foreach (Transform child in a)
+            {
                 names.Add(child.name);
             }
             return names;
@@ -344,26 +346,26 @@ namespace FbxExporter.UnitTests
         {
             // Test IncrementFileName
             {
-                var tempPath = Path.GetTempPath ();
-                var basename = Path.GetFileNameWithoutExtension (Path.GetRandomFileName ());
+                var tempPath = Path.GetTempPath();
+                var basename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
                 basename = basename + "yo"; // add some non-numeric stuff
 
                 var filename1 = basename + ".fbx";
                 var filename2 = Path.Combine(tempPath, basename + " 1.fbx");
-                Assert.AreEqual (filename2, ConvertToNestedPrefab.IncrementFileName (tempPath, filename1));
+                Assert.AreEqual(filename2, ConvertToNestedPrefab.IncrementFileName(tempPath, filename1));
 
                 filename1 = basename + " 1.fbx";
                 filename2 = Path.Combine(tempPath, basename + " 2.fbx");
-                Assert.AreEqual (filename2, ConvertToNestedPrefab.IncrementFileName (tempPath, filename1));
+                Assert.AreEqual(filename2, ConvertToNestedPrefab.IncrementFileName(tempPath, filename1));
 
                 filename1 = basename + "1.fbx";
                 filename2 = Path.Combine(tempPath, basename + "2.fbx");
-                Assert.AreEqual (filename2, ConvertToNestedPrefab.IncrementFileName (tempPath, filename1));
+                Assert.AreEqual(filename2, ConvertToNestedPrefab.IncrementFileName(tempPath, filename1));
 
                 // UNI-25513: bug was that Cube01.fbx => Cube2.fbx
                 filename1 = basename + "01.fbx";
                 filename2 = Path.Combine(tempPath, basename + "02.fbx");
-                Assert.AreEqual (filename2, ConvertToNestedPrefab.IncrementFileName (tempPath, filename1));
+                Assert.AreEqual(filename2, ConvertToNestedPrefab.IncrementFileName(tempPath, filename1));
             }
 
             // Test EnforceUniqueNames
@@ -405,57 +407,60 @@ namespace FbxExporter.UnitTests
 
             // Test CopyComponents
             {
-                var a = GameObject.CreatePrimitive (PrimitiveType.Cube);
+                var a = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 a.name = "a";
-                var b = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+                var b = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 b.name = "b";
                 a.AddComponent<BoxCollider>();
-                a.transform.localPosition += new Vector3(1,2,3);
+                a.transform.localPosition += new Vector3(1, 2, 3);
                 Assert.IsFalse(b.GetComponent<BoxCollider>());
                 Assert.AreEqual(Vector3.zero, b.transform.localPosition);
-                Assert.AreNotEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
-                var nameMap = ConvertToNestedPrefab.MapNameToSourceRecursive(b, a);
-                ConvertToNestedPrefab.CopyComponents(b, a, a, nameMap);
+                Assert.AreNotEqual(a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter>().sharedMesh);
+                ConvertToNestedPrefab.GatherSceneHierarchy(b);
+                ConvertToNestedPrefab.MapNameToSourceRecursive(b, a);
+                var fixSceneRefsMap = new Dictionary<Object, Object>();
+                ConvertToNestedPrefab.CopyComponents(b, a, a, fixSceneRefsMap);
                 Assert.IsTrue(b.GetComponent<BoxCollider>());
                 Assert.AreEqual(a.transform.localPosition, b.transform.localPosition);
-                Assert.AreNotEqual (a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter> ().sharedMesh);
+                Assert.AreNotEqual(a.GetComponent<MeshFilter>().sharedMesh, b.GetComponent<MeshFilter>().sharedMesh);
             }
 
             // Test UpdateFromSourceRecursive. Very similar but recursive.
             {
-                var a = GameObject.CreatePrimitive (PrimitiveType.Cube);
+                var a = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 a.name = "a";
-                var a1 = GameObject.CreatePrimitive (PrimitiveType.Cube);
+                var a1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 a1.name = "AA";
-                var a2 = GameObject.CreatePrimitive (PrimitiveType.Cube);
+                var a2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 a2.name = "BB";
                 a2.transform.parent = a.transform;
                 a1.transform.parent = a.transform; // out of alpha order!
-                var b = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+                var b = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 b.name = "b";
-                var b1 = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+                var b1 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 b1.name = "AA";
-                var b2 = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+                var b2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 b2.name = "BB";
                 b1.transform.parent = b.transform;
                 b2.transform.parent = b.transform; // in alpha order
-                a.AddComponent<BoxCollider> ();
-                a1.transform.localPosition = new Vector3 (1, 2, 3);
+                a.AddComponent<BoxCollider>();
+                a1.transform.localPosition = new Vector3(1, 2, 3);
                 a.transform.localPosition = new Vector3(4, 5, 6);
 
                 Assert.AreNotEqual(b.GetComponent<MeshFilter>().sharedMesh, a.GetComponent<MeshFilter>().sharedMesh);
-                Assert.IsFalse (b.GetComponent<BoxCollider> ());
-                Assert.AreEqual ("BB", b.transform.GetChild (1).name);
-                Assert.AreEqual (Vector3.zero, b1.transform.localPosition);
+                Assert.IsFalse(b.GetComponent<BoxCollider>());
+                Assert.AreEqual("BB", b.transform.GetChild(1).name);
+                Assert.AreEqual(Vector3.zero, b1.transform.localPosition);
 
-                ConvertToNestedPrefab.UpdateFromSourceRecursive (b, a);
+                ConvertToNestedPrefab.GatherSceneHierarchy(a);
+                ConvertToNestedPrefab.UpdateFromSourceRecursive(b, a);
 
                 // everything except the mesh + materials and child transforms should change
                 Assert.AreNotEqual(b.GetComponent<MeshFilter>().sharedMesh, a.GetComponent<MeshFilter>().sharedMesh);
-                Assert.IsTrue (b.GetComponent<BoxCollider> ());
-                Assert.AreEqual ("BB", b.transform.GetChild (1).name);
+                Assert.IsTrue(b.GetComponent<BoxCollider>());
+                Assert.AreEqual("BB", b.transform.GetChild(1).name);
                 Assert.AreEqual(a.transform.localPosition, b.transform.localPosition);
-                Assert.AreNotEqual (a1.transform.localPosition, b1.transform.localPosition);
+                Assert.AreNotEqual(a1.transform.localPosition, b1.transform.localPosition);
             }
 
             // Test GetFbxAssetOrNull
@@ -503,10 +508,12 @@ namespace FbxExporter.UnitTests
                 var bSerObj = new SerializedObject(bReferenceComponent);
 
                 var fromProp = aSerObj.FindProperty("m_transform");
-                Dictionary<string, GameObject> nameMap = new Dictionary<string, GameObject>(){
-                    {"test", a}
+
+                ConvertToNestedPrefab.s_nameToInfo = new Dictionary<string, ConvertToNestedPrefab.SourceObjectInfo>()
+                {
+                    { "test", new ConvertToNestedPrefab.SourceObjectInfo(a) }
                 };
-                ConvertToNestedPrefab.CopySerializedProperty(bSerObj, fromProp, nameMap);
+                ConvertToNestedPrefab.CopySerializedProperty(bSerObj, fromProp);
 
                 Assert.That(bReferenceComponent.m_transform.name, Is.EqualTo(a.transform.name));
             }
@@ -582,7 +589,8 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
-        public void ExhaustiveTests() {
+        public void ExhaustiveTests()
+        {
             // Try convert in every corner case we can imagine.
 
             // Test Convert on an object in the scene
@@ -708,12 +716,15 @@ namespace FbxExporter.UnitTests
             quad2.transform.parent = cube2.transform;
             capsule.transform.SetSiblingIndex(1);
 
-            var dictionary = ConvertToNestedPrefab.MapNameToSourceRecursive(cube, cube2);
+            ConvertToNestedPrefab.GatherSceneHierarchy(cube);
+            ConvertToNestedPrefab.MapNameToSourceRecursive(cube, cube2);
+
+            var dictionary = ConvertToNestedPrefab.s_nameToInfo;
 
             //We expect these to pass because we've given it an identical game object, as it would have after a normal export.
-            Assert.AreSame(capsule2, dictionary[capsule.name]);
-            Assert.AreSame(sphere2, dictionary[sphere.name]);
-            Assert.AreSame(quad2, dictionary[quad.name]);
+            Assert.AreSame(capsule2, dictionary[capsule.name].destGO);
+            Assert.AreSame(sphere2, dictionary[sphere.name].destGO);
+            Assert.AreSame(quad2, dictionary[quad.name].destGO);
             Assert.True(dictionary.Count == 4);
 
             //Create a broken hierarchy, one that is missing a primitive
@@ -724,14 +735,16 @@ namespace FbxExporter.UnitTests
             capsule3.transform.parent = cube3.transform;
             sphere3.transform.parent = cube3.transform;
 
-            var dictionaryBroken = ConvertToNestedPrefab.MapNameToSourceRecursive(cube, cube3);
+            ConvertToNestedPrefab.GatherSceneHierarchy(cube);
+            ConvertToNestedPrefab.MapNameToSourceRecursive(cube, cube3);
+            var dictionaryBroken = ConvertToNestedPrefab.s_nameToInfo;
 
             //the dictionary size should be equal to the amount of children + the parent
-            Assert.True(dictionaryBroken.Count == 4);
+            Assert.That(dictionaryBroken.Count, Is.EqualTo(4));
 
-            Assert.IsNull(dictionaryBroken[quad.name]);
-            Assert.AreSame(capsule3, dictionaryBroken[capsule.name]);
-            Assert.AreSame(sphere3, dictionaryBroken[sphere.name]);
+            Assert.IsNull(dictionaryBroken[quad.name].destGO);
+            Assert.AreSame(capsule3, dictionaryBroken[capsule.name].destGO);
+            Assert.AreSame(sphere3, dictionaryBroken[sphere.name].destGO);
         }
 
         [Test]
@@ -750,10 +763,10 @@ namespace FbxExporter.UnitTests
             var cubePrefab = ConvertToNestedPrefab.Convert(cube,
                 fbxFullPath: path, prefabFullPath: Path.ChangeExtension(path, ".prefab"));
 
-            Assert.That (!cube);
-            Assert.That (cubePrefab);
+            Assert.That(!cube);
+            Assert.That(cubePrefab);
 
-            Assert.AreEqual (Path.GetFileNameWithoutExtension (path), cubePrefab.name);
+            Assert.AreEqual(Path.GetFileNameWithoutExtension(path), cubePrefab.name);
         }
 
         [Test]
@@ -775,7 +788,7 @@ namespace FbxExporter.UnitTests
 
             // Undo prefab convert
             Undo.PerformUndo();
-            
+
             // Make sure name is same as original
             Assert.AreEqual("cube 1", cube.name);
         }
