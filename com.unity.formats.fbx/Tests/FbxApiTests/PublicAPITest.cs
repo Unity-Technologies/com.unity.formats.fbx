@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
 using System.Linq;
+using System.IO;
 using UnityEditor.Formats.Fbx.Exporter;
 
 namespace FbxExporter.UnitTests
@@ -84,19 +85,19 @@ namespace FbxExporter.UnitTests
             var filename = GetRandomFbxFilePath();
 
             // set all the settings that we can
-            var exportSettings = new ExportModelSettingsSerialize();
-            exportSettings.SetAnimatedSkinnedMesh(true);
-            exportSettings.SetAnimationDest(m_toExport[0].transform);
-            exportSettings.SetAnimationSource(m_toExport[0].transform);
-            exportSettings.SetEmbedTextures(false);
-            exportSettings.SetExportFormat(ExportFormat.Binary);
-            exportSettings.SetExportUnrendered(true);
-            exportSettings.SetKeepInstances(false);
-            exportSettings.SetLODExportType(LODExportType.Highest);
-            exportSettings.SetModelAnimIncludeOption(Include.Model);
-            exportSettings.SetObjectPosition(ObjectPosition.WorldAbsolute);
-            exportSettings.SetPreserveImportSettings(false);
-            exportSettings.SetUseMayaCompatibleNames(false);
+            var exportSettings = new ExportModelOptions();
+            exportSettings.AnimateSkinnedMesh = true;
+            exportSettings.AnimationDest = m_toExport[0].transform;
+            exportSettings.AnimationSource = m_toExport[0].transform;
+            exportSettings.EmbedTextures = false;
+            exportSettings.ExportFormat = ExportFormat.Binary;
+            exportSettings.ExportUnrendered = true;
+            exportSettings.KeepInstances = false;
+            exportSettings.LODExportType = LODExportType.Highest;
+            exportSettings.ModelAnimIncludeOption = Include.Model;
+            exportSettings.ObjectPosition = ObjectPosition.WorldAbsolute;
+            exportSettings.PreserveImportSettings = false;
+            exportSettings.UseMayaCompatibleNames = false;
 
             var fbxFileName = ModelExporter.ExportObject(filename, m_toExport[0], exportSettings);
             Assert.IsNotNull(fbxFileName);
@@ -117,19 +118,19 @@ namespace FbxExporter.UnitTests
             var filename = GetRandomFbxFilePath();
 
             // set all the settings that we can
-            var exportSettings = new ExportModelSettingsSerialize();
-            exportSettings.SetAnimatedSkinnedMesh(true);
-            exportSettings.SetAnimationDest(m_toExport[0].transform);
-            exportSettings.SetAnimationSource(m_toExport[0].transform);
-            exportSettings.SetEmbedTextures(false);
-            exportSettings.SetExportFormat(ExportFormat.Binary);
-            exportSettings.SetExportUnrendered(true);
-            exportSettings.SetKeepInstances(false);
-            exportSettings.SetLODExportType(LODExportType.Highest);
-            exportSettings.SetModelAnimIncludeOption(Include.Model);
-            exportSettings.SetObjectPosition(ObjectPosition.WorldAbsolute);
-            exportSettings.SetPreserveImportSettings(false);
-            exportSettings.SetUseMayaCompatibleNames(false);
+            var exportSettings = new ExportModelOptions();
+            exportSettings.AnimateSkinnedMesh = true;
+            exportSettings.AnimationDest = m_toExport[0].transform;
+            exportSettings.AnimationSource = m_toExport[0].transform;
+            exportSettings.EmbedTextures = false;
+            exportSettings.ExportFormat = ExportFormat.Binary;
+            exportSettings.ExportUnrendered = true;
+            exportSettings.KeepInstances = false;
+            exportSettings.LODExportType = LODExportType.Highest;
+            exportSettings.ModelAnimIncludeOption = Include.Model;
+            exportSettings.ObjectPosition = ObjectPosition.WorldAbsolute;
+            exportSettings.PreserveImportSettings = false;
+            exportSettings.UseMayaCompatibleNames = false;
 
             var fbxFileName = ModelExporter.ExportObjects(filename, m_toExport, exportSettings);
 
@@ -154,10 +155,14 @@ namespace FbxExporter.UnitTests
             var filename = GetRandomFbxFilePath();
             var prefabFilename = GetRandomPrefabAssetPath();
 
-            ConvertToPrefabSettingsSerialize convertSettings = new ConvertToPrefabSettingsSerialize();
-            convertSettings.SetExportFormat(ExportFormat.Binary);
+            ConvertToPrefabVariantOptions convertSettings = new ConvertToPrefabVariantOptions();
+            convertSettings.ExportFormat = ExportFormat.Binary;
+            convertSettings.AnimationDest = m_toExport[0].transform;
+            convertSettings.AnimationSource = m_toExport[0].transform;
+            convertSettings.AnimateSkinnedMesh = false;
+            convertSettings.UseMayaCompatibleNames = false;
 
-            var result = ConvertToNestedPrefab.Convert(m_toExport[0], fbxFullPath: filename, prefabFullPath: prefabFilename, exportOptions: convertSettings);
+            var result = ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxFullPath: filename, prefabFullPath: prefabFilename, convertOptions: convertSettings);
 
             Assert.IsTrue(result);
             Assert.IsTrue(!m_toExport[0]);
@@ -178,6 +183,72 @@ namespace FbxExporter.UnitTests
 
             Assert.IsNotNull(fbxFileName);
             Assert.AreEqual(fbxFileName, filename);
+        }
+
+        [Test]
+        public void TestConvertWithNoPaths()
+        {
+            var expectedPrefabPath = "Assets/Cube.prefab";
+            var expectedFbxPath = "Assets/Cube.fbx";
+
+            // make sure asset does not already exist
+            Assert.That(File.Exists(Path.GetFullPath(expectedPrefabPath)), Is.False);
+            Assert.That(File.Exists(Path.GetFullPath(expectedFbxPath)), Is.False);
+
+            Assert.IsNotNull(m_toExport);
+            Assert.IsNotNull(m_toExport[0]);
+
+            var result = ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0]);
+
+            Assert.IsTrue(result);
+            Assert.IsTrue(!m_toExport[0]);
+
+            string prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(result);
+            Assert.That(prefabPath, Is.EqualTo(expectedPrefabPath));
+
+            // get fbx path
+            var fbxObj = PrefabUtility.GetCorrespondingObjectFromOriginalSource(result);
+            var fbxPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(fbxObj);
+
+            Assert.That(fbxPath, Is.EqualTo(expectedFbxPath));
+
+            // delete at the end of the test
+            AssetDatabase.DeleteAsset(prefabPath);
+            AssetDatabase.DeleteAsset(fbxPath);
+        }
+
+        [Test]
+        public void TestConvertOutsideProject()
+        {
+            Assert.IsNotNull(m_toExport);
+            Assert.IsNotNull(m_toExport[0]);
+            var tempFilePath = GetTempOutsideFilePath();
+
+            // make sure that the filepath does not exist
+            if (File.Exists(tempFilePath))
+            {
+                File.Delete(tempFilePath);
+            }
+            Assert.That(File.Exists(tempFilePath), Is.False);
+
+            var fbxFilePath = GetRandomFbxFilePath();
+
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxDirectoryFullPath: tempFilePath));
+
+            // conversion should fail
+            Assert.IsTrue(m_toExport[0]);
+
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxFullPath: tempFilePath));
+
+            Assert.IsTrue(m_toExport[0]);
+
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxFullPath: fbxFilePath, prefabDirectoryFullPath: tempFilePath));
+
+            Assert.IsTrue(m_toExport[0]);
+
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxFullPath: fbxFilePath, prefabFullPath: tempFilePath));
+
+            Assert.IsTrue(m_toExport[0]);
         }
     }
 }

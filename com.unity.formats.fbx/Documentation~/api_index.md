@@ -4,7 +4,7 @@ As a developer, you have access to the FBX Exporter from C# scripting. You can u
 
 ## Managing export settings
 
-To use custom export settings, you can create and pass an instance of `ExportModelSettingsSerialize` class with modified settings.
+To use custom export settings, you can create and pass an instance of `ExportModelOptions` class with modified settings.
 
 If you don't pass any export settings, Unity uses default export settings to export the GameObjects to the FBX file.
 
@@ -22,9 +22,9 @@ public static void ExportGameObjects(Object[] objects)
 {
     string filePath = Path.Combine(Application.dataPath, "MyGame.fbx");
 
-    ExportModelSettingsSerialize exportSettings = new ExportModelSettingsSerialize();
-    exportSettings.SetExportFormat(ExportFormat.Binary);
-    exportSettings.SetKeepInstances(false);
+    ExportModelOptions exportSettings = new ExportModelOptions();
+    exportSettings.ExportFormat = ExportFormat.Binary;
+    exportSettings.KeepInstances = false;
 
     // Note: If you don't pass any export settings, Unity uses the default settings.
     ModelExporter.ExportObjects(filePath, objects, exportSettings);
@@ -55,11 +55,11 @@ public static GameObject ConvertGameObject(GameObject go)
 
     // Settings to use when exporting the FBX to convert to a prefab.
     // Note: If you don't pass any export settings, Unity uses the default settings.
-    ConvertToPrefabSettingsSerialize convertSettings = new ConvertToPrefabSettingsSerialize();
-    convertSettings.SetExportFormat(ExportFormat.Binary);
+    ConvertToPrefabVariantOptions convertSettings = new ConvertToPrefabVariantOptions();
+    convertSettings.ExportFormat = ExportFormat.Binary;
 
     // Returns the prefab variant linked to an FBX file.
-    return ConvertToNestedPrefab.Convert(go, fbxFullPath: filePath, prefabFullPath: prefabPath, exportOptions: convertSettings);
+    return ConvertToNestedPrefab.ConvertToPrefabVariant(go, fbxFullPath: filePath, prefabFullPath: prefabPath, convertOptions: convertSettings);
 }
 ```
 

@@ -18,15 +18,15 @@ namespace FbxExporter.UnitTests
         {
             string filePath = Path.Combine(Application.dataPath, "MyGame.fbx");
 
-            ExportModelSettingsSerialize exportSettings = new ExportModelSettingsSerialize();
-            exportSettings.SetExportFormat(ExportFormat.Binary);
-            exportSettings.SetKeepInstances(false);
+            ExportModelOptions exportSettings = new ExportModelOptions();
+            exportSettings.ExportFormat = ExportFormat.Binary;
+            exportSettings.KeepInstances = false;
 
-            // Note: if no export settings are passed, the default settings will be used.
+            // Note: If you don't pass any export settings, Unity uses the default settings.
             ModelExporter.ExportObjects(filePath, objects, exportSettings);
 
-            // ModelExporter.ExportObject can be used instead of 
-            // ModelExporter.ExportObjects to export a single game object
+            // You can use ModelExporter.ExportObject instead of
+            // ModelExporter.ExportObjects to export a single GameObject.
         }
 
         /// <summary>
@@ -38,10 +38,13 @@ namespace FbxExporter.UnitTests
             string filePath = Path.Combine(Application.dataPath, "MyObject.fbx");
             string prefabPath = Path.Combine(Application.dataPath, "MyObject.prefab");
 
-            ConvertToPrefabSettingsSerialize convertSettings = new ConvertToPrefabSettingsSerialize();
-            convertSettings.SetExportFormat(ExportFormat.Binary);
+            // Settings to use when exporting the FBX to convert to a prefab.
+            // Note: If you don't pass any export settings, Unity uses the default settings.
+            ConvertToPrefabVariantOptions convertSettings = new ConvertToPrefabVariantOptions();
+            convertSettings.ExportFormat = ExportFormat.Binary;
 
-            return ConvertToNestedPrefab.Convert(go, fbxFullPath: filePath, prefabFullPath: prefabPath, exportOptions: convertSettings);
+            // Returns the prefab variant linked to an FBX file.
+            return ConvertToNestedPrefab.ConvertToPrefabVariant(go, fbxFullPath: filePath, prefabFullPath: prefabPath, convertOptions: convertSettings);
         }
 
         [Test]
