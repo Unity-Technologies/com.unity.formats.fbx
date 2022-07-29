@@ -772,9 +772,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // We'll export either Phong or Lambert. Phong if it calls
             // itself specular, Lambert otherwise.
+            System.StringComparison strignComparison = System.StringComparison.OrdinalIgnoreCase;
             var shader = unityMaterial.shader;
-            bool specular = shader.name.Contains("specular", System.StringComparison.OrdinalIgnoreCase);
-            bool hdrp = shader.name.Contains("hdrp", System.StringComparison.OrdinalIgnoreCase);
+            bool specular = shader.name.IndexOf("specular", strignComparison) >= 0;
+            bool hdrp = shader.name.IndexOf("hdrp", strignComparison) >= 0;
 
             var fbxMaterial = specular
                 ? FbxSurfacePhong.Create(fbxScene, fbxName)
@@ -3423,7 +3424,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var completeExpSet = new HashSet<GameObject>();
             foreach (var data in hierarchyToExportData.Values)
             {
-                if (data == null || data.Objects == null || data.Objects.Count <= 0)
+                if (data == null || data.Objects == null || data.Objects.Count == 0)
                 {
                     continue;
                 }
@@ -3581,9 +3582,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 if (controller)
                 {
                     var dController = controller as UnityEditor.Animations.AnimatorController;
-                    if (dController && dController.layers.Length > 0)
+                    var controllerLayers = dController != null ? dController.layers : null;
+                    if (controllerLayers != null && controllerLayers.Length > 0)
                     {
-                        var motion = dController.layers[0].stateMachine.defaultState.motion;
+                        var motion = controllerLayers[0].stateMachine.defaultState.motion;
                         var defaultClip = motion as AnimationClip;
                         if (defaultClip)
                         {
