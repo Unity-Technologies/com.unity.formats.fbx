@@ -135,7 +135,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// <summary>
     /// Interface of export options that you can set when exporting to FBX.
     /// </summary>
-    public interface IExportOptions
+    internal interface IExportOptions
     {
         /// <summary>
         /// The export format (binary or ascii).
@@ -245,7 +245,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Base class for the export model settings and convert to prefab settings.
     /// </summary>
     [System.Serializable]
-    public abstract class ExportOptionsSettingsSerializeBase : IExportOptions
+    internal abstract class ExportOptionsSettingsSerializeBase : IExportOptions
     {
         [SerializeField]
         private ExportFormat exportFormat = ExportFormat.ASCII;
@@ -359,7 +359,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Class specifying the settings for exporting to FBX.
     /// </summary>
     [System.Serializable]
-    public class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
+    internal class ExportModelSettingsSerialize : ExportOptionsSettingsSerializeBase
     {
         [SerializeField]
         private Include include = Include.ModelAndAnim;
@@ -469,6 +469,184 @@ namespace UnityEditor.Formats.Fbx.Exporter
             bitmask = (bitmask << 1) | (exportUnrendered ? 1 : 0);
             bitmask = (bitmask << 1) | (preserveImportSettings ? 1 : 0);
             return bitmask;
+        }
+    }
+
+    /// <summary>
+    /// Class specifying the settings for exporting to FBX.
+    /// </summary>
+    [System.Serializable]
+    public class ExportModelOptions : IExportOptions
+    {
+        [SerializeField]
+        private ExportFormat exportFormat = ExportFormat.ASCII;
+        [SerializeField]
+        private bool animatedSkinnedMesh = false;
+        [SerializeField]
+        private bool mayaCompatibleNaming = true;
+
+        [System.NonSerialized]
+        private Transform animSource;
+        [System.NonSerialized]
+        private Transform animDest;
+
+        [SerializeField]
+        private Include include = Include.ModelAndAnim;
+        [SerializeField]
+        private LODExportType lodLevel = LODExportType.All;
+        [SerializeField]
+        private ObjectPosition objectPosition = ObjectPosition.LocalCentered;
+        [SerializeField]
+        private bool exportUnrendered = true;
+        [SerializeField]
+        private bool preserveImportSettings = false;
+        [SerializeField]
+        private bool keepInstances = true;
+        [SerializeField]
+        private bool embedTextures = false;
+
+        /// <summary>
+        /// The export format (binary or ascii).
+        /// </summary>
+        public ExportFormat ExportFormat
+        {
+            get { return exportFormat; }
+            set { exportFormat = value; }
+        }
+
+        /// <summary>
+        /// Option to export the model only, the animation only, or both the model and the animation.
+        /// </summary>
+        public Include ModelAnimIncludeOption
+        {
+            get { return include; }
+            set { include = value; }
+        }
+
+        /// <summary>
+        /// The type of LOD to export (All, Highest or Lowest).
+        /// </summary>
+        public LODExportType LODExportType
+        {
+            get { return lodLevel; }
+            set { lodLevel = value; }
+        }
+
+        /// <summary>
+        /// The position to export the object to (Local centered, World absolute, or Reset). Use Reset for converting to a Prefab.
+        /// </summary>
+        public ObjectPosition ObjectPosition
+        {
+            get { return objectPosition; }
+            set { objectPosition = value; }
+        }
+
+        /// <summary>
+        /// Option to export the animation on GameObjects that have a skinned mesh.
+        /// </summary>
+        public bool AnimateSkinnedMesh
+        {
+            get { return animatedSkinnedMesh; }
+            set { animatedSkinnedMesh = value; }
+        }
+
+        /// <summary>
+        /// Option to convert the GameObject and material names to Maya compatible names.
+        /// </summary>
+        public bool UseMayaCompatibleNames
+        {
+            get { return mayaCompatibleNaming; }
+            set { mayaCompatibleNaming = value; }
+        }
+
+        /// <summary>
+        /// Option to change the GameObjects and material names in the scene to keep them
+        /// Maya compatible after the export. Only works if UseMayaCompatibleNames is also enabled.
+        /// </summary>
+        bool IExportOptions.AllowSceneModification
+        {
+            get { return false; }
+        }
+
+        /// <summary>
+        /// Option to export GameObjects that don't have a renderer.
+        /// </summary>
+        public bool ExportUnrendered
+        {
+            get { return exportUnrendered; }
+            set { exportUnrendered = value; }
+        }
+
+        /// <summary>
+        /// Option to preserve the previous import settings after the export when overwriting an existing FBX file.
+        /// </summary>
+        public bool PreserveImportSettings
+        {
+            get { return preserveImportSettings; }
+            set { preserveImportSettings = value; }
+        }
+
+        /// <summary>
+        /// Option to keep multiple instances of the same mesh as separate instances on export.
+        /// </summary>
+        public bool KeepInstances
+        {
+            get { return keepInstances; }
+            set { keepInstances = value; }
+        }
+
+        /// <summary>
+        /// Option to embed textures in the exported FBX file.
+        /// </summary>
+        /// <remarks>
+        /// To embed textures, you must set the file ExportFormat to binary.
+        /// </remarks>
+        public bool EmbedTextures
+        {
+            get { return embedTextures; }
+            set { embedTextures = value; }
+        }
+
+        /// <summary>
+        /// The transform to transfer the animation from. The animation is transferred to AnimationDest.
+        /// </summary>
+        /// <remarks>
+        /// Transform must be an ancestor of AnimationDest, and may be an ancestor of the selected GameObject.
+        /// </remarks>
+        public Transform AnimationSource
+        {
+            get { return animSource; }
+            set { animSource = value; }
+        }
+
+        /// <summary>
+        /// The transform to transfer the animation to.
+        /// This GameObject receives the transform animation on GameObjects between Source
+        /// and Destination as well as the animation on the Source itself.
+        /// </summary>
+        public Transform AnimationDest
+        {
+            get { return animDest; }
+            set { animDest = value; }
+        }
+
+        internal ExportModelSettingsSerialize ConvertToModelSettingsSerialize()
+        {
+            var exportSettings = new ExportModelSettingsSerialize();
+            exportSettings.SetAnimatedSkinnedMesh(animatedSkinnedMesh);
+            exportSettings.SetAnimationDest(animDest);
+            exportSettings.SetAnimationSource(animSource);
+            exportSettings.SetEmbedTextures(embedTextures);
+            exportSettings.SetExportFormat(exportFormat);
+            exportSettings.SetExportUnrendered(exportUnrendered);
+            exportSettings.SetKeepInstances(keepInstances);
+            exportSettings.SetLODExportType(lodLevel);
+            exportSettings.SetModelAnimIncludeOption(include);
+            exportSettings.SetObjectPosition(objectPosition);
+            exportSettings.SetPreserveImportSettings(preserveImportSettings);
+            exportSettings.SetUseMayaCompatibleNames(mayaCompatibleNaming);
+
+            return exportSettings;
         }
     }
 }

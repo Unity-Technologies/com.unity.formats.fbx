@@ -5,7 +5,6 @@ using UnityEditor;
 using System.Linq;
 using System.IO;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 #if UNITY_2021_2_OR_NEWER
 using UnityEditor.Search;
 #endif
@@ -35,6 +34,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
+    /// <summary>
+    /// Class for converting an exported FBX to a Prefab Variant.
+    /// </summary>
     public static class ConvertToNestedPrefab
     {
         const string GameObjectMenuItemName = "GameObject/Convert To FBX Prefab Variant...";
@@ -146,7 +148,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>list of instanced Model Prefabs</returns>
         /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
         /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
-        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static GameObject[] CreateInstantiatedModelPrefab(
             GameObject[] unityGameObjectsToConvert)
         {
@@ -415,8 +416,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Export options to use for exporting the model asset
         /// to convert to a Prefab.
         /// </param>
-        [SecurityPermission(SecurityAction.LinkDemand)]
-        public static GameObject Convert(
+        public static GameObject ConvertToPrefabVariant(
+            GameObject toConvert,
+            string fbxDirectoryFullPath = null,
+            string fbxFullPath = null,
+            string prefabDirectoryFullPath = null,
+            string prefabFullPath = null,
+            ConvertToPrefabVariantOptions convertOptions = null)
+        {
+            return Convert(toConvert, fbxDirectoryFullPath, fbxFullPath, prefabDirectoryFullPath, prefabFullPath, convertOptions?.ConvertToModelSettingsSerialize());
+        }
+
+        internal static GameObject Convert(
             GameObject toConvert,
             string fbxDirectoryFullPath = null,
             string fbxFullPath = null,
