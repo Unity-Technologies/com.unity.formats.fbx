@@ -1,51 +1,13 @@
 #if ENABLE_FBX_RECORDER
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Recorder;
 using UnityEditor.Recorder.Input;
-using UnityEditor;
-using UnityEditor.Animations;
-using System;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
     class FbxRecorder : GenericRecorder<FbxRecorderSettings>
     {
-        static readonly CurveFilterOptions DefaultCurveFilterOptions = new CurveFilterOptions()
-        {
-            keyframeReduction = true,
-            positionError = 0.5f,
-            rotationError = 0.5f,
-            scaleError = 0.5f,
-            floatError = 0.5f
-        };
-
-        static readonly CurveFilterOptions RegularCurveFilterOptions = new CurveFilterOptions
-        {
-            keyframeReduction = true
-        };
-
-        static readonly CurveFilterOptions NoCurveFilterOptions = new CurveFilterOptions
-        {
-            keyframeReduction = false
-        };
-
-        internal CurveFilterOptions GetCurveFilterOptions(AnimationInputSettings.CurveSimplificationOptions options)
-        {
-            switch (options)
-            {
-                case AnimationInputSettings.CurveSimplificationOptions.Lossy:
-                    return DefaultCurveFilterOptions;
-                case AnimationInputSettings.CurveSimplificationOptions.Lossless:
-                    return RegularCurveFilterOptions;
-                case AnimationInputSettings.CurveSimplificationOptions.Disabled:
-                    return NoCurveFilterOptions;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
         protected override void RecordFrame(RecordingSession ctx)
         {
         }
@@ -76,7 +38,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     var clipName = absolutePath.Replace(FileNameGenerator.SanitizePath(Application.dataPath), "Assets");
 
 #if UNITY_2019_3_OR_NEWER
-                    var options = GetCurveFilterOptions(settings.AnimationInputSettings.SimplyCurves);
+                    var options = settings.GetCurveFilterOptions(settings.AnimationInputSettings.SimplyCurves);
                     aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate, options);
 #else
                     aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate);

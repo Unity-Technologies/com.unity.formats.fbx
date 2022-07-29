@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Recorder;
 using UnityEditor.Recorder.Input;
+using UnityEditor.Animations;
+using System;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
@@ -85,6 +87,40 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     m_animDestBindingId = GenerateBindingId();
 
                 SetBinding(m_animDestBindingId, value);
+            }
+        }
+
+        static readonly CurveFilterOptions DefaultCurveFilterOptions = new CurveFilterOptions()
+        {
+            keyframeReduction = true,
+            positionError = 0.5f,
+            rotationError = 0.5f,
+            scaleError = 0.5f,
+            floatError = 0.5f
+        };
+
+        static readonly CurveFilterOptions RegularCurveFilterOptions = new CurveFilterOptions
+        {
+            keyframeReduction = true
+        };
+
+        static readonly CurveFilterOptions NoCurveFilterOptions = new CurveFilterOptions
+        {
+            keyframeReduction = false
+        };
+
+        internal CurveFilterOptions GetCurveFilterOptions(AnimationInputSettings.CurveSimplificationOptions options)
+        {
+            switch (options)
+            {
+                case AnimationInputSettings.CurveSimplificationOptions.Lossy:
+                    return DefaultCurveFilterOptions;
+                case AnimationInputSettings.CurveSimplificationOptions.Lossless:
+                    return RegularCurveFilterOptions;
+                case AnimationInputSettings.CurveSimplificationOptions.Disabled:
+                    return NoCurveFilterOptions;
+                default:
+                    throw new NotImplementedException();
             }
         }
 
