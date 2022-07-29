@@ -43,6 +43,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 #else
                     aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate);
 #endif
+                    if (settings.AnimationInputSettings.ClampedTangents)
+                    {
+                        FilterClip(clip);
+                    }
+
                     var root = ((AnimationInputSettings)aInput.settings).gameObject;
                     clip.name = "recorded_clip";
 
@@ -68,6 +73,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
             base.EndRecording(session);
+        }
+
+        void FilterClip(AnimationClip clip)
+        {
+            foreach (var bind in AnimationUtility.GetCurveBindings(clip))
+            {
+                var curve = AnimationUtility.GetEditorCurve(clip, bind);
+                for (var i = 0; i < curve.keys.Length; ++i)
+                {
+                    AnimationUtility.SetKeyLeftTangentMode(curve, i, AnimationUtility.TangentMode.ClampedAuto);
+                    AnimationUtility.SetKeyRightTangentMode(curve, i, AnimationUtility.TangentMode.ClampedAuto);
+                }
+                AnimationUtility.SetEditorCurve(clip, bind, curve);
+            }
         }
     }
 }
