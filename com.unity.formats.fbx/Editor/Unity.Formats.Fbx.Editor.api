@@ -42,6 +42,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         public ExportModelOptions() {}
     }
 
+    public class FbxExportSettingsException : System.Exception
+    {
+    }
+
     [UnityEditor.Recorder.RecorderSettings(typeof(UnityEditor.Formats.Fbx.Exporter.FbxRecorder), @"FBX")] public class FbxRecorderSettings : UnityEditor.Recorder.RecorderSettings
     {
         public UnityEditor.Recorder.Input.AnimationInputSettings AnimationInputSettings { get; set; }
