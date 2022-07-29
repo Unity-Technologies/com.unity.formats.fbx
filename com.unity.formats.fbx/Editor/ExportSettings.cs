@@ -45,20 +45,22 @@ namespace UnityEditor.Formats.Fbx.Exporter {
     /// </remarks>
     public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
 
-
+    /// <summary>
+    /// Exception class for FBX export settings.
+    /// </summary>
     [System.Serializable]
-    internal class FbxExportSettingsException : System.Exception
+    public class FbxExportSettingsException : System.Exception
     {
-        public FbxExportSettingsException() { }
+        internal FbxExportSettingsException() {}
 
-        public FbxExportSettingsException(string message)
-            : base(message) { }
+        internal FbxExportSettingsException(string message)
+            : base(message) {}
 
-        public FbxExportSettingsException(string message, System.Exception inner)
-            : base(message, inner) { }
+        internal FbxExportSettingsException(string message, System.Exception inner)
+            : base(message, inner) {}
 
-        protected FbxExportSettingsException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        internal FbxExportSettingsException(SerializationInfo info, StreamingContext context)
+            : base(info, context) {}
     }
 
     [CustomEditor(typeof(ExportSettings))]
