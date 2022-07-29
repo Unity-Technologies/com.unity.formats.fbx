@@ -221,25 +221,33 @@ namespace FbxExporter.UnitTests
         {
             Assert.IsNotNull(m_toExport);
             Assert.IsNotNull(m_toExport[0]);
-            var filePath = GetTempOutsideFilePath();
+            var tempFilePath = GetTempOutsideFilePath();
 
-            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxDirectoryFullPath: filePath));
+            // make sure that the filepath does not exist
+            if (File.Exists(tempFilePath))
+            {
+                File.Delete(tempFilePath);
+            }
+            Assert.That(File.Exists(tempFilePath), Is.False);
+
+            var fbxFilePath = GetRandomFbxFilePath();
+
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxDirectoryFullPath: tempFilePath));
 
             // conversion should fail
             Assert.IsTrue(m_toExport[0]);
 
-            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxFullPath: filePath));
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxFullPath: tempFilePath));
 
             Assert.IsTrue(m_toExport[0]);
 
-            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], prefabDirectoryFullPath: filePath));
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxFullPath: fbxFilePath, prefabDirectoryFullPath: tempFilePath));
 
             Assert.IsTrue(m_toExport[0]);
 
-            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], prefabFullPath: filePath));
+            Assert.Throws<FbxExportSettingsException>(() => ConvertToNestedPrefab.ConvertToPrefabVariant(m_toExport[0], fbxFullPath: fbxFilePath, prefabFullPath: tempFilePath));
 
             Assert.IsTrue(m_toExport[0]);
-
         }
     }
 }
