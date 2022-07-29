@@ -59,7 +59,7 @@ public static GameObject ConvertGameObject(GameObject go)
     convertSettings.ExportFormat = ExportFormat.Binary;
 
     // Returns the prefab variant linked to an FBX file.
-    return ConvertToNestedPrefab.Convert(go, fbxFullPath: filePath, prefabFullPath: prefabPath, exportOptions: convertSettings);
+    return ConvertToNestedPrefab.ConvertToPrefabVariant(go, fbxFullPath: filePath, prefabFullPath: prefabPath, convertOptions: convertSettings);
 }
 ```
 
