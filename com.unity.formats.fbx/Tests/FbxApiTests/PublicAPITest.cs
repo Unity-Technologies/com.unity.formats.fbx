@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
 using System.Linq;
+using System.IO;
 using UnityEditor.Formats.Fbx.Exporter;
 
 namespace FbxExporter.UnitTests
