@@ -1,4 +1,3 @@
-
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
@@ -1039,7 +1038,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            
             if (!unityGo.TryGetComponent<SkinnedMeshRenderer>(out var unitySkin))
             {
                 return false;
@@ -1632,7 +1630,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            
             if (!unityGo.TryGetComponent<Light>(out var unityLight))
                 return false;
 
@@ -2088,7 +2085,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     var fbxTime = FbxTime.FromSecondDouble(uniKeyFrame.time);
 
                     int fbxKeyIndex = fbxAnimCurve.KeyAdd(fbxTime);
-
 
                     // configure tangents
                     var lTangent = AnimationUtility.GetKeyLeftTangentMode(uniAnimCurve, keyIndex);
@@ -3778,7 +3774,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 return meshFilter.mesh.bounds;
             }
-           
+
             if (t.TryGetComponent<Collider>(out Collider collider))
             {
                 return collider.bounds;
