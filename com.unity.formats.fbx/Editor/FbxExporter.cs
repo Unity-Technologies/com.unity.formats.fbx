@@ -3947,20 +3947,26 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     Vector3 center = Vector3.zero;
                     TransformExportType transformExportType = TransformExportType.Global;
-                    switch(ExportOptions.ObjectPosition){
-                    case ObjectPosition.LocalCentered:
+                    switch (ExportOptions.ObjectPosition)
+                    {
+                        case ObjectPosition.LocalCentered:
+                            // one object to export -> move to (0,0,0)
+                            if (rootObjCount == 1)
+                            {
+                                var tempList = new List<GameObject>(revisedExportSet);
+                                center = tempList[0].transform.position;
+                                break;
+                            }
+                            // more than one object to export -> get bounding center
+                            center = FindCenter(revisedExportSet);
                             break;
-                        }
-                        // more than one object to export -> get bounding center
-                        center = FindCenter(revisedExportSet);
-                        break;
-                    case ObjectPosition.Reset:
-                        transformExportType = TransformExportType.Reset;
-                        break;
-                    // absolute center -> don't do anything
-                    default:
-                        center = Vector3.zero;
-                        break;
+                        case ObjectPosition.Reset:
+                            transformExportType = TransformExportType.Reset;
+                            break;
+                        // absolute center -> don't do anything
+                        default:
+                            center = Vector3.zero;
+                            break;
                     }
 
                     foreach (var unityGo in revisedExportSet)
