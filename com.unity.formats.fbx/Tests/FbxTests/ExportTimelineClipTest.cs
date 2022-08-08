@@ -89,7 +89,7 @@ namespace FbxExporter.UnitTests
             Assert.That(filePath, Is.Not.Null);
 
             var exportOptions = new ExportModelSettingsSerialize();
-            exportOptions.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+            exportOptions.SetModelAnimIncludeOption(Include.Anim);
 
             ModelExporter.ExportTimelineClip(filePath, timelineClipToExport, pd, exportOptions);
             FileAssert.Exists(filePath);

@@ -807,7 +807,7 @@ namespace FbxExporter.UnitTests
             exportOptions.SetAnimatedSkinnedMesh(true);
 
             // only export animation, not model and animation
-            exportOptions.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+            exportOptions.SetModelAnimIncludeOption(Include.Anim);
 
             tester.exportOptions = exportOptions;
             return tester.DoIt();

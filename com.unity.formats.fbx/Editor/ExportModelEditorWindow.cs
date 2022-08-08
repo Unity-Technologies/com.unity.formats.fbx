@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEditor.Presets;
 #endif
 using System.Linq;
-using System.Security.Permissions;
 using UnityEngine.Timeline;
 using UnityEngine.Playables;
 using UnityEditor.Timeline;
@@ -744,7 +743,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // don't transfer animation if we are exporting more than one hierarchy, the timeline clips from
                 // a playable director, or if only the model is being exported
                 // if we are on the timeline then export length can be more than 1
-                return SettingsObject.ModelAnimIncludeOption == ExportSettings.Include.Model || (!IsTimelineAnim && (ToExport == null || ToExport.Length != 1));
+                return SettingsObject.ModelAnimIncludeOption == Include.Model || (!IsTimelineAnim && (ToExport == null || ToExport.Length != 1));
             }
         }
 
@@ -761,7 +760,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 if (m_isTimelineAnim)
                 {
                     m_previousInclude = ExportModelSettingsInstance.info.ModelAnimIncludeOption;
-                    ExportModelSettingsInstance.info.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+                    ExportModelSettingsInstance.info.SetModelAnimIncludeOption(Include.Anim);
                 }
                 if (InnerEditor)
                 {
@@ -854,7 +853,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             get { return ExportModelSettingsInstance.info; }
         }
 
-        private ExportSettings.Include m_previousInclude = ExportSettings.Include.ModelAndAnim;
+        private Include m_previousInclude = Include.ModelAndAnim;
 
         public static ExportModelEditorWindow Init(IEnumerable<UnityEngine.Object> toExport, string filename = "", TimelineClip timelineClip = null, PlayableDirector director = null)
         {
@@ -946,7 +945,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand)]
         protected override bool Export()
         {
             if (string.IsNullOrEmpty(ExportFileName))

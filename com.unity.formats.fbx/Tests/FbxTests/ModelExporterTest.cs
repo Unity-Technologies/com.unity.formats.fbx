@@ -1057,24 +1057,24 @@ namespace FbxExporter.UnitTests
 
             // test export all
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
-            GameObject fbxObj = ExportToFbx(lodGroup, lodExportType: ExportSettings.LODExportType.All);
-            Assert.IsTrue(fbxObj);
+            GameObject fbxObj = ExportToFbx(lodGroup, lodExportType:LODExportType.All);
+            Assert.IsTrue (fbxObj);
 
             HashSet<string> expectedChildren = new HashSet<string>() { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
             CompareGameObjectChildren(fbxObj, expectedChildren);
 
             // test export highest
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0
-            fbxObj = ExportToFbx(lodGroup, lodExportType: ExportSettings.LODExportType.Highest);
-            Assert.IsTrue(fbxObj);
+            fbxObj = ExportToFbx(lodGroup, lodExportType:LODExportType.Highest);
+            Assert.IsTrue (fbxObj);
 
             expectedChildren = new HashSet<string>() { sphereLOD0.name, capsuleLOD0.name };
             CompareGameObjectChildren(fbxObj, expectedChildren);
 
             // test export lowest
             // expected LODs exported: Cube_LOD2
-            fbxObj = ExportToFbx(lodGroup, lodExportType: ExportSettings.LODExportType.Lowest);
-            Assert.IsTrue(fbxObj);
+            fbxObj = ExportToFbx(lodGroup, lodExportType:LODExportType.Lowest);
+            Assert.IsTrue (fbxObj);
 
             expectedChildren = new HashSet<string>() { cubeLOD2.name };
             CompareGameObjectChildren(fbxObj, expectedChildren);

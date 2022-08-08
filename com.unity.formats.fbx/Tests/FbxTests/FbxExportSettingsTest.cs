@@ -522,26 +522,26 @@ namespace FbxExporter.UnitTests
             var convertPrefabSettings = ExportSettings.instance.ConvertToPrefabSettings;
 
             // test ExportModelSettings preset
-            exportModelSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
-            Assert.That(exportModelSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+            exportModelSettings.info.SetExportFormat(ExportFormat.Binary);
+            Assert.That(exportModelSettings.info.ExportFormat, Is.EqualTo(ExportFormat.Binary));
 
             var exportModelPreset = new Preset(exportModelSettings);
-            exportModelSettings.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
-            Assert.That(exportModelSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.ASCII));
+            exportModelSettings.info.SetExportFormat(ExportFormat.ASCII);
+            Assert.That(exportModelSettings.info.ExportFormat, Is.EqualTo(ExportFormat.ASCII));
 
             exportModelPreset.ApplyTo(exportModelSettings);
-            Assert.That(exportModelSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+            Assert.That(exportModelSettings.info.ExportFormat, Is.EqualTo(ExportFormat.Binary));
 
             // test ConvertToPrefabSettings preset
-            convertPrefabSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
-            Assert.That(convertPrefabSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+            convertPrefabSettings.info.SetExportFormat(ExportFormat.Binary);
+            Assert.That(convertPrefabSettings.info.ExportFormat, Is.EqualTo(ExportFormat.Binary));
 
             var convertPrefabPreset = new Preset(convertPrefabSettings);
-            convertPrefabSettings.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
-            Assert.That(convertPrefabSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.ASCII));
+            convertPrefabSettings.info.SetExportFormat(ExportFormat.ASCII);
+            Assert.That(convertPrefabSettings.info.ExportFormat, Is.EqualTo(ExportFormat.ASCII));
 
             convertPrefabPreset.ApplyTo(convertPrefabSettings);
-            Assert.That(convertPrefabSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+            Assert.That(convertPrefabSettings.info.ExportFormat, Is.EqualTo(ExportFormat.Binary));
         }
 
         [Test]
@@ -604,7 +604,7 @@ namespace FbxExporter.UnitTests
             // check loading export settings from preset
             var exportSettingsPreset = ScriptableObject.CreateInstance(typeof(ExportModelSettings)) as ExportModelSettings;
             exportSettingsPreset.info.SetAnimatedSkinnedMesh(true);
-            exportSettingsPreset.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
+            exportSettingsPreset.info.SetExportFormat(ExportFormat.ASCII);
             var preset = new Preset(exportSettingsPreset);
 
             // set default preset
@@ -615,7 +615,7 @@ namespace FbxExporter.UnitTests
 
             // make sure the instance settings do not match the preset
             instance.ExportModelSettings.info.SetAnimatedSkinnedMesh(false);
-            instance.ExportModelSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
+            instance.ExportModelSettings.info.SetExportFormat(ExportFormat.Binary);
 
             Assert.That(exportSettingsPreset.info.AnimateSkinnedMesh, Is.Not.EqualTo(instance.ExportModelSettings.info.AnimateSkinnedMesh));
             Assert.That(exportSettingsPreset.info.ExportFormat, Is.Not.EqualTo(instance.ExportModelSettings.info.ExportFormat));
@@ -643,7 +643,7 @@ namespace FbxExporter.UnitTests
 
             // check modifying export settings persist and don't modify project settings
             exportWindow.ExportModelSettingsInstance.info.SetAnimatedSkinnedMesh(true);
-            exportWindow.ExportModelSettingsInstance.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
+            exportWindow.ExportModelSettingsInstance.info.SetExportFormat(ExportFormat.ASCII);
             exportWindow.SaveExportSettings();
 
             exportWindow.Close();
@@ -665,7 +665,7 @@ namespace FbxExporter.UnitTests
             // check loading export settings from preset
             var convertSettingsPreset = ScriptableObject.CreateInstance(typeof(ConvertToPrefabSettings)) as ConvertToPrefabSettings;
             convertSettingsPreset.info.SetAnimatedSkinnedMesh(true);
-            convertSettingsPreset.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
+            convertSettingsPreset.info.SetExportFormat(ExportFormat.ASCII);
             var preset = new Preset(convertSettingsPreset);
 
             // set default preset
@@ -676,7 +676,7 @@ namespace FbxExporter.UnitTests
 
             // make sure the instance settings do not match the preset
             instance.ConvertToPrefabSettings.info.SetAnimatedSkinnedMesh(false);
-            instance.ConvertToPrefabSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
+            instance.ConvertToPrefabSettings.info.SetExportFormat(ExportFormat.Binary);
 
             Assert.That(convertSettingsPreset.info.AnimateSkinnedMesh, Is.Not.EqualTo(instance.ConvertToPrefabSettings.info.AnimateSkinnedMesh));
             Assert.That(convertSettingsPreset.info.ExportFormat, Is.Not.EqualTo(instance.ConvertToPrefabSettings.info.ExportFormat));
@@ -704,7 +704,7 @@ namespace FbxExporter.UnitTests
 
             // check modifying export settings persist and don't modify project settings
             convertWindow.ConvertToPrefabSettingsInstance.info.SetAnimatedSkinnedMesh(true);
-            convertWindow.ConvertToPrefabSettingsInstance.info.SetExportFormat(ExportSettings.ExportFormat.ASCII);
+            convertWindow.ConvertToPrefabSettingsInstance.info.SetExportFormat(ExportFormat.ASCII);
             convertWindow.SaveExportSettings();
 
             convertWindow.Close();
@@ -769,28 +769,28 @@ namespace FbxExporter.UnitTests
 
             // test export window reset
             // change one setting from default
-            instance.ExportModelSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
-            Assert.That(instance.ExportModelSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+            instance.ExportModelSettings.info.SetExportFormat(ExportFormat.Binary);
+            Assert.That(instance.ExportModelSettings.info.ExportFormat, Is.EqualTo(ExportFormat.Binary));
 
             // reset export settings
             instance.Reset();
 
             // check that setting was reverted to default
-            Assert.That(instance.ExportModelSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.ASCII));
+            Assert.That(instance.ExportModelSettings.info.ExportFormat, Is.EqualTo(ExportFormat.ASCII));
 
             exportWindow.ResetSessionSettings();
             exportWindow.Close();
 
             // test convert prefab window reset
             // change one setting from default
-            instance.ConvertToPrefabSettings.info.SetExportFormat(ExportSettings.ExportFormat.Binary);
-            Assert.That(instance.ConvertToPrefabSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.Binary));
+            instance.ConvertToPrefabSettings.info.SetExportFormat(ExportFormat.Binary);
+            Assert.That(instance.ConvertToPrefabSettings.info.ExportFormat, Is.EqualTo(ExportFormat.Binary));
 
             // reset export settings
             instance.Reset();
 
             // check that setting was reverted to default
-            Assert.That(instance.ConvertToPrefabSettings.info.ExportFormat, Is.EqualTo(ExportSettings.ExportFormat.ASCII));
+            Assert.That(instance.ConvertToPrefabSettings.info.ExportFormat, Is.EqualTo(ExportFormat.ASCII));
 
             convertWindow.ResetSessionSettings();
             convertWindow.Close();

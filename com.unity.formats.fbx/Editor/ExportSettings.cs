@@ -6,23 +6,60 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 using UnityEditor.Presets;
 
-namespace UnityEditor.Formats.Fbx.Exporter
-{
-    [System.Serializable]
-    internal class FbxExportSettingsException : System.Exception
-    {
-        public FbxExportSettingsException() {}
+namespace UnityEditor.Formats.Fbx.Exporter {
 
-        public FbxExportSettingsException(string message)
+    /// <summary>
+    /// FBX export format options.
+    /// </summary>
+    public enum ExportFormat { ASCII = 0, Binary = 1 }
+
+    /// <summary>
+    /// Options for the type of data to include in the export
+    /// (Model only, animation only, or model and animation).
+    /// </summary>
+    public enum Include { Model = 1, Anim = 2, ModelAndAnim = 3 }
+
+    /// <summary>
+    /// Options for the position to use for the root GameObject.
+    /// 
+    /// Local Centered: For a single root, uses the local transform information.
+    /// If you select multiple GameObjects for export, the FBX Exporter centers GameObjects 
+    /// around a shared root while keeping their relative placement unchanged.
+    /// 
+    /// World Absolute: Uses the world position of the GameObjects.
+    /// 
+    /// Reset: Exports the object to (0,0,0).
+    /// </summary>
+    public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/}
+
+    /// <summary>
+    /// LODs to export for LOD groups.
+    /// </summary>
+    /// <remarks>
+    /// Notes:
+    /// - The FBX Exporter ignores LODs outside of selected hierarchy.
+    /// - The FBX Exporter does not filter out objects that are used as LODs and doesn't 
+    ///   export them if they aren’t direct descendants of their respective LOD Group
+    /// </remarks>
+    public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
+
+    /// <summary>
+    /// Exception class for FBX export settings.
+    /// </summary>
+    [System.Serializable]
+    public class FbxExportSettingsException : System.Exception
+    {
+        internal FbxExportSettingsException() {}
+
+        internal FbxExportSettingsException(string message)
             : base(message) {}
 
-        public FbxExportSettingsException(string message, System.Exception inner)
+        internal FbxExportSettingsException(string message, System.Exception inner)
             : base(message, inner) {}
 
-        protected FbxExportSettingsException(SerializationInfo info, StreamingContext context)
+        internal FbxExportSettingsException(SerializationInfo info, StreamingContext context)
             : base(info, context) {}
     }
 
@@ -193,7 +230,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.EndHorizontal();
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand)]
         public override void OnInspectorGUI()
         {
             ExportSettings exportSettings = (ExportSettings)target;
@@ -495,14 +531,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
     [FilePath("ProjectSettings/FbxExportSettings.asset", FilePathAttribute.Location.ProjectFolder)]
     internal class ExportSettings : ScriptableObject
     {
-        public enum ExportFormat { ASCII = 0, Binary = 1 }
-
-        public enum Include { Model = 0, Anim = 1, ModelAndAnim = 2 }
-
-        public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/ }
-
-        public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
-
         internal const string kDefaultSavePath = ".";
         private static List<string> s_PreferenceList = new List<string>() {kMayaOptionName, kMayaLtOptionName, kMaxOptionName};
         //Any additional names require a space after the name
@@ -637,7 +665,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Returns a set of valid vendor folder paths with no trailing '/'
         /// </summary>
-        [SecurityPermission(SecurityAction.LinkDemand)]
         private static HashSet<string> GetCustomVendorLocations()
         {
             HashSet<string> result = null;
@@ -659,7 +686,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return result;
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand)]
         private static HashSet<string> GetDefaultVendorLocations()
         {
             if (Application.platform == RuntimePlatform.WindowsEditor)
@@ -699,7 +725,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         internal static List<string> DCCVendorLocations
         {
-            [SecurityPermission(SecurityAction.LinkDemand)]
             get
             {
                 HashSet<string> result = GetCustomVendorLocations();
@@ -1106,7 +1131,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         ///
         /// If MAYA_LOCATION is set, add this to the list as well.
         /// </summary>
-        [SecurityPermission(SecurityAction.LinkDemand)]
         private static void FindDCCInstalls()
         {
             var dccOptionNames = instance.dccOptionNames;
@@ -1172,7 +1196,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>The first valid vendor location</returns>
         internal static string FirstValidVendorLocation
         {
-            [SecurityPermission(SecurityAction.LinkDemand)]
             get
             {
                 List<string> locations = DCCVendorLocations;
@@ -1222,7 +1245,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand)]
         internal static GUIContent[] GetDCCOptions()
         {
             if (instance.dccOptionNames == null ||
@@ -1287,8 +1309,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         internal enum DCCType { Maya, Max };
 
-        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         internal static void AddDCCOption(string newOption, DCCType dcc)
         {
             if (Application.platform == RuntimePlatform.OSXEditor && dcc == DCCType.Maya)
@@ -1343,8 +1363,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Ask the version number by running maya.
         /// </summary>
-        [SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         internal static string AskMayaVersion(string exePath)
         {
             System.Diagnostics.Process myProcess = new System.Diagnostics.Process();

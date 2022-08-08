@@ -78,7 +78,7 @@ namespace FbxExporter.UnitTests
         /// <param name="animOnly">If set to <c>true</c> export animation only.</param>
         internal GameObject ExportToFbx(
             GameObject hierarchy, bool animOnly = false,
-            ExportSettings.LODExportType lodExportType = ExportSettings.LODExportType.All
+            LODExportType lodExportType = LODExportType.All
         )
         {
             string filename = GetRandomFbxFilePath();
@@ -86,7 +86,7 @@ namespace FbxExporter.UnitTests
             exportOptions.SetLODExportType(lodExportType);
             if (animOnly)
             {
-                exportOptions.SetModelAnimIncludeOption(ExportSettings.Include.Anim);
+                exportOptions.SetModelAnimIncludeOption(Include.Anim);
             }
             var exportedFilePath = ModelExporter.ExportObject(
                 filename, hierarchy, exportOptions

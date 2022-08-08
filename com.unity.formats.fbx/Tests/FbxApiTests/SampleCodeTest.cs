@@ -17,10 +17,34 @@ namespace FbxExporter.UnitTests
         public static void ExportGameObjects(Object[] objects)
         {
             string filePath = Path.Combine(Application.dataPath, "MyGame.fbx");
-            ModelExporter.ExportObjects(filePath, objects);
 
-            // ModelExporter.ExportObject can be used instead of 
-            // ModelExporter.ExportObjects to export a single game object
+            ExportModelOptions exportSettings = new ExportModelOptions();
+            exportSettings.ExportFormat = ExportFormat.Binary;
+            exportSettings.KeepInstances = false;
+
+            // Note: If you don't pass any export settings, Unity uses the default settings.
+            ModelExporter.ExportObjects(filePath, objects, exportSettings);
+
+            // You can use ModelExporter.ExportObject instead of
+            // ModelExporter.ExportObjects to export a single GameObject.
+        }
+
+        /// <summary>
+        /// Convert GameObject sample function.
+        /// </summary>
+        /// <param name="go">The GameObject to convert.</param>
+        public static GameObject ConvertGameObject(GameObject go)
+        {
+            string filePath = Path.Combine(Application.dataPath, "MyObject.fbx");
+            string prefabPath = Path.Combine(Application.dataPath, "MyObject.prefab");
+
+            // Settings to use when exporting the FBX to convert to a prefab.
+            // Note: If you don't pass any export settings, Unity uses the default settings.
+            ConvertToPrefabVariantOptions convertSettings = new ConvertToPrefabVariantOptions();
+            convertSettings.ExportFormat = ExportFormat.Binary;
+
+            // Returns the prefab variant linked to an FBX file.
+            return ConvertToNestedPrefab.ConvertToPrefabVariant(go, fbxFullPath: filePath, prefabFullPath: prefabPath, convertOptions: convertSettings);
         }
 
         [Test]
@@ -47,6 +71,53 @@ namespace FbxExporter.UnitTests
                 Assert.Greater(mesh.triangles.Length, 0);
             }
 
+            AssetDatabase.DeleteAsset(assetPath);
+        }
+
+        [Test]
+        public void TestConvertGameObjectSample()
+        {
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+
+            sphere.transform.parent = cube.transform;
+
+            var result = ConvertGameObject(cube);
+
+            var filename = "MyObject.fbx";
+            var prefabFilename = "MyObject.prefab";
+
+            var exportPath = Path.Combine(Application.dataPath, filename);
+            Assert.That(exportPath, Does.Exist);
+            var prefabExportPath = Path.Combine(Application.dataPath, prefabFilename);
+            Assert.That(prefabExportPath, Does.Exist);
+
+            // original hierarchy should no longer exist
+            Assert.IsTrue(!cube);
+            Assert.IsTrue(result);
+
+            // create a duplicate hierarchy to check it matches
+            cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+
+            sphere.transform.parent = cube.transform;
+
+            ConvertToNestedPrefabTest.AssertSameHierarchy(cube, result, ignoreRootName: true);
+
+            // check FBX
+            var assetPath = "Assets/" + filename;
+
+            Object[] loaded = AssetDatabase.LoadAllAssetsAtPath(assetPath);
+            Assert.That(loaded, Is.Not.Null.Or.Empty);
+            var loadedMeshes = (from loadedObj in loaded where loadedObj as Mesh != null select loadedObj as Mesh).ToArray();
+
+            Assert.AreEqual(2, loadedMeshes.Length);
+            foreach (var mesh in loadedMeshes)
+            {
+                Assert.Greater(mesh.triangles.Length, 0);
+            }
+
+            AssetDatabase.DeleteAsset("Assets/" + prefabFilename);
             AssetDatabase.DeleteAsset(assetPath);
         }
 

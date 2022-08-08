@@ -5,7 +5,6 @@ using UnityEditor;
 using System.Linq;
 using System.IO;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 #if UNITY_2021_2_OR_NEWER
 using UnityEditor.Search;
 #endif
@@ -35,7 +34,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 
-    internal static class ConvertToNestedPrefab
+    /// <summary>
+    /// Class for converting an exported FBX to a Prefab Variant.
+    /// </summary>
+    public static class ConvertToNestedPrefab
     {
         const string GameObjectMenuItemName = "GameObject/Convert To FBX Prefab Variant...";
         const string AssetsMenuItemName = "Assets/Convert To FBX Prefab Variant...";
@@ -104,7 +106,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         [MenuItem(GameObjectMenuItemName, true, 30)]
         [MenuItem(AssetsMenuItemName, true, 30)]
-        public static bool OnValidateMenuItem()
+        internal static bool OnValidateMenuItem()
         {
             return true;
         }
@@ -112,7 +114,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Gets the export settings.
         /// </summary>
-        public static ExportSettings ExportSettings
+        internal static ExportSettings ExportSettings
         {
             get { return ExportSettings.instance; }
         }
@@ -147,8 +149,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>list of instanced Model Prefabs</returns>
         /// <param name="unityGameObjectsToConvert">Unity game objects to convert to Model Prefab instances</param>
         /// <param name="path">Path to save Model Prefab; use FbxExportSettings if null</param>
-        [SecurityPermission(SecurityAction.LinkDemand)]
-        public static GameObject[] CreateInstantiatedModelPrefab(
+        internal static GameObject[] CreateInstantiatedModelPrefab(
             GameObject[] unityGameObjectsToConvert)
         {
             var toExport = ModelExporter.RemoveRedundantObjects(unityGameObjectsToConvert);
@@ -381,15 +382,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Returns the prefab asset that's linked to the fbx.
         ///
         /// If 'toConvert' is:
-        /// <list>
-        /// <item>An object in the scene, then the hierarchy will be exported
-        /// and a new prefab variant created pointing to the new fbx.</item>
-        /// <item>The root of an fbx asset, or the root of an instance of an
-        /// fbx asset, then a new prefab variant will be created
-        /// pointing to the existing fbx.</item>
-        /// <item>A prefab asset,
-        /// then a new fbx asset will be exported and a new prefab variant created
-        /// pointing to the fbx.</item>
+        /// <list type="bullet">
+        /// <item><description>
+        /// A GameObject in the Scene, then the method exports the hierarchy to an FBX
+        /// and creates a new Prefab Variant pointing to the exported FBX.
+        /// </description></item>
+        /// <item><description>
+        /// The root of an FBX asset, or the root of an instance of an
+        /// FBX asset, then the method creates a new Prefab Variant
+        /// pointing to the existing FBX.
+        /// </description></item>
+        /// <item><description>
+        /// A Prefab asset,
+        /// then the method exports a new FBX asset and creates a new Prefab Variant
+        /// pointing to the FBX.
+        /// </description></item>
         /// </list>
         /// </summary>
         /// <returns>The prefab variant linked to an fbx file.</returns>
@@ -413,8 +420,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// file under a unique filename. May be null, in which case we use
         /// the export settings. Ignored if 'prefabFullPath' is specified.
         /// Ignored if 'toConvert' is a prefab asset.</param>
-        [SecurityPermission(SecurityAction.LinkDemand)]
-        public static GameObject Convert(
+        /// <param name="exportOptions">
+        /// Export options to use for exporting the model asset
+        /// to convert to a Prefab.
+        /// </param>
+        public static GameObject ConvertToPrefabVariant(
+            GameObject toConvert,
+            string fbxDirectoryFullPath = null,
+            string fbxFullPath = null,
+            string prefabDirectoryFullPath = null,
+            string prefabFullPath = null,
+            ConvertToPrefabVariantOptions convertOptions = null)
+        {
+            return Convert(toConvert, fbxDirectoryFullPath, fbxFullPath, prefabDirectoryFullPath, prefabFullPath, convertOptions?.ConvertToModelSettingsSerialize());
+        }
+
+        internal static GameObject Convert(
             GameObject toConvert,
             string fbxDirectoryFullPath = null,
             string fbxFullPath = null,
@@ -615,7 +636,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Check whether <see>Convert</see> will be exporting an fbx file,
         /// or reusing one.
         /// </summary>
-        public static bool WillExportFbx(GameObject toConvert)
+        internal static bool WillExportFbx(GameObject toConvert)
         {
             return GetFbxAssetOrNull(toConvert) == null;
         }
@@ -766,7 +787,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         /// <returns>new file name.</returns>
         /// <param name="filename">Filename.</param>
-        public static string IncrementFileName(string path, string filename)
+        internal static string IncrementFileName(string path, string filename)
         {
             string fileWithoutExt = Path.GetFileNameWithoutExtension(filename);
             string ext = Path.GetExtension(filename);
@@ -812,7 +833,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// e.g. Sphere becomes Sphere 1
         /// </summary>
         /// <param name="exportSet">Export set.</param>
-        public static void EnforceUniqueNames(IEnumerable<GameObject> exportSet)
+        internal static void EnforceUniqueNames(IEnumerable<GameObject> exportSet)
         {
             Dictionary<string, int> NameToIndexMap = new Dictionary<string, int>();
             string format = "{0} {1}";
