@@ -771,10 +771,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // We'll export either Phong or Lambert. Phong if it calls
             // itself specular, Lambert otherwise.
-            System.StringComparison strignComparison = System.StringComparison.OrdinalIgnoreCase;
+            System.StringComparison stringComparison = System.StringComparison.OrdinalIgnoreCase;
             var shader = unityMaterial.shader;
-            bool specular = shader.name.IndexOf("specular", strignComparison) >= 0;
-            bool hdrp = shader.name.IndexOf("hdrp", strignComparison) >= 0;
+            bool specular = shader.name.IndexOf("specular", stringComparison) >= 0;
+            bool hdrp = shader.name.IndexOf("hdrp", stringComparison) >= 0;
 
             var fbxMaterial = specular
                 ? FbxSurfacePhong.Create(fbxScene, fbxName)
