@@ -1,8 +1,23 @@
 # Changes in Fbx Exporter
 
-## [Unreleased]
+## [5.0.0-pre.1]
+
+### Added
+- Exposed FBX Recorder Settings class to the public API.
+- Exposed functions to pass export options on export to the public API.
+- Exposed function to convert to prefab variant to the public API.
+
 ### Changed
 - Added support for exporting texture offset, scale and wrap mode. Thank you to @hybridherbst for the additions.
+- Updated the minimum Unity version to 2020.3.
+- Updated the minimum Recorder version to 4.0.0.
+- Updated the FBX SDK bindings to 5.0.0-pre.1.
+
+### Fixed
+- Cache result of SelectionContainsPrefabInstance in Editor Window to avoid unnecessary recalculations.
+- Use lists instead of dictionaries for property channel maps.
+- Add optimizations to speed up convert to prefab variant.
+- Improve formatting and functions of the FBX exporter. Thank you to @smitdylan2001 for the contributions.
 
 ## [4.2.0-pre.1] - 2022-04-20
 ### Changed
