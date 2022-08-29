@@ -8,8 +8,8 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using UnityEditor.Presets;
 
-namespace UnityEditor.Formats.Fbx.Exporter {
-
+namespace UnityEditor.Formats.Fbx.Exporter
+{
     /// <summary>
     /// FBX export format options.
     /// </summary>
@@ -52,7 +52,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
     {
         /// <summary>
         /// For a single root, uses the local transform information.
-        /// If you select multiple GameObjects for export, the FBX Exporter centers GameObjects 
+        /// If you select multiple GameObjects for export, the FBX Exporter centers GameObjects
         /// around a shared root while keeping their relative placement unchanged.
         /// </summary>
         LocalCentered = 0,
@@ -72,7 +72,7 @@ namespace UnityEditor.Formats.Fbx.Exporter {
     /// <remarks>
     /// Notes:
     /// - The FBX Exporter ignores LODs outside of selected hierarchy.
-    /// - The FBX Exporter does not filter out objects that are used as LODs and doesn't 
+    /// - The FBX Exporter does not filter out objects that are used as LODs and doesn't
     ///   export them if they aren’t direct descendants of their respective LOD Group
     /// </remarks>
     public enum LODExportType
