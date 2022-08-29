@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [5.0.0-pre.1]
+## [5.0.0-pre.1] - 2022-09-07
 
 ### Added
 - Exposed FBX Recorder Settings class to the public API.
