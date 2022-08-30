@@ -4,6 +4,15 @@
 ### Changed
 - Added support for exporting texture offset, scale and wrap mode. Thank you to @hybridherbst for the additions.
 
+## [4.2.0] - 2022-07-07
+### Changed
+- Add more details to documentation for material and texture export.
+- Add troubleshooting documentation for exporting camera animation only from Maya plugin.
+
+### Fixed
+- Fix FBX recorder does not record blendshape animation.
+- Fix only 4 uvs exported instead of 8.
+
 ## [4.2.0-pre.1] - 2022-04-20
 ### Changed
 - Added export options to Keep Instances and Embed Textures. Thank you to @hybridherbst for the additions.
