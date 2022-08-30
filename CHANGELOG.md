@@ -15,7 +15,7 @@
 
 ### Fixed
 - Cache result of SelectionContainsPrefabInstance in Editor Window to avoid unnecessary recalculations.
-- Use lists instead of dictionaries for property channel maps.
+- Use lists instead of dictionaries for property channel maps in order to ensure consistent order of operations.
 - Add optimizations to speed up convert to prefab variant.
 - Improve formatting and functions of the FBX exporter. Thank you to @smitdylan2001 for the contributions.
 
