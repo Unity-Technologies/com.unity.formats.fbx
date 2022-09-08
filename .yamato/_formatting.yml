@@ -1,0 +1,18 @@
+ formatting_apply:
+   name: Formatting (Apply requested changes)
+   agent:
+     type: Unity::VM::osx
+     image: package-ci/mac:stable
+     flavor: i1.xlarge
+   commands:
+     - git config --global user.name "noreply@unity3d.com"
+     - git config --global user.email "noreply@unity3d.com"
+     - git checkout $GIT_BRANCH
+     - git pull origin $GIT_BRANCH # In case the job was not run on the latest commit, attempt to get it. There may be situations with merge conflicts, in that case wait for everyone to push their changes and then only run the formatting job on HEAD.
+     - unity-downloader-cli -c editor -u {{ all_test_editors[0].version }}
+     - .Editor/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath TestProjects/apply-formatting
+     - .Editor/Unity.app/Contents/MacOS/Unity -executeMethod Automation.Format.ApplyFormatting -projectPath TestProjects/apply-formatting  
+     - git status
+     - git add -u *.cs
+     - git commit -m "Apply formatting changes"
+     - git push --set-upstream origin $GIT_BRANCH
