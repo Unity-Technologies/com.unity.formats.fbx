@@ -36,7 +36,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         Model = 1,
         /// <summary>
-        /// Export animation only.
+        /// Export the animation only.
         /// </summary>
         Anim = 2,
         /// <summary>
