@@ -8,31 +8,64 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using UnityEditor.Presets;
 
-namespace UnityEditor.Formats.Fbx.Exporter {
-
+namespace UnityEditor.Formats.Fbx.Exporter
+{
     /// <summary>
     /// FBX export format options.
     /// </summary>
-    public enum ExportFormat { ASCII = 0, Binary = 1 }
+    public enum ExportFormat
+    {
+        /// <summary>
+        /// Output the FBX in ASCII format.
+        /// </summary>
+        ASCII = 0,
+        /// <summary>
+        /// Output the FBX in Binary format.
+        /// </summary>
+        Binary = 1
+    }
 
     /// <summary>
     /// Options for the type of data to include in the export
     /// (Model only, animation only, or model and animation).
     /// </summary>
-    public enum Include { Model = 1, Anim = 2, ModelAndAnim = 3 }
+    public enum Include
+    {
+        /// <summary>
+        /// Export the model without animation.
+        /// </summary>
+        Model = 1,
+        /// <summary>
+        /// Export the animation only.
+        /// </summary>
+        Anim = 2,
+        /// <summary>
+        /// Export both the model and animation.
+        /// </summary>
+        ModelAndAnim = 3
+    }
 
     /// <summary>
     /// Options for the position to use for the root GameObject.
-    /// 
-    /// Local Centered: For a single root, uses the local transform information.
-    /// If you select multiple GameObjects for export, the FBX Exporter centers GameObjects 
-    /// around a shared root while keeping their relative placement unchanged.
-    /// 
-    /// World Absolute: Uses the world position of the GameObjects.
-    /// 
-    /// Reset: Exports the object to (0,0,0).
     /// </summary>
-    public enum ObjectPosition { LocalCentered = 0, WorldAbsolute = 1, Reset = 2 /* For convert to model only, no UI option*/}
+    public enum ObjectPosition
+    {
+        /// <summary>
+        /// For a single root, uses the local transform information.
+        /// If you select multiple GameObjects for export, the FBX Exporter centers GameObjects
+        /// around a shared root while keeping their relative placement unchanged.
+        /// </summary>
+        LocalCentered = 0,
+        /// <summary>
+        /// Uses the world position of the GameObjects.
+        /// </summary>
+        WorldAbsolute = 1,
+        /// <summary>
+        /// Exports the GameObject to (0,0,0).
+        /// For convert to FBX prefab variant only, no UI option.
+        /// </summary>
+        Reset = 2
+    }
 
     /// <summary>
     /// LODs to export for LOD groups.
@@ -40,10 +73,24 @@ namespace UnityEditor.Formats.Fbx.Exporter {
     /// <remarks>
     /// Notes:
     /// - The FBX Exporter ignores LODs outside of selected hierarchy.
-    /// - The FBX Exporter does not filter out objects that are used as LODs and doesn't 
+    /// - The FBX Exporter does not filter out objects that are used as LODs and doesn't
     ///   export them if they aren’t direct descendants of their respective LOD Group
     /// </remarks>
-    public enum LODExportType { All = 0, Highest = 1, Lowest = 2 }
+    public enum LODExportType
+    {
+        /// <summary>
+        /// Export all LODs.
+        /// </summary>
+        All = 0,
+        /// <summary>
+        /// Export only the highest LOD.
+        /// </summary>
+        Highest = 1,
+        /// <summary>
+        /// Export only the lowest LOD.
+        /// </summary>
+        Lowest = 2
+    }
 
     /// <summary>
     /// Exception class for FBX export settings.
