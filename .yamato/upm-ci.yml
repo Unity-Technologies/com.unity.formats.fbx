@@ -92,6 +92,8 @@ api_doc_validation:
     type: Unity::VM
     image: package-ci/ubuntu:stable
     flavor: b1.medium
+  variables:
+    UPM_REGISTRY: https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates
   commands:
     # Needed for now, until we get a recent upm-pvp into the image.
     - sudo apt-get update && sudo apt-get install -y upm-pvp
