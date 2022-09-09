@@ -61,7 +61,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         WorldAbsolute = 1,
         /// <summary>
-        /// Exports the object to (0,0,0).
+        /// Exports the GameObject to (0,0,0).
         /// For convert to FBX prefab variant only, no UI option.
         /// </summary>
         Reset = 2
