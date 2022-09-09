@@ -117,7 +117,7 @@ validate_{{ platform.name }}_{{ editor.version }}:
     flavor: {{ platform.flavor}}
   commands:
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-    - upm-ci package test --unity-version {{ editor.version }} --type vetting-tests --platform editmode --package-path com.unity.formats.fbx
+    - upm-ci package test --unity-version {{ editor.version }} --type isolation-tests --enable-load-and-test-isolation --platform editmode --package-path com.unity.formats.fbx 
   artifacts:
     logs:
       paths:
