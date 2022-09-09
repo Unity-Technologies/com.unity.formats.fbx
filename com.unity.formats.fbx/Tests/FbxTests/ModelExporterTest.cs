@@ -531,11 +531,17 @@ namespace FbxExporter.UnitTests
             mesh.normals = quadMesh.normals;
             mesh.colors = quadMesh.colors;
 
-            Assert.IsNotNull(mesh.tangents);
-            Assert.IsNotNull(mesh.vertices);
-            Assert.IsNotNull(mesh.triangles);
-            Assert.IsNotNull(mesh.normals);
-            Assert.IsNotNull(mesh.colors);
+            // set all the uvs
+            for(int i = 0; i < 8; i++)
+            {
+                var uvs = new List<Vector2>();
+                for(int j = 0; j < mesh.vertices.Length; j++)
+                {
+                    uvs.Add(new Vector2(i, j));
+                }
+                mesh.SetUVs(i, uvs);
+            }
+
 
             var gameObject = new GameObject();
             var meshFilter = gameObject.AddComponent<MeshFilter>();
@@ -577,6 +583,20 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual(mesh.normals, fbxMesh.normals);
             Assert.AreEqual(mesh.colors, fbxMesh.colors);
             Assert.AreEqual(mesh.tangents, fbxMesh.tangents);
+
+            // check the uvs
+            var origUVs = new List<Vector2>();
+            var exportedUVs = new List<Vector2>();
+            for(int i = 0; i < 8; i++)
+            {
+                mesh.GetUVs(i, origUVs);
+                fbxMesh.GetUVs(i, exportedUVs);
+
+                Assert.That(origUVs, Is.EqualTo(exportedUVs));
+
+                origUVs.Clear();
+                exportedUVs.Clear();
+            }
         }
 
         private delegate void SetImportSettings(ModelImporter importer);

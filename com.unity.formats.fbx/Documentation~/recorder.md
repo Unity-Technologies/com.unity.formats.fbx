@@ -4,7 +4,7 @@ With the FBX Exporter and the [Unity Recorder](https://docs.unity3d.com/Packages
 
 ## Requirements
 
-* To use the FBX Recorder, you must install the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/) package (version 2.5.5 or higher).
+* To use the FBX Recorder, you must install the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/) package (version 4.0.0 or higher). Compatible with Unity 2022.1 and later.
 
 
 ## Using the FBX Recorder from the Recorder window

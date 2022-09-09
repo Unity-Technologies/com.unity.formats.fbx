@@ -102,7 +102,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        // Validate the menu items defined above.
+        /// Validate the menu items defined above.
         /// </summary>
         [MenuItem(GameObjectMenuItemName, true, 30)]
         [MenuItem(AssetsMenuItemName, true, 30)]
@@ -420,7 +420,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// file under a unique filename. May be null, in which case we use
         /// the export settings. Ignored if 'prefabFullPath' is specified.
         /// Ignored if 'toConvert' is a prefab asset.</param>
-        /// <param name="exportOptions">
+        /// <param name="convertOptions">
         /// Export options to use for exporting the model asset
         /// to convert to a Prefab.
         /// </param>
