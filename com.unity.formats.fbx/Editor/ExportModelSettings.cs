@@ -58,7 +58,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Include", "Select whether to export models, animation or both."), GUILayout.Width(LabelWidth - FieldOffset));
             EditorGUI.BeginDisabledGroup(disableIncludeDropdown);
-
             exportSettings.SetModelAnimIncludeOption((Include)EditorGUILayout.Popup((int)exportSettings.ModelAnimIncludeOption, includeOptions));
             EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
