@@ -762,7 +762,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return existingDirectories;
             }
 
-            throw new NotImplementedException();
+            // empty list for not implemented (e.g. Linux)
+            return new HashSet<string>();
         }
 
         /// <summary>
@@ -1183,17 +1184,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var dccOptionNames = instance.dccOptionNames;
             var dccOptionPaths = instance.dccOptionPaths;
 
+            var vendorLocations = DCCVendorLocations;
+
             // find dcc installation from vendor locations
-            for (int i = 0; i < DCCVendorLocations.Count; i++)
+            for (int i = 0; i < vendorLocations.Count; i++)
             {
-                if (!Directory.Exists(DCCVendorLocations[i]))
+                if (!Directory.Exists(vendorLocations[i]))
                 {
                     // no autodesk products installed
                     continue;
                 }
                 // List that directory and find the right version:
                 // either the newest version, or the exact version we wanted.
-                var adskRoot = new System.IO.DirectoryInfo(DCCVendorLocations[i]);
+                var adskRoot = new System.IO.DirectoryInfo(vendorLocations[i]);
                 foreach (var productDir in adskRoot.GetDirectories())
                 {
                     var product = productDir.Name;
