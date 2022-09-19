@@ -1,18 +1,18 @@
 {
   "dependencies": {
     "com.autodesk.fbx": {
-      "version": "4.2.0-pre.1",
+      "version": "5.0.0-pre.1",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages.unity.com"
+      "url": "https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.coding": {
       "version": "0.1.0-preview.22",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages.unity.com"
+      "url": "https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.collab-proxy": {
       "version": "1.17.2",
@@ -21,14 +21,14 @@
       "dependencies": {
         "com.unity.services.core": "1.0.1"
       },
-      "url": "https://packages.unity.com"
+      "url": "https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.ext.nunit": {
       "version": "1.0.6",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages.unity.com"
+      "url": "https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.formats.fbx": {
       "version": "file:../../../com.unity.formats.fbx",
@@ -36,7 +36,7 @@
       "source": "local",
       "dependencies": {
         "com.unity.timeline": "1.7.1",
-        "com.autodesk.fbx": "4.2.0-pre.1"
+        "com.autodesk.fbx": "5.0.0-pre.1"
       }
     },
     "com.unity.ide.rider": {
@@ -46,7 +46,7 @@
       "dependencies": {
         "com.unity.test-framework": "1.1.1"
       },
-      "url": "https://packages.unity.com"
+      "url": "https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.ide.visualstudio": {
       "version": "2.0.16",
@@ -55,14 +55,14 @@
       "dependencies": {
         "com.unity.test-framework": "1.1.9"
       },
-      "url": "https://packages.unity.com"
+      "url": "https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.ide.vscode": {
       "version": "1.2.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages.unity.com"
+      "url": "https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.services.core": {
       "version": "1.0.1",
@@ -71,7 +71,7 @@
       "dependencies": {
         "com.unity.modules.unitywebrequest": "1.0.0"
       },
-      "url": "https://packages.unity.com"
+      "url": "https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.test-framework": {
       "version": "1.1.31",
@@ -82,7 +82,7 @@
         "com.unity.modules.imgui": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0"
       },
-      "url": "https://packages.unity.com"
+      "url": "https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.textmeshpro": {
       "version": "3.0.6",
@@ -91,7 +91,7 @@
       "dependencies": {
         "com.unity.ugui": "1.0.0"
       },
-      "url": "https://packages.unity.com"
+      "url": "https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.timeline": {
       "version": "1.7.1",
@@ -103,7 +103,7 @@
         "com.unity.modules.audio": "1.0.0",
         "com.unity.modules.particlesystem": "1.0.0"
       },
-      "url": "https://packages.unity.com"
+      "url": "https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.ugui": {
       "version": "1.0.0",
