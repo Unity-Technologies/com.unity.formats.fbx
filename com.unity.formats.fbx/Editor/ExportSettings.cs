@@ -34,15 +34,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export the model without animation.
         /// </summary>
-        Model = 1,
+        Model = 0,
         /// <summary>
         /// Export the animation only.
         /// </summary>
-        Anim = 2,
+        Anim = 1,
         /// <summary>
         /// Export both the model and animation.
         /// </summary>
-        ModelAndAnim = 3
+        ModelAndAnim = 2
     }
 
     /// <summary>
