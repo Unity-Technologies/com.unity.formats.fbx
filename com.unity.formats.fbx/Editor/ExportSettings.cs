@@ -735,35 +735,34 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private static HashSet<string> GetDefaultVendorLocations()
         {
-            if (Application.platform == RuntimePlatform.WindowsEditor)
+            HashSet<string> platformDefaults;
+            switch (Application.platform)
             {
-                HashSet<string> windowsDefaults = new HashSet<string>() { "C:/Program Files/Autodesk" };
-                HashSet<string> existingDirectories = new HashSet<string>();
-                foreach (string path in windowsDefaults)
-                {
-                    if (Directory.Exists(path))
-                    {
-                        existingDirectories.Add(path);
-                    }
-                }
-                return existingDirectories;
-            }
-            else if (Application.platform == RuntimePlatform.OSXEditor)
-            {
-                HashSet<string> MacOSDefaults = new HashSet<string>() { "/Applications/Autodesk" };
-                HashSet<string> existingDirectories = new HashSet<string>();
-                foreach (string path in MacOSDefaults)
-                {
-                    if (Directory.Exists(path))
-                    {
-                        existingDirectories.Add(path);
-                    }
-                }
-                return existingDirectories;
+                case RuntimePlatform.WindowsEditor:
+                    platformDefaults = new HashSet<string>() { "C:/Program Files/Autodesk" };
+                    break;
+                case RuntimePlatform.OSXEditor:
+                    platformDefaults = new HashSet<string>() { "/Applications/Autodesk" };
+                    break;
+                case RuntimePlatform.LinuxEditor:
+                    platformDefaults = new HashSet<string>() { "/usr/autodesk" };
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
 
-            // empty list for not implemented (e.g. Linux)
-            return new HashSet<string>();
+            HashSet<string> existingDirectories = new HashSet<string>();
+            if (platformDefaults != null)
+            {
+                foreach (string path in platformDefaults)
+                {
+                    if (Directory.Exists(path))
+                    {
+                        existingDirectories.Add(path);
+                    }
+                }
+            }
+            return existingDirectories;
         }
 
         /// <summary>
@@ -1272,7 +1271,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             switch (Application.platform)
             {
                 case RuntimePlatform.WindowsEditor:
-                    return location + "/bin/maya.exe";
+                    return $"{location}/bin/maya.exe";
                 case RuntimePlatform.OSXEditor:
                     // MAYA_LOCATION on mac is set by Autodesk to be the
                     // Contents directory. But let's make it easier on people
@@ -1280,16 +1279,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // directory that holds the app bundle.
                     if (location.EndsWith(".app/Contents"))
                     {
-                        return location + "/MacOS/Maya";
+                        return $"{location}/MacOS/Maya";
                     }
                     else if (location.EndsWith(".app"))
                     {
-                        return location + "/Contents/MacOS/Maya";
+                        return $"{location}/Contents/MacOS/Maya";
                     }
                     else
                     {
-                        return location + "/Maya.app/Contents/MacOS/Maya";
+                        return $"{location}/Maya.app/Contents/MacOS/Maya";
                     }
+                case RuntimePlatform.LinuxEditor:
+                    return $"{location}/Maya";
                 default:
                     throw new NotImplementedException();
             }
