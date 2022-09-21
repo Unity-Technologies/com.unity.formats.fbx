@@ -875,6 +875,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     zipApp = "7z.exe";
                     break;
                 case RuntimePlatform.OSXEditor:
+                case RuntimePlatform.LinuxEditor:
                     zipApp = "7za";
                     break;
                 default:
