@@ -1290,7 +1290,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         return $"{location}/Maya.app/Contents/MacOS/Maya";
                     }
                 case RuntimePlatform.LinuxEditor:
-                    return $"{location}/Maya";
+                    return $"{location}/bin/maya";
                 default:
                     throw new NotImplementedException();
             }
