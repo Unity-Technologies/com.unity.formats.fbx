@@ -735,34 +735,28 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private static HashSet<string> GetDefaultVendorLocations()
         {
-            if (Application.platform == RuntimePlatform.WindowsEditor)
+            string platformDefault;
+            switch (Application.platform)
             {
-                HashSet<string> windowsDefaults = new HashSet<string>() { "C:/Program Files/Autodesk" };
-                HashSet<string> existingDirectories = new HashSet<string>();
-                foreach (string path in windowsDefaults)
-                {
-                    if (Directory.Exists(path))
-                    {
-                        existingDirectories.Add(path);
-                    }
-                }
-                return existingDirectories;
-            }
-            else if (Application.platform == RuntimePlatform.OSXEditor)
-            {
-                HashSet<string> MacOSDefaults = new HashSet<string>() { "/Applications/Autodesk" };
-                HashSet<string> existingDirectories = new HashSet<string>();
-                foreach (string path in MacOSDefaults)
-                {
-                    if (Directory.Exists(path))
-                    {
-                        existingDirectories.Add(path);
-                    }
-                }
-                return existingDirectories;
+                case RuntimePlatform.WindowsEditor:
+                    platformDefault = "C:/Program Files/Autodesk";
+                    break;
+                case RuntimePlatform.OSXEditor:
+                    platformDefault = "/Applications/Autodesk";
+                    break;
+                case RuntimePlatform.LinuxEditor:
+                    platformDefault = "/usr/autodesk";
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
 
-            throw new NotImplementedException();
+            HashSet<string> existingDirectories = new HashSet<string>();
+            if (!string.IsNullOrEmpty(platformDefault) && Directory.Exists(platformDefault))
+            {
+                existingDirectories.Add(platformDefault);
+            }
+            return existingDirectories;
         }
 
         /// <summary>
@@ -1184,16 +1178,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var dccOptionPaths = instance.dccOptionPaths;
 
             // find dcc installation from vendor locations
-            for (int i = 0; i < DCCVendorLocations.Count; i++)
+            foreach(var vendorLocation in DCCVendorLocations)
             {
-                if (!Directory.Exists(DCCVendorLocations[i]))
+                if (!Directory.Exists(vendorLocation))
                 {
                     // no autodesk products installed
                     continue;
                 }
                 // List that directory and find the right version:
                 // either the newest version, or the exact version we wanted.
-                var adskRoot = new System.IO.DirectoryInfo(DCCVendorLocations[i]);
+                var adskRoot = new System.IO.DirectoryInfo(vendorLocation);
                 foreach (var productDir in adskRoot.GetDirectories())
                 {
                     var product = productDir.Name;
@@ -1269,7 +1263,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             switch (Application.platform)
             {
                 case RuntimePlatform.WindowsEditor:
-                    return location + "/bin/maya.exe";
+                    return $"{location}/bin/maya.exe";
                 case RuntimePlatform.OSXEditor:
                     // MAYA_LOCATION on mac is set by Autodesk to be the
                     // Contents directory. But let's make it easier on people
@@ -1277,16 +1271,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // directory that holds the app bundle.
                     if (location.EndsWith(".app/Contents"))
                     {
-                        return location + "/MacOS/Maya";
+                        return $"{location}/MacOS/Maya";
                     }
                     else if (location.EndsWith(".app"))
                     {
-                        return location + "/Contents/MacOS/Maya";
+                        return $"{location}/Contents/MacOS/Maya";
                     }
                     else
                     {
-                        return location + "/Maya.app/Contents/MacOS/Maya";
+                        return $"{location}/Maya.app/Contents/MacOS/Maya";
                     }
+                case RuntimePlatform.LinuxEditor:
+                    return $"{location}/bin/maya";
                 default:
                     throw new NotImplementedException();
             }

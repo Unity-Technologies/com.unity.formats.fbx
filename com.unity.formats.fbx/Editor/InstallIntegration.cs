@@ -868,11 +868,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public static void DecompressZip(string zipPath, string destPath){
             System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
-            var ZIPAPP = "7z.exe";
-            if (Application.platform == RuntimePlatform.OSXEditor) {
-                ZIPAPP = "7za";
+            string zipApp;
+            switch (Application.platform)
+            {
+                case RuntimePlatform.WindowsEditor:
+                    zipApp = "7z.exe";
+                    break;
+                case RuntimePlatform.OSXEditor:
+                case RuntimePlatform.LinuxEditor:
+                    zipApp = "7za";
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
-            myProcess.StartInfo.FileName = EditorApplication.applicationContentsPath + "/Tools/" + ZIPAPP;
+
+            myProcess.StartInfo.FileName = EditorApplication.applicationContentsPath + "/Tools/" + zipApp;
             myProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
             myProcess.StartInfo.CreateNoWindow = true;
             myProcess.StartInfo.UseShellExecute = false;
