@@ -735,32 +735,26 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         private static HashSet<string> GetDefaultVendorLocations()
         {
-            HashSet<string> platformDefaults;
+            string platformDefault;
             switch (Application.platform)
             {
                 case RuntimePlatform.WindowsEditor:
-                    platformDefaults = new HashSet<string>() { "C:/Program Files/Autodesk" };
+                    platformDefault = "C:/Program Files/Autodesk";
                     break;
                 case RuntimePlatform.OSXEditor:
-                    platformDefaults = new HashSet<string>() { "/Applications/Autodesk" };
+                    platformDefault = "/Applications/Autodesk";
                     break;
                 case RuntimePlatform.LinuxEditor:
-                    platformDefaults = new HashSet<string>() { "/usr/autodesk" };
+                    platformDefault = "/usr/autodesk";
                     break;
                 default:
                     throw new NotImplementedException();
             }
 
             HashSet<string> existingDirectories = new HashSet<string>();
-            if (platformDefaults != null)
+            if (!string.IsNullOrEmpty(platformDefault) && Directory.Exists(platformDefault))
             {
-                foreach (string path in platformDefaults)
-                {
-                    if (Directory.Exists(path))
-                    {
-                        existingDirectories.Add(path);
-                    }
-                }
+                existingDirectories.Add(platformDefault);
             }
             return existingDirectories;
         }
@@ -1183,19 +1177,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var dccOptionNames = instance.dccOptionNames;
             var dccOptionPaths = instance.dccOptionPaths;
 
-            var vendorLocations = DCCVendorLocations;
-
             // find dcc installation from vendor locations
-            for (int i = 0; i < vendorLocations.Count; i++)
+            foreach(var vendorLocation in DCCVendorLocations)
             {
-                if (!Directory.Exists(vendorLocations[i]))
+                if (!Directory.Exists(vendorLocation))
                 {
                     // no autodesk products installed
                     continue;
                 }
                 // List that directory and find the right version:
                 // either the newest version, or the exact version we wanted.
-                var adskRoot = new System.IO.DirectoryInfo(vendorLocations[i]);
+                var adskRoot = new System.IO.DirectoryInfo(vendorLocation);
                 foreach (var productDir in adskRoot.GetDirectories())
                 {
                     var product = productDir.Name;
