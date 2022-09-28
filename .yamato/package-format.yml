@@ -1,5 +1,5 @@
- formatting_apply:
-   name: Formatting (Apply requested changes)
+ format_code:
+   name: Format Code
    agent:
      type: Unity::VM::osx
      image: package-ci/mac:stable
@@ -10,8 +10,8 @@
      - git checkout $GIT_BRANCH
      - git pull origin $GIT_BRANCH # In case the job was not run on the latest commit, attempt to get it. There may be situations with merge conflicts, in that case wait for everyone to push their changes and then only run the formatting job on HEAD.
      - unity-downloader-cli -c editor -u {{ all_test_editors[0].version }}
-     - .Editor/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath TestProjects/apply-formatting
-     - .Editor/Unity.app/Contents/MacOS/Unity -executeMethod Automation.Format.ApplyFormatting -projectPath TestProjects/apply-formatting  
+     - .Editor/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath TestProjects/fbx-api-tests
+     - .Editor/Unity.app/Contents/MacOS/Unity -executeMethod Automation.Format.ApplyFormatting -projectPath TestProjects/fbx-api-tests
      - git status
      - git add -u *.cs
      - git commit -m "Apply formatting changes"
