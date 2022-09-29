@@ -3,9 +3,7 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Unity.Coding.Editor",
-        "Unity.Recorder",
-        "Unity.Recorder.Editor"
+        "Unity.Coding.Editor"
     ],
     "includePlatforms": [
         "Editor"
