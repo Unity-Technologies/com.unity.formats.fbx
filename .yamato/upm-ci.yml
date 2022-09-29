@@ -191,6 +191,7 @@ test_trigger:
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#api_doc_validation
+    - .yamato/upm-ci.yml#test_api_win
 {% for editor in test_trigger_editors %}
 {% for platform in platforms %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
