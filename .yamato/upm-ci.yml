@@ -168,8 +168,6 @@ test_api_win:
     type: Unity::VM
     image: package-ci/win10:stable
     flavor: b1.medium
-  variables:
-    UPM_REGISTRY: https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
     - gsudo choco source add -n Unity -s https://artifactory.prd.it.unity3d.com/artifactory/api/nuget/unity-choco-local

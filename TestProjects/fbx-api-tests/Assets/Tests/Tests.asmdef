@@ -18,6 +18,10 @@
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS"
     ],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "define": "ENABLE_FBX_RECORDER"
+        }
+    ],
     "noEngineReferences": false
 }
