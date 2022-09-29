@@ -3,7 +3,9 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Unity.Coding.Editor"
+        "Unity.Coding.Editor",
+        "Unity.Recorder",
+        "Unity.Recorder.Editor"
     ],
     "includePlatforms": [
         "Editor"
@@ -20,6 +22,8 @@
     ],
     "versionDefines": [
         {
+            "name": "com.unity.recorder",
+            "expression": "4.0.0",
             "define": "ENABLE_FBX_RECORDER"
         }
     ],
