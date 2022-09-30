@@ -9,3 +9,5 @@
 * The FBX Exporter package does not support exporting animation only for animated Lights and Cameras from Autodesk® Maya® and Maya LT™.
 
 * Exporting an empty mesh (MeshFilter with null sharedMesh), fails to export with ArgumentNullException.
+
+* Integrations with Autodesk® Maya® and Autodesk® 3ds Max® are not available yet on Linux.
