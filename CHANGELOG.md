@@ -18,6 +18,7 @@
 - Use lists instead of dictionaries for property channel maps in order to ensure consistent order of operations.
 - Add optimizations to speed up convert to prefab variant.
 - Improve formatting and functions of the FBX exporter. Thank you to @smitdylan2001 for the contributions.
+- Fix errors when opening FBX export project settings on Linux.
 
 ## [4.2.0] - 2022-07-07
 ### Changed

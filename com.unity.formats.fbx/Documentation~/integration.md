@@ -8,6 +8,8 @@ To customize the FBX Importer or Exporter settings in Autodesk® Maya® or Autod
 
 For Autodesk® 3ds Max®, use the `unityFbxImportSettings.ms` and `unityFbxExportSettings.ms` files located in the `Integrations/Autodesk/max/scripts` folder.
 
+>**Important note:** These integrations are currently **only supported on Windows and Mac**.
+
 ## Installing an Integration
 
 To install Unity Integration for Autodesk® Maya®, Autodesk® Maya LT™, or Autodesk® 3ds Max®:
