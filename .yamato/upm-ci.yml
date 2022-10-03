@@ -159,6 +159,27 @@ validate_{{ platform.name }}_{{ editor.version }}:
 {% endfor %}
 {% endfor %}
 
+# The following job runs the tests to validate the the public API files are up to date.
+# We can't use upm-ci for those as it would pack fbx, making its files read-only, but those
+# tests need read/write access.
+test_api_win:
+  name : Test formating and API on win
+  agent:
+    type: Unity::VM
+    image: package-ci/win10:stable
+    flavor: b1.medium
+  commands:
+    - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
+    - gsudo choco source add -n Unity -s https://artifactory.prd.it.unity3d.com/artifactory/api/nuget/unity-choco-local
+    - gsudo choco install unity-config
+    - unity-config project set registry candidates --project-path TestProjects/fbx-api-tests
+    - unity-downloader-cli -u {{ all_test_editors[2].version }} -c Editor
+    - utr/utr.bat --suite=editor --editor-location=.Editor --testproject=TestProjects/fbx-api-tests --artifacts_path=artifacts --reruncount=0
+  artifacts:
+    logs:
+      paths:
+      - "upm-ci~/test-results/**/*"
+
 test_trigger:
   name: Tests Trigger
   triggers:
@@ -170,6 +191,7 @@ test_trigger:
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#api_doc_validation
+    - .yamato/upm-ci.yml#test_api_win
 {% for editor in test_trigger_editors %}
 {% for platform in platforms %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
