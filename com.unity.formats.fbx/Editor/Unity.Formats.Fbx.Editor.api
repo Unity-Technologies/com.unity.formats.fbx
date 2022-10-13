@@ -61,9 +61,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     public enum Include
     {
-        Anim = 2,
-        Model = 1,
-        ModelAndAnim = 3,
+        Anim = 1,
+        Model = 0,
+        ModelAndAnim = 2,
     }
 
     public enum LODExportType
