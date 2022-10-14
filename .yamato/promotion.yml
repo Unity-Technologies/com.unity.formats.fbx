@@ -36,9 +36,9 @@ promotion_test_{{ platform.name }}_{{ editor.version }}:
 promote:
   name: Promote to Production
   agent:
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.small
+    type: {{ win_platform.type }}
+    image: {{ win_platform.image }}
+    flavor: {{ win_platform.flavor }}
   variables:
     UPMCI_PROMOTION: 1
   commands:
