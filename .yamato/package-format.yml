@@ -1,9 +1,12 @@
+{% metadata_file .yamato/global.metafile %}
+---
+ 
  format_code:
    name: Format Code
    agent:
-     type: Unity::VM::osx
-     image: package-ci/mac:stable
-     flavor: b1.medium
+     type: {{ mac_platform.type }}
+     image: {{ mac_platform.image }}
+     flavor: {{ mac_platform.flavor }}
    commands:
      - git config --global user.name "noreply@unity3d.com"
      - git config --global user.email "noreply@unity3d.com"

@@ -1,80 +1,12 @@
-# Nightly trigger editors by release.
-#
-# When adding a new release version, add a new section
-# to nightly_tested_releases for the release
-# containing the name with underscores to separate the numbers, 
-# the branch name and editors that it should run on.
-#
-# Make sure all editor versions specified are included in all_test_editors section as well.
-#
-# Additionally, update the previous release nightly versions if necessary.
-# For example, removing trunk from the list of editors for the previous release.
-
-all_test_editors:
-  - version: 2020.3
-  - version: 2021.3
-  - version: 2022.1
-  - version: 2022.2
-  - version: trunk
-
-test_trigger_editors:
-  - version: 2020.3
-  - version: 2021.3
-  - version: 2022.1
-  - version: trunk
-
-publish_trigger_editors:
-  - version: 2020.3
-  - version: 2021.3
-  - version: 2022.1
-  - version: trunk
-  
-nightly_tested_releases:
-  - name: release_4_2
-    branch: release/4.2
-    nightly_editors: 
-      - version: 2019.4
-      - version: 2020.3
-      - version: 2021.3
-      - version: 2022.2
-      - version: trunk
-  - name: release_4_1
-    branch: release/4.1
-    nightly_editors: 
-      - version: 2019.4
-      - version: 2020.3
-      - version: 2021.3
-      - version: 2022.1
-  - name: master
-    branch: master
-    nightly_editors: 
-      - version: 2020.3
-      - version: 2021.3
-      - version: 2022.2
-      - version: trunk
-  
-platforms:
-  - name: win
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.medium
-  - name: mac
-    type: Unity::VM::osx
-    image: package-ci/mac:stable
-    flavor: b1.medium
-  - name: ubuntu
-    type: Unity::VM
-    image: package-ci/ubuntu:stable
-    flavor: b1.medium
-coverage:
-    minPercent: 57.5
+{% metadata_file .yamato/global.metafile %}
 ---
+
 pack:
   name: Pack
   agent:
-    type: Unity::VM
-    image: package-ci/ubuntu:stable
-    flavor: b1.small
+    type: {{ ubuntu_platform.type }}
+    image: {{ ubuntu_platform.image }}
+    flavor: {{ ubuntu_platform.flavor }}
   commands:
     - ./build.sh
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
@@ -89,9 +21,9 @@ pack:
 api_doc_validation:
   name: API documentation validation
   agent:
-    type: Unity::VM
-    image: package-ci/ubuntu:stable
-    flavor: b1.medium
+    type: {{ ubuntu_platform.type }}
+    image: {{ ubuntu_platform.image }}
+    flavor: {{ ubuntu_platform.flavor }}
   variables:
     UPM_REGISTRY: https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates
   commands:
@@ -165,9 +97,9 @@ validate_{{ platform.name }}_{{ editor.version }}:
 test_api_win:
   name : Test formating and API on win
   agent:
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.medium
+    type: {{ win_platform.type }}
+    image: {{ win_platform.image }}
+    flavor: {{ win_platform.flavor }}
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
     - gsudo choco source add -n Unity -s https://artifactory.prd.it.unity3d.com/artifactory/api/nuget/unity-choco-local
@@ -235,9 +167,9 @@ publish_test_trigger:
 publish:
   name: Publish to Internal Registry
   agent:
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.small
+    type: {{ win_platform.type }}
+    image: {{ win_platform.image }}
+    flavor: {{ win_platform.flavor }}
   variables:
     UPMCI_ENABLE_PACKAGE_SIGNING: 1
   commands:
