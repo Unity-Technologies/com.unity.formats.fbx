@@ -3,12 +3,14 @@
    agent:
      type: Unity::VM::osx
      image: package-ci/mac:stable
-     flavor: i1.xlarge
+     flavor: b1.medium
    commands:
      - git config --global user.name "noreply@unity3d.com"
      - git config --global user.email "noreply@unity3d.com"
      - git checkout $GIT_BRANCH
      - git pull origin $GIT_BRANCH # In case the job was not run on the latest commit, attempt to get it. There may be situations with merge conflicts, in that case wait for everyone to push their changes and then only run the formatting job on HEAD.
+     - brew tap --force-auto-update unity/unity git@github.cds.internal.unity3d.com:unity/homebrew-unity.git
+     - brew install unity-config
      - unity-config project set registry candidates --project-path TestProjects/fbx-api-tests
      - unity-downloader-cli -c editor -u {{ all_test_editors[0].version }}
      - .Editor/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath TestProjects/fbx-api-tests
