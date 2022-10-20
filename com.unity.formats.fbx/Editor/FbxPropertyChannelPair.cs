@@ -1,4 +1,4 @@
-﻿using Autodesk.Fbx;
+using Autodesk.Fbx;
 using System.Collections.Generic;
 
 namespace UnityEditor.Formats.Fbx.Exporter
@@ -292,7 +292,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         // check if it's a constraint source property
                         fbxProperty = GetFbxConstraintSourceProperty(uniPropChannelPair.property, constraint, propertyChannelMap.MapUnityPropToFbxProp);
                     }
-                    else
+                    else if (propertyChannelMap.MapUnityPropToFbxProp == MapBlendshapesPropToFbxProp)
                     {
                         // check if it's a blendshape property
                         fbxProperty = GetFbxBlendshapeProperty(uniPropChannelPair.property, propertyChannelMap.MapUnityPropToFbxProp);
