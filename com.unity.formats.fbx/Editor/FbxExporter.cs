@@ -1734,7 +1734,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             unityConstraint.GetSources(sources);
             foreach (var source in sources)
             {
-                if (source.sourceTransform == null)
+                if (!source.sourceTransform)
                 {
                     continue;
                 }
