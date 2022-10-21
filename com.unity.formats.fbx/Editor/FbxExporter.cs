@@ -1734,6 +1734,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             unityConstraint.GetSources(sources);
             foreach (var source in sources)
             {
+                if (source.sourceTransform == null)
+                {
+                    continue;
+                }
+
                 // ignore any sources that are not getting exported
                 FbxNode sourceNode;
                 if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
