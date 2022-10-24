@@ -15,7 +15,7 @@
      - brew tap --force-auto-update unity/unity git@github.cds.internal.unity3d.com:unity/homebrew-unity.git
      - brew install unity-config
      - unity-config project set registry candidates --project-path TestProjects/fbx-api-tests
-     - unity-downloader-cli -c editor -u {{ all_test_editors[0].version }}
+     - unity-downloader-cli -c editor -u 2022.1
      - .Editor/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath TestProjects/fbx-api-tests
      - .Editor/Unity.app/Contents/MacOS/Unity -executeMethod Automation.Format.ApplyFormatting -projectPath TestProjects/fbx-api-tests
      - git add -u *.cs
