@@ -532,10 +532,10 @@ namespace FbxExporter.UnitTests
             mesh.colors = quadMesh.colors;
 
             // set all the uvs
-            for(int i = 0; i < 8; i++)
+            for (int i = 0; i < 8; i++)
             {
                 var uvs = new List<Vector2>();
-                for(int j = 0; j < mesh.vertices.Length; j++)
+                for (int j = 0; j < mesh.vertices.Length; j++)
                 {
                     uvs.Add(new Vector2(i, j));
                 }
@@ -587,7 +587,7 @@ namespace FbxExporter.UnitTests
             // check the uvs
             var origUVs = new List<Vector2>();
             var exportedUVs = new List<Vector2>();
-            for(int i = 0; i < 8; i++)
+            for (int i = 0; i < 8; i++)
             {
                 mesh.GetUVs(i, origUVs);
                 fbxMesh.GetUVs(i, exportedUVs);
@@ -1077,24 +1077,24 @@ namespace FbxExporter.UnitTests
 
             // test export all
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0, Cube_LOD2
-            GameObject fbxObj = ExportToFbx(lodGroup, lodExportType:LODExportType.All);
-            Assert.IsTrue (fbxObj);
+            GameObject fbxObj = ExportToFbx(lodGroup, lodExportType: LODExportType.All);
+            Assert.IsTrue(fbxObj);
 
             HashSet<string> expectedChildren = new HashSet<string>() { sphereLOD0.name, capsuleLOD0.name, cubeLOD2.name };
             CompareGameObjectChildren(fbxObj, expectedChildren);
 
             // test export highest
             // expected LODs exported: Sphere_LOD0, Capsule_LOD0
-            fbxObj = ExportToFbx(lodGroup, lodExportType:LODExportType.Highest);
-            Assert.IsTrue (fbxObj);
+            fbxObj = ExportToFbx(lodGroup, lodExportType: LODExportType.Highest);
+            Assert.IsTrue(fbxObj);
 
             expectedChildren = new HashSet<string>() { sphereLOD0.name, capsuleLOD0.name };
             CompareGameObjectChildren(fbxObj, expectedChildren);
 
             // test export lowest
             // expected LODs exported: Cube_LOD2
-            fbxObj = ExportToFbx(lodGroup, lodExportType:LODExportType.Lowest);
-            Assert.IsTrue (fbxObj);
+            fbxObj = ExportToFbx(lodGroup, lodExportType: LODExportType.Lowest);
+            Assert.IsTrue(fbxObj);
 
             expectedChildren = new HashSet<string>() { cubeLOD2.name };
             CompareGameObjectChildren(fbxObj, expectedChildren);
