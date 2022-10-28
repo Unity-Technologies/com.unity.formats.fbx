@@ -21,18 +21,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// <summary>
             /// Visit Object and configure FbxCamera
             /// </summary>
-            public static void ConfigureCamera (Camera unityCamera, FbxCamera fbxCamera)
+            public static void ConfigureCamera(Camera unityCamera, FbxCamera fbxCamera)
             {
-                if (unityCamera.usePhysicalProperties) 
+                if (unityCamera.usePhysicalProperties)
                     ConfigurePhysicalCamera(fbxCamera, unityCamera);
-                else 
+                else
                     ConfigureGameCamera(fbxCamera, unityCamera);
             }
 
             /// <summary>
-            /// Configure FbxCameras from GameCamera 
+            /// Configure FbxCameras from GameCamera
             /// </summary>
-            private static void ConfigureGameCamera (FbxCamera fbxCamera, Camera unityCamera)
+            private static void ConfigureGameCamera(FbxCamera fbxCamera, Camera unityCamera)
             {
                 // Configure FilmBack settings as a 35mm TV Projection (0.816 x 0.612)
                 float aspectRatio = unityCamera.aspect;
@@ -45,25 +45,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 fbxCamera.ProjectionType.Set(projectionType);
                 fbxCamera.FilmAspectRatio.Set(aspectRatio);
-                fbxCamera.SetApertureWidth (apertureWidthInInches);
-                fbxCamera.SetApertureHeight (apertureHeightInInches);
-                fbxCamera.SetApertureMode (FbxCamera.EApertureMode.eVertical);
+                fbxCamera.SetApertureWidth(apertureWidthInInches);
+                fbxCamera.SetApertureHeight(apertureHeightInInches);
+                fbxCamera.SetApertureMode(FbxCamera.EApertureMode.eVertical);
 
                 // Focal Length
-                double focalLength = fbxCamera.ComputeFocalLength (unityCamera.fieldOfView);
+                double focalLength = fbxCamera.ComputeFocalLength(unityCamera.fieldOfView);
 
                 fbxCamera.FocalLength.Set(focalLength);
 
                 // Field of View
-                fbxCamera.FieldOfView.Set (unityCamera.fieldOfView);
+                fbxCamera.FieldOfView.Set(unityCamera.fieldOfView);
 
                 // NearPlane
-                fbxCamera.SetNearPlane (unityCamera.nearClipPlane.Meters().ToCentimeters());
+                fbxCamera.SetNearPlane(unityCamera.nearClipPlane.Meters().ToCentimeters());
 
                 // FarPlane
-                fbxCamera.SetFarPlane (unityCamera.farClipPlane.Meters().ToCentimeters());
+                fbxCamera.SetFarPlane(unityCamera.farClipPlane.Meters().ToCentimeters());
 
-                return ;
+                return;
             }
 
             public static Vector2 GetSizeOfMainGameView()
@@ -79,9 +79,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             /// <summary>
-            /// Configure FbxCameras from a Physical Camera 
+            /// Configure FbxCameras from a Physical Camera
             /// </summary>
-            private static void ConfigurePhysicalCamera (FbxCamera fbxCamera, Camera unityCamera)
+            private static void ConfigurePhysicalCamera(FbxCamera fbxCamera, Camera unityCamera)
             {
                 Debug.Assert(unityCamera.usePhysicalProperties);
 
@@ -90,12 +90,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 float apertureWidthInInches = unityCamera.sensorSize.x.Millimeters().ToInches();
                 float aspectRatio = apertureWidthInInches / apertureHeightInInches;
 
-                FbxCamera.EProjectionType projectionType = unityCamera.orthographic 
-                    ? FbxCamera.EProjectionType.eOrthogonal 
+                FbxCamera.EProjectionType projectionType = unityCamera.orthographic
+                    ? FbxCamera.EProjectionType.eOrthogonal
                     : FbxCamera.EProjectionType.ePerspective;
 
-                // NOTE: it is possible to match some of the sensor sizes to the  
-                // predefined EApertureFormats : e16mmTheatrical, eSuper16mm, 
+                // NOTE: it is possible to match some of the sensor sizes to the
+                // predefined EApertureFormats : e16mmTheatrical, eSuper16mm,
                 // e35mmFullAperture, eIMAX. However the round in the sizes is not
                 // consistent between Unity and FBX so we choose
                 // to leave the values as a eCustomAperture setting.
@@ -104,9 +104,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 fbxCamera.FilmAspectRatio.Set(aspectRatio);
 
                 Vector2 gameViewSize = GetSizeOfMainGameView();
-                fbxCamera.SetAspect(FbxCamera.EAspectRatioMode.eFixedRatio, gameViewSize.x/gameViewSize.y, 1.0);
-                fbxCamera.SetApertureWidth (apertureWidthInInches);
-                fbxCamera.SetApertureHeight (apertureHeightInInches);
+                fbxCamera.SetAspect(FbxCamera.EAspectRatioMode.eFixedRatio, gameViewSize.x / gameViewSize.y, 1.0);
+                fbxCamera.SetApertureWidth(apertureWidthInInches);
+                fbxCamera.SetApertureHeight(apertureHeightInInches);
 
                 // Fit the resolution gate horizontally within the film gate.
                 fbxCamera.GateFit.Set(s_mapGateFit[unityCamera.gateFit]);
@@ -117,19 +117,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 fbxCamera.FilmOffsetY.Set(apertureHeightInInches * Mathf.Clamp(Mathf.Abs(unityCamera.lensShift.y), 0f, 1f) * Mathf.Sign(unityCamera.lensShift.y));
 
                 // Focal Length
-                fbxCamera.SetApertureMode (FbxCamera.EApertureMode.eFocalLength); 
+                fbxCamera.SetApertureMode(FbxCamera.EApertureMode.eFocalLength);
 
                 double focalLength = (double)unityCamera.focalLength;
                 fbxCamera.FocalLength.Set(focalLength); /* in millimeters */
 
                 // NearPlane
-                fbxCamera.SetNearPlane ((double)unityCamera.nearClipPlane.Meters().ToCentimeters());
+                fbxCamera.SetNearPlane((double)unityCamera.nearClipPlane.Meters().ToCentimeters());
 
                 // FarPlane
-                fbxCamera.SetFarPlane ((float)unityCamera.farClipPlane.Meters().ToCentimeters());
-                return ;
+                fbxCamera.SetFarPlane((float)unityCamera.farClipPlane.Meters().ToCentimeters());
+                return;
             }
         }
     }
 }
-

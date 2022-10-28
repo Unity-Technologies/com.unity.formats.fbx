@@ -1,4 +1,4 @@
-﻿// NOTE: uncomment the next line to leave temporary FBX files on disk
+// NOTE: uncomment the next line to leave temporary FBX files on disk
 // and create a imported object in the scene.
 //#define DEBUG_UNITTEST
 
@@ -14,19 +14,19 @@ namespace FbxExporter.UnitTests
         private float Value1 { get { return 1f; } }
 
         [TearDown]
-        public override void Term ()
+        public override void Term()
         {
             #if (!DEBUG_UNITTEST)
-            base.Term ();
+            base.Term();
             #endif
         }
 
         [Test]
         public void Vector3ExtensionTest()
         {
-            var v3 = new Vector3(1f,2f,3f);
-            Assert.That(v3.RightHanded(), Is.EqualTo(new Vector3(-1f,2f,3f)));
-            Assert.That(v3.FbxVector4(), Is.EqualTo(new FbxVector4(1f,2f,3f)));
+            var v3 = new Vector3(1f, 2f, 3f);
+            Assert.That(v3.RightHanded(), Is.EqualTo(new Vector3(-1f, 2f, 3f)));
+            Assert.That(v3.FbxVector4(), Is.EqualTo(new FbxVector4(1f, 2f, 3f)));
         }
 
         [Test]
@@ -35,9 +35,9 @@ namespace FbxExporter.UnitTests
             var ac = new AnimationCurve();
             ac.Dump();
             ac.Dump("hello world");
-            ac.Dump(keyTimesExpected:new float[]{});
-            ac.Dump(keyValuesExpected:new float[]{});
-            ac.Dump(keyTimesExpected:new float[]{}, keyValuesExpected:new float[]{});
+            ac.Dump(keyTimesExpected: new float[] {});
+            ac.Dump(keyValuesExpected: new float[] {});
+            ac.Dump(keyTimesExpected: new float[] {}, keyValuesExpected: new float[] {});
         }
 
         [Test]
@@ -72,11 +72,11 @@ namespace FbxExporter.UnitTests
             Assert.That(one_inch ==  ImperialDistance.Inch, Is.True);
 
             Assert.That(one_foot, Is.EqualTo(ImperialDistance.Foot));
-            Assert.That(one_foot!=one_inch, Is.True);
+            Assert.That(one_foot != one_inch, Is.True);
 
-            Assert.That(one_inch+one_inch, Is.EqualTo(new ImperialDistance(2f)));
-            Assert.That(one_inch-one_inch, Is.EqualTo(new ImperialDistance(0f)));
-            Assert.That(new ImperialDistance(2f)*new ImperialDistance(6f), Is.EqualTo(ImperialDistance.Foot));
+            Assert.That(one_inch + one_inch, Is.EqualTo(new ImperialDistance(2f)));
+            Assert.That(one_inch - one_inch, Is.EqualTo(new ImperialDistance(0f)));
+            Assert.That(new ImperialDistance(2f) * new ImperialDistance(6f), Is.EqualTo(ImperialDistance.Foot));
             Assert.That(ImperialDistance.Foot / ImperialDistance.Inch, Is.EqualTo(ImperialDistance.Foot));
         }
 
@@ -99,11 +99,11 @@ namespace FbxExporter.UnitTests
             Assert.That(one_cm ==  MetricDistance.Centimeter, Is.True);
 
             Assert.That(one_m, Is.EqualTo(MetricDistance.Meter));
-            Assert.That(one_m!=one_cm, Is.True);
+            Assert.That(one_m != one_cm, Is.True);
 
-            Assert.That(one_m+one_cm, Is.EqualTo(new MetricDistance(1.01f)));
-            Assert.That(one_m-one_cm, Is.EqualTo(new MetricDistance(0.99f)));
-            Assert.That(MetricDistance.Centimeter*MetricDistance.Meter, Is.EqualTo(new MetricDistance(0.01f)));
+            Assert.That(one_m + one_cm, Is.EqualTo(new MetricDistance(1.01f)));
+            Assert.That(one_m - one_cm, Is.EqualTo(new MetricDistance(0.99f)));
+            Assert.That(MetricDistance.Centimeter * MetricDistance.Meter, Is.EqualTo(new MetricDistance(0.01f)));
             Assert.That(MetricDistance.Meter / MetricDistance.Centimeter, Is.EqualTo(new MetricDistance(100f)));
         }
     }

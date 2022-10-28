@@ -1,4 +1,4 @@
-﻿#if ENABLE_FBX_RECORDER
+#if ENABLE_FBX_RECORDER
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

@@ -21,9 +21,9 @@ namespace FbxExporter.UnitTests
         [TearDown]
         public override void Term()
         {
-            foreach (var go in m_toExport) 
+            foreach (var go in m_toExport)
             {
-                GameObject.DestroyImmediate (go);
+                GameObject.DestroyImmediate(go);
             }
             base.Term();
         }
@@ -32,16 +32,16 @@ namespace FbxExporter.UnitTests
         /// Creates a GameObject to export.
         /// </summary>
         /// <returns>The game object to export.</returns>
-        private GameObject CreateGameObjectToExport (PrimitiveType type = PrimitiveType.Sphere)
+        private GameObject CreateGameObjectToExport(PrimitiveType type = PrimitiveType.Sphere)
         {
-            return GameObject.CreatePrimitive (type);
+            return GameObject.CreatePrimitive(type);
         }
 
         [Test]
         public void TestExportObject()
         {
-            Assert.IsNotNull (m_toExport);
-            Assert.IsNotNull (m_toExport[0]);
+            Assert.IsNotNull(m_toExport);
+            Assert.IsNotNull(m_toExport[0]);
             var filename = GetRandomFbxFilePath();
 
             var fbxFileName = ModelExporter.ExportObject(filename, m_toExport[0]);
@@ -58,13 +58,13 @@ namespace FbxExporter.UnitTests
         [Test]
         public void TestExportObjects()
         {
-            Assert.IsNotNull (m_toExport);
+            Assert.IsNotNull(m_toExport);
             Assert.Greater(m_toExport.Length, 1);
             var filename = GetRandomFbxFilePath();
 
             var fbxFileName = ModelExporter.ExportObjects(filename, m_toExport);
 
-            Assert.IsNotNull (fbxFileName);
+            Assert.IsNotNull(fbxFileName);
             Assert.AreEqual(fbxFileName, filename);
 
             Object[] loaded = AssetDatabase.LoadAllAssetsAtPath(filename);

@@ -34,7 +34,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 var options = settings.GetCurveFilterOptions(settings.AnimationInputSettings.SimplyCurves);
                 aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate, options);
 #else
-                    aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate);
+                aInput.GameObjectRecorder.SaveToClip(clip, settings.FrameRate);
 #endif
                 if (settings.AnimationInputSettings.ClampedTangents)
                 {
