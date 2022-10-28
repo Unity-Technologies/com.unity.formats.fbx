@@ -1,4 +1,4 @@
-﻿using Autodesk.Fbx;
+using Autodesk.Fbx;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -42,9 +42,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             GetCurves()[i] = curve;
         }
 
-        protected abstract FbxQuaternion GetConvertedQuaternionRotation (float seconds, UnityEngine.Quaternion restRotation);
+        protected abstract FbxQuaternion GetConvertedQuaternionRotation (float seconds, UnityEngine.Quaternion restRotation, Vector3 rotOffset = default);
 
-        private Key [] ComputeKeys(UnityEngine.Quaternion restRotation, FbxNode node) {
+        private Key [] ComputeKeys(UnityEngine.Quaternion restRotation, FbxNode node, double startTime = 0, Vector3 rotOffset = default) {
             // Get the source pivot pre-rotation if any, so we can
             // remove it from the animation we get from Unity.
             var fbxPreRotationEuler = node.GetRotationActive() 
@@ -62,7 +62,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var keys = new Key[keyTimes.Count];
             int i = 0;
             foreach(var seconds in keyTimes) {
-                var fbxFinalAnimation = GetConvertedQuaternionRotation (seconds, restRotation);
+                var fbxFinalAnimation = GetConvertedQuaternionRotation (seconds, restRotation, rotOffset);
 
                 // Cancel out the pre-rotation. Order matters. FBX reads left-to-right.
                 // When we run animation we will apply:
@@ -75,7 +75,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // Store the key so we can sort them later.
                 Key key = new Key();
-                key.time = FbxTime.FromSecondDouble(seconds);
+                key.time = FbxTime.FromSecondDouble(startTime + seconds);
                 key.euler = ModelExporter.ConvertToFbxVector4(finalUnityQuat.eulerAngles);
                 keys[i++] = key;
             }
@@ -86,7 +86,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return keys;
         }
 
-        public void Animate(Transform unityTransform, FbxNode fbxNode, FbxAnimLayer fbxAnimLayer, bool Verbose) {
+        public void Animate(Transform unityTransform, FbxNode fbxNode, FbxAnimLayer fbxAnimLayer, bool Verbose, double startTime = 0, Vector3 rotOffset = default) {
 
             if(!unityTransform || fbxNode == null)
             {
@@ -101,7 +101,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /* set the keys */
             using (new FbxAnimCurveModifyHelper(new List<FbxAnimCurve>{fbxAnimCurveX,fbxAnimCurveY,fbxAnimCurveZ}))
             {
-                foreach (var key in ComputeKeys(unityTransform.localRotation, fbxNode)) {
+                foreach (var key in ComputeKeys(unityTransform.localRotation, fbxNode, startTime, rotOffset)) {
 
                     int i = fbxAnimCurveX.KeyAdd(key.time);
                     fbxAnimCurveX.KeySet(i, key.time, (float)key.euler.X);
@@ -141,6 +141,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             System.StringComparison ct = System.StringComparison.CurrentCulture;
             bool isEulerComponent = uniPropertyName.StartsWith ("localEulerAnglesRaw.", ct);
+            isEulerComponent |= uniPropertyName.StartsWith("m_LocalEulerAngles.", ct);
 
             if (!isEulerComponent) { return -1; }
 
@@ -152,7 +153,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        protected override FbxQuaternion GetConvertedQuaternionRotation (float seconds, Quaternion restRotation)
+        protected override FbxQuaternion GetConvertedQuaternionRotation (float seconds, Quaternion restRotation, Vector3 rotOffset = default)
         {
             var eulerRest = restRotation.eulerAngles;
             AnimationCurve x = GetCurves()[0], y = GetCurves()[1], z = GetCurves()[2];
@@ -168,7 +169,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // convert the final animation to righthanded coords
 
-            return ModelExporter.EulerToQuaternionZXY (unityFinalAnimation);
+            Debug.Log("rot offset: " + rotOffset);
+
+            return ModelExporter.EulerToQuaternionZXY (unityFinalAnimation + rotOffset);
         }
     }
 
@@ -212,18 +215,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-        protected override FbxQuaternion GetConvertedQuaternionRotation (float seconds, Quaternion restRotation)
+        protected override FbxQuaternion GetConvertedQuaternionRotation (float seconds, Quaternion restRotation, Vector3 rotOffset = default)
         {
             AnimationCurve x = GetCurves()[0], y = GetCurves()[1], z = GetCurves()[2], w = GetCurves()[3];
 
             // The final animation, including the effect of pre-rotation.
             // If we have no curve, assume the node has the correct rotation right now.
             // We need to evaluate since we might only have keys in one of the axes.
-            var fbxFinalAnimation = new FbxQuaternion(
+            var quaternion = new Quaternion(
                 (x == null) ? restRotation[0] : x.Evaluate(seconds),
                 (y == null) ? restRotation[1] : y.Evaluate(seconds),
                 (z == null) ? restRotation[2] : z.Evaluate(seconds),
                 (w == null) ? restRotation[3] : w.Evaluate(seconds));
+
+            quaternion *= Quaternion.Euler(rotOffset);
+
+            Debug.Log("rot offset: " + rotOffset);
+
+            var fbxFinalAnimation = new FbxQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
 
             return fbxFinalAnimation;
         }

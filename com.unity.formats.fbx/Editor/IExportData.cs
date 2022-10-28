@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Timeline;
 using System.Collections.Generic;
 using UnityEngine.Playables;
@@ -19,6 +19,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// </summary>
     internal class AnimationOnlyExportData : IExportData
     {
+        public double clipStart;
+        public Vector3 positionOffset;
+        public Vector3 rotationOffset;
+
         // map from animation clip to GameObject that has Animation/Animator
         // component containing clip
         public Dictionary<AnimationClip, GameObject> animationClips;

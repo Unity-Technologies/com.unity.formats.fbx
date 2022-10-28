@@ -1734,6 +1734,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             unityConstraint.GetSources(sources);
             foreach (var source in sources)
             {
+                if (source.sourceTransform == null)
+                {
+                    continue;
+                }
+
                 // ignore any sources that are not getting exported
                 FbxNode sourceNode;
                 if (!MapUnityObjectToFbxNode.TryGetValue(source.sourceTransform.gameObject, out sourceNode))
@@ -2064,7 +2069,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// a Cubic curve using the default tangents.
         /// </summary>
         internal static void ExportAnimationKeys(AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve,
-            UnityToMayaConvertSceneHelper convertSceneHelper)
+            UnityToMayaConvertSceneHelper convertSceneHelper, double startTime = 0, float posValue = 0)
         {
             // Copy Unity AnimCurve to FBX AnimCurve.
             // NOTE: only cubic keys are supported by the FbxImporter
@@ -2073,12 +2078,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 for (int keyIndex = 0; keyIndex < uniAnimCurve.length; ++keyIndex)
                 {
                     var uniKeyFrame = uniAnimCurve[keyIndex];
-                    var fbxTime = FbxTime.FromSecondDouble(uniKeyFrame.time);
+                    var fbxTime = FbxTime.FromSecondDouble(startTime + uniKeyFrame.time);
 
                     int fbxKeyIndex = fbxAnimCurve.KeyAdd(fbxTime);
 
                     // configure tangents
-                    var lTangent = AnimationUtility.GetKeyLeftTangentMode(uniAnimCurve, keyIndex);
                     var rTangent = AnimationUtility.GetKeyRightTangentMode(uniAnimCurve, keyIndex);
 
                     // Always set tangent mode to eTangentBreak, as other modes are not handled the same in FBX as in
@@ -2101,7 +2105,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     fbxAnimCurve.KeySet(fbxKeyIndex,
                         fbxTime,
-                        convertSceneHelper.Convert(uniKeyFrame.value),
+                        convertSceneHelper.Convert(uniKeyFrame.value + posValue),
                         interpMode,
                         tanMode,
                         // value of right slope
@@ -2123,7 +2127,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         internal void ExportAnimationSamples(AnimationCurve uniAnimCurve, FbxAnimCurve fbxAnimCurve,
             double sampleRate,
-            UnityToMayaConvertSceneHelper convertSceneHelper)
+            UnityToMayaConvertSceneHelper convertSceneHelper,
+            double startTime = 0, float posValue = 0)
         {
             using (new FbxAnimCurveModifyHelper(new List<FbxAnimCurve> {fbxAnimCurve}))
             {
@@ -2131,13 +2136,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     float currSampleValue = uniAnimCurve.Evaluate((float)currSampleTime);
 
-                    var fbxTime = FbxTime.FromSecondDouble(currSampleTime);
+                    var fbxTime = FbxTime.FromSecondDouble(startTime + currSampleTime);
 
                     int fbxKeyIndex = fbxAnimCurve.KeyAdd(fbxTime);
 
                     fbxAnimCurve.KeySet(fbxKeyIndex,
                         fbxTime,
-                        convertSceneHelper.Convert(currSampleValue)
+                        convertSceneHelper.Convert(currSampleValue + posValue)
                     );
                 }
             }
@@ -2252,7 +2257,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             float frameRate,
             string uniPropertyName,
             System.Type uniPropertyType,
-            FbxAnimLayer fbxAnimLayer)
+            FbxAnimLayer fbxAnimLayer,
+            double startTime = 0, Vector3 posOffset = default)
         {
             if (fbxNode == null)
             {
@@ -2293,6 +2299,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     return;
                 }
 
+                float posValue = 0;
+                var channel = fbxPropertyChannelPair.Channel.ToLower();
+                if (channel == "x")
+                {
+                    posValue = posOffset[0];
+                }
+                else if (channel == "y")
+                {
+                    posValue = posOffset[1];
+                }
+                else if(channel == "z")
+                {
+                    posValue = posOffset[2];
+                }
+
                 // create a convert scene helper so that we can convert from Unity to Maya
                 // AxisSystem (LeftHanded to RightHanded) and FBX's default units
                 // (Meters to Centimetres)
@@ -2300,11 +2321,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 if (ModelExporter.ExportSettings.BakeAnimationProperty)
                 {
-                    ExportAnimationSamples(uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper);
+                    ExportAnimationSamples(uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper, startTime, posValue);
                 }
                 else
                 {
-                    ExportAnimationKeys(uniAnimCurve, fbxAnimCurve, convertSceneHelper);
+                    ExportAnimationKeys(uniAnimCurve, fbxAnimCurve, convertSceneHelper, startTime, posValue);
                 }
             }
         }
@@ -2376,7 +2397,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export an AnimationClip as a single take
         /// </summary>
-        private void ExportAnimationClip(AnimationClip uniAnimClip, GameObject uniRoot, FbxScene fbxScene)
+        private void ExportAnimationClip(AnimationClip uniAnimClip, GameObject uniRoot, FbxScene fbxScene, double clipStart = 0,
+            Vector3 posOffset = default, Vector3 rotOffset = default)
         {
             if (!uniAnimClip || !uniRoot || fbxScene == null) return;
 
@@ -2410,7 +2432,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // set time correctly
             var fbxStartTime = FbxTime.FromSecondDouble(0);
-            var fbxStopTime = FbxTime.FromSecondDouble(uniAnimClip.length);
+            var fbxStopTime = FbxTime.FromSecondDouble(clipStart + uniAnimClip.length);
 
             fbxAnimStack.SetLocalTimeSpan(new FbxTimeSpan(fbxStartTime, fbxStopTime));
 
@@ -2534,10 +2556,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         continue;
                     }
 
+                    var offset = posOffset;
+                    if (propertyName.StartsWith("localEulerAngles"))
+                    {
+                        offset = rotOffset;
+                    }
                     // simple property (e.g. intensity), export right away
                     ExportAnimationCurve(fbxNode, uniAnimCurve, uniAnimClip.frameRate,
                         propertyName, uniCurve.propertyType,
-                        fbxAnimLayer);
+                        fbxAnimLayer, clipStart, offset);
                 }
             }
 
@@ -2553,7 +2580,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     Debug.LogError(string.Format("no FbxNode found for {0}", unityGo.name));
                     continue;
                 }
-                rot.Animate(unityGo.transform, fbxNode, fbxAnimLayer, Verbose);
+                rot.Animate(unityGo.transform, fbxNode, fbxAnimLayer, Verbose, clipStart, rotOffset);
             }
         }
 
@@ -3446,7 +3473,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 return null;
             }
-            exportData[boundGo] = GetExportData(boundGo, pair.Value, exportOptions);
+            var temp = GetExportData(boundGo, pair.Value, exportOptions) as AnimationOnlyExportData;
+            temp.clipStart = timelineClip.start;
+
+            var asset = timelineClip.asset as AnimationPlayableAsset;
+            Debug.Log("Asset pos: " + asset.position + ", rot: " + asset.eulerAngles);
+            temp.positionOffset = asset.position;
+            temp.rotationOffset = asset.eulerAngles;
+
+            exportData[boundGo] = temp;
 
             return exportData;
         }
@@ -4003,18 +4038,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
                                 Debug.LogWarningFormat("FBX Exporter: no animation export data found for {0}", unityGo.name);
                                 continue;
                             }
+
                             // export animation
                             // export default clip first
                             if (data.defaultClip != null)
                             {
                                 var defaultClip = data.defaultClip;
-                                ExportAnimationClip(defaultClip, data.animationClips[defaultClip], fbxScene);
+                                ExportAnimationClip(defaultClip, data.animationClips[defaultClip], fbxScene, data.clipStart, data.positionOffset, data.rotationOffset);
                                 data.animationClips.Remove(defaultClip);
                             }
 
                             foreach (var animClip in data.animationClips)
                             {
-                                ExportAnimationClip(animClip.Key, animClip.Value, fbxScene);
+                                ExportAnimationClip(animClip.Key, animClip.Value, fbxScene, data.clipStart, data.positionOffset, data.rotationOffset);
                             }
                         }
                     }
@@ -4299,7 +4335,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// Gets the vertex count.
             /// </summary>
             /// <value>The vertex count.</value>
-            public int VertexCount { get { return mesh.vertexCount; } }
+            public int VertexCount { get { return Vertices.Length; } }
 
             /// <summary>
             /// Gets the triangles. Each triangle is represented as 3 indices from the vertices array.

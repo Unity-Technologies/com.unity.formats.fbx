@@ -1,4 +1,4 @@
-﻿using Autodesk.Fbx;
+using Autodesk.Fbx;
 using System.Collections.Generic;
 
 namespace UnityEditor.Formats.Fbx.Exporter
@@ -89,7 +89,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 ( "m_TranslationOffset", "Translation" ),
                 ( "m_ScaleOffset", "Scaling" ),
                 ( "m_RotationOffset", "Rotation" ),
-                ( "localEulerAnglesRaw", "Lcl Rotation" )
+                ( "localEulerAnglesRaw", "Lcl Rotation" ),
+                ( "m_LocalEulerAngles", "Lcl Rotation" )
             };
 
         /// <summary>
@@ -120,6 +121,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 ( "field of view", "FieldOfView" ),
                 ( "m_Weight", "Weight" ),
                 ( "m_FocalLength", "FocalLength" ),
+                ( "m_Lens.m_FocalLength", "FocalLength" ),
                 ( "m_LensShift.x", "FilmOffsetX" ),
                 ( "m_LensShift.y", "FilmOffsetY" )
             };
@@ -292,7 +294,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         // check if it's a constraint source property
                         fbxProperty = GetFbxConstraintSourceProperty(uniPropChannelPair.property, constraint, propertyChannelMap.MapUnityPropToFbxProp);
                     }
-                    else
+                    else if (propertyChannelMap.MapUnityPropToFbxProp == MapBlendshapesPropToFbxProp)
                     {
                         // check if it's a blendshape property
                         fbxProperty = GetFbxBlendshapeProperty(uniPropChannelPair.property, propertyChannelMap.MapUnityPropToFbxProp);
