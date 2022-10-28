@@ -4302,7 +4302,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// Gets the vertex count.
             /// </summary>
             /// <value>The vertex count.</value>
-            public int VertexCount { get { return mesh.vertexCount; } }
+            public int VertexCount { get { return Vertices.Length; } }
 
             /// <summary>
             /// Gets the triangles. Each triangle is represented as 3 indices from the vertices array.
