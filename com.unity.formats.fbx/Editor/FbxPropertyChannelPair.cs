@@ -1,10 +1,10 @@
-﻿using Autodesk.Fbx;
+using Autodesk.Fbx;
 using System.Collections.Generic;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
     /// <summary>
-    /// Store FBX property name and channel name 
+    /// Store FBX property name and channel name
     /// Default constructor added because it needs to be called before autoimplemented properties can be assigned. Otherwise we get build errors
     /// </summary>
     struct FbxPropertyChannelPair
@@ -45,7 +45,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 MapUnityChannelToFbxChannel = channelMap;
             }
 
-            private string GetFbxValue(string uniValue, List<(string,string)> list)
+            private string GetFbxValue(string uniValue, List<(string, string)> list)
             {
                 return list.Find(x => x.Item1 == uniValue).Item2;
             }
@@ -81,48 +81,48 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Map of Unity transform properties to their FBX equivalent.
         /// </summary>
         private static List<(string, string)> MapTransformPropToFbxProp = new List<(string, string)>()
-            {
-                ( "m_LocalScale", "Lcl Scaling" ),
-                ( "Motion S", "Lcl Scaling" ),
-                ( "m_LocalPosition", "Lcl Translation" ),
-                ( "Motion T", "Lcl Translation" ),
-                ( "m_TranslationOffset", "Translation" ),
-                ( "m_ScaleOffset", "Scaling" ),
-                ( "m_RotationOffset", "Rotation" ),
-                ( "localEulerAnglesRaw", "Lcl Rotation" )
-            };
+        {
+            ("m_LocalScale", "Lcl Scaling"),
+            ("Motion S", "Lcl Scaling"),
+            ("m_LocalPosition", "Lcl Translation"),
+            ("Motion T", "Lcl Translation"),
+            ("m_TranslationOffset", "Translation"),
+            ("m_ScaleOffset", "Scaling"),
+            ("m_RotationOffset", "Rotation"),
+            ("localEulerAnglesRaw", "Lcl Rotation")
+        };
 
         /// <summary>
         /// Map of Unity Aim constraint properties to their FBX equivalent.
         /// </summary>
         private static List<(string, string)> MapAimConstraintPropToFbxProp = new List<(string, string)>()
-            {
-                ( "m_AimVector", "AimVector" ),
-                ( "m_UpVector", "UpVector" ),
-                ( "m_WorldUpVector", "WorldUpVector" ),
-                ( "m_RotationOffset", "RotationOffset" )
-            };
+        {
+            ("m_AimVector", "AimVector"),
+            ("m_UpVector", "UpVector"),
+            ("m_WorldUpVector", "WorldUpVector"),
+            ("m_RotationOffset", "RotationOffset")
+        };
 
         /// <summary>
         /// Map of Unity color properties to their FBX equivalent.
         /// </summary>
         private static List<(string, string)> MapColorPropToFbxProp = new List<(string, string)>()
-            {
-                ( "m_Color", "Color" )
-            };
+        {
+            ("m_Color", "Color")
+        };
 
         /// <summary>
         /// Map of Unity properties to their FBX equivalent.
         /// </summary>
         private static List<(string, string)> MapPropToFbxProp = new List<(string, string)>()
-            {
-                ( "m_Intensity", "Intensity" ),
-                ( "field of view", "FieldOfView" ),
-                ( "m_Weight", "Weight" ),
-                ( "m_FocalLength", "FocalLength" ),
-                ( "m_LensShift.x", "FilmOffsetX" ),
-                ( "m_LensShift.y", "FilmOffsetY" )
-            };
+        {
+            ("m_Intensity", "Intensity"),
+            ("field of view", "FieldOfView"),
+            ("m_Weight", "Weight"),
+            ("m_FocalLength", "FocalLength"),
+            ("m_LensShift.x", "FilmOffsetX"),
+            ("m_LensShift.y", "FilmOffsetY")
+        };
 
         /// <summary>
         /// Map of Unity constraint source property name as a regular expression to the FBX property as a string format.
@@ -130,9 +130,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// the name of the source object.
         /// </summary>
         private static List<(string, string)> MapConstraintSourcePropToFbxProp = new List<(string, string)>()
-            {
-                ( @"m_Sources\.Array\.data\[(\d+)\]\.weight", "{0}.Weight" )
-            };
+        {
+            (@"m_Sources\.Array\.data\[(\d+)\]\.weight", "{0}.Weight")
+        };
 
         /// <summary>
         /// Map of Unity constraint source transform property name as a regular expression to the FBX property as a string format.
@@ -140,19 +140,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// the name of the source object.
         /// </summary>
         private static List<(string, string)> MapConstraintSourceTransformPropToFbxProp = new List<(string, string)>()
-            {
-                ( @"m_TranslationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset T" ),
-                ( @"m_RotationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset R" )
-            };
+        {
+            (@"m_TranslationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset T"),
+            (@"m_RotationOffsets\.Array\.data\[(\d+)\]", "{0}.Offset R")
+        };
 
         /// <summary>
         /// Map of Unity blendshape property name as a regular expression to the FBX property.
         /// This is necessary because the Unity property contains the name of the target object.
         /// </summary>
         private static List<(string, string)> MapBlendshapesPropToFbxProp = new List<(string, string)>()
-            {
-                ( @"blendShape\.(\S+)", "DeformPercent" )
-            };
+        {
+            (@"blendShape\.(\S+)", "DeformPercent")
+        };
 
         // ================== Channel Maps ======================
 
@@ -160,21 +160,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// Map of Unity transform channels to their FBX equivalent.
         /// </summary>
         private static List<(string, string)> MapTransformChannelToFbxChannel = new List<(string, string)>()
-            {
-                ( "x", Globals.FBXSDK_CURVENODE_COMPONENT_X ),
-                ( "y", Globals.FBXSDK_CURVENODE_COMPONENT_Y ),
-                ( "z", Globals.FBXSDK_CURVENODE_COMPONENT_Z )
-            };
+        {
+            ("x", Globals.FBXSDK_CURVENODE_COMPONENT_X),
+            ("y", Globals.FBXSDK_CURVENODE_COMPONENT_Y),
+            ("z", Globals.FBXSDK_CURVENODE_COMPONENT_Z)
+        };
 
         /// <summary>
         /// Map of Unity color channels to their FBX equivalent.
         /// </summary>
         private static List<(string, string)> MapColorChannelToFbxChannel = new List<(string, string)>()
-            {
-                ( "b", Globals.FBXSDK_CURVENODE_COLOR_BLUE ),
-                ( "g", Globals.FBXSDK_CURVENODE_COLOR_GREEN ),
-                ( "r", Globals.FBXSDK_CURVENODE_COLOR_RED )
-            };
+        {
+            ("b", Globals.FBXSDK_CURVENODE_COLOR_BLUE),
+            ("g", Globals.FBXSDK_CURVENODE_COLOR_GREEN),
+            ("r", Globals.FBXSDK_CURVENODE_COLOR_RED)
+        };
 
         // =======================================================
 
@@ -189,7 +189,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         /// <summary>
         /// Separates and returns the property and channel from the full Unity property name.
-        /// 
+        ///
         /// Takes what is after the last period as the channel.
         /// In order to use this have to be certain that there are channels, as there are cases where what is after
         /// the last period is still the property name. E.g. m_Sources.Array.data[0].weight has no channel.
@@ -211,7 +211,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         /// <summary>
         /// Get the Fbx property name for the given Unity constraint source property name from the given list.
-        /// 
+        ///
         /// This is different from GetFbxProperty() because the Unity constraint source properties contain indices, and
         /// the Fbx constraint source property contains the name of the source object.
         /// </summary>
@@ -241,7 +241,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         /// <summary>
         /// Get the Fbx property name for the given Unity blendshape property name from the given list.
-        /// 
+        ///
         /// This is different from GetFbxProperty() because the Unity blendshape properties contain the name
         /// of the target object.
         /// </summary>
@@ -306,7 +306,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // matched property, now try to match channel
                 string fbxChannel = null;
-                if(!string.IsNullOrEmpty(uniPropChannelPair.channel) && propertyChannelMap.MapUnityChannelToFbxChannel != null)
+                if (!string.IsNullOrEmpty(uniPropChannelPair.channel) && propertyChannelMap.MapUnityChannelToFbxChannel != null)
                 {
                     fbxChannel = propertyChannelMap.GetFbxChannel(uniPropChannelPair.channel);
                     if (string.IsNullOrEmpty(fbxChannel))
@@ -326,16 +326,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         public static bool TryGetValue(string uniPropertyName, out FbxPropertyChannelPair[] prop, FbxConstraint constraint = null)
         {
-            prop = new FbxPropertyChannelPair[] { };
-                
+            prop = new FbxPropertyChannelPair[] {};
+
             // spot angle is a special case as it returns two channel pairs instead of one
             System.StringComparison ct = System.StringComparison.CurrentCulture;
             if (uniPropertyName.StartsWith("m_SpotAngle", ct))
             {
-                prop = new FbxPropertyChannelPair[]{
-                        new FbxPropertyChannelPair ("OuterAngle", null),
-                        new FbxPropertyChannelPair ("InnerAngle", null)
-                    };
+                prop = new FbxPropertyChannelPair[]
+                {
+                    new FbxPropertyChannelPair("OuterAngle", null),
+                    new FbxPropertyChannelPair("InnerAngle", null)
+                };
                 return true;
             }
 

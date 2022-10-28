@@ -5,16 +5,11 @@
 # every test on every platform and version, so we're not actually skipping
 # tests.
 #
-test_editors:
-  - version: 2020.3
-test_platforms:
-  - name: win
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.medium
+{% metadata_file .yamato/global.metafile %}
 ---
-{% for editor in test_editors %}
-{% for platform in test_platforms %}
+
+{% for editor in promotion_test_editors %}
+{% for platform in promotion_test_platforms %}
 promotion_test_{{ platform.name }}_{{ editor.version }}:
   name : Promotion Test {{ editor.version }} on {{ platform.name }}
   agent:
@@ -41,9 +36,9 @@ promotion_test_{{ platform.name }}_{{ editor.version }}:
 promote:
   name: Promote to Production
   agent:
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.small
+    type: {{ win_platform.type }}
+    image: {{ win_platform.image }}
+    flavor: {{ win_platform.flavor }}
   variables:
     UPMCI_PROMOTION: 1
   commands:
@@ -59,8 +54,8 @@ promote:
         - "upm-ci~/packages/*.tgz"
   dependencies:
     - .yamato/upm-ci.yml#publish
-{% for editor in test_editors %}
-{% for platform in test_platforms %}
+{% for editor in promotion_test_editors %}
+{% for platform in promotion_test_platforms %}
     - .yamato/promotion.yml#promotion_test_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
 {% endfor %}
