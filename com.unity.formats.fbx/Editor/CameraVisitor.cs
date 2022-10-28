@@ -127,6 +127,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // FarPlane
                 fbxCamera.SetFarPlane((float)unityCamera.farClipPlane.Meters().ToCentimeters());
+
+                fbxCamera.UseDepthOfField.Set(true);
+                fbxCamera.FocusDistance.Set(unityCamera.focusDistance.Meters().ToCentimeters());
                 return;
             }
         }
