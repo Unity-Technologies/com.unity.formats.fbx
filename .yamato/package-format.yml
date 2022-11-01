@@ -1,0 +1,23 @@
+{% metadata_file .yamato/global.metafile %}
+---
+ 
+ format_code:
+   name: Format Code
+   agent:
+     type: {{ mac_platform.type }}
+     image: {{ mac_platform.image }}
+     flavor: {{ mac_platform.flavor }}
+   commands:
+     - git config --global user.name "noreply@unity3d.com"
+     - git config --global user.email "noreply@unity3d.com"
+     - git checkout $GIT_BRANCH
+     - git pull origin $GIT_BRANCH # In case the job was not run on the latest commit, attempt to get it. There may be situations with merge conflicts, in that case wait for everyone to push their changes and then only run the formatting job on HEAD.
+     - brew tap --force-auto-update unity/unity git@github.cds.internal.unity3d.com:unity/homebrew-unity.git
+     - brew install unity-config
+     - unity-config project set registry candidates --project-path TestProjects/fbx-api-tests
+     - unity-downloader-cli -c editor -u 2022.1
+     - .Editor/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath TestProjects/fbx-api-tests
+     - .Editor/Unity.app/Contents/MacOS/Unity -executeMethod Automation.Format.ApplyFormatting -projectPath TestProjects/fbx-api-tests
+     - git add -u *.cs
+     - git commit -m "Apply formatting changes"
+     - git push --set-upstream origin $GIT_BRANCH

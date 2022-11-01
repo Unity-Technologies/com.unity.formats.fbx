@@ -1,4 +1,4 @@
-﻿#if UNITY_2018_1_OR_NEWER
+#if UNITY_2018_1_OR_NEWER
 using UnityEditor.Presets;
 
 namespace UnityEditor.Formats.Fbx.Exporter
@@ -10,7 +10,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     {
         UnityEngine.Object m_Target;
         Preset m_InitialValue;
-        
+
         public event SelectionChangedDelegate SelectionChanged;
         public event DialogClosedDelegate DialogClosed;
 

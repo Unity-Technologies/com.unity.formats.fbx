@@ -492,7 +492,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     FbxLayerElementArray fbxElementArray = fbxLayerElement.GetDirectArray();
 
                     // (Uni-31596) only copy unique UVs into this array, and index appropriately
-                    for (int n = 0; n < uvs.Count; n++) {
+                    for (int n = 0; n < uvs.Count; n++)
+                    {
                         fbxElementArray.Add(new FbxVector2(uvs[n][0],
                             uvs[n][1]));
                     }
@@ -3025,12 +3026,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // if this object has an LOD group, then export according to the LOD preference setting
             var lodGroup = unityGo.GetComponent<LODGroup>();
-            if (lodGroup && lodExportType != LODExportType.All) {
-                LOD[] lods = lodGroup.GetLODs ();
+            if (lodGroup && lodExportType != LODExportType.All)
+            {
+                LOD[] lods = lodGroup.GetLODs();
 
                 // LODs are ordered from highest to lowest.
                 // If exporting lowest LOD, reverse the array
-                if (lodExportType == LODExportType.Lowest) {
+                if (lodExportType == LODExportType.Lowest)
+                {
                     // reverse the array
                     LOD[] tempLods = new LOD[lods.Length];
                     System.Array.Copy(lods, tempLods, lods.Length);
@@ -4304,7 +4307,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             /// Gets the vertex count.
             /// </summary>
             /// <value>The vertex count.</value>
-            public int VertexCount { get { return mesh.vertexCount; } }
+            public int VertexCount { get { return Vertices.Length; } }
 
             /// <summary>
             /// Gets the triangles. Each triangle is represented as 3 indices from the vertices array.
@@ -4811,7 +4814,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Exports a single Unity GameObject to an FBX file, 
+        /// Exports a single Unity GameObject to an FBX file,
         /// with the specified export settings.
         /// </summary>
         /// <returns>
@@ -4912,10 +4915,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             var fbxExporter = Create();
             // ensure output directory exists
-            EnsureDirectory (filePath);
+            EnsureDirectory(filePath);
             fbxExporter.ExportOptions = exportOptions;
 
-            if (objects == null) {
+            if (objects == null)
+            {
                 objects = Selection.objects;
             }
 
@@ -4924,9 +4928,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 exportData = GetExportData(objects, exportOptions);
             }
 
-            if (fbxExporter.ExportAll (objects, exportData) > 0) {
-                string message = string.Format ("Successfully exported: {0}", filePath);
-                Debug.Log (message);
+            if (fbxExporter.ExportAll(objects, exportData) > 0)
+            {
+                string message = string.Format("Successfully exported: {0}", filePath);
+                Debug.Log(message);
 
                 return filePath;
             }
