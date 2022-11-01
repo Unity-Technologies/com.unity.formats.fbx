@@ -20,8 +20,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
     internal class AnimationOnlyExportData : IExportData
     {
         public double clipStart;
-        public Vector3 positionOffset;
-        public Vector3 rotationOffset;
+        //public Vector3 positionOffset;
+        //public Vector3 rotationOffset;
 
         // map from animation clip to GameObject that has Animation/Animator
         // component containing clip

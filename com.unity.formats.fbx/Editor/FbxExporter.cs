@@ -2105,7 +2105,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     fbxAnimCurve.KeySet(fbxKeyIndex,
                         fbxTime,
-                        convertSceneHelper.Convert(uniKeyFrame.value + posValue),
+                        convertSceneHelper.Convert(uniKeyFrame.value),
                         interpMode,
                         tanMode,
                         // value of right slope
@@ -2142,7 +2142,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     fbxAnimCurve.KeySet(fbxKeyIndex,
                         fbxTime,
-                        convertSceneHelper.Convert(currSampleValue + posValue)
+                        convertSceneHelper.Convert(currSampleValue)
                     );
                 }
             }
@@ -2258,7 +2258,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             string uniPropertyName,
             System.Type uniPropertyType,
             FbxAnimLayer fbxAnimLayer,
-            double startTime = 0, Vector3 posOffset = default)
+            double startTime = 0)
         {
             if (fbxNode == null)
             {
@@ -2299,21 +2299,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     return;
                 }
 
-                float posValue = 0;
-                var channel = fbxPropertyChannelPair.Channel.ToLower();
-                if (channel == "x")
-                {
-                    posValue = posOffset[0];
-                }
-                else if (channel == "y")
-                {
-                    posValue = posOffset[1];
-                }
-                else if(channel == "z")
-                {
-                    posValue = posOffset[2];
-                }
-
                 // create a convert scene helper so that we can convert from Unity to Maya
                 // AxisSystem (LeftHanded to RightHanded) and FBX's default units
                 // (Meters to Centimetres)
@@ -2321,11 +2306,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 if (ModelExporter.ExportSettings.BakeAnimationProperty)
                 {
-                    ExportAnimationSamples(uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper, startTime, posValue);
+                    ExportAnimationSamples(uniAnimCurve, fbxAnimCurve, frameRate, convertSceneHelper, startTime);
                 }
                 else
                 {
-                    ExportAnimationKeys(uniAnimCurve, fbxAnimCurve, convertSceneHelper, startTime, posValue);
+                    ExportAnimationKeys(uniAnimCurve, fbxAnimCurve, convertSceneHelper, startTime);
                 }
             }
         }
@@ -2397,8 +2382,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export an AnimationClip as a single take
         /// </summary>
-        private void ExportAnimationClip(AnimationClip uniAnimClip, GameObject uniRoot, FbxScene fbxScene, double clipStart = 0,
-            Vector3 posOffset = default, Vector3 rotOffset = default)
+        private void ExportAnimationClip(AnimationClip uniAnimClip, GameObject uniRoot, FbxScene fbxScene, double clipStart = 0)
         {
             if (!uniAnimClip || !uniRoot || fbxScene == null) return;
 
@@ -2556,15 +2540,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         continue;
                     }
 
-                    var offset = posOffset;
-                    if (propertyName.StartsWith("localEulerAngles"))
-                    {
-                        offset = rotOffset;
-                    }
                     // simple property (e.g. intensity), export right away
                     ExportAnimationCurve(fbxNode, uniAnimCurve, uniAnimClip.frameRate,
                         propertyName, uniCurve.propertyType,
-                        fbxAnimLayer, clipStart, offset);
+                        fbxAnimLayer, clipStart);
                 }
             }
 
@@ -2580,7 +2559,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     Debug.LogError(string.Format("no FbxNode found for {0}", unityGo.name));
                     continue;
                 }
-                rot.Animate(unityGo.transform, fbxNode, fbxAnimLayer, Verbose, clipStart, rotOffset);
+                rot.Animate(unityGo.transform, fbxNode, fbxAnimLayer, Verbose, clipStart);
             }
         }
 
@@ -3476,11 +3455,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var temp = GetExportData(boundGo, pair.Value, exportOptions) as AnimationOnlyExportData;
             temp.clipStart = timelineClip.start;
 
-            var asset = timelineClip.asset as AnimationPlayableAsset;
-            Debug.Log("Asset pos: " + asset.position + ", rot: " + asset.eulerAngles);
-            temp.positionOffset = asset.position;
-            temp.rotationOffset = asset.eulerAngles;
-
             exportData[boundGo] = temp;
 
             return exportData;
@@ -4044,13 +4018,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
                             if (data.defaultClip != null)
                             {
                                 var defaultClip = data.defaultClip;
-                                ExportAnimationClip(defaultClip, data.animationClips[defaultClip], fbxScene, data.clipStart, data.positionOffset, data.rotationOffset);
+                                ExportAnimationClip(defaultClip, data.animationClips[defaultClip], fbxScene, data.clipStart);
                                 data.animationClips.Remove(defaultClip);
                             }
 
                             foreach (var animClip in data.animationClips)
                             {
-                                ExportAnimationClip(animClip.Key, animClip.Value, fbxScene, data.clipStart, data.positionOffset, data.rotationOffset);
+                                ExportAnimationClip(animClip.Key, animClip.Value, fbxScene, data.clipStart);
                             }
                         }
                     }
