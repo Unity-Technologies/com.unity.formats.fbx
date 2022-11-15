@@ -1,7 +1,10 @@
 # Changes in Fbx Exporter
 
-## [5.0.0-pre.1] - 2022-09-07
+## [5.0.0] - 2022-11-15
+### Changed
+- Updated the FBX SDK bindings to 5.0.0.
 
+## [5.0.0-pre.1] - 2022-09-07
 ### Added
 - Exposed FBX Recorder Settings class to the public API.
 - Exposed functions to pass export options on export to the public API.
