@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [4.1.3] - 2022-11-15
+### Changed
+- Updated the FBX SDK bindings to 4.1.2.
+
 ## [4.1.2] - 2021-09-19
 ### Changed
 - Added the ability to export meshes using more than 4 skin weights per vertex.
