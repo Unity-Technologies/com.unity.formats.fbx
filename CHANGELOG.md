@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [4.2.1] - 2022-11-15
+### Changed
+- Updated the FBX SDK bindings to 4.2.1.
+
 ## [4.2.0] - 2022-07-07
 ### Changed
 - Add more details to documentation for material and texture export.
