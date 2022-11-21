@@ -40,7 +40,6 @@ nightly_tested_releases:
       - version: 2020.3
       - version: 2021.3
       - version: 2022.2
-      - version: trunk
   - name: release_4_1
     branch: release/4.1
     nightly_editors: 
