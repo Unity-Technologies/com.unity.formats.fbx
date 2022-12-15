@@ -92,10 +92,6 @@ namespace FbxExporter.UnitTests
             origCam.nearClipPlane = 30f.Centimeters().ToMeters();
             origCam.farClipPlane = 600000f.Centimeters().ToMeters();
 
-#if UNITY_2022_2_OR_NEWER
-            origCam.focusDistance = 500f.Centimeters().ToMeters();
-#endif
-
             // Convert it to FBX. The asset file will be deleted automatically
             // on termination.
             var fbxAsset = ModelExporter.ExportObject(
@@ -114,9 +110,6 @@ namespace FbxExporter.UnitTests
             Assert.That(srcCam.lensShift.y, Is.EqualTo(origCam.lensShift.y).Within(EPSILON));
             Assert.That(srcCam.nearClipPlane, Is.EqualTo(origCam.nearClipPlane));
             Assert.That(srcCam.farClipPlane, Is.EqualTo(origCam.farClipPlane));
-#if UNITY_2022_2_OR_NEWER
-            Assert.That(srcCam.focusDistance, Is.EqualTo(origCam.focusDistance));
-#endif
         }
     }
 }
