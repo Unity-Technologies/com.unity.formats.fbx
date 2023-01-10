@@ -3,6 +3,7 @@
 ## [5.0.0] - 2022-11-15
 ### Changed
 - Updated the FBX SDK bindings to 5.0.0.
+- Updated supported Unity, Maya and Max versions in the documentation.
 
 ## [5.0.0-pre.1] - 2022-09-07
 ### Added
