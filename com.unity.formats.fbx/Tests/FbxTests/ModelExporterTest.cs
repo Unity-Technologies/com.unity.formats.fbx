@@ -88,7 +88,11 @@ namespace FbxExporter.UnitTests
                 var character = new GameObject();
                 var smr = character.AddComponent<SkinnedMeshRenderer>();
                 smr.sharedMesh = cube.GetComponent<MeshFilter>().sharedMesh;
+#if UNITY_2023_1_OR_NEWER
+                var meshCount = Object.FindObjectsByType<Mesh>(FindObjectsSortMode.None).Length;
+#else // UNITY_2023_1_OR_NEWER
                 var meshCount = Object.FindObjectsOfType<Mesh>().Length;
+#endif // UNITY_2023_1_OR_NEWER
                 ModelExporter.ExportObject(GetRandomFbxFilePath(), character);
                 Assert.AreEqual(meshCount, Object.FindObjectsOfType<Mesh>().Length);
             }
