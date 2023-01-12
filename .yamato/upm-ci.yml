@@ -54,6 +54,8 @@ test_{{ platform.name }}_{{ editor.version }}:
     type: {{ platform.type }}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
+  variables:
+    UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
   commands:
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
@@ -76,6 +78,8 @@ validate_{{ platform.name }}_{{ editor.version }}:
     type: {{ platform.type }}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
+  variables:
+    UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
   commands:
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package test --unity-version {{ editor.version }} --type vetting-tests --platform editmode --package-path com.unity.formats.fbx
