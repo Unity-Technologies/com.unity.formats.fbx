@@ -59,19 +59,19 @@ nightly_tested_releases:
 win_platform: &win
   name: win
   type: Unity::VM
-  image: package-ci/win10:stable
+  image: package-ci/win10:v4
   flavor: b1.medium
 
 mac_platform: &mac
   name: mac
   type: Unity::VM::osx
-  image: package-ci/mac:stable
+  image: package-ci/macos-12:v4
   flavor: b1.medium
 
 ubuntu_platform: &ubuntu
   name: ubuntu
   type: Unity::VM
-  image: package-ci/ubuntu:stable
+  image: package-ci/ubuntu18.04:v4
   flavor: b1.medium
 
   
