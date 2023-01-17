@@ -8,6 +8,7 @@ pack:
     image: {{ ubuntu_platform.image }}
     flavor: {{ ubuntu_platform.flavor }}
   commands:
+    - sudo apt-get -y install cmake
     - ./build.sh
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package pack --package-path com.unity.formats.fbx
