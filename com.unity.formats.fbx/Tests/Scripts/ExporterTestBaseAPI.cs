@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
 using System.IO;
@@ -20,15 +20,18 @@ namespace FbxExporter.UnitTests
         /// Sleep an amount of time (in ms) so we can safely assume that the
         /// timestamp on an fbx will change.
         /// </summary>
-        public void SleepForFileTimestamp() {
+        public void SleepForFileTimestamp()
+        {
             System.Threading.Thread.Sleep(1000);
         }
 
-
         private string _testDirectory;
-        protected string filePath {
-            get {
-                if (string.IsNullOrEmpty(_testDirectory)) {
+        protected string filePath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_testDirectory))
+                {
                     // Create a directory in the asset path.
                     _testDirectory = GetRandomFileNamePath("Assets", extName: "");
                     System.IO.Directory.CreateDirectory(_testDirectory);
@@ -38,7 +41,9 @@ namespace FbxExporter.UnitTests
         }
 
         private string _fileNamePrefix;
-        protected string fileNamePrefix { get { return string.IsNullOrEmpty(_fileNamePrefix) ? "_safe_to_delete__" : _fileNamePrefix; }
+        protected string fileNamePrefix
+        {
+            get { return string.IsNullOrEmpty(_fileNamePrefix) ? "_safe_to_delete__" : _fileNamePrefix; }
             set { _fileNamePrefix = value; } }
 
         private string _fileNameExt;
@@ -46,16 +51,17 @@ namespace FbxExporter.UnitTests
 
         private string MakeFileName(string baseName = null, string prefixName = null, string extName = null)
         {
-            if (baseName==null) {
+            if (baseName == null)
+            {
                 // GetRandomFileName makes a random 8.3 filename
                 // We don't want the extension.
                 baseName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
             }
 
-            if (prefixName==null)
+            if (prefixName == null)
                 prefixName = this.fileNamePrefix;
 
-            if (extName==null)
+            if (extName == null)
                 extName = this.fileNameExt;
 
             return prefixName + baseName + extName;
@@ -82,24 +88,28 @@ namespace FbxExporter.UnitTests
         ///     GetRandomFbxFilePath()
         /// </summary>
         protected string GetRandomFileNamePath(
-                string pathName = null,
-                string prefixName = null,
-                string extName = null,
-                bool unityPathSeparator = false)
+            string pathName = null,
+            string prefixName = null,
+            string extName = null,
+            bool unityPathSeparator = false)
         {
             string temp;
 
-            if (pathName == null) {
+            if (pathName == null)
+            {
                 pathName = this.filePath;
             }
 
             // repeat until you find a file that does not already exist
-            do {
-                temp = Path.Combine (pathName, MakeFileName(prefixName: prefixName, extName: extName));
-            } while(File.Exists (temp));
+            do
+            {
+                temp = Path.Combine(pathName, MakeFileName(prefixName: prefixName, extName: extName));
+            }
+            while (File.Exists(temp));
 
             // Unity asset paths need a slash on all platforms.
-            if (unityPathSeparator) {
+            if (unityPathSeparator)
+            {
                 temp = temp.Replace('\\', '/');
             }
 
@@ -110,7 +120,8 @@ namespace FbxExporter.UnitTests
         /// Return a random .fbx path that you can use in
         /// the File APIs.
         /// </summary>
-        protected string GetRandomFbxFilePath() {
+        protected string GetRandomFbxFilePath()
+        {
             return GetRandomFileNamePath(extName: ".fbx", unityPathSeparator: false);
         }
 
@@ -118,7 +129,8 @@ namespace FbxExporter.UnitTests
         /// Return a random .prefab path that you can use in
         /// PrefabUtility.CreatePrefab.
         /// </summary>
-        protected string GetRandomPrefabAssetPath() {
+        protected string GetRandomPrefabAssetPath()
+        {
             return GetRandomFileNamePath(extName: ".prefab", unityPathSeparator: true);
         }
 
@@ -140,31 +152,31 @@ namespace FbxExporter.UnitTests
         ///      ----> Child3
         /// </summary>
         /// <returns>The hierarchy root.</returns>
-        public GameObject CreateHierarchy (string rootname = "Root")
+        public GameObject CreateHierarchy(string rootname = "Root")
         {
-            var root = new GameObject (rootname);
-            SetTransform (root.transform,
-                new Vector3 (3, 4, -6),
-                new Vector3 (45, 10, 34),
-                new Vector3 (2, 1, 3));
+            var root = new GameObject(rootname);
+            SetTransform(root.transform,
+                new Vector3(3, 4, -6),
+                new Vector3(45, 10, 34),
+                new Vector3(2, 1, 3));
 
-            var parent1 = CreateGameObject ("Parent1", root.transform);
-            SetTransform (parent1.transform,
-                new Vector3 (53, 0, -1),
-                new Vector3 (0, 5, 0),
-                new Vector3 (1, 1, 1));
+            var parent1 = CreateGameObject("Parent1", root.transform);
+            SetTransform(parent1.transform,
+                new Vector3(53, 0, -1),
+                new Vector3(0, 5, 0),
+                new Vector3(1, 1, 1));
 
-            var parent2 = CreateGameObject ("Parent2", root.transform);
-            SetTransform (parent2.transform,
-                new Vector3 (0, 0, 0),
-                new Vector3 (90, 1, 3),
-                new Vector3 (1, 0.3f, 0.5f));
+            var parent2 = CreateGameObject("Parent2", root.transform);
+            SetTransform(parent2.transform,
+                new Vector3(0, 0, 0),
+                new Vector3(90, 1, 3),
+                new Vector3(1, 0.3f, 0.5f));
 
-            parent1.transform.SetAsFirstSibling ();
+            parent1.transform.SetAsFirstSibling();
 
-            CreateGameObject ("Child1", parent1.transform);
-            CreateGameObject ("Child2", parent1.transform);
-            CreateGameObject ("Child3", parent2.transform);
+            CreateGameObject("Child1", parent1.transform);
+            CreateGameObject("Child2", parent1.transform);
+            CreateGameObject("Child3", parent2.transform);
 
             return root;
         }
@@ -176,7 +188,7 @@ namespace FbxExporter.UnitTests
         /// <param name="pos">Position.</param>
         /// <param name="rot">Rotation.</param>
         /// <param name="scale">Scale.</param>
-        private void SetTransform (Transform t, Vector3 pos, Vector3 rot, Vector3 scale)
+        private void SetTransform(Transform t, Vector3 pos, Vector3 rot, Vector3 scale)
         {
             t.localPosition = pos;
             t.localEulerAngles = rot;
@@ -186,11 +198,11 @@ namespace FbxExporter.UnitTests
         /// <summary>
         /// Creates a GameObject.
         /// </summary>
-        public GameObject CreateGameObject (string name, Transform parent = null, PrimitiveType type = PrimitiveType.Cube)
+        public GameObject CreateGameObject(string name, Transform parent = null, PrimitiveType type = PrimitiveType.Cube)
         {
-            var go = GameObject.CreatePrimitive (type);
+            var go = GameObject.CreatePrimitive(type);
             go.name = name;
-            go.transform.SetParent (parent);
+            go.transform.SetParent(parent);
             return go;
         }
 
@@ -198,19 +210,23 @@ namespace FbxExporter.UnitTests
         void DeleteOnNextUpdate()
         {
             EditorApplication.update -= DeleteOnNextUpdate;
-            try {
+            try
+            {
                 AssetDatabase.DeleteAsset(filePath);
-            } catch(IOException) {
+            }
+            catch (IOException)
+            {
                 // ignore -- something else must have deleted this.
             }
         }
 
         [TearDown]
-        public virtual void Term ()
+        public virtual void Term()
         {
             Undo.ClearAll();
 
-            if (string.IsNullOrEmpty(_testDirectory)) {
+            if (string.IsNullOrEmpty(_testDirectory))
+            {
                 return;
             }
 
@@ -230,11 +246,12 @@ namespace FbxExporter.UnitTests
         /// </summary>
         /// <returns>The new GameObject in the scene.</returns>
         /// <param name="assetPath">Asset path.</param>
-        protected GameObject AddAssetToScene(string assetPath){
-            GameObject originalObj = AssetDatabase.LoadMainAssetAtPath (assetPath) as GameObject;
-            Assert.IsNotNull (originalObj, assetPath);
-            GameObject originalGO = GameObject.Instantiate (originalObj);
-            Assert.IsTrue (originalGO);
+        protected GameObject AddAssetToScene(string assetPath)
+        {
+            GameObject originalObj = AssetDatabase.LoadMainAssetAtPath(assetPath) as GameObject;
+            Assert.IsNotNull(originalObj, assetPath);
+            GameObject originalGO = GameObject.Instantiate(originalObj);
+            Assert.IsTrue(originalGO);
 
             return originalGO;
         }
@@ -250,9 +267,9 @@ namespace FbxExporter.UnitTests
             float distance = Vector3.Distance(expected, actual);
 
             var message = System.String.Format("Expected: Vector3({0}, {1}, {2})\nBut was:  Vector3({3}, {4}, {5})\nDistance: {6} is greater than allowed delta {7}",
-                                    expected.x, expected.y, expected.z,
-                                    actual.x, actual.y, actual.z,
-                                    distance, delta);
+                expected.x, expected.y, expected.z,
+                actual.x, actual.y, actual.z,
+                distance, delta);
 
             Assert.That(distance, Is.LessThanOrEqualTo(delta), message);
         }
@@ -262,24 +279,26 @@ namespace FbxExporter.UnitTests
         /// The root can be allowed to mismatch. That's normal with
         /// GameObject.Instantiate.
         /// </summary>
-        public static void AssertSameHierarchy (
+        public static void AssertSameHierarchy(
             GameObject expectedHierarchy, GameObject actualHierarchy,
             bool ignoreRootName = false, bool ignoreRootTransform = false, bool checkComponents = false)
         {
-            if (!ignoreRootName) {
-                Assert.AreEqual (expectedHierarchy.name, actualHierarchy.name);
+            if (!ignoreRootName)
+            {
+                Assert.AreEqual(expectedHierarchy.name, actualHierarchy.name);
             }
 
             var expectedTransform = expectedHierarchy.transform;
             var actualTransform = actualHierarchy.transform;
 
-            if (!ignoreRootTransform) {
+            if (!ignoreRootTransform)
+            {
                 AssertVector3(actualTransform.localPosition, expectedTransform.localPosition, 0.0001f);
                 AssertVector3(actualTransform.localEulerAngles, expectedTransform.localEulerAngles, 0.0001f);
                 AssertVector3(actualTransform.localScale, expectedTransform.localScale, 0.0001f);
             }
 
-            Assert.AreEqual (expectedTransform.childCount, actualTransform.childCount);
+            Assert.AreEqual(expectedTransform.childCount, actualTransform.childCount);
 
             if (checkComponents)
             {
@@ -288,7 +307,7 @@ namespace FbxExporter.UnitTests
                 var actualComponents = actualHierarchy.GetComponents<Component>();
                 System.Array.Sort(expectedComponents, CompareComponents);
                 System.Array.Sort(actualComponents, CompareComponents);
-                for(int i = 0; i < expectedComponents.Length; i++)
+                for (int i = 0; i < expectedComponents.Length; i++)
                 {
                     Assert.That(expectedComponents[i].GetType(), Is.EqualTo(actualComponents[i].GetType()));
                 }
@@ -301,10 +320,11 @@ namespace FbxExporter.UnitTests
                 Assert.That(GameObjectUtility.GetStaticEditorFlags(expectedHierarchy), Is.EqualTo(GameObjectUtility.GetStaticEditorFlags(actualHierarchy)));
             }
 
-            foreach (Transform expectedChild in expectedTransform) {
-                var actualChild = actualTransform.Find (expectedChild.name);
-                Assert.IsNotNull (actualChild);
-                AssertSameHierarchy (expectedChild.gameObject, actualChild.gameObject, checkComponents: checkComponents);
+            foreach (Transform expectedChild in expectedTransform)
+            {
+                var actualChild = actualTransform.Find(expectedChild.name);
+                Assert.IsNotNull(actualChild);
+                AssertSameHierarchy(expectedChild.gameObject, actualChild.gameObject, checkComponents: checkComponents);
             }
         }
 
@@ -314,7 +334,8 @@ namespace FbxExporter.UnitTests
         ///
         /// Return null if the file doesn't actually exist.
         /// </summary>
-        public string FindPathInUnitTests(string path) {
+        public string FindPathInUnitTests(string path)
+        {
             // This used to be complicated; not so much anymore.
             var virtualPath = PathToTestData + '/' + path;
             if (!System.IO.File.Exists(virtualPath))
@@ -322,7 +343,8 @@ namespace FbxExporter.UnitTests
                 virtualPath = AltPathToTestData + '/' + path;
             }
 
-            if (!System.IO.File.Exists(virtualPath)) {
+            if (!System.IO.File.Exists(virtualPath))
+            {
                 return null;
             }
             return virtualPath;

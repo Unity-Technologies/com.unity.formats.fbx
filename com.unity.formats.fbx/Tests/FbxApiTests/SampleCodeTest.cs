@@ -132,7 +132,6 @@ namespace FbxExporter.UnitTests
                 // Export the scene
                 using (Autodesk.Fbx.FbxExporter exporter = Autodesk.Fbx.FbxExporter.Create(fbxManager, "myExporter"))
                 {
-
                     // Initialize the exporter.
                     bool status = exporter.Initialize(fileName, -1, fbxManager.GetIOSettings());
 
@@ -166,7 +165,6 @@ namespace FbxExporter.UnitTests
                 // Import the scene to make sure file is valid
                 using (FbxImporter importer = FbxImporter.Create(fbxManager, "myImporter"))
                 {
-
                     // Initialize the importer.
                     bool status = importer.Initialize(fileName, -1, fbxManager.GetIOSettings());
 

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
 using System.Collections;
@@ -32,7 +32,7 @@ namespace FbxExporter.UnitTests
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1.2f, 0.8f, 10.3f }, new float[] { 194, 9, 195 }, "m_RotationOffset.z").Returns(1);
 
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 2f, 4f }, new float[] { 100f, 80f, 19f }, "m_UpVector.x").Returns(1)
-                    .Ignore("UT-3734 (fogbug 1205373): Test fails due to constraint import issues."); ;
+                    .Ignore("UT-3734 (fogbug 1205373): Test fails due to constraint import issues.");;
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 2f, 4f }, new float[] { 4f, 154f, 454f }, "m_UpVector.y").Returns(1);
                 yield return new TestCaseData(typeof(AimConstraint), new float[] { 1f, 2f, 4f }, new float[] { 8f, 14f, 6f }, "m_UpVector.z").Returns(1);
 
@@ -118,7 +118,7 @@ namespace FbxExporter.UnitTests
 
             return expConstraint;
         }
-        
+
         [Test]
         public void TestPositionConstraintExport()
         {
@@ -191,7 +191,7 @@ namespace FbxExporter.UnitTests
 
             // export and compare
             var expConstraint = ExportAndCheckConstraint(parentConstraint, toExport.ToArray());
-            
+
             Assert.That(AreRotationEqual(expConstraint.rotationAtRest, parentConstraint.rotationAtRest, 0.001), Is.True);
             Assert.That(expConstraint.rotationAxis, Is.EqualTo(parentConstraint.rotationAxis));
             Assert.That(expConstraint.translationAtRest, Is.EqualTo(parentConstraint.translationAtRest));
@@ -222,7 +222,7 @@ namespace FbxExporter.UnitTests
 
             // export and compare
             var expConstraint = ExportAndCheckConstraint(aimConstraint, toExport.ToArray());
-            
+
             Assert.That(expConstraint.aimVector, Is.EqualTo(aimConstraint.aimVector));
             Assert.That(AreRotationEqual(expConstraint.rotationAtRest, aimConstraint.rotationAtRest), Is.True);
             Assert.That(expConstraint.rotationAxis, Is.EqualTo(aimConstraint.rotationAxis));
@@ -287,7 +287,7 @@ namespace FbxExporter.UnitTests
             var expSources = new List<ConstraintSource>();
             expConstraint.GetSources(expSources);
 
-            Assert.That(expSources.Count, Is.EqualTo(origSources.Count-1));
+            Assert.That(expSources.Count, Is.EqualTo(origSources.Count - 1));
 
             Assert.That(expSources[0].sourceTransform, Is.EqualTo(origSources[0].sourceTransform));
             Assert.That(expSources[0].weight, Is.EqualTo(origSources[0].weight));
@@ -300,7 +300,7 @@ namespace FbxExporter.UnitTests
             Quaternion c = Quaternion.Euler(a.x, a.y, a.z);
             Quaternion d = Quaternion.Euler(b.x, b.y, b.z);
 
-            float angle = Quaternion.Angle(c,d);
+            float angle = Quaternion.Angle(c, d);
 
             return Mathf.Abs(angle) < epsilon;
         }
@@ -318,7 +318,7 @@ namespace FbxExporter.UnitTests
             Assert.That(constraint, Is.Not.Null);
 
             int sourceCount = sources.Count;
-            for(int i = 0;  i < sourceCount; i++)
+            for (int i = 0; i < sourceCount; i++)
             {
                 var source = sources[i];
                 var cSource = new ConstraintSource();
@@ -342,7 +342,7 @@ namespace FbxExporter.UnitTests
 
             Assert.That(expSources.Count, Is.EqualTo(origSources.Count));
 
-            for(int i = 0; i < origSources.Count; i++)
+            for (int i = 0; i < origSources.Count; i++)
             {
                 var origSource = origSources[i];
                 var expSource = expSources[i];

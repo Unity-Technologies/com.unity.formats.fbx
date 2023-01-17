@@ -15,10 +15,10 @@ namespace FbxExporter.UnitTests
         const float EPSILON = 0.00001f;
 
         [TearDown]
-        public override void Term ()
+        public override void Term()
         {
             #if (!DEBUG_UNITTEST)
-            base.Term ();
+            base.Term();
             #endif
         }
 
@@ -27,12 +27,12 @@ namespace FbxExporter.UnitTests
         {
             var keyData = new FbxAnimationTest.PropertyKeyData
             {
-                componentType=typeof(Camera), 
-                propertyName="field of view", 
-                keyTimes=new float[]{0f,1f,2f}, 
-                keyFloatValues=new float[]{1f,2f,3f}
+                componentType = typeof(Camera),
+                propertyName = "field of view",
+                keyTimes = new float[] {0f, 1f, 2f},
+                keyFloatValues = new float[] {1f, 2f, 3f}
             };
-            var tester = new FbxAnimationTest.AnimTester{keyData=keyData, testName="CameraFOV", path=GetRandomFbxFilePath()};
+            var tester = new FbxAnimationTest.AnimTester {keyData = keyData, testName = "CameraFOV", path = GetRandomFbxFilePath()};
 
             tester.DoIt();
         }
@@ -42,13 +42,13 @@ namespace FbxExporter.UnitTests
         {
             var filename = GetRandomFileNamePath();
 
-            var original = FbxAnimationTest.AnimTester.CreateTargetObject("GameCamera", typeof (Camera));
+            var original = FbxAnimationTest.AnimTester.CreateTargetObject("GameCamera", typeof(Camera));
 
             var origCam = original.GetComponent<Camera>();
 
-            // Configure Game Camera 
+            // Configure Game Camera
             origCam.fieldOfView = 59;
-                
+
             // FBX Value range is [0.001, 600000.0] centimeters
             // Unity Property Inspector range is [0.01, MAX_FLT] meters
             // Unity Importer range is [0.3, MAX_FLT] meters
@@ -61,15 +61,15 @@ namespace FbxExporter.UnitTests
                 filename, original);
 
             // refresh the assetdata base so that we can query for the model
-            AssetDatabase.Refresh ();
+            AssetDatabase.Refresh();
 
             var source = AssetDatabase.LoadMainAssetAtPath(fbxAsset) as GameObject;
             var srcCam = source.GetComponent<Camera>();
 
-            Assert.That( srcCam.aspect, Is.EqualTo(origCam.aspect));
-            Assert.That( srcCam.fieldOfView, Is.EqualTo(origCam.fieldOfView));
-            Assert.That( srcCam.farClipPlane, Is.EqualTo(origCam.farClipPlane));
-            Assert.That( srcCam.nearClipPlane, Is.EqualTo(origCam.nearClipPlane));
+            Assert.That(srcCam.aspect, Is.EqualTo(origCam.aspect));
+            Assert.That(srcCam.fieldOfView, Is.EqualTo(origCam.fieldOfView));
+            Assert.That(srcCam.farClipPlane, Is.EqualTo(origCam.farClipPlane));
+            Assert.That(srcCam.nearClipPlane, Is.EqualTo(origCam.nearClipPlane));
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace FbxExporter.UnitTests
         {
             var filename = GetRandomFileNamePath();
 
-            var original = FbxAnimationTest.AnimTester.CreateTargetObject("GameCamera", typeof (Camera));
+            var original = FbxAnimationTest.AnimTester.CreateTargetObject("GameCamera", typeof(Camera));
 
             var origCam = original.GetComponent<Camera>();
 
@@ -96,20 +96,20 @@ namespace FbxExporter.UnitTests
             // on termination.
             var fbxAsset = ModelExporter.ExportObject(
                 filename, original);
-            
+
             var source = AssetDatabase.LoadMainAssetAtPath(fbxAsset) as GameObject;
             var srcCam = source.GetComponent<Camera>();
 
-            Assert.That( srcCam.fieldOfView, Is.EqualTo(origCam.fieldOfView).Within(EPSILON));
-            Assert.That( srcCam.focalLength, Is.EqualTo(origCam.focalLength));
-            Assert.That( srcCam.aspect, Is.EqualTo(origCam.aspect));
-            Assert.That( srcCam.sensorSize.x, Is.EqualTo(origCam.sensorSize.x).Within(EPSILON));
-            Assert.That( srcCam.sensorSize.y, Is.EqualTo(origCam.sensorSize.y).Within(EPSILON));
-            Assert.That( srcCam.usePhysicalProperties, Is.EqualTo(origCam.usePhysicalProperties));
-            Assert.That( srcCam.lensShift.x, Is.EqualTo(origCam.lensShift.x).Within(EPSILON));
-            Assert.That( srcCam.lensShift.y, Is.EqualTo(origCam.lensShift.y).Within(EPSILON));
-            Assert.That( srcCam.nearClipPlane, Is.EqualTo(origCam.nearClipPlane));
-            Assert.That( srcCam.farClipPlane, Is.EqualTo(origCam.farClipPlane));
+            Assert.That(srcCam.fieldOfView, Is.EqualTo(origCam.fieldOfView).Within(EPSILON));
+            Assert.That(srcCam.focalLength, Is.EqualTo(origCam.focalLength));
+            Assert.That(srcCam.aspect, Is.EqualTo(origCam.aspect));
+            Assert.That(srcCam.sensorSize.x, Is.EqualTo(origCam.sensorSize.x).Within(EPSILON));
+            Assert.That(srcCam.sensorSize.y, Is.EqualTo(origCam.sensorSize.y).Within(EPSILON));
+            Assert.That(srcCam.usePhysicalProperties, Is.EqualTo(origCam.usePhysicalProperties));
+            Assert.That(srcCam.lensShift.x, Is.EqualTo(origCam.lensShift.x).Within(EPSILON));
+            Assert.That(srcCam.lensShift.y, Is.EqualTo(origCam.lensShift.y).Within(EPSILON));
+            Assert.That(srcCam.nearClipPlane, Is.EqualTo(origCam.nearClipPlane));
+            Assert.That(srcCam.farClipPlane, Is.EqualTo(origCam.farClipPlane));
         }
     }
 }
