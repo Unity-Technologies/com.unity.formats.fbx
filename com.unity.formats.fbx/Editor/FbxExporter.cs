@@ -262,7 +262,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             { UnityEngine.LightType.Directional,    FbxLight.EType.eDirectional },
             { UnityEngine.LightType.Spot,           FbxLight.EType.eSpot },
             { UnityEngine.LightType.Point,          FbxLight.EType.ePoint },
-            { UnityEngine.LightType.Area,           FbxLight.EType.eArea },
+            { UnityEngine.LightType.Rectangle,      FbxLight.EType.eArea },
         };
 
         /// <summary>
@@ -1655,7 +1655,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     break;
                 }
-                case LightType.Area:
+                case LightType.Rectangle:
                 {
                     // TODO: areaSize: The size of the area light by scaling the node XY
                     break;
