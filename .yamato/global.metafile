@@ -15,6 +15,7 @@ all_test_editors:
   - version: 2021.3
   - version: 2022.1
   - version: 2022.2
+  - version: 2023.1
   - version: trunk
 
 test_trigger_editors:
