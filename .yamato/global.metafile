@@ -15,18 +15,21 @@ all_test_editors:
   - version: 2021.3
   - version: 2022.1
   - version: 2022.2
+  - version: 2023.1
   - version: trunk
 
 test_trigger_editors:
   - version: 2020.3
   - version: 2021.3
   - version: 2022.1
+  - version: 2023.1
   - version: trunk
 
 publish_trigger_editors:
   - version: 2020.3
   - version: 2021.3
   - version: 2022.1
+  - version: 2023.1
   - version: trunk
 
 promotion_test_editors:
@@ -40,7 +43,6 @@ nightly_tested_releases:
       - version: 2020.3
       - version: 2021.3
       - version: 2022.2
-      - version: trunk
   - name: release_4_1
     branch: release/4.1
     nightly_editors: 
@@ -54,6 +56,7 @@ nightly_tested_releases:
       - version: 2020.3
       - version: 2021.3
       - version: 2022.2
+      - version: 2023.1
       - version: trunk
 
 win_platform: &win
