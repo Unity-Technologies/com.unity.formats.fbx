@@ -58,6 +58,9 @@ test_{{ platform.name }}_{{ editor.version }}:
   variables:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
   commands:
+{% if use_autodesk_fbx_submodule_for_testing == true %}
+    - python -c "import json, sys; data = json.load(open(sys.argv[1])); data['dependencies']['com.autodesk.fbx'] = 'file:../External/com.autodesk.fbx/com.autodesk.fbx';  json.dump(data, open(sys.argv[1], 'w'))" com.unity.formats.fbx/package.json
+{% endif %}
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
 {% if platform.name != "ubuntu" %}
@@ -72,6 +75,9 @@ test_{{ platform.name }}_{{ editor.version }}:
         - "upm-ci~/packages/**/*"
   dependencies:
     - .yamato/upm-ci.yml#pack
+{% if use_autodesk_fbx_submodule_for_testing == true %}
+    - .yamato/autodesk-fbx-package-pack.yml#pack_autodesk_fbx
+{% endif %}
 
 validate_{{ platform.name }}_{{ editor.version }}:
   name : Validate version {{ editor.version }} on {{ platform.name }}
