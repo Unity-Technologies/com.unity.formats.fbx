@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Timeline;
 using System.Collections.Generic;
 using UnityEngine.Playables;
@@ -124,7 +124,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             Debug.Assert(rootObject != null);
             Debug.Assert(exportOptions != null);
-            
+
             foreach (var animClip in animClips)
             {
                 CollectDependencies(animClip, rootObject, exportOptions);
@@ -141,7 +141,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             object parentTrack = timelineClip.GetParentTrack();
             AnimationTrack animTrack = parentTrack as AnimationTrack;
 
-            var inspectedDirector = director? director : UnityEditor.Timeline.TimelineEditor.inspectedDirector;
+            var inspectedDirector = director ? director : UnityEditor.Timeline.TimelineEditor.inspectedDirector;
             if (!inspectedDirector)
             {
                 Debug.LogWarning("No Timeline selected in inspector, cannot retrieve GameObject bound to track");

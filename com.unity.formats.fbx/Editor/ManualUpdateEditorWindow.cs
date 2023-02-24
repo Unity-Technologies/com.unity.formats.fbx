@@ -1,4 +1,4 @@
-﻿#if !UNITY_2018_3_OR_NEWER
+#if !UNITY_2018_3_OR_NEWER
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
@@ -7,7 +7,6 @@ using System.Linq;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
-
     internal class ManualUpdateEditorWindow : EditorWindow
     {
         int[] selectedNodesToDestroy;
@@ -26,7 +25,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public void Init(FbxPrefabUtility fbxPrefabUtility, FbxPrefab fbxPrefab)
         {
-            if(fbxPrefab == null)
+            if (fbxPrefab == null)
             {
                 return;
             }
@@ -140,7 +139,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // Nodes to Destroy have Unity names
             for (int i = 0; i < m_nodesToDestroy.Count; i++)
             {
-                // != [Delete] 
+                // != [Delete]
                 if (selectedNodesToDestroy[i] != 0)
                 {
                     StringPair stringpair = new StringPair();
@@ -160,7 +159,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             for (int i = 0; i < m_nodesToRename.Count; i++)
             {
                 string currentUnityNodeName = m_fbxPrefabUtility.GetUnityObjectName(m_nodesToRename[i]);
-                // == [Delete] 
+                // == [Delete]
                 if (selectedNodesToRename[i] == 0)
                 {
                     // Remove previous mapping
