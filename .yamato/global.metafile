@@ -1,0 +1,98 @@
+# Nightly trigger editors by release.
+#
+# When adding a new release version, add a new section
+# to nightly_tested_releases for the release
+# containing the name with underscores to separate the numbers, 
+# the branch name and editors that it should run on.
+#
+# Make sure all editor versions specified are included in all_test_editors section as well.
+#
+# Additionally, update the previous release nightly versions if necessary.
+# For example, removing trunk from the list of editors for the previous release.
+
+all_test_editors:
+  - version: 2020.3
+  - version: 2021.3
+  - version: 2022.1
+  - version: 2022.2
+  - version: 2023.1
+  - version: trunk
+
+test_trigger_editors:
+  - version: 2020.3
+  - version: 2021.3
+  - version: 2022.1
+  - version: 2023.1
+  - version: trunk
+
+publish_trigger_editors:
+  - version: 2020.3
+  - version: 2021.3
+  - version: 2022.1
+  - version: 2023.1
+  - version: trunk
+
+promotion_test_editors:
+  - version: 2020.3
+  
+nightly_tested_releases:
+  - name: release_4_2
+    branch: release/4.2
+    nightly_editors: 
+      - version: 2019.4
+      - version: 2020.3
+      - version: 2021.3
+      - version: 2022.2
+  - name: release_4_1
+    branch: release/4.1
+    nightly_editors: 
+      - version: 2019.4
+      - version: 2020.3
+      - version: 2021.3
+      - version: 2022.1
+  - name: release_5_0
+    branch: release/5.0
+    nightly_editors: 
+      - version: 2020.3
+      - version: 2021.3
+      - version: 2022.2
+      - version: 2023.1
+      - version: trunk
+  - name: master
+    branch: master
+    nightly_editors: 
+      - version: 2020.3
+      - version: 2021.3
+      - version: 2022.2
+      - version: 2023.1
+      - version: trunk
+
+win_platform: &win
+  name: win
+  type: Unity::VM
+  image: package-ci/win10:v4
+  flavor: b1.medium
+
+mac_platform: &mac
+  name: mac
+  type: Unity::VM::osx
+  image: package-ci/macos-12:v4
+  flavor: b1.medium
+
+ubuntu_platform: &ubuntu
+  name: ubuntu
+  type: Unity::VM
+  image: package-ci/ubuntu-18.04:v4
+  flavor: b1.medium
+
+  
+platforms:
+  - *win
+  - *mac
+  - *ubuntu
+
+promotion_test_platforms:
+  - *win
+
+coverage:
+    minPercent: 57.5
