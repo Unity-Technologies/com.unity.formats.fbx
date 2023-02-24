@@ -15,7 +15,9 @@ build_win:
     - git submodule update --remote
     - choco -v -y install 7zip
     - python External\com.autodesk.fbx\build.py --stevedore --verbose --clean --yamato
-    - ren External\com.autodesk.fbx\build External\com.autodesk.fbx\build-win
+    - |
+      cd External\com.autodesk.fbx
+      ren build build-win
   artifacts:
     build:
       paths:
@@ -68,3 +70,32 @@ build_ubuntu:
     build:
       paths:
         - "External/com.autodesk.fbx/build-ubuntu/install/**"
+
+pack_autodesk_fbx:
+  name: Pack com.autodesk.fbx package 
+  agent:
+    type: {{ ubuntu_platform.type }}
+    image: {{ ubuntu_platform.image }}
+    flavor: {{ ubuntu_platform.flavor}}
+  commands:
+    - cp -vrfp ./External/com.autodesk.fbx/build-ubuntu/install/* ./External/com.autodesk.fbx
+    - cp -vrfp ./External/com.autodesk.fbx/build-mac/install/* ./External/com.autodesk.fbx
+    - cp -vrfp ./External/com.autodesk.fbx/build-win/install/* ./External/com.autodesk.fbx
+    - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - upm-ci package pack --package-path External/com.autodesk.fbx/com.autodesk.fbx
+  dependencies:
+    - .yamato/autodesk-fbx-package-pack.yml#build_win
+    - .yamato/autodesk-fbx-package-pack.yml#build_mac
+    - .yamato/autodesk-fbx-package-pack.yml#build_ubuntu
+  artifacts:
+    build:
+      paths:
+        - "External/com.autodesk.fbx/build-ubuntu/install/**"
+        - "External/com.autodesk.fbx/build-mac/install/**"
+        - "External/com.autodesk.fbx/build-win/install/**"
+    packages:
+      paths:
+        - "upm-ci~/packages/**"
+    build_output:
+      paths:
+        - "External/com.autodesk.fbx/com.autodesk.fbx/**"
