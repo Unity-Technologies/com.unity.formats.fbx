@@ -1,0 +1,61 @@
+# This yml file contains jobs for packing com.autodesk.fbx package which is a submodule of com.unity.formats.fbx
+
+{% metadata_file .yamato/global.metafile %}
+---
+
+build_win:
+  name: Build on win
+  agent:
+    type: Unity::VM::GPU
+    image: {{ win_platform.image }}
+    flavor: {{ win_platform.flavor}}
+  commands:
+    - choco -v -y install 7zip
+    - python External\com.autodesk.fbx\build.py --stevedore --verbose --clean --yamato
+    - ren External\com.autodesk.fbx\build External\com.autodesk.fbx\build-win
+  artifacts:
+    build:
+      paths:
+        - "External/com.autodesk.fbx/build-win/install/**"
+
+build_mac:
+  name: Build on mac
+  agent:
+    type: {{ mac_platform.type }}
+    image: {{ mac_platform.image }}
+    flavor: {{ mac_platform.flavor}}
+  variables:
+    HOMEBREW_NO_INSTALL_CLEANUP: "1"
+  commands:
+    # We need to install p7zip.
+    - brew list p7zip || brew install p7zip
+    - cmake --version || brew install cmake
+    - python ./External/com.autodesk.fbx/build.py --stevedore --verbose --clean --yamato
+    - mv ./External/com.autodesk.fbx/build ./External/com.autodesk.fbx/build-mac
+  artifacts:
+    build:
+      paths:
+        - "External/com.autodesk.fbx/build-mac/install/**"
+
+build_ubuntu:
+  name: Build on ubuntu
+  agent:
+    type: {{ ubuntu_platform.type }}
+    image: {{ ubuntu_platform.image }}
+    flavor: {{ ubuntu_platform.flavor}}
+  commands:
+    # FBX SDK 2020.2 requires gcc 9.3
+    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    - sudo apt-get update
+    - sudo apt-get -y install cmake
+    - sudo apt-get -y install libxml2-dev
+    - sudo apt-get -y install gcc-9 g++-9
+    - sudo apt-get install p7zip mono-devel
+    # Ensure correct version of gcc and g++ used
+    # https://stackoverflow.com/questions/17275348/how-to-specify-new-gcc-path-for-cmake
+    - CC=`which gcc-9` CXX=`which g++-9` python ./External/com.autodesk.fbx/build.py --stevedore --verbose --clean --yamato
+    - mv ./External/com.autodesk.fbx/build ./External/com.autodesk.fbx/build-ubuntu
+  artifacts:
+    build:
+      paths:
+        - "External/com.autodesk.fbx/build-ubuntu/install/**"
