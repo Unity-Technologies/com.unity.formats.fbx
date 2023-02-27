@@ -96,7 +96,7 @@ validate_{{ platform.name }}_{{ editor.version }}:
 {% endfor %}
 {% endfor %}
 
-# The following job runs the tests to validate the the public API files are up to date.
+# The following job runs the tests to validate the public API files are up to date.
 # We can't use upm-ci for those as it would pack fbx, making its files read-only, but those
 # tests need read/write access.
 test_api_win:
