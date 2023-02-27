@@ -1,15 +1,16 @@
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;  
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
-[assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editor")]  
-[assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editor.Tests")]  
-[assembly: InternalsVisibleTo("Unity.ProBuilder.AddOns.Editor")]  
+[assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editor")]
+[assembly: InternalsVisibleTo("Unity.Formats.Fbx.Editor.Tests")]
+[assembly: InternalsVisibleTo("Unity.ProBuilder.AddOns.Editor")]
 
 namespace UnityEngine.Formats.Fbx.Exporter
 {
     [System.Serializable]
-    internal struct StringPair {
+    internal struct StringPair
+    {
         private string m_fbxObjectName;
         public string FBXObjectName
         {
@@ -80,11 +81,14 @@ namespace UnityEngine.Formats.Fbx.Exporter
         [SerializeField]
         bool m_autoUpdate = true;
 
-        public string FbxHistory {
-            get{
+        public string FbxHistory
+        {
+            get
+            {
                 return m_fbxHistory;
             }
-            set{
+            set
+            {
                 m_fbxHistory = value;
             }
         }
@@ -97,20 +101,26 @@ namespace UnityEngine.Formats.Fbx.Exporter
             }
         }
 
-        public GameObject FbxModel {
-            get{
+        public GameObject FbxModel
+        {
+            get
+            {
                 return m_fbxModel;
             }
-            set{
+            set
+            {
                 m_fbxModel = value;
             }
         }
 
-        public bool AutoUpdate {
-            get{
+        public bool AutoUpdate
+        {
+            get
+            {
                 return m_autoUpdate;
             }
-            set{
+            set
+            {
                 m_autoUpdate = value;
             }
         }
@@ -124,14 +134,16 @@ namespace UnityEngine.Formats.Fbx.Exporter
         public static event HandleUpdate OnUpdate;
 
         /// <summary>
-        /// Notify listeners that they're free to make adjustments. 
+        /// Notify listeners that they're free to make adjustments.
         /// This will be called after the FbxPrefab auto updater has completed it's work.
         /// </summary>
         /// <param name="instance">Updated FbxPrefab instance.</param>
         /// <param name="updatedObjects">Updated objects.</param>
-        public static void CallOnUpdate(FbxPrefab instance, IEnumerable<GameObject> updatedObjects){
-            if (OnUpdate != null) {
-                OnUpdate (instance, updatedObjects);
+        public static void CallOnUpdate(FbxPrefab instance, IEnumerable<GameObject> updatedObjects)
+        {
+            if (OnUpdate != null)
+            {
+                OnUpdate(instance, updatedObjects);
             }
         }
     }

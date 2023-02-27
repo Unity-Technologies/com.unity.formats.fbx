@@ -93,7 +93,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             // if there is an existing fbx file then use its name, otherwise use the same name as for the prefab
-            this.SetFilename(fbxFileName != null? fbxFileName : m_prefabFileName);
+            this.SetFilename(fbxFileName != null ? fbxFileName : m_prefabFileName);
         }
 
         protected override void OnEnable()
@@ -148,7 +148,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            var fbxDirPath = ExportSettings.GetAbsoluteSavePath(FbxSavePaths[SelectedFbxPath]); ;
+            var fbxDirPath = ExportSettings.GetAbsoluteSavePath(FbxSavePaths[SelectedFbxPath]);;
             var fbxPath = System.IO.Path.Combine(fbxDirPath, ExportFileName + ".fbx");
 
             var prefabDirPath = ExportSettings.GetAbsoluteSavePath(PrefabSavePaths[SelectedPrefabPath]);
@@ -185,8 +185,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // give a warning dialog that indicates that names in the scene may change
                 int result = UnityEditor.EditorUtility.DisplayDialogComplex(
-                                string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "OK", "Turn off and continue", "Cancel"
-                            );
+                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "OK", "Turn off and continue", "Cancel"
+                );
                 if (result == 1)
                 {
                     // turn compatible naming off
@@ -247,7 +247,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
             return true;
         }
-        
+
         public const string k_SessionStoragePrefix = "FbxExporterConvertOptions_{0}";
         protected override string SessionStoragePrefix { get { return k_SessionStoragePrefix; } }
 
@@ -262,7 +262,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             m_convertToPrefabSettingsInstance = null;
             ConvertToPrefabSettingsInstance.info.SetAnimationSource(source);
             ConvertToPrefabSettingsInstance.info.SetAnimationDest(dest);
-            
+
             m_prefabSavePaths = null;
             SelectedPrefabPath = 0;
             InnerEditor = Editor.CreateEditor(ConvertToPrefabSettingsInstance);
@@ -276,7 +276,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             StorePathsInSession(k_SessionPrefabPathsName, m_prefabSavePaths);
             SessionState.SetInt(string.Format(SessionStoragePrefix, k_SessionSelectedPrefabPathName), SelectedPrefabPath);
         }
-
 
         private List<string> m_prefabSavePaths;
         internal List<string> PrefabSavePaths
@@ -357,6 +356,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             ShowPresetReceiver(ConvertToPrefabSettingsInstance);
         }
+
 #endif
         protected override void CreateCustomUI()
         {

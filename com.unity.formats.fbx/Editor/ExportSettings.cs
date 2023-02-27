@@ -1178,7 +1178,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var dccOptionPaths = instance.dccOptionPaths;
 
             // find dcc installation from vendor locations
-            foreach(var vendorLocation in DCCVendorLocations)
+            foreach (var vendorLocation in DCCVendorLocations)
             {
                 if (!Directory.Exists(vendorLocation))
                 {

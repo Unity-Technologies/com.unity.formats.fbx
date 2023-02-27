@@ -20,13 +20,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         public override ActionValidity Validate(IEnumerable<TimelineClip> clips)
         {
-            if(clips.Count() != 1)
+            if (clips.Count() != 1)
             {
                 return ActionValidity.NotApplicable;
             }
 
             // has to be an animation clip
-            if(clips.Any((clip) => { return clip.animationClip == null; }))
+            if (clips.Any((clip) => { return clip.animationClip == null; }))
             {
                 return ActionValidity.NotApplicable;
             }
