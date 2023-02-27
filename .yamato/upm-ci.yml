@@ -17,6 +17,26 @@ pack:
      paths:
        - "upm-ci~/**/*"
 
+# Pack com.unity.formats.fbx package with a dependency to local submodule com.autodesk.fbxß
+pack_with_submodule_dependency:
+  name: Pack package with dependency to submodule com.autodesk.fbx
+  agent:
+    type: {{ ubuntu_platform.type }}
+    image: {{ ubuntu_platform.image }}
+    flavor: {{ ubuntu_platform.flavor }}
+  commands:
+{% if use_autodesk_fbx_submodule_for_testing == true %}
+    - python -c "import json, sys; data = json.load(open(sys.argv[1])); data['dependencies']['com.autodesk.fbx'] = 'file:../External/com.autodesk.fbx/com.autodesk.fbx';  json.dump(data, open(sys.argv[1], 'w'))" com.unity.formats.fbx/package.json
+{% endif %}
+    - sudo apt-get -y install cmake
+    - ./build.sh
+    - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - upm-ci package pack --package-path com.unity.formats.fbx
+  artifacts:
+   packages:
+     paths:
+       - "upm-ci~/**/*"
+
 # The following job runs PVP API docs validation to validate all public APIs (classes and methods) have documentation.
 # For APIs which are exempted from API docs validartion, they are put in pvp_exemptions.json
 api_doc_validation:
@@ -58,9 +78,6 @@ test_{{ platform.name }}_{{ editor.version }}:
   variables:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
   commands:
-{% if use_autodesk_fbx_submodule_for_testing == true %}
-    - python -c "import json, sys; data = json.load(open(sys.argv[1])); data['dependencies']['com.autodesk.fbx'] = 'file:../External/com.autodesk.fbx/com.autodesk.fbx';  json.dump(data, open(sys.argv[1], 'w'))" com.unity.formats.fbx/package.json
-{% endif %}
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
 {% if platform.name != "ubuntu" %}
@@ -74,9 +91,11 @@ test_{{ platform.name }}_{{ editor.version }}:
       paths:
         - "upm-ci~/packages/**/*"
   dependencies:
-    - .yamato/upm-ci.yml#pack
 {% if use_autodesk_fbx_submodule_for_testing == true %}
+    - .yamato/upm-ci.yml#pack_with_submodule_dependency
     - .yamato/autodesk-fbx-package-pack.yml#pack_autodesk_fbx
+{% else %}
+    - .yamato/upm-ci.yml#pack
 {% endif %}
 
 validate_{{ platform.name }}_{{ editor.version }}:
