@@ -28,7 +28,7 @@ pack_with_submodule_dependency:
 {% if use_autodesk_fbx_submodule_for_testing == true %}
 # Replace dependency on com.autodesk.fbx from registry by local submodule which is com.autodesk.fbx repo. 
 # By doing this, com.unity.formats.fbx repo can test against com.autodesk.fbx repo directly, no need to wait for com.autodesk.fbx being published.
-    - python -c "import json, sys, os; data = json.load(open(sys.argv[1])); data['dependencies']['com.autodesk.fbx'] = 'file:{0}/External/com.autodesk.fbx/com.autodesk.fbx'.format(os.environ[YAMATO_SOURCE_DIR]);  json.dump(data, open(sys.argv[1], 'w'))" com.unity.formats.fbx/package.json
+    - python -c "import json, sys, os; data = json.load(open(sys.argv[1])); data['dependencies']['com.autodesk.fbx'] = 'file:{0}/External/com.autodesk.fbx/com.autodesk.fbx'.format(os.environ['YAMATO_SOURCE_DIR']);  json.dump(data, open(sys.argv[1], 'w'))" com.unity.formats.fbx/package.json
 {% endif %}
     - sudo apt-get -y install cmake
     - ./build.sh
