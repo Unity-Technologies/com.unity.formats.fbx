@@ -84,9 +84,9 @@ pack_autodesk_fbx:
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package pack --package-path External/com.autodesk.fbx/com.autodesk.fbx
   dependencies:
-    - .yamato/autodesk-fbx-package-pack.yml#build_win
-    - .yamato/autodesk-fbx-package-pack.yml#build_mac
-    - .yamato/autodesk-fbx-package-pack.yml#build_ubuntu
+    - .yamato/pack-autodesk-fbx.yml#build_win
+    - .yamato/pack-autodesk-fbx.yml#build_mac
+    - .yamato/pack-autodesk-fbx.yml#build_ubuntu
   artifacts:
     build:
       paths:
