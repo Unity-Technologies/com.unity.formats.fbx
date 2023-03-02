@@ -6,12 +6,9 @@
 build_win:
   name: Build on win
   agent:
-    type: Unity::VM::GPU
+    type: {{ win_platform.type }}
     image: {{ win_platform.image }}
     flavor: {{ win_platform.flavor}}
-  source:
-    files:
-      josh_filter: "::External/"
   commands:
     # Load submodule and update it
     - git submodule update --init --recursive
