@@ -6,8 +6,8 @@ npm_registry: "https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/
 
 {% for editor in all_test_editors %}
 {% for platform in platforms %}
-test_{{ platform.name }}_{{ editor.version }}:
-  name : Test version {{ editor.version }} on {{ platform.name }}
+test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
+  name : Test version {{ editor.version }} on {{ platform.name }} using autodesk.fbx submodule
   agent:
     type: {{ platform.type }}
     image: {{ platform.image }}

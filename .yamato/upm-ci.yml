@@ -131,7 +131,11 @@ test_trigger:
     - .yamato/upm-ci.yml#test_api_win
 {% for editor in test_trigger_editors %}
 {% for platform in platforms %}
+{% if use_autodesk_fbx_submodule_for_testing %}
+    - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
+{% else %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+{% endif %}
 {% endfor %}
 {% endfor %}
 
