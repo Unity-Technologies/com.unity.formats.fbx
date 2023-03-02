@@ -13,16 +13,24 @@ test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-{% if platform.name == "win" -%}
+{% if platform.name | downcase contains "win" -%}
 # Copy CHANGELOG.md into com.unity.formats.fbx package. Currently it is outside the package folder under repo root.
     - copy CHANGELOG.md com.unity.formats.fbx
     - gsudo choco source add --priority 1 -n Unity -s {{ artifactory_url }}/api/nuget/unity-choco-local
     - gsudo choco install unity-config -y
     - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr.bat --output utr.bat
-{% elsif platform.name == "mac" -%}
+{% elsif platform.name | downcase contains "mac" -%}
     - cp CHANGELOG.md com.unity.formats.fbx
     - brew tap --force-auto-update unity/unity git@github.cds.internal.unity3d.com:unity/homebrew-unity.git
     - brew install unity-config
+    - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr --output ./utr
+    - chmod +x ./utr
+{% else %}
+    - cp CHANGELOG.md com.unity.formats.fbx
+    - curl -L {{ artifactory_url }}/api/gpg/key/public | sudo apt-key add -
+    - sudo sh -c "echo 'deb {{ artifactory_url }}/unity-apt-local bionic main' > /etc/apt/sources.list.d/unity.list"
+    - sudo apt update
+    - sudo apt install unity-config
     - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr --output ./utr
     - chmod +x ./utr
 {% endif -%}
