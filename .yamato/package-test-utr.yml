@@ -30,11 +30,11 @@ test_{{ platform.name }}_{{ editor.version }}:
     - unity-config project set registry {{ npm_registry }}
     - unity-downloader-cli -u {{ editor.version }} --path .Editor -c Editor --wait --published-only
     - >
-{% if platform.name == "win" -%}
+{%- if platform.name == "win" -%}
       utr.bat
-{% else %}
+{%- else -%}
       ./utr
-{% endif %}
+{%- endif -%}
       --testproject=TestProjects/TestProjectUsingSubmodule
       --editor-location=.Editor
       --suite=editor --suite=playmode
