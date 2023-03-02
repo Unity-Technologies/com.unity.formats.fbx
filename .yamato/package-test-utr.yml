@@ -13,13 +13,13 @@ test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-{% if platform.name | downcase contains "win" -%}
+{% if platform.name contains "win" -%}
 # Copy CHANGELOG.md into com.unity.formats.fbx package. Currently it is outside the package folder under repo root.
     - copy CHANGELOG.md com.unity.formats.fbx
     - gsudo choco source add --priority 1 -n Unity -s {{ artifactory_url }}/api/nuget/unity-choco-local
     - gsudo choco install unity-config -y
     - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr.bat --output utr.bat
-{% elsif platform.name | downcase contains "mac" -%}
+{% elsif platform.name contains "mac" -%}
     - cp CHANGELOG.md com.unity.formats.fbx
     - brew tap --force-auto-update unity/unity git@github.cds.internal.unity3d.com:unity/homebrew-unity.git
     - brew install unity-config
