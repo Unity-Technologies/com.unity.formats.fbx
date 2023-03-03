@@ -131,6 +131,7 @@ test_trigger:
     - .yamato/upm-ci.yml#test_api_win
 {% for editor in test_trigger_editors %}
 {% for platform in platforms %}
+# If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
 {% if use_autodesk_fbx_submodule_for_testing %}
     - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
 {% else %}
@@ -150,11 +151,16 @@ test_trigger:
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#api_doc_validation
-      {% for editor in {{release.nightly_editors}} %}
-      {% for platform in platforms %}
+{% for editor in {{release.nightly_editors}} %}
+{% for platform in platforms %}
+# If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
+{% if use_autodesk_fbx_submodule_for_testing %}
+    - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
+{% else %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
-      {% endfor %}
-      {% endfor %}
+{% endif %}
+{% endfor %}
+{% endfor %}
 {% endfor %}
 
 publish_test_trigger:
