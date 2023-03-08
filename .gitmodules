@@ -1,3 +1,4 @@
 [submodule "External/com.autodesk.fbx"]
 	path = External/com.autodesk.fbx
 	url = https://github.com/Unity-Technologies/com.autodesk.fbx.git
+	branch = wind/put_build_commands_in_script_files

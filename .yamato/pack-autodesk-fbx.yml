@@ -13,11 +13,9 @@ build_win:
     # Load submodule and update it
     - git submodule update --init --recursive
     - git submodule update --remote
-    - choco -v -y install 7zip
-    - python External\com.autodesk.fbx\build.py --stevedore --verbose --clean --yamato
     - |
       cd External\com.autodesk.fbx
-      ren build build-win
+      build_win.cmd
   artifacts:
     build:
       paths:
@@ -35,11 +33,9 @@ build_mac:
     # Load submodule and update it
     - git submodule update --init --recursive
     - git submodule update --remote
-    # We need to install p7zip.
-    - brew list p7zip || brew install p7zip
-    - cmake --version || brew install cmake
-    - python ./External/com.autodesk.fbx/build.py --stevedore --verbose --clean --yamato
-    - mv ./External/com.autodesk.fbx/build ./External/com.autodesk.fbx/build-mac
+    - |
+      cd ./External/com.autodesk.fbx
+      ./build_mac.sh
   artifacts:
     build:
       paths:
@@ -55,17 +51,9 @@ build_ubuntu:
     # Load submodule and update it
     - git submodule update --init --recursive
     - git submodule update --remote
-    # FBX SDK 2020.2 requires gcc 9.3
-    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-    - sudo apt-get update
-    - sudo apt-get -y install cmake
-    - sudo apt-get -y install libxml2-dev
-    - sudo apt-get -y install gcc-9 g++-9
-    - sudo apt-get install p7zip mono-devel
-    # Ensure correct version of gcc and g++ used
-    # https://stackoverflow.com/questions/17275348/how-to-specify-new-gcc-path-for-cmake
-    - CC=`which gcc-9` CXX=`which g++-9` python ./External/com.autodesk.fbx/build.py --stevedore --verbose --clean --yamato
-    - mv ./External/com.autodesk.fbx/build ./External/com.autodesk.fbx/build-ubuntu
+    - |
+      cd ./External/com.autodesk.fbx
+      ./build_linux.sh
   artifacts:
     build:
       paths:
