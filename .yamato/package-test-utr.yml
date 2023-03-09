@@ -20,6 +20,7 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
     - gsudo choco install unity-config -y
     - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr.bat --output utr.bat
 {% elsif platform.name contains "mac" -%}
+    - cmake --version || brew install cmake
     - ./build.sh
     - brew tap --force-auto-update unity/unity git@github.cds.internal.unity3d.com:unity/homebrew-unity.git
     - brew install unity-config
