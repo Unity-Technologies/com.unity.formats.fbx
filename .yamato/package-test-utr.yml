@@ -1,0 +1,57 @@
+{% metadata_file .yamato/global.metafile %}
+artifactory_url: "https://artifactory.prd.cds.internal.unity3d.com/artifactory"
+npm_registry: "https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates"
+
+---
+
+{% for editor in all_test_editors %}
+{% for platform in platforms %}
+test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
+  name : Test version {{ editor.version }} on {{ platform.name }} using autodesk.fbx submodule
+  agent:
+    type: {{ platform.type }}
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor}}
+  commands:
+{% if platform.name contains "win" -%}
+# Copy CHANGELOG.md into com.unity.formats.fbx package. Currently it is outside the package folder under repo root.
+    - build.cmd
+    - gsudo choco source add --priority 1 -n Unity -s {{ artifactory_url }}/api/nuget/unity-choco-local
+    - gsudo choco install unity-config -y
+    - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr.bat --output utr.bat
+{% elsif platform.name contains "mac" -%}
+    - cmake --version || brew install cmake
+    - ./build.sh
+    - brew tap --force-auto-update unity/unity git@github.cds.internal.unity3d.com:unity/homebrew-unity.git
+    - brew install unity-config
+    - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr --output ./utr
+    - chmod +x ./utr
+{% else %}
+    - ./build.sh
+    - curl -L {{ artifactory_url }}/api/gpg/key/public | sudo apt-key add -
+    - sudo sh -c "echo 'deb {{ artifactory_url }}/unity-apt-local bionic main' > /etc/apt/sources.list.d/unity.list"
+    - sudo apt update
+    - sudo apt install unity-config
+    - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr --output ./utr
+    - chmod +x ./utr
+{% endif -%}
+    - unity-config project create TestProjects/TestProjectUsingAutodeskFbxSubmodule
+    - unity-config project add testable com.unity.formats.fbx
+    - unity-config project add dependency com.unity.formats.fbx@file:../../../com.unity.formats.fbx
+    - unity-config project add dependency com.autodesk.fbx@file:../../../External/com.autodesk.fbx/com.autodesk.fbx
+    - unity-config project set registry {{ npm_registry }}
+    - unity-downloader-cli -u {{ editor.version }} --path .Editor -c Editor --wait --published-only
+    - >
+{%- if platform.name == "win" -%}
+      utr.bat
+{%- else -%}
+      ./utr
+{%- endif -%}
+      --testproject=TestProjects/TestProjectUsingAutodeskFbxSubmodule
+      --editor-location=.Editor
+      --suite=editor --suite=playmode
+      --artifacts_path=TestResults
+  dependencies:
+    - .yamato/pack-autodesk-fbx.yml#pack_autodesk_fbx
+{% endfor %}
+{% endfor %}
