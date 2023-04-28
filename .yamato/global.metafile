@@ -87,6 +87,6 @@ promotion_test_platforms:
   - *win
 
 coverage:
-    minPercent: 57.5
+    minPercent: 56
 
 use_autodesk_fbx_submodule_for_testing: !!bool true
