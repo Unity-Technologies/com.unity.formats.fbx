@@ -73,6 +73,7 @@ The FBX Exporter exports Physical Cameras, including these properties:
 
 - **Focal Length**
 - **Lens Shift**
+- **Focus Distance**
 
 ### Game Cameras
 
