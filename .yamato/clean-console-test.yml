@@ -17,3 +17,5 @@ clean_console_test_{{ platform.name }}_{{ editor.version }}:
         PACKAGE_PATH: ./com.unity.formats.fbx
         EDITOR_VERSION: {{ editor.version }}
         WARNINGS_AS_ERRORS: false
+{% endfor %}
+{% endfor %}
