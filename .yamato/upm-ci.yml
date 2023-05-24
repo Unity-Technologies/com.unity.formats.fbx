@@ -139,6 +139,14 @@ test_trigger:
 {% endif %}
 {% endfor %}
 {% endfor %}
+# Only run clean console tests on Win for PR trigger
+{% for platform in platforms %}
+{% for editor in clean_console_test_editors %}
+{% if platform.name == "win" %}
+    - .yamato/clean-console-test.yml#clean_console_test_{{ platform.name }}_{{ editor }}
+{% endif %}
+{% endfor %}
+{% endfor %}
 
 {% for release in nightly_tested_releases %}
 {{release.name}}_nightly_test_trigger:
@@ -151,6 +159,7 @@ test_trigger:
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#api_doc_validation
+    - .yamato/clean-console-test.yml#clean_console_test_trigger
 {% for editor in {{release.nightly_editors}} %}
 {% for platform in platforms %}
 # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
