@@ -135,7 +135,7 @@ test_trigger:
 {% if use_autodesk_fbx_submodule_for_testing %}
     - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
 {% else %}
-    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
 {% endfor %}
@@ -143,7 +143,7 @@ test_trigger:
 {% for platform in platforms %}
 {% for editor in clean_console_test_editors %}
 {% if platform.name == "win" %}
-    - .yamato/clean-console-test.yml#clean_console_test_{{ platform.name }}_{{ editor }}
+    - .yamato/clean-console-test.yml#clean_console_test_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
 {% endfor %}
