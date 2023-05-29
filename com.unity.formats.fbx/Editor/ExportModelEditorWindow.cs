@@ -353,7 +353,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             InitializeReceiver();
             Receiver.SetTarget(target);
             Receiver.SetInitialValue(new Preset(target));
+#pragma warning disable CS0618 // Suppress the warning about obsolete API "PresetSelector.ShowSelector"
             UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, Receiver);
+#pragma warning restore CS0618 // Restore the warning
         }
 
         #endif
