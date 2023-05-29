@@ -20,7 +20,7 @@ If you were using an older version of the FBX Exporter, some Assets in your Proj
 
 3. Before continuing, back up your Project.
 
-4. Select __Edit__ > __Project Settings__ > __FBX Export__ to view the [FBX Export Settings](options.md).
+4. Select __Edit__ > __Project Settings__ > __FBX Export__ to view the [FBX Export Settings](ref-project-settings.md).
 
   ![Run Component Updated button](images/FBXExporter_RunComponentUpdater.png)
 

@@ -4,9 +4,11 @@ The FBX Exporter package provides round-trip workflows between Unity and 3D mode
 
 The FBX Exporter package includes the following features:
 
-* [FBX Exporter](exporting.md): Export geometry, animation, Lights, and Cameras as FBX files so you can transfer game data to any 3D modeling software. Record gameplay and export it to make cinematics. Start grey-boxing with [ProBuilder](https://docs.unity3d.com/Packages/com.unity.probuilder@latest/), then export your GameObjects to FBX until you can replace them with the final Assets.
+* [Export GameObjects to FBX](export-gameobjects.md): Export geometry, animation, Lights, and Cameras as FBX files so you can transfer game data to any 3D modeling software. Start grey-boxing with [ProBuilder](https://docs.unity3d.com/Packages/com.unity.probuilder@latest/), then export your GameObjects to FBX until you can replace them with the final Assets.
 
-* [FBX Recorder](recorder.md): Export animations through the Unity Recorder (including [Cinemachine](https://docs.unity3d.com/Packages/com.unity.cinemachine@latest/) camera animations).
+* [Export a Timeline clip to FBX](export-timeline-clip.md): Export animation clips from Timeline to FBX files.
+
+* [Record animations to FBX](export-record-in-play-mode.md): Use the FBX Recorder to record animations as FBX files in Play mode (including [Cinemachine](https://docs.unity3d.com/Packages/com.unity.cinemachine@latest/) camera animations).
 <br />**Note:** To use this feature, you must install the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/) package.
 
 * [FBX Prefab Variants](prefabs.md): The FBX Importer allows you to import an FBX file as a **Model Prefab** and create **Prefab Variants** from them. Since Prefab Variants can override properties and children without affecting the original Prefab, you can use them in Unity without breaking the link to the file, and bring in updates.
