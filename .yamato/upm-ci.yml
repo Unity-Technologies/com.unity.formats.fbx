@@ -135,9 +135,13 @@ test_trigger:
 {% if use_autodesk_fbx_submodule_for_testing %}
     - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
 {% else %}
-    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
+{% endfor %}
+# Only run clean console tests on Win for PR trigger
+{% for editor in clean_console_test_editors %}
+    - .yamato/clean-console-test.yml#clean_console_test_win_{{ editor.version }}
 {% endfor %}
 
 {% for release in nightly_tested_releases %}
@@ -151,6 +155,7 @@ test_trigger:
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#api_doc_validation
+    - .yamato/clean-console-test.yml#clean_console_test_trigger
 {% for editor in {{release.nightly_editors}} %}
 {% for platform in platforms %}
 # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.

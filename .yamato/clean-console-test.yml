@@ -1,0 +1,38 @@
+{% metadata_file .yamato/global.metafile %}
+---
+
+{% for platform in platforms %}
+{% for editor in clean_console_test_editors %}
+# Clean console test jobs
+clean_console_test_{{ platform.name }}_{{ editor.version }}:
+  name: Clean console test in {{ editor.version }} on {{ platform.name }}
+  agent:
+    type: {{ platform.type }}
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor}}
+  commands:
+{% if platform.name contains "win" -%}
+    - build.cmd
+{% elsif platform.name contains "mac" -%}
+    - cmake --version || brew install cmake
+    - ./build.sh
+{% else %}
+    - ./build.sh
+{% endif %}
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.1.0
+      variables:
+        CLEAN_CONSOLE_TEST_FOR: package
+        PACKAGE_PATH: ./com.unity.formats.fbx
+        EDITOR_VERSION: {{ editor.version }}
+        WARNINGS_AS_ERRORS: false
+{% endfor %}
+{% endfor %}
+
+clean_console_test_trigger:
+  name: Clean console test trigger
+  dependencies:
+{% for platform in platforms %}
+{% for editor in clean_console_test_editors %}
+    - .yamato/clean-console-test.yml#clean_console_test_{{ platform.name }}_{{ editor.version }}
+{% endfor %}
+{% endfor %}
