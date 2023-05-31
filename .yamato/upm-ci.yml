@@ -140,12 +140,8 @@ test_trigger:
 {% endfor %}
 {% endfor %}
 # Only run clean console tests on Win for PR trigger
-{% for platform in platforms %}
 {% for editor in clean_console_test_editors %}
-{% if platform.name == "win" %}
-    - .yamato/clean-console-test.yml#clean_console_test_{{ platform.name }}_{{ editor.version }}
-{% endif %}
-{% endfor %}
+    - .yamato/clean-console-test.yml#clean_console_test_win_{{ editor.version }}
 {% endfor %}
 
 {% for release in nightly_tested_releases %}
