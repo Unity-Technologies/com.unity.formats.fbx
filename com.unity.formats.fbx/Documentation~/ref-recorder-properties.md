@@ -2,7 +2,7 @@
 
 Use **FBX Recorder properties** to [record FBX animations in Play mode](export-record-in-play-mode.md) via either the Recorder window or a Recorder clip in Timeline. They let you specify what gets exported during the recording.
 
-> **Note:** To use the FBX Recorder, you have to install the The [Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest) package in addition to the FBX Exporter package. To fully configure an FBX Recorder, you must also set the general recording Properties, at least the recording time or frame interval.
+> **Note:** To use the FBX Recorder, you have to install the [Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest) package in addition to the FBX Exporter package. To fully configure an FBX Recorder, you must also set the general recording Properties, at least the recording time or frame interval.
 
 ![](images/FBXExporter_RecorderSettings.png)  
 _FBX Recorder properties in the Recorder window context._
@@ -38,6 +38,6 @@ Define the source and the content of your recording.
 
 ## Output File
 
-Specify the output **Path** and **File Name** pattern to save the recorded images.
+Specify the output **Path** and **File Name** pattern to save the FBX file.
 
 > **Note:** Output File properties work the same for all types of recorders. The [Unity Recorder documentation](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html) describes these properties in detail.

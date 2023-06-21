@@ -11,7 +11,7 @@ The FBX Exporter exports the following objects:
 * [Textures](#textures)
 * [Cameras](#cameras)
 * [Lights](#lights)
-* [Contraints](#constraints)
+* [Constraints](#constraints)
 * [Animation](#animation)
 * Blendshapes
 
@@ -139,7 +139,7 @@ The FBX Exporter exports the following attributes for the Rotation Constraint ty
 
 ### Aim
 
-The FBX Exporter exports the following attributes for the Rotation Constraint type:
+The FBX Exporter exports the following attributes for the Aim Constraint type:
 
 - Affected axes (X,Y,Z)
 - Rotation Offset

@@ -8,6 +8,8 @@ To export an animation clip:
 
 1. In the Timeline window, right-click on the clip to export, and then select **Export Clip To FBX**.
 
+   ![Timeline animation clip export](images/FBXExporter-export-clip.png)
+
 2. Review the [Export Options](ref-export-options.md) according to your FBX export needs.
 
    ![Export Options window](images/FBXExporter_ExportOptionsWindow-clip.png)

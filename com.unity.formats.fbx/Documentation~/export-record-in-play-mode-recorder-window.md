@@ -10,7 +10,9 @@ To record an FBX animation via the Recorder window:
 
 2. In the Recorder window, add a new FBX recorder: select **Add Recorder**, and then select **FBX**.
 
-3. In the **Capture** section, set the GameObject to export the animation from.
+   ![Recorder window](images/FBXExporter_RecorderSettings.png)
+
+3. In the **Input** section, set the GameObject to export the animation from.
 
 4. Set up the time or frame interval to record and the other [FBX Recorder properties](ref-recorder-properties.md) according to your needs.
 

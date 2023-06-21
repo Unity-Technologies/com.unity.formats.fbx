@@ -34,7 +34,7 @@ Use the **Export Options** window to [export a GameObject from the Hierarchy](ex
 |**Preserve Import Settings**  |  | Enable this option to preserve all import settings applied to an existing FBX file that is overwritten during the export.<br/>If you export the GameObject as a new FBX file, the FBX Exporter does not carry over the import settings. |
 | **Keep Instances** | | Enable this option to export multiple copies of the same Mesh as instances.<br/>If unchecked, the FBX Exporter exports all Meshes as unique. |
 | **Embed Textures** | | Enable this option to embed textures in the exported FBX. |
-| **Don't ask me again** | Enable this option to use the same **Export Options** properties and hide this window when you export FBX files in the future.<br/>If you need to reset this property: from the Unity Editor menu, select **Edit** > **Project Settings** > **Fbx Export** and enable **Display Options Window**. |
+| **Don't ask me again** | | Enable this option to use the same **Export Options** properties and hide this window when you export FBX files in the future.<br/>If you need to reset this property: from the Unity Editor menu, select **Edit** > **Project Settings** > **Fbx Export** and enable **Display Options Window**. |
 
 > **Note:** For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters might differ between file systems.
 
