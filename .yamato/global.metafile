@@ -68,7 +68,7 @@ win_platform: &win
 mac_platform: &mac
   name: mac
   type: Unity::VM::osx
-  image: package-ci/macos-12:v4
+  image: package-ci/macos-12:v4.19.0
   flavor: b1.medium
 
 ubuntu_platform: &ubuntu
