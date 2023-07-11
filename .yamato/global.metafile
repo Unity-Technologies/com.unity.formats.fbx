@@ -68,6 +68,7 @@ win_platform: &win
 mac_platform: &mac
   name: mac
   type: Unity::VM::osx
+  #Pin Mac image to v4.19.0 because of https://jira.unity3d.com/browse/FBX-479
   image: package-ci/macos-12:v4.19.0
   flavor: b1.medium
 
