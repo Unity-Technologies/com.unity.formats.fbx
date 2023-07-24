@@ -13,14 +13,6 @@ This section covers the following issues:
 
 
 
-<a name="AssetStoreToPackman"></a>
-
-## Upgrading the FBX Exporter from the Asset Store package
-
-When installing a new version of the FBX Exporter package after using version 1.3.0f1 or earlier, the link between Assets and Prefabs may be lost. To repair these problems, follow the instructions under [Updating from 1.3.0f1 or earlier](assetstoreUpgrade.md).
-
-
-
 <a name="SkinnedMeshExport"></a>
 ## Incorrect skinning on Animated Skinned Mesh
 

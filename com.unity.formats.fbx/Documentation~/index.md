@@ -39,4 +39,3 @@ Verify that the FBX Exporter is correctly installed by opening it (from the top 
 
 * The FBX Exporter package has some [known limitations](knownissues.md) you should be aware of before you start to use it.
 * If you encounter issues when using the FBX Exporter, look at the dedicated [troubleshooting page](troubleshooting.md).
-* If you are upgrading from the Asset Store version of the FBX Exporter, you need to [follow specific steps](assetstoreUpgrade.md).
