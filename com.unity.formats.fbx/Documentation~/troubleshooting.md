@@ -2,7 +2,6 @@
 
 This section covers the following issues:
 
-* [Upgrading the FBX Exporter from the Asset Store package](#AssetStoreToPackman)
 * [Incorrect skinning on Animated Skinned Mesh](#SkinnedMeshExport)
 * [Converting GameObjects with UI components](#ConvertUI)
 * [Overwriting FBX files](#OverwritingFiles)
