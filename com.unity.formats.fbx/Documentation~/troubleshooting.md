@@ -2,7 +2,6 @@
 
 This section covers the following issues:
 
-* [Upgrading the FBX Exporter from the Asset Store package](#AssetStoreToPackman)
 * [Incorrect skinning on Animated Skinned Mesh](#SkinnedMeshExport)
 * [Converting GameObjects with UI components](#ConvertUI)
 * [Overwriting FBX files](#OverwritingFiles)
@@ -10,14 +9,6 @@ This section covers the following issues:
 * [Trail and line particles lose material after being converted](#ParticlesLoseMaterial)
 * [Uninstalling FBX Exporter breaks Unity Recorder](#BrokenRecorder)
 * [Exporting camera animation only from Maya gives incorrect camera rotations](#MayaCameraAnimationOnly)
-
-
-
-<a name="AssetStoreToPackman"></a>
-
-## Upgrading the FBX Exporter from the Asset Store package
-
-When installing a new version of the FBX Exporter package after using version 1.3.0f1 or earlier, the link between Assets and Prefabs may be lost. To repair these problems, follow the instructions under [Updating from 1.3.0f1 or earlier](assetstoreUpgrade.md).
 
 
 

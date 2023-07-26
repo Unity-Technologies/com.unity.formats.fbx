@@ -18,4 +18,3 @@
 * Support information
   * [Limitations](knownissues.md)
   * [Troubleshooting](troubleshooting.md)
-  * [Upgrading from Asset Store](assetstoreUpgrade.md)
