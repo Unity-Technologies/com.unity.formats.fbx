@@ -1,6 +1,6 @@
 # Convert Options window
 
-When [converting to an FBX Prefab Variant](prefabs.md), the following window opens, displaying options for exporting:
+When [converting to an FBX Prefab Variant](prefab-variants.md), the following window opens, displaying options for exporting:
 
 ![Convert Options for an FBX Prefab Variant](images/FBXExporter_ConvertOptionsWindow.png)
 

@@ -11,7 +11,7 @@ The FBX Exporter package includes the following features:
 * [Record animations to FBX](export-record-in-play-mode.md): Use the FBX Recorder to record animations as FBX files in Play mode (including [Cinemachine](https://docs.unity3d.com/Packages/com.unity.cinemachine@latest/) camera animations).
 <br />**Note:** To use this feature, you must install the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/) package.
 
-* [FBX Prefab Variants](prefabs.md): The FBX Importer allows you to import an FBX file as a **Model Prefab** and create **Prefab Variants** from them. Since Prefab Variants can override properties and children without affecting the original Prefab, you can use them in Unity without breaking the link to the file, and bring in updates.
+* [FBX Prefab Variants](prefab-variants.md): The FBX Importer allows you to import an FBX file as a **Model Prefab** and create **Prefab Variants** from them. Since Prefab Variants can override properties and children without affecting the original Prefab, you can use them in Unity without breaking the link to the file, and bring in updates.
 
 * [Unity Integration for 3D modeling software](integration.md): Effortlessly import and export Assets between Unity and Autodesk® Maya®, Autodesk® Maya LT™, or Autodesk® 3ds Max®. The 3D modeling software remembers where the files go, and what objects to export back to Unity.
 

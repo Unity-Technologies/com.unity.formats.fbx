@@ -13,7 +13,12 @@
   * [Convert Options window](ref-convert-options.md)
   * [FBX Recorder properties](ref-recorder-properties.md)
   * [Project Settings](ref-project-settings.md)
-* [FBX Prefab Variants](prefabs.md)
+* [Work with FBX Prefab Variants](prefab-variants.md)
+  * [FBX files and Prefab Variants](prefab-variants-concepts.md)
+  * [FBX Prefab Variant workflow](prefab-variants-workflow.md)
+  * [Convert a GameObject to an FBX Prefab Variant](prefab-variants-convert-gameobject.md)
+  * [Convert a Prefab asset to an FBX Prefab Variant](prefab-variants-convert-prefab-asset.md)
+  * [Create a Prefab Variant based on an FBX file](prefab-variants-create-from-model-prefab.md)
 * [Integration with 3D modeling software](integration.md)
 * Support information
   * [Limitations](knownissues.md)
