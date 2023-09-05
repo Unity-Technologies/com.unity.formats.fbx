@@ -17,7 +17,7 @@ For example, if a Model Prefab includes a Spot Light of size 10 and you override
 
 ## Available features
 
-The FBX Exporter package allows to [convert a GameObject and its children](prefab-variants-convert-gameobject.md), or [a Prefab asset](prefab-variants-convert-prefab-asset.md), to an FBX Prefab Variant. Such a conversion corresponds to an FBX export followed by a Prefab Variant creation, all in one single action.
+The FBX Exporter package allows you to [convert a GameObject and its children](prefab-variants-convert-gameobject.md), or to convert [a Prefab asset](prefab-variants-convert-prefab-asset.md) to an FBX Prefab Variant. Such a conversion corresponds to an FBX export followed by a Prefab Variant creation, all in one single action.
 
 >[!NOTE]
 >If the asset you need to convert is an existing FBX file, you can directly [create a Prefab Variant](prefab-variants-create-from-model-prefab.md) based on it.
