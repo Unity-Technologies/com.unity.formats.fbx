@@ -339,7 +339,7 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
-        [Platform(Exclude="Linux", Reason="Maya/Max integrations are only supported on Windows and OSX")]
+        [Platform(Exclude = "Linux", Reason = "Maya/Max integrations are only supported on Windows and OSX")]
         public void VendorLocationInstallationTest1()
         {
             /*
