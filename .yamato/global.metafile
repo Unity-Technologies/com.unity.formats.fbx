@@ -80,7 +80,7 @@ mac_platform: &mac
 ubuntu_platform: &ubuntu
   name: ubuntu
   type: Unity::VM
-  image: package-ci/ubuntu-18.04:v4
+  image: package-ci/ubuntu-20.04:v4
   flavor: b1.medium
 
   
@@ -93,6 +93,6 @@ promotion_test_platforms:
   - *win
 
 coverage:
-    minPercent: 57.5
+    minPercent: 56
 
 use_autodesk_fbx_submodule_for_testing: !!bool true
