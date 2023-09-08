@@ -14,7 +14,7 @@ However, the Editor's Project window always displays a single asset that represe
 
 You can adjust the way Unity handles the Model Prefab created from an FBX file by [changing the import settings](https://docs.unity3d.com/Documentation/Manual/class-FBXImporter.html), but you can't edit the Model Prefab with the Unity Editor, contrary to a Unity Prefab.
 
-You can instantiate a Model Prefab in a Scene, but a [best practice](prefab-variants-workflow.md) is to first create a Prefab Variant based on the Model Prefab and then instantiate the created Prefab Variant instead of the Model Prefab.
+You can instantiate a Model Prefab in a Scene if it suits your needs as is. However, if you need to override some of the Model Prefab properties, or further adapt the Model Prefab to your project beyond the importer capabilities, a best practice is to first create a Prefab Variant based on the Model Prefab and then instantiate the created Prefab Variant instead of the Model Prefab.
 
 ### FBX file edit
 
@@ -34,7 +34,7 @@ A Prefab Variant is a Prefab based on another Prefab that it is connected to.
 
 ## Additional resources
 
-* [FBX Prefab Variant workflow](prefab-variants-concepts.md)
+* [FBX Prefab Variant workflow](prefab-variants-workflow.md)
 * [Prefab Variants](https://docs.unity3d.com/Documentation/Manual/PrefabVariants.html)
 * [Export to FBX](export-gameobjects.md)
 * [Importing a model](https://docs.unity3d.com/Manual/ImportingModelFiles.html)

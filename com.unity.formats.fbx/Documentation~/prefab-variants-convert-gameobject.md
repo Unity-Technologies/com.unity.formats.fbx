@@ -30,7 +30,7 @@ After you convert the GameObject:
 
 * The created Prefab Variant becomes the only asset you should manipulate and instantiate in your Unity project.
 
-* Any original Prefab or Model Prefab that were instantiated as children of the converted GameObject have no more relationship with the created FBX file and Prefab Variant. You might get rid of these original assets unless you need them for another context.
+* Any Prefab or Model Prefab that had instances under the converted GameObject have no more relationship with the created FBX file and Prefab Variant. You might get rid of these remaining asset files unless you need them for another context.
 
 ## Additional resources
 
