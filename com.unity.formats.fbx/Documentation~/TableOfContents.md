@@ -15,6 +15,11 @@
   * [Project Settings](ref-project-settings.md)
 * [FBX Prefab Variants](prefabs.md)
 * [Integration with 3D modeling software](integration.md)
+  * [Set up an integration of 3D modeling application](integration-setup.md)
+  * [Use the Unity Integration tool in Maya](integration-maya-roundtrip.md)
+  * [Manage Export Sets in Maya](integration-maya-manage-export-sets.md)
+  * [Use the Unity Integration tool in 3ds Max](integration-3ds-max-roundtrip.md)
+  * [Manage objects to export from 3ds Max](integration-3ds-max-manage-objects-to-export.md)
 * Support information
   * [Limitations](knownissues.md)
   * [Troubleshooting](troubleshooting.md)
