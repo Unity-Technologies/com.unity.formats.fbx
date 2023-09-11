@@ -78,23 +78,3 @@ To export objects from the desired export set, you can select one or more object
 If you select multiple dummy objects corresponding to sets or objects from multiple sets, then the FBX Exporter exports each set to its respective file defined in the custom attributes of the set’s dummy object.
 
 In each case, the __Export__ option automatically exports the current Model back to Unity. When you switch back to Unity, your Scene has already been updated.
-
-### Sets and objects to export
-
-Unity export uses the selection sets created on import to determine which objects to export. If you add a new object to the Model, you must also add this new object to the Model’s *UnityExportSet* set.
-
-![UnityExportSets in Autodesk® 3ds Max®](images/FBXExporter_MaxMultipleUnityExportSets.png)
-
-* To edit a *UnityExportSet* set, select **Manage Selection Sets**.
-
-  ![Manage Selection Sets in Autodesk® 3ds Max®](images/FBXExporter_ManageSelectionSets.png)
-
-* To add an object to a set, select the set, select an object and select **Add Selected Objects**.
-
-* To remove an object from a set, select the object in the set and select **Subtract Selected Objects**.
-
-> **TIP:** You can also right-click the UnityExportSets and add or remove objects through the context menu.
-
-![Named Selection Sets in Autodesk® 3ds Max®](images/FBXExporter_MaxNamedSelectionSets.png)
-
-In Autodesk® 3ds Max®, use the **Add Selected Objects** button (red outline) to add objects to the *Wolf_UnityExportSet* set.
