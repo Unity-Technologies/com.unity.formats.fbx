@@ -20,6 +20,11 @@
   * [Convert a Prefab asset to an FBX Prefab Variant](prefab-variants-convert-prefab-asset.md)
   * [Create a Prefab Variant based on an FBX file](prefab-variants-create-from-model-prefab.md)
 * [Integration with 3D modeling software](integration.md)
+  * [Set up an integration of 3D modeling application](integration-setup.md)
+  * [Use the Unity Integration tool in Maya](integration-maya-roundtrip.md)
+  * [Manage Export Sets in Maya](integration-maya-manage-export-sets.md)
+  * [Use the Unity Integration tool in 3ds Max](integration-3ds-max-roundtrip.md)
+  * [Manage objects to export from 3ds Max](integration-3ds-max-manage-objects-to-export.md)
 * Support information
   * [Limitations](knownissues.md)
   * [Troubleshooting](troubleshooting.md)
