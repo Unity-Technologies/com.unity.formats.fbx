@@ -115,19 +115,16 @@ test_api_win:
       paths:
       - "upm-ci~/test-results/**/*"
 
-test_trigger:
-  name: Tests Trigger
+test_trigger_pr:
+  name: Pull Request Tests Trigger
   triggers:
-    branches:
-      only:
-        - "/.*/"
-      except:
-        - master
+    cancel_old_ci: true
+    expression: pull_request.(source match ".*" AND NOT draft)
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#api_doc_validation
     - .yamato/upm-ci.yml#test_api_win
-{% for editor in test_trigger_editors %}
+{% for editor in all_test_editors %}
 {% for platform in platforms %}
 # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
 {% if use_autodesk_fbx_submodule_for_testing %}
@@ -160,7 +157,7 @@ test_trigger:
 {% if use_autodesk_fbx_submodule_for_testing %}
     - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
 {% else %}
-    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
 {% endfor %}
@@ -174,10 +171,10 @@ publish_test_trigger:
         - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?
   dependencies:
     - .yamato/upm-ci.yml#pack
-{% for editor in publish_trigger_editors %}
+{% for editor in all_test_editors %}
 {% for platform in platforms %}
-    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
-    - .yamato/upm-ci.yml#validate_{{platform.name}}_{{editor.version}}
+    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/upm-ci.yml#validate_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
 {% endfor %}  
       
@@ -203,5 +200,27 @@ publish:
         - "upm-ci~/packages/*.tgz"
   dependencies:
     - .yamato/upm-ci.yml#pack
-    - .yamato/upm-ci.yml#test_trigger
+    - .yamato/upm-ci.yml#publish_test_trigger
+
+publish_dry_run:
+  name: Publish to Internal Registry (Dry Run)
+  agent:
+    type: {{ win_platform.type }}
+    image: {{ win_platform.image }}
+    flavor: {{ win_platform.flavor }}
+  variables:
+    UPMCI_ENABLE_PACKAGE_SIGNING: 1
+  commands:
+    - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - upm-ci package publish --package-path com.unity.formats.fbx --dry-run
+  triggers:
+    tags:
+      only:
+        - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?$/
+  artifacts:
+    artifacts:
+      paths:
+        - "upm-ci~/packages/*.tgz"
+  dependencies:
+    - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#publish_test_trigger
