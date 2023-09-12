@@ -1,6 +1,6 @@
 # Convert Options window
 
-When [converting to an FBX Prefab Variant](prefabs.md), the following window opens, displaying options for exporting:
+Use the **Convert Options** window to [convert a GameObject or Prefab asset to an FBX Prefab Variant](export-gameobjects.md). It displays options for specifying what gets exported through the conversion process.
 
 ![Convert Options for an FBX Prefab Variant](images/FBXExporter_ConvertOptionsWindow.png)
 
