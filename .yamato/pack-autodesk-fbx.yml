@@ -41,11 +41,11 @@ build_mac:
       paths:
         - "External/com.autodesk.fbx/build-mac/install/**"
 
-build_ubuntu:
-  name: Build on ubuntu
+build_ubuntu18:
+  name: Build on ubuntu 18
   agent:
     type: {{ ubuntu_platform.type }}
-    image: {{ ubuntu_platform.image }}
+    image: package-ci/ubuntu-18.04:v4
     flavor: {{ ubuntu_platform.flavor}}
   commands:
     # Load submodule and update it
