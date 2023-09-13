@@ -2,7 +2,8 @@
 
 Export any Timeline clip containing animation to an FBX file.
 
->**Note:** This scenario requires to have the [Timeline](https://docs.unity3d.com/Packages/com.unity.timeline@latest) package installed in addition to the FBX Exporter package.
+>[!NOTE]
+>This scenario requires to have the [Timeline](https://docs.unity3d.com/Packages/com.unity.timeline@latest) package installed in addition to the FBX Exporter package.
 
 To export an animation clip:
 
@@ -18,10 +19,11 @@ To export an animation clip:
 
 The FBX Exporter exports the selected animation clip to an FBX file in the folder specified in **Export Path**.
 
->**Note:** The FBX Exporter doesn't support multiple clip selection for export.
+>[!NOTE]
+>The FBX Exporter doesn't support multiple clip selection for export.
 
 ## Additional resources
 
 * [Timeline package documentation](https://docs.unity3d.com/Packages/com.unity.timeline@latest)
 * [FBX Export Options](ref-export-options.md)
-* [Exported animation attributes](exported-attributes.md#animation)
+* [Exported animation attributes](features-behaviors-exported-attributes.md#animation)

@@ -2,7 +2,8 @@
 
 Use the Recorder window to record a GameObject's animation to FBX within an arbitrary time or frame interval in Play mode.
 
->**Note:** This scenario requires to have the [Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest) package installed in addition to the FBX Exporter package.
+>[!NOTE]
+>This scenario requires to have the [Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest) package installed in addition to the FBX Exporter package.
 
 To record an FBX animation via the Recorder window:
 
@@ -24,4 +25,4 @@ The recording starts and stops according to the interval you've set up in the Re
 
 * [Recorder package documentation](https://docs.unity3d.com/Packages/com.unity.recorder@latest)
 * [FBX Recorder properties](ref-recorder-properties.md)
-* [Exported animation attributes](exported-attributes.md#animation)
+* [Exported animation attributes](features-behaviors-exported-attributes.md#animation)

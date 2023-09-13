@@ -1,6 +1,6 @@
 # Convert Options window
 
-Use the **Convert Options** window to [convert a GameObject or Prefab asset to an FBX Prefab Variant](export-gameobjects.md). It displays options for specifying what gets exported through the conversion process.
+Use the **Convert Options** window to [convert a GameObject](prefab-variants-convert-gameobject.md), or [a Prefab asset](prefab-variants-convert-prefab-asset.md), to an FBX Prefab Variant. It displays options for specifying what gets exported through the conversion process.
 
 ![Convert Options for an FBX Prefab Variant](images/FBXExporter_ConvertOptionsWindow.png)
 
@@ -29,10 +29,11 @@ Use the **Convert Options** window to [convert a GameObject or Prefab asset to a
 | **LOD level** | **Convert to FBX Prefab Variant** always exports All levels of detail (LOD) available in the hierarchy for LOD groups. |
 | **Object(s) Position** | **Convert to FBX Prefab Variant** always resets the root object's transform during export. However, the Prefab maintains the global transform for the root object. |
 | **Animated Skinned Mesh** | Enable this option to export animation on GameObjects with skinned meshes.<br/><br/>If you disable this option, the FBX Exporter does not export animation on skinned meshes. |
-| **Compatible Naming** | Enable this option to make the FBX Exporter rename GameObjects and Materials on conversion, according to specific [character replacement rules](export-compatible-naming.md).<br /><br />This ensures a compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and these software. |
+| **Compatible Naming** | Enable this option to make the FBX Exporter rename GameObjects and Materials on conversion, according to specific [character replacement rules](features-behaviors-compatible-naming.md).<br /><br />This ensures a compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and these software. |
 | **Don't ask me again** | Enable this option to use the same **Convert Options** properties and hide this window when converting to FBX Prefab Variants in the future. You can reset this option by turning on the **Display Options Window** option under **Edit** > **Project Settings** > **Fbx Export** in Unity's top menu. |
 
-> **Note:** For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters might differ between file systems.
+>[!NOTE]
+>For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters might differ between file systems.
 
 ## Default property values
 

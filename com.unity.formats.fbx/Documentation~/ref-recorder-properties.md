@@ -1,8 +1,9 @@
 # FBX Recorder properties
 
-Use **FBX Recorder properties** to [record FBX animations in Play mode](export-record-in-play-mode.md) via either the Recorder window or a Recorder clip in Timeline. They let you specify what gets exported during the recording.
+Use **FBX Recorder properties** to record FBX animations in Play mode via either [the Recorder window](record-in-play-mode-recorder-window.md) or [a Recorder clip in Timeline](record-in-play-mode-recorder-clip.md). They let you specify what gets exported during the recording.
 
-> **Note:** To use the FBX Recorder, you have to install the [Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest) package in addition to the FBX Exporter package. To fully configure an FBX Recorder, you must also set the general recording Properties, at least the recording time or frame interval.
+>[!NOTE]
+>To use the FBX Recorder, you have to install the [Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest) package in addition to the FBX Exporter package. To fully configure an FBX Recorder, you must also set the general recording Properties, at least the recording time or frame interval.
 
 ![](images/FBXExporter_RecorderSettings.png)  
 _FBX Recorder properties in the Recorder window context._
@@ -14,7 +15,7 @@ Define the source and the content of your recording.
 | Property || Function |
 | :--- | :--- | :--- |
 | **GameObject** ||The [GameObject](https://docs.unity3d.com/Manual/class-GameObject.html) to record the animation from.|
-| **Recorded Component(s)** ||The components of the GameObject to record.<br />Choose more than one item to record more than one component.<br /><br />**Note:** The FBX Recorder can only export the same component properties as the [animation export feature of the FBX Exporter](exported-attributes.md#animation). |
+| **Recorded Component(s)** ||The components of the GameObject to record.<br />Choose more than one item to record more than one component.<br /><br />**Note:** The FBX Recorder can only export the same component properties as the [animation export feature of the FBX Exporter](features-behaviors-exported-attributes.md#animation). |
 | **Record Hierarchy** ||Enable this property to record the GameObject's child GameObjects.|
 | **Clamped Tangents** || Enable this option to set all [key tangents](https://docs.unity3d.com/Manual/EditingCurves.html) of the recorded animation to **Clamped Auto**. Disabling the option sets the tangents to **Auto** (legacy).<br />Clamped tangents are useful to prevent curve overshoots when the animation data is discontinuous. |
 | **Anim. Compression** || Specifies the keyframe reduction level to use to compress the recorded animation curve data. |
@@ -40,4 +41,5 @@ Define the source and the content of your recording.
 
 Specify the output **Path** and **File Name** pattern to save the FBX file.
 
-> **Note:** Output File properties work the same for all types of recorders. The [Unity Recorder documentation](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html) describes these properties in detail.
+>[!NOTE]
+>Output File properties work the same for all types of recorders. The [Unity Recorder documentation](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html) describes these properties in detail.

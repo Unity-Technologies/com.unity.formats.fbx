@@ -4,7 +4,7 @@ Summary of Unity core concepts about FBX files, Model Prefabs, and Prefab Varian
 
 ## FBX file and Model Prefab
 
-When you [import an FBX file](https://docs.unity3d.com/Manual/ImportingModelFiles.html) in a Unity project, or when you [create one by export](export-gameobjects.md), the Editor automatically creates a read-only Model Prefab to represent the FBX file contents in a way that is compatible with Unity's Prefab system.
+When you [import an FBX file](https://docs.unity3d.com/Manual/ImportingModelFiles.html) in a Unity project, or when you [create one by export](export.md), the Editor automatically creates a read-only Model Prefab to represent the FBX file contents in a way that is compatible with Unity's Prefab system.
 
 However, the Editor's Project window always displays a single asset that represents both the FBX file and the Model Prefab.
 
@@ -36,5 +36,5 @@ A Prefab Variant is a Prefab based on another Prefab that it is connected to.
 
 * [FBX Prefab Variant workflow](prefab-variants-workflow.md)
 * [Prefab Variants](https://docs.unity3d.com/Documentation/Manual/PrefabVariants.html)
-* [Export to FBX](export-gameobjects.md)
+* [Export to FBX](export.md)
 * [Importing a model](https://docs.unity3d.com/Manual/ImportingModelFiles.html)

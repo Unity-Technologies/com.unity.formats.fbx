@@ -14,11 +14,11 @@ Export one or multiple GameObjects and their children from the Hierarchy to an F
 
 The FBX Exporter exports the selected GameObjects and all their children GameObjects to a single FBX file in the folder specified in **Export Path**.
 
->**Note:**
+>[!NOTE]
 >* If your selection includes multiple GameObjects that have no hierarchical relationship, the FBX Exporter includes the whole selection in the same exported FBX file.
 >* If your selection includes both a parent and one of its children, the FBX Exporter exports the whole as if you had selected the parent only.
 
 ## Additional resources
 
 * [FBX Export Options](ref-export-options.md)
-* [Exported objects and attributes](exported-attributes.md)
+* [Exported objects and attributes](features-behaviors-exported-attributes.md)
