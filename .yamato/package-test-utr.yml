@@ -53,5 +53,9 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
       --artifacts_path=TestResults
   dependencies:
     - .yamato/pack-autodesk-fbx.yml#pack_autodesk_fbx
+  artifacts:
+    TestResults:
+      paths:
+        - "TestResults/**/*"
 {% endfor %}
 {% endfor %}

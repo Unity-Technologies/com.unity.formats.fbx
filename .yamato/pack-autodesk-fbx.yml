@@ -74,7 +74,7 @@ pack_autodesk_fbx:
   dependencies:
     - .yamato/pack-autodesk-fbx.yml#build_win
     - .yamato/pack-autodesk-fbx.yml#build_mac
-    - .yamato/pack-autodesk-fbx.yml#build_ubuntu
+    - .yamato/pack-autodesk-fbx.yml#build_ubuntu18
   artifacts:
     build:
       paths:
