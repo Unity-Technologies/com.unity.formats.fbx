@@ -62,8 +62,10 @@ test_{{ platform.name }}_{{ editor.version }}:
 {% if platform.name == "ubuntu" %}
     - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
     - sudo apt-get -y install gcc-9 g++-9
-{% endif %}
+    - CC=`which gcc-9` CXX=`which g++-9` upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
+{% else %}
     - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
+{% endif %}
     - python tests/yamato/check_coverage_percent.py upm-ci~/test-results/ {{ coverage.minPercent }}
   artifacts:
     logs:
