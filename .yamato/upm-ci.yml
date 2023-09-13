@@ -59,6 +59,10 @@ test_{{ platform.name }}_{{ editor.version }}:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
   commands:
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+{% if platform.name == "ubuntu" %}
+    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    - sudo apt-get -y install gcc-9 g++-9
+{% endif %}
     - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
     - python tests/yamato/check_coverage_percent.py upm-ci~/test-results/ {{ coverage.minPercent }}
   artifacts:
