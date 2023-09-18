@@ -44,7 +44,8 @@ on the set.
 
 To do so, select the set, and in the **Attribute Editor**, in the **Extra Attributes** section, modify the Unity attributes.
 
-> **NOTE:** If Arnold is installed, the attributes might appear in the **Arnold > Extra Attributes** section.
+>[!NOTE]
+>If Arnold is installed, the attributes might appear in the **Arnold > Extra Attributes** section.
 
 ![](images/FBXExporter_MayaExportSetAttributes.png)
 

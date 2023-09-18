@@ -27,6 +27,10 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
     - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr --output ./utr
     - chmod +x ./utr
 {% else %}
+# FBX sdk is built on Ubuntu 18. Because of that, FBX exporter tests also have to run on Ubuntu 18, but with gcc9 and g++9 installed.
+# Otherwise, tests will fail to run on Ubuntu 18.
+    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    - sudo apt-get -y install gcc-9 g++-9
     - ./build.sh
     - curl -L {{ artifactory_url }}/api/gpg/key/public | sudo apt-key add -
     - sudo sh -c "echo 'deb {{ artifactory_url }}/unity-apt-local bionic main' > /etc/apt/sources.list.d/unity.list"

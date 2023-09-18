@@ -1,6 +1,6 @@
 # Compatible Naming rules
 
-During an export or a conversion to a Prefab Variant, if you enabled **Compatible Naming** in the [Export Options](ref-export-options.md), the FBX Exporter manages characters in the names of the exported or converted elements to ensure naming compatibility with other software.
+During an export or a conversion to a Prefab Variant, if you enabled **Compatible Naming** in the [Export Options](ref-export-options.md), or in the [Convert Options](ref-convert-options.md), the FBX Exporter manages characters in the names of the exported or converted elements to ensure naming compatibility with other software.
 
 ## Character management in names
 
@@ -21,4 +21,5 @@ If you want to keep an exact match of Materials through your export/import itera
 ## Additional resources
 
 * [FBX Export Options](ref-export-options.md)
+* [FBX Prefab Variant Convert Options](ref-convert-options.md)
 * [FBX Export Project Settings](ref-project-settings.md)

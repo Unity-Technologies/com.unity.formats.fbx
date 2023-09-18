@@ -1,5 +1,10 @@
 # Changes in Fbx Exporter
 
+## [5.1.0] - 2023-09-18
+### Changed
+- Updated the FBX SDK bindings to 5.1.0.
+- Refactored the whole user manual to consolidate the content and improve usability.
+
 ## [5.1.0-pre.1] - 2023-05-02
 ### Added
 * Export camera focus distance and use depth of field properties.

@@ -30,5 +30,5 @@ After you create the Prefab Variant:
 
 * [FBX files and Prefab Variants](prefab-variants-concepts.md)
 * [FBX Prefab Variant workflow](prefab-variants-concepts.md)
-* [Export to FBX](export-gameobjects.md)
+* [Export to FBX](export.md)
 * [Importing a model](https://docs.unity3d.com/Manual/ImportingModelFiles.html)

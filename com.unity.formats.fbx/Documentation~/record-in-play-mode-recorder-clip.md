@@ -2,7 +2,8 @@
 
 Set up one or multiple Recorder clips in a Timeline Recorder Track to activate the recording of a GameObject's animations to FBX at specific time or frame intervals in Play mode.
 
->**Note:** This scenario requires to have both the [Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest) and [Timeline](https://docs.unity3d.com/Packages/com.unity.timeline@latest) packages installed in addition to the FBX Exporter package.
+>[!NOTE]
+>This scenario requires to have both the [Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest) and [Timeline](https://docs.unity3d.com/Packages/com.unity.timeline@latest) packages installed in addition to the FBX Exporter package.
 
 To record an FBX animation through a Timeline Recorder Track:
 
@@ -33,4 +34,4 @@ The FBX Recorder clip starts and stops according to the clip timing you've set u
 * [Recorder package documentation](https://docs.unity3d.com/Packages/com.unity.recorder@latest)
 * [Timeline package documentation](https://docs.unity3d.com/Packages/com.unity.timeline@latest)
 * [FBX Recorder properties](ref-recorder-properties.md)
-* [Exported animation attributes](exported-attributes.md#animation)
+* [Exported animation attributes](features-behaviors-exported-attributes.md#animation)

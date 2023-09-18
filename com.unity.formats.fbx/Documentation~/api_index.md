@@ -1,6 +1,6 @@
 # Developer’s Guide
 
-As a developer, you have access to the FBX Exporter from C# scripting. You can use the basic API by providing a single GameObject or a list of GameObjects. 
+As a developer, you have access to the FBX Exporter from C# scripting. You can use the basic API by providing a single GameObject or a list of GameObjects.
 
 ## Managing export settings
 
@@ -29,14 +29,14 @@ public static void ExportGameObjects(Object[] objects)
     // Note: If you don't pass any export settings, Unity uses the default settings.
     ModelExporter.ExportObjects(filePath, objects, exportSettings);
 
-    // You can use ModelExporter.ExportObject instead of 
+    // You can use ModelExporter.ExportObject instead of
     // ModelExporter.ExportObjects to export a single GameObject.
 }
 ```
 
-## Creating an FBX Prefab Variant 
+## Creating an FBX Prefab Variant
 
-You can convert a GameObject hierarchy to an [FBX Prefab Variant](../manual/prefabs.html) using the API. 
+You can convert a GameObject hierarchy to an [FBX Prefab Variant](../manual/prefab-variants.html) using the API.
 
 The principle is to export the GameObject hierarchy to an FBX and then convert the exported FBX Model Prefab into a Prefab Variant while maintaining the components from the original hierarchy.
 
@@ -68,7 +68,8 @@ public static GameObject ConvertGameObject(GameObject go)
 
 The FBX SDK bindings can be executed during gameplay allowing import and export at runtime. Currently a custom importer/exporter needs to be written in order to do so, as the FBX Exporter is Editor only.
 
-> **NOTE:** The FBX SDK bindings are Editor only by default and will not be included in a build. In order for the package to be included in the build, add the FBXSDK_RUNTIME define to Edit > Project Settings... > Player > Other Settings > Scripting Define Symbols.
+>[!NOTE]
+>The FBX SDK bindings are Editor only by default and will not be included in a build. In order for the package to be included in the build, add the FBXSDK_RUNTIME define to Edit > Project Settings... > Player > Other Settings > Scripting Define Symbols.
 
 ### Basic Exporter:
 
@@ -82,7 +83,7 @@ protected void ExportScene (string fileName)
     using(FbxManager fbxManager = FbxManager.Create ()){
         // configure IO settings.
         fbxManager.SetIOSettings (FbxIOSettings.Create (fbxManager, Globals.IOSROOT));
-        
+
         // Export the scene
         using (FbxExporter exporter = FbxExporter.Create (fbxManager, "myExporter")) {
 
@@ -111,7 +112,7 @@ protected void ImportScene (string fileName)
     using(FbxManager fbxManager = FbxManager.Create ()){
         // configure IO settings.
         fbxManager.SetIOSettings (FbxIOSettings.Create (fbxManager, Globals.IOSROOT));
-        
+
         // Import the scene to make sure file is valid
         using (FbxImporter importer = FbxImporter.Create (fbxManager, "myImporter")) {
 

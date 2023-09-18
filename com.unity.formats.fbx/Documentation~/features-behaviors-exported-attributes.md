@@ -61,7 +61,8 @@ The following textures are exported:
 
 The FBX Exporter exports both Game Cameras and Physical Cameras.
 
-> **NOTE:** In Unity's Inspector, a Camera's **Physical Camera** property determines whether it is a *Physical Camera* or a *Game Camera*.
+>[!NOTE]
+>In Unity's Inspector, a Camera's **Physical Camera** property determines whether it is a *Physical Camera* or a *Game Camera*.
 
 ### Physical Cameras
 

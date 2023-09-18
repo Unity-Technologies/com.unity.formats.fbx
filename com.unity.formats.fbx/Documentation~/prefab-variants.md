@@ -9,3 +9,4 @@ Easily convert GameObjects and Prefab assets to Prefab Variants based on FBX fil
 | [Convert a GameObject to an FBX Prefab Variant](prefab-variants-convert-gameobject.md) | Convert a GameObject and its children to a Prefab Variant based on an FBX model. |
 | [Convert a Prefab asset to an FBX Prefab Variant](prefab-variants-convert-prefab-asset.md) | Convert a Prefab asset file to a Prefab Variant based on an FBX model. |
 | [Create a Prefab Variant based on an existing FBX model](prefab-variants-create-from-model-prefab.md) | Create a Prefab Variant based on an existing FBX Model Prefab without having to perform FBX re-export. |
+| [Convert Options window](ref-convert-options.md) | Get the description of all settings available in the Convert Options window that displays when you perform a conversion to an FBX Prefab Variant. |

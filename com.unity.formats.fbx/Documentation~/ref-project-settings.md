@@ -30,7 +30,7 @@ Manage the default values of the [Export Options window](ref-export-options.md).
 |  | Local Pivot | Resets the transform of the selected GameObject or group of GameObjects to the World center.<br/><br/>If you select multiple GameObjects for export, the FBX Exporter centers these GameObjects around a shared root and keeps their relative placement unchanged. |
 |  | World Absolute | Keeps world transforms unchanged during the export. |
 | **Animated Skinned Mesh**  |  | Enable this option to export animation on GameObjects with skinned meshes.<br/><br/>If you disable this option, the FBX Exporter does not export animation on skinned meshes. |
-| **Compatible Naming**  |  | Enable this option to make the FBX Exporter rename GameObjects and Materials on export, according to specific [character replacement rules](export-compatible-naming.md).<br /><br />This ensures a compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and these software. |
+| **Compatible Naming**  |  | Enable this option to make the FBX Exporter rename GameObjects and Materials on export, according to specific [character replacement rules](features-behaviors-compatible-naming.md).<br /><br />This ensures a compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and these software. |
 | **Export Unrendered**  |  | Enable this option to export meshes that don't have a renderer component or that have a disabled renderer component.<br/><br/>For example, a simplified mesh used as a Mesh collider. |
 |**Preserve Import Settings**  |  | Enable this option to preserve all import settings applied to an existing FBX file that is overwritten during the export.<br/>If you export the GameObject as a new FBX file, the FBX Exporter does not carry over the import settings. |
 | **Keep Instances** | | Enable this option to export multiple copies of the same Mesh as instances.<br/>If unchecked, the FBX Exporter exports all Meshes as unique. |
@@ -48,13 +48,13 @@ Manage the default values of the [Convert Options window](ref-convert-options.md
 | **LOD level** | **Convert to FBX Prefab Variant** always exports all levels of detail (LOD) available in the hierarchy for LOD groups. |
 | **Object(s) Position** | **Convert to FBX Prefab Variant** always resets the root GameObject's transform during export. However, the Prefab maintains the global transform for the root GameObject. |
 | **Animated Skinned Mesh** | Enable this option to export animation on GameObjects with skinned meshes.<br/><br/>If you disable this option, the FBX Exporter does not export animation on skinned meshes. |
-| **Compatible Naming** | Enable this option to make the FBX Exporter rename GameObjects and Materials on conversion, according to specific [character replacement rules](export-compatible-naming.md).<br /><br />This ensures a compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and these software. |
+| **Compatible Naming** | Enable this option to make the FBX Exporter rename GameObjects and Materials on conversion, according to specific [character replacement rules](features-behaviors-compatible-naming.md).<br /><br />This ensures a compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and these software. |
 
 ## Integration
 
 | Property | Function |
 | :------- | :------- |
-| **3D Application** | The 3D modeling software you want to integrate with Unity. The available options depend on the software you have already installed on your computer, among [the ones that the FBX Exporter currently supports](index.md#requirements).<br/><br/>Use the **[...]** (Browse) button to select the 3D modeling software if you installed it in a non-standard location. |
+| **3D Application** | The 3D modeling software you want to integrate with Unity. The available options depend on the software you have already installed on your computer, among [the ones that the FBX Exporter currently supports](installation.md).<br/><br/>Use the **[...]** (Browse) button to select the 3D modeling software if you installed it in a non-standard location. |
 | **Keep Open** | Enable this option to keep the selected 3D modeling software open after installing it. |
 | **Hide Native Menu** | Enable this option to hide the native **Send to Unity** menu in Autodesk® Maya® and Autodesk® Maya LT™. |
 | **Install Unity Integration** | Select this button to install [Unity Integration](integration.md) for the selected **3D Application**. |
