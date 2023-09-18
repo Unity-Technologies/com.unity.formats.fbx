@@ -51,6 +51,9 @@ build_ubuntu:
     # Load submodule and update it
     - git submodule update --init --recursive
     - git submodule update --remote
+# gcc-9 and g++-9 are needed for binding FBX sdk on Ubuntu 18
+    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    - sudo apt-get -y install gcc-9 g++-9
     - |
       cd ./External/com.autodesk.fbx
       ./build_linux.sh
