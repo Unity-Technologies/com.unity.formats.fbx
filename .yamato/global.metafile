@@ -65,6 +65,13 @@ mac_platform: &mac
   image: package-ci/macos-12:v4.19.0
   flavor: b1.medium
 
+mac_arm64_platform: &mac_arm64
+  name: mac_arm64
+  type: Unity::VM::osx
+  model: M1
+  image: package-ci/macos-13-arm64:v4
+  flavor: m1.mac
+
 ubuntu_platform: &ubuntu
   name: ubuntu
   type: Unity::VM
@@ -75,6 +82,7 @@ ubuntu_platform: &ubuntu
 platforms:
   - *win
   - *mac
+  - *mac_arm64
   - *ubuntu
 
 promotion_test_platforms:

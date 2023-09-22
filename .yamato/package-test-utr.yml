@@ -10,6 +10,9 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
   name : Test version {{ editor.version }} on {{ platform.name }} using autodesk.fbx submodule
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
