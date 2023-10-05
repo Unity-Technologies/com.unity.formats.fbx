@@ -1,5 +1,4 @@
 {% metadata_file .yamato/global.metafile %}
-artifactory_url: "https://artifactory.prd.cds.internal.unity3d.com/artifactory"
 npm_registry: "https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates"
 
 ---
@@ -17,43 +16,31 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
     flavor: {{ platform.flavor}}
   commands:
 {% if platform.name contains "win" -%}
-# Copy CHANGELOG.md into com.unity.formats.fbx package. Currently it is outside the package folder under repo root.
+# Run build script to copy CHANGELOG.md into com.unity.formats.fbx package. Currently it is outside the package folder under repo root.
     - build.cmd
-    - gsudo choco source add --priority 1 -n Unity -s {{ artifactory_url }}/api/nuget/unity-choco-local
-    - gsudo choco install unity-config -y
-    - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr.bat --output utr.bat
 {% elsif platform.name contains "mac" -%}
     - cmake --version || brew install cmake
     - ./build.sh
-    - brew tap --force-auto-update unity/unity git@github.cds.internal.unity3d.com:unity/homebrew-unity.git
-    - brew install unity-config
-    - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr --output ./utr
-    - chmod +x ./utr
 {% else %}
 # FBX sdk is built on Ubuntu 18. Because of that, FBX exporter tests also have to run on Ubuntu 18, but with gcc9 and g++9 installed.
 # Otherwise, tests will fail to run on Ubuntu 18.
     - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
     - sudo apt-get -y install gcc-9 g++-9
     - ./build.sh
-    - curl -L {{ artifactory_url }}/api/gpg/key/public | sudo apt-key add -
-    - sudo sh -c "echo 'deb {{ artifactory_url }}/unity-apt-local bionic main' > /etc/apt/sources.list.d/unity.list"
-    - sudo apt update
-    - sudo apt install unity-config
-    - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr --output ./utr
-    - chmod +x ./utr
 {% endif -%}
     - unity-config project create TestProjects/TestProjectUsingAutodeskFbxSubmodule
     - unity-config project add testable com.unity.formats.fbx
     - unity-config project add dependency com.unity.formats.fbx@file:../../../com.unity.formats.fbx
     - unity-config project add dependency com.autodesk.fbx@file:../../../External/com.autodesk.fbx/com.autodesk.fbx
     - unity-config project set registry {{ npm_registry }}
-    - unity-downloader-cli -u {{ editor.version }} --path .Editor -c Editor --wait --published-only
+{% if platform.model == "M1" %}
+# Download Silicon Unity Editor if on Silicon Mac
+    - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --wait --published-only
+{% else %}
+    - unity-downloader-cli -u {{ editor.version }} -c Editor --wait --published-only
+{% endif %}
     - >
-{%- if platform.name == "win" -%}
-      utr.bat
-{%- else -%}
-      ./utr
-{%- endif -%}
+      UnifiedTestRunner
       --testproject=TestProjects/TestProjectUsingAutodeskFbxSubmodule
       --editor-location=.Editor
       --suite=editor --suite=playmode
