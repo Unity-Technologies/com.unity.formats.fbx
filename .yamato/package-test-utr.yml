@@ -33,11 +33,12 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
     - unity-config project add dependency com.unity.formats.fbx@file:../../../com.unity.formats.fbx
     - unity-config project add dependency com.autodesk.fbx@file:../../../External/com.autodesk.fbx/com.autodesk.fbx
     - unity-config project set registry {{ npm_registry }}
-{% if platform.model == "M1" %}
-# Download Silicon Unity Editor if on Silicon Mac
-    - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --wait --published-only
-{% else %}
+# Editor 2020.3 doesn't support Silicon Mac, so still download x64 version of 2020.3 even on M1 Mac
+{% if platform.model != "M1" or platform.model == "M1" and editor.version == "2020.3" %}
     - unity-downloader-cli -u {{ editor.version }} -c Editor --wait --published-only
+{% else %}
+# Download Silicon Unity Editor (arm64) if on Silicon Mac, but only for version 2021.3 and above.
+    - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --wait --published-only
 {% endif %}
     - >
       UnifiedTestRunner
@@ -47,5 +48,9 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
       --artifacts_path=TestResults
   dependencies:
     - .yamato/pack-autodesk-fbx.yml#pack_autodesk_fbx
+  artifacts:
+    TestResults:
+      paths:
+        - "TestResults/**/*"
 {% endfor %}
 {% endfor %}
