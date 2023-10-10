@@ -68,8 +68,8 @@ test_{{ platform.name }}_{{ editor.version }}:
     - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
     - sudo apt-get -y install gcc-9 g++-9
 {% endif %}
-# Editor 2020.3 doesn't support Silicon Mac, so still download x64 version of 2020.3 even on M1 Mac
-{% if platform.model != "M1" or platform.model == "M1" and editor.version == "2020.3" %}
+# Editor 2020.3 doesn't support Silicon Mac, so still download x64 version of 2020.3 even on M1 Mac. On other platforms, download x64 version Editor.
+{% if platform.model != "M1" or editor.version == "2020.3" %}
     - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
 {% else %}
 # Download Silicon Unity Editor if on Silicon Mac, but only for version 2021.3 and above.
@@ -145,8 +145,8 @@ test_trigger_pr:
     - .yamato/upm-ci.yml#test_api_win
 {% for editor in all_test_editors %}
 {% for platform in platforms %}
-# Only run tests in 2023.2 and trunk if on Silicon Mac. If on other platforms (non M1), run tests anyway.
-{% if platform.model != "M1" or platform.model == "M1" and editor.version == "2023.2" or editor.version == "trunk" %}
+# Only run tests in 2023.2 and trunk if on Silicon Mac. If on other platforms (non M1), run tests in all Editor versions.
+{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
 # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
   {% if use_autodesk_fbx_submodule_for_testing %}
     - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
@@ -175,8 +175,8 @@ test_trigger_pr:
     - .yamato/clean-console-test.yml#clean_console_test_trigger
 {% for editor in {{release.nightly_editors}} %}
 {% for platform in platforms %}
-# Only run tests in 2023.2 and trunk if on Silicon Mac. If on other platforms (non M1), run tests anyway.
-{% if platform.model != "M1" or platform.model == "M1" and editor.version == "2023.2" or editor.version == "trunk" %}
+# Only run tests in 2023.2 and trunk if on Silicon Mac. If on other platforms (non M1), run tests in all Editor versions.
+{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
 # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
   {% if use_autodesk_fbx_submodule_for_testing %}
     - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
