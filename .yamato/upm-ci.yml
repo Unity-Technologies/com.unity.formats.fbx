@@ -53,6 +53,9 @@ test_{{ platform.name }}_{{ editor.version }}:
   name : Test version {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   variables:
@@ -65,7 +68,16 @@ test_{{ platform.name }}_{{ editor.version }}:
     - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
     - sudo apt-get -y install gcc-9 g++-9
 {% endif %}
+# upm-ci uses unity-downloader-cli under the hood to download Editor and currently unity-downloader-cli always downloads x64 verion Editor even on Silicon Mac which is a known bug.
+# 2020.3 doesn't support Silicon Editor which means we always need x64 version Editor for 2020.3.
+# So when the platform is non-Silicon Mac, or it is a 2020.3 Editor, we just call upm-ci to run tests which will download x64 version Editor.
+{% if platform.model != "M1" or editor.version == "2020.3" %}
     - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
+{% else %}
+# Explicitly download arm64 Editor if on Silicon Mac, but only for version 2021.3 and above.
+    - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --wait --published-only
+    - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version .Editor --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
+{% endif %}
     - python tests/yamato/check_coverage_percent.py upm-ci~/test-results/ {{ coverage.minPercent }}
   artifacts:
     logs:
@@ -81,6 +93,9 @@ validate_{{ platform.name }}_{{ editor.version }}:
   name : Validate version {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   variables:
@@ -132,11 +147,14 @@ test_trigger_pr:
     - .yamato/upm-ci.yml#test_api_win
 {% for editor in all_test_editors %}
 {% for platform in platforms %}
+# Only run tests in 2023.2 and trunk if on Silicon Mac. If on other platforms (non M1), run tests in all Editor versions.
+{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
 # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
-{% if use_autodesk_fbx_submodule_for_testing %}
+  {% if use_autodesk_fbx_submodule_for_testing %}
     - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
-{% else %}
+  {% else %}
     - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+  {% endif %}
 {% endif %}
 {% endfor %}
 {% endfor %}
@@ -159,11 +177,14 @@ test_trigger_pr:
     - .yamato/clean-console-test.yml#clean_console_test_trigger
 {% for editor in {{release.nightly_editors}} %}
 {% for platform in platforms %}
+# Only run tests in 2023.2 and trunk if on Silicon Mac. If on other platforms (non M1), run tests in all Editor versions.
+{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
 # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
-{% if use_autodesk_fbx_submodule_for_testing %}
+  {% if use_autodesk_fbx_submodule_for_testing %}
     - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
-{% else %}
+  {% else %}
     - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+  {% endif %}
 {% endif %}
 {% endfor %}
 {% endfor %}
