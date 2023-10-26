@@ -54,6 +54,9 @@ generate_documentation:
     image: {{ mac_platform.image }}
     flavor: {{ mac_platform.flavor }}
   commands:
+# Run build script to copy CHANGELOG.md and LICENSE.md into com.unity.formats.fbx package.
+    - brew install cmake
+    - ./build.sh
     - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_doc_generation.git@v0.3.0
       variables:
         EDITOR_VERSION: {{ all_test_editors.last.version }}
