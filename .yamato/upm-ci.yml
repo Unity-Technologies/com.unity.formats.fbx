@@ -59,8 +59,8 @@ generate_documentation:
         EDITOR_VERSION: {{ all_test_editors.last.version }}
         PACKAGE_NAME: com.unity.formats.fbx
         PACKAGE_PATH: com.unity.formats.fbx
-        #Treat doc build warnings as errors
-        WARNINGS_AS_ERRORS: true
+        #Set to false because some file links such as api/index.html don't exist in local Documentation folder and will cause warnings. They only exist in generated documentation. 
+        WARNINGS_AS_ERRORS: false
 
 {% for editor in all_test_editors %}
 {% for platform in platforms %}
