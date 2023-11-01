@@ -154,7 +154,7 @@ test_api_win:
       paths:
       - "upm-ci~/test-results/**/*"
 
-# PR trigger for doc only changes, it will run generate_documentation job.
+# PR trigger for doc only changes, it will run generate_documentation job and package vetting test in trunk on Windows.
 test_trigger_pr_documentation:
   name: Pull Request Tests Trigger for documentation changes
   triggers:
@@ -162,6 +162,7 @@ test_trigger_pr_documentation:
     expression: pull_request.(source match ".*" AND push.changes.any match "com.unity.formats.fbx/Documentation~/**" AND NOT draft)
   dependencies:
     - .yamato/upm-ci.yml#generate_documentation
+    - .yamato/upm-ci.yml#validate_win_trunk
 
 test_trigger_pr:
   name: Pull Request Tests Trigger
@@ -227,8 +228,10 @@ publish_test_trigger:
     - .yamato/upm-ci.yml#pack
 {% for editor in all_test_editors %}
 {% for platform in platforms %}
+# Only run tests in 2023.2 and trunk if on Silicon Mac. If on other platforms (non M1), run tests in all Editor versions.
+{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
     - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-    - .yamato/upm-ci.yml#validate_{{ platform.name }}_{{ editor.version }}
+{% endif %}
 {% endfor %}
 {% endfor %}  
       
