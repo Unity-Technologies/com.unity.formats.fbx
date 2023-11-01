@@ -54,7 +54,7 @@ generate_documentation:
     image: {{ mac_platform.image }}
     flavor: {{ mac_platform.flavor }}
   commands:
-# Run build script to copy CHANGELOG.md and LICENSE.md into com.unity.formats.fbx package.
+    # Run build script to copy CHANGELOG.md and LICENSE.md into com.unity.formats.fbx package.
     - brew install cmake
     - ./build.sh
     - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_doc_generation.git@v0.3.0
@@ -159,7 +159,7 @@ test_trigger_pr_documentation:
   name: Pull Request Tests Trigger for documentation changes
   triggers:
     cancel_old_ci: true
-    expression: pull_request.(source match ".*" AND push.changes.all match "**/*.md" AND NOT draft)
+    expression: pull_request.(source match ".*" AND push.changes.any match "com.unity.formats.fbx/Documentation~/**" AND NOT draft)
   dependencies:
     - .yamato/upm-ci.yml#generate_documentation
 
@@ -167,7 +167,7 @@ test_trigger_pr:
   name: Pull Request Tests Trigger
   triggers:
     cancel_old_ci: true
-    expression: pull_request.(source match ".*" AND NOT push.changes.all match "**/*.md" AND NOT draft)
+    expression: pull_request.(source match ".*" AND NOT push.changes.all match ["com.unity.formats.fbx/Documentation~/**", "**/*.md"] AND NOT draft)
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#api_doc_validation
