@@ -2,3 +2,4 @@ system: jira
 server: jira.unity3d.com
 project: FBX
 issuetype: Bug
+package: FBX Exporter
