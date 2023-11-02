@@ -46,6 +46,24 @@ api_doc_validation:
   dependencies:
     - .yamato/upm-ci.yml#pack
 
+# Job to generate documentation for the package
+generate_documentation:
+  name : Generate documentation
+  agent:
+    type: {{ mac_platform.type }}
+    image: {{ mac_platform.image }}
+    flavor: {{ mac_platform.flavor }}
+  commands:
+    # Run build script to copy CHANGELOG.md and LICENSE.md into com.unity.formats.fbx package.
+    - brew install cmake
+    - ./build.sh
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_doc_generation.git@v0.3.0
+      variables:
+        EDITOR_VERSION: {{ all_test_editors.last.version }}
+        PACKAGE_NAME: com.unity.formats.fbx
+        PACKAGE_PATH: com.unity.formats.fbx
+        #Set to false because some file links such as api/index.html don't exist in local Documentation folder and will cause warnings. They only exist in generated documentation. 
+        WARNINGS_AS_ERRORS: false
 
 {% for editor in all_test_editors %}
 {% for platform in platforms %}
@@ -136,11 +154,21 @@ test_api_win:
       paths:
       - "upm-ci~/test-results/**/*"
 
+# PR trigger for doc only changes, it will run generate_documentation job and package vetting test in trunk on Windows.
+test_trigger_pr_documentation:
+  name: Pull Request Tests Trigger for documentation changes
+  triggers:
+    cancel_old_ci: true
+    expression: pull_request.(source match ".*" AND push.changes.any match "com.unity.formats.fbx/Documentation~/**" AND NOT draft)
+  dependencies:
+    - .yamato/upm-ci.yml#generate_documentation
+    - .yamato/upm-ci.yml#validate_win_trunk
+
 test_trigger_pr:
   name: Pull Request Tests Trigger
   triggers:
     cancel_old_ci: true
-    expression: pull_request.(source match ".*" AND NOT draft)
+    expression: pull_request.(source match ".*" AND NOT push.changes.all match ["com.unity.formats.fbx/Documentation~/**", "**/*.md"] AND NOT draft)
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#api_doc_validation
@@ -200,8 +228,10 @@ publish_test_trigger:
     - .yamato/upm-ci.yml#pack
 {% for editor in all_test_editors %}
 {% for platform in platforms %}
+# Only run tests in 2023.2 and trunk if on Silicon Mac. If on other platforms (non M1), run tests in all Editor versions.
+{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
     - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-    - .yamato/upm-ci.yml#validate_{{ platform.name }}_{{ editor.version }}
+{% endif %}
 {% endfor %}
 {% endfor %}  
       
