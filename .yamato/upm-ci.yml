@@ -99,9 +99,6 @@ nightly_test_trigger:
   name: Nightly tests Trigger
   triggers:
     recurring:
-      - branch: wind/update_bokken_image_release_4.1
-        frequency: daily
-        rerun: always
       - branch: release/4.1
         frequency: daily
         rerun: always
