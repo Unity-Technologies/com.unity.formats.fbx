@@ -14,20 +14,13 @@ all_test_editors:
   - version: 2019.4
   - version: 2020.3
   - version: 2021.3
-  - version: 2022.1
-  - version: 2022.2
+  - version: 2022.3
 
 test_trigger_editors:
   - version: 2019.4
   - version: 2020.3
   - version: 2021.3
-  - version: 2022.1
-
-publish_trigger_editors:
-  - version: 2019.4
-  - version: 2020.3
-  - version: 2021.3
-  - version: 2022.1
+  - version: 2022.3
   
 nightly_tested_releases:
   - name: release_4_2
@@ -36,35 +29,28 @@ nightly_tested_releases:
       - version: 2019.4
       - version: 2020.3
       - version: 2021.3
-      - version: 2022.2
-  - name: release_4_1
-    branch: release/4.1
-    nightly_editors: 
-      - version: 2019.4
-      - version: 2020.3
-      - version: 2021.3
-      - version: 2022.1
+      - version: 2022.3
   - name: master
     branch: master
     nightly_editors: 
       - version: 2019.4
       - version: 2020.3
       - version: 2021.3
-      - version: 2022.2
+      - version: 2022.3
       - version: trunk
   
 platforms:
   - name: win
     type: Unity::VM
-    image: package-ci/win10:stable
+    image: package-ci/win10:v4
     flavor: b1.medium
   - name: mac
     type: Unity::VM::osx
-    image: package-ci/mac:stable
+    image: package-ci/macos-12:v4
     flavor: b1.medium
   - name: ubuntu
     type: Unity::VM
-    image: package-ci/ubuntu:stable
+    image: package-ci/ubuntu-18.04:v4
     flavor: b1.medium
 coverage:
     minPercent: 57.5
@@ -73,7 +59,7 @@ pack:
   name: Pack
   agent:
     type: Unity::VM
-    image: package-ci/ubuntu:stable
+    image: package-ci/ubuntu-18.04:v4
     flavor: b1.small
   commands:
     - ./build.sh
@@ -140,7 +126,7 @@ test_trigger:
         - master
   dependencies:
     - .yamato/upm-ci.yml#pack
-{% for editor in test_trigger_editors %}
+{% for editor in all_test_editors %}
 {% for platform in platforms %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
 {% endfor %}
@@ -171,7 +157,7 @@ publish_test_trigger:
         - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?
   dependencies:
     - .yamato/upm-ci.yml#pack
-{% for editor in publish_trigger_editors %}
+{% for editor in all_test_editors %}
 {% for platform in platforms %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
     - .yamato/upm-ci.yml#validate_{{platform.name}}_{{editor.version}}
@@ -183,7 +169,7 @@ publish:
   name: Publish to Internal Registry
   agent:
     type: Unity::VM
-    image: package-ci/win10:stable
+    image: package-ci/win10:v4
     flavor: b1.small
   variables:
     UPMCI_ENABLE_PACKAGE_SIGNING: 1
