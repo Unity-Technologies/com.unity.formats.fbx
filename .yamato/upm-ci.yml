@@ -16,12 +16,6 @@ all_test_editors:
   - version: 2021.3
   - version: 2022.3
 
-test_trigger_editors:
-  - version: 2019.4
-  - version: 2020.3
-  - version: 2021.3
-  - version: 2022.3
-  
 nightly_tested_releases:
   - name: release_4_2
     branch: release/4.2
