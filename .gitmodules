@@ -1,3 +1,4 @@
 [submodule "External/com.autodesk.fbx"]
 	path = External/com.autodesk.fbx
 	url = https://github.com/Unity-Technologies/com.autodesk.fbx.git
+	branch = wind/test_benoit_changes
