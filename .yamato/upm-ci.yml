@@ -80,12 +80,6 @@ test_{{ platform.name }}_{{ editor.version }}:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
   commands:
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-# FBX sdk is built on Ubuntu 18. Because of that, FBX exporter tests also have to run on Ubuntu 18, but with gcc9 and g++9 installed.
-# Otherwise, tests will fail to run on Ubuntu 18.
-{% if platform.name == "ubuntu" %}
-    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-    - sudo apt-get -y install gcc-9 g++-9
-{% endif %}
 # upm-ci uses unity-downloader-cli under the hood to download Editor and currently unity-downloader-cli always downloads x64 verion Editor even on Silicon Mac which is a known bug.
 # 2020.3 doesn't support Silicon Editor which means we always need x64 version Editor for 2020.3.
 # So when the platform is non-Silicon Mac, or it is a 2020.3 Editor, we just call upm-ci to run tests which will download x64 version Editor.
