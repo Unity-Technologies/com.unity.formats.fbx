@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [5.1.1] - 2024-03-18
+### Changed
+- Updated the FBX SDK bindings to 5.1.1.
+
 ## [5.1.0] - 2023-09-18
 ### Changed
 - Updated the FBX SDK bindings to 5.1.0.

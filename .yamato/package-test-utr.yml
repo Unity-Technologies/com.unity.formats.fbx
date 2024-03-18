@@ -22,10 +22,6 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
     - cmake --version || brew install cmake
     - ./build.sh
 {% else %}
-# FBX sdk is built on Ubuntu 18. Because of that, FBX exporter tests also have to run on Ubuntu 18, but with gcc9 and g++9 installed.
-# Otherwise, tests will fail to run on Ubuntu 18.
-    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-    - sudo apt-get -y install gcc-9 g++-9
     - ./build.sh
 {% endif -%}
     - unity-config project create TestProjects/TestProjectUsingAutodeskFbxSubmodule
