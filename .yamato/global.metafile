@@ -19,7 +19,6 @@ all_test_editors:
 
 clean_console_test_editors:
   - version: 2022.3
-  - version: 2023.2
   - version: trunk
 
 mac_arm64_test_editors:
