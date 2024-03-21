@@ -176,9 +176,9 @@ test_trigger_pr:
   {% for editor in mac_arm64_test_editors %}
   # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
     {% if use_autodesk_fbx_submodule_for_testing %}
-      - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
+    - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
     {% else %}
-      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
     {% endif %}
   {% endfor %}
 # On ARM64 Windows, only test in trunk
@@ -186,9 +186,9 @@ test_trigger_pr:
   {% for editor in win_arm64_test_editors %}
   # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
     {% if use_autodesk_fbx_submodule_for_testing %}
-      - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
+    - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
     {% else %}
-      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
     {% endif %}
   {% endfor %}
 # On other platforms, test in all editor versions
@@ -196,9 +196,9 @@ test_trigger_pr:
   {% for editor in all_test_editors %}
   # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
     {% if use_autodesk_fbx_submodule_for_testing %}
-      - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
+    - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
     {% else %}
-      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
     {% endif %}
   {% endfor %}
 {% endif %}
@@ -234,17 +234,17 @@ publish_test_trigger:
 {% for platform in platforms %}
 {% if platform.model == "M1" %}
   {% for editor in mac_arm64_test_editors %}
-      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
   {% endfor %}
 #On ARM64 Windows
 {% elsif platform.model == "arm" %}
   {% for editor in win_arm64_test_editors %}
-      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
   {% endfor %}
 #On other platforms
 {% else %}
   {% for editor in all_test_editors %}
-      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
   {% endfor %}
 {% endif %}
 {% endfor %}      
