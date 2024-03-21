@@ -67,6 +67,8 @@ generate_documentation:
 
 {% for editor in all_test_editors %}
 {% for platform in platforms %}
+# If on "win_arm64" platform, only run tests in "trunk".
+{% if platform.name != "win_arm64" or editor.version == "trunk" %}
 test_{{ platform.name }}_{{ editor.version }}:
   name : Test version {{ editor.version }} on {{ platform.name }}
   agent:
@@ -80,13 +82,13 @@ test_{{ platform.name }}_{{ editor.version }}:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
   commands:
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-# upm-ci uses unity-downloader-cli under the hood to download Editor and currently unity-downloader-cli always downloads x64 verion Editor even on Silicon Mac which is a known bug.
+# upm-ci uses unity-downloader-cli under the hood to download Editor and currently unity-downloader-cli always downloads x64 verion Editor even on Silicon Mac and ARM64 Windows which is a known bug.
 # 2020.3 doesn't support Silicon Editor which means we always need x64 version Editor for 2020.3.
-# So when the platform is non-Silicon Mac, or it is a 2020.3 Editor, we just call upm-ci to run tests which will download x64 version Editor.
-{% if platform.model != "M1" or editor.version == "2020.3" %}
+# So when the platform is not a Silicon Mac nor ARM64 Windows, or it is a 2020.3 Editor, we just call upm-ci to run tests which will download x64 version Editor. Otherwise, we need to explicitly download ARM64 vesion editor.
+{% if platform.model != "M1" and platform.model != "arm" or editor.version == "2020.3" %}
     - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
 {% else %}
-# Explicitly download arm64 Editor if on Silicon Mac, but only for version 2021.3 and above.
+# Explicitly download arm64 Editor if on ARM devices
     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --wait --published-only
     - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version .Editor --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
 {% endif %}
@@ -124,6 +126,7 @@ validate_{{ platform.name }}_{{ editor.version }}:
         - "upm-ci~/packages/**/*"
   dependencies:
     - .yamato/upm-ci.yml#pack
+{% endif %}
 {% endfor %}
 {% endfor %}
 
@@ -167,50 +170,57 @@ test_trigger_pr:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#api_doc_validation
     - .yamato/upm-ci.yml#test_api_win
-{% for editor in all_test_editors %}
 {% for platform in platforms %}
-# Only run tests in 2023.2 and trunk if on Silicon Mac. If on other platforms (non M1), run tests in all Editor versions.
-{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
-# If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
-  {% if use_autodesk_fbx_submodule_for_testing %}
-    - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
-  {% else %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-  {% endif %}
+# On Silicon Mac, test in 2022.3 and trunk
+{% if platform.model == "M1" %}
+  {% for editor in mac_arm64_test_editors %}
+  # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
+    {% if use_autodesk_fbx_submodule_for_testing %}
+      - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
+    {% else %}
+      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+    {% endif %}
+  {% endfor %}
+# On ARM64 Windows, only test in trunk
+{% elsif platform.model == "arm" %}
+  {% for editor in win_arm64_test_editors %}
+  # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
+    {% if use_autodesk_fbx_submodule_for_testing %}
+      - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
+    {% else %}
+      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+    {% endif %}
+  {% endfor %}
+# On other platforms, test in all editor versions
+{% else %}
+  {% for editor in all_test_editors %}
+  # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
+    {% if use_autodesk_fbx_submodule_for_testing %}
+      - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
+    {% else %}
+      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+    {% endif %}
+  {% endfor %}
 {% endif %}
-{% endfor %}
 {% endfor %}
 # Only run clean console tests on Win for PR trigger
 {% for editor in clean_console_test_editors %}
     - .yamato/clean-console-test.yml#clean_console_test_win_{{ editor.version }}
 {% endfor %}
 
-{% for release in nightly_tested_releases %}
-{{release.name}}_nightly_test_trigger:
-  name: {{release.branch}} nightly tests Trigger
+
+nightly_test_trigger:
+  name: Nightly tests Trigger
   triggers:
     recurring:
-      - branch: {{release.branch}}
+      - branch: master
         frequency: daily
         rerun: always
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#api_doc_validation
     - .yamato/clean-console-test.yml#clean_console_test_trigger
-{% for editor in {{release.nightly_editors}} %}
-{% for platform in platforms %}
-# Only run tests in 2023.2 and trunk if on Silicon Mac. If on other platforms (non M1), run tests in all Editor versions.
-{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
-# If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
-  {% if use_autodesk_fbx_submodule_for_testing %}
-    - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
-  {% else %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-  {% endif %}
-{% endif %}
-{% endfor %}
-{% endfor %}
-{% endfor %}
+    - .yamato/upm-ci.yml#test_trigger_pr
 
 publish_test_trigger:
   name: Publish Tests Trigger
@@ -220,15 +230,24 @@ publish_test_trigger:
         - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?
   dependencies:
     - .yamato/upm-ci.yml#pack
-{% for editor in all_test_editors %}
+#On Silicon Mac
 {% for platform in platforms %}
-# Only run tests in 2023.2 and trunk if on Silicon Mac. If on other platforms (non M1), run tests in all Editor versions.
-{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+{% if platform.model == "M1" %}
+  {% for editor in mac_arm64_test_editors %}
+      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+  {% endfor %}
+#On ARM64 Windows
+{% elsif platform.model == "arm" %}
+  {% for editor in win_arm64_test_editors %}
+      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+  {% endfor %}
+#On other platforms
+{% else %}
+  {% for editor in all_test_editors %}
+      - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+  {% endfor %}
 {% endif %}
-{% endfor %}
-{% endfor %}  
-      
+{% endfor %}      
 
 publish:
   name: Publish to Internal Registry

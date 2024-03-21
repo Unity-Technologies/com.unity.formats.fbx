@@ -14,49 +14,36 @@ all_test_editors:
   - version: 2020.3
   - version: 2021.3
   - version: 2022.3
-  - version: 2023.1
   - version: 2023.2
   - version: trunk
 
 clean_console_test_editors:
   - version: 2022.3
-  - version: 2023.1
   - version: 2023.2
+  - version: trunk
+
+mac_arm64_test_editors:
+  - version: 2022.3
+  - version: trunk
+
+win_arm64_test_editors:
   - version: trunk
 
 promotion_test_editors:
   - version: 2020.3
-  
-nightly_tested_releases:
-  - name: release_4_2
-    branch: release/4.2
-    nightly_editors: 
-      - version: 2019.4
-      - version: 2020.3
-      - version: 2021.3
-      - version: 2022.2
-  - name: release_4_1
-    branch: release/4.1
-    nightly_editors: 
-      - version: 2019.4
-      - version: 2020.3
-      - version: 2021.3
-      - version: 2022.1
-  - name: master
-    branch: master
-    nightly_editors: 
-      - version: 2020.3
-      - version: 2021.3
-      - version: 2022.3
-      - version: 2023.1
-      - version: 2023.2
-      - version: trunk
 
 win_platform: &win
   name: win
   type: Unity::VM
   image: package-ci/win10:v4
   flavor: b1.medium
+
+win_arm64_platform: &win_arm64
+  name: win_arm64
+  type: Unity::VM::Azure
+  model: arm
+  image: package-ci/win11-arm64:v4
+  flavor: b1.large
 
 mac_platform: &mac
   name: mac
@@ -81,6 +68,7 @@ ubuntu_platform: &ubuntu
   
 platforms:
   - *win
+  - *win_arm64
   - *mac
   - *mac_arm64
   - *ubuntu
