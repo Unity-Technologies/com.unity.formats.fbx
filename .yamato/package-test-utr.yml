@@ -19,6 +19,7 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
   commands:
 {% if platform.name contains "win" -%}
 # Run build script to copy CHANGELOG.md into com.unity.formats.fbx package. Currently it is outside the package folder under repo root.
+    - choco install cmake -y
     - build.cmd
 {% elsif platform.name contains "mac" -%}
     - cmake --version || brew install cmake
