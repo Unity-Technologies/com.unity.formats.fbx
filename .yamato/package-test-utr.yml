@@ -33,7 +33,7 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
     - unity-config project add dependency com.autodesk.fbx@file:../../../External/com.autodesk.fbx/com.autodesk.fbx
     - unity-config project set registry {{ npm_registry }}
 # Editor 2020.3 doesn't have arm64 version. So when the platform is not a Silicon Mac or editor version is 2020.3, download x64 version which is the default of unity-downloader-cli for testing.
-{% if platform.model != "M1" and platform.model != "arm" or editor.version == "2020.3" %}
+{% if editor.version == "2020.3" or platform.model != "M1" and platform.model != "arm" %}
     - unity-downloader-cli -u {{ editor.version }} -c Editor --wait --published-only
 {% else %}
 # Download arm64 editor when on Silicon Mac, but only for version 2021.3 and above.

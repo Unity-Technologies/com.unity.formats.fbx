@@ -85,7 +85,7 @@ test_{{ platform.name }}_{{ editor.version }}:
 # upm-ci uses unity-downloader-cli under the hood to download Editor and currently unity-downloader-cli always downloads x64 verion Editor even on Silicon Mac and ARM64 Windows which is a known bug.
 # 2020.3 doesn't support Silicon Editor which means we always need x64 version Editor for 2020.3.
 # So when the platform is not a Silicon Mac nor ARM64 Windows, or it is a 2020.3 Editor, we just call upm-ci to run tests which will download x64 version Editor. Otherwise, we need to explicitly download ARM64 vesion editor.
-{% if platform.model != "M1" and platform.model != "arm" or editor.version == "2020.3" %}
+{% if editor.version == "2020.3" or platform.model != "M1" and platform.model != "arm" %}
     - upm-ci package test --extra-create-project-arg="-upmNoDefaultPackages" --unity-version {{ editor.version }} --package-path com.unity.formats.fbx --enable-code-coverage --code-coverage-options 'generateHtmlReport;assemblyFilters:+Unity.Formats.Fbx.Editor,+Unity.Formats.Fbx.Runtime'
 {% else %}
 # Explicitly download arm64 Editor if on ARM devices
