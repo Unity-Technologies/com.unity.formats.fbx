@@ -33,7 +33,7 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
     - unity-config project add dependency com.autodesk.fbx@file:../../../External/com.autodesk.fbx/com.autodesk.fbx
     - unity-config project set registry {{ npm_registry }}
 # When the platform is Silicon Mac or ARM64 Win, explicitly download ARM64 vesion editor.
-{% if platform.model == "M1" and platform.model == "arm" %}
+{% if platform.model == "M1" or platform.model == "arm" %}
     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --wait --published-only
 {% else %}
     - unity-downloader-cli -u {{ editor.version }} -c Editor --wait --published-only
