@@ -21,13 +21,6 @@ clean_console_test_editors:
   - version: 2022.3
   - version: trunk
 
-mac_arm64_test_editors:
-  - version: 2022.3
-  - version: trunk
-
-win_arm64_test_editors:
-  - version: trunk
-
 promotion_test_editors:
   - version: 2020.3
 

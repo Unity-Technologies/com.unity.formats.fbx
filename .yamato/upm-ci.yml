@@ -140,12 +140,11 @@ test_api_win:
     image: {{ win_platform.image }}
     flavor: {{ win_platform.flavor }}
   commands:
-    - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
     - gsudo choco source add -n Unity -s https://artifactory.prd.it.unity3d.com/artifactory/api/nuget/unity-choco-local
     - gsudo choco install unity-config
     - unity-config project set registry candidates --project-path TestProjects/fbx-api-tests
     - unity-downloader-cli -u {{ all_test_editors[2].version }} -c Editor
-    - utr/utr.bat --suite=editor --editor-location=.Editor --testproject=TestProjects/fbx-api-tests --artifacts_path=artifacts --reruncount=0
+    - UnifiedTestRunner --suite=editor --editor-location=.Editor --testproject=TestProjects/fbx-api-tests --artifacts_path=artifacts --reruncount=0
   artifacts:
     logs:
       paths:
@@ -171,37 +170,20 @@ test_trigger_pr:
     - .yamato/upm-ci.yml#api_doc_validation
     - .yamato/upm-ci.yml#test_api_win
 {% for platform in platforms %}
-# On Silicon Mac, test in 2022.3 and trunk
-{% if platform.model == "M1" %}
-  {% for editor in mac_arm64_test_editors %}
-  # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
-    {% if use_autodesk_fbx_submodule_for_testing %}
+{% for editor in all_test_editors %}
+# If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
+{% if use_autodesk_fbx_submodule_for_testing %}
+  # Only run tests in trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
+  {% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
-    {% else %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-    {% endif %}
-  {% endfor %}
-# On ARM64 Windows, only test in trunk
-{% elsif platform.model == "arm" %}
-  {% for editor in win_arm64_test_editors %}
-  # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
-    {% if use_autodesk_fbx_submodule_for_testing %}
-    - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
-    {% else %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-    {% endif %}
-  {% endfor %}
-# On other platforms, test in all editor versions
+  {% endif %}
 {% else %}
-  {% for editor in all_test_editors %}
-  # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
-    {% if use_autodesk_fbx_submodule_for_testing %}
-    - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
-    {% else %}
+  # Only run tests in trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
+  {% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-    {% endif %}
-  {% endfor %}
+  {% endif %}
 {% endif %}
+{% endfor %}
 {% endfor %}
 # Only run clean console tests on Win for PR trigger
 {% for editor in clean_console_test_editors %}
@@ -230,24 +212,14 @@ publish_test_trigger:
         - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?
   dependencies:
     - .yamato/upm-ci.yml#pack
-#On Silicon Mac
 {% for platform in platforms %}
-{% if platform.model == "M1" %}
-  {% for editor in mac_arm64_test_editors %}
+{% for editor in all_test_editors %}
+# Only run tests in trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
+{% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-  {% endfor %}
-#On ARM64 Windows
-{% elsif platform.model == "arm" %}
-  {% for editor in win_arm64_test_editors %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-  {% endfor %}
-#On other platforms
-{% else %}
-  {% for editor in all_test_editors %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-  {% endfor %}
 {% endif %}
-{% endfor %}      
+{% endfor %}
+{% endfor %}  
 
 publish:
   name: Publish to Internal Registry
