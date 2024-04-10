@@ -36,6 +36,9 @@ clean_console_test_trigger:
   dependencies:
 {% for platform in platforms %}
 {% for editor in clean_console_test_editors %}
+# On ARM64 Windows, only run clean console test in trunk. On other platforms, run clean console tests in all editor versions.
+{% if editor.version == "trunk" or platform.model != "arm" %}
     - .yamato/clean-console-test.yml#clean_console_test_{{ platform.name }}_{{ editor.version }}
+{% endif %}
 {% endfor %}
 {% endfor %}
