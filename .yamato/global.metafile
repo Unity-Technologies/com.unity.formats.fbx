@@ -13,59 +13,32 @@
 all_test_editors:
   - version: 2020.3
   - version: 2021.3
-  - version: 2022.1
-  - version: 2022.2
+  - version: 2022.3
   - version: 2023.1
-  - version: trunk
 
 test_trigger_editors:
   - version: 2020.3
   - version: 2021.3
-  - version: 2022.1
+  - version: 2022.3
   - version: 2023.1
-  - version: trunk
 
 publish_trigger_editors:
   - version: 2020.3
   - version: 2021.3
-  - version: 2022.1
+  - version: 2022.3
   - version: 2023.1
-  - version: trunk
 
 promotion_test_editors:
   - version: 2020.3
   
 nightly_tested_releases:
-  - name: release_4_2
-    branch: release/4.2
-    nightly_editors: 
-      - version: 2019.4
-      - version: 2020.3
-      - version: 2021.3
-      - version: 2022.2
-  - name: release_4_1
-    branch: release/4.1
-    nightly_editors: 
-      - version: 2019.4
-      - version: 2020.3
-      - version: 2021.3
-      - version: 2022.1
   - name: release_5_0
     branch: release/5.0
     nightly_editors: 
       - version: 2020.3
       - version: 2021.3
-      - version: 2022.2
+      - version: 2022.3
       - version: 2023.1
-      - version: trunk
-  - name: master
-    branch: master
-    nightly_editors: 
-      - version: 2020.3
-      - version: 2021.3
-      - version: 2022.2
-      - version: 2023.1
-      - version: trunk
 
 win_platform: &win
   name: win
