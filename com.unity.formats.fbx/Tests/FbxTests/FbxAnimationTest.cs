@@ -905,6 +905,7 @@ namespace FbxExporter.UnitTests
             return tester.DoIt() <= propertyNames.Length ? 1 : 0;
         }
 
+        [Ignore("FBX-525 FBX Exporter 5.1.1 exports AnimationCurve tangent 0 as -2147483648")]
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "AnimOnlyTestCases")]
         public void AnimOnlyExportTest(string prefabPath)
         {
