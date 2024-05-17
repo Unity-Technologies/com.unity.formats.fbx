@@ -25,6 +25,7 @@ build_win_arm64:
   name: Build on win arm64
   agent:
     type: {{ win_arm64_platform.type }}
+    model: {{ win_arm64_platform.model }}
     image: {{ win_arm64_platform.image }}
     flavor: {{ win_arm64_platform.flavor}}
   commands:
