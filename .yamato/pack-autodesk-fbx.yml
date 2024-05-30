@@ -21,6 +21,25 @@ build_win:
       paths:
         - "External/com.autodesk.fbx/build-win/install/**"
 
+build_win_arm64:
+  name: Build on win arm64
+  agent:
+    type: {{ win_arm64_platform.type }}
+    model: {{ win_arm64_platform.model }}
+    image: {{ win_arm64_platform.image }}
+    flavor: {{ win_arm64_platform.flavor}}
+  commands:
+    # Load submodule and update it
+    - git submodule update --init --recursive
+    - git submodule update --remote
+    - |
+      cd External\com.autodesk.fbx
+      build_win.cmd
+  artifacts:
+    build:
+      paths:
+        - "External/com.autodesk.fbx/build-win/install/**"
+
 build_mac:
   name: Build on mac
   agent:
@@ -73,14 +92,10 @@ pack_autodesk_fbx:
     - upm-ci package pack --package-path External/com.autodesk.fbx/com.autodesk.fbx
   dependencies:
     - .yamato/pack-autodesk-fbx.yml#build_win
+    - .yamato/pack-autodesk-fbx.yml#build_win_arm64
     - .yamato/pack-autodesk-fbx.yml#build_mac
     - .yamato/pack-autodesk-fbx.yml#build_ubuntu
   artifacts:
-    build:
-      paths:
-        - "External/com.autodesk.fbx/build-ubuntu/install/**"
-        - "External/com.autodesk.fbx/build-mac/install/**"
-        - "External/com.autodesk.fbx/build-win/install/**"
     packages:
       paths:
         - "upm-ci~/packages/**"
