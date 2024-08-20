@@ -14,11 +14,12 @@ pack:
     - upm-ci package pack --package-path com.unity.formats.fbx
     - upm-pvp xray --packages "upm-ci~/packages/*.tgz" --results upm-ci~/xray
   # Require once without exemptions (and without Yamato reporting) to generate a new exemption file "new_exemptions.json"
-  # "new_exemptions.json" always contains all errors at the moment
+  # "new_exemptions.json" always contains all errors at the moment if there is any.
     - upm-pvp require "supported rme" --allow-missing --no-report --results upm-ci~/xray --exemptions "upm-ci~/xray/new_exemptions.json"
-  # Require once with exemptions (pvp_xray_exemptions.json) to determine job status and report errors
-  # If the job fails because of new errors which are not exempted by pvp_xray_exemptions.json and thought expected, we can use new_exemptions.json to replace the exemptions in pvp_xray_exemptions.json
-    - upm-pvp require "supported rme -PVP-41-1 ./pvp_xray_exemptions.json" --allow-missing --results "upm-ci~/xray"
+  # Require once to determine job status and report errors
+  # If the job fails because of errors which are expected, save the "new_exemptions.json" as "pvp_xray_exemptions.json"
+  # and run the command with exemptions, such as: upm-pvp require "supported rme ./pvp_xray_exemptions.json"
+    - upm-pvp require "supported rme" --allow-missing --results "upm-ci~/xray"
   artifacts:
     packages:
       paths:
