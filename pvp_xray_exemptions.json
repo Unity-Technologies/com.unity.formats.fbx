@@ -1,0 +1,13 @@
+{
+  "per_package": {
+    "com.unity.formats.fbx@5": {
+      "exempts": {
+        "PVP-150-1": {
+          "errors": [
+            "UnityEditor.Formats.Fbx.Exporter.ModelExporter: mixed block and inline content in <summary>; wrap inline content in <para>"
+          ]
+        }
+      }
+    }
+  }
+}
