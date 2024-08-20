@@ -63,7 +63,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// options are used when exporting the objects to the FBX file.
     /// </para>
     /// <para>
-    /// For information on using the ModelExporter class, see <a href="index.html">the Developer's Guide</a>.
+    /// For information on using the ModelExporter class, see
+    /// <a href="index.html">
+    /// the Developer's Guide
+    /// </a>.
     /// </para>
     /// </summary>
     public sealed class ModelExporter
