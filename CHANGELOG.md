@@ -1,5 +1,8 @@
 # Changes in Fbx Exporter
 
+## [Unreleased]
+- Fixed an exception occurring during hierarchy export when an LOD contains a null renderer.
+
 ## [5.1.1] - 2024-03-18
 ### Changed
 - Updated the FBX SDK bindings to 5.1.1.

@@ -3047,6 +3047,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     bool exportedRenderer = false;
                     foreach (var renderer in lod.renderers)
                     {
+                        if (renderer == null)
+                            continue;
                         // only export if parented under LOD group
                         if (renderer.transform.parent == unityGo.transform)
                         {

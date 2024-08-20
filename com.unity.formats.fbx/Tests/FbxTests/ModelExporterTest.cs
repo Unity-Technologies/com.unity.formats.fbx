@@ -1129,6 +1129,28 @@ namespace FbxExporter.UnitTests
 #endif
         }
 
+        [Test]
+        public void TestNullRendererLODExportTransformHierarchy()
+        {
+            // Create a GO with an LOD that contains a null renderer
+            var gameObject = new GameObject("TestObject");
+            var lodGroup = gameObject.AddComponent<LODGroup>();
+            var lods = new LOD[1];
+            lods[0] = new LOD(0.5f, new Renderer[] {null});
+            lodGroup.SetLODs(lods);
+
+            var fbxScene = FbxScene.Create(FbxManager.Create(), "TestScene");
+            var fbxNodeParent = FbxNode.Create(fbxScene, "ParentNode");
+            var modelExporter = new ModelExporter();
+
+            // Assert we don't raise an exception anymore
+            Assert.DoesNotThrow(() =>
+            {
+                modelExporter.ExportTransformHierarchy(gameObject, fbxScene, fbxNodeParent, 0, 1, Vector3.zero,
+                    ModelExporter.TransformExportType.Local, LODExportType.Lowest);
+            });
+        }
+
         /// <summary>
         /// Compares obj's children to the expected children in the hashset.
         /// Doesn't recurse through the children.
