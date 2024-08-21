@@ -57,7 +57,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     }
 
     /// <summary>
-    /// Use the ModelExporter class to export Unity GameObjects to an FBX file.
+    /// <para>Use the ModelExporter class to export Unity GameObjects to an FBX file.</para>
     /// <para>
     /// Use the ExportObject and ExportObjects methods. The default export
     /// options are used when exporting the objects to the FBX file.
@@ -4901,7 +4901,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Exports a list of GameObjects to an FBX file.
+        /// <para>Exports a list of GameObjects to an FBX file.</para>
         /// <para>
         /// Use the SaveFile panel to allow the user to enter a file name.
         /// </para>

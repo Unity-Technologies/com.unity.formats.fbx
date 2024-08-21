@@ -12,10 +12,21 @@ pack:
     - ./build.sh
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package pack --package-path com.unity.formats.fbx
+    - upm-pvp xray --packages "upm-ci~/packages/*.tgz" --results upm-ci~/xray
+  # Require once without exemptions (and without Yamato reporting) to generate a new exemption file "new_exemptions.json"
+  # "new_exemptions.json" always contains all errors at the moment if there is any.
+    - upm-pvp require "supported rme" --allow-missing --no-report --results upm-ci~/xray --exemptions "upm-ci~/xray/new_exemptions.json"
+  # Require once to determine job status and report errors
+  # If the job fails because of errors which are expected, save the "new_exemptions.json" as "pvp_xray_exemptions.json"
+  # and run the command with exemptions, such as: upm-pvp require "supported rme ./pvp_xray_exemptions.json"
+    - upm-pvp require "supported rme" --allow-missing --results "upm-ci~/xray"
   artifacts:
-   packages:
-     paths:
-       - "upm-ci~/**/*"
+    packages:
+      paths:
+        - "upm-ci~/**/*"
+    xray_results:
+      paths:
+        - "upm-ci~/xray/**/*"
 
 # The following job runs PVP API docs validation to validate all public APIs (classes and methods) have documentation.
 # For APIs which are exempted from API docs validartion, they are put in pvp_exemptions.json
