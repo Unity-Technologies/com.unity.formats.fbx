@@ -75,14 +75,20 @@ public static GameObject ConvertGameObject(GameObject go)
 ```
 
 
-## Runtime
+## FBX export at runtime
 
-The FBX SDK bindings can be executed during gameplay allowing import and export at runtime. Currently a custom importer/exporter needs to be written in order to do so, as the FBX Exporter is Editor only.
+By default, the FBX Exporter is Editor only. However, you can script a custom exporter to execute the FBX SDK bindings during gameplay to perform FBX exports at runtime.
 
->[!NOTE]
->The FBX SDK bindings are Editor only by default and will not be included in a build. In order for the package to be included in the build, add the FBXSDK_RUNTIME define to Edit > Project Settings... > Player > Other Settings > Scripting Define Symbols.
+### Prerequisite
 
-### Basic Exporter:
+The FBX SDK bindings are Editor only by default and are not included in builds.  
+To include the package in the build, add the `FBXSDK_RUNTIME` define to **Edit** > **Project Settings** > **Player** > **Other Settings** > **Scripting Define Symbols**.
+
+### Limitations
+
+* Only 64 bit Windows, MacOS and Ubuntu standalone player builds are supported.
+
+### Basic exporter example script
 
 ```
 using Autodesk.Fbx;
@@ -110,36 +116,3 @@ protected void ExportScene (string fileName)
     }
 }
 ```
-
-### Basic Importer:
-
-```
-using Autodesk.Fbx;
-using UnityEngine;
-using UnityEditor;
-
-protected void ImportScene (string fileName)
-{
-    using(FbxManager fbxManager = FbxManager.Create ()){
-        // configure IO settings.
-        fbxManager.SetIOSettings (FbxIOSettings.Create (fbxManager, Globals.IOSROOT));
-
-        // Import the scene to make sure file is valid
-        using (FbxImporter importer = FbxImporter.Create (fbxManager, "myImporter")) {
-
-            // Initialize the importer.
-            bool status = importer.Initialize (fileName, -1, fbxManager.GetIOSettings ());
-
-            // Create a new scene so it can be populated by the imported file.
-            FbxScene scene = FbxScene.Create (fbxManager, "myScene");
-
-            // Import the contents of the file into the scene.
-            importer.Import (scene);
-        }
-    }
-}
-```
-
-### Limitations
-
-* Only 64 bit Windows, MacOS and Ubuntu standalone player builds are supported
