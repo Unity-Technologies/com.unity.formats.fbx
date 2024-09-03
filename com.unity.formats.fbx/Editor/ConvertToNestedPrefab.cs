@@ -35,7 +35,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
     }
 
     /// <summary>
-    /// Class for converting an exported FBX to a Prefab Variant.
+    /// <para>Class for converting an exported FBX to a Prefab Variant.</para>
+    /// <para>See the <a href="index.html#example-scripts">example script</a> on the API documentation homepage.</para>
     /// </summary>
     public static class ConvertToNestedPrefab
     {

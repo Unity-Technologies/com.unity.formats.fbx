@@ -1,16 +1,33 @@
-# Developer’s Guide
+# FBX Exporter scripting API reference
 
-As a developer, you have access to the FBX Exporter from C# scripting. You can use the basic API by providing a single GameObject or a list of GameObjects.
+The FBX Exporter package includes an API that allows to create C# scripts and applications to handle FBX export processes based on your custom needs.
 
-## Managing export settings
+## Get started
 
-To use custom export settings, you can create and pass an instance of `ExportModelOptions` class with modified settings.
+This section points out the base elements to know to get started with the FBX Exporter API.
 
-If you don't pass any export settings, Unity uses default export settings to export the GameObjects to the FBX file.
+### Use cases
 
-## Calling the FBX Exporter
+* To export Unity GameObjects to FBX, use the [`ModelExporter` class](xref:UnityEditor.Formats.Fbx.Exporter.ModelExporter).  
+  Depending on the method, you can specify a single GameObject or a list of GameObjects to export to FBX.
 
-You can call the FBX Exporter from C# using methods found in the [UnityEditor.Formats.Fbx.Exporter](UnityEditor.Formats.Fbx.Exporter.html) namespace, for example:
+* To convert a GameObject hierarchy to an FBX Prefab Variant, use the The `ConvertToNestedPrefab` class.
+
+### Export settings
+
+* To use custom export settings, you can create and pass an instance of `ExportModelOptions` class with modified settings.
+* If you don't pass any export settings, Unity uses default export settings.
+
+### Underlying concepts and features
+
+For more details about the FBX package concepts and features, refer to the user manual pages:
+* [FBX Exporter features and behaviors](../manual/features-behaviors.html)
+* [Export models and animations to FBX](../manual/export.html)
+* [Work with FBX Prefab Variants](../manual/prefab-variants.html)
+
+## Example scripts
+
+### Export to FBX
 
 ```
 using System.IO;
@@ -34,13 +51,7 @@ public static void ExportGameObjects(Object[] objects)
 }
 ```
 
-## Creating an FBX Prefab Variant
-
-You can convert a GameObject hierarchy to an [FBX Prefab Variant](../manual/prefab-variants.html) using the API.
-
-The principle is to export the GameObject hierarchy to an FBX and then convert the exported FBX Model Prefab into a Prefab Variant while maintaining the components from the original hierarchy.
-
-For example:
+### Create an FBX Prefab Variant
 
 ```
 using System.IO;
