@@ -1,3 +1,7 @@
+---
+uid: features-behaviors
+---
+
 # FBX Exporter features and behaviors
 
 Reference and guidelines to better understand the FBX export process and expectable results.
