@@ -4,7 +4,11 @@ uid: api_index
 
 # FBX Exporter scripting API
 
-The FBX Exporter package includes an API that allows to create C# scripts and applications to handle FBX export processes based on your custom needs.
+The FBX Exporter package includes an API that allows you to write C# scripts and applications to handle FBX export processes based on your custom needs.
+
+> [!NOTE]
+> While technically possible, it's not recommended to use the API for FBX import, as it wasn't designed for such a use case.
+
 
 ## Get started
 
