@@ -15,4 +15,4 @@ The FBX Exporter package enables round-trip workflows between Unity and 3D model
 | [Integrate Unity with 3D modeling software](integration.md) | Use the Unity Integration tool in Autodesk® Maya®, Autodesk® Maya LT™ or Autodesk® 3ds Max® to import and export FBX files directly to and from Unity without having to specify filenames, select objects, or set FBX importer or exporter settings. |
 | [Project Settings](ref-project-settings.md) | Manage the Unity Editor project settings dedicated to the FBX Exporter package features. |
 | [Known issues and limitations](knownissues.md) | See the list of known issues and limitations that you might experience with the FBX Exporter package, along with some workarounds. |
-| [API samples and reference](../api/index.html) | Get an introduction to scripting with the FBX Exporter API, and access the API reference documentation. |
+| [API samples and reference](xref:api_index) | Get an introduction to scripting with the FBX Exporter API, and access the API reference documentation. |

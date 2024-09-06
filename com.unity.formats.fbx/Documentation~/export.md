@@ -1,3 +1,7 @@
+---
+uid: export
+---
+
 # Export models and animations to FBX
 
 Export GameObjects from the Hierarchy, or animation clips from Timeline, to FBX.

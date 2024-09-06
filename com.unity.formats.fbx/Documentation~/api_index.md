@@ -1,16 +1,47 @@
-# Developer’s Guide
+---
+uid: api_index
+---
 
-As a developer, you have access to the FBX Exporter from C# scripting. You can use the basic API by providing a single GameObject or a list of GameObjects.
+# FBX Exporter scripting API
 
-## Managing export settings
+The FBX Exporter package includes an API that allows you to write C# scripts and applications to handle FBX export processes based on your custom needs.
 
-To use custom export settings, you can create and pass an instance of `ExportModelOptions` class with modified settings.
+> [!NOTE]
+> While technically possible, it's not recommended to use the API for FBX import, as it wasn't designed for such a use case.
 
-If you don't pass any export settings, Unity uses default export settings to export the GameObjects to the FBX file.
 
-## Calling the FBX Exporter
+## Get started
 
-You can call the FBX Exporter from C# using methods found in the [UnityEditor.Formats.Fbx.Exporter](UnityEditor.Formats.Fbx.Exporter.html) namespace, for example:
+This section points out the base elements you need to know to get started with the FBX Exporter API. [Example scripts](#example-scripts) and [additional resources](#additional-resources) are also provided below.
+
+### Export to FBX
+
+To export Unity GameObjects to FBX, use the [`ModelExporter` class](xref:UnityEditor.Formats.Fbx.Exporter.ModelExporter).  
+Depending on the method, you can specify a single GameObject or a list of GameObjects to export to FBX.
+
+### Convert to FBX Prefab Variant
+
+To convert a GameObject hierarchy to an FBX Prefab Variant, use the The [`ConvertToNestedPrefab` class](xref:UnityEditor.Formats.Fbx.Exporter.ConvertToNestedPrefab).
+
+### Use custom export settings
+
+To use custom export settings, create and pass an instance of [`ExportModelOptions` class](xref:UnityEditor.Formats.Fbx.Exporter.ExportModelOptions) with modified settings. If you don't pass any export settings, Unity uses default export settings.
+
+### Export FBX at runtime
+
+By default, the FBX Exporter is Editor only and the FBX SDK bindings are not included in builds. To enable FBX export at runtime, you have to perform some Editor configuration and custom scripting.
+
+1. Include the FBX SDK bindings in the build: go to **Edit** > **Project Settings** > **Player** > **Other Settings** > **Script Compilation** > **Scripting Define Symbols** and add `FBXSDK_RUNTIME` to the list.
+1. Script a custom exporter like in the [basic example](#runtime-fbx-exporter) provided below.
+
+> [!NOTE]
+> Runtime FBX export only works with 64 bit Windows, MacOS and Ubuntu standalone player builds.
+
+## Example scripts
+
+### FBX export
+
+Use this script as an example to export GameObjects to FBX files within the Unity Editor.
 
 ```
 using System.IO;
@@ -34,13 +65,9 @@ public static void ExportGameObjects(Object[] objects)
 }
 ```
 
-## Creating an FBX Prefab Variant
+### FBX Prefab Variant conversion
 
-You can convert a GameObject hierarchy to an [FBX Prefab Variant](../manual/prefab-variants.html) using the API.
-
-The principle is to export the GameObject hierarchy to an FBX and then convert the exported FBX Model Prefab into a Prefab Variant while maintaining the components from the original hierarchy.
-
-For example:
+Use this script as an example to convert a GameObject hierarchy to an FBX Prefab Variant within the Unity Editor.
 
 ```
 using System.IO;
@@ -63,15 +90,12 @@ public static GameObject ConvertGameObject(GameObject go)
 }
 ```
 
+### Runtime FBX exporter
 
-## Runtime
+Use this script as an example to export FBX at runtime.
 
-The FBX SDK bindings can be executed during gameplay allowing import and export at runtime. Currently a custom importer/exporter needs to be written in order to do so, as the FBX Exporter is Editor only.
-
->[!NOTE]
->The FBX SDK bindings are Editor only by default and will not be included in a build. In order for the package to be included in the build, add the FBXSDK_RUNTIME define to Edit > Project Settings... > Player > Other Settings > Scripting Define Symbols.
-
-### Basic Exporter:
+> [!NOTE]
+> Before you move forward with this scenario, review the [specific requirements and implications](#export-fbx-at-runtime) about using the FBX Exporter at runtime.
 
 ```
 using Autodesk.Fbx;
@@ -100,35 +124,9 @@ protected void ExportScene (string fileName)
 }
 ```
 
-### Basic Importer:
+## Additional resources
 
-```
-using Autodesk.Fbx;
-using UnityEngine;
-using UnityEditor;
-
-protected void ImportScene (string fileName)
-{
-    using(FbxManager fbxManager = FbxManager.Create ()){
-        // configure IO settings.
-        fbxManager.SetIOSettings (FbxIOSettings.Create (fbxManager, Globals.IOSROOT));
-
-        // Import the scene to make sure file is valid
-        using (FbxImporter importer = FbxImporter.Create (fbxManager, "myImporter")) {
-
-            // Initialize the importer.
-            bool status = importer.Initialize (fileName, -1, fbxManager.GetIOSettings ());
-
-            // Create a new scene so it can be populated by the imported file.
-            FbxScene scene = FbxScene.Create (fbxManager, "myScene");
-
-            // Import the contents of the file into the scene.
-            importer.Import (scene);
-        }
-    }
-}
-```
-
-### Limitations
-
-* Only 64 bit Windows, MacOS and Ubuntu standalone player builds are supported
+For more details about the FBX package concepts and features, refer to the user manual pages:
+* [FBX Exporter features and behaviors](xref:features-behaviors)
+* [Export models and animations to FBX](xref:export)
+* [Work with FBX Prefab Variants](xref:prefab-variants)

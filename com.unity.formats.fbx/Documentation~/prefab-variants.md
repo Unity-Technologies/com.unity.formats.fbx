@@ -1,3 +1,7 @@
+---
+uid: prefab-variants
+---
+
 # Work with FBX Prefab Variants
 
 Easily convert GameObjects and Prefab assets to Prefab Variants based on FBX files to enable a convenient FBX model workflow between Unity and your 3D modeling application.
