@@ -275,6 +275,9 @@ publish_dry_run:
     artifacts:
       paths:
         - "upm-ci~/packages/*.tgz"
+    xray_results:
+      paths:
+        - "upm-ci~/xray/**/*"
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#publish_test_trigger
