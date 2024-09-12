@@ -4,7 +4,6 @@ Use the FBX Export Project Settings to:
 * Manage the display of the options windows when exporting to FBX or converting to Model Prefab Variant.
 * Change the default option values for FBX File export and Model Prefab Variant conversion.
 * Install the [Unity Integration](integration.md) for Autodesk® Maya®, Autodesk® Maya LT™, or Autodesk® 3ds Max® and manage the related integration settings.
-* Repair FBX Prefab components if you were using version 1.3.0f1 or earlier of the FBX Exporter package.
 
 ![](images/FBXExporter_FBXExportSettingsWindow.png)
 
@@ -58,9 +57,3 @@ Manage the default values of the [Convert Options window](ref-convert-options.md
 | **Keep Open** | Enable this option to keep the selected 3D modeling software open after installing it. |
 | **Hide Native Menu** | Enable this option to hide the native **Send to Unity** menu in Autodesk® Maya® and Autodesk® Maya LT™. |
 | **Install Unity Integration** | Select this button to install [Unity Integration](integration.md) for the selected **3D Application**. |
-
-## FBX Prefab Component Updater
-
-| Property | Function |
-| :------- | :------- |
-| **Run Component Updater** | Runs a script that repairs any missing FbxPrefab components if you were using version 1.3.0f1 or earlier of the FBX Exporter package.<br /><br />**Note:** This functionality is being deprecated. If you need to use it, refer to the [previous version](https://docs.unity3d.com/Packages/com.unity.formats.fbx@4.2/manual/assetstoreUpgrade.html). |
