@@ -19,7 +19,7 @@ pack:
   # Require once to determine job status and report errors
   # If the job fails because of errors which are expected, save the "new_exemptions.json" as "pvp_xray_exemptions.json"
   # and run the command with exemptions, such as: upm-pvp require "supported rme ./pvp_xray_exemptions.json"
-    - upm-pvp require "supported rme" --allow-missing --results "upm-ci~/xray"
+    - upm-pvp require "supported rme -PVP-41-1" --allow-missing --results "upm-ci~/xray"
   artifacts:
     packages:
       paths:
@@ -262,6 +262,9 @@ publish_dry_run:
   variables:
     UPMCI_ENABLE_PACKAGE_SIGNING: 1
   commands:
+    # upm-pvp commands to make sure the package comply with APV 2.0
+    - upm-pvp xray --packages "upm-ci~/packages/*.tgz" --results upm-ci~/xray
+    - upm-pvp require "supported rme" --allow-missing --results "upm-ci~/xray"
     - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package publish --package-path com.unity.formats.fbx --dry-run
   triggers:
@@ -272,6 +275,9 @@ publish_dry_run:
     artifacts:
       paths:
         - "upm-ci~/packages/*.tgz"
+    xray_results:
+      paths:
+        - "upm-ci~/xray/**/*"
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#publish_test_trigger
