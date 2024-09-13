@@ -39,7 +39,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             get { return m_innerEditor; }
             set { m_innerEditor = value; }
         }
-#if UNITY_2018_1_OR_NEWER
+#if UNITY_2018_1_OR_NEWER && !UNITY_2023_1_OR_NEWER
         private FbxExportPresetSelectorReceiver m_receiver;
         protected FbxExportPresetSelectorReceiver Receiver
         {
@@ -249,7 +249,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected virtual void OnEnable()
         {
-            #if UNITY_2018_1_OR_NEWER
+            #if UNITY_2018_1_OR_NEWER && !UNITY_2023_1_OR_NEWER
             InitializeReceiver();
             #endif
             m_showOptions = true;
@@ -267,7 +267,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             this.SetFilename(filename);
         }
 
-        #if UNITY_2018_1_OR_NEWER
+        #if UNITY_2018_1_OR_NEWER && !UNITY_2023_1_OR_NEWER
         protected void InitializeReceiver()
         {
             if (!Receiver)
@@ -345,7 +345,15 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         protected virtual void CreateCustomUI() {}
 
-        #if UNITY_2018_1_OR_NEWER
+        #if UNITY_2023_1_OR_NEWER
+        protected abstract void ShowPresetReceiver();
+
+        protected void ShowPresetReceiver(UnityEngine.Object target)
+        {
+            PresetSelector.ShowSelector(new[] {target}, null, true);
+        }
+
+        #elif UNITY_2018_1_OR_NEWER
         protected abstract void ShowPresetReceiver();
 
         protected void ShowPresetReceiver(UnityEngine.Object target)
@@ -353,9 +361,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             InitializeReceiver();
             Receiver.SetTarget(target);
             Receiver.SetInitialValue(new Preset(target));
-#pragma warning disable CS0618 // Suppress the warning about obsolete API "PresetSelector.ShowSelector" FBX-452
             UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, Receiver);
-#pragma warning restore CS0618 // Restore the warning
         }
 
         #endif
