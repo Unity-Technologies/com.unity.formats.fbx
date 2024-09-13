@@ -3,6 +3,7 @@
 ## [Unreleased]
 - Fixed an exception occurring during hierarchy export when an LOD contains a null renderer.
 - Removed the deprecated Component Updater from FBX Export Project Settings.
+- Fixed Presets creation in Unity 2023.1+.
 
 ## [5.1.1] - 2024-03-18
 ### Changed
