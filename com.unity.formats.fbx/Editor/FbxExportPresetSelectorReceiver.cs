@@ -1,4 +1,5 @@
-#if UNITY_2018_1_OR_NEWER
+#if UNITY_2018_1_OR_NEWER && !UNITY_2023_1_OR_NEWER
+
 using UnityEditor.Presets;
 
 namespace UnityEditor.Formats.Fbx.Exporter
@@ -6,9 +7,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
     internal delegate void SelectionChangedDelegate();
     internal delegate void DialogClosedDelegate();
 
-#pragma warning disable CS0618 // Suppress the warning about obsolete class "PresetSelectorReceiver" FBX-452
     internal class FbxExportPresetSelectorReceiver : PresetSelectorReceiver
-#pragma warning restore CS0618 // Restore the warning
+
     {
         UnityEngine.Object m_Target;
         Preset m_InitialValue;
