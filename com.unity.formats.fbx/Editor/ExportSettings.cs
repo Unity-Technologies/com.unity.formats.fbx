@@ -148,10 +148,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             public static GUIContent InstallIntegrationContent = new GUIContent(
                 "Install Unity Integration",
                 "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
-            public static GUIContent RepairMissingScripts = new GUIContent(
-                "Run Component Updater",
-                "If FBX exporter version 1.3.0f1 or earlier was previously installed, then links to the FbxPrefab component will need updating.\n" +
-                "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
             public static GUIContent DisplayOptionsWindow = new GUIContent(
                 "Display Options Window",
                 "Show the Convert dialog when converting to an FBX Prefab Variant");
@@ -427,45 +423,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUI.EndDisabledGroup();
 
             EditorGUILayout.Space();
-
-            EditorGUI.indentLevel--;
-            EditorGUILayout.LabelField("FBX Prefab Component Updater", EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
-
-            EditorGUILayout.Space();
-
-            EditorGUI.BeginDisabledGroup(!isSingletonInstance);
-            if (GUILayout.Button(Style.RepairMissingScripts))
-            {
-                var componentUpdater = new UnityEditor.Formats.Fbx.Exporter.RepairMissingScripts();
-                var filesToRepairCount = componentUpdater.AssetsToRepairCount;
-                var dialogTitle = "FBX Prefab Component Updater";
-                if (filesToRepairCount > 0)
-                {
-                    bool result = UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
-                        string.Format("Found {0} prefab(s) and/or scene(s) with components requiring update.\n\n" +
-                            "If you choose 'Go Ahead', the FbxPrefab components in these assets " +
-                            "will be automatically updated to work with the latest FBX exporter.\n" +
-                            "You should make a backup before proceeding.", filesToRepairCount),
-                        "I Made a Backup. Go Ahead!", "No Thanks");
-                    if (result)
-                    {
-                        componentUpdater.ReplaceGUIDInTextAssets();
-                    }
-                    else
-                    {
-                        var assetsToRepair = componentUpdater.GetAssetsToRepair();
-                        Debug.LogFormat("Failed to update the FbxPrefab components in the following files:\n{0}", string.Join("\n", assetsToRepair));
-                    }
-                }
-                else
-                {
-                    UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
-                        "Couldn't find any prefabs or scenes that require updating", "Ok");
-                }
-            }
-            EditorGUI.EndDisabledGroup();
-            EditorGUI.indentLevel--;
 
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
