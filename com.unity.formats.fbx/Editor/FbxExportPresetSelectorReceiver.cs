@@ -8,7 +8,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
     internal delegate void DialogClosedDelegate();
 
     internal class FbxExportPresetSelectorReceiver : PresetSelectorReceiver
-
     {
         UnityEngine.Object m_Target;
         Preset m_InitialValue;

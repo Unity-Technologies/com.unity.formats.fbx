@@ -350,8 +350,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
         protected void ShowPresetReceiver(UnityEngine.Object target)
         {
-            PresetSelector.ShowSelector(new []{target}, null, true);
+            PresetSelector.ShowSelector(new[] {target}, null, true);
         }
+
         #elif UNITY_2018_1_OR_NEWER
         protected abstract void ShowPresetReceiver();
 
@@ -362,6 +363,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             Receiver.SetInitialValue(new Preset(target));
             UnityEditor.Presets.PresetSelector.ShowSelector(target, null, true, Receiver);
         }
+
         #endif
 
         protected Transform TransferAnimationSource
