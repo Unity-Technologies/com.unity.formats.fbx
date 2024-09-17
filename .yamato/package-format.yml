@@ -8,8 +8,8 @@
      image: {{ mac_platform.image }}
      flavor: {{ mac_platform.flavor }}
    commands:
-     - git config --global user.name "noreply@unity3d.com"
-     - git config --global user.email "noreply@unity3d.com"
+     - git config --global user.name "FBX Exporter CI"
+     - git config --global user.email $YAMATO_OWNER_EMAIL
      - git checkout $GIT_BRANCH
      - git pull origin $GIT_BRANCH # In case the job was not run on the latest commit, attempt to get it. There may be situations with merge conflicts, in that case wait for everyone to push their changes and then only run the formatting job on HEAD.
      - brew tap --force-auto-update unity/unity git@github.cds.internal.unity3d.com:unity/homebrew-unity.git
