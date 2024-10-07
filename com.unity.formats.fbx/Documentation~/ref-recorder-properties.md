@@ -33,10 +33,7 @@ Define the source and the content of your recording.
 
 ### Transfer Animation
 
-| Property | Function |
-| :--- | :--- |
-| **Source** | The object to transfer the transform animation from. <br/><br/>**Note:**<br/>• **Source** must be an ancestor of **Destination**.<br/>• **Source** may be an ancestor of the selected object. |
-| **Destination** | The object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between **Source** and **Destination** as well as the animation on the **Source** itself. |
+[!INCLUDE [transfer-animation](includes/transfer-animation.md)]
 
 ## Output File
 

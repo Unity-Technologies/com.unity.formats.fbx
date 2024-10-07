@@ -13,10 +13,7 @@ Use the **Export Options** window to [export a GameObject from the Hierarchy](ex
 
 ## Transfer Animation
 
-| Property | Function |
-| :--- | :--- |
-| **Source** | Transfer the transform animation from this object to the **Destination** transform. <br/><br/>**NOTES:**<br/> - **Source** must be an ancestor of **Destination**<br/> - **Source** may be an ancestor of the selected object. |
-| **Destination** | Which object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between **Source** and **Destination** as well as the animation on the Source itself. |
+[!INCLUDE [transfer-animation](includes/transfer-animation.md)]
 
 ## Options
 
