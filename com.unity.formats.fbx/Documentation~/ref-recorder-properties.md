@@ -22,6 +22,7 @@ Define the source and the content of your recording.
 | | Lossy | Applies an overall keyframe reduction. The Recorder removes animation keys based on a relative tolerance of 0.5 percent, to overall simplify the curve. This reduces the file size but directly affects the original curve accuracy. |
 | | Lossless | Applies keyframe reduction to constant curves only. The Recorder removes all unnecessary keys when the animation curve is a straight line, but keeps all recorded keys as long as the animation is not constant. |
 | | Disabled | Disables the animation compression. The Recorder saves all animation keys throughout the recording, even when the animation curve is a straight line. This might result in large files and slow playback. |
+| **Render Frame Step** || Available when you set **Playback** to **Variable**. Specifies the number of rendered frames to discard between recorded frames. The duration of the discarded frames is preserved, reducing frames per second. Example: if the value is 2, every second frame is discarded, but the duration of the recording remains the same. |
 
 ## Output Format
 
@@ -32,10 +33,7 @@ Define the source and the content of your recording.
 
 ### Transfer Animation
 
-| Property | Function |
-| :--- | :--- |
-| **Source** | The object to transfer the transform animation from. <br/><br/>**Note:**<br/>• **Source** must be an ancestor of **Destination**.<br/>• **Source** may be an ancestor of the selected object. |
-| **Destination** | The object to transfer the transform animation to.<br/><br/>This object receives the transform animation on objects between **Source** and **Destination** as well as the animation on the **Source** itself. |
+[!INCLUDE [transfer-animation](includes/transfer-animation.md)]
 
 ## Output File
 
