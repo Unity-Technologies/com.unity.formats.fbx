@@ -78,8 +78,8 @@ generate_documentation:
 
 {% for editor in all_test_editors %}
 {% for platform in platforms %}
-# If on "win_arm64" platform, only run tests in "trunk".
-{% if platform.name != "win_arm64" or editor.version == "trunk" %}
+# If on "win_arm64" platform, only run tests in "6000.0" and "trunk".
+{% if platform.name != "win_arm64" or editor.version == "6000.0" or editor.version == "trunk" %}
 test_{{ platform.name }}_{{ editor.version }}:
   name : Test version {{ editor.version }} on {{ platform.name }}
   agent:
@@ -182,13 +182,13 @@ test_trigger_pr:
 {% for editor in all_test_editors %}
 # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
 {% if use_autodesk_fbx_submodule_for_testing %}
-  # Only run tests in trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
-  {% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
+  # Only run tests in 6000.0 and trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
+  {% if editor.version == "6000.0" or editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/package-test-utr.yml#test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule
   {% endif %}
 {% else %}
-  # Only run tests in trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
-  {% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
+  # Only run tests in 6000.0 and trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
+  {% if editor.version == "6000.0" or editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
   {% endif %}
 {% endif %}
@@ -223,8 +223,8 @@ publish_test_trigger:
     - .yamato/upm-ci.yml#pack
 {% for platform in platforms %}
 {% for editor in all_test_editors %}
-# Only run tests in trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
-{% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
+# Only run tests in 6000.0 and trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
+{% if editor.version == "6000.0" or editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}

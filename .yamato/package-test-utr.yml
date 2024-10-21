@@ -5,8 +5,8 @@ npm_registry: "https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/
 
 {% for editor in all_test_editors %}
 {% for platform in platforms %}
-# If on "win_arm64" platform, only run tests in "trunk".
-{% if platform.name != "win_arm64" or editor.version == "trunk" %}
+# If on "win_arm64" platform, only run tests in "6000.0" or "trunk".
+{% if platform.name != "win_arm64" or editor.version == "6000.0" or editor.version == "trunk" %}
 test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
   name : Test version {{ editor.version }} on {{ platform.name }} using autodesk.fbx submodule
   agent:
