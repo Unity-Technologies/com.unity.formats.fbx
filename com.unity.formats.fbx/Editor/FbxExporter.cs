@@ -695,6 +695,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 fbxTexture.SetWrapMode(GetWrapModeFromUnityWrapMode(wrapModeU, unityMaterial.name, unityPropName),
                     GetWrapModeFromUnityWrapMode(wrapModeV, unityMaterial.name, unityPropName));
                 TextureMap.Add(tuple, fbxTexture);
+                if (!ExportSettings.DisableAbsolutePathWarningProperty)
+                    Debug.LogWarning(
+                        "The source object contains a reference to a texture file. As a consequence, the exported FBX will contain " +
+                        "an absolute reference to this texture file.\nIf you plan to share this FBX asset, double check your path does " +
+                        "not contain sensitive information.\nThis warning can be disabled in the Fbx Export section of your Project Settings." +
+                        $"\nTexture path: {textureSourceFullPath}");
             }
             fbxTexture.ConnectDstProperty(fbxMaterialProperty);
 
