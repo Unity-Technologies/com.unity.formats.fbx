@@ -296,6 +296,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUI.indentLevel++;
 
             GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Verbose logging",
+                "If enabled, logging will be more verbose."), GUILayout.Width(LabelWidth));
+            exportSettings.VerboseProperty = EditorGUILayout.Toggle(exportSettings.VerboseProperty);
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(new GUIContent("Disable Texture Path Warning",
                 "If enabled, disable absolute path warnings"), GUILayout.Width(LabelWidth));
             exportSettings.DisableAbsolutePathWarningProperty = EditorGUILayout.Toggle(exportSettings.DisableAbsolutePathWarningProperty);
