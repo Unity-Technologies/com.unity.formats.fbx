@@ -4043,8 +4043,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // This needs to be done last so that everything is converted properly.
                     FbxAxisSystem.MayaYUp.DeepConvertScene(fbxScene);
 
-					// Destroy Url and LastSavedUrl properties before exporting
-					// This will avoid having useless absolute paths in the DocumentUrl and SrcDocumentUrl fields of the exported file
+                    // Destroy Url and LastSavedUrl properties before exporting
+                    // This will avoid having useless absolute paths in the DocumentUrl and SrcDocumentUrl fields of the exported file
                     fbxSceneInfo.Url.Destroy();
                     fbxSceneInfo.LastSavedUrl.Destroy();
 
