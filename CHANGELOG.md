@@ -2,9 +2,9 @@
 
 ## [Unreleased]
 ### Added
-- Added destruction of Url and LastUrl FBXScene properties before export
-- Added a warning about absolute paths when exporting with Texture file references and a project setting to disable it
-- Added a project setting to activate verbose logging mode
+- Added destruction of Url and LastUrl FBXScene properties before export.
+- Added a warning about absolute paths when exporting with Texture file references, with an option in Project Settings to disable this warning.
+- Added an option in Project Settings to activate verbose logging mode.
 
 ### Removed
 - Removed the deprecated Component Updater from FBX Export Project Settings.
