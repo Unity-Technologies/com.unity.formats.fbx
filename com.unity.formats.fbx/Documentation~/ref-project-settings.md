@@ -11,9 +11,11 @@ Use the FBX Export Project Settings to:
 
 ## Export Options
 
-| Property | Function |
-| :------- | :------- |
-| **Display Options Window** | Enable this option to display the **Export Options** or **Convert Options** window before letting the FBX Exporter proceed when you respectively select the **Export To FBX** or **Convert To FBX Prefab Variant** menu action.<br /><br />If you disable this option, the FBX Exporter directly converts or exports without asking. It uses the last path you specified and a filename based on the selected GameObject's name. |
+| Property                           | Function                                                                                                                                                                                                                                                                                                                                                                                                                         |
+|:-----------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Verbose logging**                | Enable this option to get more debugging messages in the console.                                                                                                                                                                                                                                                                                                                                                                |
+| **Disable Texture Path Warning**   | Enable this option to suppress a specific console message that warns about the presence of any absolute path in the exported FBX file when the export includes references to texture files.<br/><br/>This warning informs users that such absolute paths may contain sensitive information that should not be shared and allows them to take corrective action if necessary.                                   |
+| **Display Options Window**         | Enable this option to display the **Export Options** or **Convert Options** window before letting the FBX Exporter proceed when you respectively select the **Export To FBX** or **Convert To FBX Prefab Variant** menu action.<br /><br />If you disable this option, the FBX Exporter directly converts or exports without asking. It uses the last path you specified and a filename based on the selected GameObject's name. |
 
 ### FBX File Options
 

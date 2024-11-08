@@ -695,6 +695,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 fbxTexture.SetWrapMode(GetWrapModeFromUnityWrapMode(wrapModeU, unityMaterial.name, unityPropName),
                     GetWrapModeFromUnityWrapMode(wrapModeV, unityMaterial.name, unityPropName));
                 TextureMap.Add(tuple, fbxTexture);
+                if (!ExportSettings.DisableAbsolutePathWarningProperty)
+                    Debug.LogWarning(
+                        "The source object contains a reference to a texture file. As a consequence, the exported FBX will contain " +
+                        "an absolute reference to this texture file.\nIf you plan to share this FBX asset, make sure your path does " +
+                        "not contain sensitive information.\nYou can disable this warning in the Fbx Export section of your Project Settings." +
+                        $"\nTexture path: {textureSourceFullPath}");
             }
             fbxTexture.ConnectDstProperty(fbxMaterialProperty);
 
@@ -4036,6 +4042,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // https://forums.autodesk.com/t5/fbx-forum/get-confused-with-fbxaxissystem-convertscene/td-p/4265472
                     // This needs to be done last so that everything is converted properly.
                     FbxAxisSystem.MayaYUp.DeepConvertScene(fbxScene);
+
+                    // Destroy Url and LastSavedUrl properties before exporting
+                    // This will avoid having useless absolute paths in the DocumentUrl and SrcDocumentUrl fields of the exported file
+                    fbxSceneInfo.Url.Destroy();
+                    fbxSceneInfo.LastSavedUrl.Destroy();
 
                     // Export the scene to the file.
                     status = fbxExporter.Export(fbxScene);

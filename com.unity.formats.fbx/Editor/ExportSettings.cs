@@ -114,7 +114,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     internal class ExportSettingsEditor : UnityEditor.Editor
     {
         Vector2 scrollPos = Vector2.zero;
-        const float LabelWidth = 180;
+        const float LabelWidth = 205;
         const float SelectableLabelMinWidth = 90;
         const float BrowseButtonWidth = 25;
         const float FieldOffset = 18;
@@ -294,6 +294,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Verbose logging",
+                "If enabled, logging will be more verbose."), GUILayout.Width(LabelWidth));
+            exportSettings.VerboseProperty = EditorGUILayout.Toggle(exportSettings.VerboseProperty);
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Disable Texture Path Warning",
+                "If enabled, disable absolute path warnings"), GUILayout.Width(LabelWidth));
+            exportSettings.DisableAbsolutePathWarningProperty = EditorGUILayout.Toggle(exportSettings.DisableAbsolutePathWarningProperty);
+            GUILayout.EndHorizontal();
+
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(Style.DisplayOptionsWindow, GUILayout.Width(LabelWidth));
             exportSettings.DisplayOptionsWindow = EditorGUILayout.Toggle(
@@ -609,6 +622,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             get { return Verbose; }
             set { Verbose = value; }
+        }
+
+        [SerializeField]
+        private bool DisableAbsolutePathWarning = false;
+        public bool DisableAbsolutePathWarningProperty
+        {
+            get { return DisableAbsolutePathWarning; }
+            set { DisableAbsolutePathWarning = value; }
         }
 
         private static string DefaultIntegrationSavePath
