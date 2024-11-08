@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [Unreleased]
+## [5.1.2] - 2024-11-12
 ### Added
 - Added destruction of Url and LastUrl FBXScene properties before export.
 - Added a warning about absolute paths when exporting with Texture file references, with an option in Project Settings to disable this warning.
