@@ -437,6 +437,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             EditorGUILayout.Space();
 
+            EditorGUI.indentLevel--;
+
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
             GUILayout.EndScrollView();
