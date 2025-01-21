@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [5.1.3] - 2025-01-20
+### Fixed
+- Fixed an indentation issue in FBX Exporter Project Settings that was preventing straightforward toggling of checkboxes.
+
 ## [5.1.2] - 2024-11-12
 ### Added
 - Added destruction of Url and LastUrl FBXScene properties before export.
