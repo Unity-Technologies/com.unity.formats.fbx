@@ -16,6 +16,8 @@ package_pack_-_formats_fbx:
   - command: 7z x -aoa wrench-localapv.zip
   - command: pip install semver requests --index-url https://artifactory-slo.bf.unity3d.com/artifactory/api/pypi/pypi/simple
   - command: python PythonScripts/print_machine_info.py
+  - name: Build
+    command: ./build.sh
   - command: upm-ci package pack --package-path com.unity.formats.fbx
   - command: cp upm-ci~/packages/packages.json upm-ci~/packages/com.unity.formats.fbx_packages.json
   after:

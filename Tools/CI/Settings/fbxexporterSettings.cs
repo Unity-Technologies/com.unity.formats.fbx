@@ -1,4 +1,5 @@
-﻿using RecipeEngine.Api.Settings;
+﻿using RecipeEngine.Api.Commands;
+using RecipeEngine.Api.Settings;
 using RecipeEngine.Modules.Wrench.Models;
 using RecipeEngine.Modules.Wrench.Settings;
 
@@ -14,7 +15,15 @@ public class fbxexporterSettings : AnnotatedSettingsBase
     {
         {
             "com.unity.formats.fbx",
-            new PackageOptions() { ReleaseOptions = new ReleaseOptions() { IsReleasing = true } }
+            new PackageOptions()
+            {
+                ReleaseOptions = new ReleaseOptions() { IsReleasing = true },
+                PackJobOptions = new PackJobOptions()
+                {
+                    PrePackCommands = new List<Command>
+                        {new Command("Build", "./build.sh")}
+                }
+            }
         }
     };
 

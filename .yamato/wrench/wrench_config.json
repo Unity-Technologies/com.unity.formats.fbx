@@ -3,7 +3,9 @@
   "packages": {
     "com.unity.formats.fbx": {
       "directory": "com.unity.formats.fbx/",
-      "prePackCommands": [],
+      "prePackCommands": [
+        "./build.sh"
+      ],
       "preTestCommands": {
         "MacOS": [],
         "Ubuntu": [],
