@@ -32,7 +32,10 @@ public class fbxexporterSettings : AnnotatedSettingsBase
         Wrench = new WrenchSettings(
             PackagesRootPaths,
             PackageOptions
-        );      
+        );
+        
+        Wrench.BranchNamingPattern = BranchPatterns.ReleaseSlash;
+        Wrench.PvpProfilesToCheck = new HashSet<string>() { "rme", "supported" };
     }
 
     public WrenchSettings Wrench { get; private set; }
