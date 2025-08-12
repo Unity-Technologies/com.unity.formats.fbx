@@ -57,7 +57,7 @@ mac_arm64_platform: &mac_arm64
 ubuntu_platform: &ubuntu
   name: ubuntu
   type: Unity::VM
-  image: package-ci/ubuntu-20.04:v4
+  image: package-ci/ubuntu-22.04:v4
   flavor: b1.medium
 
   
