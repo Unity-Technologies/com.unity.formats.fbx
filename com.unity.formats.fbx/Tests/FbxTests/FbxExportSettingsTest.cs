@@ -584,7 +584,11 @@ namespace FbxExporter.UnitTests
             // Test creating a new ExportSettings instance
             ExportSettings newInstance = ScriptableObject.CreateInstance<ExportSettings>();
             // check that a new instance was created
+#if UNITY_6000_2_OR_NEWER
+            Assert.That(newInstance.GetEntityId(), Is.Not.EqualTo(instance.GetEntityId()));
+#else
             Assert.That(newInstance.GetInstanceID(), Is.Not.EqualTo(instance.GetInstanceID()));
+#endif
             // but that the "instance" member is the same
             Assert.That(ExportSettings.instance, Is.EqualTo(instance));
             Assert.That(ExportSettings.instance, Is.Not.EqualTo(newInstance));

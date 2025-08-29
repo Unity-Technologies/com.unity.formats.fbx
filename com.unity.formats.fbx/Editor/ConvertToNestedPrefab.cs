@@ -270,10 +270,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
+
+
 #if UNITY_2021_2_OR_NEWER
-        internal static List<Object> GetSceneReferences(int instanceId)
+        internal static List<Object> GetSceneReferences(Object obj)
         {
+#if UNITY_6000_2_OR_NEWER
+            var instanceId = obj.GetEntityId();
+#else
+            var instanceId = obj.GetInstanceID();
+#endif
             var query = $"h: ref={instanceId}";
+
 
             using (var searchContext = UnityEditor.Search.SearchService.CreateContext(query))
             {
@@ -341,7 +349,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns></returns>
         internal static List<GameObject> GetSceneReferencesToObject(Object obj)
         {
-            var instanceID = obj.GetInstanceID();
+#if UNITY_6000_2_OR_NEWER
+            var instanceId = obj.EntityId();
+#else
+            var instanceId = obj.GetInstanceID();
+#endif
             var idFormat = "ref:{0}:";
 
             var sceneHierarchyWindow = SceneHierarchyWindow;
@@ -363,7 +375,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             foreach (var row in rows)
             {
                 var id = (int)GetPropertyReflection(row, "id", isPublic: true);
+#if UNITY_6000_2_OR_NEWER
+                var gameObject = EditorUtility.EntityIdToObject(id) as GameObject;
+#else
                 var gameObject = EditorUtility.InstanceIDToObject(id) as GameObject;
+#endif
                 if (gameObject)
                 {
                     sceneObjects.Add(gameObject);
@@ -619,8 +635,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 #if UNITY_2021_2_OR_NEWER
                 if (!isPreviewScene)
                 {
-                    var instanceID = t.gameObject.GetInstanceID();
-                    info.sceneObjectsWithReference = GetSceneReferences(instanceID);
+                    info.sceneObjectsWithReference = GetSceneReferences(t.gameObject);
                 }
 #endif // UNITY_2021_2_OR_NEWER
 
