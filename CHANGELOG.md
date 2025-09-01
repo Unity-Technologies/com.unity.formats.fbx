@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [5.1.4] - Unreleased
+## [Unreleased]
 ### Changed
 - Migrating away from GetInstanceID to GetEntity when used with Unity 6.2+
 
