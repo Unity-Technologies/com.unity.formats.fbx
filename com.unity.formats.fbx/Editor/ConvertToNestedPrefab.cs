@@ -270,8 +270,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
-
-
 #if UNITY_2021_2_OR_NEWER
         internal static List<Object> GetSceneReferences(Object obj)
         {
@@ -281,7 +279,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var instanceId = obj.GetInstanceID();
 #endif
             var query = $"h: ref={instanceId}";
-
 
             using (var searchContext = UnityEditor.Search.SearchService.CreateContext(query))
             {
