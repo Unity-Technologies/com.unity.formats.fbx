@@ -740,6 +740,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return new FbxDouble3(unityColor.r, unityColor.g, unityColor.b);
         }
 
+#if UNITY_6000_2_OR_NEWER
+        private EntityId GetUnityId(Object obj) {
+            var unityID = obj.GetEntityId();
+            return unityID;
+        }
+#else
+        private int GetUnityId(Object obj)
+        {
+            var unityID = obj.GetInstanceID();
+            return unityID;
+        }
+#endif
+
         /// <summary>
         /// Export (and map) a Unity PBS material to FBX classic material
         /// </summary>
@@ -750,11 +763,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 unityMaterial = DefaultMaterial;
             }
 
-#if UNITY_6000_2_OR_NEWER
-            var unityID = unityMaterial.GetEntityId();
-#else
-            var unityID = unityMaterial.GetInstanceID();
-#endif
+            var unityID = GetUnityId(unityMaterial);
 
             FbxSurfaceMaterial mappedMaterial;
             if (MaterialMap.TryGetValue(unityID, out mappedMaterial))
@@ -1572,17 +1581,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 foreach (var mat in materials)
                 {
-                    if (mat != null)
+                    if (mat != null && MaterialMap.TryGetValue(GetUnityId(mat), out newMaterial))
                     {
-#if UNITY_6000_2_OR_NEWER
-                        var materialUnityId = mat.GetEntityId();
-#else
-                        var materialUnityId = mat.GetInstanceID();
-#endif
-                        if (MaterialMap.TryGetValue(materialUnityId, out newMaterial))
-                        {
-                            fbxNode.AddMaterial(newMaterial);
-                        }
+                        fbxNode.AddMaterial(newMaterial);
                     }
                     else
                     {
