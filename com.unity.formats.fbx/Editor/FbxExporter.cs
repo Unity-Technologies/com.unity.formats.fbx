@@ -741,16 +741,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
 #if UNITY_6000_2_OR_NEWER
-        private EntityId GetUnityId(Object obj) {
+        private EntityId GetUnityId(Object obj)
+        {
             var unityID = obj.GetEntityId();
             return unityID;
         }
+
 #else
         private int GetUnityId(Object obj)
         {
             var unityID = obj.GetInstanceID();
             return unityID;
         }
+
 #endif
 
         /// <summary>
