@@ -360,7 +360,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var previousSearchFilter = sceneHierarchy.GetType().GetField("m_SearchFilter", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(sceneHierarchy);
 
             // Set the search filter to find all references in the scene to the given object
-            setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { string.Format(idFormat, instanceID), SearchableEditorWindow.SearchMode.All, true, false });
+            setSearchFilterMethod.Invoke(sceneHierarchyWindow, new object[] { string.Format(idFormat, instanceId), SearchableEditorWindow.SearchMode.All, true, false });
 
             // Get objects from list of instance IDs of currently visible objects
             var treeView = GetPropertyReflection(sceneHierarchy, "treeView", isPublic: false);
