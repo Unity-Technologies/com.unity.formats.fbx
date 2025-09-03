@@ -346,11 +346,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns></returns>
         internal static List<GameObject> GetSceneReferencesToObject(Object obj)
         {
-#if UNITY_6000_2_OR_NEWER
-            var instanceId = obj.EntityId();
-#else
             var instanceId = obj.GetInstanceID();
-#endif
             var idFormat = "ref:{0}:";
 
             var sceneHierarchyWindow = SceneHierarchyWindow;
