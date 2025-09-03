@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [Unreleased]
+### Changed
+- Migrating away from GetInstanceID to GetEntity when used with Unity 6.2+
+
 ## [5.1.3] - 2025-01-20
 ### Fixed
 - Fixed an indentation issue in FBX Exporter Project Settings that was preventing straightforward toggling of checkboxes.
