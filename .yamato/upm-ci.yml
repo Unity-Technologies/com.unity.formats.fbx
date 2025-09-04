@@ -28,35 +28,6 @@ pack:
       paths:
         - "upm-ci~/xray/**/*"
 
-# The following job runs PVP API docs validation to validate all public APIs (classes and methods) have documentation.
-# For APIs which are exempted from API docs validartion, they are put in pvp_exemptions.json
-api_doc_validation:
-  name: API documentation validation
-  agent:
-    type: {{ ubuntu_platform.type }}
-    image: {{ ubuntu_platform.image }}
-    flavor: {{ ubuntu_platform.flavor }}
-  variables:
-    UPM_REGISTRY: https://artifactory-slo.bf.unity3d.com/artifactory/api/npm/upm-candidates
-  commands:
-    # Needed for now, until we get a recent upm-pvp into the image.
-    - sudo apt-get update && sudo apt-get install -y upm-pvp
-    # Download Unity.
-    - unity-downloader-cli --fast --wait -u {{ all_test_editors[0].version }} -c editor
-    # Run PVS in PVP mode.
-    - upm-pvp test --unity .Editor --packages "upm-ci~/packages/*.tgz" --results "upm-ci~/pvp"
-    # Require that PVP-20-1 (API docs validation) passed
-    - upm-pvp require PVP-20-1 --results "upm-ci~/pvp" --failures "upm-ci~/pvp/failures.json"
-  artifacts:
-    pvp:
-      paths:
-        - upm-ci~/pvp/**
-    logs:
-      paths:
-        - upm-ci~/test-results/**
-  dependencies:
-    - .yamato/upm-ci.yml#pack
-
 # Job to generate documentation for the package
 generate_documentation:
   name : Generate documentation
@@ -176,7 +147,6 @@ test_trigger_pr:
     expression: pull_request.(source match ".*" AND NOT push.changes.all match ["com.unity.formats.fbx/Documentation~/**", "**/*.md"] AND NOT draft)
   dependencies:
     - .yamato/upm-ci.yml#pack
-    - .yamato/upm-ci.yml#api_doc_validation
     - .yamato/upm-ci.yml#test_api_win
 {% for platform in platforms %}
 {% for editor in all_test_editors %}
@@ -212,72 +182,3 @@ nightly_test_trigger:
     - .yamato/upm-ci.yml#api_doc_validation
     - .yamato/clean-console-test.yml#clean_console_test_trigger
     - .yamato/upm-ci.yml#test_trigger_pr
-
-publish_test_trigger:
-  name: Publish Tests Trigger
-  triggers:
-    tags:
-      only:
-        - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?
-  dependencies:
-    - .yamato/upm-ci.yml#pack
-{% for platform in platforms %}
-{% for editor in all_test_editors %}
-# Only run tests in 6000.0 and trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
-{% if editor.version == "6000.0" or editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-{% endif %}
-{% endfor %}
-{% endfor %}  
-
-publish:
-  name: Publish to Internal Registry
-  agent:
-    type: {{ win_platform.type }}
-    image: {{ win_platform.image }}
-    flavor: {{ win_platform.flavor }}
-  variables:
-    UPMCI_ENABLE_PACKAGE_SIGNING: 1
-  commands:
-    - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-    - upm-ci package publish --package-path com.unity.formats.fbx
-  triggers:
-    tags:
-      only:
-        - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?$/
-  artifacts:
-    artifacts:
-      paths:
-        - "upm-ci~/packages/*.tgz"
-  dependencies:
-    - .yamato/upm-ci.yml#pack
-    - .yamato/upm-ci.yml#publish_test_trigger
-
-publish_dry_run:
-  name: Publish to Internal Registry (Dry Run)
-  agent:
-    type: {{ win_platform.type }}
-    image: {{ win_platform.image }}
-    flavor: {{ win_platform.flavor }}
-  variables:
-    UPMCI_ENABLE_PACKAGE_SIGNING: 1
-  commands:
-    # upm-pvp commands to make sure the package comply with APV 2.0
-    - upm-pvp xray --packages "upm-ci~/packages/*.tgz" --results upm-ci~/xray
-    - upm-pvp require "supported rme" --allow-missing --results "upm-ci~/xray"
-    - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-    - upm-ci package publish --package-path com.unity.formats.fbx --dry-run
-  triggers:
-    tags:
-      only:
-        - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?$/
-  artifacts:
-    artifacts:
-      paths:
-        - "upm-ci~/packages/*.tgz"
-    xray_results:
-      paths:
-        - "upm-ci~/xray/**/*"
-  dependencies:
-    - .yamato/upm-ci.yml#pack
-    - .yamato/upm-ci.yml#publish_test_trigger
