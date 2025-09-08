@@ -22,7 +22,7 @@ clean_console_test_{{ platform.name }}_{{ editor.version }}:
 {% else %}
     - ./build.sh
 {% endif %}
-    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.1.0
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.3.7
       variables:
         CLEAN_CONSOLE_TEST_FOR: package
         PACKAGE_PATH: ./com.unity.formats.fbx

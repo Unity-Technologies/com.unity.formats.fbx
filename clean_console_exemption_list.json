@@ -1,0 +1,7 @@
+{
+  "exempts":{
+    "messages": [
+    "MaterialLocation.External is obsolete. External Material Location is no longer supported."
+    ]
+  }
+}

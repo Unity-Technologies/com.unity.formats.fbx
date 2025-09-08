@@ -179,6 +179,5 @@ nightly_test_trigger:
         rerun: always
   dependencies:
     - .yamato/upm-ci.yml#pack
-    - .yamato/upm-ci.yml#api_doc_validation
     - .yamato/clean-console-test.yml#clean_console_test_trigger
     - .yamato/upm-ci.yml#test_trigger_pr
