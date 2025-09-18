@@ -276,7 +276,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 #if UNITY_6000_2_OR_NEWER
             var instanceId = obj.GetEntityId();
 #else
-            var instanceId = obj.GetInstanceID();
+            var instanceId = obj.GetInstanceID().GetRawData();
 #endif
             var query = $"h: ref={instanceId}";
 
