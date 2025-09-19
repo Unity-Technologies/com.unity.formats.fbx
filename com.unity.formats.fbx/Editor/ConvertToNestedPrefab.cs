@@ -274,9 +274,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         internal static List<Object> GetSceneReferences(Object obj)
         {
 #if UNITY_6000_2_OR_NEWER
-            var instanceId = obj.GetEntityId();
+            var instanceId = obj.GetEntityId().GetRawData();
 #else
-            var instanceId = obj.GetInstanceID().GetRawData();
+            var instanceId = obj.GetInstanceID();
 #endif
             var query = $"h: ref={instanceId}";
 
