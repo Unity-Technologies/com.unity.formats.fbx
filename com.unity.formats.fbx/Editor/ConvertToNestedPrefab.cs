@@ -273,7 +273,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 #if UNITY_2021_2_OR_NEWER
         internal static List<Object> GetSceneReferences(Object obj)
         {
-#if UNITY_6000_2_OR_NEWER
+#if UNITY_6000_4_OR_NEWER
             var instanceId = obj.GetEntityId().GetRawData();
 #else
             var instanceId = obj.GetInstanceID();
