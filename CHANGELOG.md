@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [Unreleased]
+## [5.1.5] - 2025-09-24
 ### Changed
 - Updated the APIs used around EntityId
 
