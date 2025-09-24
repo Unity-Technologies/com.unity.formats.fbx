@@ -22,7 +22,9 @@ public class fbxexporterSettings : AnnotatedSettingsBase
                 {
                     PrePackCommands = new List<Command>
                         {new Command("Build", "./build.sh")}
-                }
+                },
+                // This is temporary, need to remove once the fix for FBX tests is landed in Trunk, see conversations in https://unity.slack.com/archives/CT99K98E8/p1756379668214119
+                MaximumEditorVersion = "6000.3"
             }
         }
     };
