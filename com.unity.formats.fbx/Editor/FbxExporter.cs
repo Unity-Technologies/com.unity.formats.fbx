@@ -169,7 +169,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Map Unity material ID to FBX material object
         /// </summary>
-#if UNITY_6000_2_OR_NEWER
+#if UNITY_6000_4_OR_NEWER
         Dictionary<EntityId, FbxSurfaceMaterial> MaterialMap = new Dictionary<EntityId, FbxSurfaceMaterial>();
 #else
         Dictionary<int, FbxSurfaceMaterial> MaterialMap = new Dictionary<int, FbxSurfaceMaterial>();
@@ -740,7 +740,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return new FbxDouble3(unityColor.r, unityColor.g, unityColor.b);
         }
 
-#if UNITY_6000_2_OR_NEWER
+#if UNITY_6000_4_OR_NEWER
         private EntityId GetUnityId(Object obj)
         {
             var unityID = obj.GetEntityId();
