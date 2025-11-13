@@ -510,7 +510,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             ExportSettings.instance.Load();
 
             var provider = AssetSettingsProvider.CreateProviderFromObject(
-                "Project/Fbx Export", ExportSettings.instance, GetSearchKeywordsFromGUIContentProperties(typeof(Style)));
+                "Project/FBX Export", ExportSettings.instance, GetSearchKeywordsFromGUIContentProperties(typeof(Style)));
 #if UNITY_2019_1_OR_NEWER
             provider.inspectorUpdateHandler += () =>
             {
