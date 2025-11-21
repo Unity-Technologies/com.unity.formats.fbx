@@ -27,7 +27,7 @@ Use the **Convert Options** window to [convert a GameObject](prefab-variants-con
 | **Object(s) Position** | **Convert to FBX Prefab Variant** always resets the root object's transform during export. However, the Prefab maintains the global transform for the root object. |
 | **Animated Skinned Mesh** | Enable this option to export animation on GameObjects with skinned meshes.<br/><br/>If you disable this option, the FBX Exporter does not export animation on skinned meshes. |
 | **Compatible Naming** | Enable this option to make the FBX Exporter rename GameObjects and Materials on conversion, according to specific [character replacement rules](features-behaviors-compatible-naming.md).<br /><br />This ensures a compatible naming with Autodesk® Maya® and Autodesk® Maya LT™ to avoid unexpected name changes between Unity and these software. |
-| **Don't ask me again** | Enable this option to use the same **Convert Options** properties and hide this window when converting to FBX Prefab Variants in the future. You can reset this option by turning on the **Display Options Window** option under **Edit** > **Project Settings** > **Fbx Export** in Unity's top menu. |
+| **Don't ask me again** | Enable this option to use the same **Convert Options** properties and hide this window when converting to FBX Prefab Variants in the future. You can reset this option by turning on the **Display Options Window** option under **Edit** > **Project Settings** > **FBX Export** in Unity's top menu. |
 
 >[!NOTE]
 >For FBX Model filenames, the FBX Exporter ensures that names do not contain invalid characters for the file system. The set of invalid characters might differ between file systems.

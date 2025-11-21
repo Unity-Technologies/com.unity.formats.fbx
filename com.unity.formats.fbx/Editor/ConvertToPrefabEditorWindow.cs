@@ -284,7 +284,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 if (m_prefabSavePaths == null)
                 {
-                    // Try to restore from session, fall back to Fbx Export Settings
+                    // Try to restore from session, fall back to FBX Export Settings
                     RestorePathsFromSession(k_SessionPrefabPathsName, ExportSettings.instance.GetCopyOfPrefabSavePaths(), out m_prefabSavePaths);
                     SelectedPrefabPath = SessionState.GetInt(string.Format(SessionStoragePrefix, k_SessionSelectedPrefabPathName), ExportSettings.instance.SelectedPrefabPath);
                 }
