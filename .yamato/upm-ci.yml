@@ -39,7 +39,7 @@ generate_documentation:
     # Run build script to copy CHANGELOG.md and LICENSE.md into com.unity.formats.fbx package.
     - brew install cmake
     - ./build.sh
-    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_doc_generation.git@v0.3.0
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_doc_generation.git@v0.5.3
       variables:
         EDITOR_VERSION: {{ all_test_editors.last.version }}
         PACKAGE_NAME: com.unity.formats.fbx
