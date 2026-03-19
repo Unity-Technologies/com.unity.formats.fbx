@@ -284,14 +284,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 // Initiate the query and get the first results.
                 #if UNITY_6000_5_OR_NEWER
-                    using (var items = UnityEditor.Search.SearchService.Request(searchContext, SearchFlags.Synchronous))
-                    {
-                        return items.Where(x => x != null).Select(x => x.ToObject()).ToList();
-                    }
+                var items = UnityEditor.Search.SearchService.Request(searchContext, SearchFlags.Synchronous);
                 #else
-                    var items = UnityEditor.Search.SearchService.GetItems(searchContext, SearchFlags.Synchronous);
-                    return items.ConvertAll(x => x.ToObject());
+                var items = UnityEditor.Search.SearchService.GetItems(searchContext, SearchFlags.Synchronous);
                 #endif
+                return items.Select(x => x.ToObject()).ToList();
             }
         }
 
