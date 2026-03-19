@@ -288,7 +288,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 #else
                 var items = UnityEditor.Search.SearchService.GetItems(searchContext, SearchFlags.Synchronous);
                 #endif
-                return items.Select(x => x.ToObject()).ToList();
+                return items.Where(x => x != null).Select(x => x.ToObject()).ToList();
             }
         }
 
