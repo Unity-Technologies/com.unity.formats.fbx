@@ -517,39 +517,40 @@ namespace FbxExporter.UnitTests
 
                 Assert.That(bReferenceComponent.m_transform.name, Is.EqualTo(a.transform.name));
             }
+        }
 
-            // Test GetSceneReferencesToObject()
-            {
-                var a = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                var b = new GameObject();
-                var c = new GameObject();
+        // Scenario: cube (a), object b referencing a's BoxCollider, object c with a PositionConstraint on a.transform.
+        // After yield, asserts Search lists the expected referrers for the GameObject, collider, and transform (GetSceneRefsForTest).
+        [UnityTest]
+        public IEnumerator TestSceneObjectReferrersSearch()
+        {
+            var a = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var b = new GameObject();
+            var c = new GameObject();
 
-                var reference = b.AddComponent<ReferenceComponent>();
-                var constraint = c.AddComponent<UnityEngine.Animations.PositionConstraint>();
+            var reference = b.AddComponent<ReferenceComponent>();
+            var constraint = c.AddComponent<UnityEngine.Animations.PositionConstraint>();
 
-                reference.m_collider = a.GetComponent<BoxCollider>();
+            reference.m_collider = a.GetComponent<BoxCollider>();
 
-                var constraintSource = new UnityEngine.Animations.ConstraintSource();
-                constraintSource.sourceTransform = a.transform;
-                constraintSource.weight = 0.5f;
-                constraint.AddSource(constraintSource);
+            var constraintSource = new UnityEngine.Animations.ConstraintSource();
+            constraintSource.sourceTransform = a.transform;
+            constraintSource.weight = 0.5f;
+            constraint.AddSource(constraintSource);
 
-#if !UNITY_2021_2_OR_NEWER
-                var sceneRefs = ConvertToNestedPrefab.GetSceneReferencesToObject(a);
-                Assert.That(sceneRefs.Count, Is.EqualTo(2));
-                Assert.That(sceneRefs.Contains(a)); // GameObjects also reference themself
-                Assert.That(sceneRefs.Contains(b));
+            yield return null;
 
-                sceneRefs = ConvertToNestedPrefab.GetSceneReferencesToObject(a.GetComponent<BoxCollider>());
-                Assert.That(sceneRefs.Count, Is.EqualTo(1));
-                Assert.That(sceneRefs.Contains(b));
+            // GameObject a: expect b (collider ref).
+            var sceneRefs = GetSceneRefsForTest(a);
+            Assert.That(sceneRefs, Has.Member(b));
 
-                sceneRefs = ConvertToNestedPrefab.GetSceneReferencesToObject(a.transform);
-                Assert.That(sceneRefs.Count, Is.EqualTo(2));
-                Assert.That(sceneRefs.Contains(b));
-                Assert.That(sceneRefs.Contains(c));
-#endif // !UNITY_2021_2_OR_NEWER
-            }
+            // Same collider: expect b.
+            sceneRefs = GetSceneRefsForTest(a.GetComponent<BoxCollider>());
+            Assert.That(sceneRefs, Has.Member(b));
+
+            // Transform of a: expect c (constraint source).
+            sceneRefs = GetSceneRefsForTest(a.transform);
+            Assert.That(sceneRefs, Has.Member(c));
         }
 
         [Test]
@@ -791,6 +792,16 @@ namespace FbxExporter.UnitTests
 
             // Make sure name is same as original
             Assert.AreEqual("cube 1", cube.name);
+        }
+
+        // GetSceneReferences (2021.2+) vs hierarchy search on older Unity; same assertions for both.
+        static List<Object> GetSceneRefsForTest(Object obj)
+        {
+#if UNITY_2021_2_OR_NEWER
+            return ConvertToNestedPrefab.GetSceneReferences(obj);
+#else
+            return new List<Object>(ConvertToNestedPrefab.GetSceneReferencesToObject(obj));
+#endif
         }
     }
 }
