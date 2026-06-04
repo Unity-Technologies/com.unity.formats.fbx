@@ -274,7 +274,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         internal static List<Object> GetSceneReferences(Object obj)
         {
 #if UNITY_6000_4_OR_NEWER
-            var instanceId = obj.GetEntityId().GetRawData();
+            var instanceId = EntityId.ToULong(obj.GetEntityId());
 #else
             var instanceId = obj.GetInstanceID();
 #endif
@@ -283,8 +283,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             using (var searchContext = UnityEditor.Search.SearchService.CreateContext(query))
             {
                 // Initiate the query and get the first results.
+                #if UNITY_6000_5_OR_NEWER
+                var items = UnityEditor.Search.SearchService.Request(searchContext, SearchFlags.Synchronous);
+                #else
                 var items = UnityEditor.Search.SearchService.GetItems(searchContext, SearchFlags.Synchronous);
-                return items.ConvertAll(x => x.ToObject());
+                #endif
+                return items.Where(x => x != null).Select(x => x.ToObject()).ToList();
             }
         }
 

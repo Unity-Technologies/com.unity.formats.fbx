@@ -211,7 +211,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             {
                 if (m_fbxSavePaths == null)
                 {
-                    // Try to restore from session, fall back to Fbx Export Settings
+                    // Try to restore from session, fall back to FBX Export Settings
                     RestorePathsFromSession(k_SessionFbxPathsName, ExportSettings.instance.GetCopyOfFbxSavePaths(), out m_fbxSavePaths);
                     SelectedFbxPath = SessionState.GetInt(string.Format(SessionStoragePrefix, k_SessionSelectedFbxPathName), ExportSettings.instance.SelectedFbxPath);
                 }

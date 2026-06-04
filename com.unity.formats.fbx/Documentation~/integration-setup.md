@@ -11,7 +11,7 @@ The Unity Integration tool is a plug-in that installs on top of **Autodesk® May
 
 To install the Unity Integration tool and make it available in your 3D modeling application:
 
-1. **In Unity**, open the [Fbx Export Settings](ref-project-settings.md): from the Unity Editor main menu, select **Edit > Project Settings > Fbx Export**.
+1. **In Unity**, open the [FBX Export Settings](ref-project-settings.md): from the Unity Editor main menu, select **Edit > Project Settings > FBX Export**.
 
    ![FBX Export Settings window](images/FBXExporter_FBXExportSettingsWindow.png)
 
@@ -39,7 +39,7 @@ To install the Unity Integration tool and make it available in your 3D modeling 
 
 If an error occurs during startup, Autodesk® Maya® or Autodesk® Maya LT™ may not close. If this happens, check the Autodesk® Maya® or Autodesk® Maya LT™ console to see if you can resolve the issue, and then manually close Autodesk® Maya® or Autodesk® Maya LT™.
 
-If you enabled the __Keep Open__ option in the [Fbx Export Settings](ref-project-settings.md) window, then Autodesk® Maya® or Autodesk® Maya LT™ remains open after installation completes.
+If you enabled the __Keep Open__ option in the [FBX Export Settings](ref-project-settings.md) window, then Autodesk® Maya® or Autodesk® Maya LT™ remains open after installation completes.
 
 ## Customize FBX import/export settings in the 3D modeling application
 
