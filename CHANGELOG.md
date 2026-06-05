@@ -2,7 +2,9 @@
 
 ## [5.1.7] - 2026-06-05
 ### Changed
+- Bumped the minimum supported Unity version to 6000.0 (Unity 6.0).
 - Replaced obsolete `FindObjectsByType<T>(FindObjectsSortMode)` with the parameterless `FindObjectsByType<T>()` on Unity 6.6+ (warning CS0618).
+- Upgraded serialized importer settings on test models/textures to the formats required by Unity 6.6.
 
 ## [5.1.6] - 2026-06-03
 ### Changed
