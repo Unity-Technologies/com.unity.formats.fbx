@@ -1,6 +1,6 @@
 # Changes in Fbx Exporter
 
-## [5.1.7] - 2026-06-05
+## [Unreleased]
 ### Changed
 - Bumped the minimum supported Unity version to 6000.0 (Unity 6.0).
 - Replaced obsolete `FindObjectsByType<T>(FindObjectsSortMode)` with the parameterless `FindObjectsByType<T>()` on Unity 6.4+ (warning CS0618).
