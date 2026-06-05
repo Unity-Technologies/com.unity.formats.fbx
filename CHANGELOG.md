@@ -1,5 +1,9 @@
 # Changes in Fbx Exporter
 
+## [5.1.7] - 2026-06-05
+### Changed
+- Replaced obsolete `FindObjectsByType<T>(FindObjectsSortMode)` with the parameterless `FindObjectsByType<T>()` on Unity 6.6+ (warning CS0618).
+
 ## [5.1.6] - 2026-06-03
 ### Changed
 - Replaced obsolete `EntityId.GetRawData()` with `EntityId.ToULong(EntityId)` (warning CS0618).
