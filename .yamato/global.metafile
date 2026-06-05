@@ -11,8 +11,6 @@
 # For example, removing trunk from the list of editors for the previous release.
 
 all_test_editors:
-  - version: 2020.3
-  - version: 2022.3
   - version: 6000.0
   - version: 6000.3
   - version: 6000.4
@@ -27,7 +25,7 @@ clean_console_test_editors:
   - version: trunk
 
 promotion_test_editors:
-  - version: 2020.3
+  - version: 6000.0
 
 win_platform: &win
   name: win
