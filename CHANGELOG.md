@@ -9,7 +9,7 @@
 ## [5.1.6] - 2026-06-03
 ### Changed
 - Replaced obsolete `EntityId.GetRawData()` with `EntityId.ToULong(EntityId)` (warning CS0618).
-- Replaced obsolete `SearchService.GetItems` with `SearchService.Request`(warning CS0618).
+- Replaced obsolete `SearchService.GetItems` with `SearchService.Request` (warning CS0618).
 
 ## [5.1.5] - 2025-09-24
 ### Changed
