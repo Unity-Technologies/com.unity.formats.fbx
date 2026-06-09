@@ -90,19 +90,15 @@ namespace FbxExporter.UnitTests
                 smr.sharedMesh = cube.GetComponent<MeshFilter>().sharedMesh;
 #if UNITY_6000_4_OR_NEWER
                 var meshCount = Object.FindObjectsByType<Mesh>().Length;
-#elif UNITY_2023_1_OR_NEWER
-                var meshCount = Object.FindObjectsByType<Mesh>(FindObjectsSortMode.None).Length;
 #else
-                var meshCount = Object.FindObjectsOfType<Mesh>().Length;
-#endif
+                var meshCount = Object.FindObjectsByType<Mesh>(FindObjectsSortMode.None).Length;
+#endif // UNITY_6000_4_OR_NEWER
                 ModelExporter.ExportObject(GetRandomFbxFilePath(), character);
 #if UNITY_6000_4_OR_NEWER
                 Assert.AreEqual(meshCount, Object.FindObjectsByType<Mesh>().Length);
-#elif UNITY_2023_1_OR_NEWER
-                Assert.AreEqual(meshCount, Object.FindObjectsByType<Mesh>(FindObjectsSortMode.None).Length);
 #else
-                Assert.AreEqual(meshCount, Object.FindObjectsOfType<Mesh>().Length);
-#endif
+                Assert.AreEqual(meshCount, Object.FindObjectsByType<Mesh>(FindObjectsSortMode.None).Length);
+#endif // UNITY_6000_4_OR_NEWER
             }
 
             // Test euler to quaternion conversion

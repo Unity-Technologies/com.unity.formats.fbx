@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.unity.coding": "0.1.0-preview.22",
+    "com.unity.coding": "0.1.0-preview.26",
     "com.unity.collab-proxy": "1.17.2",
     "com.unity.formats.fbx": "file:../../../com.unity.formats.fbx",
     "com.unity.ide.rider": "3.0.15",
