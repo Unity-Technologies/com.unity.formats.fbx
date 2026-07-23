@@ -41,7 +41,7 @@
   },
   "publishing_job": ".yamato/wrench/promotion-jobs.yml#publish_formats_fbx",
   "branch_pattern": "ReleaseSlash",
-  "wrench_version": "2.3.1.0",
+  "wrench_version": "3.3.1.0",
   "pvp_exemption_path": ".yamato/wrench/pvp-exemptions.json",
   "cs_project_path": "Tools/CI/fbxexporter.Cookbook.csproj"
 }
