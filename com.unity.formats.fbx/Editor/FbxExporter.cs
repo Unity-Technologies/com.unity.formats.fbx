@@ -1528,11 +1528,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
+        /// Returns true if the game object has no enabled renderer and the user doesn't want to export unrendered objects.
+        /// </summary>
+        private bool IsUnrenderedAndExcluded(GameObject gameObject)
+        {
+            return !ExportOptions.ExportUnrendered && (!gameObject.GetComponent<Renderer>() || !gameObject.GetComponent<Renderer>().enabled);
+        }
+
+        /// <summary>
         /// if this game object is a model prefab or the model has already been exported, then export with shared components
         /// </summary>
         private bool ExportInstance(GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
         {
             if (!unityGo || fbxNode == null)
+            {
+                return false;
+            }
+
+            // don't export (or register) the mesh of an unrendered object when the user doesn't want unrendered objects
+            if (IsUnrenderedAndExcluded(unityGo))
             {
                 return false;
             }
@@ -4744,7 +4758,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // if user doesn't want to export mesh colliders, and this gameobject doesn't have a renderer
             // then don't export it.
-            if (!ExportOptions.ExportUnrendered && (!gameObject.GetComponent<Renderer>() || !gameObject.GetComponent<Renderer>().enabled))
+            if (IsUnrenderedAndExcluded(gameObject))
             {
                 return false;
             }
