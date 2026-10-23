@@ -22,6 +22,7 @@
 
 ### Fixed
 - Fixed blend shape animation not being exported when the blend shape name contains a space, such as Blender's default shape key names "Key 1" and "Key 2".
+- Fixed skinned meshes losing bone weights on export. If a bone was null or a vertex had a zero-weight influence, the vertices after it were exported with missing or wrong skin weights.
 
 ## [5.1.6] - 2026-06-03
 ### Changed
