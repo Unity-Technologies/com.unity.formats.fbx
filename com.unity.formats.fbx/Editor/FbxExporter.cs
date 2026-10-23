@@ -1361,7 +1361,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // For each vertex, iterate over its BoneWeights
                 for (var i = 0; i < numberOfBonesForThisVertex; i++)
                 {
-                    var currentBoneWeight = boneWeights1[boneWeightIndex];
+                    var currentBoneWeight = boneWeights1[boneWeightIndex + i];
 
                     // bone index is index into skinnedmesh.bones[]
                     var boneIndex = currentBoneWeight.boneIndex;
@@ -1381,9 +1381,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                     // add vertex and weighting on vertex to this bone's cluster
                     boneCluster.AddControlPointIndex(actualIndex, weight);
-
-                    boneWeightIndex++;
                 }
+
+                // always move to the next vertex's weights, even if some of this vertex's weights were skipped
+                boneWeightIndex += numberOfBonesForThisVertex;
             }
         }
 
