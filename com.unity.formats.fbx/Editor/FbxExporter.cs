@@ -2935,13 +2935,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
             int count;
             if (nameToCountMap.TryGetValue(name, out count))
             {
-                uniqueName = string.Format(UniqueNameFormat, name, count);
+                // Skip any generated name that has already been used, e.g. an
+                // existing "Sphere_1" must not be reused for a second "Sphere".
+                do
+                {
+                    uniqueName = string.Format(UniqueNameFormat, name, count);
+                    count++;
+                }
+                while (nameToCountMap.ContainsKey(uniqueName));
+                // Record the generated name so later requests can't collide with it.
+                nameToCountMap[uniqueName] = 1;
             }
             else
             {
-                count = 0;
+                count = 1;
             }
-            nameToCountMap[name] = count + 1;
+            nameToCountMap[name] = count;
             return uniqueName;
         }
 

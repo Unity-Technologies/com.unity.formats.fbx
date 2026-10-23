@@ -6,6 +6,9 @@
 - Replaced obsolete `FindObjectsByType<T>(FindObjectsSortMode)` with the parameterless `FindObjectsByType<T>()` on Unity 6.4+ (warning CS0618).
 - Upgraded serialized importer settings on test models/textures to the formats required by Unity 6.6
 
+### Fixed
+- Fixed exported GameObjects, materials and textures ending up with identical names in the FBX file when one of them already had a name like `Cube_1` and another was a duplicate named `Cube`.
+
 ## [5.1.6] - 2026-06-03
 ### Changed
 - Replaced obsolete `EntityId.GetRawData()` with `EntityId.ToULong(EntityId)` (warning CS0618).
