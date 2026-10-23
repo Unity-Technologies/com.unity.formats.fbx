@@ -2214,7 +2214,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             List<FbxBlendShapeChannel> blendshapeChannels;
             if (MapUnityObjectToBlendShapes.TryGetValue(blendshapeNode, out blendshapeChannels))
             {
-                var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, @"blendShape\.(\S+)");
+                var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, @"blendShape\.(.+)");
                 if (match.Success && match.Groups.Count > 0)
                 {
                     string blendshapeName = match.Groups[1].Value;
