@@ -813,6 +813,68 @@ namespace FbxExporter.UnitTests
             return tester.DoIt();
         }
 
+        // Blend shape curves are already in the 0..100 range that FBX uses for DeformPercent,
+        // so they must be exported unscaled, whatever the blend shape is called.
+        [Test]
+        [TestCase("BodyWeight")]
+        [TestCase("Weight")]
+        [TestCase("BodyShape")] // control: a name that does not end in "weight"
+        public void BlendshapeNameEndingInWeightIsNotScaledTest(string blendShapeName)
+        {
+            const float expectedValue = 40f;
+
+            var mesh = new Mesh();
+            mesh.vertices = new Vector3[] { new Vector3(-0.5f, 0f, 0f), new Vector3(0.5f, 0f, 0f), new Vector3(0.5f, 1f, 0f), new Vector3(-0.5f, 1f, 0f) };
+            mesh.triangles = new int[] { 0, 2, 1, 0, 3, 2 };
+            mesh.RecalculateNormals();
+            mesh.AddBlendShapeFrame(blendShapeName, 100f, new Vector3[] { Vector3.forward, Vector3.forward, Vector3.forward, Vector3.forward }, null, null);
+
+            var go = new GameObject("BlendShapeWeightSuffix");
+            go.AddComponent<SkinnedMeshRenderer>().sharedMesh = mesh;
+
+            var clip = new AnimationClip();
+            clip.legacy = true;
+            clip.name = "anim_" + blendShapeName;
+            clip.SetCurve("", typeof(SkinnedMeshRenderer), "blendShape." + blendShapeName, new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(1f, expectedValue)));
+
+            var animation = go.AddComponent<Animation>();
+            animation.AddClip(clip, clip.name);
+            animation.clip = clip;
+
+            try
+            {
+                var exportOptions = new ExportModelOptions
+                {
+                    ExportFormat = ExportFormat.ASCII,
+                    ModelAnimIncludeOption = Include.ModelAndAnim,
+                    AnimateSkinnedMesh = true
+                };
+
+                var fbxPath = GetRandomFbxFilePath();
+                Assert.That(ModelExporter.ExportObject(fbxPath, go, exportOptions), Is.Not.Null);
+
+                // ASCII FBX stores the animation key values as "KeyValueFloat: *N { a: v0,v1,... }"
+                var keyValues = new List<float>();
+                var fbxText = System.IO.File.ReadAllText(fbxPath);
+                foreach (System.Text.RegularExpressions.Match match in System.Text.RegularExpressions.Regex.Matches(fbxText, @"KeyValueFloat:\s*\*\d+\s*\{\s*a:\s*([^}]*)\}"))
+                {
+                    foreach (var token in match.Groups[1].Value.Split(new char[] { ',', ' ', '\t', '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        keyValues.Add(float.Parse(token, System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                }
+
+                Assert.That(keyValues, Is.Not.Empty, "expected the exported blend shape curve to contain key values");
+                Assert.That(keyValues.Max(), Is.EqualTo(expectedValue).Within(0.01f), "blend shape '" + blendShapeName + "' curve was scaled on export");
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+                Object.DestroyImmediate(mesh);
+                Object.DestroyImmediate(clip);
+            }
+        }
+
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "QuaternionTestCases")]
         public int QuaternionPropertyAnimTest(float[] keyTimesInSeconds, Vector3[] keyValues, System.Type componentType, string[] componentNames)
         {
