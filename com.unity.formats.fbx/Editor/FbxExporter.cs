@@ -1743,10 +1743,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 set { m_weight = value; }
             }
 
-            public ExpConstraintSource(FbxNode node, float weight)
+            private int m_unityIndex;
+            /// <summary>
+            /// Index of this source in the Unity constraint's source list.
+            /// Differs from the index in the exported list when sources are skipped.
+            /// </summary>
+            public int unityIndex
+            {
+                get { return m_unityIndex; }
+                set { m_unityIndex = value; }
+            }
+
+            public ExpConstraintSource(FbxNode node, float weight, int unityIndex)
             {
                 this.m_node = node;
                 this.m_weight = weight;
+                this.m_unityIndex = unityIndex;
             }
         }
 
@@ -1760,8 +1772,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var fbxSources = new List<ExpConstraintSource>();
             var sources = new List<ConstraintSource>();
             unityConstraint.GetSources(sources);
-            foreach (var source in sources)
+            for (int i = 0; i < sources.Count; i++)
             {
+                var source = sources[i];
                 if (!source.sourceTransform)
                 {
                     continue;
@@ -1773,7 +1786,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     continue;
                 }
-                fbxSources.Add(new ExpConstraintSource(sourceNode, source.weight * UnitScaleFactor));
+                fbxSources.Add(new ExpConstraintSource(sourceNode, source.weight * UnitScaleFactor, i));
             }
             return fbxSources;
         }
@@ -1970,8 +1983,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             for (int i = 0; i < uniSources.Count; i++)
             {
                 var uniSource = uniSources[i];
-                var uniTranslationOffset = uniTranslationOffsets[i];
-                var uniRotationOffset = uniRotationOffsets[i];
+                var uniTranslationOffset = uniTranslationOffsets[uniSource.unityIndex];
+                var uniRotationOffset = uniRotationOffsets[uniSource.unityIndex];
 
                 fbxParentConstraint.AddConstraintSource(uniSource.node, uniSource.weight);
 
