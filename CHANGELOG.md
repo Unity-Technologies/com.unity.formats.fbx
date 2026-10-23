@@ -17,6 +17,9 @@
 ### Fixed
 - Fixed objects without an enabled renderer being exported with a mesh when **Export Unrendered** is disabled and **Keep Instances** is enabled and the mesh is shared with a rendered object.
 
+### Fixed
+- Fixed blend shape animation being exported 100 times too large when the blend shape's name ends in "weight".
+
 ## [5.1.6] - 2026-06-03
 ### Changed
 - Replaced obsolete `EntityId.GetRawData()` with `EntityId.ToULong(EntityId)` (warning CS0618).
