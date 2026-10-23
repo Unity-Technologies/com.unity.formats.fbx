@@ -14,6 +14,9 @@
 ### Fixed
 - Fixed exported GameObjects, materials and textures ending up with identical names in the FBX file when one of them already had a name like `Cube_1` and another was a duplicate named `Cube`.
 
+### Fixed
+- Fixed objects without an enabled renderer being exported with a mesh when **Export Unrendered** is disabled and **Keep Instances** is enabled and the mesh is shared with a rendered object.
+
 ## [5.1.6] - 2026-06-03
 ### Changed
 - Replaced obsolete `EntityId.GetRawData()` with `EntityId.ToULong(EntityId)` (warning CS0618).
