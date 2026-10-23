@@ -151,7 +151,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         private static List<(string, string)> MapBlendshapesPropToFbxProp = new List<(string, string)>()
         {
-            (@"blendShape\.(\S+)", "DeformPercent")
+            (@"blendShape\.(.+)", "DeformPercent")
         };
 
         // ================== Channel Maps ======================
