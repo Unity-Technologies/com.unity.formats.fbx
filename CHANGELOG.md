@@ -20,6 +20,9 @@
 ### Fixed
 - Fixed blend shape animation being exported 100 times too large when the blend shape's name ends in "weight".
 
+### Fixed
+- Fixed blend shape animation not being exported when the blend shape name contains a space, such as Blender's default shape key names "Key 1" and "Key 2".
+
 ## [5.1.6] - 2026-06-03
 ### Changed
 - Replaced obsolete `EntityId.GetRawData()` with `EntityId.ToULong(EntityId)` (warning CS0618).
