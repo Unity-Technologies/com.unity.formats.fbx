@@ -5,6 +5,8 @@
 - Bumped the minimum supported Unity version to 6000.0 (Unity 6.0).
 - Replaced obsolete `FindObjectsByType<T>(FindObjectsSortMode)` with the parameterless `FindObjectsByType<T>()` on Unity 6.4+ (warning CS0618).
 - Upgraded serialized importer settings on test models/textures to the formats required by Unity 6.6
+### Fixed
+- Fixed objects without a Renderer (MeshFilter only) being exported at the wrong position when exporting several objects with Object Position set to Local Centered. The mesh bounds are now converted to world space, and exporting no longer replaces the MeshFilter's shared mesh with an instance in the scene.
 
 ## [5.1.6] - 2026-06-03
 ### Changed

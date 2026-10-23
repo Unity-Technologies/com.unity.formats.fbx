@@ -151,6 +151,36 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
+        public void TestFindCenterMeshFilterWithoutRenderer()
+        {
+            // Objects with a MeshFilter but no Renderer take the MeshFilter branch of GetBounds.
+            var a = CreateGameObject("a");
+            var b = CreateGameObject("b");
+            Object.DestroyImmediate(a.GetComponent<MeshRenderer>());
+            Object.DestroyImmediate(b.GetComponent<MeshRenderer>());
+
+            a.transform.position = new Vector3(10, 0, 0);
+            b.transform.position = new Vector3(30, 0, 0);
+            b.transform.localScale = new Vector3(3, 1, 1);
+
+            var meshA = a.GetComponent<MeshFilter>().sharedMesh;
+            var meshB = b.GetComponent<MeshFilter>().sharedMesh;
+            Assert.That(meshA, Is.Not.Null);
+            Assert.That(meshB, Is.Not.Null);
+
+            var center = ModelExporter.FindCenter(new GameObject[] { a, b });
+
+            // World space bounds: a spans x in [9.5, 10.5], b spans x in [28.5, 31.5]
+            Assert.AreEqual(20.5f, center.x, 1e-4f);
+            Assert.AreEqual(0f, center.y, 1e-4f);
+            Assert.AreEqual(0f, center.z, 1e-4f);
+
+            // Computing the center must not replace the shared meshes with instances.
+            Assert.AreSame(meshA, a.GetComponent<MeshFilter>().sharedMesh);
+            Assert.AreSame(meshB, b.GetComponent<MeshFilter>().sharedMesh);
+        }
+
+        [Test]
         public void TestRemoveRedundantObjects()
         {
             var root = CreateGameObject("root");
