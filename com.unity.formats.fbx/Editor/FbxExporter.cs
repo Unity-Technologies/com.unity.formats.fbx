@@ -2361,7 +2361,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 convertDistance |= partT;
                 convertDistance |= uniPropertyName.StartsWith("m_Intensity", cc);
-                convertDistance |= uniPropertyName.ToLower().EndsWith("weight", cc);
+                // Constraint weights are 0..1 in Unity and 0..100 in FBX. Blend shape curves are already 0..100,
+                // so only match the constraint weight properties and not any name ending in "weight".
+                convertDistance |= uniPropertyName == "m_Weight" || System.Text.RegularExpressions.Regex.IsMatch(uniPropertyName, @"^m_Sources\.Array\.data\[\d+\]\.weight$");
                 convertLensShiftX |= uniPropertyName.StartsWith("m_LensShift.x", cc);
                 convertLensShiftY |= uniPropertyName.StartsWith("m_LensShift.y", cc);
                 if (convertLensShiftX || convertLensShiftY)
