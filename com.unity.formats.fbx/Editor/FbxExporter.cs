@@ -64,6 +64,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// </para>
     /// <para>For API overview and example scripts, refer to @api_index.</para>
     /// </summary>
+#if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
     public sealed class ModelExporter
     {
         const string Title =

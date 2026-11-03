@@ -7,6 +7,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 {
     namespace Visitors
     {
+#if UNITY_7000_0_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         internal static class CameraVisitor
         {
             private static Dictionary<Camera.GateFitMode, FbxCamera.EGateFit> s_mapGateFit = new Dictionary<Camera.GateFitMode, FbxCamera.EGateFit>()

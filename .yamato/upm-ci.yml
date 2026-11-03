@@ -150,6 +150,8 @@ test_trigger_pr:
     - .yamato/upm-ci.yml#test_api_win
 {% for platform in platforms %}
 {% for editor in all_test_editors %}
+# Trunk has no Intel Mac editor, so it is only tested on Silicon Mac.
+{% if editor.version != "trunk" or platform.name != "mac" %}
 # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
 {% if use_autodesk_fbx_submodule_for_testing %}
   # Only run tests in 6000.0 and trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
@@ -161,6 +163,7 @@ test_trigger_pr:
   {% if editor.version == "6000.0" or editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
   {% endif %}
+{% endif %}
 {% endif %}
 {% endfor %}
 {% endfor %}
