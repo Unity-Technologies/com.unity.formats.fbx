@@ -12,6 +12,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Class describing the settings for the FBX Recorder.
     /// </summary>
     [RecorderSettings(typeof(FbxRecorder), "FBX")]
+#if UNITY_7000_0_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
     public class FbxRecorderSettings : RecorderSettings
     {
         [SerializeField] bool m_exportGeometry = true;
