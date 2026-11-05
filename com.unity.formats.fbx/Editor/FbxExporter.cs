@@ -3784,9 +3784,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return renderer.bounds;
             }
 
-            if (t.TryGetComponent<MeshFilter>(out MeshFilter meshFilter))
+            // Use sharedMesh: accessing MeshFilter.mesh would instantiate a copy and assign it to the
+            // MeshFilter, modifying the user's scene.
+            if (t.TryGetComponent<MeshFilter>(out MeshFilter meshFilter) && meshFilter.sharedMesh != null)
             {
-                return meshFilter.mesh.bounds;
+                return TransformBounds(t, meshFilter.sharedMesh.bounds);
             }
 
             if (t.TryGetComponent<Collider>(out Collider collider))
@@ -3794,6 +3796,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return collider.bounds;
             }
             return new Bounds(t.position, Vector3.zero);
+        }
+
+        /// <summary>
+        /// Converts bounds in the local space of a transform to a world space axis-aligned bounds.
+        /// </summary>
+        /// <returns>The world space bounds.</returns>
+        /// <param name="t">Transform.</param>
+        /// <param name="localBounds">Bounds in the local space of the transform.</param>
+        private static Bounds TransformBounds(Transform t, Bounds localBounds)
+        {
+            var min = localBounds.min;
+            var max = localBounds.max;
+            var worldBounds = new Bounds(t.TransformPoint(min), Vector3.zero);
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(min.x, min.y, max.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(min.x, max.y, min.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(min.x, max.y, max.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(max.x, min.y, min.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(max.x, min.y, max.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(max.x, max.y, min.z)));
+            worldBounds.Encapsulate(t.TransformPoint(max));
+            return worldBounds;
         }
 
         /// <summary>
