@@ -51,7 +51,7 @@ namespace UnityEngine.Formats.Fbx.Exporter
     ///         FbxPrefabInspector
     ///         FbxPrefabAutoUpdater
     /// </summary>
-#if UNITY_7000_0_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
     [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
 #endif
     internal class FbxPrefab : MonoBehaviour
