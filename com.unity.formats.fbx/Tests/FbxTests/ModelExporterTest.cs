@@ -843,6 +843,204 @@ namespace FbxExporter.UnitTests
             Debug.LogWarningFormat("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
         }
 
+        /// <summary>
+        /// Exports a 4 vertex skinned mesh to an ASCII FBX file and returns the vertex indices
+        /// that were written to the skin cluster of each bone, keyed by bone name.
+        /// </summary>
+        /// <param name="boneNames">Names of the bones, in SkinnedMeshRenderer.bones order. A null entry becomes a null (destroyed) bone.</param>
+        /// <param name="bonesPerVertex">Number of bone weights for each of the 4 vertices.</param>
+        /// <param name="boneWeights">All bone weights, in vertex order.</param>
+        private Dictionary<string, List<int>> ExportSkinnedQuadAndReadClusters(string[] boneNames, byte[] bonesPerVertex, BoneWeight1[] boneWeights)
+        {
+            var root = new GameObject("Root");
+            var skin = new GameObject("Skin");
+            skin.transform.SetParent(root.transform, false);
+
+            var bones = new Transform[boneNames.Length];
+            var bindposes = new Matrix4x4[boneNames.Length];
+            for (int i = 0; i < boneNames.Length; i++)
+            {
+                var bone = new GameObject(boneNames[i] ?? "BoneToDestroy");
+                bone.transform.SetParent(root.transform, false);
+                bone.transform.localPosition = new Vector3(0, i, 0);
+                bones[i] = bone.transform;
+                bindposes[i] = Matrix4x4.identity;
+            }
+
+            var mesh = new Mesh();
+            mesh.vertices = new[] { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 1, 0), new Vector3(0, 1, 0) };
+            mesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
+            mesh.bindposes = bindposes;
+            // NativeArray in a using statement is read-only, so build them from managed arrays.
+            using (var nativeBonesPerVertex = new Unity.Collections.NativeArray<byte>(bonesPerVertex, Unity.Collections.Allocator.Temp))
+            using (var nativeBoneWeights = new Unity.Collections.NativeArray<BoneWeight1>(boneWeights, Unity.Collections.Allocator.Temp))
+            {
+                mesh.SetBoneWeights(nativeBonesPerVertex, nativeBoneWeights);
+            }
+
+            var smr = skin.AddComponent<SkinnedMeshRenderer>();
+            smr.sharedMesh = mesh;
+            smr.bones = bones;
+            smr.rootBone = bones[0];
+
+            for (int i = 0; i < boneNames.Length; i++)
+            {
+                if (boneNames[i] == null)
+                {
+                    // leaves a null entry in SkinnedMeshRenderer.bones
+                    Object.DestroyImmediate(bones[i].gameObject);
+                }
+            }
+
+            try
+            {
+                var fbxPath = GetRandomFbxFilePath();
+                var options = new ExportModelOptions { ExportFormat = ExportFormat.ASCII };
+                Assert.That(ModelExporter.ExportObject(fbxPath, root, options), Is.EqualTo(fbxPath));
+                return ReadSkinClusterVertices(File.ReadAllLines(fbxPath));
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(mesh);
+            }
+        }
+
+        /// <summary>
+        /// Parses the skin clusters of an ASCII FBX file.
+        /// </summary>
+        /// <returns>The vertex indices written to each cluster, keyed by the name of the bone the cluster is linked to.</returns>
+        private static Dictionary<string, List<int>> ReadSkinClusterVertices(string[] fbxLines)
+        {
+            var modelNames = new Dictionary<string, string>();
+            var clusterIndices = new Dictionary<string, List<int>>();
+            var modelRegex = new System.Text.RegularExpressions.Regex("^\\s*Model:\\s*(\\d+)\\s*,\\s*\"Model::([^\"]*)\"");
+            var clusterRegex = new System.Text.RegularExpressions.Regex("^\\s*Deformer:\\s*(\\d+)\\s*,\\s*\"[^\"]*\"\\s*,\\s*\"Cluster\"");
+            var connectionRegex = new System.Text.RegularExpressions.Regex("^\\s*C:\\s*\"OO\"\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)");
+
+            List<int> current = null;
+            var depth = 0;
+            var inIndexes = false;
+            foreach (var line in fbxLines)
+            {
+                var modelMatch = modelRegex.Match(line);
+                if (modelMatch.Success)
+                {
+                    modelNames[modelMatch.Groups[1].Value] = modelMatch.Groups[2].Value;
+                }
+
+                if (current == null)
+                {
+                    var clusterMatch = clusterRegex.Match(line);
+                    if (clusterMatch.Success)
+                    {
+                        current = new List<int>();
+                        clusterIndices[clusterMatch.Groups[1].Value] = current;
+                        depth = 1;
+                        inIndexes = false;
+                    }
+                    continue;
+                }
+
+                var trimmed = line.Trim();
+                if (trimmed.StartsWith("Indexes:"))
+                {
+                    inIndexes = true;
+                }
+                else if (trimmed.StartsWith("Weights:"))
+                {
+                    inIndexes = false;
+                }
+                else if (inIndexes && trimmed.StartsWith("a:"))
+                {
+                    foreach (var value in trimmed.Substring(2).Split(new[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        current.Add(int.Parse(value.Trim()));
+                    }
+                }
+
+                foreach (var c in line)
+                {
+                    if (c == '{') depth++;
+                    else if (c == '}') depth--;
+                }
+                if (depth <= 0)
+                {
+                    current = null;
+                }
+            }
+
+            // a cluster is connected to the node of the bone it is linked to
+            var result = new Dictionary<string, List<int>>();
+            foreach (var line in fbxLines)
+            {
+                var connectionMatch = connectionRegex.Match(line);
+                if (!connectionMatch.Success)
+                {
+                    continue;
+                }
+                var a = connectionMatch.Groups[1].Value;
+                var b = connectionMatch.Groups[2].Value;
+                string boneName;
+                if (clusterIndices.ContainsKey(a) && modelNames.TryGetValue(b, out boneName))
+                {
+                    result[boneName] = clusterIndices[a];
+                }
+                else if (clusterIndices.ContainsKey(b) && modelNames.TryGetValue(a, out boneName))
+                {
+                    result[boneName] = clusterIndices[b];
+                }
+            }
+            return result;
+        }
+
+        [Test]
+        public void TestSkinWeightsExportedWithNullBone()
+        {
+            // UUM-158294: a vertex weighted to a null bone has no cluster, which used to leave the bone weight
+            // read cursor behind and made every later vertex lose its weights.
+            // Vertex 0 is weighted to bone index 1 (null), vertices 1 to 3 are weighted to bone index 0.
+            var clusters = ExportSkinnedQuadAndReadClusters(
+                new[] { "BoneA", null },
+                new byte[] { 1, 1, 1, 1 },
+                new[]
+                {
+                    new BoneWeight1 { boneIndex = 1, weight = 1f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f }
+                });
+
+            Assert.That(clusters.ContainsKey("BoneA"), Is.True, "No skin cluster was exported for BoneA");
+            Assert.That(clusters["BoneA"], Is.EquivalentTo(new[] { 1, 2, 3 }), "Vertices weighted to BoneA lost their weights");
+        }
+
+        [Test]
+        public void TestSkinWeightsExportedWithZeroWeightInfluence()
+        {
+            // UUM-158294: a zero weight influence is not exported, which used to leave the bone weight
+            // read cursor behind and made every later vertex lose its weights.
+            // Vertex 0 has an influence of weight 0 from bone index 1, all vertices are fully weighted to bone index 0.
+            var clusters = ExportSkinnedQuadAndReadClusters(
+                new[] { "BoneA", "BoneB" },
+                new byte[] { 2, 1, 1, 1 },
+                new[]
+                {
+                    new BoneWeight1 { boneIndex = 0, weight = 1f },
+                    new BoneWeight1 { boneIndex = 1, weight = 0f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f }
+                });
+
+            Assert.That(clusters.ContainsKey("BoneA"), Is.True, "No skin cluster was exported for BoneA");
+            Assert.That(clusters["BoneA"], Is.EquivalentTo(new[] { 0, 1, 2, 3 }), "Vertices weighted to BoneA lost their weights");
+            if (clusters.ContainsKey("BoneB"))
+            {
+                Assert.That(clusters["BoneB"], Is.Empty, "A zero weight influence should not be exported");
+            }
+        }
+
         private delegate float GetDistance<T>(T x, T y);
         private static float ComputeHausdorffDistance<T>(T[] orig, T[] converted, GetDistance<T> getDistance)
         {
