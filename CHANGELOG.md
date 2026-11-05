@@ -6,6 +6,9 @@
 - Replaced obsolete `FindObjectsByType<T>(FindObjectsSortMode)` with the parameterless `FindObjectsByType<T>()` on Unity 6.4+ (warning CS0618).
 - Upgraded serialized importer settings on test models/textures to the formats required by Unity 6.6
 
+### Fixed
+- Fixed objects without an enabled renderer being exported with a mesh when **Export Unrendered** is disabled and **Keep Instances** is enabled and the mesh is shared with a rendered object.
+
 ## [5.1.6] - 2026-06-03
 ### Changed
 - Replaced obsolete `EntityId.GetRawData()` with `EntityId.ToULong(EntityId)` (warning CS0618).
