@@ -1,7 +1,8 @@
 {
   "exempts":{
     "messages": [
-    "MaterialLocation.External is obsolete. External Material Location is no longer supported."
+    "MaterialLocation.External is obsolete. External Material Location is no longer supported.",
+    "'Camera.onPreCull' is obsolete: 'Camera.onPreCull is deprecated now that the Built-In Render Pipeline is removed."
     ]
   }
 }
