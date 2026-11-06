@@ -38,12 +38,9 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
 {% else %}
     - unity-downloader-cli -u {{ editor.version }} -c Editor --wait --published-only
 {% endif %}
-    - >
-      timeout -k 120 2700 UnifiedTestRunner
-      --testproject=TestProjects/TestProjectUsingAutodeskFbxSubmodule
-      --editor-location=.Editor
-      --suite=editor --suite=playmode
-      --artifacts_path=TestResults
+    - |
+      ( sleep 2700; mkdir -p TestResults/hang; ps auxf > TestResults/hang/ps.txt; pkill -ABRT -f '.Editor/Unity'; sleep 90; cp -r ~/.config/unity3d TestResults/hang/ 2>/dev/null; pkill -9 -f '.Editor/Unity'; pkill -9 -f UnifiedTestRunner ) > /dev/null 2>&1 &
+      UnifiedTestRunner --testproject=TestProjects/TestProjectUsingAutodeskFbxSubmodule --editor-location=.Editor --suite=editor --suite=playmode --artifacts_path=TestResults
   dependencies:
     - .yamato/pack-autodesk-fbx.yml#pack_autodesk_fbx
   artifacts:
