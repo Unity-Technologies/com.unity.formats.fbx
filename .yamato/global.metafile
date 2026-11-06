@@ -60,7 +60,7 @@ ubuntu_platform: &ubuntu
   name: ubuntu
   type: Unity::VM
   image: package-ci/ubuntu-22.04:v4
-  flavor: b1.medium
+  flavor: b1.large
 
   
 platforms:
