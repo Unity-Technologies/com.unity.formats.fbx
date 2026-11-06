@@ -58,7 +58,7 @@ test_{{ platform.name }}_{{ editor.version }}:
 {% if platform.model %}
     model: {{ platform.model }}
 {% endif %}
-    image: {{ platform.image }}
+    image: {% if platform.test_image %}{{ platform.test_image }}{% else %}{{ platform.image }}{% endif %}
     flavor: {{ platform.flavor}}
   variables:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
@@ -90,7 +90,7 @@ validate_{{ platform.name }}_{{ editor.version }}:
 {% if platform.model %}
     model: {{ platform.model }}
 {% endif %}
-    image: {{ platform.image }}
+    image: {% if platform.test_image %}{{ platform.test_image }}{% else %}{{ platform.image }}{% endif %}
     flavor: {{ platform.flavor}}
   variables:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1

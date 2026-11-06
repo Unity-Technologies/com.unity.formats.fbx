@@ -45,6 +45,8 @@ mac_platform: &mac
   type: Unity::VM::osx
   #Pin Mac image to v4.19.0 because of https://jira.unity3d.com/browse/FBX-479
   image: package-ci/macos-12:v4.19.0
+  # The editor needs macOS 13 or later, but building the bindings needs the mono and SWIG from the macOS 12 image.
+  test_image: package-ci/macos-13:v4
   flavor: b1.medium
 
 mac_arm64_platform: &mac_arm64
