@@ -39,7 +39,7 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
     - unity-downloader-cli -u {{ editor.version }} -c Editor --wait --published-only
 {% endif %}
     - >
-      UnifiedTestRunner
+      timeout -k 120 2700 UnifiedTestRunner
       --testproject=TestProjects/TestProjectUsingAutodeskFbxSubmodule
       --editor-location=.Editor
       --suite=editor --suite=playmode
