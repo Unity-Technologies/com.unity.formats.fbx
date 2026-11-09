@@ -43,7 +43,7 @@ generate_documentation:
       ./build.sh
     - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_doc_generation.git@v0.5.3
       variables:
-        EDITOR_VERSION: {{ all_test_editors.last.version }}
+        EDITOR_VERSION: {{ all_test_editors.first.version }}
         PACKAGE_NAME: com.unity.formats.fbx
         PACKAGE_PATH: com.unity.formats.fbx
         #Set to false because some file links such as api/index.html don't exist in local Documentation folder and will cause warnings. They only exist in generated documentation. 
