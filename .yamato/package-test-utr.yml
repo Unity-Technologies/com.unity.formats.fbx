@@ -14,7 +14,7 @@ test_{{ platform.name }}_{{ editor.version }}_using_autodesk_fbx_submodule:
 {% if platform.model %}
     model: {{ platform.model }}
 {% endif %}
-    image: {{ platform.image }}
+    image: {% if platform.test_image %}{{ platform.test_image }}{% else %}{{ platform.image }}{% endif %}
     flavor: {{ platform.flavor}}
   commands:
 {% if platform.name contains "win" -%}
