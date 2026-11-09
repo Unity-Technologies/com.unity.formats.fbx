@@ -5,6 +5,8 @@
 - Bumped the minimum supported Unity version to 6000.0 (Unity 6.0).
 - Replaced obsolete `FindObjectsByType<T>(FindObjectsSortMode)` with the parameterless `FindObjectsByType<T>()` on Unity 6.4+ (warning CS0618).
 - Upgraded serialized importer settings on test models/textures to the formats required by Unity 6.6
+### Fixed
+- Fixed skinned meshes losing bone weights on export. If a bone was null or a vertex had a zero-weight influence, the vertices after it were exported with missing or wrong skin weights.
 
 ## [5.1.6] - 2026-06-03
 ### Changed
