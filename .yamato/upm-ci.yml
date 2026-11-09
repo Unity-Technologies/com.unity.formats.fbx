@@ -36,9 +36,11 @@ generate_documentation:
     image: {{ mac_platform.image }}
     flavor: {{ mac_platform.flavor }}
   commands:
+    # Homebrew has no CMake bottle for macOS 12, and building it from source is unreliable.
     # Run build script to copy CHANGELOG.md and LICENSE.md into com.unity.formats.fbx package.
-    - brew install cmake
-    - ./build.sh
+    - |
+      cmake --version || { curl -sSfL https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-macos-universal.tar.gz | tar xz -C "$HOME" && export PATH="$HOME/cmake-3.31.6-macos-universal/CMake.app/Contents/bin:$PATH"; }
+      ./build.sh
     - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_doc_generation.git@v0.5.3
       variables:
         EDITOR_VERSION: {{ all_test_editors.last.version }}
