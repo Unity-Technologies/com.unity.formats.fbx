@@ -1,6 +1,9 @@
 # Changes in Fbx Exporter
 
 ## [Unreleased]
+### Fixed
+- Fixed Parent Constraint sources being exported with the offsets of a different source when an earlier source of the constraint is missing or not exported.
+
 ### Changed
 - Bumped the minimum supported Unity version to 6000.0 (Unity 6.0).
 - Replaced obsolete `FindObjectsByType<T>(FindObjectsSortMode)` with the parameterless `FindObjectsByType<T>()` on Unity 6.4+ (warning CS0618).
