@@ -1,4 +1,4 @@
-﻿//#define DEBUG_UNITTEST
+//#define DEBUG_UNITTEST
 using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;

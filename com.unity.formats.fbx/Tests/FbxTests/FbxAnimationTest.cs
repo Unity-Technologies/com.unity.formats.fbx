@@ -1,4 +1,4 @@
-﻿// NOTE: uncomment the next line to leave temporary FBX files on disk
+// NOTE: uncomment the next line to leave temporary FBX files on disk
 // and create a imported object in the scene.
 //#define DEBUG_UNITTEST
 
