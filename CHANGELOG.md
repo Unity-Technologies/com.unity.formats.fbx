@@ -6,6 +6,9 @@
 - Replaced obsolete `FindObjectsByType<T>(FindObjectsSortMode)` with the parameterless `FindObjectsByType<T>()` on Unity 6.4+ (warning CS0618).
 - Upgraded serialized importer settings on test models/textures to the formats required by Unity 6.6
 
+### Fixed
+- Fixed blend shape animation being exported 100 times too large when the blend shape's name ends in "weight".
+
 ## [5.1.6] - 2026-06-03
 ### Changed
 - Replaced obsolete `EntityId.GetRawData()` with `EntityId.ToULong(EntityId)` (warning CS0618).
