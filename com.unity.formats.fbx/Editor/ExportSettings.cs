@@ -136,6 +136,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             m_convertEditor = UnityEditor.Editor.CreateEditor(exportSettings.ConvertToPrefabSettings) as ConvertToPrefabSettingsEditor;
         }
 
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         static class Style
         {
             public static GUIContent Application3D = new GUIContent(
@@ -548,6 +551,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
     }
 
     [FilePath("ProjectSettings/FbxExportSettings.asset", FilePathAttribute.Location.ProjectFolder)]
+#if UNITY_6000_7_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
     internal class ExportSettings : ScriptableObject
     {
         internal const string kDefaultSavePath = ".";
