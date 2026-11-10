@@ -1377,9 +1377,11 @@ namespace FbxExporter.UnitTests
                 CreateGameObject(name, root.transform);
             }
 
-            // export as ASCII so the node names can be read directly from the file
+            // export as ASCII so the node names can be read directly from the file,
+            // and keep the names as they are instead of converting them to Maya compatible names
             var exportOptions = new ExportModelOptions();
             exportOptions.ExportFormat = ExportFormat.ASCII;
+            exportOptions.UseMayaCompatibleNames = false;
             var filename = GetRandomFbxFilePath();
             var result = ModelExporter.ExportObject(filename, root, exportOptions);
             Assert.AreEqual(filename, result);
