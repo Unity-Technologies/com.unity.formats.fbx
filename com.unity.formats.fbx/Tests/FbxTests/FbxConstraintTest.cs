@@ -4,6 +4,10 @@ using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Animations;
+using UnityEditor.Formats.Fbx.Exporter;
+using System.Globalization;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace FbxExporter.UnitTests
 {
@@ -198,6 +202,76 @@ namespace FbxExporter.UnitTests
             Assert.That(expConstraint.translationAxis, Is.EqualTo(parentConstraint.translationAxis));
             Assert.That(AreRotationEqual(expConstraint.GetRotationOffset(0), parentConstraint.GetRotationOffset(0)), Is.True);
             Assert.That(expConstraint.GetTranslationOffset(0), Is.EqualTo(parentConstraint.GetTranslationOffset(0)));
+        }
+
+        [Test]
+        public void TestParentConstraintOffsetsWithUnexportedSource()
+        {
+            // test that each exported source keeps its own offsets when an earlier source is not exported
+            var notExported = new GameObject("notExportedSource");
+
+            var root = new GameObject("root");
+            var exportedSource = new GameObject("exportedSource");
+            exportedSource.transform.SetParent(root.transform, false);
+            var constrained = new GameObject("constrained");
+            constrained.transform.SetParent(root.transform, false);
+
+            var parentConstraint = constrained.AddComponent<ParentConstraint>();
+            // source 0 is outside of the exported hierarchy, source 1 is exported
+            parentConstraint.AddSource(new ConstraintSource { sourceTransform = notExported.transform, weight = 1f });
+            parentConstraint.AddSource(new ConstraintSource { sourceTransform = exportedSource.transform, weight = 1f });
+            parentConstraint.SetTranslationOffset(0, new Vector3(1, 2, 3));
+            parentConstraint.SetTranslationOffset(1, new Vector3(4, 5, 6));
+            parentConstraint.SetRotationOffset(0, new Vector3(10, 0, 0));
+            parentConstraint.SetRotationOffset(1, new Vector3(0, 20, 0));
+
+            // export as ascii so the per-source offsets can be read back from the file
+            var exportOptions = new ExportModelSettingsSerialize();
+            exportOptions.SetExportFormat(ExportFormat.ASCII);
+            var filename = GetRandomFileNamePath();
+            Debug.unityLogger.logEnabled = false;
+            var fbxFileName = ModelExporter.ExportObject(filename, root, exportOptions);
+            Debug.unityLogger.logEnabled = true;
+            Assert.That(fbxFileName, Is.Not.Null);
+
+            var translation = new double[0];
+            var rotation = new double[0];
+            var offsetRegex = new Regex("\"exportedSource\\.Offset ([TR])\".*?,\\s*([-0-9.eE+]+),\\s*([-0-9.eE+]+),\\s*([-0-9.eE+]+)\\s*$");
+            foreach (var line in File.ReadAllLines(fbxFileName))
+            {
+                var match = offsetRegex.Match(line);
+                if (!match.Success)
+                {
+                    continue;
+                }
+
+                // the sign of some components depends on the handedness conversion, so only compare magnitudes
+                var values = new double[]
+                {
+                    System.Math.Abs(double.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture)),
+                    System.Math.Abs(double.Parse(match.Groups[3].Value, CultureInfo.InvariantCulture)),
+                    System.Math.Abs(double.Parse(match.Groups[4].Value, CultureInfo.InvariantCulture))
+                };
+                if (match.Groups[1].Value == "T")
+                {
+                    translation = values;
+                }
+                else
+                {
+                    rotation = values;
+                }
+            }
+
+            Assert.That(translation.Length, Is.EqualTo(3), "Translation offset of the exported source not found in the FBX file");
+            Assert.That(rotation.Length, Is.EqualTo(3), "Rotation offset of the exported source not found in the FBX file");
+
+            // translation is exported in centimeters
+            Assert.That(translation[0], Is.EqualTo(400).Within(0.01));
+            Assert.That(translation[1], Is.EqualTo(500).Within(0.01));
+            Assert.That(translation[2], Is.EqualTo(600).Within(0.01));
+            Assert.That(rotation[0], Is.EqualTo(0).Within(0.01));
+            Assert.That(rotation[1], Is.EqualTo(20).Within(0.01));
+            Assert.That(rotation[2], Is.EqualTo(0).Within(0.01));
         }
 
         [Test]
