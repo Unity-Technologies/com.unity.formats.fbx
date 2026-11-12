@@ -52,7 +52,9 @@ build_mac:
     # Load submodule and update it
     - git submodule update --init --recursive
     - git submodule update --remote
+    # Homebrew has no CMake bottle for macOS 12, and building it from source is unreliable.
     - |
+      cmake --version || { curl -sSfL https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-macos-universal.tar.gz | tar xz -C "$HOME" && export PATH="$HOME/cmake-3.31.6-macos-universal/CMake.app/Contents/bin:$PATH"; }
       cd ./External/com.autodesk.fbx
       ./build_mac.sh
   artifacts:

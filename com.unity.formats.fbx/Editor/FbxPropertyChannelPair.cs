@@ -7,6 +7,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Store FBX property name and channel name
     /// Default constructor added because it needs to be called before autoimplemented properties can be assigned. Otherwise we get build errors
     /// </summary>
+#if UNITY_6000_7_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
     struct FbxPropertyChannelPair
     {
         public string Property { get; private set; }

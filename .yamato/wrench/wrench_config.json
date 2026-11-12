@@ -34,14 +34,14 @@
   ],
   "jobs_to_monitor": {
     "com.unity.formats.fbx": [
-      ".yamato/wrench/api-validation-jobs.yml#api_validation_-_formats_fbx_-_2020_3_-_win10",
+      ".yamato/wrench/api-validation-jobs.yml#api_validation_-_formats_fbx_-_6000_0_-_win10",
       ".yamato/wrench/preview-a-p-v.yml#all_preview_apv_jobs",
       ".yamato/wrench/promotion-jobs.yml#publish_dry_run_formats_fbx"
     ]
   },
   "publishing_job": ".yamato/wrench/promotion-jobs.yml#publish_formats_fbx",
   "branch_pattern": "ReleaseSlash",
-  "wrench_version": "2.3.1.0",
+  "wrench_version": "3.26.0.0",
   "pvp_exemption_path": ".yamato/wrench/pvp-exemptions.json",
   "cs_project_path": "Tools/CI/fbxexporter.Cookbook.csproj"
 }

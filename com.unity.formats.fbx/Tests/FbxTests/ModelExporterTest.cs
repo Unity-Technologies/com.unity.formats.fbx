@@ -88,17 +88,17 @@ namespace FbxExporter.UnitTests
                 var character = new GameObject();
                 var smr = character.AddComponent<SkinnedMeshRenderer>();
                 smr.sharedMesh = cube.GetComponent<MeshFilter>().sharedMesh;
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_6000_4_OR_NEWER
+                var meshCount = Object.FindObjectsByType<Mesh>().Length;
+#else
                 var meshCount = Object.FindObjectsByType<Mesh>(FindObjectsSortMode.None).Length;
-#else // UNITY_2023_1_OR_NEWER
-                var meshCount = Object.FindObjectsOfType<Mesh>().Length;
-#endif // UNITY_2023_1_OR_NEWER
+#endif // UNITY_6000_4_OR_NEWER
                 ModelExporter.ExportObject(GetRandomFbxFilePath(), character);
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_6000_4_OR_NEWER
+                Assert.AreEqual(meshCount, Object.FindObjectsByType<Mesh>().Length);
+#else
                 Assert.AreEqual(meshCount, Object.FindObjectsByType<Mesh>(FindObjectsSortMode.None).Length);
-#else // UNITY_2023_1_OR_NEWER
-                Assert.AreEqual(meshCount, Object.FindObjectsOfType<Mesh>().Length);
-#endif // UNITY_2023_1_OR_NEWER
+#endif // UNITY_6000_4_OR_NEWER
             }
 
             // Test euler to quaternion conversion
@@ -1363,6 +1363,57 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual(clampMat.mainTextureScale, importedClampMat.mainTextureScale);
             Assert.AreEqual(repeatMat.mainTextureOffset, importedRepeatMat.mainTextureOffset);
             Assert.AreEqual(repeatMat.mainTextureScale, importedRepeatMat.mainTextureScale);
+        }
+
+        // Katakana, an accented Latin letter and a German umlaut
+        static readonly string[] k_nonAsciiNames = { "\u7247\u4EEE\u540D", "Accentu\u00E9", "W\u00FCrfel" };
+
+        [Test]
+        public void TestExportNonAsciiNames()
+        {
+            var root = CreateGameObject("root");
+            foreach (var name in k_nonAsciiNames)
+            {
+                CreateGameObject(name, root.transform);
+            }
+
+            // export as ASCII so the node names can be read directly from the file,
+            // and keep the names as they are instead of converting them to Maya compatible names
+            var exportOptions = new ExportModelOptions();
+            exportOptions.ExportFormat = ExportFormat.ASCII;
+            exportOptions.UseMayaCompatibleNames = false;
+            var filename = GetRandomFbxFilePath();
+            var result = ModelExporter.ExportObject(filename, root, exportOptions);
+            Assert.AreEqual(filename, result);
+
+            var fbxText = File.ReadAllText(filename, System.Text.Encoding.UTF8);
+            foreach (var name in k_nonAsciiNames)
+            {
+                StringAssert.Contains("\"Model::" + name + "\"", fbxText);
+            }
+
+            var fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.That(fbxObj, Is.Not.Null);
+            foreach (var name in k_nonAsciiNames)
+            {
+                Assert.That(fbxObj.transform.Find(name), Is.Not.Null, name);
+            }
+        }
+
+        [Test]
+        public void TestExportToNonAsciiPath()
+        {
+            var directory = Path.Combine(filePath, k_nonAsciiNames[0] + " " + k_nonAsciiNames[1]);
+            Directory.CreateDirectory(directory);
+            var filename = GetRandomFileNamePath(directory, prefixName: k_nonAsciiNames[2] + "_", extName: ".fbx");
+
+            var result = ModelExporter.ExportObject(filename, CreateGameObject("cube"));
+            Assert.AreEqual(filename, result);
+            Assert.That(filename, Does.Exist);
+
+            var fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.That(fbxObj, Is.Not.Null);
+            Assert.That(fbxObj.GetComponent<MeshFilter>(), Is.Not.Null);
         }
     }
 }

@@ -5,6 +5,9 @@ using System.Security.Permissions;
 
 namespace UnityEditor.Formats.Fbx.Exporter
 {
+#if UNITY_6000_7_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
     internal abstract class DCCIntegration
     {
         public abstract string DccDisplayName { get; }
