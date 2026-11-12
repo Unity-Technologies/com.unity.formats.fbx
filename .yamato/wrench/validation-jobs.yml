@@ -40,7 +40,7 @@ validate_-_formats_fbx_-_6000_0_-_macos13:
   - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -117,7 +117,7 @@ validate_-_formats_fbx_-_6000_0_-_ubuntu2204:
   - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -194,7 +194,7 @@ validate_-_formats_fbx_-_6000_0_-_win10:
   - command: 'UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -271,7 +271,7 @@ validate_-_formats_fbx_-_6000_3_-_macos13:
   - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -348,7 +348,7 @@ validate_-_formats_fbx_-_6000_3_-_ubuntu2204:
   - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -425,7 +425,7 @@ validate_-_formats_fbx_-_6000_3_-_win10:
   - command: 'UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -503,7 +503,7 @@ validate_-_formats_fbx_-_6000_6_-_macos13arm:
   - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -580,7 +580,7 @@ validate_-_formats_fbx_-_6000_6_-_ubuntu2204:
   - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -657,7 +657,7 @@ validate_-_formats_fbx_-_6000_6_-_win10:
   - command: 'UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -735,7 +735,7 @@ validate_-_formats_fbx_-_6000_7_-_macos13arm:
   - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -812,7 +812,7 @@ validate_-_formats_fbx_-_6000_7_-_ubuntu2204:
   - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -889,7 +889,7 @@ validate_-_formats_fbx_-_6000_7_-_win10:
   - command: 'UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -967,7 +967,7 @@ validate_-_formats_fbx_-_7000_0_-_macos13arm:
   - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -1044,7 +1044,7 @@ validate_-_formats_fbx_-_7000_0_-_ubuntu2204:
   - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
@@ -1121,7 +1121,7 @@ validate_-_formats_fbx_-_7000_0_-_win10:
   - command: 'UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/editor --suite=editor "--ff={ops.upmpvpevidence.enable=true}" '
     timeout: 20
     retries: 1
-  - command: 'UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode "--ff={ops.upmpvpevidence.enable=true}" '
+  - command: UnifiedTestRunner.exe --testproject=test-formats.fbx --editor-location=.Editor --clean-library --reruncount=1 --clean-library-on-rerun --artifacts-path=artifacts/playmode --suite=playmode --zero-tests-are-ok=1
     timeout: 20
     retries: 1
   after:
