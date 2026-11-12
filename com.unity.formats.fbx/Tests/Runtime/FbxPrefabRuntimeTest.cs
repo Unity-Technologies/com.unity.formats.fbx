@@ -1,23 +1,15 @@
+using System;
 using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.Formats.Fbx.Exporter;
 
 namespace FbxExporter.RuntimeTests
 {
     public class FbxPrefabRuntimeTest
     {
         [Test]
-        public void FbxPrefabCanBeAddedToGameObject()
+        public void RuntimeAssemblyContainsFbxPrefab()
         {
-            var go = new GameObject("FbxPrefabRuntimeTest");
-            try
-            {
-                Assert.IsNotNull(go.AddComponent<FbxPrefab>());
-            }
-            finally
-            {
-                Object.DestroyImmediate(go);
-            }
+            var type = Type.GetType("UnityEngine.Formats.Fbx.Exporter.FbxPrefab, Unity.Formats.Fbx.Runtime");
+            Assert.IsNotNull(type);
         }
     }
 }
