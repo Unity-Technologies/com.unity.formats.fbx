@@ -6,6 +6,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 {
     namespace CustomExtensions
     {
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         internal class MetricDistance : object
         {
             public static readonly MetricDistance Millimeter = new MetricDistance(0.001f);
@@ -121,6 +124,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
         }
 
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         internal class ImperialDistance
         {
             public static readonly ImperialDistance Inch = new ImperialDistance(1.0f);

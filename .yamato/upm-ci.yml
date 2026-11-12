@@ -36,12 +36,14 @@ generate_documentation:
     image: {{ mac_platform.image }}
     flavor: {{ mac_platform.flavor }}
   commands:
+    # Homebrew has no CMake bottle for macOS 12, and building it from source is unreliable.
     # Run build script to copy CHANGELOG.md and LICENSE.md into com.unity.formats.fbx package.
-    - brew install cmake
-    - ./build.sh
+    - |
+      cmake --version || { curl -sSfL https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-macos-universal.tar.gz | tar xz -C "$HOME" && export PATH="$HOME/cmake-3.31.6-macos-universal/CMake.app/Contents/bin:$PATH"; }
+      ./build.sh
     - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_doc_generation.git@v0.5.3
       variables:
-        EDITOR_VERSION: {{ all_test_editors.last.version }}
+        EDITOR_VERSION: {{ all_test_editors.first.version }}
         PACKAGE_NAME: com.unity.formats.fbx
         PACKAGE_PATH: com.unity.formats.fbx
         #Set to false because some file links such as api/index.html don't exist in local Documentation folder and will cause warnings. They only exist in generated documentation. 
@@ -58,7 +60,7 @@ test_{{ platform.name }}_{{ editor.version }}:
 {% if platform.model %}
     model: {{ platform.model }}
 {% endif %}
-    image: {{ platform.image }}
+    image: {% if platform.test_image %}{{ platform.test_image }}{% else %}{{ platform.image }}{% endif %}
     flavor: {{ platform.flavor}}
   variables:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
@@ -90,7 +92,7 @@ validate_{{ platform.name }}_{{ editor.version }}:
 {% if platform.model %}
     model: {{ platform.model }}
 {% endif %}
-    image: {{ platform.image }}
+    image: {% if platform.test_image %}{{ platform.test_image }}{% else %}{{ platform.image }}{% endif %}
     flavor: {{ platform.flavor}}
   variables:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
@@ -123,7 +125,7 @@ test_api_win:
     - gsudo choco source add -n Unity -s https://artifactory.prd.it.unity3d.com/artifactory/api/nuget/unity-choco-local
     - gsudo choco install unity-config
     - unity-config project set registry candidates --project-path TestProjects/fbx-api-tests
-    - unity-downloader-cli -u 2022.3 -c Editor
+    - unity-downloader-cli -u 6000.0 -c Editor
     - UnifiedTestRunner --suite=editor --editor-location=.Editor --testproject=TestProjects/fbx-api-tests --artifacts_path=artifacts --reruncount=0
   artifacts:
     logs:
@@ -150,6 +152,8 @@ test_trigger_pr:
     - .yamato/upm-ci.yml#test_api_win
 {% for platform in platforms %}
 {% for editor in all_test_editors %}
+# Trunk has no Intel Mac editor, so it is only tested on Silicon Mac.
+{% if editor.version != "trunk" or platform.name != "mac" %}
 # If use_autodesk_fbx_submodule_for_testing is set, com.unity.formats.fbx package will test against com.autodesk.fbx repo instead of published package.
 {% if use_autodesk_fbx_submodule_for_testing %}
   # Only run tests in 6000.0 and trunk if on Silicon Mac or ARM64 Windows. On other platforms, run tests in all Editor versions.
@@ -161,6 +165,7 @@ test_trigger_pr:
   {% if editor.version == "6000.0" or editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
   {% endif %}
+{% endif %}
 {% endif %}
 {% endfor %}
 {% endfor %}
