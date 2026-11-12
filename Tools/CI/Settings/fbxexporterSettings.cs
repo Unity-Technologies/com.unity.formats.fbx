@@ -1,4 +1,5 @@
 ﻿using RecipeEngine.Api.Commands;
+using RecipeEngine.Api.Platforms;
 using RecipeEngine.Api.Settings;
 using RecipeEngine.Modules.Wrench.Models;
 using RecipeEngine.Modules.Wrench.Settings;
@@ -22,6 +23,10 @@ public class fbxexporterSettings : AnnotatedSettingsBase
                 {
                     PrePackCommands = new List<Command>
                         {new Command("Build", "./build.sh")}
+                },
+                ValidationOptions = new ValidationOptions()
+                {
+                    HostsWhereZeroPlaymodeTestsAreAllowed = new HashSet<HostPlatform>(HostPlatform.All)
                 }
             }
         }
