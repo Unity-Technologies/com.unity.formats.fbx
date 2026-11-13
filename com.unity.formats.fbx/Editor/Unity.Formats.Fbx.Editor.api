@@ -61,8 +61,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
     public enum Include
     {
-        Anim = 1,
         Model = 0,
+        Anim = 1,
         ModelAndAnim = 2,
     }
 
@@ -85,7 +85,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     public enum ObjectPosition
     {
         LocalCentered = 0,
-        Reset = 2,
         WorldAbsolute = 1,
+        Reset = 2,
     }
 }

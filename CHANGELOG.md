@@ -1,9 +1,16 @@
 # Changes in Fbx Exporter
 
+## [5.1.7] - 2026-11-12
+### Changed
+- Updated the FBX SDK bindings to 5.1.5, which uses FBX SDK 2020.3.11 and fixes the security vulnerabilities CVE-2026-10709 and CVE-2026-10710 (Autodesk advisory ADSK-SA-2026-0010).
+- Bumped the minimum supported Unity version to 6000.0 (Unity 6.0).
+- Replaced obsolete `FindObjectsByType<T>(FindObjectsSortMode)` with the parameterless `FindObjectsByType<T>()` on Unity 6.4+ (warning CS0618).
+- Upgraded serialized importer settings on test models/textures to the formats required by Unity 6.6
+
 ## [5.1.6] - 2026-06-03
 ### Changed
 - Replaced obsolete `EntityId.GetRawData()` with `EntityId.ToULong(EntityId)` (warning CS0618).
-- Replaced obsolete `SearchService.GetItems` with `SearchService.Request`(warning CS0618).
+- Replaced obsolete `SearchService.GetItems` with `SearchService.Request` (warning CS0618).
 
 ## [5.1.5] - 2025-09-24
 ### Changed
