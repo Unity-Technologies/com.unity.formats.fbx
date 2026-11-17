@@ -6,7 +6,7 @@ To install this package, follow the instructions in the [Package Manager documen
 
 The FBX Exporter package is compatible with the following versions of the Unity Editor:
 
-* 2020.3 and later
+* 6000.0 (Unity 6.0) and later
 
 ## Supported 3D modeling applications
 

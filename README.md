@@ -37,7 +37,7 @@ The package will be built in-place in com.unity.formats.fbx.
 Testing
 -------
 
-Open `TestProjects/FbxTests` in Unity 2018.2+ and run using the Test Runner.
+Open `TestProjects/FbxTests` in Unity 6000.0+ and run using the Test Runner.
 
 Reporting Bugs
 --------------
