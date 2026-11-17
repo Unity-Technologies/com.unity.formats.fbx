@@ -1233,6 +1233,35 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual(fbxObj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.name, fbxObj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh.name);
         }
 
+        // UUM-158108 Objects without an enabled renderer must not export a mesh when ExportUnrendered is off,
+        // including when KeepInstances is on and the mesh is shared with a rendered object.
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestExportUnrenderedOffSkipsSharedMesh(bool keepInstances)
+        {
+            // rendered parent, and a child with a disabled renderer that shares the parent's mesh
+            var parent = CreateGameObject("parent");
+            var child = CreateGameObject("child", parent.transform);
+            child.GetComponent<MeshRenderer>().enabled = false;
+            Assert.AreEqual(parent.GetComponent<MeshFilter>().sharedMesh, child.GetComponent<MeshFilter>().sharedMesh);
+
+            var exportOptions = new ExportModelOptions();
+            exportOptions.ExportUnrendered = false;
+            exportOptions.KeepInstances = keepInstances;
+
+            var filename = GetRandomFbxFilePath();
+            var result = ModelExporter.ExportObject(filename, parent, exportOptions);
+            Assert.AreEqual(filename, result);
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.That(fbxObj, Is.Not.Null);
+            Assert.That(fbxObj.GetComponent<MeshFilter>(), Is.Not.Null);
+
+            var fbxChild = fbxObj.transform.Find("child");
+            Assert.That(fbxChild, Is.Not.Null);
+            Assert.That(fbxChild.GetComponent<MeshFilter>(), Is.Null);
+        }
+
         /// <summary>
         /// Check if two Vector3's are equal by comparing the squared magnitude.
         /// </summary>
