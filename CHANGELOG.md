@@ -1,6 +1,9 @@
 # Changes in Fbx Exporter
 
 ## [Unreleased]
+### Fixed
+- Fixed Parent Constraint sources being exported with the offsets of a different source when an earlier source of the constraint is missing or not exported.
+
 ### Changed
 - Updated the FBX SDK bindings to 5.1.5, which uses FBX SDK 2020.3.11 and fixes the security vulnerabilities CVE-2026-10709 and CVE-2026-10710 (Autodesk advisory ADSK-SA-2026-0010).
 - Bumped the minimum supported Unity version to 6000.0 (Unity 6.0).
