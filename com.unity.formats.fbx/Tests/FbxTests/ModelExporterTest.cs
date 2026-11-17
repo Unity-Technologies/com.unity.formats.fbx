@@ -1,4 +1,4 @@
-//#define DEBUG_UNITTEST
+﻿//#define DEBUG_UNITTEST
 using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
@@ -1231,6 +1231,43 @@ namespace FbxExporter.UnitTests
             // check that both children reference the same mesh
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             Assert.AreEqual(fbxObj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.name, fbxObj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh.name);
+        }
+
+        // UUM-158079 Generated unique names must not collide with names of other siblings
+        static IEnumerable<TestCaseData> UniqueNodeNameCases()
+        {
+            yield return new TestCaseData(new object[] { new[] { "Cube", "Cube", "Cube_1" } }).SetName("DuplicateThenSuffixedName");
+            yield return new TestCaseData(new object[] { new[] { "Cube_1", "Cube", "Cube" } }).SetName("SuffixedNameThenDuplicate");
+            yield return new TestCaseData(new object[] { new[] { "Cube", "Cube", "Cube" } }).SetName("OnlyDuplicates");
+        }
+
+        [TestCaseSource(nameof(UniqueNodeNameCases))]
+        public void TestExportedNodeNamesAreUnique(string[] childNames)
+        {
+            var filename = GetRandomFbxFilePath();
+            GameObject root = new GameObject("root");
+            foreach (var childName in childNames)
+            {
+                CreateGameObject(childName, root.transform);
+            }
+
+            // export as ASCII so the node names can be read directly from the file
+            var exportOptions = new ExportModelOptions();
+            exportOptions.ExportFormat = ExportFormat.ASCII;
+            var result = ModelExporter.ExportObject(filename, root, exportOptions);
+            Assert.That(result, Is.Not.Null);
+            Assert.AreEqual(filename, result);
+
+            var nodeNames = new List<string>();
+            foreach (System.Text.RegularExpressions.Match match in
+                System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(filename), "Model:\\s*-?\\d+,\\s*\"Model::([^\"]*)\""))
+            {
+                nodeNames.Add(match.Groups[1].Value);
+            }
+
+            // root + one node per child
+            Assert.AreEqual(childNames.Length + 1, nodeNames.Count, "Unexpected node names: " + string.Join(", ", nodeNames.ToArray()));
+            Assert.That(nodeNames, Is.Unique, "Exported node names: " + string.Join(", ", nodeNames.ToArray()));
         }
 
         /// <summary>
