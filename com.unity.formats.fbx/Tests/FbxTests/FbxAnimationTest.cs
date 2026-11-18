@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.Formats.Fbx.Exporter;
 using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
+using UnityEngine.TestTools;
 
 namespace FbxExporter.UnitTests
 {
@@ -811,6 +812,124 @@ namespace FbxExporter.UnitTests
 
             tester.exportOptions = exportOptions;
             return tester.DoIt();
+        }
+
+        // Blend shape curves are already in the 0..100 range that FBX uses for DeformPercent,
+        // so they must be exported unscaled, whatever the blend shape is called.
+        [Test]
+        [TestCase("BodyWeight")]
+        [TestCase("Weight")]
+        [TestCase("BodyShape")] // control: a name that does not end in "weight"
+        public void BlendshapeNameEndingInWeightIsNotScaledTest(string blendShapeName)
+        {
+            const float expectedValue = 40f;
+
+            var mesh = new Mesh();
+            mesh.vertices = new Vector3[] { new Vector3(-0.5f, 0f, 0f), new Vector3(0.5f, 0f, 0f), new Vector3(0.5f, 1f, 0f), new Vector3(-0.5f, 1f, 0f) };
+            mesh.triangles = new int[] { 0, 2, 1, 0, 3, 2 };
+            mesh.RecalculateNormals();
+            mesh.AddBlendShapeFrame(blendShapeName, 100f, new Vector3[] { Vector3.forward, Vector3.forward, Vector3.forward, Vector3.forward }, null, null);
+
+            var go = new GameObject("BlendShapeWeightSuffix");
+            go.AddComponent<SkinnedMeshRenderer>().sharedMesh = mesh;
+
+            var clip = new AnimationClip();
+            clip.legacy = true;
+            clip.name = "anim_" + blendShapeName;
+            clip.SetCurve("", typeof(SkinnedMeshRenderer), "blendShape." + blendShapeName, new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(1f, expectedValue)));
+
+            var animation = go.AddComponent<Animation>();
+            animation.AddClip(clip, clip.name);
+            animation.clip = clip;
+
+            try
+            {
+                var exportOptions = new ExportModelOptions
+                {
+                    ExportFormat = ExportFormat.ASCII,
+                    ModelAnimIncludeOption = Include.ModelAndAnim,
+                    AnimateSkinnedMesh = true
+                };
+
+                var fbxPath = GetRandomFbxFilePath();
+                Assert.That(ModelExporter.ExportObject(fbxPath, go, exportOptions), Is.Not.Null);
+
+                // ASCII FBX stores the animation key values as "KeyValueFloat: *N { a: v0,v1,... }"
+                var keyValues = new List<float>();
+                var fbxText = System.IO.File.ReadAllText(fbxPath);
+                foreach (System.Text.RegularExpressions.Match match in System.Text.RegularExpressions.Regex.Matches(fbxText, @"KeyValueFloat:\s*\*\d+\s*\{\s*a:\s*([^}]*)\}"))
+                {
+                    foreach (var token in match.Groups[1].Value.Split(new char[] { ',', ' ', '\t', '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        keyValues.Add(float.Parse(token, System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                }
+
+                Assert.That(keyValues, Is.Not.Empty, "expected the exported blend shape curve to contain key values");
+                Assert.That(keyValues.Max(), Is.EqualTo(expectedValue).Within(0.01f), "blend shape '" + blendShapeName + "' curve was scaled on export");
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+                Object.DestroyImmediate(mesh);
+                Object.DestroyImmediate(clip);
+            }
+        }
+
+        [Test]
+        public void BlendshapeNameWithSpaceAnimTest()
+        {
+            // Blend shape names may contain spaces (e.g. Blender's default "Key 1"),
+            // the animation curve must still be exported.
+            const string blendShapeName = "Key 1";
+            const string propertyName = "blendShape." + blendShapeName;
+
+            var mesh = new Mesh { name = "BlendshapeNameWithSpaceMesh" };
+            mesh.vertices = new Vector3[] { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 1, 0), new Vector3(0, 1, 0) };
+            mesh.triangles = new int[] { 0, 2, 1, 0, 3, 2 };
+            mesh.RecalculateNormals();
+            var deltaVertices = new Vector3[] { new Vector3(0, 0, 0.5f), new Vector3(0, 0, 0.5f), new Vector3(0, 0, 0.5f), new Vector3(0, 0, 0.5f) };
+            var zeros = new Vector3[4];
+            mesh.AddBlendShapeFrame(blendShapeName, 100f, deltaVertices, zeros, zeros);
+
+            var root = new GameObject("BlendshapeNameWithSpaceRoot");
+            var body = new GameObject("Body");
+            body.transform.SetParent(root.transform, false);
+            var skinnedMeshRenderer = body.AddComponent<SkinnedMeshRenderer>();
+            skinnedMeshRenderer.sharedMesh = mesh;
+
+            var clip = new AnimationClip { name = "anim_BlendshapeNameWithSpace", legacy = true };
+            clip.SetCurve("Body", typeof(SkinnedMeshRenderer), propertyName, new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(1f, 100f)));
+            var animation = root.AddComponent<Animation>();
+            animation.AddClip(clip, clip.name);
+            animation.clip = clip;
+
+            var exportOptions = new ExportModelSettingsSerialize();
+            exportOptions.SetAnimatedSkinnedMesh(true);
+
+            var path = GetRandomFbxFilePath();
+            try
+            {
+                var exportedFilePath = ModelExporter.ExportObject(path, root, exportOptions);
+                Assert.That(exportedFilePath, Is.EqualTo(path));
+
+                // the exporter logs an error ("no fbx property DeformPercent found...") when the blend shape is not found
+                // The exporter logs an informational "Successfully exported" message, so a blanket
+                // NoUnexpectedReceived() would fail here. An unexpected LogError (the symptom of
+                // UUM-158293) still fails the test on its own under the Unity Test Framework.
+
+                AnimTester.ConfigureImportSettings(path);
+                var animClipImported = AnimTester.GetClipFromFbx(path);
+
+                var hasBlendshapeCurve = AnimationUtility.GetCurveBindings(animClipImported).Any(binding => binding.propertyName == propertyName);
+                Assert.That(hasBlendshapeCurve, Is.True, "expected the curve for blend shape '" + blendShapeName + "' to be exported");
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(mesh);
+                Object.DestroyImmediate(clip);
+            }
         }
 
         [Test, TestCaseSource(typeof(AnimationTestDataClass), "QuaternionTestCases")]

@@ -1364,7 +1364,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // For each vertex, iterate over its BoneWeights
                 for (var i = 0; i < numberOfBonesForThisVertex; i++)
                 {
-                    var currentBoneWeight = boneWeights1[boneWeightIndex];
+                    var currentBoneWeight = boneWeights1[boneWeightIndex + i];
 
                     // bone index is index into skinnedmesh.bones[]
                     var boneIndex = currentBoneWeight.boneIndex;
@@ -1384,9 +1384,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                     // add vertex and weighting on vertex to this bone's cluster
                     boneCluster.AddControlPointIndex(actualIndex, weight);
-
-                    boneWeightIndex++;
                 }
+
+                // always move to the next vertex's weights, even if some of this vertex's weights were skipped
+                boneWeightIndex += numberOfBonesForThisVertex;
             }
         }
 
@@ -1531,11 +1532,25 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
+        /// Returns true if the game object has no enabled renderer and the user doesn't want to export unrendered objects.
+        /// </summary>
+        private bool IsUnrenderedAndExcluded(GameObject gameObject)
+        {
+            return !ExportOptions.ExportUnrendered && (!gameObject.GetComponent<Renderer>() || !gameObject.GetComponent<Renderer>().enabled);
+        }
+
+        /// <summary>
         /// if this game object is a model prefab or the model has already been exported, then export with shared components
         /// </summary>
         private bool ExportInstance(GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
         {
             if (!unityGo || fbxNode == null)
+            {
+                return false;
+            }
+
+            // don't export (or register) the mesh of an unrendered object when the user doesn't want unrendered objects
+            if (IsUnrenderedAndExcluded(unityGo))
             {
                 return false;
             }
@@ -1746,10 +1761,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 set { m_weight = value; }
             }
 
-            public ExpConstraintSource(FbxNode node, float weight)
+            private int m_unityIndex;
+            /// <summary>
+            /// Index of this source in the Unity constraint's source list.
+            /// Differs from the index in the exported list when sources are skipped.
+            /// </summary>
+            public int unityIndex
+            {
+                get { return m_unityIndex; }
+                set { m_unityIndex = value; }
+            }
+
+            public ExpConstraintSource(FbxNode node, float weight, int unityIndex)
             {
                 this.m_node = node;
                 this.m_weight = weight;
+                this.m_unityIndex = unityIndex;
             }
         }
 
@@ -1763,8 +1790,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var fbxSources = new List<ExpConstraintSource>();
             var sources = new List<ConstraintSource>();
             unityConstraint.GetSources(sources);
-            foreach (var source in sources)
+            for (int i = 0; i < sources.Count; i++)
             {
+                var source = sources[i];
                 if (!source.sourceTransform)
                 {
                     continue;
@@ -1776,7 +1804,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     continue;
                 }
-                fbxSources.Add(new ExpConstraintSource(sourceNode, source.weight * UnitScaleFactor));
+                fbxSources.Add(new ExpConstraintSource(sourceNode, source.weight * UnitScaleFactor, i));
             }
             return fbxSources;
         }
@@ -1973,8 +2001,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             for (int i = 0; i < uniSources.Count; i++)
             {
                 var uniSource = uniSources[i];
-                var uniTranslationOffset = uniTranslationOffsets[i];
-                var uniRotationOffset = uniRotationOffsets[i];
+                var uniTranslationOffset = uniTranslationOffsets[uniSource.unityIndex];
+                var uniRotationOffset = uniRotationOffsets[uniSource.unityIndex];
 
                 fbxParentConstraint.AddConstraintSource(uniSource.node, uniSource.weight);
 
@@ -2217,7 +2245,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             List<FbxBlendShapeChannel> blendshapeChannels;
             if (MapUnityObjectToBlendShapes.TryGetValue(blendshapeNode, out blendshapeChannels))
             {
-                var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, @"blendShape\.(\S+)");
+                var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, @"blendShape\.(.+)");
                 if (match.Success && match.Groups.Count > 0)
                 {
                     string blendshapeName = match.Groups[1].Value;
@@ -2364,7 +2392,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 convertDistance |= partT;
                 convertDistance |= uniPropertyName.StartsWith("m_Intensity", cc);
-                convertDistance |= uniPropertyName.ToLower().EndsWith("weight", cc);
+                // Constraint weights are 0..1 in Unity and 0..100 in FBX. Blend shape curves are already 0..100,
+                // so only match the constraint weight properties and not any name ending in "weight".
+                convertDistance |= uniPropertyName == "m_Weight" || System.Text.RegularExpressions.Regex.IsMatch(uniPropertyName, @"^m_Sources\.Array\.data\[\d+\]\.weight$");
                 convertLensShiftX |= uniPropertyName.StartsWith("m_LensShift.x", cc);
                 convertLensShiftY |= uniPropertyName.StartsWith("m_LensShift.y", cc);
                 if (convertLensShiftX || convertLensShiftY)
@@ -2938,13 +2968,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
             int count;
             if (nameToCountMap.TryGetValue(name, out count))
             {
-                uniqueName = string.Format(UniqueNameFormat, name, count);
+                // Skip any generated name that has already been used, e.g. an
+                // existing "Sphere_1" must not be reused for a second "Sphere".
+                do
+                {
+                    uniqueName = string.Format(UniqueNameFormat, name, count);
+                    count++;
+                }
+                while (nameToCountMap.ContainsKey(uniqueName));
+                // Record the generated name so later requests can't collide with it.
+                nameToCountMap[uniqueName] = 1;
             }
             else
             {
-                count = 0;
+                count = 1;
             }
-            nameToCountMap[name] = count + 1;
+            nameToCountMap[name] = count;
             return uniqueName;
         }
 
@@ -3787,9 +3826,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return renderer.bounds;
             }
 
-            if (t.TryGetComponent<MeshFilter>(out MeshFilter meshFilter))
+            // Use sharedMesh: accessing MeshFilter.mesh would instantiate a copy and assign it to the
+            // MeshFilter, modifying the user's scene.
+            if (t.TryGetComponent<MeshFilter>(out MeshFilter meshFilter) && meshFilter.sharedMesh != null)
             {
-                return meshFilter.mesh.bounds;
+                return TransformBounds(t, meshFilter.sharedMesh.bounds);
             }
 
             if (t.TryGetComponent<Collider>(out Collider collider))
@@ -3797,6 +3838,27 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return collider.bounds;
             }
             return new Bounds(t.position, Vector3.zero);
+        }
+
+        /// <summary>
+        /// Converts bounds in the local space of a transform to a world space axis-aligned bounds.
+        /// </summary>
+        /// <returns>The world space bounds.</returns>
+        /// <param name="t">Transform.</param>
+        /// <param name="localBounds">Bounds in the local space of the transform.</param>
+        private static Bounds TransformBounds(Transform t, Bounds localBounds)
+        {
+            var min = localBounds.min;
+            var max = localBounds.max;
+            var worldBounds = new Bounds(t.TransformPoint(min), Vector3.zero);
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(min.x, min.y, max.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(min.x, max.y, min.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(min.x, max.y, max.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(max.x, min.y, min.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(max.x, min.y, max.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(max.x, max.y, min.z)));
+            worldBounds.Encapsulate(t.TransformPoint(max));
+            return worldBounds;
         }
 
         /// <summary>
@@ -4747,7 +4809,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // if user doesn't want to export mesh colliders, and this gameobject doesn't have a renderer
             // then don't export it.
-            if (!ExportOptions.ExportUnrendered && (!gameObject.GetComponent<Renderer>() || !gameObject.GetComponent<Renderer>().enabled))
+            if (IsUnrenderedAndExcluded(gameObject))
             {
                 return false;
             }
