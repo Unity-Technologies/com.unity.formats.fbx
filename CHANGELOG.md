@@ -9,7 +9,7 @@
 ### Fixed
 - Fixed Parent Constraint sources being exported with the offsets of a different source when an earlier source of the constraint is missing or not exported.
 - Fixed objects without a Renderer (MeshFilter only) being exported at the wrong position when exporting several objects with Object Position set to Local Centered. The mesh bounds are now converted to world space, and exporting no longer replaces the MeshFilter's shared mesh with an instance in the scene.
-- Fixed exported GameObjects, materials and textures ending up with identical names in the FBX file when one of them already had a name like `Cube_1` and another was a duplicate named `Cube`.
+- Fixed exported GameObjects, materials and textures ending up with identical names in the FBX file when one of them already had a name like `Cube_1` and another was a duplicate named `Cube`. Names generated for duplicates now skip the names of all exported objects and materials, so an object or material named `Cube_1` keeps its name.
 - Fixed objects without an enabled renderer being exported with a mesh when **Export Unrendered** is disabled and **Keep Instances** is enabled and the mesh is shared with a rendered object.
 - Fixed blend shape animation being exported 100 times too large when the blend shape's name ends in "weight".
 - Fixed blend shape animation not being exported when the blend shape name contains a space, such as Blender's default shape key names "Key 1" and "Key 2".

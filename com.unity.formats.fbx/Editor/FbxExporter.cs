@@ -208,6 +208,16 @@ namespace UnityEditor.Formats.Fbx.Exporter
         Dictionary<string, int> TextureNameToIndexMap = new Dictionary<string, int>();
 
         /// <summary>
+        /// Names of the objects being exported, which generated unique node names must not take.
+        /// </summary>
+        HashSet<string> ReservedNodeNames = new HashSet<string>();
+
+        /// <summary>
+        /// Names of the materials being exported, which generated unique material names must not take.
+        /// </summary>
+        HashSet<string> ReservedMaterialNames = new HashSet<string>();
+
+        /// <summary>
         /// Format for creating unique names
         /// </summary>
         const string UniqueNameFormat = "{0}_{1}";
@@ -779,10 +789,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             var unityName = unityMaterial.name;
-            var fbxName = ExportOptions.UseMayaCompatibleNames
-                ? ConvertToMayaCompatibleName(unityName) : unityName;
-
-            fbxName = GetUniqueMaterialName(fbxName);
+            var fbxName = GetUniqueMaterialName(GetFbxMaterialName(unityMaterial));
 
             if (Verbose)
             {
@@ -2962,7 +2969,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>Unique name</returns>
         /// <param name="name">Name</param>
         /// <param name="nameToCountMap">The dictionary to use to map name to # of occurences</param>
-        private string GetUniqueName(string name, Dictionary<string, int> nameToCountMap)
+        /// <param name="reservedNames">Original names that a generated name must not take, or null.</param>
+        private string GetUniqueName(string name, Dictionary<string, int> nameToCountMap, HashSet<string> reservedNames = null)
         {
             var uniqueName = name;
             int count;
@@ -2975,7 +2983,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     uniqueName = string.Format(UniqueNameFormat, name, count);
                     count++;
                 }
-                while (nameToCountMap.ContainsKey(uniqueName));
+                while (nameToCountMap.ContainsKey(uniqueName) || (reservedNames != null && reservedNames.Contains(uniqueName)));
                 // Record the generated name so later requests can't collide with it.
                 nameToCountMap[uniqueName] = 1;
             }
@@ -2996,7 +3004,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="name">Name</param>
         private string GetUniqueFbxNodeName(string name)
         {
-            return GetUniqueName(name, NameToIndexMap);
+            return GetUniqueName(name, NameToIndexMap, ReservedNodeNames);
         }
 
         /// <summary>
@@ -3008,7 +3016,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>Unique material name</returns>
         private string GetUniqueMaterialName(string name)
         {
-            return GetUniqueName(name, MaterialNameToIndexMap);
+            return GetUniqueName(name, MaterialNameToIndexMap, ReservedMaterialNames);
         }
 
         /// <summary>
@@ -3023,6 +3031,43 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return GetUniqueName(name, TextureNameToIndexMap);
         }
 
+        private string GetFbxNodeName(GameObject unityGo)
+        {
+            return ExportOptions.UseMayaCompatibleNames ? ConvertToMayaCompatibleName(unityGo.name) : unityGo.name;
+        }
+
+        private string GetFbxMaterialName(Material unityMaterial)
+        {
+            return ExportOptions.UseMayaCompatibleNames ? ConvertToMayaCompatibleName(unityMaterial.name) : unityMaterial.name;
+        }
+
+        /// <summary>
+        /// Reserves the names of all objects and materials in the export set, so that a name
+        /// generated for a duplicate never takes the original name of an object exported later.
+        /// </summary>
+        private void ReserveOriginalNames(IEnumerable<GameObject> exportSet)
+        {
+            ReservedNodeNames.Clear();
+            ReservedMaterialNames.Clear();
+            foreach (var unityGo in exportSet)
+            {
+                foreach (var t in unityGo.GetComponentsInChildren<Transform>(true))
+                {
+                    ReservedNodeNames.Add(GetFbxNodeName(t.gameObject));
+                }
+                foreach (var renderer in unityGo.GetComponentsInChildren<Renderer>(true))
+                {
+                    foreach (var mat in renderer.sharedMaterials)
+                    {
+                        if (mat)
+                        {
+                            ReservedMaterialNames.Add(GetFbxMaterialName(mat));
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Create a fbxNode from unityGo.
         /// </summary>
@@ -3031,10 +3076,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>the created FbxNode</returns>
         private FbxNode CreateFbxNode(GameObject unityGo, FbxScene fbxScene)
         {
-            string fbxName = unityGo.name;
+            string fbxName = GetFbxNodeName(unityGo);
             if (ExportOptions.UseMayaCompatibleNames)
             {
-                fbxName = ConvertToMayaCompatibleName(unityGo.name);
                 if (ExportOptions.AllowSceneModification)
                 {
                     Undo.RecordObject(unityGo, "rename " + fbxName);
@@ -4029,6 +4073,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         rootObjCount = revisedGOSet.Count;
                         revisedExportSet = revisedGOSet;
                     }
+
+                    ReserveOriginalNames(revisedExportSet);
 
                     if (count <= 0)
                     {

@@ -1464,13 +1464,14 @@ namespace FbxExporter.UnitTests
         // UUM-158079 Generated unique names must not collide with names of other siblings
         static IEnumerable<TestCaseData> UniqueNodeNameCases()
         {
-            yield return new TestCaseData(new object[] { new[] { "Cube", "Cube", "Cube_1" } }).SetName("DuplicateThenSuffixedName");
-            yield return new TestCaseData(new object[] { new[] { "Cube_1", "Cube", "Cube" } }).SetName("SuffixedNameThenDuplicate");
-            yield return new TestCaseData(new object[] { new[] { "Cube", "Cube", "Cube" } }).SetName("OnlyDuplicates");
+            yield return new TestCaseData(new[] { "Cube", "Cube", "Cube_1" }, new[] { "Cube", "Cube_2", "Cube_1" }).SetName("DuplicateThenSuffixedName");
+            yield return new TestCaseData(new[] { "Cube_1", "Cube", "Cube" }, new[] { "Cube_1", "Cube", "Cube_2" }).SetName("SuffixedNameThenDuplicate");
+            yield return new TestCaseData(new[] { "Cube", "Cube", "Cube" }, new[] { "Cube", "Cube_1", "Cube_2" }).SetName("OnlyDuplicates");
+            yield return new TestCaseData(new[] { "Cube", "Cube", "Cube_1", "Cube_1" }, new[] { "Cube", "Cube_2", "Cube_1", "Cube_1_1" }).SetName("DuplicatedSuffixedName");
         }
 
         [TestCaseSource(nameof(UniqueNodeNameCases))]
-        public void TestExportedNodeNamesAreUnique(string[] childNames)
+        public void TestExportedNodeNamesAreUnique(string[] childNames, string[] expectedNames)
         {
             var filename = GetRandomFbxFilePath();
             GameObject root = new GameObject("root");
@@ -1496,6 +1497,40 @@ namespace FbxExporter.UnitTests
             // root + one node per child
             Assert.AreEqual(childNames.Length + 1, nodeNames.Count, "Unexpected node names: " + string.Join(", ", nodeNames.ToArray()));
             Assert.That(nodeNames, Is.Unique, "Exported node names: " + string.Join(", ", nodeNames.ToArray()));
+            // objects are written in creation order: root first, then the children in order
+            Assert.That(nodeNames.Skip(1), Is.EqualTo(expectedNames));
+        }
+
+        // UUM-158079 A name generated for a duplicate material must not take the name of another material
+        [Test]
+        public void TestExportedMaterialNamesKeepOriginalNames()
+        {
+            var filename = GetRandomFbxFilePath();
+            GameObject root = new GameObject("root");
+            var materialNames = new[] { "Mat", "Mat", "Mat_1" };
+            for (int i = 0; i < materialNames.Length; i++)
+            {
+                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.name = "Cube" + i;
+                cube.transform.SetParent(root.transform);
+                var renderer = cube.GetComponent<MeshRenderer>();
+                renderer.sharedMaterial = new Material(renderer.sharedMaterial) { name = materialNames[i] };
+            }
+
+            var exportOptions = new ExportModelOptions();
+            exportOptions.ExportFormat = ExportFormat.ASCII;
+            var result = ModelExporter.ExportObject(filename, root, exportOptions);
+            Assert.AreEqual(filename, result);
+
+            var exportedNames = new List<string>();
+            foreach (System.Text.RegularExpressions.Match match in
+                System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(filename), "Material:\\s*-?\\d+,\\s*\"Material::([^\"]*)\""))
+            {
+                exportedNames.Add(match.Groups[1].Value);
+            }
+
+            // materials are written in export order, which follows the children
+            Assert.That(exportedNames, Is.EqualTo(new[] { "Mat", "Mat_2", "Mat_1" }));
         }
 
         // UUM-158108 Objects without an enabled renderer must not export a mesh when ExportUnrendered is off,
