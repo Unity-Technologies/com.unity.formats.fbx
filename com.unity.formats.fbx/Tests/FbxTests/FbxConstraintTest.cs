@@ -207,7 +207,6 @@ namespace FbxExporter.UnitTests
         [Test]
         public void TestParentConstraintOffsetsWithUnexportedSource()
         {
-            // test that each exported source keeps its own offsets when an earlier source is not exported
             var notExported = new GameObject("notExportedSource");
 
             var root = new GameObject("root");
@@ -225,13 +224,19 @@ namespace FbxExporter.UnitTests
             parentConstraint.SetRotationOffset(0, new Vector3(10, 0, 0));
             parentConstraint.SetRotationOffset(1, new Vector3(0, 20, 0));
 
-            // export as ascii so the per-source offsets can be read back from the file
             var exportOptions = new ExportModelSettingsSerialize();
             exportOptions.SetExportFormat(ExportFormat.ASCII);
             var filename = GetRandomFileNamePath();
+            string fbxFileName;
             Debug.unityLogger.logEnabled = false;
-            var fbxFileName = ModelExporter.ExportObject(filename, root, exportOptions);
-            Debug.unityLogger.logEnabled = true;
+            try
+            {
+                fbxFileName = ModelExporter.ExportObject(filename, root, exportOptions);
+            }
+            finally
+            {
+                Debug.unityLogger.logEnabled = true;
+            }
             Assert.That(fbxFileName, Is.Not.Null);
 
             var translation = new double[0];

@@ -181,6 +181,27 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
+        public void TestFindCenterMeshFilterWithoutRendererRotated()
+        {
+            var a = CreateGameObject("a");
+            var b = CreateGameObject("b");
+            Object.DestroyImmediate(a.GetComponent<MeshRenderer>());
+            Object.DestroyImmediate(b.GetComponent<MeshRenderer>());
+
+            a.transform.position = new Vector3(10, 0, 0);
+            b.transform.position = new Vector3(30, 5, 0);
+            b.transform.rotation = Quaternion.Euler(0, 0, 90);
+            b.transform.localScale = new Vector3(3, 1, 1);
+
+            var center = ModelExporter.FindCenter(new GameObject[] { a, b });
+
+            // b's scaled x axis is rotated onto world y: b spans x in [29.5, 30.5] and y in [3.5, 6.5]
+            Assert.AreEqual(20f, center.x, 1e-4f);
+            Assert.AreEqual(3f, center.y, 1e-4f);
+            Assert.AreEqual(0f, center.z, 1e-4f);
+        }
+
+        [Test]
         public void TestRemoveRedundantObjects()
         {
             var root = CreateGameObject("root");
@@ -901,7 +922,6 @@ namespace FbxExporter.UnitTests
             mesh.vertices = new[] { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 1, 0), new Vector3(0, 1, 0) };
             mesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
             mesh.bindposes = bindposes;
-            // NativeArray in a using statement is read-only, so build them from managed arrays.
             using (var nativeBonesPerVertex = new Unity.Collections.NativeArray<byte>(bonesPerVertex, Unity.Collections.Allocator.Temp))
             using (var nativeBoneWeights = new Unity.Collections.NativeArray<BoneWeight1>(boneWeights, Unity.Collections.Allocator.Temp))
             {
@@ -1027,9 +1047,7 @@ namespace FbxExporter.UnitTests
         [Test]
         public void TestSkinWeightsExportedWithNullBone()
         {
-            // UUM-158294: a vertex weighted to a null bone has no cluster, which used to leave the bone weight
-            // read cursor behind and made every later vertex lose its weights.
-            // Vertex 0 is weighted to bone index 1 (null), vertices 1 to 3 are weighted to bone index 0.
+            // UUM-158294: vertex 0 is weighted to bone index 1 (null), vertices 1 to 3 are weighted to bone index 0.
             var clusters = ExportSkinnedQuadAndReadClusters(
                 new[] { "BoneA", null },
                 new byte[] { 1, 1, 1, 1 },
@@ -1048,9 +1066,7 @@ namespace FbxExporter.UnitTests
         [Test]
         public void TestSkinWeightsExportedWithZeroWeightInfluence()
         {
-            // UUM-158294: a zero weight influence is not exported, which used to leave the bone weight
-            // read cursor behind and made every later vertex lose its weights.
-            // Vertex 0 has an influence of weight 0 from bone index 1, all vertices are fully weighted to bone index 0.
+            // UUM-158294: vertex 0 has an influence of weight 0 from bone index 1, all vertices are fully weighted to bone index 0.
             var clusters = ExportSkinnedQuadAndReadClusters(
                 new[] { "BoneA", "BoneB" },
                 new byte[] { 2, 1, 1, 1 },
@@ -1461,7 +1477,7 @@ namespace FbxExporter.UnitTests
             Assert.AreEqual(fbxObj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.name, fbxObj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh.name);
         }
 
-        // UUM-158079 Generated unique names must not collide with names of other siblings
+        // UUM-158079
         static IEnumerable<TestCaseData> UniqueNodeNameCases()
         {
             yield return new TestCaseData(new[] { "Cube", "Cube", "Cube_1" }, new[] { "Cube", "Cube_2", "Cube_1" }).SetName("DuplicateThenSuffixedName");
@@ -1494,14 +1510,13 @@ namespace FbxExporter.UnitTests
                 nodeNames.Add(match.Groups[1].Value);
             }
 
-            // root + one node per child
             Assert.AreEqual(childNames.Length + 1, nodeNames.Count, "Unexpected node names: " + string.Join(", ", nodeNames.ToArray()));
             Assert.That(nodeNames, Is.Unique, "Exported node names: " + string.Join(", ", nodeNames.ToArray()));
             // objects are written in creation order: root first, then the children in order
             Assert.That(nodeNames.Skip(1), Is.EqualTo(expectedNames));
         }
 
-        // UUM-158079 A name generated for a duplicate material must not take the name of another material
+        // UUM-158079
         [Test]
         public void TestExportedMaterialNamesKeepOriginalNames()
         {
@@ -1533,8 +1548,7 @@ namespace FbxExporter.UnitTests
             Assert.That(exportedNames, Is.EqualTo(new[] { "Mat", "Mat_2", "Mat_1" }));
         }
 
-        // UUM-158108 Objects without an enabled renderer must not export a mesh when ExportUnrendered is off,
-        // including when KeepInstances is on and the mesh is shared with a rendered object.
+        // UUM-158108
         [TestCase(true)]
         [TestCase(false)]
         public void TestExportUnrenderedOffSkipsSharedMesh(bool keepInstances)
@@ -1560,6 +1574,33 @@ namespace FbxExporter.UnitTests
             var fbxChild = fbxObj.transform.Find("child");
             Assert.That(fbxChild, Is.Not.Null);
             Assert.That(fbxChild.GetComponent<MeshFilter>(), Is.Null);
+        }
+
+        // UUM-158108
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestExportUnrenderedOffSharedMeshUnrenderedFirst(bool keepInstances)
+        {
+            var parent = CreateGameObject("parent");
+            var child = CreateGameObject("child", parent.transform);
+            parent.GetComponent<MeshRenderer>().enabled = false;
+            Assert.AreEqual(parent.GetComponent<MeshFilter>().sharedMesh, child.GetComponent<MeshFilter>().sharedMesh);
+
+            var exportOptions = new ExportModelOptions();
+            exportOptions.ExportUnrendered = false;
+            exportOptions.KeepInstances = keepInstances;
+
+            var filename = GetRandomFbxFilePath();
+            var result = ModelExporter.ExportObject(filename, parent, exportOptions);
+            Assert.AreEqual(filename, result);
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.That(fbxObj, Is.Not.Null);
+            Assert.That(fbxObj.GetComponent<MeshFilter>(), Is.Null);
+
+            var fbxChild = fbxObj.transform.Find("child");
+            Assert.That(fbxChild, Is.Not.Null);
+            Assert.That(fbxChild.GetComponent<MeshFilter>(), Is.Not.Null);
         }
 
         /// <summary>

@@ -207,14 +207,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         Dictionary<string, int> TextureNameToIndexMap = new Dictionary<string, int>();
 
-        /// <summary>
-        /// Names of the objects being exported, which generated unique node names must not take.
-        /// </summary>
         HashSet<string> ReservedNodeNames = new HashSet<string>();
-
-        /// <summary>
-        /// Names of the materials being exported, which generated unique material names must not take.
-        /// </summary>
         HashSet<string> ReservedMaterialNames = new HashSet<string>();
 
         /// <summary>
@@ -1392,8 +1385,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // add vertex and weighting on vertex to this bone's cluster
                     boneCluster.AddControlPointIndex(actualIndex, weight);
                 }
-
-                // always move to the next vertex's weights, even if some of this vertex's weights were skipped
                 boneWeightIndex += numberOfBonesForThisVertex;
             }
         }
@@ -1538,9 +1529,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
-        /// <summary>
-        /// Returns true if the game object has no enabled renderer and the user doesn't want to export unrendered objects.
-        /// </summary>
         private bool IsUnrenderedAndExcluded(GameObject gameObject)
         {
             return !ExportOptions.ExportUnrendered && (!gameObject.GetComponent<Renderer>() || !gameObject.GetComponent<Renderer>().enabled);
@@ -1556,7 +1544,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
-            // don't export (or register) the mesh of an unrendered object when the user doesn't want unrendered objects
             if (IsUnrenderedAndExcluded(unityGo))
             {
                 return false;
@@ -1770,8 +1757,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             private int m_unityIndex;
             /// <summary>
-            /// Index of this source in the Unity constraint's source list.
-            /// Differs from the index in the exported list when sources are skipped.
+            /// Index in the Unity constraint's source list, which differs from the exported index when sources are skipped.
             /// </summary>
             public int unityIndex
             {
@@ -2399,8 +2385,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 convertDistance |= partT;
                 convertDistance |= uniPropertyName.StartsWith("m_Intensity", cc);
-                // Constraint weights are 0..1 in Unity and 0..100 in FBX. Blend shape curves are already 0..100,
-                // so only match the constraint weight properties and not any name ending in "weight".
+                // Blend shape weights are already 0..100, only constraint weights need scaling from 0..1.
                 convertDistance |= uniPropertyName == "m_Weight" || System.Text.RegularExpressions.Regex.IsMatch(uniPropertyName, @"^m_Sources\.Array\.data\[\d+\]\.weight$");
                 convertLensShiftX |= uniPropertyName.StartsWith("m_LensShift.x", cc);
                 convertLensShiftY |= uniPropertyName.StartsWith("m_LensShift.y", cc);
@@ -2976,15 +2961,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
             int count;
             if (nameToCountMap.TryGetValue(name, out count))
             {
-                // Skip any generated name that has already been used, e.g. an
-                // existing "Sphere_1" must not be reused for a second "Sphere".
                 do
                 {
                     uniqueName = string.Format(UniqueNameFormat, name, count);
                     count++;
                 }
                 while (nameToCountMap.ContainsKey(uniqueName) || (reservedNames != null && reservedNames.Contains(uniqueName)));
-                // Record the generated name so later requests can't collide with it.
                 nameToCountMap[uniqueName] = 1;
             }
             else
@@ -3042,8 +3024,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Reserves the names of all objects and materials in the export set, so that a name
-        /// generated for a duplicate never takes the original name of an object exported later.
+        /// Reserves the original names in the export set so that a name generated for a duplicate never takes one.
         /// </summary>
         private void ReserveOriginalNames(IEnumerable<GameObject> exportSet)
         {
@@ -3870,8 +3851,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return renderer.bounds;
             }
 
-            // Use sharedMesh: accessing MeshFilter.mesh would instantiate a copy and assign it to the
-            // MeshFilter, modifying the user's scene.
+            // MeshFilter.mesh would instantiate a copy and assign it to the MeshFilter in the scene.
             if (t.TryGetComponent<MeshFilter>(out MeshFilter meshFilter) && meshFilter.sharedMesh != null)
             {
                 return TransformBounds(t, meshFilter.sharedMesh.bounds);
@@ -3884,12 +3864,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return new Bounds(t.position, Vector3.zero);
         }
 
-        /// <summary>
-        /// Converts bounds in the local space of a transform to a world space axis-aligned bounds.
-        /// </summary>
-        /// <returns>The world space bounds.</returns>
-        /// <param name="t">Transform.</param>
-        /// <param name="localBounds">Bounds in the local space of the transform.</param>
         private static Bounds TransformBounds(Transform t, Bounds localBounds)
         {
             var min = localBounds.min;

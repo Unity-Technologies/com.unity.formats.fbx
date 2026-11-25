@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.Formats.Fbx.Exporter;
 using UnityEditor.Formats.Fbx.Exporter.CustomExtensions;
-using UnityEngine.TestTools;
 
 namespace FbxExporter.UnitTests
 {
@@ -814,8 +813,7 @@ namespace FbxExporter.UnitTests
             return tester.DoIt();
         }
 
-        // Blend shape curves are already in the 0..100 range that FBX uses for DeformPercent,
-        // so they must be exported unscaled, whatever the blend shape is called.
+        // Blend shape curves are already in the 0..100 range that FBX uses for DeformPercent.
         [Test]
         [TestCase("BodyWeight")]
         [TestCase("Weight")]
@@ -879,8 +877,7 @@ namespace FbxExporter.UnitTests
         [Test]
         public void BlendshapeNameWithSpaceAnimTest()
         {
-            // Blend shape names may contain spaces (e.g. Blender's default "Key 1"),
-            // the animation curve must still be exported.
+            // Blender's default shape key name
             const string blendShapeName = "Key 1";
             const string propertyName = "blendShape." + blendShapeName;
 
@@ -912,11 +909,6 @@ namespace FbxExporter.UnitTests
             {
                 var exportedFilePath = ModelExporter.ExportObject(path, root, exportOptions);
                 Assert.That(exportedFilePath, Is.EqualTo(path));
-
-                // the exporter logs an error ("no fbx property DeformPercent found...") when the blend shape is not found
-                // The exporter logs an informational "Successfully exported" message, so a blanket
-                // NoUnexpectedReceived() would fail here. An unexpected LogError (the symptom of
-                // UUM-158293) still fails the test on its own under the Unity Test Framework.
 
                 AnimTester.ConfigureImportSettings(path);
                 var animClipImported = AnimTester.GetClipFromFbx(path);
