@@ -207,8 +207,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         Dictionary<string, int> TextureNameToIndexMap = new Dictionary<string, int>();
 
-        HashSet<string> ReservedNodeNames = new HashSet<string>();
-        HashSet<string> ReservedMaterialNames = new HashSet<string>();
+        Dictionary<string, (string baseName, FbxObject fbxObject)> GeneratedNodeNames = new Dictionary<string, (string baseName, FbxObject fbxObject)>();
+        Dictionary<string, (string baseName, FbxObject fbxObject)> GeneratedMaterialNames = new Dictionary<string, (string baseName, FbxObject fbxObject)>();
 
         /// <summary>
         /// Format for creating unique names
@@ -782,7 +782,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             var unityName = unityMaterial.name;
-            var fbxName = GetUniqueMaterialName(GetFbxMaterialName(unityMaterial));
+            var baseName = ExportOptions.UseMayaCompatibleNames
+                ? ConvertToMayaCompatibleName(unityName) : unityName;
+
+            var fbxName = GetUniqueMaterialName(baseName);
 
             if (Verbose)
             {
@@ -806,6 +809,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var fbxMaterial = specular
                 ? FbxSurfacePhong.Create(fbxScene, fbxName)
                 : FbxSurfaceLambert.Create(fbxScene, fbxName);
+            if (fbxName != baseName)
+            {
+                GeneratedMaterialNames[fbxName] = (baseName, fbxMaterial);
+            }
 
             // Copy the flat colours over from Unity standard materials to FBX.
             fbxMaterial.Diffuse.Set(GetMaterialColor(unityMaterial, "_Color"));
@@ -2954,9 +2961,20 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>Unique name</returns>
         /// <param name="name">Name</param>
         /// <param name="nameToCountMap">The dictionary to use to map name to # of occurences</param>
-        /// <param name="reservedNames">Original names that a generated name must not take, or null.</param>
-        private string GetUniqueName(string name, Dictionary<string, int> nameToCountMap, HashSet<string> reservedNames = null)
+        /// <param name="generatedNames">Generated names and the objects that have them, or null.</param>
+        private string GetUniqueName(string name, Dictionary<string, int> nameToCountMap, Dictionary<string, (string baseName, FbxObject fbxObject)> generatedNames = null)
         {
+            (string baseName, FbxObject fbxObject) holder;
+            if (generatedNames != null && generatedNames.TryGetValue(name, out holder))
+            {
+                // An earlier duplicate was given this name, so it moves to the next free one and the original keeps it.
+                generatedNames.Remove(name);
+                var newName = GetUniqueName(holder.baseName, nameToCountMap);
+                holder.fbxObject.SetName(newName);
+                generatedNames[newName] = holder;
+                return name;
+            }
+
             var uniqueName = name;
             int count;
             if (nameToCountMap.TryGetValue(name, out count))
@@ -2966,7 +2984,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     uniqueName = string.Format(UniqueNameFormat, name, count);
                     count++;
                 }
-                while (nameToCountMap.ContainsKey(uniqueName) || (reservedNames != null && reservedNames.Contains(uniqueName)));
+                while (nameToCountMap.ContainsKey(uniqueName));
                 nameToCountMap[uniqueName] = 1;
             }
             else
@@ -2986,7 +3004,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="name">Name</param>
         private string GetUniqueFbxNodeName(string name)
         {
-            return GetUniqueName(name, NameToIndexMap, ReservedNodeNames);
+            return GetUniqueName(name, NameToIndexMap, GeneratedNodeNames);
         }
 
         /// <summary>
@@ -2998,7 +3016,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>Unique material name</returns>
         private string GetUniqueMaterialName(string name)
         {
-            return GetUniqueName(name, MaterialNameToIndexMap, ReservedMaterialNames);
+            return GetUniqueName(name, MaterialNameToIndexMap, GeneratedMaterialNames);
         }
 
         /// <summary>
@@ -3013,42 +3031,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return GetUniqueName(name, TextureNameToIndexMap);
         }
 
-        private string GetFbxNodeName(GameObject unityGo)
-        {
-            return ExportOptions.UseMayaCompatibleNames ? ConvertToMayaCompatibleName(unityGo.name) : unityGo.name;
-        }
-
-        private string GetFbxMaterialName(Material unityMaterial)
-        {
-            return ExportOptions.UseMayaCompatibleNames ? ConvertToMayaCompatibleName(unityMaterial.name) : unityMaterial.name;
-        }
-
-        /// <summary>
-        /// Reserves the original names in the export set so that a name generated for a duplicate never takes one.
-        /// </summary>
-        private void ReserveOriginalNames(IEnumerable<GameObject> exportSet)
-        {
-            ReservedNodeNames.Clear();
-            ReservedMaterialNames.Clear();
-            foreach (var unityGo in exportSet)
-            {
-                foreach (var t in unityGo.GetComponentsInChildren<Transform>(true))
-                {
-                    ReservedNodeNames.Add(GetFbxNodeName(t.gameObject));
-                }
-                foreach (var renderer in unityGo.GetComponentsInChildren<Renderer>(true))
-                {
-                    foreach (var mat in renderer.sharedMaterials)
-                    {
-                        if (mat)
-                        {
-                            ReservedMaterialNames.Add(GetFbxMaterialName(mat));
-                        }
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// Create a fbxNode from unityGo.
         /// </summary>
@@ -3057,9 +3039,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>the created FbxNode</returns>
         private FbxNode CreateFbxNode(GameObject unityGo, FbxScene fbxScene)
         {
-            string fbxName = GetFbxNodeName(unityGo);
+            string fbxName = unityGo.name;
             if (ExportOptions.UseMayaCompatibleNames)
             {
+                fbxName = ConvertToMayaCompatibleName(unityGo.name);
                 if (ExportOptions.AllowSceneModification)
                 {
                     Undo.RecordObject(unityGo, "rename " + fbxName);
@@ -3067,7 +3050,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
-            FbxNode fbxNode = FbxNode.Create(fbxScene, GetUniqueFbxNodeName(fbxName));
+            var uniqueName = GetUniqueFbxNodeName(fbxName);
+            FbxNode fbxNode = FbxNode.Create(fbxScene, uniqueName);
+            if (uniqueName != fbxName)
+            {
+                GeneratedNodeNames[uniqueName] = (fbxName, fbxNode);
+            }
 
             // Default inheritance type in FBX is RrSs, which causes scaling issues in Maya as
             // both Maya and Unity use RSrs inheritance by default.
@@ -4047,8 +4035,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         rootObjCount = revisedGOSet.Count;
                         revisedExportSet = revisedGOSet;
                     }
-
-                    ReserveOriginalNames(revisedExportSet);
 
                     if (count <= 0)
                     {
