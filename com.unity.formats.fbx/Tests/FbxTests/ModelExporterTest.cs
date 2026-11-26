@@ -1505,7 +1505,7 @@ namespace FbxExporter.UnitTests
 
             var nodeNames = new List<string>();
             foreach (System.Text.RegularExpressions.Match match in
-                System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(filename), "Model:\\s*-?\\d+,\\s*\"Model::([^\"]*)\""))
+                     System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(filename), "Model:\\s*-?\\d+,\\s*\"Model::([^\"]*)\""))
             {
                 nodeNames.Add(match.Groups[1].Value);
             }
@@ -1539,7 +1539,7 @@ namespace FbxExporter.UnitTests
 
             var exportedNames = new List<string>();
             foreach (System.Text.RegularExpressions.Match match in
-                System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(filename), "Material:\\s*-?\\d+,\\s*\"Material::([^\"]*)\""))
+                     System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(filename), "Material:\\s*-?\\d+,\\s*\"Material::([^\"]*)\""))
             {
                 exportedNames.Add(match.Groups[1].Value);
             }

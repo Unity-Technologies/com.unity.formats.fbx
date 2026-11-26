@@ -2964,8 +2964,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="generatedNames">Generated names and the objects that have them, or null.</param>
         private string GetUniqueName(string name, Dictionary<string, int> nameToCountMap, Dictionary<string, (string baseName, FbxObject fbxObject)> generatedNames = null)
         {
-            (string baseName, FbxObject fbxObject) holder;
-            if (generatedNames != null && generatedNames.TryGetValue(name, out holder))
+            if (generatedNames != null && generatedNames.TryGetValue(name, out var holder))
             {
                 // An earlier duplicate was given this name, so it moves to the next free one and the original keeps it.
                 generatedNames.Remove(name);
