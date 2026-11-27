@@ -207,6 +207,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// </summary>
         Dictionary<string, int> TextureNameToIndexMap = new Dictionary<string, int>();
 
+        Dictionary<string, (string baseName, FbxObject fbxObject)> GeneratedNodeNames = new Dictionary<string, (string baseName, FbxObject fbxObject)>();
+        Dictionary<string, (string baseName, FbxObject fbxObject)> GeneratedMaterialNames = new Dictionary<string, (string baseName, FbxObject fbxObject)>();
+
         /// <summary>
         /// Format for creating unique names
         /// </summary>
@@ -779,10 +782,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             var unityName = unityMaterial.name;
-            var fbxName = ExportOptions.UseMayaCompatibleNames
+            var baseName = ExportOptions.UseMayaCompatibleNames
                 ? ConvertToMayaCompatibleName(unityName) : unityName;
 
-            fbxName = GetUniqueMaterialName(fbxName);
+            var fbxName = GetUniqueMaterialName(baseName);
 
             if (Verbose)
             {
@@ -806,6 +809,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var fbxMaterial = specular
                 ? FbxSurfacePhong.Create(fbxScene, fbxName)
                 : FbxSurfaceLambert.Create(fbxScene, fbxName);
+            if (fbxName != baseName)
+            {
+                GeneratedMaterialNames[fbxName] = (baseName, fbxMaterial);
+            }
 
             // Copy the flat colours over from Unity standard materials to FBX.
             fbxMaterial.Diffuse.Set(GetMaterialColor(unityMaterial, "_Color"));
@@ -1364,7 +1371,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 // For each vertex, iterate over its BoneWeights
                 for (var i = 0; i < numberOfBonesForThisVertex; i++)
                 {
-                    var currentBoneWeight = boneWeights1[boneWeightIndex];
+                    var currentBoneWeight = boneWeights1[boneWeightIndex + i];
 
                     // bone index is index into skinnedmesh.bones[]
                     var boneIndex = currentBoneWeight.boneIndex;
@@ -1384,9 +1391,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                     // add vertex and weighting on vertex to this bone's cluster
                     boneCluster.AddControlPointIndex(actualIndex, weight);
-
-                    boneWeightIndex++;
                 }
+                boneWeightIndex += numberOfBonesForThisVertex;
             }
         }
 
@@ -1530,12 +1536,22 @@ namespace UnityEditor.Formats.Fbx.Exporter
             return true;
         }
 
+        private bool IsUnrenderedAndExcluded(GameObject gameObject)
+        {
+            return !ExportOptions.ExportUnrendered && (!gameObject.GetComponent<Renderer>() || !gameObject.GetComponent<Renderer>().enabled);
+        }
+
         /// <summary>
         /// if this game object is a model prefab or the model has already been exported, then export with shared components
         /// </summary>
         private bool ExportInstance(GameObject unityGo, FbxScene fbxScene, FbxNode fbxNode)
         {
             if (!unityGo || fbxNode == null)
+            {
+                return false;
+            }
+
+            if (IsUnrenderedAndExcluded(unityGo))
             {
                 return false;
             }
@@ -1746,10 +1762,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 set { m_weight = value; }
             }
 
-            public ExpConstraintSource(FbxNode node, float weight)
+            private int m_unityIndex;
+            /// <summary>
+            /// Index in the Unity constraint's source list, which differs from the exported index when sources are skipped.
+            /// </summary>
+            public int unityIndex
+            {
+                get { return m_unityIndex; }
+                set { m_unityIndex = value; }
+            }
+
+            public ExpConstraintSource(FbxNode node, float weight, int unityIndex)
             {
                 this.m_node = node;
                 this.m_weight = weight;
+                this.m_unityIndex = unityIndex;
             }
         }
 
@@ -1763,8 +1790,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
             var fbxSources = new List<ExpConstraintSource>();
             var sources = new List<ConstraintSource>();
             unityConstraint.GetSources(sources);
-            foreach (var source in sources)
+            for (int i = 0; i < sources.Count; i++)
             {
+                var source = sources[i];
                 if (!source.sourceTransform)
                 {
                     continue;
@@ -1776,7 +1804,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 {
                     continue;
                 }
-                fbxSources.Add(new ExpConstraintSource(sourceNode, source.weight * UnitScaleFactor));
+                fbxSources.Add(new ExpConstraintSource(sourceNode, source.weight * UnitScaleFactor, i));
             }
             return fbxSources;
         }
@@ -1973,8 +2001,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
             for (int i = 0; i < uniSources.Count; i++)
             {
                 var uniSource = uniSources[i];
-                var uniTranslationOffset = uniTranslationOffsets[i];
-                var uniRotationOffset = uniRotationOffsets[i];
+                var uniTranslationOffset = uniTranslationOffsets[uniSource.unityIndex];
+                var uniRotationOffset = uniRotationOffsets[uniSource.unityIndex];
 
                 fbxParentConstraint.AddConstraintSource(uniSource.node, uniSource.weight);
 
@@ -2217,7 +2245,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
             List<FbxBlendShapeChannel> blendshapeChannels;
             if (MapUnityObjectToBlendShapes.TryGetValue(blendshapeNode, out blendshapeChannels))
             {
-                var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, @"blendShape\.(\S+)");
+                var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, @"blendShape\.(.+)");
                 if (match.Success && match.Groups.Count > 0)
                 {
                     string blendshapeName = match.Groups[1].Value;
@@ -2364,7 +2392,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 convertDistance |= partT;
                 convertDistance |= uniPropertyName.StartsWith("m_Intensity", cc);
-                convertDistance |= uniPropertyName.ToLower().EndsWith("weight", cc);
+                // Blend shape weights are already 0..100, only constraint weights need scaling from 0..1.
+                convertDistance |= uniPropertyName == "m_Weight" || System.Text.RegularExpressions.Regex.IsMatch(uniPropertyName, @"^m_Sources\.Array\.data\[\d+\]\.weight$");
                 convertLensShiftX |= uniPropertyName.StartsWith("m_LensShift.x", cc);
                 convertLensShiftY |= uniPropertyName.StartsWith("m_LensShift.y", cc);
                 if (convertLensShiftX || convertLensShiftY)
@@ -2932,19 +2961,36 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>Unique name</returns>
         /// <param name="name">Name</param>
         /// <param name="nameToCountMap">The dictionary to use to map name to # of occurences</param>
-        private string GetUniqueName(string name, Dictionary<string, int> nameToCountMap)
+        /// <param name="generatedNames">Generated names and the objects that have them, or null.</param>
+        private string GetUniqueName(string name, Dictionary<string, int> nameToCountMap, Dictionary<string, (string baseName, FbxObject fbxObject)> generatedNames = null)
         {
+            if (generatedNames != null && generatedNames.TryGetValue(name, out var holder))
+            {
+                // An earlier duplicate was given this name, so it moves to the next free one and the original keeps it.
+                generatedNames.Remove(name);
+                var newName = GetUniqueName(holder.baseName, nameToCountMap);
+                holder.fbxObject.SetName(newName);
+                generatedNames[newName] = holder;
+                return name;
+            }
+
             var uniqueName = name;
             int count;
             if (nameToCountMap.TryGetValue(name, out count))
             {
-                uniqueName = string.Format(UniqueNameFormat, name, count);
+                do
+                {
+                    uniqueName = string.Format(UniqueNameFormat, name, count);
+                    count++;
+                }
+                while (nameToCountMap.ContainsKey(uniqueName));
+                nameToCountMap[uniqueName] = 1;
             }
             else
             {
-                count = 0;
+                count = 1;
             }
-            nameToCountMap[name] = count + 1;
+            nameToCountMap[name] = count;
             return uniqueName;
         }
 
@@ -2957,7 +3003,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <param name="name">Name</param>
         private string GetUniqueFbxNodeName(string name)
         {
-            return GetUniqueName(name, NameToIndexMap);
+            return GetUniqueName(name, NameToIndexMap, GeneratedNodeNames);
         }
 
         /// <summary>
@@ -2969,7 +3015,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <returns>Unique material name</returns>
         private string GetUniqueMaterialName(string name)
         {
-            return GetUniqueName(name, MaterialNameToIndexMap);
+            return GetUniqueName(name, MaterialNameToIndexMap, GeneratedMaterialNames);
         }
 
         /// <summary>
@@ -3003,7 +3049,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 }
             }
 
-            FbxNode fbxNode = FbxNode.Create(fbxScene, GetUniqueFbxNodeName(fbxName));
+            var uniqueName = GetUniqueFbxNodeName(fbxName);
+            FbxNode fbxNode = FbxNode.Create(fbxScene, uniqueName);
+            if (uniqueName != fbxName && GeneratedNodeNames != null)
+            {
+                GeneratedNodeNames[uniqueName] = (fbxName, fbxNode);
+            }
 
             // Default inheritance type in FBX is RrSs, which causes scaling issues in Maya as
             // both Maya and Unity use RSrs inheritance by default.
@@ -3787,9 +3838,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return renderer.bounds;
             }
 
-            if (t.TryGetComponent<MeshFilter>(out MeshFilter meshFilter))
+            // MeshFilter.mesh would instantiate a copy and assign it to the MeshFilter in the scene.
+            if (t.TryGetComponent<MeshFilter>(out MeshFilter meshFilter) && meshFilter.sharedMesh != null)
             {
-                return meshFilter.mesh.bounds;
+                return TransformBounds(t, meshFilter.sharedMesh.bounds);
             }
 
             if (t.TryGetComponent<Collider>(out Collider collider))
@@ -3797,6 +3849,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return collider.bounds;
             }
             return new Bounds(t.position, Vector3.zero);
+        }
+
+        private static Bounds TransformBounds(Transform t, Bounds localBounds)
+        {
+            var min = localBounds.min;
+            var max = localBounds.max;
+            var worldBounds = new Bounds(t.TransformPoint(min), Vector3.zero);
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(min.x, min.y, max.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(min.x, max.y, min.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(min.x, max.y, max.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(max.x, min.y, min.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(max.x, min.y, max.z)));
+            worldBounds.Encapsulate(t.TransformPoint(new Vector3(max.x, max.y, min.z)));
+            worldBounds.Encapsulate(t.TransformPoint(max));
+            return worldBounds;
         }
 
         /// <summary>
@@ -3873,6 +3940,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             try
             {
                 bool animOnly = exportData != null && ExportOptions.ModelAnimIncludeOption == Include.Anim;
+                if (animOnly)
+                {
+                    // Components are exported between node creations here and may keep a node's name, so nodes are never renamed.
+                    GeneratedNodeNames = null;
+                }
                 bool status = false;
                 // Create the FBX manager
                 using (var fbxManager = FbxManager.Create())
@@ -4747,7 +4819,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             // if user doesn't want to export mesh colliders, and this gameobject doesn't have a renderer
             // then don't export it.
-            if (!ExportOptions.ExportUnrendered && (!gameObject.GetComponent<Renderer>() || !gameObject.GetComponent<Renderer>().enabled))
+            if (IsUnrenderedAndExcluded(gameObject))
             {
                 return false;
             }

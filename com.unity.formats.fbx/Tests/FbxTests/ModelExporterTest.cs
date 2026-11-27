@@ -151,6 +151,57 @@ namespace FbxExporter.UnitTests
         }
 
         [Test]
+        public void TestFindCenterMeshFilterWithoutRenderer()
+        {
+            // Objects with a MeshFilter but no Renderer take the MeshFilter branch of GetBounds.
+            var a = CreateGameObject("a");
+            var b = CreateGameObject("b");
+            Object.DestroyImmediate(a.GetComponent<MeshRenderer>());
+            Object.DestroyImmediate(b.GetComponent<MeshRenderer>());
+
+            a.transform.position = new Vector3(10, 0, 0);
+            b.transform.position = new Vector3(30, 0, 0);
+            b.transform.localScale = new Vector3(3, 1, 1);
+
+            var meshA = a.GetComponent<MeshFilter>().sharedMesh;
+            var meshB = b.GetComponent<MeshFilter>().sharedMesh;
+            Assert.That(meshA, Is.Not.Null);
+            Assert.That(meshB, Is.Not.Null);
+
+            var center = ModelExporter.FindCenter(new GameObject[] { a, b });
+
+            // World space bounds: a spans x in [9.5, 10.5], b spans x in [28.5, 31.5]
+            Assert.AreEqual(20.5f, center.x, 1e-4f);
+            Assert.AreEqual(0f, center.y, 1e-4f);
+            Assert.AreEqual(0f, center.z, 1e-4f);
+
+            // Computing the center must not replace the shared meshes with instances.
+            Assert.AreSame(meshA, a.GetComponent<MeshFilter>().sharedMesh);
+            Assert.AreSame(meshB, b.GetComponent<MeshFilter>().sharedMesh);
+        }
+
+        [Test]
+        public void TestFindCenterMeshFilterWithoutRendererRotated()
+        {
+            var a = CreateGameObject("a");
+            var b = CreateGameObject("b");
+            Object.DestroyImmediate(a.GetComponent<MeshRenderer>());
+            Object.DestroyImmediate(b.GetComponent<MeshRenderer>());
+
+            a.transform.position = new Vector3(10, 0, 0);
+            b.transform.position = new Vector3(30, 5, 0);
+            b.transform.rotation = Quaternion.Euler(0, 0, 90);
+            b.transform.localScale = new Vector3(3, 1, 1);
+
+            var center = ModelExporter.FindCenter(new GameObject[] { a, b });
+
+            // b's scaled x axis is rotated onto world y: b spans x in [29.5, 30.5] and y in [3.5, 6.5]
+            Assert.AreEqual(20f, center.x, 1e-4f);
+            Assert.AreEqual(3f, center.y, 1e-4f);
+            Assert.AreEqual(0f, center.z, 1e-4f);
+        }
+
+        [Test]
         public void TestRemoveRedundantObjects()
         {
             var root = CreateGameObject("root");
@@ -843,6 +894,199 @@ namespace FbxExporter.UnitTests
             Debug.LogWarningFormat("Compared {0} out of a possible {1} bone weights", comparisonCount, minVertCount);
         }
 
+        /// <summary>
+        /// Exports a 4 vertex skinned mesh to an ASCII FBX file and returns the vertex indices
+        /// that were written to the skin cluster of each bone, keyed by bone name.
+        /// </summary>
+        /// <param name="boneNames">Names of the bones, in SkinnedMeshRenderer.bones order. A null entry becomes a null (destroyed) bone.</param>
+        /// <param name="bonesPerVertex">Number of bone weights for each of the 4 vertices.</param>
+        /// <param name="boneWeights">All bone weights, in vertex order.</param>
+        private Dictionary<string, List<int>> ExportSkinnedQuadAndReadClusters(string[] boneNames, byte[] bonesPerVertex, BoneWeight1[] boneWeights)
+        {
+            var root = new GameObject("Root");
+            var skin = new GameObject("Skin");
+            skin.transform.SetParent(root.transform, false);
+
+            var bones = new Transform[boneNames.Length];
+            var bindposes = new Matrix4x4[boneNames.Length];
+            for (int i = 0; i < boneNames.Length; i++)
+            {
+                var bone = new GameObject(boneNames[i] ?? "BoneToDestroy");
+                bone.transform.SetParent(root.transform, false);
+                bone.transform.localPosition = new Vector3(0, i, 0);
+                bones[i] = bone.transform;
+                bindposes[i] = Matrix4x4.identity;
+            }
+
+            var mesh = new Mesh();
+            mesh.vertices = new[] { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 1, 0), new Vector3(0, 1, 0) };
+            mesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
+            mesh.bindposes = bindposes;
+            using (var nativeBonesPerVertex = new Unity.Collections.NativeArray<byte>(bonesPerVertex, Unity.Collections.Allocator.Temp))
+            using (var nativeBoneWeights = new Unity.Collections.NativeArray<BoneWeight1>(boneWeights, Unity.Collections.Allocator.Temp))
+            {
+                mesh.SetBoneWeights(nativeBonesPerVertex, nativeBoneWeights);
+            }
+
+            var smr = skin.AddComponent<SkinnedMeshRenderer>();
+            smr.sharedMesh = mesh;
+            smr.bones = bones;
+            smr.rootBone = bones[0];
+
+            for (int i = 0; i < boneNames.Length; i++)
+            {
+                if (boneNames[i] == null)
+                {
+                    // leaves a null entry in SkinnedMeshRenderer.bones
+                    Object.DestroyImmediate(bones[i].gameObject);
+                }
+            }
+
+            try
+            {
+                var fbxPath = GetRandomFbxFilePath();
+                var options = new ExportModelOptions { ExportFormat = ExportFormat.ASCII };
+                Assert.That(ModelExporter.ExportObject(fbxPath, root, options), Is.EqualTo(fbxPath));
+                return ReadSkinClusterVertices(File.ReadAllLines(fbxPath));
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(mesh);
+            }
+        }
+
+        /// <summary>
+        /// Parses the skin clusters of an ASCII FBX file.
+        /// </summary>
+        /// <returns>The vertex indices written to each cluster, keyed by the name of the bone the cluster is linked to.</returns>
+        private static Dictionary<string, List<int>> ReadSkinClusterVertices(string[] fbxLines)
+        {
+            var modelNames = new Dictionary<string, string>();
+            var clusterIndices = new Dictionary<string, List<int>>();
+            var modelRegex = new System.Text.RegularExpressions.Regex("^\\s*Model:\\s*(\\d+)\\s*,\\s*\"Model::([^\"]*)\"");
+            var clusterRegex = new System.Text.RegularExpressions.Regex("^\\s*Deformer:\\s*(\\d+)\\s*,\\s*\"[^\"]*\"\\s*,\\s*\"Cluster\"");
+            var connectionRegex = new System.Text.RegularExpressions.Regex("^\\s*C:\\s*\"OO\"\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)");
+
+            List<int> current = null;
+            var depth = 0;
+            var inIndexes = false;
+            foreach (var line in fbxLines)
+            {
+                var modelMatch = modelRegex.Match(line);
+                if (modelMatch.Success)
+                {
+                    modelNames[modelMatch.Groups[1].Value] = modelMatch.Groups[2].Value;
+                }
+
+                if (current == null)
+                {
+                    var clusterMatch = clusterRegex.Match(line);
+                    if (clusterMatch.Success)
+                    {
+                        current = new List<int>();
+                        clusterIndices[clusterMatch.Groups[1].Value] = current;
+                        depth = 1;
+                        inIndexes = false;
+                    }
+                    continue;
+                }
+
+                var trimmed = line.Trim();
+                if (trimmed.StartsWith("Indexes:"))
+                {
+                    inIndexes = true;
+                }
+                else if (trimmed.StartsWith("Weights:"))
+                {
+                    inIndexes = false;
+                }
+                else if (inIndexes && trimmed.StartsWith("a:"))
+                {
+                    foreach (var value in trimmed.Substring(2).Split(new[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        current.Add(int.Parse(value.Trim()));
+                    }
+                }
+
+                foreach (var c in line)
+                {
+                    if (c == '{') depth++;
+                    else if (c == '}') depth--;
+                }
+                if (depth <= 0)
+                {
+                    current = null;
+                }
+            }
+
+            // a cluster is connected to the node of the bone it is linked to
+            var result = new Dictionary<string, List<int>>();
+            foreach (var line in fbxLines)
+            {
+                var connectionMatch = connectionRegex.Match(line);
+                if (!connectionMatch.Success)
+                {
+                    continue;
+                }
+                var a = connectionMatch.Groups[1].Value;
+                var b = connectionMatch.Groups[2].Value;
+                string boneName;
+                if (clusterIndices.ContainsKey(a) && modelNames.TryGetValue(b, out boneName))
+                {
+                    result[boneName] = clusterIndices[a];
+                }
+                else if (clusterIndices.ContainsKey(b) && modelNames.TryGetValue(a, out boneName))
+                {
+                    result[boneName] = clusterIndices[b];
+                }
+            }
+            return result;
+        }
+
+        [Test]
+        public void TestSkinWeightsExportedWithNullBone()
+        {
+            // UUM-158294: vertex 0 is weighted to bone index 1 (null), vertices 1 to 3 are weighted to bone index 0.
+            var clusters = ExportSkinnedQuadAndReadClusters(
+                new[] { "BoneA", null },
+                new byte[] { 1, 1, 1, 1 },
+                new[]
+                {
+                    new BoneWeight1 { boneIndex = 1, weight = 1f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f }
+                });
+
+            Assert.That(clusters.ContainsKey("BoneA"), Is.True, "No skin cluster was exported for BoneA");
+            Assert.That(clusters["BoneA"], Is.EquivalentTo(new[] { 1, 2, 3 }), "Vertices weighted to BoneA lost their weights");
+        }
+
+        [Test]
+        public void TestSkinWeightsExportedWithZeroWeightInfluence()
+        {
+            // UUM-158294: vertex 0 has an influence of weight 0 from bone index 1, all vertices are fully weighted to bone index 0.
+            var clusters = ExportSkinnedQuadAndReadClusters(
+                new[] { "BoneA", "BoneB" },
+                new byte[] { 2, 1, 1, 1 },
+                new[]
+                {
+                    new BoneWeight1 { boneIndex = 0, weight = 1f },
+                    new BoneWeight1 { boneIndex = 1, weight = 0f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f },
+                    new BoneWeight1 { boneIndex = 0, weight = 1f }
+                });
+
+            Assert.That(clusters.ContainsKey("BoneA"), Is.True, "No skin cluster was exported for BoneA");
+            Assert.That(clusters["BoneA"], Is.EquivalentTo(new[] { 0, 1, 2, 3 }), "Vertices weighted to BoneA lost their weights");
+            if (clusters.ContainsKey("BoneB"))
+            {
+                Assert.That(clusters["BoneB"], Is.Empty, "A zero weight influence should not be exported");
+            }
+        }
+
         private delegate float GetDistance<T>(T x, T y);
         private static float ComputeHausdorffDistance<T>(T[] orig, T[] converted, GetDistance<T> getDistance)
         {
@@ -1231,6 +1475,167 @@ namespace FbxExporter.UnitTests
             // check that both children reference the same mesh
             GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
             Assert.AreEqual(fbxObj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.name, fbxObj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh.name);
+        }
+
+        // UUM-158079
+        static IEnumerable<TestCaseData> UniqueNodeNameCases()
+        {
+            yield return new TestCaseData(new[] { "Cube", "Cube", "Cube_1" }, new[] { "Cube", "Cube_2", "Cube_1" }).SetName("DuplicateThenSuffixedName");
+            yield return new TestCaseData(new[] { "Cube_1", "Cube", "Cube" }, new[] { "Cube_1", "Cube", "Cube_2" }).SetName("SuffixedNameThenDuplicate");
+            yield return new TestCaseData(new[] { "Cube", "Cube", "Cube" }, new[] { "Cube", "Cube_1", "Cube_2" }).SetName("OnlyDuplicates");
+            yield return new TestCaseData(new[] { "Cube", "Cube", "Cube_1", "Cube_1" }, new[] { "Cube", "Cube_2", "Cube_1", "Cube_1_1" }).SetName("DuplicatedSuffixedName");
+        }
+
+        [TestCaseSource(nameof(UniqueNodeNameCases))]
+        public void TestExportedNodeNamesAreUnique(string[] childNames, string[] expectedNames)
+        {
+            var filename = GetRandomFbxFilePath();
+            GameObject root = new GameObject("root");
+            foreach (var childName in childNames)
+            {
+                CreateGameObject(childName, root.transform);
+            }
+
+            // export as ASCII so the node names can be read directly from the file
+            var exportOptions = new ExportModelOptions();
+            exportOptions.ExportFormat = ExportFormat.ASCII;
+            var result = ModelExporter.ExportObject(filename, root, exportOptions);
+            Assert.That(result, Is.Not.Null);
+            Assert.AreEqual(filename, result);
+
+            var nodeNames = new List<string>();
+            foreach (System.Text.RegularExpressions.Match match in
+                     System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(filename), "Model:\\s*-?\\d+,\\s*\"Model::([^\"]*)\""))
+            {
+                nodeNames.Add(match.Groups[1].Value);
+            }
+
+            Assert.AreEqual(childNames.Length + 1, nodeNames.Count, "Unexpected node names: " + string.Join(", ", nodeNames.ToArray()));
+            Assert.That(nodeNames, Is.Unique, "Exported node names: " + string.Join(", ", nodeNames.ToArray()));
+            // objects are written in creation order: root first, then the children in order
+            Assert.That(nodeNames.Skip(1), Is.EqualTo(expectedNames));
+        }
+
+        // UUM-158079
+        [Test]
+        public void TestAnimOnlyDefaultCameraNameMatchesCameraNode()
+        {
+            var filename = GetRandomFbxFilePath();
+            GameObject root = new GameObject("root");
+            CreateGameObject("Foo", CreateGameObject("P", root.transform).transform);
+            CreateGameObject("Foo", CreateGameObject("Q", root.transform).transform).AddComponent<Camera>();
+            CreateGameObject("Foo_1", CreateGameObject("R", root.transform).transform);
+
+            var clip = new AnimationClip();
+            clip.legacy = true;
+            clip.name = "anim";
+            var curve = new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(1f, 1f));
+            clip.SetCurve("P/Foo", typeof(Transform), "localPosition.x", curve);
+            clip.SetCurve("Q/Foo", typeof(Camera), "field of view", new AnimationCurve(new Keyframe(0f, 40f), new Keyframe(1f, 60f)));
+            clip.SetCurve("R/Foo_1", typeof(Transform), "localPosition.x", curve);
+            var animation = root.AddComponent<Animation>();
+            animation.AddClip(clip, clip.name);
+            animation.clip = clip;
+
+            var exportOptions = new ExportModelOptions();
+            exportOptions.ExportFormat = ExportFormat.ASCII;
+            exportOptions.ModelAnimIncludeOption = Include.Anim;
+            var result = ModelExporter.ExportObject(filename, root, exportOptions);
+            Assert.AreEqual(filename, result);
+
+            var text = File.ReadAllText(filename);
+            var defaultCamera = System.Text.RegularExpressions.Regex.Match(text, "P: \"DefaultCamera\", \"KString\", \"\", \"\", \"([^\"]*)\"");
+            Assert.That(defaultCamera.Success, "DefaultCamera not found");
+            var cameraNodes = System.Text.RegularExpressions.Regex.Matches(text, "Model:\\s*-?\\d+,\\s*\"Model::([^\"]*)\",\\s*\"Camera\"");
+            Assert.AreEqual(1, cameraNodes.Count);
+            Assert.AreEqual(cameraNodes[0].Groups[1].Value, defaultCamera.Groups[1].Value);
+        }
+
+        // UUM-158079
+        [Test]
+        public void TestExportedMaterialNamesKeepOriginalNames()
+        {
+            var filename = GetRandomFbxFilePath();
+            GameObject root = new GameObject("root");
+            var materialNames = new[] { "Mat", "Mat", "Mat_1" };
+            for (int i = 0; i < materialNames.Length; i++)
+            {
+                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.name = "Cube" + i;
+                cube.transform.SetParent(root.transform);
+                var renderer = cube.GetComponent<MeshRenderer>();
+                renderer.sharedMaterial = new Material(renderer.sharedMaterial) { name = materialNames[i] };
+            }
+
+            var exportOptions = new ExportModelOptions();
+            exportOptions.ExportFormat = ExportFormat.ASCII;
+            var result = ModelExporter.ExportObject(filename, root, exportOptions);
+            Assert.AreEqual(filename, result);
+
+            var exportedNames = new List<string>();
+            foreach (System.Text.RegularExpressions.Match match in
+                     System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(filename), "Material:\\s*-?\\d+,\\s*\"Material::([^\"]*)\""))
+            {
+                exportedNames.Add(match.Groups[1].Value);
+            }
+
+            // materials are written in export order, which follows the children
+            Assert.That(exportedNames, Is.EqualTo(new[] { "Mat", "Mat_2", "Mat_1" }));
+        }
+
+        // UUM-158108
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestExportUnrenderedOffSkipsSharedMesh(bool keepInstances)
+        {
+            // rendered parent, and a child with a disabled renderer that shares the parent's mesh
+            var parent = CreateGameObject("parent");
+            var child = CreateGameObject("child", parent.transform);
+            child.GetComponent<MeshRenderer>().enabled = false;
+            Assert.AreEqual(parent.GetComponent<MeshFilter>().sharedMesh, child.GetComponent<MeshFilter>().sharedMesh);
+
+            var exportOptions = new ExportModelOptions();
+            exportOptions.ExportUnrendered = false;
+            exportOptions.KeepInstances = keepInstances;
+
+            var filename = GetRandomFbxFilePath();
+            var result = ModelExporter.ExportObject(filename, parent, exportOptions);
+            Assert.AreEqual(filename, result);
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.That(fbxObj, Is.Not.Null);
+            Assert.That(fbxObj.GetComponent<MeshFilter>(), Is.Not.Null);
+
+            var fbxChild = fbxObj.transform.Find("child");
+            Assert.That(fbxChild, Is.Not.Null);
+            Assert.That(fbxChild.GetComponent<MeshFilter>(), Is.Null);
+        }
+
+        // UUM-158108
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestExportUnrenderedOffSharedMeshUnrenderedFirst(bool keepInstances)
+        {
+            var parent = CreateGameObject("parent");
+            var child = CreateGameObject("child", parent.transform);
+            parent.GetComponent<MeshRenderer>().enabled = false;
+            Assert.AreEqual(parent.GetComponent<MeshFilter>().sharedMesh, child.GetComponent<MeshFilter>().sharedMesh);
+
+            var exportOptions = new ExportModelOptions();
+            exportOptions.ExportUnrendered = false;
+            exportOptions.KeepInstances = keepInstances;
+
+            var filename = GetRandomFbxFilePath();
+            var result = ModelExporter.ExportObject(filename, parent, exportOptions);
+            Assert.AreEqual(filename, result);
+
+            GameObject fbxObj = AssetDatabase.LoadMainAssetAtPath(filename) as GameObject;
+            Assert.That(fbxObj, Is.Not.Null);
+            Assert.That(fbxObj.GetComponent<MeshFilter>(), Is.Null);
+
+            var fbxChild = fbxObj.transform.Find("child");
+            Assert.That(fbxChild, Is.Not.Null);
+            Assert.That(fbxChild.GetComponent<MeshFilter>(), Is.Not.Null);
         }
 
         /// <summary>
