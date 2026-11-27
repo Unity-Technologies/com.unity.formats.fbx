@@ -1518,6 +1518,41 @@ namespace FbxExporter.UnitTests
 
         // UUM-158079
         [Test]
+        public void TestAnimOnlyDefaultCameraNameMatchesCameraNode()
+        {
+            var filename = GetRandomFbxFilePath();
+            GameObject root = new GameObject("root");
+            CreateGameObject("Foo", CreateGameObject("P", root.transform).transform);
+            CreateGameObject("Foo", CreateGameObject("Q", root.transform).transform).AddComponent<Camera>();
+            CreateGameObject("Foo_1", CreateGameObject("R", root.transform).transform);
+
+            var clip = new AnimationClip();
+            clip.legacy = true;
+            clip.name = "anim";
+            var curve = new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(1f, 1f));
+            clip.SetCurve("P/Foo", typeof(Transform), "localPosition.x", curve);
+            clip.SetCurve("Q/Foo", typeof(Camera), "field of view", new AnimationCurve(new Keyframe(0f, 40f), new Keyframe(1f, 60f)));
+            clip.SetCurve("R/Foo_1", typeof(Transform), "localPosition.x", curve);
+            var animation = root.AddComponent<Animation>();
+            animation.AddClip(clip, clip.name);
+            animation.clip = clip;
+
+            var exportOptions = new ExportModelOptions();
+            exportOptions.ExportFormat = ExportFormat.ASCII;
+            exportOptions.ModelAnimIncludeOption = Include.Anim;
+            var result = ModelExporter.ExportObject(filename, root, exportOptions);
+            Assert.AreEqual(filename, result);
+
+            var text = File.ReadAllText(filename);
+            var defaultCamera = System.Text.RegularExpressions.Regex.Match(text, "P: \"DefaultCamera\", \"KString\", \"\", \"\", \"([^\"]*)\"");
+            Assert.That(defaultCamera.Success, "DefaultCamera not found");
+            var cameraNodes = System.Text.RegularExpressions.Regex.Matches(text, "Model:\\s*-?\\d+,\\s*\"Model::([^\"]*)\",\\s*\"Camera\"");
+            Assert.AreEqual(1, cameraNodes.Count);
+            Assert.AreEqual(cameraNodes[0].Groups[1].Value, defaultCamera.Groups[1].Value);
+        }
+
+        // UUM-158079
+        [Test]
         public void TestExportedMaterialNamesKeepOriginalNames()
         {
             var filename = GetRandomFbxFilePath();

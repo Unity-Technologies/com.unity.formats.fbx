@@ -3051,7 +3051,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             var uniqueName = GetUniqueFbxNodeName(fbxName);
             FbxNode fbxNode = FbxNode.Create(fbxScene, uniqueName);
-            if (uniqueName != fbxName)
+            if (uniqueName != fbxName && GeneratedNodeNames != null)
             {
                 GeneratedNodeNames[uniqueName] = (fbxName, fbxNode);
             }
@@ -3940,6 +3940,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
             try
             {
                 bool animOnly = exportData != null && ExportOptions.ModelAnimIncludeOption == Include.Anim;
+                if (animOnly)
+                {
+                    // Components are exported between node creations here and may keep a node's name, so nodes are never renamed.
+                    GeneratedNodeNames = null;
+                }
                 bool status = false;
                 // Create the FBX manager
                 using (var fbxManager = FbxManager.Create())
